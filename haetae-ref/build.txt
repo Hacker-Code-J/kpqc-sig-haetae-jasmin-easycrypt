@@ -1,0 +1,142 @@
+[HAETAE-2]
+mkdir build build/lib build/bin build/kat build/benchmark
+/usr/bin/cc  -I./include -fPIC -std=c11 -MMD -MP -o ./build/randombytes.o -c ./src/randombytes.c
+/usr/bin/cc  -I./include -fPIC -std=c11 -MMD -MP -o ./build/fips202.o -c ./src/fips202.c
+/usr/bin/cc  -I./include -fPIC -std=c11 -MMD -MP -o ./build/symmetric-shake.o -c ./src/symmetric-shake.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/decompose.o -c ./src/decompose.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/encoding.o -c ./src/encoding.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fft.o -c ./src/fft.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fixpoint.o -c ./src/fixpoint.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/ntt.o -c ./src/ntt.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/packing.o -c ./src/packing.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/poly.o -c ./src/poly.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec.o -c ./src/polyvec.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polymat.o -c ./src/polymat.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyfix.o -c ./src/polyfix.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/reduce.o -c ./src/reduce.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sampler.o -c ./src/sampler.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sign.o -c ./src/sign.c
+
+/usr/bin/cc -fPIC -shared -Wl,-soname,libhaetae-mode2.so -o ./build/lib/libhaetae-mode2.so \
+    ./build/randombytes.o ./build/fips202.o ./build/symmetric-shake.o \
+    ./build/decompose.o ./build/encoding.o ./build/fft.o ./build/fixpoint.o ./build/ntt.o ./build/packing.o \
+    ./build/poly.o ./build/polyvec.o ./build/polymat.o ./build/polyfix.o ./build/reduce.o ./build/sampler.o ./build/sign.o
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/main.o -c ./test/main.c
+/usr/bin/cc ./build/randombytes.o ./build/main.o -o ./build/bin/haetae-mode2-main  -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2.so
+
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/kat/kat_sign.o -c ./kat/kat_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/kat/PQCgenKAT_sign.o -c ./kat/PQCgenKAT_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/kat/rng.o -c ./kat/rng.c
+/usr/bin/cc ./build/kat/kat_sign.o ./build/kat/PQCgenKAT_sign.o ./build/kat/rng.o \
+    -o ./build/bin/haetae-mode2-kat \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2.so \
+    -lcrypto
+
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed.o -c ./benchmark/speed.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/benchmark/cpucycles.o -c ./benchmark/cpucycles.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed_print.o -c ./benchmark/speed_print.c
+/usr/bin/cc ./build/benchmark/speed.o ./build/benchmark/cpucycles.o ./build/benchmark/speed_print.o ./build/randombytes.o \
+    -o ./build/bin/haetae-mode2-benchmark \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2.so
+
+
+[HAETAE-3]
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/decompose.o -c ./src/decompose.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/encoding.o -c ./src/encoding.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fft.o -c ./src/fft.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fixpoint.o -c ./src/fixpoint.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/ntt.o -c ./src/ntt.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/packing.o -c ./src/packing.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/poly.o -c ./src/poly.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec.o -c ./src/polyvec.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polymat.o -c ./src/polymat.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyfix.o -c ./src/polyfix.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/reduce.o -c ./src/reduce.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sampler.o -c ./src/sampler.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sign.o -c ./src/sign.c
+/usr/bin/cc -fPIC -shared -Wl,-soname,libhaetae-mode3.so -o ./build/lib/libhaetae-mode3.so \
+    ./build/randombytes.o ./build/fips202.o ./build/symmetric-shake.o \
+    ./build/decompose.o ./build/encoding.o ./build/fft.o ./build/fixpoint.o ./build/ntt.o ./build/packing.o \
+    ./build/poly.o ./build/polyvec.o ./build/polymat.o ./build/polyfix.o ./build/reduce.o ./build/sampler.o ./build/sign.o
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/main.o -c ./test/main.c
+/usr/bin/cc ./build/randombytes.o ./build/main.o -o ./build/bin/haetae-mode3-main  -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode3.so
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/kat/kat_sign.o -c ./kat/kat_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/kat/PQCgenKAT_sign.o -c ./kat/PQCgenKAT_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/kat/rng.o -c ./kat/rng.c
+/usr/bin/cc ./build/kat/kat_sign.o ./build/kat/PQCgenKAT_sign.o ./build/kat/rng.o \
+    -o ./build/bin/haetae-mode3-kat \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode3.so \
+    -lcrypto
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed.o -c ./benchmark/speed.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -I./include -std=c11 -MMD -MP -o ./build/benchmark/cpucycles.o -c ./benchmark/cpucycles.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed_print.o -c ./benchmark/speed_print.c
+/usr/bin/cc ./build/benchmark/speed.o ./build/benchmark/cpucycles.o ./build/benchmark/speed_print.o ./build/randombytes.o \
+    -o ./build/bin/haetae-mode3-benchmark \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode3.so
+
+
+[HAETAE-5]
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/decompose.o -c ./src/decompose.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/encoding.o -c ./src/encoding.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fft.o -c ./src/fft.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/fixpoint.o -c ./src/fixpoint.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/ntt.o -c ./src/ntt.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/packing.o -c ./src/packing.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/poly.o -c ./src/poly.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec.o -c ./src/polyvec.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polymat.o -c ./src/polymat.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyfix.o -c ./src/polyfix.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/reduce.o -c ./src/reduce.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sampler.o -c ./src/sampler.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -I./include -fPIC -std=c11 -MMD -MP -o ./build/sign.o -c ./src/sign.c
+/usr/bin/cc -fPIC -shared -Wl,-soname,libhaetae-mode5.so -o ./build/lib/libhaetae-mode5.so \
+    ./build/randombytes.o ./build/fips202.o ./build/symmetric-shake.o \
+    ./build/decompose.o ./build/encoding.o ./build/fft.o ./build/fixpoint.o ./build/ntt.o ./build/packing.o \
+    ./build/poly.o ./build/polyvec.o ./build/polymat.o ./build/polyfix.o ./build/reduce.o ./build/sampler.o ./build/sign.o
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/main.o -c ./test/main.c
+/usr/bin/cc ./build/randombytes.o ./build/main.o -o ./build/bin/haetae-mode5-main  -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode5.so
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/kat/kat_sign.o -c ./kat/kat_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/kat/PQCgenKAT_sign.o -c ./kat/PQCgenKAT_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/kat/rng.o -c ./kat/rng.c
+/usr/bin/cc ./build/kat/kat_sign.o ./build/kat/PQCgenKAT_sign.o ./build/kat/rng.o \
+    -o ./build/bin/haetae-mode5-kat \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode5.so \
+    -lcrypto
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed.o -c ./benchmark/speed.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -I./include -std=c11 -MMD -MP -o ./build/benchmark/cpucycles.o -c ./benchmark/cpucycles.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed_print.o -c ./benchmark/speed_print.c
+/usr/bin/cc ./build/benchmark/speed.o ./build/benchmark/cpucycles.o ./build/benchmark/speed_print.o ./build/randombytes.o \
+    -o ./build/bin/haetae-mode5-benchmark \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode5.so
+
+[JAZZ]
+/usr/bin/cc -o ./build/jpoly.o -c ./src/jpoly.s 
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -Dhaetae_mode2_EXPORTS -DJAZZ -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec-jazz.o -c ./src/polyvec.c
+
+/usr/bin/cc -fPIC -shared -Wl,-soname,libhaetae-mode2-jazz.so -o ./build/lib/libhaetae-mode2-jazz.so \
+    ./build/randombytes.o ./build/fips202.o ./build/symmetric-shake.o \
+    ./build/decompose.o ./build/encoding.o ./build/fft.o ./build/fixpoint.o ./build/ntt.o ./build/packing.o \
+    ./build/poly.o ./build/polyvec-jazz.o ./build/polymat.o ./build/polyfix.o ./build/reduce.o ./build/sampler.o ./build/sign.o \
+    ./build/jpoly.o
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/main.o -c ./test/main.c
+/usr/bin/cc ./build/randombytes.o ./build/main.o -o ./build/bin/haetae-mode2-main-jazz  -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2-jazz.so
+
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/kat/kat_sign.o -c ./kat/kat_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/kat/PQCgenKAT_sign.o -c ./kat/PQCgenKAT_sign.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/kat/rng.o -c ./kat/rng.c
+/usr/bin/cc ./build/kat/kat_sign.o ./build/kat/PQCgenKAT_sign.o ./build/kat/rng.o \
+    -o ./build/bin/haetae-mode2-kat-jazz \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2-jazz.so \
+    -lcrypto
+
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed.o -c ./benchmark/speed.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/benchmark/cpucycles.o -c ./benchmark/cpucycles.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DJAZZ -I./include -std=c11 -MMD -MP -o ./build/benchmark/speed_print.o -c ./benchmark/speed_print.c
+/usr/bin/cc ./build/benchmark/speed.o ./build/benchmark/cpucycles.o ./build/benchmark/speed_print.o ./build/randombytes.o \
+    -o ./build/bin/haetae-mode2-benchmark-jazz \
+    -Wl,-rpath,./build/lib  ./build/lib/libhaetae-mode2-jazz.so
+
+
+
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -Dhaetae_mode3_EXPORTS -DJAZZ -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec-jazz.o -c ./src/polyvec.c
+/usr/bin/cc -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -Dhaetae_mode5_EXPORTS -DJAZZ -I./include -fPIC -std=c11 -MMD -MP -o ./build/polyvec-jazz.o -c ./src/polyvec.c

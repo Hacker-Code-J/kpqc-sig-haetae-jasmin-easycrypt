@@ -1,0 +1,144 @@
+require "params.jinc"
+require "reduce.jinc"
+require "zetas.jinc"
+
+/* Forward NTT (in-place, bit-reversed output).
+ * Mirrors C ntt(): 8 butterfly layers, no reduction between steps.
+ * Coefficients are int32_t stored as u32. */
+fn _poly_ntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 len;
+  reg ui64 start;
+  reg ui64 j;
+  reg ui64 cmp;
+  reg ui64 offset;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg ui64 zetasctr;
+
+  zetasp   = jzetas;
+  zetasctr = 0;
+  len      = 128;
+
+  while (len > 0)
+  {
+    start = 0;
+    while (start < HAETAE_N)
+    {
+      zetasctr += 1;
+      zeta = zetasp[zetasctr];
+
+      j   = start;
+      cmp = start; cmp += len;
+      while (j < cmp)
+      {
+        s      = rp[j];
+        offset = j; offset += len;
+        coeff  = rp[offset];
+
+        t      = __fqmul(zeta, coeff);   /* t = montgomery_reduce(zeta * coeff) */
+        coeff  = s;
+        coeff -= t;                      /* coeff = a[j] - t */
+        rp[offset] = coeff;
+        s     += t;                      /* s = a[j] + t */
+        rp[j]  = s;
+
+        j += 1;
+      }
+      start = j; start += len;
+    }
+    len >>= 1;
+  }
+
+  return rp;
+}
+
+/* Inverse NTT multiplied by Montgomery factor 2^32 (in-place).
+ * Mirrors C invntt_tomont(): 8 inverse butterfly layers + final scaling by f. */
+fn _poly_invntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 len;
+  reg ui64 start;
+  reg ui64 j;
+  reg ui64 cmp;
+  reg ui64 offset;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg ui64 zetasctr;
+
+  zetasp   = jzetas_inv;
+  zetasctr = 0;
+
+  len = 1;
+  while (len < HAETAE_N)
+  {
+    start = 0;
+    while (start < HAETAE_N)
+    {
+      zeta = zetasp[zetasctr];
+      zetasctr += 1;
+
+      j   = start;
+      cmp = start; cmp += len;
+      while (j < cmp)
+      {
+        t      = rp[j];
+        offset = j; offset += len;
+        coeff  = rp[offset];
+
+        s          = t;           /* copy a[j] */
+        s         += coeff;       /* s = a[j] + a[j+len] */
+        rp[j]      = s;
+        t         -= coeff;       /* t = a[j] - a[j+len] */
+        t          = __fqmul(zeta, t); /* montgomery_reduce(zeta * (a[j]-a[j+len])) */
+        rp[offset] = t;
+
+        j += 1;
+      }
+      start = j; start += len;
+    }
+    len <<= 1;
+  }
+
+  /* Final scaling by f = -29720 (jzetas_inv[255] = mont^2/256) */
+  zeta = zetasp[255];
+  j = 0;
+  while (j < HAETAE_N)
+  {
+    coeff  = rp[j];
+    t      = __fqmul(zeta, coeff);
+    rp[j]  = t;
+    j     += 1;
+  }
+
+  return rp;
+}
+
+/* Pointwise multiplication in NTT domain: r[i] = montgomery_reduce(a[i]*b[i]) */
+fn _poly_basemul(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a b r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    b = bp[i];
+    r = __fqmul(a, b);
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}

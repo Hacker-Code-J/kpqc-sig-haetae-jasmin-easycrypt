@@ -1,0 +1,2 @@
+jasminc -nowarning -o jasmin-ntt/jpoly.s  jasmin-ntt/jpoly.jazz 
+/usr/bin/cc -Wall -Wextra -g -O3 -fomit-frame-pointer -o test_poly_ntt poly.c ntt.c reduce.c jasmin-ntt/jpoly.s test_poly_ntt.c 
