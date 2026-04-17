@@ -1,0 +1,292 @@
+{
+  "version": 3,
+  "echash": "n/a",
+  "root": { "kind": "ec", "digest": "2afdda8c62732169052f5fd225c5339a" },
+  "depends": {
+    "AES": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b25e360604e8ec757d7302bdbd678dbf"
+    },
+    "AlgTactic": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "850cd748ba64fbbb969579c57fb7186d"
+    },
+    "AllCore": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "530d964738d9a6b9093986916c5225d1"
+    },
+    "Array256": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "f80cf2d4733ecae7ccf3edece998ec92"
+    },
+    "BArray1024": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "43345a6c4c3c05334a9a3fcc38c46b27"
+    },
+    "Bigalg": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "e88204311613892d6d56395cfc7f1f22"
+    },
+    "Bigop": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "df44e8fce988e1889f40d4b616961a54"
+    },
+    "Binomial": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "1e23893cdbfac8da97b831166366c823"
+    },
+    "BitEncoding": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "20ea2526bd64d293cc5131a88f411c5b"
+    },
+    "Bool": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "62eccfce391e38a3470506f7e36dc115"
+    },
+    "Core": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "4c1f1b14433a0e81286f6af1e6795b1e"
+    },
+    "CoreInt": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "656971c528721573c2aadba8c3e474f0"
+    },
+    "CoreMap": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "4ca3e904f01727612fbbc929e0c74cf9"
+    },
+    "CoreReal": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "71a66b712b2595af8e02fada3eaa0c67"
+    },
+    "DList": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "622bf01533cef6385934072bf38bc377"
+    },
+    "DProd": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "ece7b881468e9a3411abd6d8932e7eec"
+    },
+    "Discrete": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "7bfc7bffc1442385fc98161d37676888"
+    },
+    "Distr": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "7fd38b3b56e82f201613911175bec025"
+    },
+    "FSet": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "d6644f48a81e8406088a47023a938b28"
+    },
+    "FinType": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "35da7c0f7bb9fe412bfb938cb1036abf"
+    },
+    "Finite": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b97d32983e1fb562a4ce3233cef9e7b6"
+    },
+    "Int": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "9e1878ac5a993a111a8528a9d7507c72"
+    },
+    "IntDiv": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "dbf9d49943a5e9cc18df75972d6914d3"
+    },
+    "IntMin": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "6e85ff145774627ec46ac4b58a8d47c8"
+    },
+    "JArray": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "933939c648713b119b5d6cd375d0545d"
+    },
+    "JByte_array": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "ae27b62fea61b84b5381ae568fe27b28"
+    },
+    "JMemory": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "30084c1086a99dafe6d9c101781c5e4b"
+    },
+    "JModel_common": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "57a3c5038a144f4a451f2bbd0bdccc5d"
+    },
+    "JModel_x86": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "21db879683c2c6f1028410d13ea4a18a"
+    },
+    "JUtils": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "46d210eba49cc9a614bbbd892719084e"
+    },
+    "JWord": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "c93a6493c463cd47169369cd9116c30c"
+    },
+    "JWord_array": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "2ea69c14e09887354227a21276ada728"
+    },
+    "Jslh": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "dc266063986086cf6fcf2a7aa292ec7f"
+    },
+    "List": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "411fa05309b73cb59dc50cd53f9f7c92"
+    },
+    "Logic": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "6b500cdc50293d9b0674166fdcc73d7e"
+    },
+    "Monoid": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "b94b5fd99cc42a3a5fb358ab9c0f0d32"
+    },
+    "Number": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b9016fa51385372ce8fe5e214fa6f60a"
+    },
+    "Pervasive": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "0f385a91ae1a1269de2ba2b7fad360d0"
+    },
+    "Real": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "dcd8d3246c289a44016836a6426d4e1c"
+    },
+    "RealExp": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "5116449d24ac683eeec6eab99a3c1398"
+    },
+    "RealFLub": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "67123d0c0b981ea268ba14ecd1468fda"
+    },
+    "RealFun": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "3508fd32cbeb00b686e7c6e9be1bf996"
+    },
+    "RealLub": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "aa3b5336b2a2cafeb779a1429ce3035d"
+    },
+    "RealSeq": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "e9e86e10f7b3df8d9dfe9de0c4a2e36f"
+    },
+    "RealSeries": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "a75f5ecd2b0b3b619ab003ddd2c1ae20"
+    },
+    "Ring": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "1679a80ea225fe5d8904c9cd0f5d99c1"
+    },
+    "SHA": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "c37f3c2feef6cc83687aa19ae5f574c1"
+    },
+    "SmtMap": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "f9765c5d991ea67cdef1572a98ea13b9"
+    },
+    "StdBigop": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "3ef933d3ba2a743f395e2153324b9e4c"
+    },
+    "StdOrder": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "82265e9586f68a8a961d27de80735728"
+    },
+    "StdRing": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "86d8efe5a5c553697e271a3bbbfa51a2"
+    },
+    "Subtype": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "1c3c6bac42a4a1feb23376c7e09a5276"
+    },
+    "Tactics": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "86b1b5cd82f32d0405a70279cdc8b67b"
+    },
+    "Tuple": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "36b9e4ed5a561340515bcd79ee21f01e"
+    },
+    "WArray1024": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "f1ab53604afe2932a9d4bba4d866de2a"
+    },
+    "Word": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "41aeaea6b949aa91e1699caab881576d"
+    },
+    "Xint": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "f8cdbe78777b5164dc57262d577911a4"
+    }
+  }
+}

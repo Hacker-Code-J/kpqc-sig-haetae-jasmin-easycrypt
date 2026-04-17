@@ -1,0 +1,421 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!50!black,
+  urlcolor=blue!50!black,
+  citecolor=blue!50!black
+}
+
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\ec}[1]{\texttt{#1}}
+\newcommand{\todoec}{\textcolor{red!60!black}{\texttt{admit.}}}
+
+\title{Proof Artifact Report for the HAETAE NTT EasyCrypt Development}
+\author{Artifact documentation for the \file{proof/} directory}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents the EasyCrypt proof artifact currently stored in the
+\file{proof/} directory of the HAETAE NTT repository. The artifact aims to
+connect a Jasmin-extracted implementation of HAETAE polynomial arithmetic to
+coefficient-level specifications over the finite field $\mathbb{Z}_{64513}$.
+The development follows the proof architecture used in the ML-KEM/Kyber
+artifacts, but it is adapted to HAETAE's modulus, 32-bit Montgomery arithmetic,
+and 256-coefficient polynomial layout. The report explains the role of each
+proof module, the main definitions and theorems, the current proof status, and
+the operational checks available to test the artifact.
+\end{abstract}
+
+\section{Artifact Scope}
+
+The \file{proof/} directory contains six substantive EasyCrypt modules and three
+small array-wrapper files:
+\begin{itemize}[leftmargin=1.5em]
+\item \file{HAETAE\_poly\_extract.ec}: extracted EasyCrypt model of the Jasmin
+      code, including the concrete twiddle tables and the imperative procedures
+      for Montgomery reduction, field multiplication, NTT, inverse NTT, and
+      coefficient-wise base multiplication.
+\item \file{HAETAE\_GFq.ec}: finite-field model for HAETAE's modulus
+      $q = 64513$.
+\item \file{HAETAE\_Montgomery.ec}: generic signed Montgomery reduction theory,
+      instantiated later with the HAETAE parameters.
+\item \file{HAETAE\_FCLib.ec}: low-level word lemmas needed to bridge Jasmin
+      bit-vector operations with mathematical integer semantics.
+\item \file{HAETAE\_Fq.ec}: instantiation of Montgomery arithmetic for the
+      extracted \ec{\_\_montgomery\_reduce} and \ec{\_\_fqmul} routines.
+\item \file{HAETAE\_poly.ec}: abstract NTT specification, losslessness proofs,
+      representation bridges, relational correctness statements, and wrapper
+      correctness theorems.
+\end{itemize}
+
+The auxiliary files \file{Array256.ec}, \file{BArray1024.ec}, and
+\file{WArray1024.ec} provide array interfaces used by the extracted code and
+its proofs. The corresponding \file{.eco} files are compiled EasyCrypt
+artifacts that speed up replay and serve as evidence that individual modules
+have been checked in the local toolchain.
+
+\section{Design Overview}
+
+The proof development is layered. Each layer eliminates a different gap between
+the extracted implementation and the target mathematical statement.
+
+\subsection{Layer 1: Extracted Program Model}
+
+\file{HAETAE\_poly\_extract.ec} defines \ec{module M}, which is the concrete
+program artifact to be verified. Its key procedures are:
+\begin{itemize}[leftmargin=1.5em]
+\item \ec{M.\_\_montgomery\_reduce}: reduces a signed 64-bit intermediate to a
+      32-bit coefficient using HAETAE's Montgomery parameters.
+\item \ec{M.\_\_fqmul}: multiplies two signed 32-bit coefficients and applies
+      Montgomery reduction.
+\item \ec{M.\_poly\_ntt}: iterative breadth-first NTT on 256 coefficients using
+      concrete twiddle tables \ec{jzetas}.
+\item \ec{M.\_poly\_invntt}: inverse NTT using \ec{jzetas\_inv} followed by
+      final scaling.
+\item \ec{M.\_poly\_basemul}: coefficient-wise multiplication in the
+      Montgomery domain.
+\item Wrapper procedures \ec{poly\_ntt\_jazz}, \ec{poly\_invntt\_jazz}, and
+      \ec{poly\_basemul\_jazz}.
+\end{itemize}
+
+This file is intentionally operational: it contains the concrete control flow,
+loop counters, word-level loads/stores, and precomputed constants that later
+proof layers must interpret.
+
+\subsection{Layer 2: Algebraic Model}
+
+\file{HAETAE\_GFq.ec} defines the coefficient type by cloning EasyCrypt's
+\ec{ZModField} at modulus $64513$. The file also introduces the signed
+projection \ec{as\_sint}, which is used throughout the artifact to express
+range bounds on coefficients.
+
+\file{HAETAE\_Montgomery.ec} then develops a parameterized theory
+\ec{SignedReductions}. The central object is the signed Montgomery reduction
+operator
+\[
+\ec{SREDC}(a),
+\]
+whose main theorem \ec{SREDCp\_corr} proves both a range bound
+\[
+-q \le \ec{SREDC}(a) < q
+\]
+under the standard input precondition, and the expected modular congruence
+\[
+\ec{SREDC}(a) \equiv a \cdot R^{-1} \pmod q.
+\]
+This generic theorem is the algebraic backbone for the later correctness proofs
+of HAETAE's concrete field multiplication.
+
+\subsection{Layer 3: Word-Level Bridging}
+
+\file{HAETAE\_FCLib.ec} contains the bit-level lemmas needed to connect the
+Jasmin right-shift and sign-extension operators to integer division. The most
+important theorem is \ec{SAR\_sem32}, which is intended to justify that
+arithmetic right shift by 32 bits matches signed division by $2^{32}$. This is
+precisely the semantic bridge required by the extracted Montgomery reduction
+code.
+
+\subsection{Layer 4: Field Arithmetic Correctness}
+
+\file{HAETAE\_Fq.ec} instantiates \ec{SignedReductions} with the HAETAE
+parameters:
+\[
+q = 64513,\qquad R = 2^{32},\qquad q^{-1} \bmod R = 940508161,\qquad
+R^{-1} \bmod q = 50386.
+\]
+It then states the two key arithmetic correctness lemmas:
+\begin{itemize}[leftmargin=1.5em]
+\item \ec{montgomery\_reduce\_corr\_h}: correctness of
+      \ec{M.\_\_montgomery\_reduce}.
+\item \ec{fqmul\_corr\_h}: correctness of \ec{M.\_\_fqmul}.
+\end{itemize}
+These theorems are lifted into probability-1 judgments
+(\ec{phoare}) by combining them with losslessness results.
+
+\subsection{Layer 5: Polynomial-Level Correctness}
+
+\file{HAETAE\_poly.ec} is the main algorithmic proof file. It introduces:
+\begin{itemize}[leftmargin=1.5em]
+\item an abstract coefficient-level \ec{NTT} module with procedures
+      \ec{ntt}, \ec{invntt}, and \ec{basemul};
+\item losslessness theorems for the abstract algorithms and the extracted
+      implementations;
+\item representation bridges such as \ec{lift\_array256},
+      \ec{zetas\_coeff}, \ec{zetas\_inv\_coeff}, and
+      \ec{signed\_bound\_cxq};
+\item algebraic bridge lemmas \ec{rrinvcoeff} and \ec{mul\_congr};
+\item relational correctness statements
+      \ec{poly\_ntt\_equiv}, \ec{poly\_invntt\_equiv}, and
+      \ec{poly\_basemul\_equiv};
+\item wrapper correctness statements for the public entry points.
+\end{itemize}
+
+This file is where the ML-KEM proof structure is being ported to HAETAE. The
+current \ec{poly\_ntt\_equiv} statement already carries a stage-sensitive bound
+invariant: a signed-$q$ input bound is tracked to a signed-$9q$ output bound
+through the eight NTT stages.
+
+\section{Module-by-Module Inventory}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.22\textwidth}
+                  >{\raggedright\arraybackslash}p{0.18\textwidth}
+                  >{\raggedright\arraybackslash}p{0.42\textwidth}
+                  >{\raggedright\arraybackslash}p{0.12\textwidth}}
+\toprule
+Module & Role & Key objects and theorems & Current status \\
+\midrule
+\endfirsthead
+\toprule
+Module & Role & Key objects and theorems & Current status \\
+\midrule
+\endhead
+\file{HAETAE\_GFq.ec} &
+Finite-field interface &
+\ec{q}, \ec{prime\_q}, clone of \ec{ZModField}, signed projection
+\ec{as\_sint} &
+Complete in current file \\[0.4em]
+
+\file{HAETAE\_Montgomery.ec} &
+Generic signed Montgomery theory &
+\ec{SignedReductions}, \ec{smod}, \ec{SREDC}, \ec{SREDCp\_corr} &
+Core theorem complete in current file \\[0.4em]
+
+\file{HAETAE\_FCLib.ec} &
+Word-level helper lemmas &
+\ec{mask32\_hi}, \ec{aux32\_0}, \ec{aux32\_1}, \ec{aux32\_2},
+\ec{SAR\_sem32} &
+One admitted lemma \\[0.4em]
+
+\file{HAETAE\_Fq.ec} &
+Concrete arithmetic correctness &
+\ec{montgomery\_reduce\_corr\_h}, \ec{montgomery\_reduce\_corr},
+\ec{fqmul\_corr\_h}, \ec{fqmul\_corr} &
+Two admitted lemmas \\[0.4em]
+
+\file{HAETAE\_poly\_extract.ec} &
+Extracted imperative model &
+\ec{module M}, \ec{jzetas}, \ec{jzetas\_inv}, \ec{\_poly\_ntt},
+\ec{\_poly\_invntt}, \ec{\_poly\_basemul} &
+Operational model present \\[0.4em]
+
+\file{HAETAE\_poly.ec} &
+Abstract spec and relational correctness &
+\ec{module NTT}, \ec{lift\_array256}, \ec{signed\_bound\_cxq},
+\ec{poly\_ntt\_equiv}, \ec{poly\_invntt\_equiv},
+\ec{poly\_basemul\_equiv} &
+Nine admitted lemmas \\
+\bottomrule
+\end{longtable}
+
+\section{Main Mathematical Content}
+
+\subsection{Finite-Field and Representation Bridge}
+
+The coefficient type is represented abstractly as elements of
+$\mathbb{Z}_{64513}$ and concretely as signed 32-bit integers stored in
+\ec{BArray1024}. The bridge
+\[
+\ec{lift\_array256}(p) =
+\ec{Array256.init}(\lambda i.\,\ec{incoeff}(\ec{W32.to\_sint}(\ec{get32}\ p\ i)))
+\]
+maps a concrete polynomial buffer to the abstract coefficient vector consumed by
+the specification. This is the canonical relation used in all equivalence
+theorems.
+
+The twiddle tables require one additional adjustment. Since the extracted code
+multiplies through \ec{\_\_fqmul}, the concrete table entries are interpreted in
+the proof as
+\[
+\ec{incoeff}(\text{table entry}) \cdot R^{-1},
+\]
+captured by \ec{zetas\_coeff} and \ec{zetas\_inv\_coeff}. The lemma
+\ec{rrinvcoeff} is then used to cancel the extra Montgomery factor.
+
+\subsection{Losslessness}
+
+Before relational correctness is attempted, the artifact establishes
+losslessness of both the abstract algorithms and their extracted counterparts.
+This matters for two reasons:
+\begin{itemize}[leftmargin=1.5em]
+\item it guarantees that the imperative loops are structurally well-founded in
+      EasyCrypt's semantics;
+\item it provides the probabilistic side conditions needed to lift Hoare-style
+      arithmetic results into probability-1 correctness statements.
+\end{itemize}
+
+The files \file{HAETAE\_poly.ec} and \file{HAETAE\_Fq.ec} already contain
+completed losslessness lemmas such as \ec{ntt\_ll}, \ec{poly\_ntt\_ll},
+\ec{montgomery\_reduce\_ll}, and \ec{fqmul\_ll}.
+
+\subsection{Montgomery Arithmetic}
+
+The intended proof story for field arithmetic is standard:
+\begin{enumerate}[leftmargin=1.5em]
+\item prove that the extracted right shift and truncation operations implement
+      the integer divisions and modular reductions appearing in the definition
+      of \ec{SREDC};
+\item instantiate the generic theorem \ec{SREDCp\_corr};
+\item conclude that \ec{\_\_fqmul} computes multiplication in the Montgomery
+      domain with the expected $R^{-1}$ factor.
+\end{enumerate}
+
+This bridge is already structurally in place, but its last steps still depend
+on the admitted word-level and arithmetic lemmas in \file{HAETAE\_FCLib.ec} and
+\file{HAETAE\_Fq.ec}.
+
+\subsection{NTT-Level Correctness}
+
+The central algorithmic theorem is currently:
+\begin{quote}
+\begin{verbatim}
+equiv poly_ntt_equiv :
+  NTT.ntt ~ M._poly_ntt :
+    r{1} = lift_array256 rp{2} /\
+    zetas{1} = zetas_coeff /\
+    signed_bound_cxq rp{2} 0 256 1
+    ==>
+    res{1} = lift_array256 res{2} /\
+    signed_bound_cxq res{2} 0 256 9.
+\end{verbatim}
+\end{quote}
+
+This statement is important for paper exposition because it shows the exact
+contract carried by the ported ML-KEM invariant:
+\begin{itemize}[leftmargin=1.5em]
+\item relational equality between the abstract NTT state and the lifted
+      concrete state;
+\item stage-sensitive signed bounds on the concrete representation;
+\item explicit alignment between the extracted twiddle table and the abstract
+      coefficient table.
+\end{itemize}
+
+The proof skeleton in \file{HAETAE\_poly.ec} already identifies the intended
+HAETAE analogues of the ML-KEM ingredients:
+\begin{itemize}[leftmargin=1.5em]
+\item \ec{signed\_bound\_cxq} for concrete coefficient range tracking;
+\item \ec{zeta\_bound} for twiddle-table range facts;
+\item \ec{rrinvcoeff} to eliminate the residual Montgomery factor;
+\item \ec{mul\_congr} to convert concrete integer multiplication into abstract
+      coefficient multiplication.
+\end{itemize}
+
+\section{Current Proof Gaps}
+
+At the time of writing, the artifact still contains twelve explicit
+\todoec{} placeholders:
+\begin{itemize}[leftmargin=1.5em]
+\item \file{HAETAE\_FCLib.ec}: \ec{SAR\_sem32}.
+\item \file{HAETAE\_Fq.ec}: \ec{montgomery\_reduce\_corr\_h},
+      \ec{fqmul\_corr\_h}.
+\item \file{HAETAE\_poly.ec}: \ec{zeta\_bound}, \ec{zetainv\_bound},
+      \ec{ntt\_inner\_loop\_correct}, \ec{poly\_ntt\_equiv},
+      \ec{poly\_ntt\_corr}, \ec{poly\_invntt\_equiv},
+      \ec{poly\_invntt\_corr}, \ec{poly\_basemul\_equiv},
+      \ec{poly\_basemul\_corr}.
+\end{itemize}
+
+These gaps are not cosmetic; they identify the precise frontier between the
+already-ported framework and the remaining mechanization work.
+
+\subsection{What Is Already Established}
+
+Several important components are already in place:
+\begin{itemize}[leftmargin=1.5em]
+\item the finite-field model and parameter instantiation;
+\item the generic signed Montgomery correctness theorem;
+\item the extracted imperative model and all concrete constants;
+\item losslessness proofs for the abstract and concrete procedures;
+\item the shape of the main relational theorems and the HAETAE-specific NTT
+      bound invariant.
+\end{itemize}
+
+\subsection{What Still Blocks Full End-to-End Correctness}
+
+The remaining work clusters into three proof-critical areas:
+\begin{enumerate}[leftmargin=1.5em]
+\item \textbf{Word semantics.} The negative-case proof of \ec{SAR\_sem32} is
+      still missing.
+\item \textbf{Field arithmetic.} The high-level correctness of
+      \ec{\_\_montgomery\_reduce} and \ec{\_\_fqmul} is stated but not yet fully
+      discharged.
+\item \textbf{Algorithmic relational proofs.} The NTT, inverse NTT, and base
+      multiplication equivalence proofs are scaffolded but still admitted.
+\end{enumerate}
+
+\section{Operational Validation}
+
+The repository now includes a dedicated artifact test runner:
+\begin{center}
+\file{tools/test-proof-artifacts.sh}
+\end{center}
+and matching \file{Makefile} targets:
+\begin{itemize}[leftmargin=1.5em]
+\item \ec{make test}
+\item \ec{make proof-test}
+\item \ec{make proof-test-quiet}
+\item \ec{make proof-test-strict}
+\end{itemize}
+
+The test runner performs the following checks:
+\begin{enumerate}[leftmargin=1.5em]
+\item command availability (\ec{easycrypt}, \ec{why3}, \ec{why3server});
+\item presence of required \file{.ec} and \file{.eco} artifacts;
+\item freshness of compiled \file{.eco} files relative to their sources;
+\item inventory of unresolved \todoec{} placeholders;
+\item staged EasyCrypt smoke compiles for the proof modules.
+\end{enumerate}
+
+In the current local environment, the script reports an
+\ec{ENVIRONMENT\_FAILURE} because \ec{why3server} is not available in
+\ec{PATH}. This is an environment issue rather than a mathematical contradiction
+in the proof artifact. The same run also reports that
+\file{HAETAE\_poly.eco} is stale relative to \file{HAETAE\_poly.ec}, which is
+expected after recent edits to the NTT invariant.
+
+\section{How to Cite the Artifact State in a Paper}
+
+For a paper or technical report, the artifact can be described accurately as
+follows:
+\begin{quote}
+The EasyCrypt development contains a complete extracted model of HAETAE's
+polynomial arithmetic, a finite-field formalization at $q = 64513$, a
+parameterized Montgomery reduction theory, completed losslessness proofs for the
+abstract and extracted procedures, and a partially mechanized port of the
+ML-KEM relational proof architecture for NTT correctness. The remaining work is
+localized to the word-level shift semantics, the final field-arithmetic bridge
+lemmas, and the admitted relational correctness proofs for NTT, inverse NTT,
+and base multiplication.
+\end{quote}
+
+This wording is precise about what has been formalized, what has been proved,
+and what remains unfinished.
+
+\section{Conclusion}
+
+The \file{proof/} artifact is already organized as a serious verification
+development rather than a flat collection of proof scripts. Its strongest
+features are the clean separation between extracted code, algebraic theory, and
+algorithmic correctness, together with the explicit reuse of the ML-KEM proof
+structure. Its current limitations are also sharply localized and therefore
+tractable. From a paper-writing perspective, this makes the artifact mature
+enough to describe in detail, provided the write-up distinguishes clearly
+between completed layers, admitted lemmas, and environment-dependent replay
+requirements.
+
+\end{document}

@@ -40,35 +40,35 @@ int main() {
   poly *a = &mat[0].vec[0];
   complex_fp32_16 fft_in[FFT_N];
 
-  randombytes(msg, HAETAE_SEEDBYTES);
-  overhead = clock();
-  cpucycles();
-  overhead = clock() - overhead;
+  // randombytes(msg, HAETAE_SEEDBYTES);
+  // overhead = clock();
+  // cpucycles();
+  // overhead = clock() - overhead;
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polymatkm_expand_matA(mat, msg);
-  }
-  print_results("polymatkm_expand_matA:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polymatkm_expand_matA(mat, msg);
+  // }
+  // print_results("polymatkm_expand_matA:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polyfixveclk_sample_hyperball(&y1, &y2, &byte, msg, i);
-  }
-  print_results("\npolyfixveclk_sample_hyperball:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polyfixveclk_sample_hyperball(&y1, &y2, &byte, msg, i);
+  // }
+  // print_results("\npolyfixveclk_sample_hyperball:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polyvecmk_expand_S(&s1, &s2, msg, i);
-  }
-  print_results("\npolyvecmk_uniform_eta:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polyvecmk_expand_S(&s1, &s2, msg, i);
+  // }
+  // print_results("\npolyvecmk_uniform_eta:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    fft_init_and_bitrev(fft_in, &s2.vec[i % HAETAE_K]);
-    fft(fft_in);
-  }
-  print_results("\nfft_bitrev + fft:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   fft_init_and_bitrev(fft_in, &s2.vec[i % HAETAE_K]);
+  //   fft(fft_in);
+  // }
+  // print_results("\nfft_bitrev + fft:", t, NTESTS);
 
   for (i = 0; i < NTESTS; ++i) {
     t[i] = cpucycles();
@@ -100,24 +100,24 @@ int main() {
   }
   print_results("\npolymatkm_pointwise_montgomery:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polyfixvecl_round(&vecl, &y1);
-    polyfixveck_round(&s2, &y2);
-  }
-  print_results("\npolyfixvecl_round + polyfixveck_round:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polyfixvecl_round(&vecl, &y1);
+  //   polyfixveck_round(&s2, &y2);
+  // }
+  // print_results("\npolyfixvecl_round + polyfixveck_round:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polyveck_poly_fromcrt(&s2, &s2, a);
-  }
-  print_results("\npolyveck_poly_fromcrt:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polyveck_poly_fromcrt(&s2, &s2, a);
+  // }
+  // print_results("\npolyveck_poly_fromcrt:", t, NTESTS);
 
-  for (i = 0; i < NTESTS; ++i) {
-    t[i] = cpucycles();
-    polyveck_highbits_hint(&s2, &s2);
-  }
-  print_results("\npolyveck_highbits_hint:", t, NTESTS);
+  // for (i = 0; i < NTESTS; ++i) {
+  //   t[i] = cpucycles();
+  //   polyveck_highbits_hint(&s2, &s2);
+  // }
+  // print_results("\npolyveck_highbits_hint:", t, NTESTS);
 
   srt = clock();
   for (i = 0; i < NTESTS; i++) {

@@ -1,0 +1,34 @@
+require "params.jinc"
+param int QINV = 940508161; /* q^(-1) mod 2^32 */
+
+/* montgomery_reduce: computes a * 2^{-32} mod Q for input a (int64_t)
+ * Output is in (-Q, Q).
+ * Mirrors the C: t = (int32_t)a * QINV; return (a - (int64_t)t * Q) >> 32;
+ */
+inline fn __montgomery_reduce(reg u64 a) -> reg u32
+{
+  reg u32 t32;
+  reg u64 t64;
+
+  t32 = (32u)a;       /* lower 32 bits of a */
+  t32 *= QINV;        /* wrapping 32-bit multiply: lower32(a_low * QINV) */
+  t64 = (64s)t32;     /* sign-extend t32 (treated as int32_t) to int64_t */
+  t64 *= HAETAE_Q;
+  a   -= t64;
+  a >>s= 32;          /* arithmetic right shift: (a - t*Q) / 2^32 */
+  t32  = (32u)a;
+  return t32;
+}
+
+/* fqmul: montgomery_reduce(a * b) for int32_t inputs stored as u32 */
+inline fn __fqmul(reg u32 a b) -> reg u32
+{
+  reg u64 ta tb t;
+  reg u32 r;
+
+  ta = (64s)a;        /* sign-extend a (int32_t) to int64_t */
+  tb = (64s)b;
+  t  = ta * tb;
+  r  = __montgomery_reduce(t);
+  return r;
+}
