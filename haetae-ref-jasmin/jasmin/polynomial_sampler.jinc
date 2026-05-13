@@ -1,0 +1,498 @@
+fn __poly_sample_squeeze128(reg mut ptr u8[1024] outp,
+                            reg u64 outoff,
+                            reg mut ptr u64[25] sp) -> reg ptr u8[1024],
+                                                     reg ptr u64[25]
+{
+  reg u64 i j lane t idx;
+  reg u8 b;
+
+  idx = outoff;
+  () = #spill(outp, outoff, idx);
+  sp = _keccakf1600(sp);
+  () = #unspill(outp, outoff, idx);
+
+  i = 0;
+  while (i < 168)
+  {
+    lane = i;
+    lane >>= 3;
+    t = sp[lane];
+
+    j = 0;
+    while (j < 8)
+    {
+      b = (8u)t;
+      outp[idx] = b;
+      t >>= 8;
+      idx += 1;
+      j += 1;
+    }
+
+    i += 8;
+  }
+
+  return outp, sp;
+}
+
+fn __poly_sample_squeeze256(reg mut ptr u8[1024] outp,
+                            reg u64 outoff,
+                            reg mut ptr u64[25] sp) -> reg ptr u8[1024],
+                                                     reg ptr u64[25]
+{
+  reg u64 i j lane t idx;
+  reg u8 b;
+
+  idx = outoff;
+  () = #spill(outp, outoff, idx);
+  sp = _keccakf1600(sp);
+  () = #unspill(outp, outoff, idx);
+
+  i = 0;
+  while (i < 136)
+  {
+    lane = i;
+    lane >>= 3;
+    t = sp[lane];
+
+    j = 0;
+    while (j < 8)
+    {
+      b = (8u)t;
+      outp[idx] = b;
+      t >>= 8;
+      idx += 1;
+      j += 1;
+    }
+
+    i += 8;
+  }
+
+  return outp, sp;
+}
+
+fn __poly_sample_shake128_init(reg mut ptr u64[25] sp,
+                               reg ui64 seedp,
+                               reg u64 nonce) -> reg ptr u64[25]
+{
+  reg ui64 src;
+  reg u64 pos lane t n;
+  reg u8 b shift;
+  inline int k;
+
+  sp = _keccak_init_state(sp);
+
+  src = seedp;
+  n = nonce;
+  pos = 0;
+  while (pos < 32)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 (64u)src];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    src += 1;
+    pos += 1;
+  }
+
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)n;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    n >>= 8;
+    pos += 1;
+  }
+
+  t = 0x1f;
+  t <<= 16;
+  sp[4] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[20] ^= t;
+
+  return sp;
+}
+
+fn __poly_sample_shake256_init(reg mut ptr u64[25] sp,
+                               reg ui64 seedp,
+                               reg u64 nonce) -> reg ptr u64[25]
+{
+  reg ui64 src;
+  reg u64 pos lane t n;
+  reg u8 b shift;
+  inline int k;
+
+  sp = _keccak_init_state(sp);
+
+  src = seedp;
+  n = nonce;
+  pos = 0;
+  while (pos < 64)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 (64u)src];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    src += 1;
+    pos += 1;
+  }
+
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)n;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    n >>= 8;
+    pos += 1;
+  }
+
+  t = 0x1f;
+  t <<= 16;
+  sp[8] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[16] ^= t;
+
+  return sp;
+}
+
+inline fn __poly_sample_mod3(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __poly_sample_mod3_leq26(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __poly_sample_mod3_leq8(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 2;
+  u = t;
+  u &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+fn __poly_uniform_consume(reg mut ptr u32[8192] ap,
+                          reg u64 base,
+                          reg u64 ctr,
+                          reg ptr u8[1024] bp,
+                          reg u64 buflen) -> reg ptr u32[8192],
+                                             reg u64
+{
+  reg u64 pos rem live idx;
+  reg u8 byte;
+  reg u32 t u;
+
+  pos = 0;
+  live = 1;
+  while (live != 0)
+  {
+    if (ctr >= HAETAE_N)
+    {
+      live = 0;
+    }
+    else
+    {
+      rem = buflen;
+      rem -= pos;
+      if (rem < 2)
+      {
+        live = 0;
+      }
+      else
+      {
+        byte = bp[pos];
+        t = (32u)byte;
+        pos += 1;
+        byte = bp[pos];
+        u = (32u)byte;
+        pos += 1;
+        u <<= 8;
+        t |= u;
+
+        if (t < HAETAE_Q)
+        {
+          idx = base;
+          idx += ctr;
+          ap[idx] = t;
+          ctr += 1;
+        }
+      }
+    }
+  }
+
+  return ap, ctr;
+}
+
+fn __poly_uniform_eta_consume(reg mut ptr u32[8192] ap,
+                              reg u64 base,
+                              reg u64 ctr,
+                              reg ptr u8[1024] bp,
+                              reg u64 buflen) -> reg ptr u32[8192],
+                                                 reg u64
+{
+  reg u64 pos live idx;
+  reg u8 byte;
+  reg u32 t r;
+
+  pos = 0;
+  live = 1;
+  while (live != 0)
+  {
+    if (ctr >= HAETAE_N)
+    {
+      live = 0;
+    }
+    else
+    {
+      if (pos < buflen)
+      {
+        byte = bp[pos];
+        t = (32u)byte;
+        pos += 1;
+
+        if (t < 243)
+        {
+          r = __poly_sample_mod3(t);
+          idx = base;
+          idx += ctr;
+          ap[idx] = r;
+          ctr += 1;
+
+          if (ctr < HAETAE_N)
+          {
+            t *= 171;
+            t >>= 9;
+            r = __poly_sample_mod3(t);
+            idx = base;
+            idx += ctr;
+            ap[idx] = r;
+            ctr += 1;
+          }
+
+          if (ctr < HAETAE_N)
+          {
+            t *= 171;
+            t >>= 9;
+            r = __poly_sample_mod3_leq26(t);
+            idx = base;
+            idx += ctr;
+            ap[idx] = r;
+            ctr += 1;
+          }
+
+          if (ctr < HAETAE_N)
+          {
+            t *= 171;
+            t >>= 9;
+            r = __poly_sample_mod3_leq8(t);
+            idx = base;
+            idx += ctr;
+            ap[idx] = r;
+            ctr += 1;
+          }
+
+          if (ctr < HAETAE_N)
+          {
+            t *= 171;
+            t >>= 9;
+            r = t;
+            r >>= 1;
+            r *= 3;
+            t -= r;
+            idx = base;
+            idx += ctr;
+            ap[idx] = t;
+            ctr += 1;
+          }
+        }
+      }
+      else
+      {
+        live = 0;
+      }
+    }
+  }
+
+  return ap, ctr;
+}
+
+fn _poly_uniform_at(reg mut ptr u32[8192] ap,
+                    reg u64 base,
+                    reg ui64 seedp,
+                    reg u64 nonce) -> reg ptr u32[8192]
+{
+  stack u64[25] state;
+  stack u8[1024] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[1024] bufp;
+  reg u64 ctr buflen off i idx;
+  reg u8 b;
+
+  sp = state;
+  bufp = buf;
+
+  sp = __poly_sample_shake128_init(sp, seedp, nonce);
+  off = 0;
+  () = #spill(ap, base);
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  off = 168;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  off = 336;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  off = 504;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #unspill(ap, base);
+
+  ctr = 0;
+  buflen = 672;
+  ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+
+  while (ctr < HAETAE_N)
+  {
+    off = buflen;
+    off &= 1;
+
+    i = 0;
+    while (i < off)
+    {
+      idx = buflen;
+      idx -= off;
+      idx += i;
+      b = bufp[idx];
+      bufp[i] = b;
+      i += 1;
+    }
+
+    () = #spill(ap, base, ctr, buflen);
+    bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+    () = #unspill(ap, base, ctr, buflen);
+    buflen = 168;
+    buflen += off;
+    ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+  }
+
+  return ap;
+}
+
+fn _poly_uniform_eta_at(reg mut ptr u32[8192] ap,
+                        reg u64 base,
+                        reg ui64 seedp,
+                        reg u64 nonce) -> reg ptr u32[8192]
+{
+  stack u64[25] state;
+  stack u8[1024] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[1024] bufp;
+  reg u64 ctr off buflen;
+
+  sp = state;
+  bufp = buf;
+
+  sp = __poly_sample_shake256_init(sp, seedp, nonce);
+  off = 0;
+  () = #spill(ap, base);
+  bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #unspill(ap, base);
+
+  ctr = 0;
+  buflen = 136;
+  ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+
+  while (ctr < HAETAE_N)
+  {
+    () = #spill(ap, base, ctr, buflen);
+    bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+    () = #unspill(ap, base, ctr, buflen);
+    ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+  }
+
+  return ap;
+}

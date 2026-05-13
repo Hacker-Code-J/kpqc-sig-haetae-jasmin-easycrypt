@@ -1,0 +1,739 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Keccak1600.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Keccak state and low-level hash support.
+
+\section*{How To Read This Script}
+Read this file as finite-state deterministic support for the modeled hash layer.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore IntDiv List.} & Imports AllCore IntDiv List.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+3 & {\ttfamily\scriptsize theory HAETAE\_Keccak1600.} & Begins the namespace HAETAE\_Keccak1600, grouping the declarations as one checked theory. \\
+4 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+5 & {\ttfamily\scriptsize type keccak\_byte = int.} & Declares carrier set keccak\_byte.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+6 & {\ttfamily\scriptsize type keccak\_lane = bool list.} & Declares carrier set keccak\_lane.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+7 & {\ttfamily\scriptsize type keccak\_state = keccak\_lane list.} & Declares carrier set keccak\_state.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+8 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+9 & {\ttfamily\scriptsize op keccak\_lane\_bits : int = 64.} & Defines integer-valued parameter keccak\_lane\_bits, used for dimensions, budgets, support sizes, or bounds. \\
+10 & {\ttfamily\scriptsize op keccak\_state\_lanes : int = 25.} & Defines integer-valued parameter keccak\_state\_lanes, used for dimensions, budgets, support sizes, or bounds. \\
+11 & {\ttfamily\scriptsize op keccak\_state\_bytes : int = 200.} & Defines integer-valued parameter keccak\_state\_bytes, used for dimensions, budgets, support sizes, or bounds. \\
+12 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+13 & {\ttfamily\scriptsize op keccak\_byte\_norm (b : keccak\_byte) : keccak\_byte = b \%\% 256.} & Defines operation keccak\_byte\_norm, a total mathematical function or abbreviation used by later declarations. \\
+14 & {\ttfamily\scriptsize op keccak\_byte\_bit (b : keccak\_byte) (i : int) : bool =} & Defines predicate keccak\_byte\_bit, an event or well-formedness condition used in later implications and game proofs. \\
+15 & {\ttfamily\scriptsize   ((keccak\_byte\_norm b) \%/ (2 \textasciicircum{} i)) \%\% 2 <> 0.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+16 & {\ttfamily\scriptsize op keccak\_word\_norm (w : int) : int = w \%\% (2 \textasciicircum{} keccak\_lane\_bits).} & Defines integer-valued parameter keccak\_word\_norm, used for dimensions, budgets, support sizes, or bounds. \\
+17 & {\ttfamily\scriptsize op keccak\_word\_bit (w : int) (i : int) : bool =} & Defines predicate keccak\_word\_bit, an event or well-formedness condition used in later implications and game proofs. \\
+18 & {\ttfamily\scriptsize   ((keccak\_word\_norm w) \%/ (2 \textasciicircum{} i)) \%\% 2 <> 0.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+19 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+20 & {\ttfamily\scriptsize op keccak\_lane\_zero : keccak\_lane = nseq keccak\_lane\_bits false.} & Defines operation keccak\_lane\_zero, a total mathematical function or abbreviation used by later declarations. \\
+21 & {\ttfamily\scriptsize op keccak\_lane\_bit (lane : keccak\_lane) (i : int) : bool =} & Defines predicate keccak\_lane\_bit, an event or well-formedness condition used in later implications and game proofs. \\
+22 & {\ttfamily\scriptsize   nth false lane i.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+23 & {\ttfamily\scriptsize op keccak\_lane\_wf (lane : keccak\_lane) : bool =} & Defines predicate keccak\_lane\_wf, an event or well-formedness condition used in later implications and game proofs. \\
+24 & {\ttfamily\scriptsize   size lane = keccak\_lane\_bits.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+25 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+26 & {\ttfamily\scriptsize op keccak\_lane\_xor (a b : keccak\_lane) : keccak\_lane =} & Defines operation keccak\_lane\_xor, a total mathematical function or abbreviation used by later declarations. \\
+27 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+28 & {\ttfamily\scriptsize     (fun i => keccak\_lane\_bit a i <> keccak\_lane\_bit b i)} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+29 & {\ttfamily\scriptsize     keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize op keccak\_lane\_and (a b : keccak\_lane) : keccak\_lane =} & Defines operation keccak\_lane\_and, a total mathematical function or abbreviation used by later declarations. \\
+31 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+32 & {\ttfamily\scriptsize     (fun i => keccak\_lane\_bit a i /\textbackslash{} keccak\_lane\_bit b i)} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+33 & {\ttfamily\scriptsize     keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+34 & {\ttfamily\scriptsize op keccak\_lane\_not (a : keccak\_lane) : keccak\_lane =} & Defines operation keccak\_lane\_not, a total mathematical function or abbreviation used by later declarations. \\
+35 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+36 & {\ttfamily\scriptsize     (fun i => if keccak\_lane\_bit a i then false else true)} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+37 & {\ttfamily\scriptsize     keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+38 & {\ttfamily\scriptsize op keccak\_lane\_rotl (a : keccak\_lane) (offset : int) : keccak\_lane =} & Defines integer-valued parameter keccak\_lane\_rotl, used for dimensions, budgets, support sizes, or bounds. \\
+39 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+40 & {\ttfamily\scriptsize     (fun i => keccak\_lane\_bit a ((i - offset) \%\% keccak\_lane\_bits))} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+41 & {\ttfamily\scriptsize     keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+43 & {\ttfamily\scriptsize op keccak\_lane\_of\_int (x : int) : keccak\_lane =} & Defines integer-valued parameter keccak\_lane\_of\_int, used for dimensions, budgets, support sizes, or bounds. \\
+44 & {\ttfamily\scriptsize   mkseq (fun i => keccak\_word\_bit x i) keccak\_lane\_bits.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+45 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+46 & {\ttfamily\scriptsize op keccak\_lane\_to\_byte (lane : keccak\_lane) (byte\_index : int) : keccak\_byte =} & Defines integer-valued parameter keccak\_lane\_to\_byte, used for dimensions, budgets, support sizes, or bounds. \\
+47 & {\ttfamily\scriptsize   sumz} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+48 & {\ttfamily\scriptsize     (map} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+49 & {\ttfamily\scriptsize       (fun j =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+50 & {\ttfamily\scriptsize          if keccak\_lane\_bit lane (8 * byte\_index + j)} & Splits proof obligations according to a conditional branch in the program or formula. \\
+51 & {\ttfamily\scriptsize          then 2 \textasciicircum{} j} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+52 & {\ttfamily\scriptsize          else 0)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+53 & {\ttfamily\scriptsize       (range 0 8)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+54 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+55 & {\ttfamily\scriptsize op keccak\_bytes\_to\_lane (bs : keccak\_byte list) (lane\_index : int) :} & Defines integer-valued parameter keccak\_bytes\_to\_lane, used for dimensions, budgets, support sizes, or bounds. \\
+56 & {\ttfamily\scriptsize   keccak\_lane =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+57 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+58 & {\ttfamily\scriptsize     (fun bit =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+59 & {\ttfamily\scriptsize        keccak\_byte\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+60 & {\ttfamily\scriptsize          (nth 0 bs (8 * lane\_index + bit \%/ 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize          (bit \%\% 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+62 & {\ttfamily\scriptsize     keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+63 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+64 & {\ttfamily\scriptsize op keccak\_lanes\_of\_bytes (bs : keccak\_byte list) : keccak\_state =} & Defines operation keccak\_lanes\_of\_bytes, a total mathematical function or abbreviation used by later declarations. \\
+65 & {\ttfamily\scriptsize   mkseq (fun lane => keccak\_bytes\_to\_lane bs lane) keccak\_state\_lanes.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+66 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+67 & {\ttfamily\scriptsize op keccak\_bytes\_of\_lanes (st : keccak\_state) : keccak\_byte list =} & Defines operation keccak\_bytes\_of\_lanes, a total mathematical function or abbreviation used by later declarations. \\
+68 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+70 & {\ttfamily\scriptsize        keccak\_lane\_to\_byte} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+71 & {\ttfamily\scriptsize          (nth keccak\_lane\_zero st (i \%/ 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+72 & {\ttfamily\scriptsize          (i \%\% 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+73 & {\ttfamily\scriptsize     keccak\_state\_bytes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+74 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+75 & {\ttfamily\scriptsize op keccak\_lane\_index (x y : int) : int =} & Defines integer-valued parameter keccak\_lane\_index, used for dimensions, budgets, support sizes, or bounds. \\
+76 & {\ttfamily\scriptsize   (x \%\% 5) + 5 * (y \%\% 5).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+77 & {\ttfamily\scriptsize op keccak\_state\_lane (st : keccak\_state) (x y : int) : keccak\_lane =} & Defines integer-valued parameter keccak\_state\_lane, used for dimensions, budgets, support sizes, or bounds. \\
+78 & {\ttfamily\scriptsize   nth keccak\_lane\_zero st (keccak\_lane\_index x y).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+79 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+80 & {\ttfamily\scriptsize op keccak\_rho\_offsets : int list =} & Defines integer-valued parameter keccak\_rho\_offsets, used for dimensions, budgets, support sizes, or bounds. \\
+81 & {\ttfamily\scriptsize   0 :: 1 :: 62 :: 28 :: 27 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+82 & {\ttfamily\scriptsize   36 :: 44 :: 6 :: 55 :: 20 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+83 & {\ttfamily\scriptsize   3 :: 10 :: 43 :: 25 :: 39 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+84 & {\ttfamily\scriptsize   41 :: 45 :: 15 :: 21 :: 8 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+85 & {\ttfamily\scriptsize   18 :: 2 :: 61 :: 56 :: 14 :: [].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+86 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+87 & {\ttfamily\scriptsize op keccak\_round\_constants : int list =} & Defines integer-valued parameter keccak\_round\_constants, used for dimensions, budgets, support sizes, or bounds. \\
+88 & {\ttfamily\scriptsize   1 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+89 & {\ttfamily\scriptsize   32898 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+90 & {\ttfamily\scriptsize   9223372036854808714 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize   9223372039002292224 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+92 & {\ttfamily\scriptsize   32907 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+93 & {\ttfamily\scriptsize   2147483649 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+94 & {\ttfamily\scriptsize   9223372039002292353 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+95 & {\ttfamily\scriptsize   9223372036854808585 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+96 & {\ttfamily\scriptsize   138 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+97 & {\ttfamily\scriptsize   136 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+98 & {\ttfamily\scriptsize   2147516425 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+99 & {\ttfamily\scriptsize   2147483658 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+100 & {\ttfamily\scriptsize   2147516555 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+101 & {\ttfamily\scriptsize   9223372036854775947 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+102 & {\ttfamily\scriptsize   9223372036854808713 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+103 & {\ttfamily\scriptsize   9223372036854808579 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+104 & {\ttfamily\scriptsize   9223372036854808578 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+105 & {\ttfamily\scriptsize   9223372036854775936 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+106 & {\ttfamily\scriptsize   32778 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+107 & {\ttfamily\scriptsize   9223372039002259466 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+108 & {\ttfamily\scriptsize   9223372039002292353 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+109 & {\ttfamily\scriptsize   9223372036854808704 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+110 & {\ttfamily\scriptsize   2147483649 ::} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+111 & {\ttfamily\scriptsize   9223372039002292232 :: [].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+112 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+113 & {\ttfamily\scriptsize op keccak\_theta\_c (st : keccak\_state) (x : int) : keccak\_lane =} & Defines integer-valued parameter keccak\_theta\_c, used for dimensions, budgets, support sizes, or bounds. \\
+114 & {\ttfamily\scriptsize   keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+115 & {\ttfamily\scriptsize     (keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+116 & {\ttfamily\scriptsize       (keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+117 & {\ttfamily\scriptsize         (keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+118 & {\ttfamily\scriptsize           (keccak\_state\_lane st x 0)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+119 & {\ttfamily\scriptsize           (keccak\_state\_lane st x 1))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+120 & {\ttfamily\scriptsize         (keccak\_state\_lane st x 2))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+121 & {\ttfamily\scriptsize       (keccak\_state\_lane st x 3))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+122 & {\ttfamily\scriptsize     (keccak\_state\_lane st x 4).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+123 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+124 & {\ttfamily\scriptsize op keccak\_theta\_d (st : keccak\_state) (x : int) : keccak\_lane =} & Defines integer-valued parameter keccak\_theta\_d, used for dimensions, budgets, support sizes, or bounds. \\
+125 & {\ttfamily\scriptsize   keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+126 & {\ttfamily\scriptsize     (keccak\_theta\_c st (x + 4))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+127 & {\ttfamily\scriptsize     (keccak\_lane\_rotl (keccak\_theta\_c st (x + 1)) 1).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+128 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+129 & {\ttfamily\scriptsize op keccak\_theta (st : keccak\_state) : keccak\_state =} & Defines operation keccak\_theta, a total mathematical function or abbreviation used by later declarations. \\
+130 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+131 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+132 & {\ttfamily\scriptsize        let x = i \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+133 & {\ttfamily\scriptsize        let y = i \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+134 & {\ttfamily\scriptsize        keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+135 & {\ttfamily\scriptsize          (keccak\_state\_lane st x y)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+136 & {\ttfamily\scriptsize          (keccak\_theta\_d st x))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+137 & {\ttfamily\scriptsize     keccak\_state\_lanes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+138 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+139 & {\ttfamily\scriptsize op keccak\_rho\_pi (st : keccak\_state) : keccak\_state =} & Defines operation keccak\_rho\_pi, a total mathematical function or abbreviation used by later declarations. \\
+140 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+141 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+142 & {\ttfamily\scriptsize        let x = i \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+143 & {\ttfamily\scriptsize        let y = i \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+144 & {\ttfamily\scriptsize        let sx = (x + 3 * y) \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+145 & {\ttfamily\scriptsize        let sy = x in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+146 & {\ttfamily\scriptsize        keccak\_lane\_rotl} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+147 & {\ttfamily\scriptsize          (keccak\_state\_lane st sx sy)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+148 & {\ttfamily\scriptsize          (nth 0 keccak\_rho\_offsets (keccak\_lane\_index sx sy)))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+149 & {\ttfamily\scriptsize     keccak\_state\_lanes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+150 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+151 & {\ttfamily\scriptsize op keccak\_chi (st : keccak\_state) : keccak\_state =} & Defines operation keccak\_chi, a total mathematical function or abbreviation used by later declarations. \\
+152 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+153 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+154 & {\ttfamily\scriptsize        let x = i \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+155 & {\ttfamily\scriptsize        let y = i \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+156 & {\ttfamily\scriptsize        keccak\_lane\_xor} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+157 & {\ttfamily\scriptsize          (keccak\_state\_lane st x y)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+158 & {\ttfamily\scriptsize          (keccak\_lane\_and} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+159 & {\ttfamily\scriptsize            (keccak\_lane\_not (keccak\_state\_lane st (x + 1) y))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+160 & {\ttfamily\scriptsize            (keccak\_state\_lane st (x + 2) y)))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+161 & {\ttfamily\scriptsize     keccak\_state\_lanes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+162 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+163 & {\ttfamily\scriptsize op keccak\_iota (st : keccak\_state) (rc : keccak\_lane) : keccak\_state =} & Defines operation keccak\_iota, a total mathematical function or abbreviation used by later declarations. \\
+164 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+165 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+166 & {\ttfamily\scriptsize        if i = 0} & Splits proof obligations according to a conditional branch in the program or formula. \\
+167 & {\ttfamily\scriptsize        then keccak\_lane\_xor (nth keccak\_lane\_zero st 0) rc} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+168 & {\ttfamily\scriptsize        else nth keccak\_lane\_zero st i)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+169 & {\ttfamily\scriptsize     keccak\_state\_lanes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+170 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+171 & {\ttfamily\scriptsize op keccak\_round (st : keccak\_state) (rc : keccak\_lane) : keccak\_state =} & Defines operation keccak\_round, a total mathematical function or abbreviation used by later declarations. \\
+172 & {\ttfamily\scriptsize   keccak\_iota (keccak\_chi (keccak\_rho\_pi (keccak\_theta st))) rc.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+173 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+174 & {\ttfamily\scriptsize op keccak\_f1600\_lanes (st : keccak\_state) : keccak\_state =} & Defines operation keccak\_f1600\_lanes, a total mathematical function or abbreviation used by later declarations. \\
+175 & {\ttfamily\scriptsize   foldl} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+176 & {\ttfamily\scriptsize     (fun acc rc => keccak\_round acc (keccak\_lane\_of\_int rc))} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+177 & {\ttfamily\scriptsize     st} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+178 & {\ttfamily\scriptsize     keccak\_round\_constants.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+179 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+180 & {\ttfamily\scriptsize op keccak\_f1600\_bytes (st : keccak\_byte list) : keccak\_byte list =} & Defines operation keccak\_f1600\_bytes, a total mathematical function or abbreviation used by later declarations. \\
+181 & {\ttfamily\scriptsize   keccak\_bytes\_of\_lanes (keccak\_f1600\_lanes (keccak\_lanes\_of\_bytes st)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+182 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+183 & {\ttfamily\scriptsize lemma keccak\_lane\_bitsE :} & States checked lemma keccak\_lane\_bitsE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+184 & {\ttfamily\scriptsize   keccak\_lane\_bits = 64.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+185 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_bits. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+186 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+187 & {\ttfamily\scriptsize lemma keccak\_state\_lanesE :} & States checked lemma keccak\_state\_lanesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+188 & {\ttfamily\scriptsize   keccak\_state\_lanes = 25.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+189 & {\ttfamily\scriptsize proof. by rewrite /keccak\_state\_lanes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+190 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+191 & {\ttfamily\scriptsize lemma keccak\_state\_bytesE :} & States checked lemma keccak\_state\_bytesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+192 & {\ttfamily\scriptsize   keccak\_state\_bytes = 200.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+193 & {\ttfamily\scriptsize proof. by rewrite /keccak\_state\_bytes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+194 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+195 & {\ttfamily\scriptsize lemma keccak\_lane\_zero\_wf :} & States checked lemma keccak\_lane\_zero\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+196 & {\ttfamily\scriptsize   keccak\_lane\_wf keccak\_lane\_zero.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+197 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_zero size\_nseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+198 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+199 & {\ttfamily\scriptsize lemma keccak\_lane\_xor\_wf a b :} & States checked lemma keccak\_lane\_xor\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+200 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_lane\_xor a b).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+201 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_xor size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+202 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+203 & {\ttfamily\scriptsize lemma keccak\_lane\_and\_wf a b :} & States checked lemma keccak\_lane\_and\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+204 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_lane\_and a b).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+205 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_and size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+206 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+207 & {\ttfamily\scriptsize lemma keccak\_lane\_not\_wf a :} & States checked lemma keccak\_lane\_not\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+208 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_lane\_not a).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+209 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_not size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+210 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+211 & {\ttfamily\scriptsize lemma keccak\_lane\_rotl\_wf a offset :} & States checked lemma keccak\_lane\_rotl\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+212 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_lane\_rotl a offset).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+213 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_rotl size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+214 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+215 & {\ttfamily\scriptsize lemma keccak\_lane\_of\_int\_wf x :} & States checked lemma keccak\_lane\_of\_int\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+216 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_lane\_of\_int x).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+217 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_lane\_of\_int size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+218 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+219 & {\ttfamily\scriptsize lemma keccak\_lane\_mod\_range x :} & States checked lemma keccak\_lane\_mod\_range.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+220 & {\ttfamily\scriptsize   0 <= x \%\% keccak\_lane\_bits < keccak\_lane\_bits.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+221 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_bits; smt(). qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+222 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+223 & {\ttfamily\scriptsize lemma keccak\_word\_modulus\_pos :} & States checked lemma keccak\_word\_modulus\_pos.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+224 & {\ttfamily\scriptsize   0 < 2 \textasciicircum{} keccak\_lane\_bits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+225 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_bits; smt(). qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+226 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+227 & {\ttfamily\scriptsize lemma keccak\_word\_norm\_small w :} & States checked lemma keccak\_word\_norm\_small.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+228 & {\ttfamily\scriptsize   0 <= w < 2 \textasciicircum{} keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+229 & {\ttfamily\scriptsize   keccak\_word\_norm w = w.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+230 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+231 & {\ttfamily\scriptsize move=> w\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+232 & {\ttfamily\scriptsize by rewrite /keccak\_word\_norm pmod\_small.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+233 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+234 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+235 & {\ttfamily\scriptsize lemma keccak\_pow2\_0E :} & States checked lemma keccak\_pow2\_0E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+236 & {\ttfamily\scriptsize   2 \textasciicircum{} 0 = 1.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+237 & {\ttfamily\scriptsize proof. by rewrite expr0. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+238 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+239 & {\ttfamily\scriptsize lemma keccak\_pow2\_1E :} & States checked lemma keccak\_pow2\_1E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+240 & {\ttfamily\scriptsize   2 \textasciicircum{} 1 = 2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+241 & {\ttfamily\scriptsize proof. by rewrite expr1. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+242 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+243 & {\ttfamily\scriptsize lemma keccak\_pow2\_2E :} & States checked lemma keccak\_pow2\_2E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+244 & {\ttfamily\scriptsize   2 \textasciicircum{} 2 = 4.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+245 & {\ttfamily\scriptsize proof. by rewrite expr2. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+246 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+247 & {\ttfamily\scriptsize lemma keccak\_pow2\_3E :} & States checked lemma keccak\_pow2\_3E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+248 & {\ttfamily\scriptsize   2 \textasciicircum{} 3 = 8.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+249 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+250 & {\ttfamily\scriptsize rewrite (\_ : 3 = 2 + 1) 1:/\# exprS //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+251 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_2E.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+252 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+253 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+254 & {\ttfamily\scriptsize lemma keccak\_pow2\_4E :} & States checked lemma keccak\_pow2\_4E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+255 & {\ttfamily\scriptsize   2 \textasciicircum{} 4 = 16.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+256 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+257 & {\ttfamily\scriptsize rewrite (\_ : 4 = 3 + 1) 1:/\# exprS //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+258 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_3E.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+259 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+260 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+261 & {\ttfamily\scriptsize lemma keccak\_pow2\_5E :} & States checked lemma keccak\_pow2\_5E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+262 & {\ttfamily\scriptsize   2 \textasciicircum{} 5 = 32.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+263 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+264 & {\ttfamily\scriptsize rewrite (\_ : 5 = 4 + 1) 1:/\# exprS //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+265 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_4E.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+266 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+267 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+268 & {\ttfamily\scriptsize lemma keccak\_pow2\_6E :} & States checked lemma keccak\_pow2\_6E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+269 & {\ttfamily\scriptsize   2 \textasciicircum{} 6 = 64.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+270 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+271 & {\ttfamily\scriptsize rewrite (\_ : 6 = 5 + 1) 1:/\# exprS //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+272 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_5E.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+273 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+274 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+275 & {\ttfamily\scriptsize lemma keccak\_pow2\_7E :} & States checked lemma keccak\_pow2\_7E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+276 & {\ttfamily\scriptsize   2 \textasciicircum{} 7 = 128.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+277 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+278 & {\ttfamily\scriptsize rewrite (\_ : 7 = 6 + 1) 1:/\# exprS //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+279 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_6E.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+280 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+281 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+282 & {\ttfamily\scriptsize lemma keccak\_bytes\_to\_lane\_wf bs lane\_index :} & States checked lemma keccak\_bytes\_to\_lane\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+283 & {\ttfamily\scriptsize   keccak\_lane\_wf (keccak\_bytes\_to\_lane bs lane\_index).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+284 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lane\_wf /keccak\_bytes\_to\_lane size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+285 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+286 & {\ttfamily\scriptsize lemma keccak\_rho\_offsets\_size :} & States checked lemma keccak\_rho\_offsets\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+287 & {\ttfamily\scriptsize   size keccak\_rho\_offsets = keccak\_state\_lanes.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+288 & {\ttfamily\scriptsize proof. by rewrite /keccak\_rho\_offsets /keccak\_state\_lanes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+289 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+290 & {\ttfamily\scriptsize lemma keccak\_round\_constants\_size :} & States checked lemma keccak\_round\_constants\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+291 & {\ttfamily\scriptsize   size keccak\_round\_constants = 24.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+292 & {\ttfamily\scriptsize proof. by rewrite /keccak\_round\_constants. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+293 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+294 & {\ttfamily\scriptsize lemma keccak\_lanes\_of\_bytes\_size bs :} & States checked lemma keccak\_lanes\_of\_bytes\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+295 & {\ttfamily\scriptsize   size (keccak\_lanes\_of\_bytes bs) = keccak\_state\_lanes.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+296 & {\ttfamily\scriptsize proof. by rewrite /keccak\_lanes\_of\_bytes size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+297 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+298 & {\ttfamily\scriptsize lemma keccak\_lanes\_of\_bytes\_lane\_wf bs lane :} & States checked lemma keccak\_lanes\_of\_bytes\_lane\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+299 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+300 & {\ttfamily\scriptsize   keccak\_lane\_wf} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+301 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_lanes\_of\_bytes bs) lane).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+302 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+303 & {\ttfamily\scriptsize move=> lane\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+304 & {\ttfamily\scriptsize rewrite /keccak\_lanes\_of\_bytes nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+305 & {\ttfamily\scriptsize by apply keccak\_bytes\_to\_lane\_wf.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+306 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+307 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+308 & {\ttfamily\scriptsize lemma keccak\_lanes\_of\_bytes\_bitE bs lane bit :} & States checked lemma keccak\_lanes\_of\_bytes\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+309 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+310 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+311 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+312 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_lanes\_of\_bytes bs) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+313 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+314 & {\ttfamily\scriptsize   keccak\_byte\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+315 & {\ttfamily\scriptsize     (nth 0 bs (8 * lane + bit \%/ 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+316 & {\ttfamily\scriptsize     (bit \%\% 8).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+317 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+318 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+319 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lanes\_of\_bytes nth\_mkseq;} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+320 & {\ttfamily\scriptsize   first by smt().} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+321 & {\ttfamily\scriptsize by rewrite /keccak\_bytes\_to\_lane nth\_mkseq.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+322 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+323 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+324 & {\ttfamily\scriptsize lemma keccak\_lane\_xor\_bitE a b bit :} & States checked lemma keccak\_lane\_xor\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+325 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+326 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_lane\_xor a b) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+327 & {\ttfamily\scriptsize   (keccak\_lane\_bit a bit <> keccak\_lane\_bit b bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+328 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+329 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+330 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lane\_xor nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+331 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+332 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+333 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+334 & {\ttfamily\scriptsize lemma keccak\_lane\_and\_bitE a b bit :} & States checked lemma keccak\_lane\_and\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+335 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+336 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_lane\_and a b) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+337 & {\ttfamily\scriptsize   (keccak\_lane\_bit a bit /\textbackslash{} keccak\_lane\_bit b bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+338 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+339 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+340 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lane\_and nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+341 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+342 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+343 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+344 & {\ttfamily\scriptsize lemma keccak\_lane\_not\_bitE a bit :} & States checked lemma keccak\_lane\_not\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+345 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+346 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_lane\_not a) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+347 & {\ttfamily\scriptsize   (if keccak\_lane\_bit a bit then false else true).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+348 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+349 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+350 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lane\_not nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+351 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+352 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+353 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+354 & {\ttfamily\scriptsize lemma keccak\_lane\_rotl\_bitE a offset bit :} & States checked lemma keccak\_lane\_rotl\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+355 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+356 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_lane\_rotl a offset) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+357 & {\ttfamily\scriptsize   keccak\_lane\_bit a ((bit - offset) \%\% keccak\_lane\_bits).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+358 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+359 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+360 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lane\_rotl nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+361 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+362 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+363 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+364 & {\ttfamily\scriptsize lemma keccak\_lane\_of\_int\_bitE x bit :} & States checked lemma keccak\_lane\_of\_int\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+365 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+366 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_lane\_of\_int x) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+367 & {\ttfamily\scriptsize   keccak\_word\_bit x bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+368 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+369 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+370 & {\ttfamily\scriptsize rewrite /keccak\_lane\_bit /keccak\_lane\_of\_int nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+371 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+372 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+373 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+374 & {\ttfamily\scriptsize lemma keccak\_state\_lane\_bitE st x y bit :} & States checked lemma keccak\_state\_lane\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+375 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_state\_lane st x y) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+376 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+377 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero st (keccak\_lane\_index x y))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+378 & {\ttfamily\scriptsize     bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+379 & {\ttfamily\scriptsize proof. by rewrite /keccak\_state\_lane. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+380 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+381 & {\ttfamily\scriptsize op keccak\_theta\_c\_bit\_index\_value} & Defines operation keccak\_theta\_c\_bit\_index\_value, a total mathematical function or abbreviation used by later declarations. \\
+382 & {\ttfamily\scriptsize    (st : keccak\_state) (x bit : int) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+383 & {\ttfamily\scriptsize   ((((keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+384 & {\ttfamily\scriptsize         (nth keccak\_lane\_zero st (keccak\_lane\_index x 0)) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+385 & {\ttfamily\scriptsize       keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+386 & {\ttfamily\scriptsize         (nth keccak\_lane\_zero st (keccak\_lane\_index x 1)) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+387 & {\ttfamily\scriptsize      keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+388 & {\ttfamily\scriptsize        (nth keccak\_lane\_zero st (keccak\_lane\_index x 2)) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+389 & {\ttfamily\scriptsize     keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+390 & {\ttfamily\scriptsize       (nth keccak\_lane\_zero st (keccak\_lane\_index x 3)) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+391 & {\ttfamily\scriptsize    keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+392 & {\ttfamily\scriptsize      (nth keccak\_lane\_zero st (keccak\_lane\_index x 4)) bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+393 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+394 & {\ttfamily\scriptsize op keccak\_theta\_d\_bit\_index\_value} & Defines operation keccak\_theta\_d\_bit\_index\_value, a total mathematical function or abbreviation used by later declarations. \\
+395 & {\ttfamily\scriptsize    (st : keccak\_state) (x bit : int) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+396 & {\ttfamily\scriptsize   keccak\_theta\_c\_bit\_index\_value st (x + 4) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+397 & {\ttfamily\scriptsize   keccak\_theta\_c\_bit\_index\_value} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+398 & {\ttfamily\scriptsize     st} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+399 & {\ttfamily\scriptsize     (x + 1)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+400 & {\ttfamily\scriptsize     ((bit - 1) \%\% keccak\_lane\_bits).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+401 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+402 & {\ttfamily\scriptsize lemma keccak\_theta\_c\_bitE st x bit :} & States checked lemma keccak\_theta\_c\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+403 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+404 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_theta\_c st x) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+405 & {\ttfamily\scriptsize   ((((keccak\_lane\_bit (keccak\_state\_lane st x 0) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+406 & {\ttfamily\scriptsize       keccak\_lane\_bit (keccak\_state\_lane st x 1) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+407 & {\ttfamily\scriptsize      keccak\_lane\_bit (keccak\_state\_lane st x 2) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+408 & {\ttfamily\scriptsize     keccak\_lane\_bit (keccak\_state\_lane st x 3) bit) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+409 & {\ttfamily\scriptsize    keccak\_lane\_bit (keccak\_state\_lane st x 4) bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+410 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+411 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+412 & {\ttfamily\scriptsize by rewrite /keccak\_theta\_c !keccak\_lane\_xor\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+413 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+414 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+415 & {\ttfamily\scriptsize lemma keccak\_theta\_c\_bit\_indexE st x bit :} & States checked lemma keccak\_theta\_c\_bit\_indexE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+416 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+417 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_theta\_c st x) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+418 & {\ttfamily\scriptsize   keccak\_theta\_c\_bit\_index\_value st x bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+419 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+420 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+421 & {\ttfamily\scriptsize by rewrite /keccak\_theta\_c\_bit\_index\_value} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+422 & {\ttfamily\scriptsize            keccak\_theta\_c\_bitE // !keccak\_state\_lane\_bitE.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+423 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+424 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+425 & {\ttfamily\scriptsize lemma keccak\_theta\_d\_bitE st x bit :} & States checked lemma keccak\_theta\_d\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+426 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+427 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_theta\_d st x) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+428 & {\ttfamily\scriptsize   (keccak\_lane\_bit (keccak\_theta\_c st (x + 4)) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+429 & {\ttfamily\scriptsize    keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+430 & {\ttfamily\scriptsize      (keccak\_theta\_c st (x + 1))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+431 & {\ttfamily\scriptsize      ((bit - 1) \%\% keccak\_lane\_bits)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+432 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+433 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+434 & {\ttfamily\scriptsize rewrite /keccak\_theta\_d.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+435 & {\ttfamily\scriptsize rewrite keccak\_lane\_xor\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+436 & {\ttfamily\scriptsize by rewrite keccak\_lane\_rotl\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+437 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+438 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+439 & {\ttfamily\scriptsize lemma keccak\_theta\_d\_bit\_indexE st x bit :} & States checked lemma keccak\_theta\_d\_bit\_indexE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+440 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+441 & {\ttfamily\scriptsize   keccak\_lane\_bit (keccak\_theta\_d st x) bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+442 & {\ttfamily\scriptsize   keccak\_theta\_d\_bit\_index\_value st x bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+443 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+444 & {\ttfamily\scriptsize move=> bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+445 & {\ttfamily\scriptsize rewrite keccak\_theta\_d\_bitE //.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+446 & {\ttfamily\scriptsize rewrite /keccak\_theta\_d\_bit\_index\_value.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+447 & {\ttfamily\scriptsize rewrite keccak\_theta\_c\_bit\_indexE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+448 & {\ttfamily\scriptsize rewrite keccak\_theta\_c\_bit\_indexE; first by rewrite /keccak\_lane\_bits; smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+449 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+450 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+451 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+452 & {\ttfamily\scriptsize lemma keccak\_theta\_bitE st lane bit :} & States checked lemma keccak\_theta\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+453 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+454 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+455 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+456 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_theta st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+457 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+458 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+459 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+460 & {\ttfamily\scriptsize    keccak\_lane\_bit (keccak\_state\_lane st x y) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+461 & {\ttfamily\scriptsize    keccak\_lane\_bit (keccak\_theta\_d st x) bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+462 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+463 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+464 & {\ttfamily\scriptsize rewrite /keccak\_theta nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+465 & {\ttfamily\scriptsize rewrite /= keccak\_lane\_xor\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+466 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+467 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+468 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+469 & {\ttfamily\scriptsize lemma keccak\_theta\_bit\_indexE st lane bit :} & States checked lemma keccak\_theta\_bit\_indexE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+470 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+471 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+472 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+473 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_theta st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+474 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+475 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+476 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+477 & {\ttfamily\scriptsize    keccak\_lane\_bit (nth keccak\_lane\_zero st (keccak\_lane\_index x y)) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+478 & {\ttfamily\scriptsize    keccak\_lane\_bit (keccak\_theta\_d st x) bit).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+479 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+480 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+481 & {\ttfamily\scriptsize by rewrite keccak\_theta\_bitE // keccak\_state\_lane\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+482 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+483 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+484 & {\ttfamily\scriptsize lemma keccak\_rho\_pi\_bitE st lane bit :} & States checked lemma keccak\_rho\_pi\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+485 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+486 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+487 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+488 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_rho\_pi st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+489 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+490 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+491 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+492 & {\ttfamily\scriptsize    let sx = (x + 3 * y) \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+493 & {\ttfamily\scriptsize    let sy = x in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+494 & {\ttfamily\scriptsize    keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+495 & {\ttfamily\scriptsize      (keccak\_state\_lane st sx sy)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+496 & {\ttfamily\scriptsize      ((bit - nth 0 keccak\_rho\_offsets (keccak\_lane\_index sx sy)) \%\%} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+497 & {\ttfamily\scriptsize       keccak\_lane\_bits)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+498 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+499 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+500 & {\ttfamily\scriptsize rewrite /keccak\_rho\_pi nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+501 & {\ttfamily\scriptsize rewrite /= keccak\_lane\_rotl\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+502 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+503 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+504 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+505 & {\ttfamily\scriptsize lemma keccak\_rho\_pi\_bit\_indexE st lane bit :} & States checked lemma keccak\_rho\_pi\_bit\_indexE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+506 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+507 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+508 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+509 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_rho\_pi st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+510 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+511 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+512 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+513 & {\ttfamily\scriptsize    let sx = (x + 3 * y) \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+514 & {\ttfamily\scriptsize    let sy = x in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+515 & {\ttfamily\scriptsize    keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+516 & {\ttfamily\scriptsize      (nth keccak\_lane\_zero st (keccak\_lane\_index sx sy))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+517 & {\ttfamily\scriptsize      ((bit - nth 0 keccak\_rho\_offsets (keccak\_lane\_index sx sy)) \%\%} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+518 & {\ttfamily\scriptsize       keccak\_lane\_bits)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+519 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+520 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+521 & {\ttfamily\scriptsize by rewrite keccak\_rho\_pi\_bitE // keccak\_state\_lane\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+522 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+523 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+524 & {\ttfamily\scriptsize lemma keccak\_chi\_bitE st lane bit :} & States checked lemma keccak\_chi\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+525 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+526 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+527 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+528 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_chi st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+529 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+530 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+531 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+532 & {\ttfamily\scriptsize    keccak\_lane\_bit (keccak\_state\_lane st x y) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+533 & {\ttfamily\scriptsize    ((if keccak\_lane\_bit (keccak\_state\_lane st (x + 1) y) bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+534 & {\ttfamily\scriptsize      then false else true) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+535 & {\ttfamily\scriptsize     keccak\_lane\_bit (keccak\_state\_lane st (x + 2) y) bit)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+536 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+537 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+538 & {\ttfamily\scriptsize rewrite /keccak\_chi nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+539 & {\ttfamily\scriptsize rewrite /= keccak\_lane\_xor\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+540 & {\ttfamily\scriptsize rewrite keccak\_lane\_and\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+541 & {\ttfamily\scriptsize rewrite keccak\_lane\_not\_bitE; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+542 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+543 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+544 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+545 & {\ttfamily\scriptsize lemma keccak\_chi\_bit\_indexE st lane bit :} & States checked lemma keccak\_chi\_bit\_indexE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+546 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+547 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+548 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+549 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_chi st) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+550 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+551 & {\ttfamily\scriptsize   (let x = lane \%\% 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+552 & {\ttfamily\scriptsize    let y = lane \%/ 5 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+553 & {\ttfamily\scriptsize    keccak\_lane\_bit (nth keccak\_lane\_zero st (keccak\_lane\_index x y)) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+554 & {\ttfamily\scriptsize    ((if keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+555 & {\ttfamily\scriptsize           (nth keccak\_lane\_zero st (keccak\_lane\_index (x + 1) y))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+556 & {\ttfamily\scriptsize           bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+557 & {\ttfamily\scriptsize      then false else true) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+558 & {\ttfamily\scriptsize     keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+559 & {\ttfamily\scriptsize       (nth keccak\_lane\_zero st (keccak\_lane\_index (x + 2) y))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+560 & {\ttfamily\scriptsize       bit)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+561 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+562 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+563 & {\ttfamily\scriptsize by rewrite keccak\_chi\_bitE // !keccak\_state\_lane\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+564 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+565 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+566 & {\ttfamily\scriptsize lemma keccak\_iota\_bitE st rc lane bit :} & States checked lemma keccak\_iota\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+567 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+568 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+569 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+570 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_iota st rc) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+571 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+572 & {\ttfamily\scriptsize   if lane = 0} & Splits proof obligations according to a conditional branch in the program or formula. \\
+573 & {\ttfamily\scriptsize   then keccak\_lane\_bit (nth keccak\_lane\_zero st 0) bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+574 & {\ttfamily\scriptsize        keccak\_lane\_bit rc bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+575 & {\ttfamily\scriptsize   else keccak\_lane\_bit (nth keccak\_lane\_zero st lane) bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+576 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+577 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+578 & {\ttfamily\scriptsize rewrite /keccak\_iota nth\_mkseq; first by smt().} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+579 & {\ttfamily\scriptsize case (lane = 0) => lane0.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+580 & {\ttfamily\scriptsize + rewrite lane0 /= keccak\_lane\_xor\_bitE; first by smt().} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+581 & {\ttfamily\scriptsize   by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+582 & {\ttfamily\scriptsize by rewrite lane0.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+583 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+584 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+585 & {\ttfamily\scriptsize lemma keccak\_round\_bitE st rc lane bit :} & States checked lemma keccak\_round\_bitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+586 & {\ttfamily\scriptsize   0 <= lane < keccak\_state\_lanes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+587 & {\ttfamily\scriptsize   0 <= bit < keccak\_lane\_bits =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+588 & {\ttfamily\scriptsize   keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+589 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero (keccak\_round st rc) lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+590 & {\ttfamily\scriptsize     bit =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+591 & {\ttfamily\scriptsize   if lane = 0} & Splits proof obligations according to a conditional branch in the program or formula. \\
+592 & {\ttfamily\scriptsize   then} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+593 & {\ttfamily\scriptsize     keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+594 & {\ttfamily\scriptsize       (nth keccak\_lane\_zero} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+595 & {\ttfamily\scriptsize         (keccak\_chi (keccak\_rho\_pi (keccak\_theta st)))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+596 & {\ttfamily\scriptsize         0)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+597 & {\ttfamily\scriptsize       bit <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+598 & {\ttfamily\scriptsize     keccak\_lane\_bit rc bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+599 & {\ttfamily\scriptsize   else} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+600 & {\ttfamily\scriptsize     keccak\_lane\_bit} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+601 & {\ttfamily\scriptsize       (nth keccak\_lane\_zero} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+602 & {\ttfamily\scriptsize         (keccak\_chi (keccak\_rho\_pi (keccak\_theta st)))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+603 & {\ttfamily\scriptsize         lane)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+604 & {\ttfamily\scriptsize       bit.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+605 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+606 & {\ttfamily\scriptsize move=> lane\_range bit\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+607 & {\ttfamily\scriptsize rewrite /keccak\_round.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+608 & {\ttfamily\scriptsize by rewrite keccak\_iota\_bitE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+609 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+610 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+611 & {\ttfamily\scriptsize lemma keccak\_bytes\_of\_lanes\_size st :} & States checked lemma keccak\_bytes\_of\_lanes\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+612 & {\ttfamily\scriptsize   size (keccak\_bytes\_of\_lanes st) = keccak\_state\_bytes.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+613 & {\ttfamily\scriptsize proof. by rewrite /keccak\_bytes\_of\_lanes size\_mkseq. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+614 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+615 & {\ttfamily\scriptsize lemma keccak\_bytes\_of\_lanes\_byteE st i :} & States checked lemma keccak\_bytes\_of\_lanes\_byteE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+616 & {\ttfamily\scriptsize   0 <= i < keccak\_state\_bytes =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+617 & {\ttfamily\scriptsize   nth 0 (keccak\_bytes\_of\_lanes st) i =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+618 & {\ttfamily\scriptsize   keccak\_lane\_to\_byte} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+619 & {\ttfamily\scriptsize     (nth keccak\_lane\_zero st (i \%/ 8))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+620 & {\ttfamily\scriptsize     (i \%\% 8).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+621 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+622 & {\ttfamily\scriptsize move=> i\_range.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+623 & {\ttfamily\scriptsize by rewrite /keccak\_bytes\_of\_lanes nth\_mkseq.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+624 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+625 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+626 & {\ttfamily\scriptsize lemma keccak\_lane\_to\_byte\_bitsE lane byte\_index :} & States checked lemma keccak\_lane\_to\_byte\_bitsE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+627 & {\ttfamily\scriptsize   keccak\_lane\_to\_byte lane byte\_index =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+628 & {\ttfamily\scriptsize   (if keccak\_lane\_bit lane (8 * byte\_index) then 2 \textasciicircum{} 0 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+629 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 1) then 2 \textasciicircum{} 1 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+630 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 2) then 2 \textasciicircum{} 2 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+631 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 3) then 2 \textasciicircum{} 3 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+632 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 4) then 2 \textasciicircum{} 4 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+633 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 5) then 2 \textasciicircum{} 5 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+634 & {\ttfamily\scriptsize   ((if keccak\_lane\_bit lane (8 * byte\_index + 6) then 2 \textasciicircum{} 6 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+635 & {\ttfamily\scriptsize    (if keccak\_lane\_bit lane (8 * byte\_index + 7) then 2 \textasciicircum{} 7 else 0))))))).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+636 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+637 & {\ttfamily\scriptsize rewrite /keccak\_lane\_to\_byte /range /sumz /=.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+638 & {\ttfamily\scriptsize rewrite (@iotaS 0 7) 1:/\# /=} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+639 & {\ttfamily\scriptsize         (@iotaS 1 6) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+640 & {\ttfamily\scriptsize         (@iotaS 2 5) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+641 & {\ttfamily\scriptsize         (@iotaS 3 4) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+642 & {\ttfamily\scriptsize         (@iotaS 4 3) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+643 & {\ttfamily\scriptsize         (@iotaS 5 2) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+644 & {\ttfamily\scriptsize         (@iotaS 6 1) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+645 & {\ttfamily\scriptsize         (@iotaS 7 0) 1:/\# /=} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+646 & {\ttfamily\scriptsize         iota0 1:/\# /=.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+647 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+648 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+649 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+650 & {\ttfamily\scriptsize lemma keccak\_lane\_to\_byte\_from\_bitsE} & States checked lemma keccak\_lane\_to\_byte\_from\_bitsE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+651 & {\ttfamily\scriptsize   lane byte\_index b0 b1 b2 b3 b4 b5 b6 b7 :} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+652 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index) = b0 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+653 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 1) = b1 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+654 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 2) = b2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+655 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 3) = b3 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+656 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 4) = b4 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+657 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 5) = b5 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+658 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 6) = b6 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+659 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 7) = b7 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+660 & {\ttfamily\scriptsize   keccak\_lane\_to\_byte lane byte\_index =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+661 & {\ttfamily\scriptsize   (if b0 then 1 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+662 & {\ttfamily\scriptsize   ((if b1 then 2 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+663 & {\ttfamily\scriptsize   ((if b2 then 4 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+664 & {\ttfamily\scriptsize   ((if b3 then 8 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+665 & {\ttfamily\scriptsize   ((if b4 then 16 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+666 & {\ttfamily\scriptsize   ((if b5 then 32 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+667 & {\ttfamily\scriptsize   ((if b6 then 64 else 0) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+668 & {\ttfamily\scriptsize    (if b7 then 128 else 0))))))).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+669 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+670 & {\ttfamily\scriptsize move=> h0 h1 h2 h3 h4 h5 h6 h7.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+671 & {\ttfamily\scriptsize rewrite keccak\_lane\_to\_byte\_bitsE h0 h1 h2 h3 h4 h5 h6 h7 /=.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+672 & {\ttfamily\scriptsize by rewrite keccak\_pow2\_0E keccak\_pow2\_1E keccak\_pow2\_2E keccak\_pow2\_3E} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+673 & {\ttfamily\scriptsize            keccak\_pow2\_4E keccak\_pow2\_5E keccak\_pow2\_6E keccak\_pow2\_7E.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+674 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+675 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+676 & {\ttfamily\scriptsize lemma keccak\_lane\_to\_byte\_70E lane byte\_index :} & States checked lemma keccak\_lane\_to\_byte\_70E.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+677 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index) = false =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+678 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 1) = true =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+679 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 2) = true =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+680 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 3) = false =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+681 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 4) = false =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+682 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 5) = false =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+683 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 6) = true =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+684 & {\ttfamily\scriptsize   keccak\_lane\_bit lane (8 * byte\_index + 7) = false =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+685 & {\ttfamily\scriptsize   keccak\_lane\_to\_byte lane byte\_index = 70.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+686 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+687 & {\ttfamily\scriptsize move=> b0 b1 b2 b3 b4 b5 b6 b7.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+688 & {\ttfamily\scriptsize rewrite keccak\_lane\_to\_byte\_bitsE b0 b1 b2 b3 b4 b5 b6 b7 /=.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+689 & {\ttfamily\scriptsize rewrite keccak\_pow2\_1E keccak\_pow2\_2E keccak\_pow2\_6E.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+690 & {\ttfamily\scriptsize by smt().} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+691 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+692 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+693 & {\ttfamily\scriptsize lemma keccak\_f1600\_bytes\_size st :} & States checked lemma keccak\_f1600\_bytes\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+694 & {\ttfamily\scriptsize   size (keccak\_f1600\_bytes st) = keccak\_state\_bytes.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+695 & {\ttfamily\scriptsize proof. by rewrite /keccak\_f1600\_bytes keccak\_bytes\_of\_lanes\_size. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+696 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+697 & {\ttfamily\scriptsize end HAETAE\_Keccak1600.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

@@ -1,0 +1,262 @@
+inline fn _api_copy_raw_to_32(reg mut ptr u8[32] dstp,
+                       reg ui64 srcp) -> reg ptr u8[32]
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < 32)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 (64u)addr];
+    dstp[(64u)i] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_raw_to_2752_prefix(reg mut ptr u8[2752] dstp,
+                                reg ui64 srcp,
+                                reg ui64 len) -> reg ptr u8[2752]
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 (64u)addr];
+    dstp[(64u)i] = b;
+    i += 1;
+  }
+  while (i < 2752)
+  {
+    dstp[(64u)i] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_raw_to_2948_prefix(reg mut ptr u8[2948] dstp,
+                                reg ui64 srcp,
+                                reg ui64 len) -> reg ptr u8[2948]
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 (64u)addr];
+    dstp[(64u)i] = b;
+    i += 1;
+  }
+  while (i < 2948)
+  {
+    dstp[(64u)i] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_2080_to_raw(reg ui64 dstp,
+                         reg const ptr u8[2080] srcp,
+                         reg ui64 len) -> reg ui64
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[(64u)i];
+    addr = dstp;
+    addr += i;
+    [:u8 (64u)addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_2752_to_raw(reg ui64 dstp,
+                         reg const ptr u8[2752] srcp,
+                         reg ui64 len) -> reg ui64
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[(64u)i];
+    addr = dstp;
+    addr += i;
+    [:u8 (64u)addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_2948_to_raw(reg ui64 dstp,
+                         reg const ptr u8[2948] srcp,
+                         reg ui64 len) -> reg ui64
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[(64u)i];
+    addr = dstp;
+    addr += i;
+    [:u8 (64u)addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_raw_to_raw(reg ui64 dstp,
+                        reg ui64 srcp,
+                        reg ui64 len) -> reg ui64
+{
+  reg ui64 i src dst;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    src = srcp;
+    src += i;
+    dst = dstp;
+    dst += i;
+    b = [:u8 (64u)src];
+    [:u8 (64u)dst] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_raw_to_raw_len64(reg ui64 dstp,
+                              reg ui64 srcp,
+                              reg u64 len) -> reg ui64
+{
+  reg u64 i src dst srcbase dstbase;
+  reg u8 b;
+
+  srcbase = (64u)srcp;
+  dstbase = (64u)dstp;
+  i = 0;
+  while (i < len)
+  {
+    src = srcbase;
+    src += i;
+    dst = dstbase;
+    dst += i;
+    b = [:u8 src];
+    [:u8 dst] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_addr_to_addr(reg u64 dstp,
+                          reg u64 srcp,
+                          reg u64 len) -> reg u64
+{
+  reg u64 i src dst;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    src = srcp;
+    src += i;
+    dst = dstp;
+    dst += i;
+    b = [:u8 src];
+    [:u8 dst] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_zero_raw_len64(reg ui64 dstp,
+                       reg u64 len) -> reg ui64
+{
+  reg u64 i dst dstbase;
+
+  dstbase = (64u)dstp;
+  i = 0;
+  while (i < len)
+  {
+    dst = dstbase;
+    dst += i;
+    [:u8 dst] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_zero_raw(reg ui64 dstp,
+                 reg ui64 len) -> reg ui64
+{
+  reg ui64 i dst;
+
+  i = 0;
+  while (i < len)
+  {
+    dst = dstp;
+    dst += i;
+    [:u8 (64u)dst] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_prepare_pre_raw(reg mut ptr u8[257] prep,
+                        reg ui64 ctxp,
+                        reg ui64 ctxlen) -> reg ptr u8[257]
+{
+  reg ui64 i addr;
+  reg u8 b;
+
+  b = (8u)(64u)ctxlen;
+  prep[0] = b;
+  i = 0;
+  while (i < ctxlen)
+  {
+    addr = ctxp;
+    addr += i;
+    b = [:u8 (64u)addr];
+    prep[1 + (64u)i] = b;
+    i += 1;
+  }
+
+  return prep;
+}
+
+inline fn _api_reject() -> reg u64
+{
+  reg u64 r;
+
+  r = 0;
+  r -= 1;
+  return r;
+}

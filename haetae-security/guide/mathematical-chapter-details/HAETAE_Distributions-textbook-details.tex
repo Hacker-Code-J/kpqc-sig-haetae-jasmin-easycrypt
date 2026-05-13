@@ -1,0 +1,4348 @@
+\subsection*{Textbook Formal Inventory}
+This subsection records the exact formal material in \file{HAETAE_Distributions.ec}.  It is generated from the proof-surface EasyCrypt file, so the line numbers and statements are meant to be read next to the checked source.
+
+\noindent\textbf{Chapter role.} sampling distributions, support predicates, point bounds, and losslessness facts.
+
+\noindent\textbf{Inventory size.} 6 context declarations, 66 definitions/game objects, 97 lemmas or relational theorems, and 0 explicit Hoare/Phoare judgments were found.
+
+\subsubsection*{Theory Context, Imports, and Quantified Modules}
+\paragraph{Context 1 (line 1)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import AllCore Distr DInterval DList IntDiv List Real StdOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 2 (line 2)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Params HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 3 (line 4)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE_Distributions
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+theory HAETAE_Distributions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This begins a namespace for the formal development in this file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 4 (line 6)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 5 (line 7)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Params.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 6 (line 8)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import RealOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\subsubsection*{Definitions, Carrier Sets, Operations, Games, and Procedures}
+\begin{formaldefinition}[EasyCrypt line 10]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_source
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type signing_randomness_source = int.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 12]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbyte
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dbyte : byte distr = dinter 0 255.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 13]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dseed
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dseed : seed distr = dlist dbyte seedbytes.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 14]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dcrh
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dcrh : crh distr = dlist dbyte crhbytes.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 15]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_cardinality
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_entropy_token_cardinality : int = 288230376151711744.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 16]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_in_range
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_entropy_token_in_range (x : int) : bool =
+  0 <= x /\ x < signing_entropy_token_cardinality.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 18]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_byte_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_byte_ok (b : byte) : bool = 0 <= b /\ b < 256.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 19]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_entropy_token_to_coins (x : int) : random_coins =
+  [ x %% 256;
+    (x %/ 256) %% 256;
+    (x %/ 65536) %% 256;
+    (x %/ 16777216) %% 256;
+    (x %/ 4294967296) %% 256;
+    (x %/ 1099511627776) %% 256;
+    (x %/ 281474976710656) %% 256;
+    x %/ 72057594037927936 ] ++
+  nseq (seedbytes - 8) 0.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 29]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_domain
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_domain (coins : random_coins) : bool =
+  size coins = seedbytes /\
+  all signing_randomness_byte_ok coins /\
+  signing_entropy_token_in_range (signing_entropy_token_of_coins coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 33]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_entropy_token
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_entropy_token : int distr =
+  dinter 0 (signing_entropy_token_cardinality - 1).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 35]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_randomness_source
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_randomness_source : signing_randomness_source distr =
+  dsigning_entropy_token.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 37]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_source_valid
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_source_valid (src : signing_randomness_source) : bool =
+  signing_entropy_token_in_range src.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 39]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_from_source
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_from_source (src : signing_randomness_source) :
+  random_coins =
+  signing_entropy_token_to_coins src.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 42]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_randomness
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_randomness : random_coins distr =
+  dmap dsigning_randomness_source signing_randomness_from_source.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 44]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+drandom_coins
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op drandom_coins : random_coins distr = dsigning_randomness.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 45]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_point_bound : real =
+  1%r / (signing_entropy_token_cardinality)%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 47]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_token_spread
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_token_spread (d : random_coins distr) : bool =
+  forall token,
+    mu d (fun coins => signing_entropy_token_of_coins coins = token) <=
+    signing_randomness_point_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 51]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_randomness_distribution_ok (d : random_coins distr) : bool =
+  is_lossless d /\
+  (forall coins, coins \in d => signing_randomness_domain coins) /\
+  signing_randomness_token_spread d.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 55]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dcoeff
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dcoeff : coeff distr = dinter 0 (q - 1).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 56]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dpoly
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dpoly : poly distr = dlist dcoeff n.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 57]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dpolyveck
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dpolyveck (md : mode) : polyveck distr = dlist dpoly (mode_k md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 58]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dpolyvecl
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dpolyvecl (md : mode) : polyvecl distr = dlist dpoly (mode_l md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 59]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmatrix
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dmatrix (md : mode) : matrix distr = dlist (dpolyvecl md) (mode_k md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 65]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dchallenge
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dchallenge (md : mode) : challenge distr =
+  dmap dcrh (challenge_from_seed md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 68]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type signing_sample_pair = polyvecl * polyveck.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 70]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_y1
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_y1 (s : signing_sample_pair) : polyvecl = s.`1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 71]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_y2
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_y2 (s : signing_sample_pair) : polyveck = s.`2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 73]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_wf
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_wf (md : mode) (s : signing_sample_pair) : bool =
+  polyvecl_wf md (signing_sample_pair_y1 s) /\
+  polyveck_wf md (signing_sample_pair_y2 s).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 77]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_unit
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_unit (md : mode) (s : signing_sample_pair) : bool =
+  polyvecl_unit md (signing_sample_pair_y1 s) /\
+  polyveck_unit md (signing_sample_pair_y2 s).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 81]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_bound (md : mode) : int = mode_ln md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 83]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_bounded_by
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op coeff_bounded_by (b : int) (x : coeff) : bool =
+  -b <= x /\ x <= b.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 86]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+poly_bounded_by
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op poly_bounded_by (b : int) (p : poly) : bool =
+  poly_wf p /\
+  forall i, 0 <= i < n =>
+    coeff_bounded_by b (poly_coeff p i).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 91]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyvecl_bounded_by
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op polyvecl_bounded_by (md : mode) (b : int) (xs : polyvecl) : bool =
+  polyvecl_wf md xs /\
+  forall row, 0 <= row < mode_l md =>
+    poly_bounded_by b (nth poly_zero xs row).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 96]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyveck_bounded_by
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op polyveck_bounded_by (md : mode) (b : int) (xs : polyveck) : bool =
+  polyveck_wf md xs /\
+  forall row, 0 <= row < mode_k md =>
+    poly_bounded_by b (nth poly_zero xs row).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 101]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_bounded
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_bounded (md : mode) (s : signing_sample_pair) : bool =
+  polyvecl_bounded_by md (signing_sample_bound md)
+    (signing_sample_pair_y1 s) /\
+  polyveck_bounded_by md (signing_sample_bound md)
+    (signing_sample_pair_y2 s).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 107]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_sample_ok (md : mode) (s : signing_sample_pair) : bool =
+  signing_sample_pair_wf md s /\
+  signing_sample_pair_bounded md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 111]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_of_coins
+   (md : mode) (sk : skey) (m : message) (ctx : context)
+   (coins : random_coins) : signing_sample_pair =
+  (signing_sample_y1 md sk m ctx coins,
+   signing_sample_y2 md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 117]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dstructural_signing_sample_pair
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dstructural_signing_sample_pair
+   (md : mode) (sk : skey) (m : message) (ctx : context)
+   (coins : random_coins) : signing_sample_pair distr =
+  dunit (signing_sample_pair_of_coins md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 122]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_coeff
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_unit_coeff : coeff distr = duniform [-1; 1].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 123]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_poly
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_unit_poly : poly distr = dlist dsigning_unit_coeff n.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 124]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_polyvecl
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_unit_polyvecl (md : mode) : polyvecl distr =
+  dlist dsigning_unit_poly (mode_l md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 126]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_polyveck
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_unit_polyveck (md : mode) : polyveck distr =
+  dlist dsigning_unit_poly (mode_k md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 129]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_cardinality
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_bounded_coeff_cardinality (md : mode) : int =
+  2 * signing_sample_bound md + 1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 131]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_bounded_coeff_point_bound (md : mode) : real =
+  1%r / (signing_bounded_coeff_cardinality md)%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 133]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_bounded_coeff
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_bounded_coeff (md : mode) : coeff distr =
+  dinter (-(signing_sample_bound md)) (signing_sample_bound md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 135]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_bounded_poly
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_bounded_poly (md : mode) : poly distr =
+  dlist (dsigning_bounded_coeff md) n.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 137]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_bounded_polyvecl
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_bounded_polyvecl (md : mode) : polyvecl distr =
+  dlist (dsigning_bounded_poly md) (mode_l md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 139]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_bounded_polyveck
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dsigning_bounded_polyveck (md : mode) : polyveck distr =
+  dlist (dsigning_bounded_poly md) (mode_k md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 145]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbounded_unit_signing_sample_pair
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dbounded_unit_signing_sample_pair (md : mode) :
+   signing_sample_pair distr =
+  dlet (dsigning_unit_polyvecl md)
+    (fun y1 =>
+      dmap (dsigning_unit_polyveck md)
+        (fun y2 => (y1, y2))).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 156]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dchecked_hyperball_signing_sample_pair
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dchecked_hyperball_signing_sample_pair (md : mode) :
+   signing_sample_pair distr =
+  dlet (dsigning_bounded_polyvecl md)
+    (fun y1 =>
+      dmap (dsigning_bounded_polyveck md)
+        (fun y2 => (y1, y2))).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 163]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_coeff_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_coeff_ok (md : mode) (c : coeff) : bool =
+  coeff_bounded_by (signing_sample_bound md) c.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 165]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_poly_ok (md : mode) (p : poly) : bool =
+  poly_bounded_by (signing_sample_bound md) p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 167]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_polyvecl_ok (md : mode) (y1 : polyvecl) : bool =
+  polyvecl_bounded_by md (signing_sample_bound md) y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 169]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_polyveck_ok (md : mode) (y2 : polyveck) : bool =
+  polyveck_bounded_by md (signing_sample_bound md) y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 171]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_sample_ok (md : mode) (s : signing_sample_pair) : bool =
+  hyperball_polyvecl_ok md (signing_sample_pair_y1 s) /\
+  hyperball_polyveck_ok md (signing_sample_pair_y2 s).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 175]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_coeff
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dhyperball_coeff (md : mode) : coeff distr =
+  dsigning_bounded_coeff md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 177]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_poly
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dhyperball_poly (md : mode) : poly distr =
+  dsigning_bounded_poly md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 179]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyvecl
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dhyperball_polyvecl (md : mode) : polyvecl distr =
+  dsigning_bounded_polyvecl md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 181]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyveck
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dhyperball_polyveck (md : mode) : polyveck distr =
+  dsigning_bounded_polyveck md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 184]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_coeff_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_coeff_point_bound (md : mode) : real =
+  signing_bounded_coeff_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 186]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_poly_point_bound (md : mode) : real =
+  hyperball_coeff_point_bound md ^ n.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 188]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_polyvecl_point_bound (md : mode) : real =
+  hyperball_poly_point_bound md ^ (mode_l md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 190]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_polyveck_point_bound (md : mode) : real =
+  hyperball_poly_point_bound md ^ (mode_k md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 192]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_sample_pair_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hyperball_sample_pair_point_bound (md : mode) : real =
+  hyperball_polyvecl_point_bound md *
+  hyperball_polyveck_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 201]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dexact_hyperball_signing_sample_pair
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dexact_hyperball_signing_sample_pair (md : mode) :
+   signing_sample_pair distr =
+  (dhyperball_polyvecl md) `*` (dhyperball_polyveck md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 205]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_sample_pair_distribution_ok
+   (md : mode) (d : signing_sample_pair distr) : bool =
+  is_lossless d /\
+  (forall s, s \in d =>
+     signing_sample_pair_sample_ok md s).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\subsubsection*{Lemmas, Theorems, Relational Equivalences, and Their Proof Dependencies}
+\begin{formaltheorem}[EasyCrypt line 211]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+byte_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma byte_distribution_lossless : is_lossless dbyte.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 214]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+seed_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma seed_distribution_lossless : is_lossless dseed.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+byte_distribution_lossless
+dlist_ll
+dseed
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 220]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+crh_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma crh_distribution_lossless : is_lossless dcrh.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+byte_distribution_lossless
+dcrh
+dlist_ll
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 226]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_cardinality_positive
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_cardinality_positive :
+  0 < signing_entropy_token_cardinality.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 230]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_distribution_lossless :
+  is_lossless dsigning_entropy_token.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dinter_ll
+dsigning_entropy_token
+signing_entropy_token_cardinality
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 238]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_source_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_randomness_source_distribution_lossless :
+  is_lossless dsigning_randomness_source.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_randomness_source
+signing_entropy_token_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 245]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_lossless : is_lossless drandom_coins.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmap_ll
+drandom_coins
+dsigning_randomness
+signing_randomness_source_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 251]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_tokenK
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_to_coins_tokenK x :
+  signing_entropy_token_of_coins (signing_entropy_token_to_coins x) = x.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+divz_eq
+divz_mul
+signing_entropy_token_of_coins
+signing_entropy_token_to_coins
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 260]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_from_source_tokenK
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_randomness_from_source_tokenK src :
+  signing_entropy_token_of_coins (signing_randomness_from_source src) = src.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_tokenK
+signing_randomness_from_source
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 267]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_size
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_to_coins_size x :
+  size (signing_entropy_token_to_coins x) = seedbytes.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact
+hsize
+max
+nseq
+seedbytes
+signing_entropy_token_to_coins
+size
+size_nseq
+trivial
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 279]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_byte_domain
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_to_coins_byte_domain x :
+  signing_entropy_token_in_range x =>
+  all signing_randomness_byte_ok (signing_entropy_token_to_coins x).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+all_nseq
+divz_ge0
+ltz_divLR
+ltz_pmod
+modz_ge0
+seedbytes
+signing_entropy_token_cardinality
+signing_entropy_token_in_range
+signing_entropy_token_to_coins
+signing_randomness_byte_ok
+xrange
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 292]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_domain
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_to_coins_domain x :
+  signing_entropy_token_in_range x =>
+  signing_randomness_domain (signing_entropy_token_to_coins x).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_byte_domain
+signing_entropy_token_to_coins_size
+signing_entropy_token_to_coins_tokenK
+signing_randomness_domain
+xrange
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 305]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_from_source_domain
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_randomness_from_source_domain src :
+  signing_randomness_source_valid src =>
+  signing_randomness_domain (signing_randomness_from_source src).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_to_coins_domain
+signing_randomness_from_source
+signing_randomness_source_valid
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 314]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_entropy_token_distribution_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_entropy_token_distribution_point_bound x :
+  mu dsigning_entropy_token (pred1 x) <=
+  signing_randomness_point_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{case}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+RField
+dinter1E
+div1r
+divr_ge0
+dsigning_entropy_token
+pred1
+signing_entropy_token_cardinality
+signing_randomness_point_bound
+trivial
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 326]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_randomness_source_distribution_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_randomness_source_distribution_point_bound src :
+  mu dsigning_randomness_source (pred1 src) <=
+  signing_randomness_point_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_randomness_source
+signing_entropy_token_distribution_point_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 334]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_token_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_token_point_bound token :
+  mu drandom_coins
+    (fun coins => signing_entropy_token_of_coins coins = token) <=
+  signing_randomness_point_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmapE
+drandom_coins
+dsigning_entropy_token
+dsigning_randomness
+ler_trans
+mu
+mu_le
+pred1
+signing_entropy_token_distribution_point_bound
+signing_entropy_token_to_coins_tokenK
+token
+token_eq
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 348]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_token_spread
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_token_spread :
+  signing_randomness_token_spread drandom_coins.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_token_point_bound
+signing_randomness_token_spread
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 355]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_domain
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_domain coins :
+  coins \in drandom_coins =>
+  signing_randomness_domain coins.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+drandom_coins
+dsigning_entropy_token
+dsigning_randomness
+dsigning_randomness_source
+signing_entropy_token_cardinality
+signing_entropy_token_in_range
+signing_entropy_token_to_coins_domain
+signing_randomness_from_source
+src
+src_supp
+supp_dinter
+supp_dmap
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 371]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_domain_full
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_domain_full :
+  mu drandom_coins signing_randomness_domain = 1%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+eq1_mu
+signing_coin_distribution_domain
+signing_coin_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 379]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_coin_distribution_ok :
+  signing_randomness_distribution_ok drandom_coins.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_coin_distribution_domain
+signing_coin_distribution_lossless
+signing_coin_distribution_token_spread
+signing_randomness_distribution_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 390]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma coeff_distribution_lossless : is_lossless dcoeff.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 393]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+poly_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma poly_distribution_lossless : is_lossless dpoly.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_distribution_lossless
+dlist_ll
+dpoly
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 399]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyveck_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma polyveck_distribution_lossless md : is_lossless (dpolyveck md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dpolyveck
+poly_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 405]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyvecl_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma polyvecl_distribution_lossless md : is_lossless (dpolyvecl md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dpolyvecl
+poly_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 411]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+matrix_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma matrix_distribution_lossless md : is_lossless (dmatrix md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dmatrix
+polyvecl_distribution_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 417]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_distribution_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma challenge_distribution_lossless md : is_lossless (dchallenge md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+crh_distribution_lossless
+dchallenge
+dmap_ll
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 423]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins_wf
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_sample_pair_of_coins_wf md sk m ctx coins :
+  signing_sample_pair_wf md
+    (signing_sample_pair_of_coins md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins
+signing_sample_pair_wf
+signing_sample_pair_y1
+signing_sample_pair_y2
+signing_sample_y1_wf
+signing_sample_y2_wf
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 434]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins_unit
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_sample_pair_of_coins_unit md sk m ctx coins :
+  signing_sample_pair_unit md
+    (signing_sample_pair_of_coins md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins
+signing_sample_pair_unit
+signing_sample_pair_y1
+signing_sample_pair_y2
+signing_sample_y1_unit
+signing_sample_y2_unit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 445]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_bound_gt0
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_sample_bound_gt0 md :
+  0 < signing_sample_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 449]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+unit_coeff_bounded_by_signing_sample_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma unit_coeff_bounded_by_signing_sample_bound md c :
+  unit_coeff_ok c =>
+  coeff_bounded_by (signing_sample_bound md) c.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{case}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_bounded_by
+md
+signing_sample_bound
+unit_coeff_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 457]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+poly_unit_bounded_by_signing_sample_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma poly_unit_bounded_by_signing_sample_bound md p :
+  poly_unit p =>
+  poly_bounded_by (signing_sample_bound md) p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+mem_nth
+p_all
+p_wf
+poly_bounded_by
+poly_coeff
+poly_unit
+unit_coeff_bounded_by_signing_sample_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 470]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyvecl_unit_bounded_by_signing_sample_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma polyvecl_unit_bounded_by_signing_sample_bound md y1 :
+  polyvecl_unit md y1 =>
+  polyvecl_bounded_by md (signing_sample_bound md) y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+mem_nth
+poly_unit_bounded_by_signing_sample_bound
+polyvecl_bounded_by
+polyvecl_unit
+y1_all
+y1_wf
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 482]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyveck_unit_bounded_by_signing_sample_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma polyveck_unit_bounded_by_signing_sample_bound md y2 :
+  polyveck_unit md y2 =>
+  polyveck_bounded_by md (signing_sample_bound md) y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+mem_nth
+poly_unit_bounded_by_signing_sample_bound
+polyveck_bounded_by
+polyveck_unit
+y2_all
+y2_wf
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 494]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_unit_bounded
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_sample_pair_unit_bounded md s :
+  signing_sample_pair_unit md s =>
+  signing_sample_pair_bounded md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+polyveck_unit_bounded_by_signing_sample_bound
+polyvecl_unit_bounded_by_signing_sample_bound
+signing_sample_pair_bounded
+signing_sample_pair_unit
+y1_unit
+y2_unit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 505]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_sample_pair_of_coins_sample_ok md sk m ctx coins :
+  signing_sample_pair_sample_ok md
+    (signing_sample_pair_of_coins md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_of_coins_unit
+signing_sample_pair_of_coins_wf
+signing_sample_pair_sample_ok
+signing_sample_pair_unit_bounded
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 516]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+structural_signing_sample_pair_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma structural_signing_sample_pair_lossless md sk m ctx coins :
+  is_lossless
+    (dstructural_signing_sample_pair md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dstructural_signing_sample_pair
+dunit_ll
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 523]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+structural_signing_sample_pair_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma structural_signing_sample_pair_support md sk m ctx coins s :
+  s \in dstructural_signing_sample_pair md sk m ctx coins =>
+  signing_sample_pair_wf md s /\ signing_sample_pair_unit md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dstructural_signing_sample_pair
+signing_sample_pair_of_coins_unit
+signing_sample_pair_of_coins_wf
+supp_dunit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 534]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+structural_signing_sample_pair_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma structural_signing_sample_pair_sample_ok md sk m ctx coins s :
+  s \in dstructural_signing_sample_pair md sk m ctx coins =>
+  signing_sample_pair_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dstructural_signing_sample_pair
+signing_sample_pair_of_coins_sample_ok
+supp_dunit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 543]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+structural_signing_sample_pair_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma structural_signing_sample_pair_distribution_ok md sk m ctx coins :
+  signing_sample_pair_distribution_ok md
+    (dstructural_signing_sample_pair md sk m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_sample_pair_distribution_ok
+structural_signing_sample_pair_lossless
+structural_signing_sample_pair_sample_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 553]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_coeff_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_coeff_lossless :
+  is_lossless dsigning_unit_coeff.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_coeff
+duniform_ll
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 560]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_coeff_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_coeff_support c :
+  c \in dsigning_unit_coeff =>
+  unit_coeff_ok c.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dsigning_unit_coeff
+supp_duniform
+unit_coeff_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 568]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_cardinality_positive
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_cardinality_positive md :
+  0 < signing_bounded_coeff_cardinality md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_cardinality
+signing_sample_bound_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 575]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_lossless md :
+  is_lossless (dsigning_bounded_coeff md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dinter_ll
+dsigning_bounded_coeff
+signing_sample_bound_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 583]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_support md c :
+  c \in dsigning_bounded_coeff md =>
+  coeff_bounded_by (signing_sample_bound md) c.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_bounded_by
+dsigning_bounded_coeff
+supp_dinter
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 590]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_supportP md c :
+  c \in dsigning_bounded_coeff md <=>
+  coeff_bounded_by (signing_sample_bound md) c.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coeff_bounded_by
+dsigning_bounded_coeff
+supp_dinter
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 597]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_point_bound md c :
+  mu (dsigning_bounded_coeff md) (pred1 c) <=
+  signing_bounded_coeff_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{case}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dinter1E
+dsigning_bounded_coeff
+md
+mode_ln
+pred1
+signing_bounded_coeff_cardinality
+signing_bounded_coeff_point_bound
+signing_sample_bound
+trivial
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 616]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_coeff_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_coeff_point_bound_nonnegative md :
+  0%r <= signing_bounded_coeff_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+divr_ge0
+signing_bounded_coeff_cardinality_positive
+signing_bounded_coeff_point_bound
+trivial
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 625]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_size_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma dlist_size_point_bound ['a] (d : 'a distr) bd xs :
+  0%r <= bd =>
+  (forall x, mu d (pred1 x) <= bd) =>
+  mu (dlist d (size xs)) (pred1 xs) <= bd ^ (size xs).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{elim}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BRM
+Bigreal
+RField
+StdBigop
+bd_ge0
+big_cons
+big_ind
+big_nil
+dlist1E
+expr0
+exprS
+ge0_mu
+ih
+ler_pmul
+mulr_ge0
+point_bound
+predT
+size
+size_ge0
+trivial
+xs
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 647]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma dlist_point_bound ['a] (d : 'a distr) len bd xs :
+  0 <= len =>
+  0%r <= bd =>
+  (forall x, mu d (pred1 x) <= bd) =>
+  mu (dlist d len) (pred1 xs) <= bd ^ len.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{case}, \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bd_ge0
+dlist1E
+dlist_size_point_bound
+expr_ge0
+len
+lenE
+len_ge0
+point_bound
+size
+xs
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 661]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_coeff_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_coeff_point_bound_nonnegative md :
+  0%r <= hyperball_coeff_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_coeff_point_bound
+signing_bounded_coeff_point_bound_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 668]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_coeff_point_boundE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_coeff_point_boundE md c :
+  mu (dhyperball_coeff md) (pred1 c) <=
+  hyperball_coeff_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_coeff
+hyperball_coeff_point_bound
+signing_bounded_coeff_point_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 676]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_poly_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_poly_lossless :
+  is_lossless dsigning_unit_poly.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_unit_poly
+signing_unit_coeff_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 683]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_poly_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_poly_support p :
+  p \in dsigning_unit_poly =>
+  poly_unit p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+c_mem
+dsigning_unit_poly
+n_gt0
+p_all
+p_sz
+poly_unit
+poly_wf
+signing_unit_coeff_support
+supp_dlist
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 695]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_poly_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_poly_lossless md :
+  is_lossless (dsigning_bounded_poly md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_bounded_poly
+signing_bounded_coeff_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 702]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_poly_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_poly_support md p :
+  p \in dsigning_bounded_poly md =>
+  poly_bounded_by (signing_sample_bound md) p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_bounded_poly
+i_rng
+mem_nth
+n_gt0
+p_all
+p_sz
+poly_bounded_by
+poly_coeff
+poly_wf
+signing_bounded_coeff_support
+supp_dlist
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 717]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_poly_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_poly_supportP md p :
+  p \in dsigning_bounded_poly md <=>
+  poly_bounded_by (signing_sample_bound md) p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+c_mem
+dsigning_bounded_poly
+i_rng
+mem_nth
+n_gt0
+nthP
+p_all
+p_bound
+p_sz
+poly_bounded_by
+poly_coeff
+poly_wf
+signing_bounded_coeff_support
+signing_bounded_coeff_supportP
+supp_dlist
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 738]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_poly_point_bound_nonnegative md :
+  0%r <= hyperball_poly_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+expr_ge0
+hyperball_coeff_point_bound_nonnegative
+hyperball_poly_point_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 745]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_poly_lossless md :
+  is_lossless (dhyperball_poly md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_poly
+signing_bounded_poly_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 751]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_poly_support md p :
+  p \in dhyperball_poly md =>
+  hyperball_poly_ok md p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_poly
+hyperball_poly_ok
+signing_bounded_poly_support
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 759]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_poly_supportP md p :
+  p \in dhyperball_poly md <=> hyperball_poly_ok md p.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_poly
+hyperball_poly_ok
+signing_bounded_poly_supportP
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 766]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_poly_point_boundE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_poly_point_boundE md p :
+  mu (dhyperball_poly md) (pred1 p) <=
+  hyperball_poly_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_poly
+dlist_point_bound
+dsigning_bounded_poly
+hyperball_coeff_point_boundE
+hyperball_coeff_point_bound_nonnegative
+hyperball_poly_point_bound
+n_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 778]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_polyvecl_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_polyvecl_lossless md :
+  is_lossless (dsigning_unit_polyvecl md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_unit_polyvecl
+signing_unit_poly_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 785]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_polyveck_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_polyveck_lossless md :
+  is_lossless (dsigning_unit_polyveck md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_unit_polyveck
+signing_unit_poly_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 792]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyvecl_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyvecl_lossless md :
+  is_lossless (dsigning_bounded_polyvecl md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_bounded_polyvecl
+signing_bounded_poly_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 799]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyveck_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyveck_lossless md :
+  is_lossless (dsigning_bounded_polyveck md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dlist_ll
+dsigning_bounded_polyveck
+signing_bounded_poly_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 806]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_polyvecl_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_polyvecl_support md y1 :
+  y1 \in dsigning_unit_polyvecl md =>
+  polyvecl_unit md y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{apply}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_unit_poly
+dsigning_unit_polyvecl
+mode_l_gt0
+p_mem
+p_supp
+p_wf
+poly_unit
+polyvecl_unit
+polyvecl_wf
+signing_unit_poly_support
+supp_dlist
+y1_all
+y1_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 825]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_unit_polyveck_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_unit_polyveck_support md y2 :
+  y2 \in dsigning_unit_polyveck md =>
+  polyveck_unit md y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{apply}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_unit_poly
+dsigning_unit_polyveck
+mode_k_gt0
+p_mem
+p_supp
+p_wf
+poly_unit
+polyveck_unit
+polyveck_wf
+signing_unit_poly_support
+supp_dlist
+y2_all
+y2_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 844]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyvecl_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyvecl_support md y1 :
+  y1 \in dsigning_bounded_polyvecl md =>
+  polyvecl_bounded_by md (signing_sample_bound md) y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{apply}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_bounded_poly
+dsigning_bounded_polyvecl
+md
+mem_nth
+mode_l_gt0
+p_mem
+p_supp
+p_wf
+poly_bounded_by
+polyvecl_bounded_by
+polyvecl_wf
+row
+row_rng
+signing_bounded_poly_support
+supp_dlist
+y1_all
+y1_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 865]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyvecl_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyvecl_supportP md y1 :
+  y1 \in dsigning_bounded_polyvecl md <=>
+  polyvecl_bounded_by md (signing_sample_bound md) y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{have}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_bounded_poly
+dsigning_bounded_polyvecl
+md
+mem_nth
+mode_l_gt0
+nthP
+p_mem
+p_supp
+p_wf
+poly_bounded_by
+polyvecl_bounded_by
+polyvecl_wf
+row
+row_rng
+signing_bounded_poly_support
+signing_bounded_poly_supportP
+supp_dlist
+y1_all
+y1_allwf
+y1_bound
+y1_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 892]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyveck_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyveck_support md y2 :
+  y2 \in dsigning_bounded_polyveck md =>
+  polyveck_bounded_by md (signing_sample_bound md) y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{apply}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_bounded_poly
+dsigning_bounded_polyveck
+md
+mem_nth
+mode_k_gt0
+p_mem
+p_supp
+p_wf
+poly_bounded_by
+polyveck_bounded_by
+polyveck_wf
+row
+row_rng
+signing_bounded_poly_support
+supp_dlist
+y2_all
+y2_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 913]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_bounded_polyveck_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_bounded_polyveck_supportP md y2 :
+  y2 \in dsigning_bounded_polyveck md <=>
+  polyveck_bounded_by md (signing_sample_bound md) y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}, \ec{split}, \ec{have}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+allP
+dsigning_bounded_poly
+dsigning_bounded_polyveck
+md
+mem_nth
+mode_k_gt0
+nthP
+p_mem
+p_supp
+p_wf
+poly_bounded_by
+polyveck_bounded_by
+polyveck_wf
+row
+row_rng
+signing_bounded_poly_support
+signing_bounded_poly_supportP
+supp_dlist
+y2_all
+y2_allwf
+y2_bound
+y2_sz
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 940]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyvecl_point_bound_nonnegative md :
+  0%r <= hyperball_polyvecl_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+expr_ge0
+hyperball_poly_point_bound_nonnegative
+hyperball_polyvecl_point_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 947]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyveck_point_bound_nonnegative md :
+  0%r <= hyperball_polyveck_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+expr_ge0
+hyperball_poly_point_bound_nonnegative
+hyperball_polyveck_point_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 954]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_sample_pair_point_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_sample_pair_point_bound_nonnegative md :
+  0%r <= hyperball_sample_pair_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_point_bound_nonnegative
+hyperball_polyvecl_point_bound_nonnegative
+hyperball_sample_pair_point_bound
+mulr_ge0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 963]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyvecl_lossless md :
+  is_lossless (dhyperball_polyvecl md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyvecl
+signing_bounded_polyvecl_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 969]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyveck_lossless md :
+  is_lossless (dhyperball_polyveck md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyveck
+signing_bounded_polyveck_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 975]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyvecl_support md y1 :
+  y1 \in dhyperball_polyvecl md =>
+  hyperball_polyvecl_ok md y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyvecl
+hyperball_polyvecl_ok
+signing_bounded_polyvecl_support
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 983]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyvecl_supportP md y1 :
+  y1 \in dhyperball_polyvecl md <=> hyperball_polyvecl_ok md y1.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyvecl
+hyperball_polyvecl_ok
+signing_bounded_polyvecl_supportP
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 990]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyveck_support md y2 :
+  y2 \in dhyperball_polyveck md =>
+  hyperball_polyveck_ok md y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyveck
+hyperball_polyveck_ok
+signing_bounded_polyveck_support
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 998]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyveck_supportP md y2 :
+  y2 \in dhyperball_polyveck md <=> hyperball_polyveck_ok md y2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyveck
+hyperball_polyveck_ok
+signing_bounded_polyveck_supportP
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1005]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyvecl_point_boundE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyvecl_point_boundE md y1 :
+  mu (dhyperball_polyvecl md) (pred1 y1) <=
+  hyperball_polyvecl_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyvecl
+dlist_point_bound
+dsigning_bounded_polyvecl
+hyperball_poly_point_boundE
+hyperball_poly_point_bound_nonnegative
+hyperball_polyvecl_point_bound
+mode_l_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1017]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_point_boundE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_polyveck_point_boundE md y2 :
+  mu (dhyperball_polyveck md) (pred1 y2) <=
+  hyperball_polyveck_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dhyperball_polyveck
+dlist_point_bound
+dsigning_bounded_polyveck
+hyperball_poly_point_boundE
+hyperball_poly_point_bound_nonnegative
+hyperball_polyveck_point_bound
+mode_k_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1029]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bounded_unit_signing_sample_pair_lossless md :
+  is_lossless (dbounded_unit_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbounded_unit_signing_sample_pair
+dlet_ll
+dmap_ll
+signing_unit_polyveck_lossless
+signing_unit_polyvecl_lossless
+y1
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1039]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bounded_unit_signing_sample_pair_support md s :
+  s \in dbounded_unit_signing_sample_pair md =>
+  signing_sample_pair_wf md s /\ signing_sample_pair_unit md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}, \ec{apply}, \ec{split}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbounded_unit_signing_sample_pair
+md
+polyveck_unit
+polyvecl_unit
+signing_sample_pair_unit
+signing_sample_pair_wf
+signing_sample_pair_y1
+signing_sample_pair_y2
+signing_unit_polyveck_support
+signing_unit_polyvecl_support
+supp_dlet
+supp_dmap
+y1
+y1_supp
+y1_unit
+y2
+y2_supp
+y2_unit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1060]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bounded_unit_signing_sample_pair_sample_ok md s :
+  s \in dbounded_unit_signing_sample_pair md =>
+  signing_sample_pair_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_support
+hs
+md
+s_unit
+s_wf
+signing_sample_pair_sample_ok
+signing_sample_pair_unit_bounded
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1072]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bounded_unit_signing_sample_pair_distribution_ok md :
+  signing_sample_pair_distribution_ok md
+    (dbounded_unit_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bounded_unit_signing_sample_pair_lossless
+bounded_unit_signing_sample_pair_sample_ok
+signing_sample_pair_distribution_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1082]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+checked_hyperball_signing_sample_pair_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma checked_hyperball_signing_sample_pair_lossless md :
+  is_lossless (dchecked_hyperball_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dchecked_hyperball_signing_sample_pair
+dlet_ll
+dmap_ll
+signing_bounded_polyveck_lossless
+signing_bounded_polyvecl_lossless
+y1
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1092]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+checked_hyperball_signing_sample_pair_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma checked_hyperball_signing_sample_pair_support md s :
+  s \in dchecked_hyperball_signing_sample_pair md =>
+  signing_sample_pair_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}, \ec{apply}, \ec{split}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dchecked_hyperball_signing_sample_pair
+md
+polyveck_bounded_by
+polyvecl_bounded_by
+signing_bounded_polyveck_support
+signing_bounded_polyvecl_support
+signing_sample_bound
+signing_sample_pair_bounded
+signing_sample_pair_sample_ok
+signing_sample_pair_wf
+signing_sample_pair_y1
+signing_sample_pair_y2
+supp_dlet
+supp_dmap
+y1
+y1_bounded
+y1_supp
+y2
+y2_bounded
+y2_supp
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1114]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+checked_hyperball_signing_sample_pair_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma checked_hyperball_signing_sample_pair_distribution_ok md :
+  signing_sample_pair_distribution_ok md
+    (dchecked_hyperball_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+checked_hyperball_signing_sample_pair_lossless
+checked_hyperball_signing_sample_pair_support
+signing_sample_pair_distribution_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1124]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_sample_ok_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hyperball_sample_ok_sample_ok md s :
+  hyperball_sample_ok md s =>
+  signing_sample_pair_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hyperball_polyveck_ok
+hyperball_polyvecl_ok
+hyperball_sample_ok
+polyveck_bounded_by
+polyvecl_bounded_by
+signing_sample_pair_bounded
+signing_sample_pair_sample_ok
+signing_sample_pair_wf
+y1_ok
+y2_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1139]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_lossless md :
+  is_lossless (dexact_hyperball_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dexact_hyperball_signing_sample_pair
+dprod_ll
+hyperball_polyveck_lossless
+hyperball_polyvecl_lossless
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1149]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_support md s :
+  s \in dexact_hyperball_signing_sample_pair md =>
+  hyperball_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{case}, \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dexact_hyperball_signing_sample_pair
+hyperball_polyveck_support
+hyperball_polyvecl_support
+hyperball_sample_ok
+signing_sample_pair_y1
+signing_sample_pair_y2
+supp_dprod
+y1
+y1_supp
+y2
+y2_supp
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1163]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_supportP
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_supportP md s :
+  s \in dexact_hyperball_signing_sample_pair md <=>
+  hyperball_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{case}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dexact_hyperball_signing_sample_pair
+hyperball_polyveck_supportP
+hyperball_polyvecl_supportP
+hyperball_sample_ok
+signing_sample_pair_y1
+signing_sample_pair_y2
+supp_dprod
+y1
+y2
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1173]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_sample_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_sample_ok md s :
+  s \in dexact_hyperball_signing_sample_pair md =>
+  signing_sample_pair_sample_ok md s.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_support
+hs
+hyperball_sample_ok_sample_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1182]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_distribution_ok
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_distribution_ok md :
+  signing_sample_pair_distribution_ok md
+    (dexact_hyperball_signing_sample_pair md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_lossless
+exact_hyperball_signing_sample_pair_sample_ok
+signing_sample_pair_distribution_ok
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1192]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_point_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_point_bound md s :
+  mu (dexact_hyperball_signing_sample_pair md) (pred1 s) <=
+  hyperball_sample_pair_point_bound md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{case}, \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dexact_hyperball_signing_sample_pair
+dprod1E
+ge0_mu
+hyperball_polyveck_point_boundE
+hyperball_polyvecl_point_boundE
+hyperball_sample_pair_point_bound
+ler_pmul
+y1
+y2
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1206]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_signing_sample_pair_checkedE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_signing_sample_pair_checkedE md :
+  dexact_hyperball_signing_sample_pair md =
+  dchecked_hyperball_signing_sample_pair md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dchecked_hyperball_signing_sample_pair
+dexact_hyperball_signing_sample_pair
+dhyperball_polyveck
+dhyperball_polyvecl
+dmap
+dprod_dlet
+eq_dlet
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\medskip
+\noindent\emph{End of generated formal inventory for \file{HAETAE_Distributions.ec}.}

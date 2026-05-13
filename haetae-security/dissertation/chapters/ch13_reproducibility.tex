@@ -1,0 +1,42 @@
+\chapter{Reproducibility and Evaluation}
+\label{ch:reproducibility}
+
+\section{Build and Proof Commands}
+
+The dissertation can be built from the \code{dissertation/} directory with:
+
+\begin{lstlisting}[language=bash]
+make
+\end{lstlisting}
+
+The EasyCrypt declaration inventory used in Appendix~\ref{app:ec-inventory} is
+regenerated with:
+
+\begin{lstlisting}[language=bash]
+make inventory
+\end{lstlisting}
+
+This writes \code{etc/easycrypt-declaration-counts.csv}.  The target is not part
+of the default PDF build because it inspects the separated proof manifest rather
+than LaTeX sources.
+
+The EasyCrypt proof gate is checked from \code{haetae-security/} with:
+
+\begin{lstlisting}[language=bash]
+EC_ATTEMPTS=8 ./provable-security/verify-provable-security.sh
+\end{lstlisting}
+
+A successful proof run ends with \code{RESULT: PASS}.
+
+\section{Why Attempts Are Configurable}
+
+Long EasyCrypt batches may occasionally fail because the Why3 server cannot be
+started or contacted.  The verification script retries files, but accepts a file
+only if EasyCrypt eventually returns success for that file.  This distinguishes
+infrastructure lifecycle failures from real failed proof obligations.
+
+\section{Evaluation Criteria}
+
+A reviewer should check manifest completeness, manifest minimality, successful
+compilation, theorem traceability, and assumption transparency.  The separated
+folder is designed to support exactly that review.

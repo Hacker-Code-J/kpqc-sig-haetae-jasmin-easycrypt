@@ -1,0 +1,1420 @@
+require "params.jinc"
+
+fn _poly_decomposed_pack(reg mut ptr u8[HAETAE_N] bp,
+                         reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    bp[i] = a;
+    i += 1;
+  }
+
+  return bp;
+}
+
+fn _poly_decomposed_unpack(reg mut ptr u32[HAETAE_N] rp,
+                           reg const ptr u8[HAETAE_N] bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = (32u)bp[i];
+    a <<= 24;
+    a >>s= 24;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _pack_poly_lsb(reg mut ptr u8[32] bp,
+                  reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[32]
+{
+  inline int i j;
+  reg u32 out bit a;
+
+  for i = 0 to 32
+  {
+    out = 0;
+
+    for j = 0 to 8
+    {
+      a = ap[8 * i + j];
+      bit = a;
+      bit &= 1;
+      bit <<= j;
+      out |= bit;
+    }
+
+    bp[i] = out;
+  }
+
+  return bp;
+}
+
+fn _pack_sig_prefix(reg mut ptr u8[2948] sigp,
+                    reg const ptr u32[HAETAE_N] cp,
+                    reg const ptr u32[2048] lowp,
+                    reg u64 lcount,
+                    reg u64 sigbytes) -> reg ptr u8[2948]
+{
+  inline int j;
+  reg u64 i idx total off;
+  reg u32 out bit a;
+
+  i = 0;
+  while (i < sigbytes)
+  {
+    sigp[i] = 0;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < 32)
+  {
+    out = 0;
+    for j = 0 to 8
+    {
+      idx = 8 * i;
+      idx += j;
+      bit = cp[idx];
+      bit &= 1;
+      bit <<= j;
+      out |= bit;
+    }
+    sigp[i] = out;
+    i += 1;
+  }
+
+  off = 32;
+  total = lcount;
+  total *= HAETAE_N;
+  i = 0;
+  while (i < total)
+  {
+    idx = off;
+    idx += i;
+    a = lowp[i];
+    sigp[idx] = a;
+    i += 1;
+  }
+
+  return sigp;
+}
+
+fn _unpack_sig_prefix(reg mut ptr u32[HAETAE_N] cp,
+                      reg mut ptr u32[2048] lowp,
+                      reg const ptr u8[2948] sigp,
+                      reg u64 lcount) -> reg ptr u32[HAETAE_N],
+                                         reg ptr u32[2048]
+{
+  inline int j;
+  reg u64 i idx total off;
+  reg u32 b bit a;
+
+  i = 0;
+  while (i < 32)
+  {
+    b = (32u)sigp[i];
+    for j = 0 to 8
+    {
+      idx = 8 * i;
+      idx += j;
+      bit = b;
+      bit >>= j;
+      bit &= 1;
+      cp[idx] = bit;
+    }
+    i += 1;
+  }
+
+  off = 32;
+  total = lcount;
+  total *= HAETAE_N;
+  i = 0;
+  while (i < total)
+  {
+    idx = off;
+    idx += i;
+    a = (32u)sigp[idx];
+    a <<= 24;
+    a >>s= 24;
+    lowp[i] = a;
+    i += 1;
+  }
+
+  return cp, lowp;
+}
+
+fn _pack_sig_suffix(reg mut ptr u8[2948] sigp,
+                    reg const ptr u8[2048] hbencp,
+                    reg const ptr u8[2048] hencp,
+                    reg u64 hbsize,
+                    reg u64 hsize,
+                    reg u64 offsets) -> reg ptr u8[2948]
+{
+  reg u64 i dst;
+  reg u32 b;
+
+  b = (32u)offsets;
+  sigp[0] = b;
+  b = (32u)offsets;
+  b >>= 8;
+  sigp[1] = b;
+
+  dst = 2;
+  i = 0;
+  while (i < hbsize)
+  {
+    b = (32u)hbencp[i];
+    sigp[dst] = b;
+    dst += 1;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < hsize)
+  {
+    b = (32u)hencp[i];
+    sigp[dst] = b;
+    dst += 1;
+    i += 1;
+  }
+
+  return sigp;
+}
+
+fn _pack_sig_size_offsets(reg mut ptr u64[5] statep) -> reg ptr u64[5]
+{
+  reg u64 hbsize hsize base_hb base_h payload_limit bad upper_hb upper_h;
+  reg u64 off_hb off_h packed total;
+
+  hbsize = statep[0];
+  hsize = statep[1];
+  base_hb = statep[2];
+  base_h = statep[3];
+  payload_limit = statep[4];
+
+  bad = 0;
+  if (hsize == 0)
+  {
+    bad = 1;
+  }
+  if (hbsize == 0)
+  {
+    bad = 1;
+  }
+
+  upper_hb = base_hb;
+  upper_hb += 255;
+  upper_h = base_h;
+  upper_h += 255;
+  if (hbsize < base_hb)
+  {
+    bad = 1;
+  }
+  if (hsize < base_h)
+  {
+    bad = 1;
+  }
+  if (hbsize > upper_hb)
+  {
+    bad = 1;
+  }
+  if (hsize > upper_h)
+  {
+    bad = 1;
+  }
+
+  total = hbsize;
+  total += hsize;
+  if (total > payload_limit)
+  {
+    bad = 1;
+  }
+
+  packed = 0;
+  if (bad == 0)
+  {
+    off_hb = hbsize;
+    off_hb -= base_hb;
+    off_h = hsize;
+    off_h -= base_h;
+    packed = off_h;
+    packed <<= 8;
+    packed |= off_hb;
+  }
+
+  statep[0] = packed;
+  statep[1] = bad;
+  return statep;
+}
+
+fn _unpack_sig_size_offsets(reg mut ptr u64[4] statep,
+                            reg const ptr u8[2948] sigp) -> reg ptr u64[4]
+{
+  reg u64 base_hb base_h payload_limit hbsize hsize padlen total bad;
+  reg u8 b;
+
+  base_hb = statep[0];
+  base_h = statep[1];
+  payload_limit = statep[2];
+
+  b = sigp[0];
+  hbsize = (64u)b;
+  hbsize += base_hb;
+  b = sigp[1];
+  hsize = (64u)b;
+  hsize += base_h;
+
+  bad = 0;
+  padlen = 0;
+  total = hbsize;
+  total += hsize;
+  if (total > payload_limit)
+  {
+    bad = 1;
+  }
+  else
+  {
+    padlen = payload_limit;
+    padlen -= total;
+  }
+
+  statep[0] = hbsize;
+  statep[1] = hsize;
+  statep[2] = padlen;
+  statep[3] = bad;
+  return statep;
+}
+
+fn _sig_zero_padding_nonzero(reg const ptr u8[2948] sigp,
+                             reg u64 padlen) -> reg u64
+{
+  reg u64 i bad bb;
+  reg u32 b;
+
+  bad = 0;
+  i = 0;
+  while (i < padlen)
+  {
+    b = (32u)sigp[i];
+    bb = (64u)b;
+    bad |= bb;
+    i += 1;
+  }
+
+  return bad;
+}
+
+fn _pack_poly_eta(reg mut ptr u8[64] bp,
+                  reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[64]
+{
+  reg ui64 i base;
+  reg u32 t0 t1 t2 t3 out;
+
+  i = 0;
+  while (i < 64)
+  {
+    base = 4 * i;
+
+    t0 = HAETAE_ETA; t0 -= ap[base + 0]; t0 &= 255;
+    t1 = HAETAE_ETA; t1 -= ap[base + 1]; t1 &= 255;
+    t2 = HAETAE_ETA; t2 -= ap[base + 2]; t2 &= 255;
+    t3 = HAETAE_ETA; t3 -= ap[base + 3]; t3 &= 255;
+
+    out = t0;
+    t1 <<= 2; out |= t1;
+    t2 <<= 4; out |= t2;
+    t3 <<= 6; out |= t3;
+    bp[i] = out;
+
+    i += 1;
+  }
+
+  return bp;
+}
+
+fn _unpack_poly_eta(reg mut ptr u32[HAETAE_N] rp,
+                    reg const ptr u8[64] bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i base;
+  reg u32 b t r;
+
+  i = 0;
+  while (i < 64)
+  {
+    base = 4 * i;
+    b = (32u)bp[i];
+
+    t = b; t &= 3; r = HAETAE_ETA; r -= t; rp[base + 0] = r;
+    t = b; t >>= 2; t &= 3; r = HAETAE_ETA; r -= t; rp[base + 1] = r;
+    t = b; t >>= 4; t &= 3; r = HAETAE_ETA; r -= t; rp[base + 2] = r;
+    t = b; t >>= 6; t &= 3; r = HAETAE_ETA; r -= t; rp[base + 3] = r;
+
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _pack_poly2_eta(reg mut ptr u8[96] bp,
+                   reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[96]
+{
+  reg ui64 i base off;
+  reg u32 t0 t1 t2 t3 t4 t5 t6 t7 out part;
+
+  i = 0;
+  off = 0;
+  while (i < 32)
+  {
+    base = 8 * i;
+
+    t0 = 2 * HAETAE_ETA; t0 -= ap[base + 0]; t0 &= 255;
+    t1 = 2 * HAETAE_ETA; t1 -= ap[base + 1]; t1 &= 255;
+    t2 = 2 * HAETAE_ETA; t2 -= ap[base + 2]; t2 &= 255;
+    t3 = 2 * HAETAE_ETA; t3 -= ap[base + 3]; t3 &= 255;
+    t4 = 2 * HAETAE_ETA; t4 -= ap[base + 4]; t4 &= 255;
+    t5 = 2 * HAETAE_ETA; t5 -= ap[base + 5]; t5 &= 255;
+    t6 = 2 * HAETAE_ETA; t6 -= ap[base + 6]; t6 &= 255;
+    t7 = 2 * HAETAE_ETA; t7 -= ap[base + 7]; t7 &= 255;
+
+    out = t0;
+    part = t1; part <<= 3; out |= part;
+    part = t2; part <<= 6; out |= part;
+    bp[off + 0] = out;
+
+    out = t2; out >>= 2;
+    part = t3; part <<= 1; out |= part;
+    part = t4; part <<= 4; out |= part;
+    part = t5; part <<= 7; out |= part;
+    bp[off + 1] = out;
+
+    out = t5; out >>= 1;
+    part = t6; part <<= 2; out |= part;
+    part = t7; part <<= 5; out |= part;
+    bp[off + 2] = out;
+
+    i += 1;
+    off += 3;
+  }
+
+  return bp;
+}
+
+fn _unpack_poly2_eta(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u8[96] bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i base off;
+  reg u32 b0 b1 b2 t r part;
+
+  i = 0;
+  off = 0;
+  while (i < 32)
+  {
+    base = 8 * i;
+    b0 = (32u)bp[off + 0];
+    b1 = (32u)bp[off + 1];
+    b2 = (32u)bp[off + 2];
+
+    t = b0; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 0] = r;
+    t = b0; t >>= 3; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 1] = r;
+    t = b0; t >>= 6; part = b1; part <<= 2; t |= part; t &= 7;
+    r = 2 * HAETAE_ETA; r -= t; rp[base + 2] = r;
+    t = b1; t >>= 1; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 3] = r;
+    t = b1; t >>= 4; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 4] = r;
+    t = b1; t >>= 7; part = b2; part <<= 1; t |= part; t &= 7;
+    r = 2 * HAETAE_ETA; r -= t; rp[base + 5] = r;
+    t = b2; t >>= 2; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 6] = r;
+    t = b2; t >>= 5; t &= 7; r = 2 * HAETAE_ETA; r -= t; rp[base + 7] = r;
+
+    i += 1;
+    off += 3;
+  }
+
+  return rp;
+}
+
+fn _pack_poly_q_m23(reg mut ptr u8[480] bp,
+                    reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[480]
+{
+  reg ui64 i base off;
+  reg u32 a0 a1 a2 a3 a4 a5 a6 a7 out part;
+
+  i = 0;
+  off = 0;
+  while (i < 32)
+  {
+    base = 8 * i;
+    a0 = ap[base + 0];
+    a1 = ap[base + 1];
+    a2 = ap[base + 2];
+    a3 = ap[base + 3];
+    a4 = ap[base + 4];
+    a5 = ap[base + 5];
+    a6 = ap[base + 6];
+    a7 = ap[base + 7];
+
+    bp[off + 0] = a0;
+
+    out = a0; out >>= 8; out &= 127;
+    part = a1; part &= 1; part <<= 7; out |= part;
+    bp[off + 1] = out;
+
+    out = a1; out >>= 1; bp[off + 2] = out;
+
+    out = a1; out >>= 9; out &= 63;
+    part = a2; part &= 3; part <<= 6; out |= part;
+    bp[off + 3] = out;
+
+    out = a2; out >>= 2; bp[off + 4] = out;
+
+    out = a2; out >>= 10; out &= 31;
+    part = a3; part &= 7; part <<= 5; out |= part;
+    bp[off + 5] = out;
+
+    out = a3; out >>= 3; bp[off + 6] = out;
+
+    out = a3; out >>= 11; out &= 15;
+    part = a4; part &= 15; part <<= 4; out |= part;
+    bp[off + 7] = out;
+
+    out = a4; out >>= 4; bp[off + 8] = out;
+
+    out = a4; out >>= 12; out &= 7;
+    part = a5; part &= 31; part <<= 3; out |= part;
+    bp[off + 9] = out;
+
+    out = a5; out >>= 5; bp[off + 10] = out;
+
+    out = a5; out >>= 13; out &= 3;
+    part = a6; part &= 63; part <<= 2; out |= part;
+    bp[off + 11] = out;
+
+    out = a6; out >>= 6; bp[off + 12] = out;
+
+    out = a6; out >>= 14; out &= 1;
+    part = a7; part &= 127; part <<= 1; out |= part;
+    bp[off + 13] = out;
+
+    out = a7; out >>= 7; bp[off + 14] = out;
+
+    i += 1;
+    off += 15;
+  }
+
+  return bp;
+}
+
+fn _unpack_poly_q_m23(reg mut ptr u32[HAETAE_N] rp,
+                      reg const ptr u8[480] bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i base off;
+  reg u32 r part;
+
+  i = 0;
+  off = 0;
+  while (i < 32)
+  {
+    base = 8 * i;
+
+    r = (32u)bp[off + 0];
+    part = (32u)bp[off + 1]; part &= 127; part <<= 8; r |= part;
+    rp[base + 0] = r;
+
+    r = (32u)bp[off + 1]; r >>= 7;
+    part = (32u)bp[off + 2]; part <<= 1; r |= part;
+    part = (32u)bp[off + 3]; part &= 63; part <<= 9; r |= part;
+    rp[base + 1] = r;
+
+    r = (32u)bp[off + 3]; r >>= 6;
+    part = (32u)bp[off + 4]; part <<= 2; r |= part;
+    part = (32u)bp[off + 5]; part &= 31; part <<= 10; r |= part;
+    rp[base + 2] = r;
+
+    r = (32u)bp[off + 5]; r >>= 5;
+    part = (32u)bp[off + 6]; part <<= 3; r |= part;
+    part = (32u)bp[off + 7]; part &= 15; part <<= 11; r |= part;
+    rp[base + 3] = r;
+
+    r = (32u)bp[off + 7]; r >>= 4;
+    part = (32u)bp[off + 8]; part <<= 4; r |= part;
+    part = (32u)bp[off + 9]; part &= 7; part <<= 12; r |= part;
+    rp[base + 4] = r;
+
+    r = (32u)bp[off + 9]; r >>= 3;
+    part = (32u)bp[off + 10]; part <<= 5; r |= part;
+    part = (32u)bp[off + 11]; part &= 3; part <<= 13; r |= part;
+    rp[base + 5] = r;
+
+    r = (32u)bp[off + 11]; r >>= 2;
+    part = (32u)bp[off + 12]; part <<= 6; r |= part;
+    part = (32u)bp[off + 13]; part &= 1; part <<= 14; r |= part;
+    rp[base + 6] = r;
+
+    r = (32u)bp[off + 13]; r >>= 1; r &= 127;
+    part = (32u)bp[off + 14]; part <<= 7; r |= part;
+    rp[base + 7] = r;
+
+    i += 1;
+    off += 15;
+  }
+
+  return rp;
+}
+
+fn _pack_poly_q_m5(reg mut ptr u8[512] bp,
+                   reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[512]
+{
+  reg ui64 i off;
+  reg u32 a out;
+
+  i = 0;
+  off = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    bp[off + 0] = a;
+    out = a; out >>= 8; bp[off + 1] = out;
+
+    i += 1;
+    off += 2;
+  }
+
+  return bp;
+}
+
+fn _unpack_poly_q_m5(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u8[512] bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i off;
+  reg u32 b0 b1 r;
+
+  i = 0;
+  off = 0;
+  while (i < HAETAE_N)
+  {
+    b0 = (32u)bp[off + 0];
+    b1 = (32u)bp[off + 1];
+    r = b0;
+    b1 <<= 8;
+    r |= b1;
+    r &= 65535;
+    rp[i] = r;
+
+    i += 1;
+    off += 2;
+  }
+
+  return rp;
+}
+
+fn _pack_vk_m23(reg mut ptr u8[2080] vkp,
+                reg const ptr u32[2048] bp,
+                reg const ptr u8[32] seedp,
+                reg u64 count) -> reg ptr u8[2080]
+{
+  reg u64 i poly coeff_base base off;
+  reg u32 a next out part;
+
+  i = 0;
+  while (i < 32)
+  {
+    vkp[i] = seedp[i];
+    i += 1;
+  }
+
+  poly = 0;
+  coeff_base = 0;
+  off = 32;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+      a = bp[base + 0];
+      vkp[off + 0] = a;
+
+      out = a; out >>= 8; out &= 127;
+      next = bp[base + 1];
+      part = next; part &= 1; part <<= 7; out |= part;
+      vkp[off + 1] = out;
+
+      a = next;
+      out = a; out >>= 1; vkp[off + 2] = out;
+
+      out = a; out >>= 9; out &= 63;
+      next = bp[base + 2];
+      part = next; part &= 3; part <<= 6; out |= part;
+      vkp[off + 3] = out;
+
+      a = next;
+      out = a; out >>= 2; vkp[off + 4] = out;
+
+      out = a; out >>= 10; out &= 31;
+      next = bp[base + 3];
+      part = next; part &= 7; part <<= 5; out |= part;
+      vkp[off + 5] = out;
+
+      a = next;
+      out = a; out >>= 3; vkp[off + 6] = out;
+
+      out = a; out >>= 11; out &= 15;
+      next = bp[base + 4];
+      part = next; part &= 15; part <<= 4; out |= part;
+      vkp[off + 7] = out;
+
+      a = next;
+      out = a; out >>= 4; vkp[off + 8] = out;
+
+      out = a; out >>= 12; out &= 7;
+      next = bp[base + 5];
+      part = next; part &= 31; part <<= 3; out |= part;
+      vkp[off + 9] = out;
+
+      a = next;
+      out = a; out >>= 5; vkp[off + 10] = out;
+
+      out = a; out >>= 13; out &= 3;
+      next = bp[base + 6];
+      part = next; part &= 63; part <<= 2; out |= part;
+      vkp[off + 11] = out;
+
+      a = next;
+      out = a; out >>= 6; vkp[off + 12] = out;
+
+      out = a; out >>= 14; out &= 1;
+      next = bp[base + 7];
+      part = next; part &= 127; part <<= 1; out |= part;
+      vkp[off + 13] = out;
+
+      out = next; out >>= 7; vkp[off + 14] = out;
+
+      i += 1;
+      off += 15;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return vkp;
+}
+
+fn _pack_vk_m5(reg mut ptr u8[2080] vkp,
+               reg const ptr u32[2048] bp,
+               reg const ptr u8[32] seedp,
+               reg u64 count) -> reg ptr u8[2080]
+{
+  reg u64 i poly coeff_base out_base off idx;
+  reg u32 a out;
+
+  i = 0;
+  while (i < 32)
+  {
+    vkp[i] = seedp[i];
+    i += 1;
+  }
+
+  poly = 0;
+  coeff_base = 0;
+  out_base = 32;
+  while (poly < count)
+  {
+    i = 0;
+    off = out_base;
+    while (i < HAETAE_N)
+    {
+      idx = coeff_base;
+      idx += i;
+      a = bp[idx];
+      vkp[off + 0] = a;
+      out = a; out >>= 8; vkp[off + 1] = out;
+
+      i += 1;
+      off += 2;
+    }
+
+    coeff_base += HAETAE_N;
+    out_base += 512;
+    poly += 1;
+  }
+
+  return vkp;
+}
+
+fn _unpack_vk_m23(reg mut ptr u32[2048] bp,
+                  reg mut ptr u8[32] seedp,
+                  reg const ptr u8[2080] vkp,
+                  reg u64 count) -> reg ptr u32[2048], reg ptr u8[32]
+{
+  reg u64 i poly coeff_base in_base off base;
+  reg u32 r part;
+
+  i = 0;
+  while (i < 32)
+  {
+    seedp[i] = vkp[i];
+    i += 1;
+  }
+
+  poly = 0;
+  coeff_base = 0;
+  in_base = 32;
+  while (poly < count)
+  {
+    i = 0;
+    off = in_base;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+
+      r = (32u)vkp[off + 0];
+      part = (32u)vkp[off + 1]; part &= 127; part <<= 8; r |= part;
+      bp[base + 0] = r;
+
+      r = (32u)vkp[off + 1]; r >>= 7;
+      part = (32u)vkp[off + 2]; part <<= 1; r |= part;
+      part = (32u)vkp[off + 3]; part &= 63; part <<= 9; r |= part;
+      bp[base + 1] = r;
+
+      r = (32u)vkp[off + 3]; r >>= 6;
+      part = (32u)vkp[off + 4]; part <<= 2; r |= part;
+      part = (32u)vkp[off + 5]; part &= 31; part <<= 10; r |= part;
+      bp[base + 2] = r;
+
+      r = (32u)vkp[off + 5]; r >>= 5;
+      part = (32u)vkp[off + 6]; part <<= 3; r |= part;
+      part = (32u)vkp[off + 7]; part &= 15; part <<= 11; r |= part;
+      bp[base + 3] = r;
+
+      r = (32u)vkp[off + 7]; r >>= 4;
+      part = (32u)vkp[off + 8]; part <<= 4; r |= part;
+      part = (32u)vkp[off + 9]; part &= 7; part <<= 12; r |= part;
+      bp[base + 4] = r;
+
+      r = (32u)vkp[off + 9]; r >>= 3;
+      part = (32u)vkp[off + 10]; part <<= 5; r |= part;
+      part = (32u)vkp[off + 11]; part &= 3; part <<= 13; r |= part;
+      bp[base + 5] = r;
+
+      r = (32u)vkp[off + 11]; r >>= 2;
+      part = (32u)vkp[off + 12]; part <<= 6; r |= part;
+      part = (32u)vkp[off + 13]; part &= 1; part <<= 14; r |= part;
+      bp[base + 6] = r;
+
+      r = (32u)vkp[off + 13]; r >>= 1; r &= 127;
+      part = (32u)vkp[off + 14]; part <<= 7; r |= part;
+      bp[base + 7] = r;
+
+      i += 1;
+      off += 15;
+    }
+
+    coeff_base += HAETAE_N;
+    in_base += 480;
+    poly += 1;
+  }
+
+  return bp, seedp;
+}
+
+fn _unpack_vk_m5(reg mut ptr u32[2048] bp,
+                 reg mut ptr u8[32] seedp,
+                 reg const ptr u8[2080] vkp,
+                 reg u64 count) -> reg ptr u32[2048], reg ptr u8[32]
+{
+  reg u64 i poly coeff_base in_base off idx;
+  reg u32 b0 b1 r;
+
+  i = 0;
+  while (i < 32)
+  {
+    seedp[i] = vkp[i];
+    i += 1;
+  }
+
+  poly = 0;
+  coeff_base = 0;
+  in_base = 32;
+  while (poly < count)
+  {
+    i = 0;
+    off = in_base;
+    while (i < HAETAE_N)
+    {
+      idx = coeff_base;
+      idx += i;
+      b0 = (32u)vkp[off + 0];
+      b1 = (32u)vkp[off + 1];
+      r = b0;
+      b1 <<= 8;
+      r |= b1;
+      r &= 65535;
+      bp[idx] = r;
+
+      i += 1;
+      off += 2;
+    }
+
+    coeff_base += HAETAE_N;
+    in_base += 512;
+    poly += 1;
+  }
+
+  return bp, seedp;
+}
+
+fn _pack_vec_eta_to(reg mut ptr u8[2752] outp,
+                    reg const ptr u32[2048] vp,
+                    reg u64 out_off,
+                    reg u64 count) -> reg ptr u8[2752]
+{
+  reg u64 poly i base coeff_base pos;
+  reg u32 t out part;
+
+  poly = 0;
+  coeff_base = 0;
+  pos = out_off;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 64)
+    {
+      base = coeff_base;
+      base += 4 * i;
+
+      t = HAETAE_ETA; t -= vp[base + 0]; t &= 255;
+      out = t;
+      t = HAETAE_ETA; t -= vp[base + 1]; t &= 255;
+      part = t; part <<= 2; out |= part;
+      t = HAETAE_ETA; t -= vp[base + 2]; t &= 255;
+      part = t; part <<= 4; out |= part;
+      t = HAETAE_ETA; t -= vp[base + 3]; t &= 255;
+      part = t; part <<= 6; out |= part;
+      outp[pos] = out;
+
+      i += 1;
+      pos += 1;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return outp;
+}
+
+fn _unpack_vec_eta_from(reg mut ptr u32[2048] vp,
+                        reg const ptr u8[2752] inp,
+                        reg u64 in_off,
+                        reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 poly i base coeff_base pos;
+  reg u32 b t r;
+
+  poly = 0;
+  coeff_base = 0;
+  pos = in_off;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 64)
+    {
+      base = coeff_base;
+      base += 4 * i;
+      b = (32u)inp[pos];
+
+      t = b; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 0] = r;
+      t = b; t >>= 2; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 1] = r;
+      t = b; t >>= 4; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 2] = r;
+      t = b; t >>= 6; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 3] = r;
+
+      i += 1;
+      pos += 1;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return vp;
+}
+
+fn _unpack_vec_eta_from_second(reg mut ptr u32[2048] vp,
+                               reg const ptr u8[2752] inp,
+                               reg u64 in_off,
+                               reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 poly i base coeff_base pos;
+  reg u32 b t r;
+
+  poly = 0;
+  coeff_base = 0;
+  pos = in_off;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 64)
+    {
+      base = coeff_base;
+      base += 4 * i;
+      b = (32u)inp[pos];
+
+      t = b; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 0] = r;
+      t = b; t >>= 2; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 1] = r;
+      t = b; t >>= 4; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 2] = r;
+      t = b; t >>= 6; t &= 3; r = HAETAE_ETA; r -= t; vp[base + 3] = r;
+
+      i += 1;
+      pos += 1;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return vp;
+}
+
+fn _pack_vec2_eta_to(reg mut ptr u8[2752] outp,
+                     reg const ptr u32[2048] vp,
+                     reg u64 out_off,
+                     reg u64 count) -> reg ptr u8[2752]
+{
+  reg u64 poly i base coeff_base pos;
+  reg u32 t carry out part;
+
+  poly = 0;
+  coeff_base = 0;
+  pos = out_off;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+
+      t = 2 * HAETAE_ETA; t -= vp[base + 0]; t &= 255;
+      out = t;
+      t = 2 * HAETAE_ETA; t -= vp[base + 1]; t &= 255;
+      part = t; part <<= 3; out |= part;
+      t = 2 * HAETAE_ETA; t -= vp[base + 2]; t &= 255;
+      carry = t;
+      part = t; part <<= 6; out |= part;
+      outp[pos + 0] = out;
+
+      out = carry; out >>= 2;
+      t = 2 * HAETAE_ETA; t -= vp[base + 3]; t &= 255;
+      part = t; part <<= 1; out |= part;
+      t = 2 * HAETAE_ETA; t -= vp[base + 4]; t &= 255;
+      part = t; part <<= 4; out |= part;
+      t = 2 * HAETAE_ETA; t -= vp[base + 5]; t &= 255;
+      carry = t;
+      part = t; part <<= 7; out |= part;
+      outp[pos + 1] = out;
+
+      out = carry; out >>= 1;
+      t = 2 * HAETAE_ETA; t -= vp[base + 6]; t &= 255;
+      part = t; part <<= 2; out |= part;
+      t = 2 * HAETAE_ETA; t -= vp[base + 7]; t &= 255;
+      part = t; part <<= 5; out |= part;
+      outp[pos + 2] = out;
+
+      i += 1;
+      pos += 3;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return outp;
+}
+
+fn _unpack_vec2_eta_from(reg mut ptr u32[2048] vp,
+                         reg const ptr u8[2752] inp,
+                         reg u64 in_off,
+                         reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 poly i base coeff_base pos;
+  reg u32 b next t r;
+
+  poly = 0;
+  coeff_base = 0;
+  pos = in_off;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+      b = (32u)inp[pos + 0];
+
+      t = b; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 0] = r;
+      t = b; t >>= 3; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 1] = r;
+      t = b; t >>= 6;
+      next = (32u)inp[pos + 1];
+      b = next;
+      next <<= 2;
+      t |= next; t &= 7;
+      r = 2 * HAETAE_ETA; r -= t; vp[base + 2] = r;
+      t = b; t >>= 1; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 3] = r;
+      t = b; t >>= 4; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 4] = r;
+      t = b; t >>= 7;
+      next = (32u)inp[pos + 2];
+      b = next;
+      next <<= 1;
+      t |= next; t &= 7;
+      r = 2 * HAETAE_ETA; r -= t; vp[base + 5] = r;
+      t = b; t >>= 2; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 6] = r;
+      t = b; t >>= 5; t &= 7; r = 2 * HAETAE_ETA; r -= t; vp[base + 7] = r;
+
+      i += 1;
+      pos += 3;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return vp;
+}
+
+fn _pack_sk_m23(reg mut ptr u8[2752] skp,
+                reg const ptr u8[2080] vkp,
+                reg const ptr u32[2048] s0p,
+                reg const ptr u32[2048] s1p,
+                reg const ptr u8[32] keyp,
+                reg u64 vkbytes,
+                reg u64 mcount,
+                reg u64 kcount) -> reg ptr u8[2752]
+{
+  reg u64 i off step;
+
+  i = 0;
+  while (i < vkbytes)
+  {
+    skp[i] = vkp[i];
+    i += 1;
+  }
+
+  off = vkbytes;
+  skp = _pack_vec_eta_to(skp, s0p, off, mcount);
+  step = mcount;
+  step *= 64;
+  off += step;
+
+  skp = _pack_vec2_eta_to(skp, s1p, off, kcount);
+  step = kcount;
+  step *= 96;
+  off += step;
+
+  i = 0;
+  while (i < 32)
+  {
+    step = off;
+    step += i;
+    skp[step] = keyp[i];
+    i += 1;
+  }
+
+  return skp;
+}
+
+fn _unpack_sk_m23(reg mut ptr u32[2048] s0p,
+                  reg mut ptr u32[2048] s1p,
+                  reg mut ptr u8[32] keyp,
+                  reg const ptr u8[2752] skp,
+                  reg u64 vkbytes,
+                  reg u64 mcount,
+                  reg u64 kcount) -> reg ptr u32[2048], reg ptr u32[2048],
+                                       reg ptr u8[32]
+{
+  reg u64 i off step idx;
+
+  off = vkbytes;
+  s0p = _unpack_vec_eta_from(s0p, skp, off, mcount);
+  step = mcount;
+  step *= 64;
+  off += step;
+
+  s1p = _unpack_vec2_eta_from(s1p, skp, off, kcount);
+  step = kcount;
+  step *= 96;
+  off += step;
+
+  i = 0;
+  while (i < 32)
+  {
+    idx = off;
+    idx += i;
+    keyp[i] = skp[idx];
+    i += 1;
+  }
+
+  return s0p, s1p, keyp;
+}
+
+fn _pack_sk_m5(reg mut ptr u8[2752] skp,
+               reg const ptr u8[2080] vkp,
+               reg const ptr u32[2048] s0p,
+               reg const ptr u32[2048] s1p,
+               reg const ptr u8[32] keyp,
+               reg u64 vkbytes,
+               reg u64 mcount,
+               reg u64 kcount) -> reg ptr u8[2752]
+{
+  reg u64 i off step;
+
+  i = 0;
+  while (i < vkbytes)
+  {
+    skp[i] = vkp[i];
+    i += 1;
+  }
+
+  off = vkbytes;
+  skp = _pack_vec_eta_to(skp, s0p, off, mcount);
+  step = mcount;
+  step *= 64;
+  off += step;
+
+  mcount = kcount;
+  s0p = s1p;
+  skp = _pack_vec_eta_to(skp, s0p, off, mcount);
+  step = mcount;
+  step *= 64;
+  off += step;
+
+  i = 0;
+  while (i < 32)
+  {
+    step = off;
+    step += i;
+    skp[step] = keyp[i];
+    i += 1;
+  }
+
+  return skp;
+}
+
+fn _unpack_sk_m5(reg mut ptr u32[2048] s0p,
+                 reg mut ptr u32[2048] s1p,
+                 reg mut ptr u8[32] keyp,
+                 reg const ptr u8[2752] skp,
+                 reg u64 vkbytes,
+                 reg u64 mcount,
+                 reg u64 kcount) -> reg ptr u32[2048], reg ptr u32[2048],
+                                      reg ptr u8[32]
+{
+  reg u64 i off step idx;
+
+  off = vkbytes;
+  s0p = _unpack_vec_eta_from(s0p, skp, off, mcount);
+  step = mcount;
+  step *= 64;
+  off += step;
+
+  s1p = _unpack_vec_eta_from_second(s1p, skp, off, kcount);
+  step = kcount;
+  step *= 64;
+  off += step;
+
+  i = 0;
+  while (i < 32)
+  {
+    idx = off;
+    idx += i;
+    keyp[i] = skp[idx];
+    i += 1;
+  }
+
+  return s0p, s1p, keyp;
+}
+
+fn _pack_poly_highbits_m23(reg mut ptr u8[HAETAE_N] bp,
+                           reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[HAETAE_N]
+{
+  bp = _poly_decomposed_pack(bp, ap);
+  return bp;
+}
+
+fn _pack_poly_highbits_m5(reg mut ptr u8[288] bp,
+                          reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[288]
+{
+  reg ui64 i base off;
+  reg u32 a0 a1 a2 a3 a4 a5 a6 a7 out part;
+
+  i = 0;
+  off = 0;
+  while (i < 32)
+  {
+    base = 8 * i;
+    a0 = ap[base + 0];
+    a1 = ap[base + 1];
+    a2 = ap[base + 2];
+    a3 = ap[base + 3];
+    a4 = ap[base + 4];
+    a5 = ap[base + 5];
+    a6 = ap[base + 6];
+    a7 = ap[base + 7];
+
+    bp[off + 0] = a0;
+
+    out = a0; out >>= 8; out &= 1;
+    part = a1; part <<= 1; part &= 255; out |= part;
+    bp[off + 1] = out;
+
+    out = a1; out >>= 7; out &= 3;
+    part = a2; part <<= 2; part &= 255; out |= part;
+    bp[off + 2] = out;
+
+    out = a2; out >>= 6; out &= 7;
+    part = a3; part <<= 3; part &= 255; out |= part;
+    bp[off + 3] = out;
+
+    out = a3; out >>= 5; out &= 15;
+    part = a4; part <<= 4; part &= 255; out |= part;
+    bp[off + 4] = out;
+
+    out = a4; out >>= 4; out &= 31;
+    part = a5; part <<= 5; part &= 255; out |= part;
+    bp[off + 5] = out;
+
+    out = a5; out >>= 3; out &= 63;
+    part = a6; part <<= 6; part &= 255; out |= part;
+    bp[off + 6] = out;
+
+    out = a6; out >>= 2; out &= 127;
+    part = a7; part <<= 7; part &= 255; out |= part;
+    bp[off + 7] = out;
+
+    out = a7; out >>= 1; bp[off + 8] = out;
+
+    i += 1;
+    off += 9;
+  }
+
+  return bp;
+}
+
+fn _pack_vec_highbits_m23(reg mut ptr u8[1152] bp,
+                          reg const ptr u32[2048] ap,
+                          reg u64 count) -> reg ptr u8[1152]
+{
+  reg u64 poly i coeff_base out_base idx;
+  reg u32 a;
+
+  poly = 0;
+  coeff_base = 0;
+  out_base = 0;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < HAETAE_N)
+    {
+      idx = coeff_base;
+      idx += i;
+      a = ap[idx];
+      idx = out_base;
+      idx += i;
+      bp[idx] = a;
+      i += 1;
+    }
+
+    coeff_base += HAETAE_N;
+    out_base += 288;
+    poly += 1;
+  }
+
+  return bp;
+}
+
+fn _pack_vec_highbits_m5(reg mut ptr u8[1152] bp,
+                         reg const ptr u32[2048] ap,
+                         reg u64 count) -> reg ptr u8[1152]
+{
+  reg u64 poly i coeff_base base off;
+  reg u32 a next out part;
+
+  poly = 0;
+  coeff_base = 0;
+  off = 0;
+  while (poly < count)
+  {
+    i = 0;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+      a = ap[base + 0];
+      bp[off + 0] = a;
+
+      out = a; out >>= 8; out &= 1;
+      next = ap[base + 1];
+      part = next; part <<= 1; part &= 255; out |= part;
+      bp[off + 1] = out;
+
+      a = next;
+      out = a; out >>= 7; out &= 3;
+      next = ap[base + 2];
+      part = next; part <<= 2; part &= 255; out |= part;
+      bp[off + 2] = out;
+
+      a = next;
+      out = a; out >>= 6; out &= 7;
+      next = ap[base + 3];
+      part = next; part <<= 3; part &= 255; out |= part;
+      bp[off + 3] = out;
+
+      a = next;
+      out = a; out >>= 5; out &= 15;
+      next = ap[base + 4];
+      part = next; part <<= 4; part &= 255; out |= part;
+      bp[off + 4] = out;
+
+      a = next;
+      out = a; out >>= 4; out &= 31;
+      next = ap[base + 5];
+      part = next; part <<= 5; part &= 255; out |= part;
+      bp[off + 5] = out;
+
+      a = next;
+      out = a; out >>= 3; out &= 63;
+      next = ap[base + 6];
+      part = next; part <<= 6; part &= 255; out |= part;
+      bp[off + 6] = out;
+
+      a = next;
+      out = a; out >>= 2; out &= 127;
+      next = ap[base + 7];
+      part = next; part <<= 7; part &= 255; out |= part;
+      bp[off + 7] = out;
+
+      out = next; out >>= 1; bp[off + 8] = out;
+
+      i += 1;
+      off += 9;
+    }
+
+    coeff_base += HAETAE_N;
+    poly += 1;
+  }
+
+  return bp;
+}

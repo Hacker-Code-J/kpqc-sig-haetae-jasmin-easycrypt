@@ -1,0 +1,607 @@
+\documentclass[10pt]{article}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{amsmath,amssymb,mathtools,longtable,array,booktabs,hyperref,xcolor,stmaryrd}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\newcommand{\EC}[1]{\texttt{#1}}
+\newcommand{\Fq}{\mathbb F_q}
+\newcommand{\brev}{\operatorname{brev}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{2pt}
+\setlength{\LTleft}{0pt}
+\setlength{\LTright}{0pt}
+\begin{document}
+
+\begin{center}
+{\Large HAETAE NTT Functional-Correctness Correspondence Catalog}\\[3pt]
+{\small Exhaustive mapping for counted EasyCrypt declarations in \EC{haetae-ntt-verify/easycrypt}}
+\end{center}
+
+\section*{Scope and Counts}
+This handout gives the mathematician's reading of every counted declaration used
+in the machine-checked functional-correctness proof for HAETAE's Jasmin NTT.
+The counted declaration classes are:
+\[
+\#\mathrm{Types}=5,\quad
+\#\mathrm{Ops}=124,\quad
+\#\mathrm{Modules}=2,\quad
+\#\mathrm{Lemmas}=329,\quad
+\#\mathrm{Hoare/phoare/equiv}=34.
+\]
+The EasyCrypt code column records the exact declaration line as it appears in
+the source file.  For multi-line definitions and proof statements, the displayed
+line is the source declaration line; the mathematical column gives the precise
+object, predicate, theorem schema, or semantic judgment denoted by that
+declaration.
+
+\section*{Global Mathematical Notation}
+Let
+\[
+q=64513,\qquad \Fq=\mathbb Z/q\mathbb Z,\qquad
+N=256,\qquad \zeta=[426]_q,\qquad \brev_8=\text{8-bit bit reversal}.
+\]
+A value of EasyCrypt type \EC{coeff Array256.t} is read as a vector
+$p=(p_0,\ldots,p_{255})\in\Fq^{256}$.  A Jasmin byte array $rp$ is decoded by
+\[
+D(rp)_i=\left[\operatorname{to\_sint}\!\left(\operatorname{get32}(rp,i)\right)\right]_q,
+\qquad 0\le i<256.
+\]
+The final forward and inverse specifications are
+\[
+F(p)_i=\sum_{j=0}^{255}p_j\zeta^{(2\brev_8(i)+1)j},
+\]
+\[
+F^{-1}(p)_i=[256]_q^{-1}\sum_{j=0}^{255}
+p_j\zeta^{-(2\brev_8(j)+1)i}.
+\]
+The proof uses the forward partial sums
+\[
+P_{\ell,s,b}(p)=\sum_{u=0}^{\ell-1}
+\zeta^{(2s+1)\brev_8(u)}p_{\brev_8(b\ell+u)}
+\]
+and inverse partial sums
+\[
+Q_{\ell,s,b}(p)=\sum_{u=0}^{\ell-1}
+p_{b\ell+u}\zeta^{-(2\brev_8(b\ell+u)+1)s}.
+\]
+The Hoare-style semantic readings are
+\[
+\{P\}\;c\;\{Q\}\quad\equiv\quad
+\forall s.\;P(s)\Rightarrow Q(\llbracket c\rrbracket(s)),
+\]
+\[
+\mathbf{phoare}\,[c:P\Rightarrow Q]=1
+\quad\equiv\quad
+\Pr[\llbracket c\rrbracket(s)\text{ terminates and satisfies }Q\mid P(s)]=1,
+\]
+and
+\[
+\mathbf{equiv}\,[c_1\sim c_2:P\Rightarrow Q]
+\quad\equiv\quad
+P(s_1,s_2)\Rightarrow
+Q(\llbracket c_1\rrbracket(s_1),\llbracket c_2\rrbracket(s_2)).
+\]
+
+\section*{Exact Declaration Correspondence}
+\tiny
+\begin{longtable}{L{0.11\textwidth}L{0.05\textwidth}L{0.38\textwidth}L{0.42\textwidth}}
+\toprule
+\textbf{Source} & \textbf{Kind} & \textbf{Exact EasyCrypt declaration line} & \textbf{Mathematical correspondence}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Source} & \textbf{Kind} & \textbf{Exact EasyCrypt declaration line} & \textbf{Mathematical correspondence}\\
+\midrule
+\endhead
+Fastexp.\allowbreak{}ec:\allowbreak{}22 & op & {\ttfamily\scriptsize op fastexp\_nbits N x n =} & Exponentiation function; the theorem family proves $\mathtt{fastexp}(x,n)=x^n$. \\
+Fastexp.\allowbreak{}ec:\allowbreak{}26 & op & {\ttfamily\scriptsize op fastexp x n =} & Exponentiation function; the theorem family proves $\mathtt{fastexp}(x,n)=x^n$. \\
+Fastexp.\allowbreak{}ec:\allowbreak{}57 & lemma & {\ttfamily\scriptsize lemma fastexp\_nbitsP N x n :} & Correctness of binary exponentiation: $\mathtt{fastexp}(x,n)=x^n$. \\
+Fastexp.\allowbreak{}ec:\allowbreak{}63 & lemma & {\ttfamily\scriptsize lemma fastexpP x n :} & Correctness of binary exponentiation: $\mathtt{fastexp}(x,n)=x^n$. \\
+Fq.\allowbreak{}ec:\allowbreak{}18 & op & {\ttfamily\scriptsize op q : int = 64513.} & Prime modulus $q=64513$. \\
+Fq.\allowbreak{}ec:\allowbreak{}19 & lemma & {\ttfamily\scriptsize lemma qE : q = 64513 by rewrite /q.} & Field-arithmetic constant or word-representation theorem. \\
+Fq.\allowbreak{}ec:\allowbreak{}22 & op & {\ttfamily\scriptsize op k    <- 32,} & Montgomery parameters: $k=32$, $R=2^{32}$, $q^{-1}\bmod R$, and $R^{-1}\bmod q$. \\
+Fq.\allowbreak{}ec:\allowbreak{}23 & op & {\ttfamily\scriptsize op q    <- q,} & Prime modulus $q=64513$. \\
+Fq.\allowbreak{}ec:\allowbreak{}24 & op & {\ttfamily\scriptsize op qinv <- 940508161,} & Montgomery parameters: $k=32$, $R=2^{32}$, $q^{-1}\bmod R$, and $R^{-1}\bmod q$. \\
+Fq.\allowbreak{}ec:\allowbreak{}25 & op & {\ttfamily\scriptsize op Rinv <- 50386} & Montgomery parameters: $k=32$, $R=2^{32}$, $q^{-1}\bmod R$, and $R^{-1}\bmod q$. \\
+Fq.\allowbreak{}ec:\allowbreak{}38 & lemma & {\ttfamily\scriptsize lemma smod\_W32 a :} & Compatibility of centered modular representatives with Jasmin word signedness. \\
+Fq.\allowbreak{}ec:\allowbreak{}42 & lemma & {\ttfamily\scriptsize lemma smod\_W64 a :} & Compatibility of centered modular representatives with Jasmin word signedness. \\
+Fq.\allowbreak{}ec:\allowbreak{}52 & lemma & {\ttfamily\scriptsize lemma aux32\_0 x :} & Bit-level arithmetic-shift fact used to identify machine shifts with signed integer division. \\
+Fq.\allowbreak{}ec:\allowbreak{}93 & lemma & {\ttfamily\scriptsize lemma aux32\_1 x :} & Bit-level arithmetic-shift fact used to identify machine shifts with signed integer division. \\
+Fq.\allowbreak{}ec:\allowbreak{}134 & lemma & {\ttfamily\scriptsize lemma aux32\_2 (a : W64.t) :} & Bit-level arithmetic-shift fact used to identify machine shifts with signed integer division. \\
+Fq.\allowbreak{}ec:\allowbreak{}155 & lemma & {\ttfamily\scriptsize lemma SAR\_sem32 (a : W64.t) :} & Bit-level arithmetic-shift fact used to identify machine shifts with signed integer division. \\
+Fq.\allowbreak{}ec:\allowbreak{}193 & lemma & {\ttfamily\scriptsize lemma montgomery\_reduce\_corr\_h \_a :} & Hoare/phoare theorem: Jasmin Montgomery reduction returns $\operatorname{SREDC}(a)$. \\
+Fq.\allowbreak{}ec:\allowbreak{}300 & lemma & {\ttfamily\scriptsize lemma montgomery\_reduce\_ll :} & Losslessness/termination of the corresponding deterministic Jasmin procedure. \\
+Fq.\allowbreak{}ec:\allowbreak{}303 & lemma & {\ttfamily\scriptsize lemma montgomery\_reduce\_corr \_a :} & Hoare/phoare theorem: Jasmin Montgomery reduction returns $\operatorname{SREDC}(a)$. \\
+Fq.\allowbreak{}ec:\allowbreak{}317 & lemma & {\ttfamily\scriptsize lemma fqmul\_corr\_h \_a \_b :} & Hoare/phoare theorem: Jasmin multiplication returns $\operatorname{SREDC}(ab)$. \\
+Fq.\allowbreak{}ec:\allowbreak{}471 & lemma & {\ttfamily\scriptsize lemma fqmul\_ll : islossless M.\_\_fqmul by proc; islossless.} & Losslessness/termination of the corresponding deterministic Jasmin procedure. \\
+Fq.\allowbreak{}ec:\allowbreak{}473 & lemma & {\ttfamily\scriptsize lemma fqmul\_corr \_a \_b :} & Hoare/phoare theorem: Jasmin multiplication returns $\operatorname{SREDC}(ab)$. \\
+Fq.\allowbreak{}ec:\allowbreak{}484 & op & {\ttfamily\scriptsize op bw32 (a : W32.t) (sz : int) =} & Signed-word bound predicate: $\mathtt{bw32}(w,b)\iff -2^b\le \operatorname{to\_sint}(w)<2^b$. \\
+Fq.\allowbreak{}ec:\allowbreak{}487 & lemma & {\ttfamily\scriptsize lemma exp\_max a b :} & Signed-word range theorem for addition/subtraction: bounds grow by at most one exponent. \\
+Fq.\allowbreak{}ec:\allowbreak{}494 & lemma & {\ttfamily\scriptsize lemma add\_corr (a b : W32.t) (asz bsz : int) :} & Signed-word range theorem for addition/subtraction: bounds grow by at most one exponent. \\
+Fq.\allowbreak{}ec:\allowbreak{}515 & lemma & {\ttfamily\scriptsize lemma sub\_corr (a b : W32.t) (asz bsz : int) :} & Signed-word range theorem for addition/subtraction: bounds grow by at most one exponent. \\
+GFq.\allowbreak{}ec:\allowbreak{}5 & op & {\ttfamily\scriptsize op q : int = 64513 axiomatized by qE.} & Field modulus $q=64513$. \\
+GFq.\allowbreak{}ec:\allowbreak{}9 & op & {\ttfamily\scriptsize op p <- q} & Total EasyCrypt function or predicate used by the NTT functional-correctness proof. \\
+GFq.\allowbreak{}ec:\allowbreak{}16 & op & {\ttfamily\scriptsize op as\_sint(x : coeff) = if (q-1) \%/ 2 < asint x then asint x - q else asint x.} & Centered representative $\operatorname{sint}(x)=asint(x)$ if $asint(x)\le(q-1)/2$, otherwise $asint(x)-q$. \\
+GFq.\allowbreak{}ec:\allowbreak{}21 & op & {\ttfamily\scriptsize op round(x : real) : int = floor (x + inv 2\%r).} & Nearest-integer map $\lfloor x+1/2\rfloor$. \\
+GFq.\allowbreak{}ec:\allowbreak{}24 & op & {\ttfamily\scriptsize op compress(d : int, x : coeff) : int = comp d (asint x)\%r \%\% 2\textasciicircum{}d.} & $\operatorname{compress}_d(x)=\lfloor asint(x)2^d/q+1/2\rfloor\bmod 2^d$. \\
+GFq.\allowbreak{}ec:\allowbreak{}27 & op & {\ttfamily\scriptsize op decompress(d : int, x : int) : coeff = incoeff (decomp d x\%r).} & $\operatorname{compress}_d(x)=\lfloor asint(x)2^d/q+1/2\rfloor\bmod 2^d$. \\
+Hpoly\_extract.\allowbreak{}ec:\allowbreak{}186 & module & {\ttfamily\scriptsize module M = \{} & Extracted Jasmin transition system; its procedures act on concrete machine states and byte arrays. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}6 & lemma & {\ttfamily\scriptsize lemma div\_pow x n m : 0 <= m <= n => 0 < x => x\textasciicircum{}n \%/ x\textasciicircum{}m = x\textasciicircum{}(n - m).} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}14 & lemma & {\ttfamily\scriptsize lemma pow\_div1 b k :} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}18 & lemma & {\ttfamily\scriptsize lemma pow\_div2 b k :} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}22 & lemma & {\ttfamily\scriptsize lemma div\_mulr p q m : m \%| q => (p * q) \%/ m = p * (q \%/ m).} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}28 & lemma & {\ttfamily\scriptsize lemma div\_mull p q m : m \%| p => (p * q) \%/ m = (p \%/ m) * q.} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}33 & lemma & {\ttfamily\scriptsize lemma dvdNz (m n : int) : ((-m) \%| n) = (m \%| n).} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}36 & lemma & {\ttfamily\scriptsize lemma div\_mul p m n : 0 <= m => m \%| p => p \%/ (m * n) = p \%/ m \%/ n.} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}42 & lemma & {\ttfamily\scriptsize lemma divM\_mul p q m n :} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}55 & op & {\ttfamily\scriptsize op k : \{ int | 2 < k \} as gt2\_k.} & Word exponent $k$; the Montgomery radix is $R=2^k$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}57 & op & {\ttfamily\scriptsize op R = 2\textasciicircum{}k.} & Word exponent $k$; the Montgomery radix is $R=2^k$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}59 & lemma & {\ttfamily\scriptsize lemma dvd4R : 4 \%| R} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}64 & lemma & {\ttfamily\scriptsize lemma dvd2R : 2 \%| R.} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}69 & lemma & {\ttfamily\scriptsize lemma gt0\_R: 0 < R by apply: expr\_gt0.} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}72 & op & {\ttfamily\scriptsize op q: int.} & Total EasyCrypt function or predicate used by the NTT functional-correctness proof. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}77 & op & {\ttfamily\scriptsize op qinv : int.} & Integer inverse parameter satisfying $qq^{-1}\equiv1\pmod R$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}81 & op & {\ttfamily\scriptsize op Rinv : int.} & Integer inverse parameter satisfying $RR^{-1}\equiv1\pmod q$ or modulo $N$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}85 & op & {\ttfamily\scriptsize op smod (a b : int) =} & Centered representative congruent to $a\bmod b$ in $[-b/2,b/2)$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}90 & lemma & {\ttfamily\scriptsize lemma smod\_bnd a b :} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}94 & lemma & {\ttfamily\scriptsize lemma smod\_congr a b :  (smod a b) \%\% b = a \%\% b.} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}101 & lemma & {\ttfamily\scriptsize lemma smod\_sq t: smod (t \%/ R \%\% (R \textasciicircum{} 2)) R = smod (t \%/ R) R.} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}109 & lemma & {\ttfamily\scriptsize lemma wd\_bnd x : 0 <= x  \%\% (R*R) \%/ R < `| R |} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}112 & lemma & {\ttfamily\scriptsize lemma smod\_small x y:} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}130 & lemma & {\ttfamily\scriptsize lemma smod\_div x : smod (x * R) (R \textasciicircum{} 2) \%/ R = smod x  R.} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}143 & lemma & {\ttfamily\scriptsize lemma smod\_exists x y : exists k, smod x y = x + k * y.} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}150 & lemma & {\ttfamily\scriptsize lemma inrange a :  0 <= a < R \%/ 2 => a \%\% R = a by smt().} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}151 & lemma & {\ttfamily\scriptsize lemma outrange a :  - R\%/2 <= a < 0 => a \%\% R = R + a by smt(@IntDiv).} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}153 & lemma & {\ttfamily\scriptsize lemma sign\_comp a b: smod (a \%\%R + b \%\% R) R = smod (a + b) R} & Centered modular-representative theorem: bounds, congruence, or compatibility with addition. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}158 & op & {\ttfamily\scriptsize op SREDC (a: int) : int =} & Signed Montgomery reduction: output is congruent to $aR^{-1}\pmod q$ and lies in a signed interval. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}163 & lemma & {\ttfamily\scriptsize lemma SREDCp\_corr (a : int):} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}276 & op & {\ttfamily\scriptsize op k: int.} & Word exponent $k$; the Montgomery radix is $R=2^k$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}279 & op & {\ttfamily\scriptsize op R = 2\textasciicircum{}k.} & Word exponent $k$; the Montgomery radix is $R=2^k$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}281 & lemma & {\ttfamily\scriptsize lemma R\_gt0: 0 < R by smt(expr\_gt0).} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}284 & op & {\ttfamily\scriptsize op \_N: int.} & Odd modulus $N$ for generic REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}287 & op & {\ttfamily\scriptsize op \_N' : int.} & Montgomery inverse parameter $N'$ for REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}289 & op & {\ttfamily\scriptsize op Rinv : int.} & Integer inverse parameter satisfying $RR^{-1}\equiv1\pmod q$ or modulo $N$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}293 & op & {\ttfamily\scriptsize op REDC' (T: int) : int =} & Classical Montgomery reduction $T\mapsto TR^{-1}\pmod N$ with conditional subtraction. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}297 & lemma & {\ttfamily\scriptsize lemma aux\_divR T:} & Integer divisibility/power lemma justifying Montgomery arithmetic and radix manipulation. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}308 & lemma & {\ttfamily\scriptsize lemma  REDC'\_congr T:} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}322 & lemma & {\ttfamily\scriptsize lemma  REDC'\_bnds T n:} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}349 & op & {\ttfamily\scriptsize op REDC T = let t = REDC' T in if \_N <= t then t-\_N else t.} & Odd modulus $N$ for generic REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}351 & lemma & {\ttfamily\scriptsize lemma REDC\_corr T:} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}368 & op & {\ttfamily\scriptsize op r: int.} & Total EasyCrypt function or predicate used by the NTT functional-correctness proof. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}372 & op & {\ttfamily\scriptsize op w : int.} & Total EasyCrypt function or predicate used by the NTT functional-correctness proof. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}376 & op & {\ttfamily\scriptsize op \_N: int.} & Odd modulus $N$ for generic REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}379 & op & {\ttfamily\scriptsize op k <- w,} & Word exponent $k$; the Montgomery radix is $R=2^k$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}380 & op & {\ttfamily\scriptsize op \_N <- \_N.} & Odd modulus $N$ for generic REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}383 & op & {\ttfamily\scriptsize op REDCk : int -> int -> int.} & Iterated Montgomery reduction with $r$ limbs of width $w$. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}389 & lemma & {\ttfamily\scriptsize lemma REDCk\_corr r T:} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}415 & op & {\ttfamily\scriptsize op REDC T = let t = REDCk r T in if \_N <= t then t-\_N else t.} & Odd modulus $N$ for generic REDC. \\
+Montgomery.\allowbreak{}ec:\allowbreak{}417 & lemma & {\ttfamily\scriptsize lemma REDC\_corr T:} & Montgomery correctness: output is bounded and congruent to multiplication by $R^{-1}$ modulo the target modulus. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}12 & type & {\ttfamily\scriptsize type poly = coeff Array256.t.} & $\mathtt{poly}=\mathbb F_q^{256}$; when multiplication is present, the same carrier is read as $\mathbb F_q[X]/(X^{256}+1)$. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}14 & op & {\ttfamily\scriptsize op jasmin\_ntt\_full\_post (rp : BArray1024.t) (p : poly) =} & Final forward postcondition: decoded output is $F(p)$ with the output bound. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}17 & op & {\ttfamily\scriptsize op jasmin\_invntt\_full\_post (rp : BArray1024.t) (p : poly) =} & Final inverse postcondition: decoded output is $R\cdot F^{-1}(p)$ with the output bound. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}21 & lemma & {\ttfamily\scriptsize lemma full\_ntt\_post\_from\_core rp r p :} & Composition theorem: core Jasmin refinement plus algebraic loop theorem implies the final postcondition. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}27 & lemma & {\ttfamily\scriptsize lemma full\_invntt\_post\_from\_core rp r p :} & Composition theorem: core Jasmin refinement plus algebraic loop theorem implies the final postcondition. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}33 & lemma & {\ttfamily\scriptsize lemma jasmin\_ntt\_full\_from\_core\_and\_alg p :} & Composition theorem: core Jasmin refinement plus algebraic loop theorem implies the final postcondition. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}46 & lemma & {\ttfamily\scriptsize lemma jasmin\_ntt\_full p :} & End-to-end Hoare theorem for a Jasmin NTT entry point. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}53 & lemma & {\ttfamily\scriptsize lemma jasmin\_poly\_ntt\_jazz\_full p :} & End-to-end Hoare theorem for a Jasmin NTT entry point. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}60 & lemma & {\ttfamily\scriptsize lemma jasmin\_invntt\_full\_from\_core\_and\_alg p :} & Composition theorem: core Jasmin refinement plus algebraic loop theorem implies the final postcondition. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}73 & lemma & {\ttfamily\scriptsize lemma jasmin\_invntt\_full p :} & End-to-end Hoare theorem for a Jasmin NTT entry point. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}80 & lemma & {\ttfamily\scriptsize lemma jasmin\_poly\_invntt\_jazz\_full p :} & End-to-end Hoare theorem for a Jasmin NTT entry point. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}87 & lemma & {\ttfamily\scriptsize lemma haetae\_jasmin\_ntt\_correct p :} & Final forward functional-correctness theorem: exported Jasmin computes $F$. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}95 & lemma & {\ttfamily\scriptsize lemma haetae\_jasmin\_invntt\_correct p :} & Final inverse functional-correctness theorem: exported Jasmin computes $R\cdot F^{-1}$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}11 & type & {\ttfamily\scriptsize type poly = coeff Array256.t.} & $\mathtt{poly}=\mathbb F_q^{256}$; when multiplication is present, the same carrier is read as $\mathbb F_q[X]/(X^{256}+1)$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}13 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_512 :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}22 & lemma & {\ttfamily\scriptsize lemma incoeff\_m1 :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}28 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_512\_mul n :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}34 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_dvd512 e :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}43 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_mod512 e n :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}50 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_m256 :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}57 & lemma & {\ttfamily\scriptsize lemma pow2\_div k :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}68 & lemma & {\ttfamily\scriptsize lemma div256\_pow2 k :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}81 & lemma & {\ttfamily\scriptsize lemma pow2S k :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}86 & lemma & {\ttfamily\scriptsize lemma div256\_pair\_range k bsj :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}104 & lemma & {\ttfamily\scriptsize lemma bsrev\_add\_pow2 k i :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}117 & lemma & {\ttfamily\scriptsize lemma bsrev\_stage\_index k ks :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}149 & lemma & {\ttfamily\scriptsize lemma zetas\_stage k ks :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}165 & lemma & {\ttfamily\scriptsize lemma bsrev\_extend\_zero m x :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}179 & lemma & {\ttfamily\scriptsize lemma bsrev\_extend\_one m x :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}204 & lemma & {\ttfamily\scriptsize lemma bsrev\_double m x :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}223 & lemma & {\ttfamily\scriptsize lemma bsrev\_double\_plus1 m x :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}242 & lemma & {\ttfamily\scriptsize lemma bsrev\_ones n :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}260 & lemma & {\ttfamily\scriptsize lemma bsrev\_zbase\_index k ks :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}313 & lemma & {\ttfamily\scriptsize lemma bsrev\_stage\_pair\_low k ks off :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}371 & lemma & {\ttfamily\scriptsize lemma bsrev\_stage\_pair\_high k ks off :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}439 & lemma & {\ttfamily\scriptsize lemma bsrev8\_low\_dvd k i :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}452 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_stage\_extra k i :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}472 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_low\_shift k start i :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}490 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_high\_shift k start i :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}524 & lemma & {\ttfamily\scriptsize lemma partial\_ntt\_split\_low p k start bsj :} & Partial-sum recurrence: a length-$2^{k+1}$ sum decomposes into two length-$2^k$ sums with the appropriate twiddle. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}568 & lemma & {\ttfamily\scriptsize lemma partial\_ntt\_split\_high p k start bsj :} & Partial-sum recurrence: a length-$2^{k+1}$ sum decomposes into two length-$2^k$ sums with the appropriate twiddle. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}609 & op & {\ttfamily\scriptsize op partial\_ntt\_spec (r p : poly, len start bsj : int) =} & Predicate equating one cell with $P_{\ell,s,b}(p)$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}613 & op & {\ttfamily\scriptsize op full\_stage\_spec (r p : poly, len : int) =} & Forward stage invariant: every cell stores its current partial NTT sum. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}619 & op & {\ttfamily\scriptsize op fwd\_old\_pair\_spec (r p : poly, k ks off : int) =} & Before-butterfly condition: two cells contain old length-$2^k$ partial sums. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}623 & op & {\ttfamily\scriptsize op fwd\_new\_pair\_spec (r p : poly, k ks off : int) =} & After-butterfly condition: two cells contain new length-$2^{k+1}$ partial sums. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}627 & op & {\ttfamily\scriptsize op fwd\_pair\_done (ks off ks' off' : int) =} & Lexicographic progress predicate for visited butterfly pairs. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}630 & op & {\ttfamily\scriptsize op fwd\_stage\_progress (r p : poly, k ks off : int) =} & Mixed invariant: visited pairs satisfy new specs, unvisited pairs old specs. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}639 & op & {\ttfamily\scriptsize op fwd\_low\_addr (k ks off : int) =} & Lower forward butterfly address $ks2^{8-k}+off$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}642 & op & {\ttfamily\scriptsize op fwd\_high\_addr (k ks off : int) =} & Upper forward butterfly address $ks2^{8-k}+off+2^{7-k}$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}645 & op & {\ttfamily\scriptsize op set2\_add\_mulr (p : poly, z : coeff, a b : int) =} & Forward butterfly update $(a,b)\mapsto(a+zb,a-zb)$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}648 & lemma & {\ttfamily\scriptsize lemma fwd\_high\_addrE k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}653 & lemma & {\ttfamily\scriptsize lemma fwd\_old\_low\_addr k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}670 & lemma & {\ttfamily\scriptsize lemma fwd\_old\_high\_addr k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}687 & lemma & {\ttfamily\scriptsize lemma fwd\_new\_low\_addr k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}698 & lemma & {\ttfamily\scriptsize lemma fwd\_new\_high\_addr k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}709 & lemma & {\ttfamily\scriptsize lemma block\_low\_div l x y :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}720 & lemma & {\ttfamily\scriptsize lemma block\_low\_mod l x y :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}730 & lemma & {\ttfamily\scriptsize lemma block\_high\_div l x y :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}741 & lemma & {\ttfamily\scriptsize lemma block\_high\_mod l x y :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}751 & lemma & {\ttfamily\scriptsize lemma fwd\_pair\_addr\_disjoint k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}842 & lemma & {\ttfamily\scriptsize lemma forward\_pair\_inputs k start bsj :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}866 & lemma & {\ttfamily\scriptsize lemma set2\_add\_mulr\_eq1 p z a b :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}875 & lemma & {\ttfamily\scriptsize lemma set2\_add\_mulr\_eq2 p z a b :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}886 & lemma & {\ttfamily\scriptsize lemma set2\_add\_mulr\_neq p z a b x :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}895 & lemma & {\ttfamily\scriptsize lemma set2\_add\_mulr\_assign (p : poly) (z : coeff) (a b : int) :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}909 & lemma & {\ttfamily\scriptsize lemma fwd\_addr\_ranges k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}935 & lemma & {\ttfamily\scriptsize lemma partial\_ntt\_spec\_neq\_update p r z len start bsj a b :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}946 & lemma & {\ttfamily\scriptsize lemma fwd\_old\_pair\_spec\_neq\_update p r z k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}985 & lemma & {\ttfamily\scriptsize lemma fwd\_new\_pair\_spec\_neq\_update p r z k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1024 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_init p r k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1059 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_old p r k ks off ks' off' :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1071 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_new p r k ks off ks' off' :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1083 & lemma & {\ttfamily\scriptsize lemma forward\_pair\_refines\_values p r k start bsj :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1145 & lemma & {\ttfamily\scriptsize lemma forward\_pair\_refines p r k start bsj :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1163 & lemma & {\ttfamily\scriptsize lemma forward\_nat\_pair\_refines p r k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1203 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_step p r k ks off :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1259 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_next\_block p r k ks :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1277 & lemma & {\ttfamily\scriptsize lemma div256\_pow2\_next k :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1291 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_progress\_finish p r k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1376 & lemma & {\ttfamily\scriptsize lemma pow2\_stage\_product k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1388 & lemma & {\ttfamily\scriptsize lemma pow2\_stage\_block k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1398 & lemma & {\ttfamily\scriptsize lemma fwd\_len\_div2\_next k :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1412 & op & {\ttfamily\scriptsize op fwd\_outer\_inv (p r zetas : poly, len zetasctr : int) =} & Hoare loop invariant connecting loop counters to the forward stage-progress predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1423 & op & {\ttfamily\scriptsize op fwd\_middle\_inv (p r zetas : poly, len start zetasctr : int) =} & Hoare loop invariant connecting loop counters to the forward stage-progress predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1433 & op & {\ttfamily\scriptsize op fwd\_inner\_inv} & Hoare loop invariant connecting loop counters to the forward stage-progress predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1447 & lemma & {\ttfamily\scriptsize lemma fwd\_outer\_inv\_init p :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1466 & lemma & {\ttfamily\scriptsize lemma fwd\_outer\_exit\_stage p r zetas len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1482 & lemma & {\ttfamily\scriptsize lemma fwd\_outer\_enter\_middle p r zetas len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1503 & lemma & {\ttfamily\scriptsize lemma fwd\_middle\_enter\_inner p r zetas len start zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1529 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_step\_set2 p r zetas len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1570 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_step\_array p r zetas len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1624 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_exit\_middle p r zetas len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1656 & lemma & {\ttfamily\scriptsize lemma fwd\_middle\_exit\_outer p r zetas len start zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1701 & lemma & {\ttfamily\scriptsize lemma full\_stage1\_init (p : poly) :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1714 & lemma & {\ttfamily\scriptsize lemma full\_stage256\_imp p r :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1726 & lemma & {\ttfamily\scriptsize lemma fwd\_outer\_exit\_full p r zetas len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1735 & lemma & {\ttfamily\scriptsize lemma ntt\_full\_ntt (p : poly) :} & Hoare theorem: imperative forward loop computes $F$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1760 & op & {\ttfamily\scriptsize op inv\_low\_addr (k ks off : int) =} & Lower inverse butterfly address $ks2^{k+1}+off$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1763 & op & {\ttfamily\scriptsize op inv\_high\_addr (k ks off : int) =} & Upper inverse butterfly address $ks2^{k+1}+off+2^k$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1766 & lemma & {\ttfamily\scriptsize lemma inv\_high\_addrE k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1771 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_blocks\_product k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1783 & lemma & {\ttfamily\scriptsize lemma inv\_pair\_inputs k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1802 & lemma & {\ttfamily\scriptsize lemma bsrev\_inv\_pair\_low k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1837 & lemma & {\ttfamily\scriptsize lemma bsrev\_inv\_pair\_high k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1876 & lemma & {\ttfamily\scriptsize lemma zetas\_inv\_stage k ks :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1917 & lemma & {\ttfamily\scriptsize lemma inv\_low\_twiddle\_factor k ks off :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1945 & lemma & {\ttfamily\scriptsize lemma inv\_high\_twiddle\_factor k ks off :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1986 & op & {\ttfamily\scriptsize op partial\_invntt (p : poly, len start bsj : int) =} & $Q_{\ell,s,b}(p)=\sum_{u=0}^{\ell-1}p_{b\ell+u}\zeta^{-(2\operatorname{brev}_8(b\ell+u)+1)s}$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1993 & op & {\ttfamily\scriptsize op partial\_invntt\_spec (r p : poly, len start bsj : int) =} & Predicate equating one cell with the inverse partial sum $Q_{\ell,s,b}(p)$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1996 & op & {\ttfamily\scriptsize op inv\_stage\_spec (r p : poly, len : int) =} & Inverse stage invariant: every cell stores its current inverse partial sum. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2002 & lemma & {\ttfamily\scriptsize lemma partial\_invntt\_split\_low p k off ks :} & Partial-sum recurrence: a length-$2^{k+1}$ sum decomposes into two length-$2^k$ sums with the appropriate twiddle. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2034 & lemma & {\ttfamily\scriptsize lemma partial\_invntt\_split\_high p k off ks :} & Partial-sum recurrence: a length-$2^{k+1}$ sum decomposes into two length-$2^k$ sums with the appropriate twiddle. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2135 & op & {\ttfamily\scriptsize op inv\_old\_pair\_spec (r p : poly, k ks off : int) =} & Before inverse butterfly: two cells contain old inverse partial sums. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2139 & op & {\ttfamily\scriptsize op inv\_new\_pair\_spec (r p : poly, k ks off : int) =} & After inverse butterfly: two cells contain merged inverse partial sums. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2143 & op & {\ttfamily\scriptsize op inv\_pair\_done (ks off ks' off' : int) =} & Lexicographic progress predicate for visited butterfly pairs. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2146 & op & {\ttfamily\scriptsize op inv\_stage\_progress (r p : poly, k ks off : int) =} & Mixed invariant for visited/unvisited inverse butterfly pairs. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2155 & op & {\ttfamily\scriptsize op set2\_inv\_mulr (p : poly, z : coeff, a b : int) =} & Inverse butterfly update $(a,b)\mapsto(a+b,z(a-b))$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2158 & lemma & {\ttfamily\scriptsize lemma inv\_pair\_addr\_disjoint k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2244 & lemma & {\ttfamily\scriptsize lemma set2\_inv\_mulr\_eq1 p z a b :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2255 & lemma & {\ttfamily\scriptsize lemma set2\_inv\_mulr\_eq2 p z a b :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2263 & lemma & {\ttfamily\scriptsize lemma set2\_inv\_mulr\_neq p z a b x :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2272 & lemma & {\ttfamily\scriptsize lemma set2\_inv\_mulr\_assign (p : poly) (z : coeff) (a b : int) :} & Array-update theorem for the mathematical butterfly update. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2278 & lemma & {\ttfamily\scriptsize lemma partial\_invntt\_spec\_neq\_update p r z len start bsj a b :} & Arithmetic side condition used in the stage-invariant proof. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2289 & lemma & {\ttfamily\scriptsize lemma inv\_old\_pair\_spec\_neq\_update p r z k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2334 & lemma & {\ttfamily\scriptsize lemma inv\_new\_pair\_spec\_neq\_update p r z k ks off ks' off' :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2379 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_init p r k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2404 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_old p r k ks off ks' off' :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2416 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_new p r k ks off ks' off' :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2428 & lemma & {\ttfamily\scriptsize lemma inverse\_pair\_refines\_values p r k ks off :} & Addressing and pair-refinement theorem identifying the two cells touched by a butterfly. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2472 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_step p r k ks off :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2528 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_next\_block p r k ks :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2546 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_progress\_finish p r k :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2589 & op & {\ttfamily\scriptsize op inv\_outer\_inv (p r zetas\_inv : poly, len zetasctr : int) =} & Hoare loop invariant for inverse stages and final $[256]^{-1}$ scaling. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2600 & op & {\ttfamily\scriptsize op inv\_middle\_inv (p r zetas\_inv : poly, len start zetasctr : int) =} & Hoare loop invariant for inverse stages and final $[256]^{-1}$ scaling. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2610 & op & {\ttfamily\scriptsize op inv\_inner\_inv} & Hoare loop invariant for inverse stages and final $[256]^{-1}$ scaling. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2624 & op & {\ttfamily\scriptsize op inv\_post\_inv (p r zetas\_inv : poly, j : int) =} & Hoare loop invariant for inverse stages and final $[256]^{-1}$ scaling. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2633 & lemma & {\ttfamily\scriptsize lemma inv\_stage1\_init (p : poly) :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2645 & lemma & {\ttfamily\scriptsize lemma inv\_outer\_inv\_init p :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2657 & lemma & {\ttfamily\scriptsize lemma inv\_outer\_enter\_middle p r zetas\_inv len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2678 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_enter\_inner p r zetas\_inv len start zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2707 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_step\_set2 p r zetas\_inv len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2748 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_step\_array p r zetas\_inv len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2830 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_step\_array\_wp p r zetas\_inv len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2852 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_exit\_middle p r zetas\_inv len start j zetasctr zeta\_ :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2885 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_exit\_outer p r zetas\_inv len start zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2934 & lemma & {\ttfamily\scriptsize lemma inv\_outer\_exit\_stage p r zetas\_inv len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2955 & lemma & {\ttfamily\scriptsize lemma inv\_outer\_exit\_post p r zetas\_inv len zetasctr :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}2977 & lemma & {\ttfamily\scriptsize lemma inv\_post\_step p r zetas\_inv j :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}3008 & lemma & {\ttfamily\scriptsize lemma zetas\_inv\_255 :} & Root-of-unity and bit-reversal algebra aligning loop twiddle indices with spectral exponents. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}3014 & lemma & {\ttfamily\scriptsize lemma inv\_post\_exit\_full p r zetas\_inv j :} & Loop-invariant theorem: initialization, preservation, or exit of a forward/inverse NTT stage predicate. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}3055 & lemma & {\ttfamily\scriptsize lemma invntt\_full\_invntt (p : poly) :} & Hoare theorem: imperative inverse loop computes $F^{-1}$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}10 & lemma & {\ttfamily\scriptsize lemma pow2\_8 :} & Concrete equality used to distinguish and evaluate NTT specifications. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}14 & lemma & {\ttfamily\scriptsize lemma bsrev8\_range\_256 n :} & Bit-reversal range or involution theorem over $[0,256)$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}21 & lemma & {\ttfamily\scriptsize lemma bsrev8\_involutive\_256 n :} & Bit-reversal range or involution theorem over $[0,256)$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}32 & op & {\ttfamily\scriptsize op partial\_ntt (p : poly, len start bsj : int) =} & $P_{\ell,s,b}(p)=\sum_{u=0}^{\ell-1}\zeta^{(2s+1)\operatorname{brev}_8(u)}p_{\operatorname{brev}_8(b\ell+u)}$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}39 & op & {\ttfamily\scriptsize op full\_ntt\_spec (r p : poly) =} & Extensional specification: $r_{\operatorname{brev}_8(s)}=P_{256,s,0}(p)$ for all $s$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}44 & op & {\ttfamily\scriptsize op full\_ntt (p : poly) : poly =} & $F(p)_i=\sum_{j=0}^{255}p_j\zeta^{(2\operatorname{brev}_8(i)+1)j}$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}50 & op & {\ttfamily\scriptsize op full\_invntt (p : poly) : poly =} & $F^{-1}(p)_i=[256]^{-1}\sum_{j=0}^{255}p_j\zeta^{-(2\operatorname{brev}_8(j)+1)i}$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}58 & op & {\ttfamily\scriptsize op full\_invntt\_spec (r p : poly) =} & Extensional inverse specification in bit-reversed output order. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}68 & lemma & {\ttfamily\scriptsize lemma full\_ntt\_spec\_imp p r :} & Extensional equality: the indexed forward specification equals the array function $F$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}101 & lemma & {\ttfamily\scriptsize lemma full\_invntt\_spec\_imp p r :} & Extensional equality: the indexed inverse specification equals $F^{-1}$. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}115 & lemma & {\ttfamily\scriptsize lemma one\_get0 :} & Concrete equality used to distinguish and evaluate NTT specifications. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}119 & lemma & {\ttfamily\scriptsize lemma one\_get\_neq0 i :} & Concrete equality used to distinguish and evaluate NTT specifications. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}129 & lemma & {\ttfamily\scriptsize lemma rq\_ntt\_one\_odd1 :} & Concrete equality used to distinguish and evaluate NTT specifications. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}138 & lemma & {\ttfamily\scriptsize lemma full\_ntt\_one\_odd1 :} & Concrete equality used to distinguish and evaluate NTT specifications. \\
+NTTFullSpec.\allowbreak{}ec:\allowbreak{}151 & lemma & {\ttfamily\scriptsize lemma rq\_ntt\_is\_not\_full\_ntt\_on\_one :} & Separates the Kyber-style split transform from the HAETAE full NTT target by a counterexample. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}12 & type & {\ttfamily\scriptsize type CR.t <- coeff,} & Carrier of the cloned commutative-ring/field theory, instantiated as $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}13 & op & {\ttfamily\scriptsize op CR.zeror <- Zq.zero,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}14 & op & {\ttfamily\scriptsize op CR.oner <- Zq.one,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}15 & op & {\ttfamily\scriptsize op CR.(+) <- Zq.(+),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}16 & op & {\ttfamily\scriptsize op CR.([ - ]) <- Zq.([-]),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}17 & op & {\ttfamily\scriptsize op CR.( * ) <- Zq.( * ),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}18 & op & {\ttfamily\scriptsize op CR.invr  <- Zq.inv,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}19 & op & {\ttfamily\scriptsize op CR.exp  <- Zq.exp,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}20 & op & {\ttfamily\scriptsize op CR.ofint <- ZqField.ofint,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}47 & module & {\ttfamily\scriptsize module NTT = \{} & Imperative transition system implementing the forward and inverse NTT loops over $\mathbb F_q^{256}$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}113 & lemma & {\ttfamily\scriptsize lemma ntt\_middle\_right start len j0 :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}135 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_right start len j0 :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}157 & lemma & {\ttfamily\scriptsize lemma inv\_outer\_progress len :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}181 & lemma & {\ttfamily\scriptsize lemma ntt\_init\_progress len0 :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}197 & lemma & {\ttfamily\scriptsize lemma ntt\_spec\_ll : islossless NTT.ntt.} & Losslessness/termination of the imperative EasyCrypt NTT loop. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}259 & lemma & {\ttfamily\scriptsize lemma invntt\_spec\_ll : islossless NTT.invntt.} & Losslessness/termination of the imperative EasyCrypt NTT loop. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}322 & op & {\ttfamily\scriptsize op perm256 ['t] (p : int -> int) (a : 't Array256.t) : 't Array256.t =} & Permutation action $a\mapsto(i\mapsto a_{p(i)})$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}325 & op & {\ttfamily\scriptsize op bsrev256 ['t] : 't Array256.t -> 't Array256.t =} & Permutation by $\operatorname{brev}_8$ on $\mathbb F_q^{256}$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}328 & op & {\ttfamily\scriptsize op R = incoeff Fq.SignedReductions.R.} & Field element $R=[2^{32}]_q$ used for Montgomery representation. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}331 & op & {\ttfamily\scriptsize op scale255 = incoeff (-252).} & Field element $[256]^{-1}=[-252]_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}333 & op & {\ttfamily\scriptsize op array256\_mont\_inv (p : coeff Array256.t) =} & Pointwise multiplication by $R$, used to cancel/expose Montgomery representation. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}336 & op & {\ttfamily\scriptsize op word\_to\_coeff (w : W32.t) : coeff =} & Word decoding $w\mapsto[\operatorname{to\_sint}(w)]_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}339 & op & {\ttfamily\scriptsize op barray256\_to\_poly (rp : BArray1024.t) : coeff Array256.t =} & Decoded polynomial $D(rp)_i=[\operatorname{to\_sint}(\operatorname{get32}(rp,i))]_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}342 & op & {\ttfamily\scriptsize op poly\_repr (rp : BArray1024.t) (p : coeff Array256.t) : bool =} & Representation predicate $D(rp)=p$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}345 & op & {\ttfamily\scriptsize op barray256\_bound (rp : BArray1024.t) (sz : int) : bool =} & Uniform per-coordinate signed-word bound. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}348 & op & {\ttfamily\scriptsize op poly\_repr\_bound (rp : BArray1024.t) (p : coeff Array256.t) (sz : int) : bool =} & $D(rp)=p$ and every word satisfies the signed bound. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}351 & lemma & {\ttfamily\scriptsize lemma bw32\_weaken (w : W32.t) sz1 sz2 :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}363 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_weaken rp sz1 sz2 :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}372 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_repr rp p sz :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}377 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_bound rp p sz :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}382 & lemma & {\ttfamily\scriptsize lemma barray256\_to\_polyE rp i :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}390 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_get rp p i :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}400 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_get rp p sz i :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}412 & lemma & {\ttfamily\scriptsize lemma barray256\_to\_poly\_set32E rp i w j :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}439 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_set32 rp p i w :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}451 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_set32 rp i w sz :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}470 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_set32 rp p i w sz :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}483 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_of\_int z :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}491 & lemma & {\ttfamily\scriptsize lemma w32\_q\_to\_sint :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}497 & lemma & {\ttfamily\scriptsize lemma w32\_negq\_to\_sint :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}503 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_small z :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}518 & lemma & {\ttfamily\scriptsize lemma incoeff\_signed\_repr z :} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}527 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_repr z :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}536 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_neg16505 :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}542 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_26964 :} & Representation theorem connecting W32/byte-array updates with $\mathbb F_q^{256}$ values and signed bounds. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}555 & lemma & {\ttfamily\scriptsize lemma unit\_zroot : Zq.unit zroot.} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}558 & lemma & {\ttfamily\scriptsize lemma inv\_zroot : Zq.inv zroot = incoeff 6209.} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}565 & op & {\ttfamily\scriptsize op zetas\_inv : coeff Array256.t =} & Inverse twiddle table: powers of $\zeta$ in inverse loop order, with final entry $[256]^{-1}$ in Montgomery form. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}569 & lemma & {\ttfamily\scriptsize lemma zetas\_invE: zetas\_inv = Array256.of\_list witness} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}622 & lemma & {\ttfamily\scriptsize lemma scale255E :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}631 & lemma & {\ttfamily\scriptsize lemma unit\_R :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}637 & lemma & {\ttfamily\scriptsize lemma inv\_R :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}649 & lemma & {\ttfamily\scriptsize lemma zetas\_inv\_vals : array256\_mont\_inv zetas\_inv =} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}697 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_255\_get32E :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}706 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_255\_wordE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}713 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_poly\_vals i :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}730 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_get i :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}739 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_polyE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}753 & lemma & {\ttfamily\scriptsize lemma zetas\_inv\_255\_montE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}765 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_255\_scaleE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}772 & op & {\ttfamily\scriptsize op array256\_mont (p : coeff Array256.t) =} & Pointwise Montgomery scaling map on $\mathbb F_q^{256}$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}781 & op & {\ttfamily\scriptsize op zetas : coeff Array256.t =} & Forward twiddle table: powers of $\zeta$ in forward loop order. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}784 & lemma & {\ttfamily\scriptsize lemma zetasE:} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}835 & lemma & {\ttfamily\scriptsize lemma zetas\_vals : array256\_mont zetas =} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}876 & lemma & {\ttfamily\scriptsize lemma jzetas\_1\_poly :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}885 & lemma & {\ttfamily\scriptsize lemma jzetas\_1\_word\_montE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}892 & lemma & {\ttfamily\scriptsize lemma jzetas\_1\_get32E :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}900 & lemma & {\ttfamily\scriptsize lemma jzetas\_1\_get32dE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}908 & lemma & {\ttfamily\scriptsize lemma jzetas\_polyE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}935 & lemma & {\ttfamily\scriptsize lemma jzetas\_poly\_vals i :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}946 & lemma & {\ttfamily\scriptsize lemma jzetas\_get i :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}954 & lemma & {\ttfamily\scriptsize lemma zetas\_1\_montE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}960 & lemma & {\ttfamily\scriptsize lemma jzetas\_1E :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}967 & lemma & {\ttfamily\scriptsize lemma jzetas\_1\_wordE :} & Twiddle-table, root-of-unity, or Montgomery-scaling equality in $\mathbb F_q$. \\
+NTT\_Fq.\allowbreak{}ec:\allowbreak{}974 & lemma & {\ttfamily\scriptsize lemma exp\_zroot\_256 : Zq.exp zroot 256 = incoeff (-1).} & Loop-index arithmetic or representation theorem for the imperative NTT model. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}21 & lemma & {\ttfamily\scriptsize lemma int\_shr1\_div2 x :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}29 & lemma & {\ttfamily\scriptsize lemma int\_shl1\_mul2 x :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}35 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_add (a b : W32.t) (asz bsz : int) :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}57 & lemma & {\ttfamily\scriptsize lemma word\_to\_coeff\_sub (a b : W32.t) (asz bsz : int) :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}79 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_bounds s t asz tsz :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}93 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_bounds t0 coeff asz bsz :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}107 & lemma & {\ttfamily\scriptsize lemma unit\_R\_ref : Zq.unit NTT\_Fq.R.} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}112 & lemma & {\ttfamily\scriptsize lemma inv\_R\_ref :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}121 & lemma & {\ttfamily\scriptsize lemma array256\_mont\_get p i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}129 & lemma & {\ttfamily\scriptsize lemma mont\_cancel p i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}140 & lemma & {\ttfamily\scriptsize lemma jzetas\_get\_cancel i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}151 & lemma & {\ttfamily\scriptsize lemma array256\_mont\_inv\_get p i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}159 & lemma & {\ttfamily\scriptsize lemma mont\_inv\_cancel p i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}170 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_get\_cancel i :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}182 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_255\_scale\_cancel :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}189 & lemma & {\ttfamily\scriptsize lemma fqmul\_bw32\_16 aa bb :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}209 & lemma & {\ttfamily\scriptsize lemma fqmul\_word\_to\_coeff\_mul aa bb :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}230 & lemma & {\ttfamily\scriptsize lemma fqmul\_word\_to\_coeff\_mul\_h aa bb :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}252 & lemma & {\ttfamily\scriptsize lemma fqmul\_word\_to\_coeff\_mul\_bound\_h aa bb :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}279 & lemma & {\ttfamily\scriptsize lemma fqmul\_word\_to\_coeff\_mul\_bound\_ph aa bb :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}290 & op & {\ttfamily\scriptsize op barray256\_bound\_by (rp : BArray1024.t) (bd : int -> int) : bool =} & Pointwise signed-word bound with index-dependent exponent $bd(i)$, combined with representation when needed. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}293 & op & {\ttfamily\scriptsize op poly\_repr\_bound\_by} & Pointwise signed-word bound with index-dependent exponent $bd(i)$, combined with representation when needed. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}297 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_get rp bd i :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}303 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_weaken rp bd1 bd2 :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}313 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_set32 rp bd i w :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}332 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_set32\_change rp bd bd' i w :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}354 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_by\_repr rp p bd :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}359 & lemma & {\ttfamily\scriptsize lemma poly\_repr\_bound\_by\_bound rp p bd :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}364 & lemma & {\ttfamily\scriptsize lemma fqmul\_product\_bound\_16\_24 a b :} & Jasmin multiplication refinement: decoded result equals field multiplication/Montgomery product and preserves bounds. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}375 & lemma & {\ttfamily\scriptsize lemma jzetas\_bound16 i :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}388 & lemma & {\ttfamily\scriptsize lemma jzetas\_inv\_bound16 i :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}401 & op & {\ttfamily\scriptsize op const\_bound (sz : int) : int -> int = fun \_ => sz.} & Constant bound function $i\mapsto sz$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}403 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_const rp sz :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}408 & lemma & {\ttfamily\scriptsize lemma barray256\_bound\_by\_const\_bound rp sz :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}413 & op & {\ttfamily\scriptsize op fwd\_len\_ok (len : int) : bool =} & Permitted loop length in the Jasmin loop schedule. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}417 & op & {\ttfamily\scriptsize op fwd\_stage\_bound (len : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}427 & op & {\ttfamily\scriptsize op fwd\_zbase (len : int) : int =} & Affine base index into the Jasmin twiddle table. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}437 & op & {\ttfamily\scriptsize op fwd\_middle\_bound (sz start i : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}440 & op & {\ttfamily\scriptsize op fwd\_inner\_bound (sz len start j i : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}445 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_bound\_range len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}450 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_bound\_pos len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}455 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_bound\_lt31 len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}460 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_bound\_ge16 len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}465 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_next len :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}471 & lemma & {\ttfamily\scriptsize lemma fwd\_len\_next\_ok len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}477 & lemma & {\ttfamily\scriptsize lemma fwd\_zbase\_next len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}483 & lemma & {\ttfamily\scriptsize lemma fwd\_zbase\_range len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}488 & lemma & {\ttfamily\scriptsize lemma fwd\_read\_range len start zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}496 & lemma & {\ttfamily\scriptsize lemma fwd\_block\_end\_bound len start zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}504 & lemma & {\ttfamily\scriptsize lemma fwd\_stage\_zbase\_exit len zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}511 & lemma & {\ttfamily\scriptsize lemma fwd\_middle\_to\_inner sz len start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}515 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_current sz len start j :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}525 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_weaken\_unchanged sz len start j k :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}536 & lemma & {\ttfamily\scriptsize lemma fwd\_inner\_exit\_to\_middle sz len start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}570 & lemma & {\ttfamily\scriptsize lemma fwd\_middle\_exit\_const sz start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}576 & lemma & {\ttfamily\scriptsize lemma fwd\_middle\_start\_const sz i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}580 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}612 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product\_bound\_h} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}633 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product\_bound\_ph} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}653 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product\_bound\_call\_h} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}686 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product\_bound\_call\_ph} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}704 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_value} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}728 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_store} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}776 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_store\_bound} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}817 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_store\_bound\_by} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}866 & lemma & {\ttfamily\scriptsize lemma forward\_spec\_updateE (p : coeff Array256.t) j len t :} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}878 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_step\_bound\_by} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}922 & lemma & {\ttfamily\scriptsize lemma forward\_twiddle\_product\_bound\_from\_inner} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}956 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_repr} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}985 & lemma & {\ttfamily\scriptsize lemma forward\_butterfly\_step} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1014 & op & {\ttfamily\scriptsize op inv\_len\_ok (len : int) : bool =} & Permitted loop length in the Jasmin loop schedule. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1019 & op & {\ttfamily\scriptsize op inv\_stage\_bound (len : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1029 & op & {\ttfamily\scriptsize op inv\_zbase (len : int) : int =} & Affine base index into the Jasmin twiddle table. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1039 & op & {\ttfamily\scriptsize op inv\_middle\_bound (sz start i : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1042 & op & {\ttfamily\scriptsize op inv\_inner\_bound (sz len start j i : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1047 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_bound\_range len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1052 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_bound\_pos len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1057 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_bound\_lt31 len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1062 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_bound\_ge16 len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1067 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_next len :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1073 & lemma & {\ttfamily\scriptsize lemma inv\_len\_next\_ok len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1079 & lemma & {\ttfamily\scriptsize lemma inv\_zbase\_range len :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1084 & lemma & {\ttfamily\scriptsize lemma inv\_read\_range len start zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1092 & lemma & {\ttfamily\scriptsize lemma inv\_block\_end\_bound len start zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1100 & lemma & {\ttfamily\scriptsize lemma inv\_stage\_zbase\_exit len zc :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1107 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_to\_inner sz len start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1111 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_current sz len start j :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1121 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_weaken\_unchanged sz len start j k :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1132 & lemma & {\ttfamily\scriptsize lemma inv\_inner\_exit\_to\_middle sz len start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1166 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_exit\_const sz start i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1172 & lemma & {\ttfamily\scriptsize lemma inv\_middle\_start\_const sz i :} & Jasmin-to-mathematics refinement lemma. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1176 & lemma & {\ttfamily\scriptsize lemma inverse\_spec\_updateE (p : coeff Array256.t) z j len :} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1191 & lemma & {\ttfamily\scriptsize lemma inverse\_twiddle\_product\_bound\_call\_h} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1214 & lemma & {\ttfamily\scriptsize lemma inverse\_twiddle\_product\_bound\_call\_ph} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1230 & lemma & {\ttfamily\scriptsize lemma inverse\_twiddle\_value} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1250 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_store} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1304 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_store\_bound} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1359 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_store\_bound\_by} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1417 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_step\_bound\_by} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1463 & lemma & {\ttfamily\scriptsize lemma inverse\_twiddle\_product\_bound\_from\_inner} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1498 & lemma & {\ttfamily\scriptsize lemma inverse\_twiddle\_product\_call\_bound\_from\_inner} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1536 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_step\_full} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1577 & lemma & {\ttfamily\scriptsize lemma inverse\_butterfly\_repr} & One Jasmin butterfly preserves the decoded polynomial according to the forward or inverse partial-sum formula. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1607 & op & {\ttfamily\scriptsize op final\_mont\_array (p : coeff Array256.t) (j : int) : coeff Array256.t =} & Partially scaled output vector: first $j$ entries multiplied by the final Montgomery factor. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1610 & op & {\ttfamily\scriptsize op final\_bound (j i : int) : int =} & Index-dependent exponent bounding signed machine words during the corresponding loop phase. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1613 & lemma & {\ttfamily\scriptsize lemma final\_mont\_array\_start p :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1620 & lemma & {\ttfamily\scriptsize lemma final\_mont\_array\_exit p :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1631 & lemma & {\ttfamily\scriptsize lemma final\_mont\_array\_get\_raw p j :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1639 & lemma & {\ttfamily\scriptsize lemma final\_mont\_array\_setE p j :} & Montgomery/twiddle-table cancellation connecting Jasmin constants with $\mathbb F_q$ constants. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1662 & lemma & {\ttfamily\scriptsize lemma final\_bound\_start i :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1666 & lemma & {\ttfamily\scriptsize lemma final\_bound\_next\_unchanged j k :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1673 & lemma & {\ttfamily\scriptsize lemma inverse\_final\_product\_bound\_call\_h} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1698 & lemma & {\ttfamily\scriptsize lemma inverse\_final\_product\_bound\_call\_ph} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1713 & lemma & {\ttfamily\scriptsize lemma inverse\_final\_product\_bound\_from\_inv rp j :} & Signed-word bound or loop-index side condition for extracted Jasmin code. \\
+Rq.\allowbreak{}ec:\allowbreak{}17 & type & {\ttfamily\scriptsize type poly = coeff Array256.t.} & $\mathtt{poly}=\mathbb F_q^{256}$; when multiplication is present, the same carrier is read as $\mathbb F_q[X]/(X^{256}+1)$. \\
+Rq.\allowbreak{}ec:\allowbreak{}19 & op & {\ttfamily\scriptsize op zero : poly = Array256.create Zq.zero.} & Zero polynomial: $(0,\ldots,0)$. \\
+Rq.\allowbreak{}ec:\allowbreak{}20 & op & {\ttfamily\scriptsize op one : poly = zero.[0<-Zq.one].} & Zero polynomial: $(0,\ldots,0)$. \\
+Rq.\allowbreak{}ec:\allowbreak{}25 & op & {\ttfamily\scriptsize op (\&*) (pa pb : poly) : poly =} & Negacyclic product in $\mathbb F_q[X]/(X^{256}+1)$: coefficients wrap with sign because $X^{256}=-1$. \\
+Rq.\allowbreak{}ec:\allowbreak{}32 & op & {\ttfamily\scriptsize op (\&+) (pa pb : poly) : poly =} & Pointwise vector addition over $\mathbb F_q$. \\
+Rq.\allowbreak{}ec:\allowbreak{}35 & op & {\ttfamily\scriptsize op (\&-) (p : poly) : poly =  map Zq.([-]) p.} & Pointwise additive inverse over $\mathbb F_q$. \\
+Rq.\allowbreak{}ec:\allowbreak{}39 & op & {\ttfamily\scriptsize op compress\_poly(d : int, p : poly) : int Array256.t =  map (compress d) p.} & Pointwise coefficient compression on $\mathbb F_q^{256}$. \\
+Rq.\allowbreak{}ec:\allowbreak{}41 & op & {\ttfamily\scriptsize op decompress\_poly(d : int, p : int Array256.t) : poly =  map (decompress d) p.} & Pointwise coefficient compression on $\mathbb F_q^{256}$. \\
+Rq.\allowbreak{}ec:\allowbreak{}61 & type & {\ttfamily\scriptsize type  CR.t     <- coeff,} & Carrier of the cloned commutative-ring/field theory, instantiated as $\mathbb F_q$. \\
+Rq.\allowbreak{}ec:\allowbreak{}62 & op & {\ttfamily\scriptsize op  CR.zeror <- Zq.zero,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}63 & op & {\ttfamily\scriptsize op  CR.oner  <- Zq.one,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}64 & op & {\ttfamily\scriptsize op  CR.(+)   <- Zq.(+),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}65 & op & {\ttfamily\scriptsize op  CR.([-]) <- Zq.([-]),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}66 & op & {\ttfamily\scriptsize op  CR.( * ) <- Zq.( * ),} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}67 & op & {\ttfamily\scriptsize op  CR.invr  <- Zq.inv,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}68 & op & {\ttfamily\scriptsize op  CR.ofint <- ZqRing.ofint,} & Structure map of $\mathbb F_q$: $0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, or integer embedding. \\
+Rq.\allowbreak{}ec:\allowbreak{}85 & op & {\ttfamily\scriptsize op zroot = incoeff 426.} & Primitive root used by the NTT formulas: $\zeta=[426]_q$. \\
+Rq.\allowbreak{}ec:\allowbreak{}87 & op & {\ttfamily\scriptsize op br = BitEncoding.BitReverse.bsrev 8.} & Eight-bit reversal map $\operatorname{brev}_8$. \\
+Rq.\allowbreak{}ec:\allowbreak{}89 & op & {\ttfamily\scriptsize op ntt(p : poly) = Array256.init (fun i =>} & Even/odd split transform over $128$ terms; recorded as not the final HAETAE full NTT target. \\
+Rq.\allowbreak{}ec:\allowbreak{}95 & op & {\ttfamily\scriptsize op invntt(p : poly) = Array256.init (fun i =>} & Inverse even/odd split transform with factor $128^{-1}$. \\
+Rq.\allowbreak{}ec:\allowbreak{}106 & op & {\ttfamily\scriptsize op cmplx\_mul (a :coeff * coeff, b : coeff * coeff, zzeta : coeff) : coeff * coeff =} & Degree-one product modulo $X^2-\zeta^e$: $(a_0+a_1X)(b_0+b_1X)$. \\
+Rq.\allowbreak{}ec:\allowbreak{}111 & op & {\ttfamily\scriptsize op basemul(a b : poly) :  poly = Array256.init (fun i =>} & Pointwise base multiplication in the split NTT domain. \\
+\bottomrule
+\end{longtable}
+
+\section*{Hoare, phoare, and equiv Occurrences}
+\tiny
+\begin{longtable}{L{0.11\textwidth}L{0.05\textwidth}L{0.38\textwidth}L{0.42\textwidth}}
+\toprule
+\textbf{Source} & \textbf{Kind} & \textbf{Exact EasyCrypt judgment line} & \textbf{Mathematical semantic reading}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Source} & \textbf{Kind} & \textbf{Exact EasyCrypt judgment line} & \textbf{Mathematical semantic reading}\\
+\midrule
+\endhead
+Fq.\allowbreak{}ec:\allowbreak{}194 & hoare & {\ttfamily\scriptsize hoare [M.\_\_montgomery\_reduce :} & Hoare judgment for $\operatorname{SREDC}$. \\
+Fq.\allowbreak{}ec:\allowbreak{}304 & phoare & {\ttfamily\scriptsize phoare [M.\_\_montgomery\_reduce :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+Fq.\allowbreak{}ec:\allowbreak{}318 & hoare & {\ttfamily\scriptsize hoare [M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+Fq.\allowbreak{}ec:\allowbreak{}474 & phoare & {\ttfamily\scriptsize phoare [M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}34 & hoare & {\ttfamily\scriptsize hoare [NTT\_Fq.NTT.ntt :} & Hoare judgment that the imperative forward loop computes $F$. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}36 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_poly\_ntt :} & Hoare judgment for the forward Jasmin entry point: decoded output is $F(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}47 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_poly\_ntt :} & Hoare judgment for the forward Jasmin entry point: decoded output is $F(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}54 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.poly\_ntt\_jazz :} & Hoare judgment for the forward Jasmin entry point: decoded output is $F(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}61 & hoare & {\ttfamily\scriptsize hoare [NTT\_Fq.NTT.invntt :} & Hoare judgment that the imperative inverse loop computes $F^{-1}$. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}63 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_poly\_invntt :} & Hoare judgment for the inverse Jasmin entry point: decoded output is $R\cdot F^{-1}(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}74 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_poly\_invntt :} & Hoare judgment for the inverse Jasmin entry point: decoded output is $R\cdot F^{-1}(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}81 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.poly\_invntt\_jazz :} & Hoare judgment for the inverse Jasmin entry point: decoded output is $R\cdot F^{-1}(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}88 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.poly\_ntt\_jazz :} & Hoare judgment for the forward Jasmin entry point: decoded output is $F(p)$ with bounds. \\
+NTTEndToEnd.\allowbreak{}ec:\allowbreak{}96 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.poly\_invntt\_jazz :} & Hoare judgment for the inverse Jasmin entry point: decoded output is $R\cdot F^{-1}(p)$ with bounds. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}1736 & hoare & {\ttfamily\scriptsize hoare [NTT\_Fq.NTT.ntt :} & Hoare judgment that the imperative forward loop computes $F$. \\
+NTTFullAlgebra.\allowbreak{}ec:\allowbreak{}3056 & hoare & {\ttfamily\scriptsize hoare [NTT\_Fq.NTT.invntt :} & Hoare judgment that the imperative inverse loop computes $F^{-1}$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}191 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}211 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}231 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}253 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}280 & phoare & {\ttfamily\scriptsize phoare [Hpoly\_extract.M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}589 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}621 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}642 & phoare & {\ttfamily\scriptsize phoare [Hpoly\_extract.M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}655 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}688 & phoare & {\ttfamily\scriptsize phoare [Hpoly\_extract.M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1193 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1216 & phoare & {\ttfamily\scriptsize phoare [Hpoly\_extract.M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1675 & hoare & {\ttfamily\scriptsize hoare [Hpoly\_extract.M.\_\_fqmul :} & Hoare judgment for Montgomery field multiplication. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1700 & phoare & {\ttfamily\scriptsize phoare [Hpoly\_extract.M.\_\_fqmul :} & Probability-one Hoare judgment: the deterministic procedure terminates and satisfies the postcondition with probability $1$. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1737 & equiv & {\ttfamily\scriptsize equiv poly\_ntt\_jazz\_ref :} & Relational program equality/refinement: related inputs lead to related outputs. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1746 & equiv & {\ttfamily\scriptsize equiv poly\_invntt\_jazz\_ref :} & Relational program equality/refinement: related inputs lead to related outputs. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}1755 & equiv & {\ttfamily\scriptsize equiv poly\_ntt\_core\_ref :} & Relational program equality/refinement: related inputs lead to related outputs. \\
+RefJasminNTT.\allowbreak{}ec:\allowbreak{}2083 & equiv & {\ttfamily\scriptsize equiv poly\_invntt\_core\_ref :} & Relational program equality/refinement: related inputs lead to related outputs. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

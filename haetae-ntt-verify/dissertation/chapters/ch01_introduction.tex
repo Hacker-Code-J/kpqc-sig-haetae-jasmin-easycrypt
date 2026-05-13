@@ -1,0 +1,186 @@
+%==============================================================================%
+% Chapter 1 – Introduction
+%==============================================================================%
+
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{Motivation}
+
+The threat posed by large-scale quantum computers to today's public-key
+infrastructure is no longer a theoretical curiosity.  Shor's algorithm reduces
+the security of RSA, DSA, and elliptic-curve schemes to polynomial time once a
+sufficiently powerful quantum computer is available~\cite{Shor1994}.  In
+response, the U.S.\ National Institute of Standards and Technology (NIST) ran
+a multi-year post-quantum cryptography standardisation project, selecting four
+algorithms for standardisation in 2022--2024~\cite{NIST2022}, while the Korean
+Cryptography Module Validation Programme (KPQC) is pursuing its own national
+standards~\cite{KPQC2022}.
+
+\haetae{}~\cite{HAETAE2022} is one of the KPQC signature finalists.  It is a
+lattice-based scheme whose security reduces to the Decisional Module
+Short Integer Solution (DMSIS) hardness assumption over module lattices.  Like
+all modern lattice-based schemes, \haetae{} relies on efficient polynomial
+multiplication modulo $X^{256}+1$ in the ring $\Z_q[X]/(X^{256}+1)$, which
+in practice is implemented via the \emph{Number-Theoretic Transform} (NTT).
+The NTT reduces an $O(n^2)$ schoolbook convolution to $O(n \log n)$ operations
+and is the dominant computational primitive in the scheme.
+
+For a cryptographic standard to be trustworthy, correctness proofs cannot stop
+at pen-and-paper mathematics.  History has shown that hand-verified
+implementations harbour subtle bugs: off-by-one errors in loop bounds,
+incorrect twiddle factor tables, wrong modular arithmetic, or mishandled
+Montgomery scaling can silently produce wrong outputs while passing standard
+test vectors~\cite{BerBuc2017}.  This dissertation takes the position that
+\emph{machine-checked} formal proofs, linking every line of executable code to
+its abstract mathematical specification, are the appropriate gold standard for
+cryptographic primitives in post-quantum standards.
+
+\section{Problem Statement}
+
+We address the following problem:
+
+\begin{quote}
+  \textit{Prove, in a machine-checkable formal system, that the \jasmin{}
+  implementation of the NTT and inverse-NTT in \haetae{} is functionally
+  correct with respect to the abstract mathematical specification of the
+  negacyclic NTT over $\Z_q[X]/(X^{256}+1)$.}
+\end{quote}
+
+The challenge is to bridge three distinct abstraction levels:
+
+\begin{enumerate}
+  \item \textbf{Low-level word arithmetic.}  The \jasmin{} source is compiled
+        to x86-64 assembly and works with 32-bit and 64-bit machine words.
+        Correctness at this level means proving arithmetic identities modulo
+        $2^{32}$ and establishing bounds (e.g., that an intermediate product
+        fits in a 64-bit register without overflow).
+
+  \item \textbf{Algorithmic (loop) level.}  The Cooley--Tukey butterfly
+        algorithm is expressed as a nested three-loop structure with eight
+        stages.  Correctness here means showing that after all loops terminate,
+        the array holds the intended Fourier coefficients, using loop invariants
+        expressed in terms of partial NTT computations.
+
+  \item \textbf{Mathematical (spectral) level.}  The NTT is a linear map
+        $\Z_q^{256} \to \Z_q^{256}$ defined by evaluation at specific powers
+        of a primitive $512$th root of unity.  Correctness here means proving
+        that the algorithmic output equals the evaluation formula, and that the
+        inverse NTT is its exact algebraic inverse.
+\end{enumerate}
+
+Each layer requires different mathematical machinery: modular arithmetic
+and bit-vector identities at level~1, loop invariants and array
+relational assertions at level~2, and field theory with primitive roots at
+level~3.  Composing all three in a single proof assistant is the central
+technical challenge.
+
+\section{Tools and Methodology}
+
+We use two mature high-assurance tools:
+
+\paragraph{\jasmin{}~\cite{Almeida2017}.}
+A domain-specific programming language and compiler designed for
+high-assurance cryptographic implementations.  \jasmin{} programs are compiled
+to provably correct x86-64 assembly and simultaneously admit extraction into
+the \easycrypt{} proof assistant as first-class program modules.  The language
+provides explicit register and memory annotations that remove ambiguity from
+the compiler's optimisation decisions.
+
+\paragraph{\easycrypt{}~\cite{Barthe2011,Barthe2013}.}
+A proof assistant built around the probabilistic Relational Hoare Logic
+($\pRHL$) calculus, designed specifically for reasoning about cryptographic
+constructions.  An \easycrypt{} \emph{program logic} allows Hoare-style
+reasoning over both deterministic and probabilistic procedures.  The ambient
+logic is a dependent type theory supporting classical higher-order reasoning,
+enabling rich algebraic developments (ring theory, field theory, group theory)
+within the same tool.
+
+Our proof strategy follows the \emph{refinement} paradigm:
+\begin{align*}
+  \text{Jasmin} &\xrightarrow{\text{extraction}}
+  \text{EC module (RefJasminNTT)} \xrightarrow{\text{pRHL equivalence}}
+  \text{EC imperative spec (NTT\_Fq)} \\
+  &\xrightarrow{\text{loop invariant}}
+  \text{EC abstract spec (NTTFullSpec/Algebra)}
+\end{align*}
+Each arrow represents a machine-checked proof step; the composition yields
+the end-to-end theorem stated in \ec{NTTEndToEnd.ec}.
+
+\section{Main Contributions}
+
+\begin{description}
+  \item[\textbf{C1 -- Montgomery correctness.}]
+    A machine-checked proof that \ec{montgomery\_reduce} computes
+    $a \cdot R^{-1} \bmod q$ for all inputs in the relevant working range,
+    with $R = 2^{32}$, $q = 64513$, explicitly verified bit-width bounds,
+    and signed-integer arithmetic lemmas absent from the \easycrypt{} standard
+    library (\Cref{ch:montgomery}).
+
+  \item[\textbf{C2 -- Imperative NTT specification.}]
+    A fully proved \easycrypt{} model of the forward and inverse NTT loops in
+    \ec{NTT\_Fq.ec}, including twiddle-factor correctness, coefficient-bound
+    invariants (16-bit input $\to$ 24-bit output for forward NTT; 16-bit
+    preservation for inverse NTT), and termination witnesses
+    (\Cref{ch:ntt_spec}).
+
+  \item[\textbf{C3 -- Abstract spectral specification.}]
+    An algebraic library \ec{NTTFullAlgebra.ec} establishing properties of the
+    primitive root $\zeta_0 = 426$ in $\Zq$, bit-reversal permutation lemmas,
+    and a butterfly-stage induction connecting the iterative algorithm to the
+    closed-form evaluation formula (\Cref{ch:algebra}).
+
+  \item[\textbf{C4 -- Jasmin refinement.}]
+    A pRHL proof in \ec{RefJasminNTT.ec} showing that the extracted \jasmin{}
+    procedures are observationally equivalent to the imperative specifications
+    up to array representation (\Cref{ch:refinement}).
+
+  \item[\textbf{C5 -- End-to-end correctness.}]
+    Top-level theorems \ec{haetae\_jasmin\_ntt\_correct} and
+    \ec{haetae\_jasmin\_invntt\_correct} in \ec{NTTEndToEnd.ec}, together
+    with the round-trip theorem $\INTT \circ \NTT = \op{id}$
+    (\Cref{ch:end_to_end}).
+\end{description}
+
+\section{Structure of the Dissertation}
+
+The remainder of this dissertation is organised as follows.
+
+\begin{description}
+  \item[\Cref{ch:background}] reviews the relevant background: lattice
+        cryptography, the NTT, post-quantum signature schemes, and the
+        theoretical foundations of formal verification with \easycrypt{} and
+        \jasmin{}.
+
+  \item[\Cref{ch:haetae_ntt}] describes the \haetae{} scheme, its NTT
+        parameters, and the reference C implementation that serves as the
+        algorithmic ground truth.
+
+  \item[\Cref{ch:formal_framework}] presents the overall formal framework:
+        the three-layer abstraction stack and the proof methodology.
+
+  \item[\Cref{ch:field_ring}] covers the formalization of the field
+        $\Zq$ and the polynomial ring $\Rq$ in \easycrypt{}.
+
+  \item[\Cref{ch:montgomery}] details the Montgomery reduction
+        formalization and its correctness proof.
+
+  \item[\Cref{ch:ntt_spec}] presents the imperative NTT specification in
+        \ec{NTT\_Fq.ec}, its invariants, and its termination proof.
+
+  \item[\Cref{ch:algebra}] develops the algebraic infrastructure
+        in \ec{NTTFullAlgebra.ec}: primitive root properties, bit-reversal
+        lemmas, and stage decompositions.
+
+  \item[\Cref{ch:jasmin_impl}] describes the \jasmin{} implementation in
+        detail.
+
+  \item[\Cref{ch:refinement}] presents the Jasmin-to-EasyCrypt refinement
+        proof in \ec{RefJasminNTT.ec}.
+
+  \item[\Cref{ch:end_to_end}] assembles all pieces into the end-to-end
+        correctness theorems.
+
+  \item[\Cref{ch:conclusion}] discusses limitations, remaining obligations,
+        related and future work.
+\end{description}

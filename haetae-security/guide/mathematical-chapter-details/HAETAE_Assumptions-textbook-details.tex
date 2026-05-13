@@ -1,0 +1,1571 @@
+\subsection*{Textbook Formal Inventory}
+This subsection records the exact formal material in \file{HAETAE_Assumptions.ec}.  It is generated from the proof-surface EasyCrypt file, so the line numbers and statements are meant to be read next to the checked source.
+
+\noindent\textbf{Chapter role.} formal MLWE, Module-SIS, and bimodal self-target MSIS games.
+
+\noindent\textbf{Inventory size.} 11 context declarations, 60 definitions/game objects, 11 lemmas or relational theorems, and 0 explicit Hoare/Phoare judgments were found.
+
+\subsubsection*{Theory Context, Imports, and Quantified Modules}
+\paragraph{Context 1 (line 1)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import AllCore Distr List.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 2 (line 2)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Params HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 3 (line 4)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE_Assumptions
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+theory HAETAE_Assumptions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This begins a namespace for the formal development in this file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 4 (line 6)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Params.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 5 (line 7)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 6 (line 205)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSolverLift
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section BimodalSolverLift.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 7 (line 207)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+B
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module B <: BimodalSelfTargetMSIS_Solver.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 8 (line 288)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalModeSolverLiftedDistribution
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section BimodalModeSolverLiftedDistribution.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 9 (line 290)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+B
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module B <: BimodalSelfTargetMSIS_ModeSolver.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 10 (line 358)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalModuleSISReduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section BimodalModuleSISReduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 11 (line 360)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+B
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module B <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\subsubsection*{Definitions, Carrier Sets, Operations, Games, and Procedures}
+\begin{formaldefinition}[EasyCrypt line 9]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+mlwe_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type mlwe_instance.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. \(\mathsf{mlwe\_instance}\) is an abstract carrier set.  The proof may quantify over this domain, but it does not expose a representation.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 10]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type module_sis_instance = matrix * polyveck.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 11]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_solution
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type module_sis_solution = polyvecl.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 12]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type bimodal_selftarget_msis_instance = module_sis_instance.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 13]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_solution
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+type bimodal_selftarget_msis_solution = module_sis_solution.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a definitional type abbreviation.  The exact displayed EasyCrypt statement gives the right-hand side; later proof steps may unfold it without adding an assumption.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 15]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmlwe_real
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op [lossless] dmlwe_real : mode -> mlwe_instance distr.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.  The EasyCrypt [lossless] annotation states that this distribution has total mass 1.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 16]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmlwe_random
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op [lossless] dmlwe_random : mode -> mlwe_instance distr.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.  The EasyCrypt [lossless] annotation states that this distribution has total mass 1.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 17]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmodule_sis_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op [lossless] dmodule_sis_instance : mode -> module_sis_instance distr.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.  The EasyCrypt [lossless] annotation states that this distribution has total mass 1.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 18]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbimodal_selftarget_msis_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op [lossless] dbimodal_selftarget_msis_instance :
+  mode -> bimodal_selftarget_msis_instance distr.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.  The EasyCrypt [lossless] annotation states that this distribution has total mass 1.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 21]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_eval
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op module_sis_eval
+   (md : mode) (x : module_sis_instance)
+   (sol : module_sis_solution) : polyveck =
+  polyveck_sub md (matrix_vec_mul md x.`1 sol) x.`2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 26]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_zero_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op module_sis_zero_instance (md : mode) : module_sis_instance =
+  ([], polyveck_zero md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 29]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_solution_wf
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op module_sis_solution_wf (md : mode) (sol : module_sis_solution) : bool =
+  polyvecl_wf md sol.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 32]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_valid
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op module_sis_valid
+   (md : mode) (x : module_sis_instance)
+   (sol : module_sis_solution) : bool =
+  module_sis_solution_wf md sol /\
+  matrix_vec_mul md x.`1 sol = x.`2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 38]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_valid
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op bimodal_selftarget_msis_valid
+   (md : mode) (x : bimodal_selftarget_msis_instance)
+   (sol : bimodal_selftarget_msis_solution) : bool =
+  module_sis_valid md x sol.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a Boolean predicate.  The exact displayed EasyCrypt statement gives its arguments; mathematically it is an event, invariant, support condition, or well-formedness predicate over those arguments.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a well-formedness, support, or validity predicate needed by later preservation lemmas.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 72]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_module_sis_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op bimodal_to_module_sis_instance :
+  mode -> bimodal_selftarget_msis_instance -> module_sis_instance =
+  fun (_ : mode) x => x.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 75]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_module_sis_solution
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op bimodal_to_module_sis_solution :
+  mode -> bimodal_selftarget_msis_instance ->
+  bimodal_selftarget_msis_solution -> module_sis_solution =
+  fun (_ : mode) (_ : bimodal_selftarget_msis_instance) sol => sol.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 91]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MLWE_Distinguisher
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type MLWE_Distinguisher = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 92]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+distinguish
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc distinguish(x : mlwe_instance) : bool
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 95]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MLWE_Real_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module MLWE_Real_Game(B : MLWE_Distinguisher) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 96]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 106]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MLWE_Random_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module MLWE_Random_Game(B : MLWE_Distinguisher) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 107]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 117]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_Solver
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type ModuleSIS_Solver = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 118]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+solve
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc solve(x : module_sis_instance) : module_sis_solution option
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 121]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_Relation_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module ModuleSIS_Relation_Game(B : ModuleSIS_Solver) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 122]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 132]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_Solver
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type BimodalSelfTargetMSIS_Solver = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 133]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+solve
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc solve(x : bimodal_selftarget_msis_instance) :
+    bimodal_selftarget_msis_solution option
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 137]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_Relation_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalSelfTargetMSIS_Relation_Game(
+  B : BimodalSelfTargetMSIS_Solver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 140]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 150]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lift_bimodal_solution_option
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op lift_bimodal_solution_option
+   (md : mode) (x : bimodal_selftarget_msis_instance)
+   (sol : bimodal_selftarget_msis_solution option) :
+   module_sis_solution option =
+  if sol = None then None
+  else Some (bimodal_to_module_sis_solution md x (oget sol)).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 157]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmodule_sis_from_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op dmodule_sis_from_bimodal (md : mode) : module_sis_instance distr =
+  dmap (dbimodal_selftarget_msis_instance md)
+    (bimodal_to_module_sis_instance md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes a sampler or sampler-derived object to the distributional model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 174]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalToModuleSIS_Lift_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalToModuleSIS_Lift_Game(
+  B : BimodalSelfTargetMSIS_Solver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 177]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 227]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_ModeSolver
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type ModuleSIS_ModeSolver = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 228]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+solve
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc solve(md : mode, x : module_sis_instance) :
+    module_sis_solution option
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 232]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_ModeSolver
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type BimodalSelfTargetMSIS_ModeSolver = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 233]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+solve
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc solve(md : mode, x : bimodal_selftarget_msis_instance) :
+    bimodal_selftarget_msis_solution option
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 237]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_ModeRelation_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module ModuleSIS_ModeRelation_Game(
+  B : ModuleSIS_ModeSolver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 240]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 250]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_ModeRelation_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalSelfTargetMSIS_ModeRelation_Game(
+  B : BimodalSelfTargetMSIS_ModeSolver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 253]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 263]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_LiftedDistribution_Relation_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module ModuleSIS_LiftedDistribution_Relation_Game(
+  B : ModuleSIS_ModeSolver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 266]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main(md : mode) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 276]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalModeSolver_As_ModuleSIS
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalModeSolver_As_ModuleSIS(
+  B : BimodalSelfTargetMSIS_ModeSolver
+) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 279]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+solve
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc solve(md : mode, x : module_sis_instance) :
+    module_sis_solution option = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 310]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MLWE_Reduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type MLWE_Reduction = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 311]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 314]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_Reduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type BimodalSelfTargetMSIS_Reduction = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 315]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 318]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_Reduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module type ModuleSIS_Reduction = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is an interface for an oracle, adversary, scheme, sampler, solver, or reduction.  A later theorem quantified over this interface is universally quantified over all modules implementing these procedures.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 319]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool
+}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 322]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MLWE_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module MLWE_Game(B : MLWE_Reduction) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 323]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 331]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalSelfTargetMSIS_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalSelfTargetMSIS_Game(B : BimodalSelfTargetMSIS_Reduction) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 332]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 340]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ModuleSIS_Game
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module ModuleSIS_Game(B : ModuleSIS_Reduction) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It defines the game or game interface whose success event is bounded by later theorems.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 341]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 349]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalMSIS_As_ModuleSIS
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module BimodalMSIS_As_ModuleSIS(B : BimodalSelfTargetMSIS_Reduction) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 350]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+main
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc main() : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\subsubsection*{Lemmas, Theorems, Relational Equivalences, and Their Proof Dependencies}
+\begin{formaltheorem}[EasyCrypt line 43]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_eval_zero_instance
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma module_sis_eval_zero_instance md sol :
+  module_sis_eval md (module_sis_zero_instance md) sol = polyveck_zero md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+matrix_vec_mul
+module_sis_eval
+module_sis_zero_instance
+polyveck_add
+polyveck_neg
+polyveck_sub
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 50]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_zero_valid
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma module_sis_zero_valid md :
+  module_sis_valid md (module_sis_zero_instance md) (polyvecl_zero md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+matrix_vec_mul
+module_sis_solution_wf
+module_sis_valid
+module_sis_zero_instance
+polyvecl_zero_wf
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 59]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_eval_wf
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma module_sis_eval_wf md x sol :
+  polyveck_wf md (module_sis_eval md x sol).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 63]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_valid_target_wf
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma module_sis_valid_target_wf md x sol :
+  module_sis_valid md x sol =>
+  polyveck_wf md x.`2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+matrix_vec_mul_wf
+module_sis_valid
+targetE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 80]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_module_sis_valid
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_to_module_sis_valid md x sol :
+  bimodal_selftarget_msis_valid md x sol =>
+  module_sis_valid md
+    (bimodal_to_module_sis_instance md x)
+    (bimodal_to_module_sis_solution md x sol).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an implication, normally turning one invariant, validity predicate, or proof obligation into another.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_valid
+bimodal_to_module_sis_instance
+bimodal_to_module_sis_solution
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 161]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmodule_sis_from_bimodalE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma dmodule_sis_from_bimodalE md :
+  dmodule_sis_from_bimodal md = dbimodal_selftarget_msis_instance md.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_module_sis_instance
+dmap_id
+dmodule_sis_from_bimodal
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 167]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dmodule_sis_from_bimodal_lossless
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma dmodule_sis_from_bimodal_lossless md :
+  is_lossless (dmodule_sis_from_bimodal md).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+dbimodal_selftarget_msis_instance_ll
+dmodule_sis_from_bimodalE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 191]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_lift_successE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_lift_successE md x sol :
+  (sol <> None /\ bimodal_selftarget_msis_valid md x (oget sol)) =
+  (lift_bimodal_solution_option md x sol <> None /\
+   module_sis_valid md
+     (bimodal_to_module_sis_instance md x)
+     (oget (lift_bimodal_solution_option md x sol))).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{case}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+None
+bimodal_selftarget_msis_valid
+bimodal_to_module_sis_instance
+bimodal_to_module_sis_solution
+lift_bimodal_solution_option
+sol
+sol_none
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 209]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_solver_lift_exact
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_solver_lift_exact &m md :
+  Pr[BimodalSelfTargetMSIS_Relation_Game(B).main(md) @ &m : res] =
+  Pr[BimodalToModuleSIS_Lift_Game(B).main(md) @ &m : res].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] = B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{byequiv}, \ec{proc}, \ec{wp}, \ec{call}, \ec{rnd}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_valid
+bimodal_to_module_sis_instance
+bimodal_to_module_sis_solution
+glob
+md
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 292]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_mode_solver_lifted_distribution_exact
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_mode_solver_lifted_distribution_exact &m md :
+  Pr[BimodalSelfTargetMSIS_ModeRelation_Game(B).main(md) @ &m : res] =
+  Pr[ModuleSIS_LiftedDistribution_Relation_Game(
+       BimodalModeSolver_As_ModuleSIS(B)).main(md) @ &m : res].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] = B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{byequiv}, \ec{proc}, \ec{inline}, \ec{wp}, \ec{call}, \ec{rnd}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalModeSolver_As_ModuleSIS
+bimodal_selftarget_msis_valid
+glob
+md
+solve
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 362]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_msis_as_module_sis_exact
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_msis_as_module_sis_exact &m :
+  Pr[BimodalSelfTargetMSIS_Game(B).main() @ &m : res] =
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(B)).main() @ &m : res].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] = B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{byequiv}, \ec{proc}, \ec{inline}, \ec{wp}, \ec{call}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+BimodalMSIS_As_ModuleSIS
+glob
+main
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\medskip
+\noindent\emph{End of generated formal inventory for \file{HAETAE_Assumptions.ec}.}

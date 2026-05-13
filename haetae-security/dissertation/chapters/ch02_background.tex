@@ -1,0 +1,200 @@
+\chapter{Background}
+\label{ch:background}
+
+\section{Signature Correctness and EUF-CMA Security}
+
+A signature scheme is a triple of probabilistic algorithms
+\[
+  (\mathsf{KeyGen}, \mathsf{Sign}, \mathsf{Verify}).
+\]
+At security parameter \(\lambda\), key generation samples
+\((pk,sk)\leftarrow\mathsf{KeyGen}(1^\lambda)\), signing samples
+\(\sigma\leftarrow\mathsf{Sign}(sk,m,ctx)\), and verification returns a bit
+\(\mathsf{Verify}(pk,m,ctx,\sigma)\in\{0,1\}\).  In the HAETAE development the
+security parameter is represented indirectly by a fixed parameter mode and by
+the symbolic hardness and loss terms attached to that mode, but the mathematical
+reading is the usual asymptotic one.
+
+Correctness is the assertion that honestly signed messages verify except with
+negligible probability:
+\[
+  \Pr\!\left[
+    \mathsf{Verify}(pk,m,ctx,\sigma)=1
+    \;\middle|\;
+    (pk,sk)\leftarrow\mathsf{KeyGen},\;
+    \sigma\leftarrow\mathsf{Sign}(sk,m,ctx)
+  \right]\ge 1-\varepsilon_{\mathsf{corr}}.
+\]
+Perfect correctness is the special case \(\varepsilon_{\mathsf{corr}}=0\).
+For \eufcma{} security, an adversary receives \(pk\), random-oracle access, and
+adaptive signing-oracle access.  If \(Q_S\) is the set of signed pairs
+\((m,ctx)\), its success event is
+\[
+  \mathsf{Forge}(A) \equiv
+  \mathsf{Verify}(pk,m^*,ctx^*,\sigma^*)=1
+  \land (m^*,ctx^*)\notin Q_S .
+\]
+The advantage is
+\[
+  \Adv_{\Pi}^{\eufcma}(A)=\Pr[\mathsf{Forge}(A)].
+\]
+The proof objective is not to show that this probability is zero, but to bound
+it by hardness terms and explicitly counted statistical losses.  A reductionist
+statement has the shape
+\[
+  \Adv_{\Pi}^{\eufcma}(A)
+  \le
+  \sum_i \Adv_{\mathcal{P}_i}(B_i)
+  + \sum_j L_j(q_H,q_S,\lambda),
+\]
+where, in a conventional paper proof, the \(B_i\) are adversaries constructed
+against underlying mathematical problems and the \(L_j\) are loss terms arising
+from collisions, prequeries, sampling changes, and rejection events.  In the
+final EasyCrypt theorem checked in this dissertation, the corresponding MLWE and
+Module-SIS solvers are declared reduction modules supplied through explicit
+antecedents rather than constructed inside the top-level composition lemma.
+
+The checked development models these notions in \code{Sig\_ROM.ec}.  This file
+contains the generic interfaces for random oracles, schemes, signing oracles,
+chosen-message adversaries, and no-message adversaries.  Keeping these games
+generic is important: it prevents \haetae{}-specific proof assumptions from
+being smuggled into the security definition.
+
+\section{The Random Oracle Model}
+
+The proof is a random-oracle-model proof.  A random oracle is an ideal sampled
+function
+\[
+  H : \mathcal{X}\to\mathcal{Y}
+\]
+such that the values \(H(x)\) are independent samples from the prescribed output
+distribution, subject only to consistency on repeated inputs.  In a lazy
+implementation, the oracle maintains a finite partial map
+\[
+  T : \mathcal{X} \rightharpoonup \mathcal{Y}.
+\]
+On query \(x\), the oracle returns \(T(x)\) if \(x\in\operatorname{dom}(T)\);
+otherwise it samples \(y\leftarrow D_x\), stores \(T[x\mapsto y]\), and returns
+\(y\).  This lazy semantics is distributionally equivalent to sampling the whole
+function in advance, but it exposes the finite set of adversarially observed
+queries.
+
+ROM proofs often program the oracle: a simulator chooses a point \(x_0\) and
+sets \(H(x_0)\) to a value needed by the reduction.  Programming is sound only
+when \(x_0\) is fresh:
+\[
+  x_0\notin Q_H,
+\]
+where \(Q_H\) is the adversary's prior query set.  If \(x_0\) has min-entropy at
+least \(\log_2 N\) against the adversary's view and \(|Q_H|\le q_H\), then
+\[
+  \Pr[x_0\in Q_H]\le q_H/N.
+\]
+This inequality is the mathematical source of many counted ROM losses.  The
+machine-checked development does not allow this argument to remain implicit:
+the query log, budget counter, freshness predicate, and bad event are explicit
+program state.
+
+In the machine-checked proof, the random oracle is lazy and stateful.  Its map,
+query log, bad flags, and counters are explicit program variables.  This makes
+freshness and query-budget arguments checkable.
+
+\section{Fiat-Shamir with Aborts}
+
+\haetae{} follows the general pattern of Fiat-Shamir signatures with rejection
+sampling.  The abstract pattern starts from an identification protocol with a
+commitment, a challenge, and a response.  The Fiat-Shamir transform replaces the
+verifier's challenge by a hash value
+\[
+  c = H(\mathsf{commitment},m,ctx).
+\]
+Security then depends on two interacting principles.
+
+First, special soundness says that two accepting transcripts sharing the same
+commitment but carrying different challenges reveal a witness or a solution to a
+hard algebraic problem.  In lattice signatures this solution is typically a
+short relation, hence the appearance of Module-SIS-style assumptions.
+
+Second, the signing algorithm must produce transcripts with the same
+adversary-visible distribution as the honest protocol would produce.  Rejection
+sampling enforces this distributional property by discarding responses whose
+shape would leak information about the secret key.  Mathematically, if
+\(D_{\mathsf{real}}\) is the real signing distribution and
+\(D_{\mathsf{sim}}\) is the simulated transcript distribution, the proof needs
+a bound on statistical distance:
+\[
+  \Delta(D_{\mathsf{real}},D_{\mathsf{sim}})
+  =
+  \frac12\sum_x
+  \left|\Pr[D_{\mathsf{real}}=x]-\Pr[D_{\mathsf{sim}}=x]\right|.
+\]
+The EasyCrypt development decomposes this distance into named sampling,
+rejection, and clean-conditioned lifting lemmas rather than treating it as one
+informal statement.
+
+The word ``aborts'' refers to the rejection step.  It is not merely an
+implementation branch: it is a proof device that shapes the output
+distribution.  A correct provable-security proof must track both the probability
+of aborting and the distribution conditioned on not aborting.
+
+\section{Lattice Assumptions and Reduction Targets}
+
+HAETAE's formal security proof ultimately reduces forgeries to structured
+lattice problems.  At the level needed for the dissertation, the key point is
+not the exact estimator cost of those problems, but the way the reduction
+connects transcript algebra to assumption games.
+
+Module-LWE is a pseudorandomness assumption.  In a typical module form, samples
+have the shape
+\[
+  (A,\; A s + e)
+\]
+over a module \(R_q^k\), where \(s\) and \(e\) are short or noisy.  The
+assumption says that these samples are computationally indistinguishable from
+uniform samples of the same type.
+
+Module-SIS is a short-relation assumption.  Given a public matrix \(A\), the
+goal is to find a nonzero short vector \(z\) such that
+\[
+  A z = 0 \pmod q
+\]
+or, in inhomogeneous variants, \(A z = t \pmod q\).  Fiat-Shamir extraction
+typically produces such a relation from two accepting transcripts with the same
+commitment and different challenges.
+
+The checked theorem keeps the hardness terms symbolic.  This is the right proof
+engineering boundary: conditional on the declared hop and reduction premises,
+EasyCrypt checks that the formal game bound composes the declared reduction
+modules, symbolic assumptions, and declared probability losses.  It does not
+perform independent lattice-estimator analysis for HAETAE parameter levels.
+
+\section{EasyCrypt}
+
+\easycrypt{} supports game-based cryptographic proofs using probabilistic
+programs, module systems, Hoare logic, probabilistic Hoare logic, and relational
+equivalence.  The \haetae{} development uses these features to express game
+hops, oracle wrappers, state-preservation invariants, and concrete probability
+bounds.
+
+The mathematical interpretation of the main judgment forms is as follows.
+A Hoare judgment proves that a program transforms states satisfying a
+precondition into states satisfying a postcondition.  A probabilistic Hoare
+judgment proves an upper or lower bound on the probability of a postcondition.
+An equivalence judgment proves a coupling between two probabilistic programs,
+usually the formal counterpart of a game hop.  Losslessness judgments prove that
+procedures terminate with probability one, which is required before probabilities
+can be compared without hidden nontermination mass.
+
+For a provable-security proof, these judgments correspond to familiar paper
+proof obligations:
+\[
+\begin{array}{rcl}
+\text{state invariant} &\leftrightarrow& \text{Hoare judgment},\\
+\text{bad-event probability} &\leftrightarrow& \text{probabilistic Hoare judgment},\\
+\text{game indistinguishability} &\leftrightarrow& \text{equivalence judgment},\\
+\text{well-defined experiment} &\leftrightarrow& \text{losslessness}.
+\end{array}
+\]
+The value of the machine-checked proof is that these obligations are not
+collapsed into prose.  Each must be represented as a typed statement over the
+actual programs used by the security theorem.

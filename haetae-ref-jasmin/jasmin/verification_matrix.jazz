@@ -1,0 +1,36 @@
+require "params.jinc"
+require "poly.jinc"
+
+export
+fn sign_verify_matrix_ntt_acc_jazz(reg mut ptr u32[2048] z1p,
+                                   reg mut ptr u32[2048] highp,
+                                   reg const ptr u32[8192] a1p,
+                                   reg u64 rows,
+                                   reg u64 cols) -> reg ptr u32[2048],
+                                                   reg ptr u32[2048]
+{
+  () = #spill(highp, a1p, rows, cols);
+  z1p = _polyvec_ntt(z1p, cols);
+  () = #unspill(highp, a1p, rows, cols);
+
+  highp = _polymat_pointwise_acc(highp, a1p, z1p, rows, cols);
+  highp = _polyvec_invntt(highp, rows);
+
+  return z1p, highp;
+}
+
+export
+fn sign_verify_crt_freeze_jazz(reg mut ptr u32[2048] z1p,
+                               reg const ptr u32[2048] highp,
+                               reg const ptr u32[HAETAE_N] wprimep,
+                               reg u64 rows) -> reg ptr u32[2048]
+{
+  reg u64 count;
+
+  z1p = _polyveck_poly_fromcrt(z1p, highp, wprimep, rows);
+  count = rows;
+  count *= HAETAE_N;
+  z1p = _polyvec_freeze2q(z1p, count);
+
+  return z1p;
+}

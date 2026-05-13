@@ -1,0 +1,63 @@
+require "params.jinc"
+require "pack.jinc"
+require "encoding.jinc"
+require "sparse_encoding.jinc"
+require "encoding_tables.jinc"
+require "signature_pack.jinc"
+
+export
+fn pack_sig_mode2_full_jazz(reg mut ptr u8[2948] sigp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u32[HAETAE_N] cp,
+                            reg const ptr u32[2048] lowp,
+                            reg const ptr u32[2048] hbzp,
+                            reg const ptr u32[2048] hp)
+                            -> reg ptr u8[2948], reg ptr u64[1]
+{
+  reg ptr u32[132] hb_esymsp h_esymsp;
+
+  hb_esymsp = jmode2_hb_z1_esyms;
+  h_esymsp = jmode2_h_esyms;
+  sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,
+                              h_esymsp, 1474, 4, 1024, 13, 6, 512, 13, 239,
+                              132, 7, 416);
+  return sigp, badp;
+}
+
+export
+fn pack_sig_mode3_full_jazz(reg mut ptr u8[2948] sigp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u32[HAETAE_N] cp,
+                            reg const ptr u32[2048] lowp,
+                            reg const ptr u32[2048] hbzp,
+                            reg const ptr u32[2048] hp)
+                            -> reg ptr u8[2948], reg ptr u64[1]
+{
+  reg ptr u32[132] hb_esymsp h_esymsp;
+
+  hb_esymsp = jmode3_hb_z1_esyms;
+  h_esymsp = jmode3_h_esyms;
+  sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,
+                              h_esymsp, 2349, 6, 1536, 17, 8, 768, 17, 235,
+                              376, 127, 779);
+  return sigp, badp;
+}
+
+export
+fn pack_sig_mode5_full_jazz(reg mut ptr u8[2948] sigp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u32[HAETAE_N] cp,
+                            reg const ptr u32[2048] lowp,
+                            reg const ptr u32[2048] hbzp,
+                            reg const ptr u32[2048] hp)
+                            -> reg ptr u8[2948], reg ptr u64[1]
+{
+  reg ptr u32[132] hb_esymsp h_esymsp;
+
+  hb_esymsp = jmode5_hb_z1_esyms;
+  h_esymsp = jmode5_h_esyms;
+  sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,
+                              h_esymsp, 2948, 7, 1792, 19, 9, 1024, 33, 471,
+                              501, 358, 1122);
+  return sigp, badp;
+}

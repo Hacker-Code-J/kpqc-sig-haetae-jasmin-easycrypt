@@ -1,0 +1,153 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_ROM.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Typed random-oracle query and output model.
+
+\section*{How To Read This Script}
+Read this file as the hash-domain interface.  It separates the query forms so later freshness and programming proofs can refer to precise events.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore Distr List PROM.} & Imports AllCore Distr List PROM.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Params HAETAE\_Algebra HAETAE\_Distributions.} & Imports HAETAE\_Params HAETAE\_Algebra HAETAE\_Distributions.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_ROM.} & Begins the namespace HAETAE\_ROM, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Algebra.} & Opens HAETAE\_Algebra so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize import HAETAE\_Distributions.} & Opens HAETAE\_Distributions so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize import HAETAE\_Params.} & Opens HAETAE\_Params so its names can be used without qualification in the following proof. \\
+9 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+10 & {\ttfamily\scriptsize type ro\_query =} & Declares carrier set ro\_query.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+11 & {\ttfamily\scriptsize   [ MessageHashQuery of (pkey * context * message)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+12 & {\ttfamily\scriptsize   | ChallengeHashQuery of (mode * polyveck * poly * crh)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+13 & {\ttfamily\scriptsize   | MatrixExpandQuery of (mode * seed)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+14 & {\ttfamily\scriptsize   | SamplerExpandQuery of random\_coins ].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+15 & {\ttfamily\scriptsize type ro\_output = crh * challenge * matrix * random\_coins.} & Declares carrier set ro\_output.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+16 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+17 & {\ttfamily\scriptsize op message\_hash\_query (pk : pkey) (ctx : context) (m : message) : ro\_query =} & Defines operation message\_hash\_query, a total mathematical function or abbreviation used by later declarations. \\
+18 & {\ttfamily\scriptsize   MessageHashQuery (pk, ctx, m).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+19 & {\ttfamily\scriptsize op challenge\_hash\_query} & Defines operation challenge\_hash\_query, a total mathematical function or abbreviation used by later declarations. \\
+20 & {\ttfamily\scriptsize    (md : mode) (w1 : polyveck) (w0 : poly) (mu : crh) : ro\_query =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+21 & {\ttfamily\scriptsize   ChallengeHashQuery (md, w1, w0, mu).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+22 & {\ttfamily\scriptsize op matrix\_expand\_query (md : mode) (sd : seed) : ro\_query =} & Defines operation matrix\_expand\_query, a total mathematical function or abbreviation used by later declarations. \\
+23 & {\ttfamily\scriptsize   MatrixExpandQuery (md, sd).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+24 & {\ttfamily\scriptsize op sampler\_expand\_query (coins : random\_coins) : ro\_query =} & Defines operation sampler\_expand\_query, a total mathematical function or abbreviation used by later declarations. \\
+25 & {\ttfamily\scriptsize   SamplerExpandQuery coins.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+26 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+27 & {\ttfamily\scriptsize op ro\_crh\_zero : crh = nseq crhbytes 0.} & Defines operation ro\_crh\_zero, a total mathematical function or abbreviation used by later declarations. \\
+28 & {\ttfamily\scriptsize op ro\_challenge\_zero : challenge = poly\_zero.} & Defines operation ro\_challenge\_zero, a total mathematical function or abbreviation used by later declarations. \\
+29 & {\ttfamily\scriptsize op ro\_matrix\_zero : matrix = [].} & Defines operation ro\_matrix\_zero, a total mathematical function or abbreviation used by later declarations. \\
+30 & {\ttfamily\scriptsize op ro\_random\_coins\_zero : random\_coins = nseq seedbytes 0.} & Defines operation ro\_random\_coins\_zero, a total mathematical function or abbreviation used by later declarations. \\
+31 & {\ttfamily\scriptsize op ro\_output\_zero : ro\_output =} & Defines operation ro\_output\_zero, a total mathematical function or abbreviation used by later declarations. \\
+32 & {\ttfamily\scriptsize   (ro\_crh\_zero, ro\_challenge\_zero, ro\_matrix\_zero, ro\_random\_coins\_zero).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+33 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+34 & {\ttfamily\scriptsize op ro\_output\_to\_crh (y : ro\_output) : crh = y.`1.} & Defines operation ro\_output\_to\_crh, a total mathematical function or abbreviation used by later declarations. \\
+35 & {\ttfamily\scriptsize op ro\_output\_to\_challenge (y : ro\_output) : challenge = y.`2.} & Defines operation ro\_output\_to\_challenge, a total mathematical function or abbreviation used by later declarations. \\
+36 & {\ttfamily\scriptsize op ro\_output\_to\_matrix (y : ro\_output) : matrix = y.`3.} & Defines operation ro\_output\_to\_matrix, a total mathematical function or abbreviation used by later declarations. \\
+37 & {\ttfamily\scriptsize op ro\_output\_to\_random\_coins (y : ro\_output) : random\_coins = y.`4.} & Defines operation ro\_output\_to\_random\_coins, a total mathematical function or abbreviation used by later declarations. \\
+38 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+39 & {\ttfamily\scriptsize op ro\_output\_of\_crh (mu : crh) : ro\_output =} & Defines operation ro\_output\_of\_crh, a total mathematical function or abbreviation used by later declarations. \\
+40 & {\ttfamily\scriptsize   (mu, ro\_challenge\_zero, ro\_matrix\_zero, ro\_random\_coins\_zero).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+41 & {\ttfamily\scriptsize op ro\_output\_of\_challenge (ch : challenge) : ro\_output =} & Defines operation ro\_output\_of\_challenge, a total mathematical function or abbreviation used by later declarations. \\
+42 & {\ttfamily\scriptsize   (ro\_crh\_zero, ch, ro\_matrix\_zero, ro\_random\_coins\_zero).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+43 & {\ttfamily\scriptsize op ro\_output\_of\_matrix (a : matrix) : ro\_output =} & Defines operation ro\_output\_of\_matrix, a total mathematical function or abbreviation used by later declarations. \\
+44 & {\ttfamily\scriptsize   (ro\_crh\_zero, ro\_challenge\_zero, a, ro\_random\_coins\_zero).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+45 & {\ttfamily\scriptsize op ro\_output\_of\_random\_coins (coins : random\_coins) : ro\_output =} & Defines operation ro\_output\_of\_random\_coins, a total mathematical function or abbreviation used by later declarations. \\
+46 & {\ttfamily\scriptsize   (ro\_crh\_zero, ro\_challenge\_zero, ro\_matrix\_zero, coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+47 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+48 & {\ttfamily\scriptsize op dmatrix\_for\_query (x : mode * seed) : matrix distr = dmatrix x.`1.} & Defines dmatrix\_for\_query as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+49 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+50 & {\ttfamily\scriptsize op dro\_output (q : ro\_query) : ro\_output distr =} & Defines dro\_output as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+51 & {\ttfamily\scriptsize   with q = MessageHashQuery \_ => dmap dcrh ro\_output\_of\_crh} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+52 & {\ttfamily\scriptsize   with q = ChallengeHashQuery x =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+53 & {\ttfamily\scriptsize     dmap (dchallenge x.`1) ro\_output\_of\_challenge} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+54 & {\ttfamily\scriptsize   with q = MatrixExpandQuery x =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+55 & {\ttfamily\scriptsize     dmap (dmatrix\_for\_query x) ro\_output\_of\_matrix} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+56 & {\ttfamily\scriptsize   with q = SamplerExpandQuery \_ =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+57 & {\ttfamily\scriptsize     dmap drandom\_coins ro\_output\_of\_random\_coins.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+58 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+59 & {\ttfamily\scriptsize lemma matrix\_query\_distribution\_lossless x :} & States checked lemma matrix\_query\_distribution\_lossless.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+60 & {\ttfamily\scriptsize   is\_lossless (dmatrix\_for\_query x).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+62 & {\ttfamily\scriptsize rewrite /dmatrix\_for\_query.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+63 & {\ttfamily\scriptsize case x => md sd /=.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+64 & {\ttfamily\scriptsize by apply matrix\_distribution\_lossless.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+65 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+66 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+67 & {\ttfamily\scriptsize lemma ro\_output\_distribution\_lossless q :} & States checked lemma ro\_output\_distribution\_lossless.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+68 & {\ttfamily\scriptsize   is\_lossless (dro\_output q).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+70 & {\ttfamily\scriptsize rewrite /dro\_output.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+71 & {\ttfamily\scriptsize case q => /=.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+72 & {\ttfamily\scriptsize + by apply dmap\_ll; apply crh\_distribution\_lossless.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+73 & {\ttfamily\scriptsize + move=> x.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+74 & {\ttfamily\scriptsize   by apply dmap\_ll; apply challenge\_distribution\_lossless.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+75 & {\ttfamily\scriptsize + move=> x.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+76 & {\ttfamily\scriptsize   by apply dmap\_ll; apply matrix\_query\_distribution\_lossless.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+77 & {\ttfamily\scriptsize + by apply dmap\_ll; apply signing\_coin\_distribution\_lossless.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+78 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+79 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+80 & {\ttfamily\scriptsize clone import FullRO as HAETAE\_RO with} & Clones and opens a parameterized EasyCrypt theory, producing a specialized instance used below. \\
+81 & {\ttfamily\scriptsize   type in\_t <- ro\_query,} & Declares carrier set in\_t.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+82 & {\ttfamily\scriptsize   type out\_t <- ro\_output,} & Declares carrier set out\_t.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+83 & {\ttfamily\scriptsize   op dout <- dro\_output.} & Defines operation dout, a total mathematical function or abbreviation used by later declarations. \\
+84 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+85 & {\ttfamily\scriptsize module type Oracle = \{} & Defines module interface Oracle.  It specifies the procedures that later games or adversaries may call. \\
+86 & {\ttfamily\scriptsize   include FRO [init, get, set, rem, sample, queried, allKnown]} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+87 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+88 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+89 & {\ttfamily\scriptsize module type POracle = \{} & Defines module interface POracle.  It specifies the procedures that later games or adversaries may call. \\
+90 & {\ttfamily\scriptsize   include FRO [get, set, rem, sample, queried, allKnown]} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+92 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+93 & {\ttfamily\scriptsize op ro\_message\_hash (y : ro\_output) : crh = ro\_output\_to\_crh y.} & Defines operation ro\_message\_hash, a total mathematical function or abbreviation used by later declarations. \\
+94 & {\ttfamily\scriptsize op ro\_challenge\_hash (y : ro\_output) : challenge = ro\_output\_to\_challenge y.} & Defines operation ro\_challenge\_hash, a total mathematical function or abbreviation used by later declarations. \\
+95 & {\ttfamily\scriptsize op ro\_matrix (y : ro\_output) : matrix = ro\_output\_to\_matrix y.} & Defines operation ro\_matrix, a total mathematical function or abbreviation used by later declarations. \\
+96 & {\ttfamily\scriptsize op ro\_signing\_coins (y : ro\_output) : random\_coins =} & Defines operation ro\_signing\_coins, a total mathematical function or abbreviation used by later declarations. \\
+97 & {\ttfamily\scriptsize   ro\_output\_to\_random\_coins y.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+98 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+99 & {\ttfamily\scriptsize lemma sampler\_expand\_query\_dro\_output\_ro\_signing\_coins} & States checked lemma sampler\_expand\_query\_dro\_output\_ro\_signing\_coins.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+100 & {\ttfamily\scriptsize     seed\_coins (p : random\_coins -> bool) :} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+101 & {\ttfamily\scriptsize   mu (dro\_output (sampler\_expand\_query seed\_coins))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+102 & {\ttfamily\scriptsize      (fun y => p (ro\_signing\_coins y)) =} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+103 & {\ttfamily\scriptsize   mu drandom\_coins p.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+104 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+105 & {\ttfamily\scriptsize rewrite /dro\_output /sampler\_expand\_query /ro\_signing\_coins} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+106 & {\ttfamily\scriptsize         /ro\_output\_to\_random\_coins /ro\_output\_of\_random\_coins /=.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+107 & {\ttfamily\scriptsize rewrite dmapE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+108 & {\ttfamily\scriptsize by apply mu\_eq => coins; rewrite /(\textbackslash{}o) /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+109 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+110 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+111 & {\ttfamily\scriptsize end HAETAE\_ROM.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

@@ -1,0 +1,105 @@
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+This dissertation presents a machine-checked EasyCrypt proof surface for the
+provable security of the formal HAETAE random-oracle signature model.  The word
+``formal'' is essential: the checked theorem surface is a conditional
+implication about the EasyCrypt model, together with an audited correspondence
+to the February 2026 HAETAE specification.  The proof is organized as a
+game-based reduction with explicit oracle state, transcript state, sampler
+state, bad events, query budgets, and algebraic loss composition.
+
+The main contribution is the conversion of informal proof phrases into checked
+mathematical objects.  Games are probabilistic programs.  Random oracles are
+stateful lazy tables.  Hybrid transitions are equivalence judgments or
+probability inequalities.  Bad events are Boolean predicates over concrete game
+state.  Active signing has local clean-conditioned one-call proof surfaces and
+wrapper invariants; the final NMA-level lift still has to avoid coarse fallback
+bounds before it can be read as a non-vacuous active-signing theorem.
+
+The revised dissertation also separates the checked implication from its
+boundaries.  The result is conditional on the hardness terms represented in
+\ec{HAETAE\_Assumptions.ec}, assembled in \ec{HAETAE\_Reductions.ec}, and on the
+explicit hop/reduction antecedents of the final EasyCrypt composition lemma.
+One of those antecedents is currently vacuous under the present
+\ec{rejection\_sampling\_loss\_term} constants, so the central artifact is a
+ROM-model implication rather than a non-vacuous concrete security theorem.  It
+also does not prove implementation correctness of all concrete parsing,
+arithmetic, hashing, and rejection-sampling code paths.
+
+\section*{Evidence summary}
+
+\begin{longtable}{p{0.28\textwidth}p{0.62\textwidth}}
+\toprule
+\textbf{Evidence item} & \textbf{Status recorded in this dissertation} \\
+\midrule
+Specification source & \ec{HAETAE\_v260204.pdf}, 46 pages, generated February
+4, 2026; Section 4.2, Figure 8, and Table 1 are used for model/spec
+correspondence. \\
+\midrule
+Proof manifest & \ec{provable-security/proof-files.txt}; recorded inventory:
+16 EasyCrypt files and 22046 checked-source lines. \\
+\midrule
+Main checked bound & \ec{haetae\_euf\_counted\_rom\_bound}; the right-hand side
+of the conditional probability-only ROM implication for \(\mathsf{ECModel}\),
+with the proof and bound ledger instantiated at \(q_H=q_S=2\), expanded as MLWE hardness, Module-SIS hardness,
+bimodal-to-MSIS reduction loss, and counted ROM collision/prequery/min-entropy
+terms.
+\\
+\midrule
+Strongest exact claim & A checked implication whose conclusion is a probability
+bound for \(\mathsf{ECModel}\) in the ROM; the checked bound ledger uses
+\(q_H=q_S=2\).  The bridge from \(\mathsf{Spec}_{260204}\) to
+\(\mathsf{ECModel}\) is documented by audit tables and by the explicit
+signing-randomness modeling assumption in
+\Cref{assm:signing-randomness-modeling-bridge}, not by a separate checked
+equivalence theorem.  The current final-hop premise contains
+\ec{rejection\_sampling\_loss\_term}, which is larger than one under the present
+constants, so this is a proof-surface implication and not a non-vacuous concrete
+instantiation. \\
+\midrule
+Concrete counted-ROM loss & With the current constants in \ec{HAETAE\_Reductions.ec},
+\(q_H=2\), \(q_S=2\), \(N=2^{58}\), and the counted ROM contribution is
+\(37/2^{58}\). \\
+\midrule
+Local non-vacuity evidence & Concrete lazy-ROM sampler freshness, sampler-ROM
+coverage, \ec{sampler\_bad\_prequery} instrumentation, and active \ec{O.sign}
+clean lifting lemmas are identified by name and interpreted mathematically.
+The final NMA-level path still contains coarse fallback bounds that must be
+replaced before the top-level antecedent can be called non-vacuous. \\
+\midrule
+Reproducibility aid & \ec{dissertation/etc/count-easycrypt-declarations.sh}
+records the counting policy for the proof-code inventory. \\
+\midrule
+Residual obligations & Replacing the vacuous final-hop antecedent with a
+satisfiable checked hop, mechanizing the model/spec fidelity ledger in
+\Cref{tab:internal-algorithm-fidelity-ledger}, concrete SHAKE instantiation,
+implementation correctness, concrete MLWE/Module-SIS bit-security estimation,
+and reduction runtime overhead remain outside the central checked probability
+implication. \\
+\bottomrule
+\end{longtable}
+
+The final lesson is methodological.  A machine-checked cryptographic proof is
+not persuasive merely because it is long or because it compiles.  It is
+persuasive when the theorem statement is exact, the loss ledger is not inflated,
+vacuous hypotheses are called out, the assumptions are visible, and the model is
+compared against the specification.  The rewritten dissertation is structured
+around those criteria.
+
+The dissertation should therefore be cited in three layers.  First, as a checked
+EasyCrypt implication and audit of a scoped counted-ROM proof surface for
+\(\mathsf{ECModel}\), with the current vacuity warning attached.  Second, as an
+audited specification-model correspondence argument for reading that model as
+HAETAE v260204.  Third, as a roadmap for the remaining work needed for an
+end-to-end claim: a satisfiable final-hop theorem, mechanized PDF-to-model
+equivalence, concrete SHAKE instantiation reasoning, implementation correctness,
+concrete MLWE/Module-SIS bit estimates, and cost-aware reduction accounting.
+Collapsing these layers would overstate the verification; keeping them separate
+is the main integrity property of the document.
+
+Future work should connect the formal HAETAE model to implementation-level
+correctness proofs, especially for parsing, hashing, arithmetic, and rejection
+sampling.  It should also formalize reduction runtime overhead, maintain a
+versioned proof-manifest discipline, and update the model/spec correspondence
+whenever the EasyCrypt proof surface or HAETAE specification changes.

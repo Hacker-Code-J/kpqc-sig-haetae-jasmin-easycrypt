@@ -1,0 +1,272 @@
+{
+  "version": 3,
+  "echash": "n/a",
+  "root": { "kind": "ec", "digest": "50d59a8d2d6df6c970344979f665be99" },
+  "depends": {
+    "AlgTactic": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "850cd748ba64fbbb969579c57fb7186d"
+    },
+    "AllCore": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "530d964738d9a6b9093986916c5225d1"
+    },
+    "Bigalg": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "e88204311613892d6d56395cfc7f1f22"
+    },
+    "Bigop": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "df44e8fce988e1889f40d4b616961a54"
+    },
+    "Binomial": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "1e23893cdbfac8da97b831166366c823"
+    },
+    "Bool": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "62eccfce391e38a3470506f7e36dc115"
+    },
+    "Core": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "4c1f1b14433a0e81286f6af1e6795b1e"
+    },
+    "CoreInt": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "656971c528721573c2aadba8c3e474f0"
+    },
+    "CoreMap": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "4ca3e904f01727612fbbc929e0c74cf9"
+    },
+    "CoreReal": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "71a66b712b2595af8e02fada3eaa0c67"
+    },
+    "DInterval": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b5a02169126526fda03fe806226523f7"
+    },
+    "DJoin": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "349badb634698ec3c0a6a164a5b12416"
+    },
+    "DList": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "622bf01533cef6385934072bf38bc377"
+    },
+    "DProd": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "ece7b881468e9a3411abd6d8932e7eec"
+    },
+    "Discrete": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "7bfc7bffc1442385fc98161d37676888"
+    },
+    "Distr": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "7fd38b3b56e82f201613911175bec025"
+    },
+    "FMap": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b43c597cc5536b64343655dad36bba5b"
+    },
+    "FSet": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "d6644f48a81e8406088a47023a938b28"
+    },
+    "FelTactic": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "5c7f086136439a486a1c9ca927517963"
+    },
+    "FinType": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "35da7c0f7bb9fe412bfb938cb1036abf"
+    },
+    "Finite": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b97d32983e1fb562a4ce3233cef9e7b6"
+    },
+    "HAETAE_Algebra": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "37d254732add0ac80a9eea3c6fad267e"
+    },
+    "HAETAE_Distributions": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "92a911435060025237e01e1ea1bfc9d5"
+    },
+    "HAETAE_FIPS202": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "f1be997e86f90af2e20921e23b689b5c"
+    },
+    "HAETAE_Keccak1600": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "1d52ac0147b00b4bec502b0722736d7d"
+    },
+    "HAETAE_Params": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "2b68a14b9acb52b5e053c8f4a89e9568"
+    },
+    "HAETAE_ROM": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "a3f6e48453deb9b6d4b457f2b61935bb"
+    },
+    "Int": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "9e1878ac5a993a111a8528a9d7507c72"
+    },
+    "IntDiv": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "dbf9d49943a5e9cc18df75972d6914d3"
+    },
+    "IntMin": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "6e85ff145774627ec46ac4b58a8d47c8"
+    },
+    "IterProc": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "2942ba76896f6f222aafee74f5961d7c"
+    },
+    "List": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "411fa05309b73cb59dc50cd53f9f7c92"
+    },
+    "Logic": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "6b500cdc50293d9b0674166fdcc73d7e"
+    },
+    "Monoid": {
+      "direct": false,
+      "kind": "eca",
+      "digest": "b94b5fd99cc42a3a5fb358ab9c0f0d32"
+    },
+    "Mu_mem": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "93ddc8b1ed6590781f3a42885a763de9"
+    },
+    "Number": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "b9016fa51385372ce8fe5e214fa6f60a"
+    },
+    "PROM": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "43539a60cdf72e950708676a0c826999"
+    },
+    "Pervasive": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "0f385a91ae1a1269de2ba2b7fad360d0"
+    },
+    "Real": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "dcd8d3246c289a44016836a6426d4e1c"
+    },
+    "RealExp": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "5116449d24ac683eeec6eab99a3c1398"
+    },
+    "RealFLub": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "67123d0c0b981ea268ba14ecd1468fda"
+    },
+    "RealFun": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "3508fd32cbeb00b686e7c6e9be1bf996"
+    },
+    "RealLub": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "aa3b5336b2a2cafeb779a1429ce3035d"
+    },
+    "RealSeq": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "e9e86e10f7b3df8d9dfe9de0c4a2e36f"
+    },
+    "RealSeries": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "a75f5ecd2b0b3b619ab003ddd2c1ae20"
+    },
+    "Ring": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "1679a80ea225fe5d8904c9cd0f5d99c1"
+    },
+    "Sig_ROM": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "32fa3ccb258800695cc2f5376ea09d04"
+    },
+    "SmtMap": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "f9765c5d991ea67cdef1572a98ea13b9"
+    },
+    "StdBigop": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "3ef933d3ba2a743f395e2153324b9e4c"
+    },
+    "StdOrder": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "82265e9586f68a8a961d27de80735728"
+    },
+    "StdRing": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "86d8efe5a5c553697e271a3bbbfa51a2"
+    },
+    "Tactics": {
+      "direct": true,
+      "kind": "ec",
+      "digest": "86b1b5cd82f32d0405a70279cdc8b67b"
+    },
+    "Xint": {
+      "direct": false,
+      "kind": "ec",
+      "digest": "f8cdbe78777b5164dc57262d577911a4"
+    }
+  }
+}

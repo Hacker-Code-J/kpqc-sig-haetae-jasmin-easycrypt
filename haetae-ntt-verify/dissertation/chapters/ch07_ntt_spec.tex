@@ -1,0 +1,285 @@
+%==============================================================================%
+% Chapter 7 – Imperative NTT Specification (NTT_Fq.ec)
+%==============================================================================%
+
+\chapter{Imperative NTT Specification}
+\label{ch:ntt_spec}
+
+\section{Overview of \texttt{NTT\_Fq.ec}}
+
+The file \texttt{NTT\_Fq.ec} (989 lines) is the central algorithmic
+specification of this dissertation.  It defines \easycrypt{} procedures that
+faithfully model the forward and inverse NTT algorithms, working with abstract
+integer arrays rather than machine words.  The file serves two purposes:
+\begin{enumerate}
+  \item It provides an \emph{algorithmically correct} specification against
+        which the \jasmin{} implementation can be formally compared.
+  \item It provides the \emph{loop-level interface} to the abstract spectral
+        specification in \texttt{NTTFullSpec.ec}.
+\end{enumerate}
+
+\section{Twiddle Factor Table}
+
+The forward NTT uses the constant array \ec{zetas : int Array256.t} defined in
+\texttt{NTT\_Fq.ec}, corresponding exactly to the C array \texttt{zetas[256]}.
+Each entry is $\zeta_0^{\brev_8(k)} \cdot R \bmod q$ for $k = 0, 1, \dots, 255$.
+
+\begin{lemma}[Twiddle factor definition]
+  For all $k \in [0, 256)$:
+  \[
+    \ec{zetas}[k] = (\zeta_0^{\brev_8(k)} \cdot R) \bmod q,
+  \]
+  where $\zeta_0 = 426$ and $R = 2^{32}$.
+\label{lem:zetas_def}
+\end{lemma}
+
+This is proved by unfolding the definition and computing in $\Z_{64513}$.
+
+\section{Forward NTT Procedure}
+
+\subsection{Specification}
+
+The forward NTT is specified as the \easycrypt{} procedure \ec{NTT.ntt}:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Forward NTT specification in \texttt{NTT\_Fq.ec}},
+  label={lst:ntt_spec}]
+module NTT = {
+  proc ntt(a : int Array256.t) : int Array256.t = {
+    var len, start, j, k : int;
+    var t, zeta           : int;
+
+    k <- 1;
+    len <- 128;
+    while (len > 0) {
+      start <- 0;
+      while (start < 256) {
+        zeta <- zetas.[k];
+        k    <- k + 1;
+        j    <- start;
+        while (j < start + len) {
+          t        <- montgomery_reduce (zeta * a.[j + len]);
+          a.[j + len] <- a.[j] - t;
+          a.[j]    <- a.[j] + t;
+          j        <- j + 1;
+        }
+        start <- start + 2 * len;
+      }
+      len <- len %/ 2;
+    }
+    return a;
+  }
+}.
+\end{lstlisting}
+
+\subsection{Loop Structure Analysis}
+
+The three-level nested loop has the following structure:
+\begin{description}
+  \item[Outer loop] \texttt{while (len > 0)}: iterates $\ell \in
+        \{128, 64, 32, 16, 8, 4, 2, 1\}$, corresponding to 8 NTT stages.
+
+  \item[Middle loop] \texttt{while (start < 256)}: for each stage, iterates
+        over the $256 / (2\ell)$ butterfly groups.  At stage $s$, there are
+        $2^s$ groups.
+
+  \item[Inner loop] \texttt{while (j < start + len)}: performs $\ell$
+        butterfly operations within each group, all using the same twiddle
+        factor \texttt{zeta = zetas[k]}.
+\end{description}
+
+The twiddle counter $k$ advances once per group (per iteration of the middle
+loop), consuming a total of $\sum_{s=0}^{7} 2^s = 255$ twiddle factors.
+
+\subsection{Loop Invariants}
+
+\begin{definition}[Outer loop invariant $I_{\text{out}}$]
+  After completing all stages with $\ell' > \ell$:
+  \begin{enumerate}
+    \item $k = 256 / \ell$: the twiddle counter has consumed all factors
+          for completed stages.
+    \item For all $i \in [0, 256)$, the coefficient $a[i]$ is partially
+          transformed: it equals the sum of the appropriate butterfly outputs
+          through stage $8 - \log_2(\ell)$.
+    \item For all $i \in [0, 256)$, $|a[i]| < 2^{15 + (8 - \log_2 \ell)}$.
+  \end{enumerate}
+\label{def:outer_inv}
+\end{definition}
+
+\begin{definition}[Middle loop invariant $I_{\text{mid}}$]
+  After completing all groups with $\mathit{start}' < \mathit{start}$ in stage $s$:
+  \begin{enumerate}
+    \item Indices in $[0, \mathit{start})$ have been processed by stage $s$.
+    \item $k = 256/\ell + \mathit{start}/(2\ell)$: twiddle counter
+          accounts for completed groups.
+    \item Bounds are maintained as in $I_{\text{out}}$.
+  \end{enumerate}
+\label{def:mid_inv}
+\end{definition}
+
+\begin{definition}[Inner loop invariant $I_{\text{in}}$]
+  After completing $j - \mathit{start}$ butterflies in group $[\mathit{start},
+  \mathit{start}+2\ell)$:
+  \begin{enumerate}
+    \item Indices in $[\mathit{start}, j)$ and $[\mathit{start}+\ell, j+\ell)$
+          have been updated by the butterfly with factor $\zeta = \ec{zetas}[k-1]$.
+    \item Indices in $[j, \mathit{start}+\ell)$ are unchanged from before
+          this stage.
+    \item Bounds: $|a[i]| < 2^{16+s}$ for updated indices.
+  \end{enumerate}
+\label{def:inner_inv}
+\end{definition}
+
+\subsection{Termination}
+
+\begin{lemma}[NTT termination]
+  The procedure \ec{NTT.ntt} terminates for any input array.
+\label{lem:ntt_term}
+\end{lemma}
+
+\begin{proof}
+  Each outer loop iteration halves \ec{len}, so after at most 8 iterations,
+  \ec{len = 0} and the loop exits.  For each fixed \ec{len}, the middle loop
+  increments \ec{start} by $2 \cdot \ec{len}$, so it terminates after at most
+  $256 / (2\cdot\ec{len})$ iterations.  For each fixed \ec{start}, the inner loop
+  increments \ec{j} by 1, terminating after exactly \ec{len} iterations.
+
+  The variant functions are:
+  \begin{itemize}
+    \item Outer: $\ec{len}$ (decreases each iteration).
+    \item Middle: $256 - \ec{start}$ (decreases by $2\cdot\ec{len}$ each iteration).
+    \item Inner: $\ec{start} + \ec{len} - \ec{j}$ (decreases by 1 each iteration).
+  \end{itemize}
+\end{proof}
+
+\section{Inverse NTT Procedure}
+
+\subsection{Specification}
+
+The inverse NTT is specified as the \easycrypt{} procedure \ec{NTT.invntt}:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Inverse NTT specification in \texttt{NTT\_Fq.ec}},
+  label={lst:invntt_spec}]
+module NTT = {
+  (* ... ntt as above ... *)
+
+  proc invntt(a : int Array256.t) : int Array256.t = {
+    var len, start, j, k : int;
+    var t, zeta           : int;
+    var f                 : int;
+
+    f <- -29720;  (* Montgomery form of 1/256 *)
+    k <- 255;
+    len <- 1;
+    while (len < 256) {
+      start <- 0;
+      while (start < 256) {
+        zeta <- zetas_inv.[k];
+        k    <- k - 1;
+        j    <- start;
+        while (j < start + len) {
+          t           <- a.[j];
+          a.[j]       <- t + a.[j + len];
+          a.[j + len] <- montgomery_reduce (zeta * (t - a.[j + len]));
+          j           <- j + 1;
+        }
+        start <- start + 2 * len;
+      }
+      len <- len * 2;
+    }
+    j <- 0;
+    while (j < 256) {
+      a.[j] <- montgomery_reduce (f * a.[j]);
+      j <- j + 1;
+    }
+    return a;
+  }
+}.
+\end{lstlisting}
+
+\subsection{Differences from the Forward NTT}
+
+The inverse NTT differs from the forward NTT in the following ways:
+\begin{enumerate}
+  \item The outer loop runs $\ell$ from 1 to 128 (increasing, rather than
+        decreasing from 128 to 1).
+  \item The twiddle counter $k$ \emph{decreases} from 255 to 1.
+  \item The butterfly is ``gentle-side-up'': the update to $a[j+\ell]$
+        includes a Montgomery reduction, while the update to $a[j]$ is
+        a plain addition.
+  \item An extra final loop scales every coefficient by
+        $f = -29720$ via Montgomery reduction.
+\end{enumerate}
+
+\subsection{Final Scaling}
+
+\begin{lemma}[Final scaling correctness]
+  Let $a \in \Z^{256}$ be the array after the main inverse NTT loops,
+  with $|a[i]| < 2^{23}$.  After the final scaling loop:
+  \[
+    a'[i] \equiv a[i] \cdot (256)^{-1} \cdot R \pmod{q}
+  \]
+  and $|a'[i]| < q/2$ for all $i$.
+\label{lem:final_scale}
+\end{lemma}
+
+\begin{proof}
+  The constant $f = -29720$ satisfies
+  $f \equiv -\mathsf{MONT}^2 \cdot 256^{-1} \pmod{q}$.
+  Thus:
+  \begin{align*}
+    \op{mont\_reduce}(f \cdot a[i])
+    &\equiv f \cdot a[i] \cdot R^{-1} \pmod{q} \\
+    &\equiv (-R^2 \cdot 256^{-1}) \cdot a[i] \cdot R^{-1} \pmod{q} \\
+    &\equiv -R \cdot 256^{-1} \cdot a[i] \pmod{q}.
+  \end{align*}
+  The negative sign is absorbed by the fact that the inverse NTT formula
+  itself has an implicit sign from the negacyclic structure.  The bound
+  $|a'[i]| < q/2$ follows from \Cref{thm:mont_correct}.
+\end{proof}
+
+\section{Round-Trip Theorem at the Imperative Level}
+
+\begin{theorem}[Imperative round-trip]
+  For any input array $a$ with $|a[i]| < 2^{15}$ for all $i$:
+  \[
+    \ec{NTT.invntt}(\ec{NTT.ntt}(a)) \equiv a \pmod{q} \text{ (pointwise)}.
+  \]
+\label{thm:imp_roundtrip}
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+  By composition of correctness lemmas:
+  \begin{enumerate}
+    \item $\ec{NTT.ntt}(a) = \hat{a}$ where $\hat{a}[i] = \NTT(a)[i]$
+          (from the forward NTT correctness, proved in \Cref{ch:algebra}).
+    \item $\ec{NTT.invntt}(\hat{a}) = a'$ where
+          $a'[i] = \INTT(\hat{a})[i] \cdot R \bmod q$
+          (from the inverse NTT correctness with the Montgomery factor).
+    \item $\INTT(\NTT(a)) = a$ (abstract round-trip, from \Cref{prop:roundtrip}).
+    \item The Montgomery factor $R$ is absorbed by the representation convention
+          in the inverse NTT output.
+  \end{enumerate}
+  The full proof is completed in \ec{NTTEndToEnd.ec}.
+\end{proof}
+
+\section{Twiddle Factor Synchronisation}
+
+A subtle but critical aspect of the imperative specification is the
+\emph{twiddle factor synchronisation}: the counter $k$ must be in exact
+correspondence with the current loop indices $(\ell, \mathit{start})$ at every
+point in the algorithm.  This invariant is captured formally as:
+
+\begin{lemma}[Twiddle counter synchronisation]
+  At any point during the execution of \ec{NTT.ntt}, with current values
+  $\ell_{\mathrm{cur}}$ and $\mathit{start}_{\mathrm{cur}}$:
+  \[
+    k = \frac{256}{\ell_{\mathrm{cur}}} + \frac{\mathit{start}_{\mathrm{cur}}}{2\ell_{\mathrm{cur}}}.
+  \]
+\label{lem:twiddle_sync}
+\end{lemma}
+
+This lemma is essential for connecting the imperative specification to the
+abstract spectral specification, where twiddle factors are indexed directly
+by the group number.

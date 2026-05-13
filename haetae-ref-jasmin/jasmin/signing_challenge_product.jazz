@@ -1,0 +1,14 @@
+require "params.jinc"
+require "poly.jinc"
+
+export
+fn sign_compute_cs2_jazz(reg mut ptr u32[2048] cs2p,
+                         reg const ptr u32[2048] s2p,
+                         reg const ptr u32[HAETAE_N] chatp,
+                         reg u64 count) -> reg ptr u32[2048]
+{
+  cs2p = _polyvec_poly_pointwise(cs2p, s2p, chatp, count);
+  cs2p = _polyvec_invntt(cs2p, count);
+
+  return cs2p;
+}

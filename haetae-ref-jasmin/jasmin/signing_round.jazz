@@ -1,0 +1,84 @@
+require "params.jinc"
+require "polyfix.jinc"
+
+inline fn _sign_round_lk_copy0(reg mut ptr u32[2048] z1p,
+                               reg mut ptr u32[2048] z2p,
+                               reg mut ptr u32[HAETAE_N] z10p,
+                               reg const ptr u32[4096] y1p,
+                               reg const ptr u32[4096] y2p,
+                               reg u64 lcount,
+                               reg u64 kcount) -> reg ptr u32[2048],
+                                                   reg ptr u32[2048],
+                                                   reg ptr u32[HAETAE_N]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < lcount)
+  {
+    a = y1p[i];
+    a += HAETAE_LNHALF;
+    a >>s= HAETAE_LNBITS;
+    z1p[i] = a;
+    if (i < HAETAE_N)
+    {
+      z10p[i] = a;
+    }
+    i += 1;
+  }
+
+  i = 0;
+  while (i < kcount)
+  {
+    a = y2p[i];
+    a += HAETAE_LNHALF;
+    a >>s= HAETAE_LNBITS;
+    z2p[i] = a;
+    i += 1;
+  }
+
+  return z1p, z2p, z10p;
+}
+
+export
+fn sign_round_lk_copy0_mode2_jazz(reg mut ptr u32[2048] z1p,
+                                  reg mut ptr u32[2048] z2p,
+                                  reg mut ptr u32[HAETAE_N] z10p,
+                                  reg const ptr u32[4096] y1p,
+                                  reg const ptr u32[4096] y2p)
+                                  -> reg ptr u32[2048],
+                                     reg ptr u32[2048],
+                                     reg ptr u32[HAETAE_N]
+{
+  z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1024, 512);
+  return z1p, z2p, z10p;
+}
+
+export
+fn sign_round_lk_copy0_mode3_jazz(reg mut ptr u32[2048] z1p,
+                                  reg mut ptr u32[2048] z2p,
+                                  reg mut ptr u32[HAETAE_N] z10p,
+                                  reg const ptr u32[4096] y1p,
+                                  reg const ptr u32[4096] y2p)
+                                  -> reg ptr u32[2048],
+                                     reg ptr u32[2048],
+                                     reg ptr u32[HAETAE_N]
+{
+  z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1536, 768);
+  return z1p, z2p, z10p;
+}
+
+export
+fn sign_round_lk_copy0_mode5_jazz(reg mut ptr u32[2048] z1p,
+                                  reg mut ptr u32[2048] z2p,
+                                  reg mut ptr u32[HAETAE_N] z10p,
+                                  reg const ptr u32[4096] y1p,
+                                  reg const ptr u32[4096] y2p)
+                                  -> reg ptr u32[2048],
+                                     reg ptr u32[2048],
+                                     reg ptr u32[HAETAE_N]
+{
+  z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1792, 1024);
+  return z1p, z2p, z10p;
+}

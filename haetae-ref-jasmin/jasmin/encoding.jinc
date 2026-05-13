@@ -1,0 +1,482 @@
+fn _encode_h_prepare(reg mut ptr u8[2048] symsp,
+                     reg mut ptr u64[1] badp,
+                     reg const ptr u32[2048] hp,
+                     reg u64 count,
+                     reg u64 mh,
+                     reg u64 offset) -> reg ptr u8[2048],
+                                       reg ptr u64[1]
+{
+  reg u64 i bad hcut upper tmp64;
+  reg u32 tmp off32;
+  reg u8 s;
+
+  hcut = mh;
+  hcut -= 1;
+  hcut >>= 1;
+  upper = hcut;
+  upper += offset;
+  off32 = (32u)offset;
+
+  bad = 0;
+  i = 0;
+  while (i < count)
+  {
+    if (bad != 0)
+    {
+      count = i;
+    }
+    else
+    {
+      tmp = hp[i];
+      tmp64 = (64u)tmp;
+      if (hcut < tmp64)
+      {
+        if (tmp64 <= upper)
+        {
+          bad = 1;
+        }
+        else
+        {
+          tmp -= off32;
+        }
+      }
+      s = (8u)tmp;
+      symsp[i] = s;
+      i += 1;
+    }
+  }
+
+  badp[0] = bad;
+  return symsp, badp;
+}
+
+fn _rans_encode(reg mut ptr u8[2048] encp,
+                reg mut ptr u64[2] statep,
+                reg const ptr u8[2048] symsp,
+                reg const ptr u32[132] esymsp,
+                reg u64 count) -> reg ptr u8[2048],
+                                  reg ptr u64[2]
+{
+  reg u64 i off bad idx prod hi;
+  reg u32 x x_max rcp_freq bias packed cmpl_freq rcp_shift q byte32;
+  reg u8 s byte;
+
+  x = 8388608;
+  off = count;
+  bad = 0;
+  i = count;
+  while (i > 0)
+  {
+    if (bad != 0)
+    {
+      i = 0;
+    }
+    else
+    {
+      i -= 1;
+      s = symsp[i];
+      idx = (64u)s;
+      idx *= 4;
+
+      x_max = esymsp[idx];
+      idx += 1;
+      rcp_freq = esymsp[idx];
+      idx += 1;
+      bias = esymsp[idx];
+      idx += 1;
+      packed = esymsp[idx];
+
+      cmpl_freq = packed;
+      cmpl_freq &= 0xffff;
+      rcp_shift = packed;
+      rcp_shift >>= 16;
+
+      while (x >= x_max)
+      {
+        off -= 1;
+        byte = (8u)x;
+        encp[off] = byte;
+        x >>= 8;
+      }
+
+      prod = (64u)x;
+      hi = (64u)rcp_freq;
+      prod *= hi;
+      prod >>= 32;
+      q = (32u)prod;
+      if (rcp_shift == 1)
+      {
+        q >>= 1;
+      }
+      else
+      {
+        if (rcp_shift == 2)
+        {
+          q >>= 2;
+        }
+        else
+        {
+          if (rcp_shift == 3)
+          {
+            q >>= 3;
+          }
+          else
+          {
+            if (rcp_shift == 4)
+            {
+              q >>= 4;
+            }
+            else
+            {
+              if (rcp_shift == 5)
+              {
+                q >>= 5;
+              }
+              else
+              {
+                if (rcp_shift == 6)
+                {
+                  q >>= 6;
+                }
+                else
+                {
+                  if (rcp_shift == 7)
+                  {
+                    q >>= 7;
+                  }
+                  else
+                  {
+                    if (rcp_shift == 8)
+                    {
+                      q >>= 8;
+                    }
+                    else
+                    {
+                      if (rcp_shift == 9)
+                      {
+                        q >>= 9;
+                      }
+                      else
+                      {
+                        if (rcp_shift == 10)
+                        {
+                          q >>= 10;
+                        }
+                        else
+                        {
+                          if (rcp_shift == 11)
+                          {
+                            q >>= 11;
+                          }
+                          else
+                          {
+                            if (rcp_shift == 12)
+                            {
+                              q >>= 12;
+                            }
+                            else
+                            {
+                              if (rcp_shift == 13)
+                              {
+                                q >>= 13;
+                              }
+                              else
+                              {
+                                if (rcp_shift == 14)
+                                {
+                                  q >>= 14;
+                                }
+                                else
+                                {
+                                  if (rcp_shift == 15)
+                                  {
+                                    q >>= 15;
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      q *= cmpl_freq;
+      x += bias;
+      x += q;
+
+      if (off < 4)
+      {
+        bad = 1;
+      }
+    }
+  }
+
+  if (bad == 0)
+  {
+    off -= 4;
+    byte32 = x;
+    byte = (8u)byte32;
+    encp[off] = byte;
+    idx = off;
+    idx += 1;
+    byte32 >>= 8;
+    byte = (8u)byte32;
+    encp[idx] = byte;
+    idx += 1;
+    byte32 >>= 8;
+    byte = (8u)byte32;
+    encp[idx] = byte;
+    idx += 1;
+    byte32 >>= 8;
+    byte = (8u)byte32;
+    encp[idx] = byte;
+  }
+
+  statep[0] = off;
+  statep[1] = bad;
+  return encp, statep;
+}
+
+fn _rans_decode(reg mut ptr u8[2048] symsp,
+                reg mut ptr u64[3] statep,
+                reg const ptr u8[2048] bufp,
+                reg const ptr u32[512] symbolwp,
+                reg const ptr u32[132] dsymswp) -> reg ptr u8[2048],
+                                                    reg ptr u64[3]
+{
+  reg u64 i off bad idx x64 again tmp64 count size_in m upper;
+  reg u32 x tmp word s32 packed start freq q low;
+  reg u8 byte s;
+
+  count = statep[0];
+  size_in = statep[1];
+  m = statep[2];
+  upper = 1;
+  upper <<= 31;
+  bad = 0;
+  off = 4;
+
+  x = (32u)bufp[0];
+  tmp = (32u)bufp[1];
+  tmp <<= 8;
+  x |= tmp;
+  tmp = (32u)bufp[2];
+  tmp <<= 16;
+  x |= tmp;
+  tmp = (32u)bufp[3];
+  tmp <<= 24;
+  x |= tmp;
+
+  x64 = (64u)x;
+  if (x64 < 8388608)
+  {
+    bad = 1;
+  }
+  if (x64 >= upper)
+  {
+    bad = 1;
+  }
+
+  i = 0;
+  while (i < count)
+  {
+    if (bad != 0)
+    {
+      i = count;
+    }
+    else
+    {
+      idx = (64u)x;
+      idx &= 1023;
+      tmp64 = idx;
+      tmp64 &= 1;
+      idx >>= 1;
+      word = symbolwp[idx];
+      if (tmp64 != 0)
+      {
+        word >>= 16;
+      }
+      s32 = word;
+      s32 &= 0xffff;
+
+      tmp64 = (64u)s32;
+      if (tmp64 >= m)
+      {
+        bad = 1;
+      }
+      else
+      {
+        s = (8u)s32;
+        symsp[i] = s;
+
+        idx = (64u)s32;
+        packed = dsymswp[idx];
+        start = packed;
+        start &= 0xffff;
+        freq = packed;
+        freq >>= 16;
+
+        q = x;
+        q >>= 10;
+        low = x;
+        low &= 1023;
+        q *= freq;
+        q += low;
+        q -= start;
+        x = q;
+
+        again = 1;
+        while (again != 0)
+        {
+          x64 = (64u)x;
+          if (x64 < 8388608)
+          {
+            if (off < size_in)
+            {
+              byte = bufp[off];
+              off += 1;
+              x <<= 8;
+              tmp = (32u)byte;
+              x |= tmp;
+            }
+            else
+            {
+              again = 0;
+            }
+          }
+          else
+          {
+            again = 0;
+          }
+        }
+
+        i += 1;
+      }
+    }
+  }
+
+  if (bad == 0)
+  {
+    if (x != 8388608)
+    {
+      bad = 1;
+    }
+    if (off != size_in)
+    {
+      bad = 1;
+    }
+  }
+
+  statep[0] = off;
+  statep[1] = bad;
+  return symsp, statep;
+}
+
+fn _decode_h_apply(reg mut ptr u32[2048] hp,
+                   reg const ptr u8[2048] symsp,
+                   reg u64 count,
+                   reg u64 hcut,
+                   reg u64 offset) -> reg ptr u32[2048]
+{
+  reg u64 i tmp64;
+  reg u32 tmp off32;
+  reg u8 s;
+
+  off32 = (32u)offset;
+  i = 0;
+  while (i < count)
+  {
+    s = symsp[i];
+    tmp = (32u)s;
+    tmp64 = (64u)tmp;
+    if (hcut < tmp64)
+    {
+      tmp += off32;
+    }
+    hp[i] = tmp;
+    i += 1;
+  }
+
+  return hp;
+}
+
+fn _decode_hb_z1_apply(reg mut ptr u32[2048] hp,
+                       reg const ptr u8[2048] symsp,
+                       reg u64 count,
+                       reg u64 offset) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 tmp off32;
+  reg u8 s;
+
+  off32 = (32u)offset;
+  i = 0;
+  while (i < count)
+  {
+    s = symsp[i];
+    tmp = (32u)s;
+    tmp -= off32;
+    hp[i] = tmp;
+    i += 1;
+  }
+
+  return hp;
+}
+
+fn _encode_hb_z1_prepare(reg mut ptr u8[2048] symsp,
+                         reg mut ptr u64[1] badp,
+                         reg const ptr u32[2048] hp,
+                         reg u64 count,
+                         reg u64 mhb,
+                         reg u64 offset) -> reg ptr u8[2048],
+                                           reg ptr u64[1]
+{
+  reg u64 i bad neg;
+  reg u64 tmp;
+  reg u32 a;
+  reg u8 s;
+
+  bad = 0;
+  i = 0;
+  while (i < count)
+  {
+    if (bad != 0)
+    {
+      count = i;
+    }
+    else
+    {
+      a = hp[i];
+      tmp = (64s)a;
+      tmp += offset;
+      neg = tmp;
+      neg >>s= 63;
+      if (neg != 0)
+      {
+        bad = 1;
+      }
+      else
+      {
+        if (tmp >= mhb)
+        {
+          bad = 1;
+        }
+        else
+        {
+          s = (8u)tmp;
+          symsp[i] = s;
+        }
+      }
+      i += 1;
+    }
+  }
+
+  badp[0] = bad;
+  return symsp, badp;
+}

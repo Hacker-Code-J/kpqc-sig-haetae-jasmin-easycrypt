@@ -1,0 +1,155 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Params.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Parameter modes and constants.
+
+\section*{How To Read This Script}
+Read this file as the shared numerical vocabulary used by algebra, distributions, rejection sampling, and reductions.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore.} & Imports AllCore.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+3 & {\ttfamily\scriptsize theory HAETAE\_Params.} & Begins the namespace HAETAE\_Params, grouping the declarations as one checked theory. \\
+4 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+5 & {\ttfamily\scriptsize op seedbytes : int = 32.} & Defines integer-valued parameter seedbytes, used for dimensions, budgets, support sizes, or bounds. \\
+6 & {\ttfamily\scriptsize op crhbytes : int = 64.} & Defines integer-valued parameter crhbytes, used for dimensions, budgets, support sizes, or bounds. \\
+7 & {\ttfamily\scriptsize op n : int = 256.} & Defines integer-valued parameter n, used for dimensions, budgets, support sizes, or bounds. \\
+8 & {\ttfamily\scriptsize op q : int = 64513.} & Defines integer-valued parameter q, used for dimensions, budgets, support sizes, or bounds. \\
+9 & {\ttfamily\scriptsize op dq : int = 2 * q.} & Defines integer-valued parameter dq, used for dimensions, budgets, support sizes, or bounds. \\
+10 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+11 & {\ttfamily\scriptsize type mode = [ Mode2 | Mode3 | Mode5 ].} & Declares carrier set mode.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+12 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+13 & {\ttfamily\scriptsize op mode\_k (md : mode) : int =} & Defines integer-valued parameter mode\_k, used for dimensions, budgets, support sizes, or bounds. \\
+14 & {\ttfamily\scriptsize   with md = Mode2 => 2} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+15 & {\ttfamily\scriptsize   with md = Mode3 => 3} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+16 & {\ttfamily\scriptsize   with md = Mode5 => 4.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+17 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+18 & {\ttfamily\scriptsize op mode\_l (md : mode) : int =} & Defines integer-valued parameter mode\_l, used for dimensions, budgets, support sizes, or bounds. \\
+19 & {\ttfamily\scriptsize   with md = Mode2 => 4} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+20 & {\ttfamily\scriptsize   with md = Mode3 => 6} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+21 & {\ttfamily\scriptsize   with md = Mode5 => 7.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+22 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+23 & {\ttfamily\scriptsize op mode\_tau (md : mode) : int =} & Defines integer-valued parameter mode\_tau, used for dimensions, budgets, support sizes, or bounds. \\
+24 & {\ttfamily\scriptsize   with md = Mode2 => 58} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+25 & {\ttfamily\scriptsize   with md = Mode3 => 80} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+26 & {\ttfamily\scriptsize   with md = Mode5 => 128.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+27 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+28 & {\ttfamily\scriptsize op mode\_b0sq (md : mode) : int =} & Defines integer-valued parameter mode\_b0sq, used for dimensions, budgets, support sizes, or bounds. \\
+29 & {\ttfamily\scriptsize   with md = Mode2 => 96944109} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+30 & {\ttfamily\scriptsize   with md = Mode3 => 335438492} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+31 & {\ttfamily\scriptsize   with md = Mode5 => 499239142.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+32 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+33 & {\ttfamily\scriptsize op mode\_b1sq (md : mode) : int =} & Defines integer-valued parameter mode\_b1sq, used for dimensions, budgets, support sizes, or bounds. \\
+34 & {\ttfamily\scriptsize   with md = Mode2 => 96805527} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+35 & {\ttfamily\scriptsize   with md = Mode3 => 335171879} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+36 & {\ttfamily\scriptsize   with md = Mode5 => 498849991.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+37 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+38 & {\ttfamily\scriptsize op mode\_b2sq (md : mode) : int =} & Defines integer-valued parameter mode\_b2sq, used for dimensions, budgets, support sizes, or bounds. \\
+39 & {\ttfamily\scriptsize   with md = Mode2 => 163265017} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+40 & {\ttfamily\scriptsize   with md = Mode3 => 479901314} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+41 & {\ttfamily\scriptsize   with md = Mode5 => 597386433.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+42 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+43 & {\ttfamily\scriptsize op mode\_ln (\_ : mode) : int = 8192.} & Defines integer-valued parameter mode\_ln, used for dimensions, budgets, support sizes, or bounds. \\
+44 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+45 & {\ttfamily\scriptsize op mode\_alpha\_hint (md : mode) : int =} & Defines integer-valued parameter mode\_alpha\_hint, used for dimensions, budgets, support sizes, or bounds. \\
+46 & {\ttfamily\scriptsize   with md = Mode2 => 512} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+47 & {\ttfamily\scriptsize   with md = Mode3 => 512} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+48 & {\ttfamily\scriptsize   with md = Mode5 => 256.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+49 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+50 & {\ttfamily\scriptsize op mode\_m (md : mode) : int = mode\_l md - 1.} & Defines integer-valued parameter mode\_m, used for dimensions, budgets, support sizes, or bounds. \\
+51 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+52 & {\ttfamily\scriptsize op mode\_crypto\_bytes (md : mode) : int =} & Defines integer-valued parameter mode\_crypto\_bytes, used for dimensions, budgets, support sizes, or bounds. \\
+53 & {\ttfamily\scriptsize   with md = Mode2 => 1474} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+54 & {\ttfamily\scriptsize   with md = Mode3 => 2349} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+55 & {\ttfamily\scriptsize   with md = Mode5 => 2948.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+56 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+57 & {\ttfamily\scriptsize op mode\_polyq\_packedbytes (md : mode) : int =} & Defines integer-valued parameter mode\_polyq\_packedbytes, used for dimensions, budgets, support sizes, or bounds. \\
+58 & {\ttfamily\scriptsize   with md = Mode2 => 480} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+59 & {\ttfamily\scriptsize   with md = Mode3 => 480} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+60 & {\ttfamily\scriptsize   with md = Mode5 => 512.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+61 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+62 & {\ttfamily\scriptsize op mode\_publickeybytes (md : mode) : int =} & Defines integer-valued parameter mode\_publickeybytes, used for dimensions, budgets, support sizes, or bounds. \\
+63 & {\ttfamily\scriptsize   seedbytes + mode\_k md * mode\_polyq\_packedbytes md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+64 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+65 & {\ttfamily\scriptsize lemma seedbytes\_gt0 : 0 < seedbytes by rewrite /seedbytes.} & States checked lemma seedbytes\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+66 & {\ttfamily\scriptsize lemma crhbytes\_gt0 : 0 < crhbytes by rewrite /crhbytes.} & States checked lemma crhbytes\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+67 & {\ttfamily\scriptsize lemma n\_gt0 : 0 < n by rewrite /n.} & States checked lemma n\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+68 & {\ttfamily\scriptsize lemma q\_gt0 : 0 < q by rewrite /q.} & States checked lemma q\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+69 & {\ttfamily\scriptsize lemma dqE : dq = 129026 by rewrite /dq /q.} & States checked lemma dqE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+70 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+71 & {\ttfamily\scriptsize lemma mode\_k\_gt0 md : 0 < mode\_k md.} & States checked lemma mode\_k\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+72 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+73 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+74 & {\ttfamily\scriptsize lemma mode\_l\_gt0 md : 0 < mode\_l md.} & States checked lemma mode\_l\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+75 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+76 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+77 & {\ttfamily\scriptsize lemma mode\_tau\_gt0 md : 0 < mode\_tau md.} & States checked lemma mode\_tau\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+78 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+79 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+80 & {\ttfamily\scriptsize lemma mode\_tau\_le\_n md : mode\_tau md <= n.} & States checked lemma mode\_tau\_le\_n.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+81 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+82 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+83 & {\ttfamily\scriptsize lemma mode\_b0sq\_gt0 md : 0 < mode\_b0sq md.} & States checked lemma mode\_b0sq\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+84 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+85 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+86 & {\ttfamily\scriptsize lemma mode\_b1sq\_gt0 md : 0 < mode\_b1sq md.} & States checked lemma mode\_b1sq\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+87 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+88 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+89 & {\ttfamily\scriptsize lemma mode\_b2sq\_gt0 md : 0 < mode\_b2sq md.} & States checked lemma mode\_b2sq\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+90 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+92 & {\ttfamily\scriptsize lemma mode\_ln\_gt0 md : 0 < mode\_ln md.} & States checked lemma mode\_ln\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+93 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+94 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+95 & {\ttfamily\scriptsize lemma mode\_alpha\_hint\_gt0 md : 0 < mode\_alpha\_hint md.} & States checked lemma mode\_alpha\_hint\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+96 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+97 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+98 & {\ttfamily\scriptsize lemma mode\_m\_gt0 md : 0 < mode\_m md.} & States checked lemma mode\_m\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+99 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+100 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+101 & {\ttfamily\scriptsize lemma mode\_crypto\_bytes\_gt0 md : 0 < mode\_crypto\_bytes md.} & States checked lemma mode\_crypto\_bytes\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+102 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+103 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+104 & {\ttfamily\scriptsize lemma mode\_polyq\_packedbytes\_gt0 md : 0 < mode\_polyq\_packedbytes md.} & States checked lemma mode\_polyq\_packedbytes\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+105 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+106 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+107 & {\ttfamily\scriptsize lemma n\_le\_mode\_polyq\_packedbytes md : n <= mode\_polyq\_packedbytes md.} & States checked lemma n\_le\_mode\_polyq\_packedbytes.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+108 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+109 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+110 & {\ttfamily\scriptsize lemma mode\_publickeybytes\_gt0 md : 0 < mode\_publickeybytes md.} & States checked lemma mode\_publickeybytes\_gt0.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+111 & {\ttfamily\scriptsize proof. by case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+112 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+113 & {\ttfamily\scriptsize end HAETAE\_Params.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

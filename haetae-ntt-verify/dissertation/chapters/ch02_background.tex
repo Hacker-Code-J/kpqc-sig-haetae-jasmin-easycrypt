@@ -1,0 +1,270 @@
+%==============================================================================%
+% Chapter 2 – Background
+%==============================================================================%
+
+\chapter{Background}
+\label{ch:background}
+
+\section{Lattice-Based Cryptography}
+
+\subsection{Module Lattices}
+
+A \emph{lattice} $\Lambda \subseteq \Z^n$ is a discrete additive subgroup of
+$\Z^n$; equivalently, it is the $\Z$-span of a basis matrix $\mathbf{B} \in
+\Z^{n \times n}$.  The \emph{shortest vector problem} (SVP) asks for the
+shortest non-zero lattice vector under the Euclidean norm, and is conjectured
+to be hard for quantum computers.
+
+Module lattices generalise to modules over a polynomial ring.  Let $R = \Z[X]
+/ (X^n + 1)$ and $R_q = R/qR$.  A \emph{module lattice} of rank $k$ over $R$
+is a free $R$-module $M \cong R^k$ together with a $\Z$-embedding into $\Z^{kn}$.
+The \emph{Module Short Integer Solution} (MSIS) and \emph{Module Learning With
+Errors} (MLWE) problems over such lattices underpin the security of Dilithium,
+FALCON, and \haetae{}.
+
+\subsection{NTT-Friendly Parameters}
+
+For efficient computation, the ring $R_q$ must support a fast polynomial
+multiplication algorithm.  If $q \equiv 1 \pmod{2n}$ then $X^n + 1$ splits
+completely over $\F_q$ and the NTT reduces polynomial multiplication to
+componentwise multiplication of length-$n$ vectors.  If only $q \equiv 1
+\pmod{n}$ (but $q \equiv 3 \pmod{4}$ or similar), a \emph{negacyclic} NTT can
+still be defined~\cite{Longa2016}.
+
+For \haetae{}, $n = 256$ and $q = 64513 \equiv 1 \pmod{512}$.  This means a
+primitive $512$th root of unity $\zeta_0$ exists in $\F_q$, enabling a full
+$256$-point negacyclic NTT.
+
+\section{Number-Theoretic Transform}
+
+\subsection{Definition}
+
+Let $q$ be an odd prime with $q \equiv 1 \pmod{2n}$, and let $\zeta \in \F_q^*$
+be a primitive $2n$th root of unity (so $\zeta^{2n} = 1$, $\zeta^n = -1$).
+The \emph{negacyclic NTT} of a polynomial $f = \sum_{j=0}^{n-1} f_j X^j \in
+R_q$ is the vector $\hat{f} \in \F_q^n$ defined by
+\begin{equation}
+  \hat{f}_i = \sum_{j=0}^{n-1} f_j \cdot \zeta^{(2\brev_8(i)+1) \cdot j},
+  \qquad i = 0, \dots, n-1,
+\label{eq:ntt_def}
+\end{equation}
+where $\brev_8 : \{0,\dots,255\} \to \{0,\dots,255\}$ is the bit-reversal
+permutation of an 8-bit index.
+
+The inverse NTT is
+\begin{equation}
+  f_i = \frac{1}{n} \sum_{j=0}^{n-1} \hat{f}_j \cdot \zeta^{-((2\brev_8(j)+1) \cdot i)},
+  \qquad i = 0, \dots, n-1.
+\label{eq:intt_def}
+\end{equation}
+
+\begin{proposition}[Round-trip identity]
+  $\INTT(\NTT(f)) = f$ for all $f \in R_q$.
+\label{prop:roundtrip}
+\end{proposition}
+
+\subsection{Cooley--Tukey Butterfly Algorithm}
+\label{sec:ct_butterfly}
+
+The NTT defined by \cref{eq:ntt_def} can be computed in $O(n \log n)$ field
+operations using the Cooley--Tukey decimation-in-time (DIT) algorithm.  For
+the negacyclic case with $n = 256 = 2^8$, the algorithm proceeds in 8 stages.
+
+At stage $s$ (with $s = 0, 1, \dots, 7$, from outermost to innermost), the
+half-length is $\ell = 2^{7-s}$ and the \emph{twiddle factor} for group $k$ is
+$\zeta_k^{(s)} = \zeta^{\brev_8(k) \cdot \ell}$ where $k$ ranges over the
+$2^s$ groups.  The butterfly operation on a pair $(a, b)$ with twiddle factor
+$w$ is:
+\begin{equation}
+  (a', b') = (a + w \cdot b,\ a - w \cdot b).
+\label{eq:butterfly}
+\end{equation}
+
+\begin{algorithm}[h]
+\caption{Forward NTT (Cooley--Tukey DIT, negacyclic, $n = 256$)}
+\label{alg:ntt}
+\begin{algorithmic}[1]
+\Procedure{NTT}{$a[0..255]$}
+\State $k \gets 1$
+\For{$\ell = 128, 64, 32, 16, 8, 4, 2, 1$}
+  \For{$\mathit{start} = 0, 2\ell, 4\ell, \dots, 254$}
+    \State $w \gets \zeta^{\brev_8(k)}$ \Comment{$k$-th twiddle factor}
+    \State $k \gets k + 1$
+    \For{$j = \mathit{start}, \dots, \mathit{start}+\ell-1$}
+      \State $t \gets w \cdot a[j+\ell] \bmod q$
+      \State $a[j+\ell] \gets a[j] - t$
+      \State $a[j] \gets a[j] + t$
+    \EndFor
+  \EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Negacyclic NTT vs.\ Standard NTT}
+
+A standard (cyclic) DFT of length $n$ uses the recurrence for the cyclic ring
+$\Z_q[X]/(X^n - 1)$.  The \emph{negacyclic} ring $\Z_q[X]/(X^n + 1)$ requires
+a pre-twist by powers of $\zeta$ (a half-integer shift of the exponent), which
+accounts for the $+1$ in the exponent formula of \cref{eq:ntt_def}.
+
+Critically for this dissertation, \haetae{} uses a \emph{complete} $n=256$
+negacyclic NTT with bit-reversal exponent $\brev_8(k)$, whereas MLKEM uses an
+incomplete $128$-point transform with exponent $\brev_7(k)$.  This distinction
+has direct consequences for which algebraic lemmas can be shared between
+verification projects.
+
+\section{Montgomery Modular Arithmetic}
+
+\subsection{REDC Algorithm}
+
+Montgomery reduction~\cite{Montgomery1985} is a technique for efficient modular
+multiplication that avoids expensive division.  Given $a \in \Z$ with
+$0 \le a < q \cdot R$ and integers $q, R$ with $\gcd(q, R) = 1$, the
+Montgomery product is $a \cdot R^{-1} \bmod q$.
+
+\begin{algorithm}[h]
+\caption{Montgomery Reduction REDC$(a, q, R, q')$}
+\label{alg:mont_reduce}
+\begin{algorithmic}[1]
+\Require $a, R = 2^{32}$, $q' = -q^{-1} \bmod R$
+\Ensure $a \cdot R^{-1} \bmod q$
+\State $m \gets (a \bmod R) \cdot q' \bmod R$
+\State $t \gets (a + m \cdot q) \div R$
+\If{$t \ge q$} \Return $t - q$ \Else\ \Return $t$ \EndIf
+\end{algorithmic}
+\end{algorithm}
+
+In the \haetae{} implementation, $R = 2^{32}$, $q = 64513$,
+$q' = \mathsf{QINV} = 940508161$ ($\equiv -q^{-1} \bmod 2^{32}$), and
+$\mathsf{MONT} = R \bmod q = 14321$.
+
+\subsection{Montgomery Multiplication}
+
+Given $a, b \in \Z_q$ with both represented in Montgomery form (i.e., as
+$a \cdot R \bmod q$ and $b \cdot R \bmod q$), their product in Montgomery form
+is computed as $\mathrm{REDC}(a \cdot b)$, since
+$\mathrm{REDC}(aR \cdot bR) = ab R^2 \cdot R^{-1} = abR \bmod q$.
+
+\subsection{Signed Montgomery Reduction}
+
+The \haetae{} implementation uses a \emph{signed} variant where intermediate
+values are 32-bit signed integers and the final conditional subtraction is
+replaced by an arithmetic right shift.  Specifically, for $a \in \Z$ with
+$\abs{a} < q \cdot 2^{15}$:
+\begin{equation}
+  \text{int32}(a_{\text{lo}} \cdot q') \cdot q \;\text{(as signed 64-bit)} +\; a
+  \;\text{ shifted right by 32}
+\label{eq:signed_mont}
+\end{equation}
+yields a value congruent to $a \cdot R^{-1} \pmod{q}$ and bounded by $q/2$.
+
+\section{The EasyCrypt Proof Assistant}
+
+\subsection{Architecture}
+
+\easycrypt{}~\cite{Barthe2011} is an interactive proof assistant specialised
+for reasoning about cryptographic programs.  It combines:
+\begin{itemize}
+  \item A \emph{program logic} layer supporting Hoare logic (HL) for
+        deterministic programs and probabilistic relational Hoare logic
+        (pRHL) for pairs of probabilistic programs.
+
+  \item An \emph{ambient logic} layer that is a form of higher-order logic
+        (HOL) with a type theory supporting algebraic structures (groups,
+        rings, fields).
+
+  \item A tactic engine with automation backends including SMT solvers
+        (CVC4, Z3) and a computer algebra system for ring/field equalities.
+\end{itemize}
+
+\subsection{Hoare Logic in EasyCrypt}
+
+A \emph{Hoare triple} $\{P\}\; c\; \{Q\}$ asserts that if precondition $P$
+holds before executing command $c$, then postcondition $Q$ holds after.  In
+\easycrypt{}, Hoare triples over \emph{procedures} (modules with state) are
+written \ec{hoare[M.f : P ==> Q]}.
+
+A \emph{relational Hoare triple} $\{P\}\; (c_1 \sim c_2)\; \{Q\}$ asserts
+that if $c_1$ and $c_2$ start in states satisfying $P$, their outputs satisfy
+$Q$.  This is the foundation for proving that two programs are equivalent.
+
+\subsection{Module System}
+
+\easycrypt{} organises code into \emph{modules}.  A module interface (type) is
+a signature listing procedure names and types; a module is a concrete
+implementation.  The \jasmin{} compiler generates an \easycrypt{} module for
+each exported function, which can then be related to hand-written specification
+modules via pRHL.
+
+\subsection{Theory Cloning}
+
+Algebraic structures are developed as parameterised \emph{theories} that are
+instantiated by \emph{cloning}: \ec{clone Ring.ComRing as Zq with type t = int, ...}
+creates a copy of the commutative ring theory with $\Z_q$ as the carrier type
+and appropriate witnesses for the ring axioms.
+
+\section{The Jasmin Programming Language}
+
+\jasmin{}~\cite{Almeida2017} is a C-like language designed for high-assurance
+cryptographic code.  Its distinguishing features are:
+
+\begin{itemize}
+  \item \textbf{Explicit register allocation.}  Variables are annotated
+        \jasm{reg} (in a register), \jasm{stack} (on the stack), or
+        \jasm{ptr} (a pointer).  The compiler enforces the annotation.
+
+  \item \textbf{Data types matching machine types.}  The types
+        \jasm{u32}, \jasm{u64}, \jasm{u256} correspond directly to
+        32-bit, 64-bit, and 256-bit (AVX2) machine words.
+
+  \item \textbf{Safety verification.}  A safety checker ensures no
+        undefined behaviour (array out of bounds, use before initialisation,
+        integer overflow in unsigned arithmetic).
+
+  \item \textbf{EasyCrypt extraction.}  Each \jasm{export fn} is compiled
+        to both assembly and an \easycrypt{} module.  The extracted module has
+        a semantic identical to the assembly, by the Jasmin compiler
+        correctness theorem.
+\end{itemize}
+
+\begin{lstlisting}[language=Jasmin, caption={Jasmin function signature example}]
+export fn poly_ntt_jazz(reg mut ptr u32[256] rp)
+  -> reg ptr u32[256]
+{
+  rp = _poly_ntt(rp);
+  return rp;
+}
+\end{lstlisting}
+
+The export annotation triggers both assembly generation and \easycrypt{}
+extraction.  The extracted \easycrypt{} type for \jasm{ptr u32[256]} is the
+\easycrypt{} type \ec{W32.t Array256.t}, i.e., an array of 256 machine words.
+
+\section{Related Work}
+
+\paragraph{MLKEM/Kyber NTT.}
+The closest predecessor is the Jasmin/EasyCrypt verification of the NTT in
+ML-KEM~\cite{Barbosa2023}.  That work verifies the incomplete $128$-point
+Cooley--Tukey NTT over the same ring structure but with the \emph{different}
+exponent formula $\brev_8((s \bmod \ell) \cdot 2)$.  Our work adapts
+techniques from that development but requires new algebra lemmas for the
+full $256$-point transform.
+
+\paragraph{Dilithium NTT.}
+The EasyCrypt verification of Dilithium~\cite{Barbosa2021} also formalises
+an NTT in $\Z_q[X]/(X^{256}+1)$ but uses a different prime $q = 8380417$ with
+different twiddle factor structure.
+
+\paragraph{FALCON.}
+FALCON uses a floating-point NTT over $\Z[X]/(X^n+1)$~\cite{Fouque2018}.
+Its Jasmin implementation has been verified using \easycrypt{} but the
+field arithmetic is quite different from the integer case studied here.
+
+\paragraph{High-assurance cryptography.}
+The HACL* project~\cite{Zinzindohoue2017} produces C code verified in
+F*/Low*, with machine-checked compilation to assembly.  While HACL* has
+verified ChaCha20 and Poly1305, it has not (at time of writing) produced a
+verified lattice-based NTT.  Our work contributes to the complementary
+Jasmin/EasyCrypt ecosystem, which has better support for the bitwise
+operations prevalent in lattice primitives.

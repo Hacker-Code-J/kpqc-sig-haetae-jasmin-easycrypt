@@ -1,0 +1,702 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Transcript.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Transcript records and validity/extraction facts.
+
+\section*{How To Read This Script}
+Read this file as the bridge from accepted signatures to structured mathematical objects used by the reductions.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore List.} & Imports AllCore List.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Params HAETAE\_Algebra HAETAE\_ROM HAETAE\_Assumptions.} & Imports HAETAE\_Params HAETAE\_Algebra HAETAE\_ROM HAETAE\_Assumptions.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_Transcript.} & Begins the namespace HAETAE\_Transcript, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Params.} & Opens HAETAE\_Params so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize import HAETAE\_Algebra.} & Opens HAETAE\_Algebra so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize import HAETAE\_ROM.} & Opens HAETAE\_ROM so its names can be used without qualification in the following proof. \\
+9 & {\ttfamily\scriptsize import HAETAE\_Assumptions.} & Opens HAETAE\_Assumptions so its names can be used without qualification in the following proof. \\
+10 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+11 & {\ttfamily\scriptsize type transcript =} & Declares carrier set transcript.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+12 & {\ttfamily\scriptsize   pkey * message * context * polyveck * poly * crh * challenge * signature.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+13 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+14 & {\ttfamily\scriptsize op signature\_commitment\_highbits :} & Defines operation signature\_commitment\_highbits, a total mathematical function or abbreviation used by later declarations. \\
+15 & {\ttfamily\scriptsize   mode -> pkey -> message -> context -> signature -> polyveck =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+16 & {\ttfamily\scriptsize   fun (\_ : mode) (\_ : pkey) (\_ : message) (\_ : context) sig =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+17 & {\ttfamily\scriptsize     sig\_commitment\_highbits sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+18 & {\ttfamily\scriptsize op signature\_commitment\_lowbits :} & Defines operation signature\_commitment\_lowbits, a total mathematical function or abbreviation used by later declarations. \\
+19 & {\ttfamily\scriptsize   mode -> pkey -> message -> context -> signature -> poly =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+20 & {\ttfamily\scriptsize   fun (\_ : mode) (\_ : pkey) (\_ : message) (\_ : context) sig =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+21 & {\ttfamily\scriptsize     sig\_commitment\_lowbits sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+22 & {\ttfamily\scriptsize op signature\_message\_hash :} & Defines operation signature\_message\_hash, a total mathematical function or abbreviation used by later declarations. \\
+23 & {\ttfamily\scriptsize   mode -> pkey -> message -> context -> signature -> crh =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+24 & {\ttfamily\scriptsize   fun (\_ : mode) (\_ : pkey) (\_ : message) (\_ : context) sig =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+25 & {\ttfamily\scriptsize     sig\_message\_hash sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+26 & {\ttfamily\scriptsize op signature\_challenge :} & Defines operation signature\_challenge, a total mathematical function or abbreviation used by later declarations. \\
+27 & {\ttfamily\scriptsize   mode -> pkey -> message -> context -> signature -> challenge =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+28 & {\ttfamily\scriptsize   fun (\_ : mode) (\_ : pkey) (\_ : message) (\_ : context) sig =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+29 & {\ttfamily\scriptsize     sig\_challenge sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+31 & {\ttfamily\scriptsize op transcript\_pk (tr : transcript) : pkey = tr.`1.} & Defines operation transcript\_pk, a total mathematical function or abbreviation used by later declarations. \\
+32 & {\ttfamily\scriptsize op transcript\_message (tr : transcript) : message = tr.`2.} & Defines operation transcript\_message, a total mathematical function or abbreviation used by later declarations. \\
+33 & {\ttfamily\scriptsize op transcript\_context (tr : transcript) : context = tr.`3.} & Defines operation transcript\_context, a total mathematical function or abbreviation used by later declarations. \\
+34 & {\ttfamily\scriptsize op transcript\_commitment\_highbits (tr : transcript) : polyveck = tr.`4.} & Defines operation transcript\_commitment\_highbits, a total mathematical function or abbreviation used by later declarations. \\
+35 & {\ttfamily\scriptsize op transcript\_commitment\_lowbits (tr : transcript) : poly = tr.`5.} & Defines operation transcript\_commitment\_lowbits, a total mathematical function or abbreviation used by later declarations. \\
+36 & {\ttfamily\scriptsize op transcript\_message\_hash (tr : transcript) : crh = tr.`6.} & Defines operation transcript\_message\_hash, a total mathematical function or abbreviation used by later declarations. \\
+37 & {\ttfamily\scriptsize op transcript\_challenge (tr : transcript) : challenge = tr.`7.} & Defines operation transcript\_challenge, a total mathematical function or abbreviation used by later declarations. \\
+38 & {\ttfamily\scriptsize op transcript\_signature (tr : transcript) : signature = tr.`8.} & Defines operation transcript\_signature, a total mathematical function or abbreviation used by later declarations. \\
+39 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+40 & {\ttfamily\scriptsize op transcript\_of\_signature :} & Defines operation transcript\_of\_signature, a total mathematical function or abbreviation used by later declarations. \\
+41 & {\ttfamily\scriptsize   mode -> pkey -> message -> context -> signature -> transcript =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+42 & {\ttfamily\scriptsize   fun md pk m ctx sig =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+43 & {\ttfamily\scriptsize     (pk, m, ctx,} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+44 & {\ttfamily\scriptsize      signature\_commitment\_highbits md pk m ctx sig,} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+45 & {\ttfamily\scriptsize      signature\_commitment\_lowbits md pk m ctx sig,} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+46 & {\ttfamily\scriptsize      signature\_message\_hash md pk m ctx sig,} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+47 & {\ttfamily\scriptsize      signature\_challenge md pk m ctx sig,} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+48 & {\ttfamily\scriptsize      sig).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+49 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+50 & {\ttfamily\scriptsize op transcript\_challenge\_query (md : mode) (tr : transcript) : ro\_query =} & Defines operation transcript\_challenge\_query, a total mathematical function or abbreviation used by later declarations. \\
+51 & {\ttfamily\scriptsize   challenge\_hash\_query} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+52 & {\ttfamily\scriptsize     md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+53 & {\ttfamily\scriptsize     (transcript\_commitment\_highbits tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+54 & {\ttfamily\scriptsize     (transcript\_commitment\_lowbits tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+55 & {\ttfamily\scriptsize     (transcript\_message\_hash tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+56 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+57 & {\ttfamily\scriptsize op transcript\_signature\_challenge\_query (md : mode) (tr : transcript) :} & Defines operation transcript\_signature\_challenge\_query, a total mathematical function or abbreviation used by later declarations. \\
+58 & {\ttfamily\scriptsize   ro\_query =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+59 & {\ttfamily\scriptsize   challenge\_hash\_query} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+60 & {\ttfamily\scriptsize     md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize     (sig\_commitment\_highbits (transcript\_signature tr))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+62 & {\ttfamily\scriptsize     (sig\_commitment\_lowbits (transcript\_signature tr))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+63 & {\ttfamily\scriptsize     (sig\_message\_hash (transcript\_signature tr)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+64 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+65 & {\ttfamily\scriptsize op transcript\_verifies (md : mode) (tr : transcript) : bool =} & Defines predicate transcript\_verifies, an event or well-formedness condition used in later implications and game proofs. \\
+66 & {\ttfamily\scriptsize   verify\_internal md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+67 & {\ttfamily\scriptsize     (transcript\_pk tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+68 & {\ttfamily\scriptsize     (transcript\_message tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize     (transcript\_context tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+70 & {\ttfamily\scriptsize     (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+71 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+72 & {\ttfamily\scriptsize op transcript\_challenge\_matches (tr : transcript) (y : ro\_output) : bool =} & Defines predicate transcript\_challenge\_matches, an event or well-formedness condition used in later implications and game proofs. \\
+73 & {\ttfamily\scriptsize   ro\_challenge\_hash y = transcript\_challenge tr.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+74 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+75 & {\ttfamily\scriptsize op transcript\_signature\_challenge\_matches} & Defines operation transcript\_signature\_challenge\_matches, a total mathematical function or abbreviation used by later declarations. \\
+76 & {\ttfamily\scriptsize    (tr : transcript) (y : ro\_output) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+77 & {\ttfamily\scriptsize   ro\_challenge\_hash y = sig\_challenge (transcript\_signature tr).} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+78 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+79 & {\ttfamily\scriptsize op transcript\_fields\_match\_signature (tr : transcript) : bool =} & Defines predicate transcript\_fields\_match\_signature, an event or well-formedness condition used in later implications and game proofs. \\
+80 & {\ttfamily\scriptsize   transcript\_commitment\_highbits tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+81 & {\ttfamily\scriptsize     sig\_commitment\_highbits (transcript\_signature tr) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+82 & {\ttfamily\scriptsize   transcript\_commitment\_lowbits tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+83 & {\ttfamily\scriptsize     sig\_commitment\_lowbits (transcript\_signature tr) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+84 & {\ttfamily\scriptsize   transcript\_message\_hash tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+85 & {\ttfamily\scriptsize     sig\_message\_hash (transcript\_signature tr) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+86 & {\ttfamily\scriptsize   transcript\_challenge tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+87 & {\ttfamily\scriptsize     sig\_challenge (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+88 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+89 & {\ttfamily\scriptsize op transcript\_valid (md : mode) (tr : transcript) : bool =} & Defines predicate transcript\_valid, an event or well-formedness condition used in later implications and game proofs. \\
+90 & {\ttfamily\scriptsize   transcript\_verifies md tr /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize   valid\_signature md (transcript\_signature tr) /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+92 & {\ttfamily\scriptsize   transcript\_fields\_match\_signature tr.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+93 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+94 & {\ttfamily\scriptsize op transcript\_public\_equation (md : mode) (tr : transcript) : bool =} & Defines predicate transcript\_public\_equation, an event or well-formedness condition used in later implications and game proofs. \\
+95 & {\ttfamily\scriptsize   verify\_public\_equation md (transcript\_pk tr) (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+96 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+97 & {\ttfamily\scriptsize op same\_fork\_target (tr1 tr2 : transcript) : bool =} & Defines predicate same\_fork\_target, an event or well-formedness condition used in later implications and game proofs. \\
+98 & {\ttfamily\scriptsize   transcript\_pk tr1 = transcript\_pk tr2 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+99 & {\ttfamily\scriptsize   transcript\_message tr1 = transcript\_message tr2 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+100 & {\ttfamily\scriptsize   transcript\_context tr1 = transcript\_context tr2 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+101 & {\ttfamily\scriptsize   transcript\_commitment\_highbits tr1 = transcript\_commitment\_highbits tr2 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+102 & {\ttfamily\scriptsize   transcript\_commitment\_lowbits tr1 = transcript\_commitment\_lowbits tr2 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+103 & {\ttfamily\scriptsize   transcript\_message\_hash tr1 = transcript\_message\_hash tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+104 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+105 & {\ttfamily\scriptsize op distinct\_fork\_challenges (tr1 tr2 : transcript) : bool =} & Defines predicate distinct\_fork\_challenges, an event or well-formedness condition used in later implications and game proofs. \\
+106 & {\ttfamily\scriptsize   transcript\_challenge tr1 <> transcript\_challenge tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+107 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+108 & {\ttfamily\scriptsize op valid\_forking\_pair (md : mode) (tr1 tr2 : transcript) : bool =} & Defines predicate valid\_forking\_pair, an event or well-formedness condition used in later implications and game proofs. \\
+109 & {\ttfamily\scriptsize   same\_fork\_target tr1 tr2 /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+110 & {\ttfamily\scriptsize   distinct\_fork\_challenges tr1 tr2 /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+111 & {\ttfamily\scriptsize   transcript\_valid md tr1 /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+112 & {\ttfamily\scriptsize   transcript\_valid md tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+113 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+114 & {\ttfamily\scriptsize op transcript\_response (tr : transcript) : polyvecl =} & Defines operation transcript\_response, a total mathematical function or abbreviation used by later declarations. \\
+115 & {\ttfamily\scriptsize   sig\_response (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+116 & {\ttfamily\scriptsize op transcript\_response\_aux (tr : transcript) : polyveck =} & Defines operation transcript\_response\_aux, a total mathematical function or abbreviation used by later declarations. \\
+117 & {\ttfamily\scriptsize   sig\_response\_aux (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+118 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+119 & {\ttfamily\scriptsize op transcript\_public\_key\_challenge\_term (md : mode) (tr : transcript) :} & Defines operation transcript\_public\_key\_challenge\_term, a total mathematical function or abbreviation used by later declarations. \\
+120 & {\ttfamily\scriptsize   polyveck =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+121 & {\ttfamily\scriptsize   public\_key\_challenge\_term md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+122 & {\ttfamily\scriptsize     (transcript\_pk tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+123 & {\ttfamily\scriptsize     (sig\_challenge (transcript\_signature tr)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+124 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+125 & {\ttfamily\scriptsize op active\_public\_reconstruction (md : mode) (tr : transcript) : bool =} & Defines predicate active\_public\_reconstruction, an event or well-formedness condition used in later implications and game proofs. \\
+126 & {\ttfamily\scriptsize   transcript\_public\_key\_challenge\_term md tr <> polyveck\_zero md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+127 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+128 & {\ttfamily\scriptsize op inactive\_public\_reconstruction (md : mode) (tr : transcript) : bool =} & Defines predicate inactive\_public\_reconstruction, an event or well-formedness condition used in later implications and game proofs. \\
+129 & {\ttfamily\scriptsize   transcript\_public\_key\_challenge\_term md tr = polyveck\_zero md.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+130 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+131 & {\ttfamily\scriptsize op forking\_difference\_solution} & Defines operation forking\_difference\_solution, a total mathematical function or abbreviation used by later declarations. \\
+132 & {\ttfamily\scriptsize    (md : mode) (tr1 tr2 : transcript) : bimodal\_selftarget\_msis\_solution =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+133 & {\ttfamily\scriptsize   polyvecl\_sub md (transcript\_response tr1) (transcript\_response tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+134 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+135 & {\ttfamily\scriptsize op fork\_response\_aux\_difference (md : mode) (tr1 tr2 : transcript) :} & Defines operation fork\_response\_aux\_difference, a total mathematical function or abbreviation used by later declarations. \\
+136 & {\ttfamily\scriptsize   polyveck =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+137 & {\ttfamily\scriptsize   polyveck\_sub md (transcript\_response\_aux tr1) (transcript\_response\_aux tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+138 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+139 & {\ttfamily\scriptsize op fork\_public\_challenge\_relation (md : mode) (tr1 tr2 : transcript) : bool =} & Defines predicate fork\_public\_challenge\_relation, an event or well-formedness condition used in later implications and game proofs. \\
+140 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+141 & {\ttfamily\scriptsize     (transcript\_response\_aux tr1)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+142 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr1) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+143 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+144 & {\ttfamily\scriptsize     (transcript\_response\_aux tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+145 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+146 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+147 & {\ttfamily\scriptsize op fork\_response\_aux\_relation (tr1 tr2 : transcript) : bool =} & Defines predicate fork\_response\_aux\_relation, an event or well-formedness condition used in later implications and game proofs. \\
+148 & {\ttfamily\scriptsize   transcript\_response\_aux tr1 = transcript\_response\_aux tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+149 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+150 & {\ttfamily\scriptsize op fork\_left\_active\_public\_challenge\_relation} & Defines operation fork\_left\_active\_public\_challenge\_relation, a total mathematical function or abbreviation used by later declarations. \\
+151 & {\ttfamily\scriptsize    (md : mode) (tr1 tr2 : transcript) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+152 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+153 & {\ttfamily\scriptsize     (transcript\_response\_aux tr1)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+154 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr1) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+155 & {\ttfamily\scriptsize   transcript\_response\_aux tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+156 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+157 & {\ttfamily\scriptsize op fork\_right\_active\_public\_challenge\_relation} & Defines operation fork\_right\_active\_public\_challenge\_relation, a total mathematical function or abbreviation used by later declarations. \\
+158 & {\ttfamily\scriptsize    (md : mode) (tr1 tr2 : transcript) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+159 & {\ttfamily\scriptsize   transcript\_response\_aux tr1 =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+160 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+161 & {\ttfamily\scriptsize     (transcript\_response\_aux tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+162 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+163 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+164 & {\ttfamily\scriptsize op fork\_public\_reconstruction\_cases} & Defines operation fork\_public\_reconstruction\_cases, a total mathematical function or abbreviation used by later declarations. \\
+165 & {\ttfamily\scriptsize    (md : mode) (tr1 tr2 : transcript) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+166 & {\ttfamily\scriptsize   fork\_public\_challenge\_relation md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+167 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+168 & {\ttfamily\scriptsize op fork\_matrix\_source (tr1 tr2 : transcript) : byte list =} & Defines operation fork\_matrix\_source, a total mathematical function or abbreviation used by later declarations. \\
+169 & {\ttfamily\scriptsize   encode\_pkey (transcript\_pk tr1) ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+170 & {\ttfamily\scriptsize   transcript\_context tr1 ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+171 & {\ttfamily\scriptsize   transcript\_message tr1 ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+172 & {\ttfamily\scriptsize   encode\_polyveck (transcript\_commitment\_highbits tr1) ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+173 & {\ttfamily\scriptsize   encode\_poly (transcript\_commitment\_lowbits tr1) ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+174 & {\ttfamily\scriptsize   transcript\_message\_hash tr1 ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+175 & {\ttfamily\scriptsize   encode\_poly (transcript\_challenge tr1) ++} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+176 & {\ttfamily\scriptsize   encode\_poly (transcript\_challenge tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+177 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+178 & {\ttfamily\scriptsize op fork\_module\_matrix (md : mode) (tr1 tr2 : transcript) : matrix =} & Defines operation fork\_module\_matrix, a total mathematical function or abbreviation used by later declarations. \\
+179 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+180 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+181 & {\ttfamily\scriptsize       deterministic\_unit\_polyvecl md (53 + i) (fork\_matrix\_source tr1 tr2))} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+182 & {\ttfamily\scriptsize     (mode\_k md).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+183 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+184 & {\ttfamily\scriptsize op fork\_module\_target (md : mode) (tr1 tr2 : transcript) : polyveck =} & Defines operation fork\_module\_target, a total mathematical function or abbreviation used by later declarations. \\
+185 & {\ttfamily\scriptsize   matrix\_vec\_mul md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+186 & {\ttfamily\scriptsize     (fork\_module\_matrix md tr1 tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+187 & {\ttfamily\scriptsize     (forking\_difference\_solution md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+188 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+189 & {\ttfamily\scriptsize op bimodal\_selftarget\_msis\_instance\_of\_fork :} & Defines operation bimodal\_selftarget\_msis\_instance\_of\_fork, a total mathematical function or abbreviation used by later declarations. \\
+190 & {\ttfamily\scriptsize   mode -> transcript -> transcript -> bimodal\_selftarget\_msis\_instance =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+191 & {\ttfamily\scriptsize   fun md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+192 & {\ttfamily\scriptsize     (fork\_module\_matrix md tr1 tr2, fork\_module\_target md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+193 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+194 & {\ttfamily\scriptsize op extract\_bimodal\_selftarget\_msis\_solution :} & Defines operation extract\_bimodal\_selftarget\_msis\_solution, a total mathematical function or abbreviation used by later declarations. \\
+195 & {\ttfamily\scriptsize   mode -> transcript -> transcript ->} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+196 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_solution option =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+197 & {\ttfamily\scriptsize   fun md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+198 & {\ttfamily\scriptsize     if valid\_forking\_pair md tr1 tr2} & Splits proof obligations according to a conditional branch in the program or formula. \\
+199 & {\ttfamily\scriptsize     then Some (forking\_difference\_solution md tr1 tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+200 & {\ttfamily\scriptsize     else None.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+201 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+202 & {\ttfamily\scriptsize op module\_sis\_instance\_of\_fork :} & Defines operation module\_sis\_instance\_of\_fork, a total mathematical function or abbreviation used by later declarations. \\
+203 & {\ttfamily\scriptsize   mode -> transcript -> transcript -> module\_sis\_instance =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+204 & {\ttfamily\scriptsize   fun md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+205 & {\ttfamily\scriptsize     bimodal\_to\_module\_sis\_instance md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+206 & {\ttfamily\scriptsize       (bimodal\_selftarget\_msis\_instance\_of\_fork md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+207 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+208 & {\ttfamily\scriptsize op extract\_module\_sis\_solution :} & Defines operation extract\_module\_sis\_solution, a total mathematical function or abbreviation used by later declarations. \\
+209 & {\ttfamily\scriptsize   mode -> transcript -> transcript -> module\_sis\_solution option =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+210 & {\ttfamily\scriptsize   fun md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+211 & {\ttfamily\scriptsize     let x = bimodal\_selftarget\_msis\_instance\_of\_fork md tr1 tr2 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+212 & {\ttfamily\scriptsize     let sol = extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2 in} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+213 & {\ttfamily\scriptsize       if sol = None then None} & Splits proof obligations according to a conditional branch in the program or formula. \\
+214 & {\ttfamily\scriptsize       else Some (bimodal\_to\_module\_sis\_solution md x (oget sol)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+215 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+216 & {\ttfamily\scriptsize op bimodal\_extraction\_success (md : mode) (tr1 tr2 : transcript) : bool =} & Defines predicate bimodal\_extraction\_success, an event or well-formedness condition used in later implications and game proofs. \\
+217 & {\ttfamily\scriptsize   extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2 <> None /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+218 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+219 & {\ttfamily\scriptsize     (bimodal\_selftarget\_msis\_instance\_of\_fork md tr1 tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+220 & {\ttfamily\scriptsize     (oget (extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+221 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+222 & {\ttfamily\scriptsize lemma extract\_bimodal\_forking\_some md tr1 tr2 :} & States checked lemma extract\_bimodal\_forking\_some.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+223 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+224 & {\ttfamily\scriptsize   extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2 =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+225 & {\ttfamily\scriptsize     Some (forking\_difference\_solution md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+226 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+227 & {\ttfamily\scriptsize rewrite /extract\_bimodal\_selftarget\_msis\_solution.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+228 & {\ttfamily\scriptsize by case: (valid\_forking\_pair md tr1 tr2).} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+229 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+230 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+231 & {\ttfamily\scriptsize lemma extract\_bimodal\_forking\_nonempty md tr1 tr2 :} & States checked lemma extract\_bimodal\_forking\_nonempty.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+232 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+233 & {\ttfamily\scriptsize   extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2 <> None.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+234 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+235 & {\ttfamily\scriptsize move=> valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+236 & {\ttfamily\scriptsize rewrite (extract\_bimodal\_forking\_some md tr1 tr2 valid\_pair).} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+237 & {\ttfamily\scriptsize by case: (Some (forking\_difference\_solution md tr1 tr2) = None).} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+238 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+239 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+240 & {\ttfamily\scriptsize lemma transcript\_fields\_match\_signature\_challenge\_query md tr :} & States checked lemma transcript\_fields\_match\_signature\_challenge\_query.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+241 & {\ttfamily\scriptsize   transcript\_fields\_match\_signature tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+242 & {\ttfamily\scriptsize   transcript\_challenge\_query md tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+243 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_query md tr.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+244 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+245 & {\ttfamily\scriptsize rewrite /transcript\_fields\_match\_signature} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+246 & {\ttfamily\scriptsize         /transcript\_challenge\_query} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+247 & {\ttfamily\scriptsize         /transcript\_signature\_challenge\_query.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+248 & {\ttfamily\scriptsize move=> [highE rest].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+249 & {\ttfamily\scriptsize case: rest => lowE rest.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+250 & {\ttfamily\scriptsize case: rest => muE \_.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+251 & {\ttfamily\scriptsize by rewrite highE lowE muE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+252 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+253 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+254 & {\ttfamily\scriptsize lemma transcript\_fields\_match\_signature\_challenge\_matches tr y :} & States checked lemma transcript\_fields\_match\_signature\_challenge\_matches.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+255 & {\ttfamily\scriptsize   transcript\_fields\_match\_signature tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+256 & {\ttfamily\scriptsize   transcript\_challenge\_matches tr y =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+257 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_matches tr y.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+258 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+259 & {\ttfamily\scriptsize rewrite /transcript\_fields\_match\_signature} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+260 & {\ttfamily\scriptsize         /transcript\_challenge\_matches} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+261 & {\ttfamily\scriptsize         /transcript\_signature\_challenge\_matches.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+262 & {\ttfamily\scriptsize move=> [\_ rest].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+263 & {\ttfamily\scriptsize case: rest => \_ rest.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+264 & {\ttfamily\scriptsize case: rest => \_ chE.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+265 & {\ttfamily\scriptsize by rewrite chE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+266 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+267 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+268 & {\ttfamily\scriptsize lemma transcript\_valid\_signature\_challenge\_query md tr :} & States checked lemma transcript\_valid\_signature\_challenge\_query.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+269 & {\ttfamily\scriptsize   transcript\_valid md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+270 & {\ttfamily\scriptsize   transcript\_challenge\_query md tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+271 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_query md tr.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+272 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+273 & {\ttfamily\scriptsize rewrite /transcript\_valid.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+274 & {\ttfamily\scriptsize move=> [\_ [\_ fields]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+275 & {\ttfamily\scriptsize by apply transcript\_fields\_match\_signature\_challenge\_query.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+276 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+277 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+278 & {\ttfamily\scriptsize lemma transcript\_valid\_signature\_challenge\_matches md tr y :} & States checked lemma transcript\_valid\_signature\_challenge\_matches.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+279 & {\ttfamily\scriptsize   transcript\_valid md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+280 & {\ttfamily\scriptsize   transcript\_challenge\_matches tr y =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+281 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_matches tr y.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+282 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+283 & {\ttfamily\scriptsize rewrite /transcript\_valid.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+284 & {\ttfamily\scriptsize move=> [\_ [\_ fields]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+285 & {\ttfamily\scriptsize by apply transcript\_fields\_match\_signature\_challenge\_matches.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+286 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+287 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+288 & {\ttfamily\scriptsize lemma transcript\_valid\_signature\_challengeE md tr :} & States checked lemma transcript\_valid\_signature\_challengeE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+289 & {\ttfamily\scriptsize   transcript\_valid md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+290 & {\ttfamily\scriptsize   transcript\_challenge tr = sig\_challenge (transcript\_signature tr).} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+291 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+292 & {\ttfamily\scriptsize rewrite /transcript\_valid /transcript\_fields\_match\_signature.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+293 & {\ttfamily\scriptsize move=> [\_ [\_ [\_ rest]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+294 & {\ttfamily\scriptsize case: rest => \_ rest.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+295 & {\ttfamily\scriptsize case: rest => \_ chE.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+296 & {\ttfamily\scriptsize by apply chE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+297 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+298 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+299 & {\ttfamily\scriptsize lemma transcript\_valid\_public\_equation md tr :} & States checked lemma transcript\_valid\_public\_equation.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+300 & {\ttfamily\scriptsize   transcript\_valid md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+301 & {\ttfamily\scriptsize   transcript\_public\_equation md tr.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+302 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+303 & {\ttfamily\scriptsize rewrite /transcript\_valid /transcript\_verifies} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+304 & {\ttfamily\scriptsize         /transcript\_public\_equation /verify\_internal.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+305 & {\ttfamily\scriptsize move=> h.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+306 & {\ttfamily\scriptsize case: h => hver \_.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+307 & {\ttfamily\scriptsize case: hver => \_ htail.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+308 & {\ttfamily\scriptsize case: htail => \_ hpubnorm.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+309 & {\ttfamily\scriptsize case: hpubnorm => pub \_.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+310 & {\ttfamily\scriptsize by apply pub.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+311 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+312 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+313 & {\ttfamily\scriptsize lemma transcript\_valid\_commitment\_reconstruction md tr :} & States checked lemma transcript\_valid\_commitment\_reconstruction.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+314 & {\ttfamily\scriptsize   transcript\_valid md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+315 & {\ttfamily\scriptsize   transcript\_commitment\_highbits tr =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+316 & {\ttfamily\scriptsize     verify\_reconstructed\_highbits md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+317 & {\ttfamily\scriptsize       (transcript\_pk tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+318 & {\ttfamily\scriptsize       (transcript\_signature tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+319 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+320 & {\ttfamily\scriptsize move=> valid.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+321 & {\ttfamily\scriptsize have pub := transcript\_valid\_public\_equation md tr valid.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+322 & {\ttfamily\scriptsize move: pub.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+323 & {\ttfamily\scriptsize rewrite /transcript\_public\_equation /verify\_public\_equation.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+324 & {\ttfamily\scriptsize move=> pubE.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+325 & {\ttfamily\scriptsize move: valid.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+326 & {\ttfamily\scriptsize rewrite /transcript\_valid /transcript\_fields\_match\_signature.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+327 & {\ttfamily\scriptsize case=> \_ rest.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+328 & {\ttfamily\scriptsize case: rest => \_ fields.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+329 & {\ttfamily\scriptsize case: fields => highE \_.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+330 & {\ttfamily\scriptsize by rewrite highE pubE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+331 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+332 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+333 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_public\_equations md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_public\_equations.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+334 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+335 & {\ttfamily\scriptsize   transcript\_public\_equation md tr1 /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+336 & {\ttfamily\scriptsize   transcript\_public\_equation md tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+337 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+338 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+339 & {\ttfamily\scriptsize move=> [\_ [\_ [valid1 valid2]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+340 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+341 & {\ttfamily\scriptsize + by apply transcript\_valid\_public\_equation.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+342 & {\ttfamily\scriptsize + by apply transcript\_valid\_public\_equation.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+343 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+344 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+345 & {\ttfamily\scriptsize lemma same\_fork\_target\_challenge\_query md tr1 tr2 :} & States checked lemma same\_fork\_target\_challenge\_query.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+346 & {\ttfamily\scriptsize   same\_fork\_target tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+347 & {\ttfamily\scriptsize   transcript\_challenge\_query md tr1 = transcript\_challenge\_query md tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+348 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+349 & {\ttfamily\scriptsize rewrite /same\_fork\_target /transcript\_challenge\_query.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+350 & {\ttfamily\scriptsize move=> [\_ [\_ [\_ [highE [lowE muE]]]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+351 & {\ttfamily\scriptsize by rewrite highE lowE muE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+352 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+353 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+354 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_challenge\_query md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_challenge\_query.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+355 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+356 & {\ttfamily\scriptsize   transcript\_challenge\_query md tr1 = transcript\_challenge\_query md tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+357 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+358 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+359 & {\ttfamily\scriptsize move=> [same \_].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+360 & {\ttfamily\scriptsize by apply same\_fork\_target\_challenge\_query.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+361 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+362 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+363 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_signature\_challenge\_query md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_signature\_challenge\_query.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+364 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+365 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_query md tr1 =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+366 & {\ttfamily\scriptsize   transcript\_signature\_challenge\_query md tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+367 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+368 & {\ttfamily\scriptsize move=> valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+369 & {\ttfamily\scriptsize have queryE := valid\_forking\_pair\_challenge\_query md tr1 tr2 valid\_pair.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+370 & {\ttfamily\scriptsize move: valid\_pair.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+371 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+372 & {\ttfamily\scriptsize move=> [\_ [\_ [valid1 valid2]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+373 & {\ttfamily\scriptsize rewrite -(transcript\_valid\_signature\_challenge\_query md tr1 valid1).} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+374 & {\ttfamily\scriptsize rewrite -(transcript\_valid\_signature\_challenge\_query md tr2 valid2).} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+375 & {\ttfamily\scriptsize by apply queryE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+376 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+377 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+378 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_distinct\_signature\_challenges md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_distinct\_signature\_challenges.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+379 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+380 & {\ttfamily\scriptsize   sig\_challenge (transcript\_signature tr1) <>} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+381 & {\ttfamily\scriptsize   sig\_challenge (transcript\_signature tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+382 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+383 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+384 & {\ttfamily\scriptsize move=> [\_ [distinct [valid1 valid2]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+385 & {\ttfamily\scriptsize have ch1E := transcript\_valid\_signature\_challengeE md tr1 valid1.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+386 & {\ttfamily\scriptsize have ch2E := transcript\_valid\_signature\_challengeE md tr2 valid2.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+387 & {\ttfamily\scriptsize move: distinct.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+388 & {\ttfamily\scriptsize rewrite /distinct\_fork\_challenges ch1E ch2E.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+389 & {\ttfamily\scriptsize by [].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+390 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+391 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+392 & {\ttfamily\scriptsize lemma same\_fork\_target\_commitment\_highbits tr1 tr2 :} & States checked lemma same\_fork\_target\_commitment\_highbits.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+393 & {\ttfamily\scriptsize   same\_fork\_target tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+394 & {\ttfamily\scriptsize   transcript\_commitment\_highbits tr1 = transcript\_commitment\_highbits tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+395 & {\ttfamily\scriptsize proof. by rewrite /same\_fork\_target; move=> [\_ [\_ [\_ [highE \_]]]]. qed.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+396 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+397 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_commitment\_highbits md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_commitment\_highbits.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+398 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+399 & {\ttfamily\scriptsize   transcript\_commitment\_highbits tr1 = transcript\_commitment\_highbits tr2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+400 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+401 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+402 & {\ttfamily\scriptsize move=> [same \_].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+403 & {\ttfamily\scriptsize by apply same\_fork\_target\_commitment\_highbits.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+404 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+405 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+406 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_reconstructed\_highbits\_equal md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_reconstructed\_highbits\_equal.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+407 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+408 & {\ttfamily\scriptsize   verify\_reconstructed\_highbits md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+409 & {\ttfamily\scriptsize     (transcript\_pk tr1) (transcript\_signature tr1) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+410 & {\ttfamily\scriptsize   verify\_reconstructed\_highbits md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+411 & {\ttfamily\scriptsize     (transcript\_pk tr2) (transcript\_signature tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+412 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+413 & {\ttfamily\scriptsize move=> valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+414 & {\ttfamily\scriptsize have highE := valid\_forking\_pair\_commitment\_highbits md tr1 tr2 valid\_pair.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+415 & {\ttfamily\scriptsize move: valid\_pair.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+416 & {\ttfamily\scriptsize rewrite /valid\_forking\_pair.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+417 & {\ttfamily\scriptsize move=> [\_ [\_ [valid1 valid2]]].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+418 & {\ttfamily\scriptsize have rec1 := transcript\_valid\_commitment\_reconstruction md tr1 valid1.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+419 & {\ttfamily\scriptsize have rec2 := transcript\_valid\_commitment\_reconstruction md tr2 valid2.} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+420 & {\ttfamily\scriptsize by rewrite -rec1 -rec2.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+421 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+422 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+423 & {\ttfamily\scriptsize lemma transcript\_reconstructionE md tr :} & States checked lemma transcript\_reconstructionE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+424 & {\ttfamily\scriptsize   verify\_reconstructed\_highbits md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+425 & {\ttfamily\scriptsize     (transcript\_pk tr) (transcript\_signature tr) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+426 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+427 & {\ttfamily\scriptsize     (transcript\_response\_aux tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+428 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+429 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+430 & {\ttfamily\scriptsize by rewrite /verify\_reconstructed\_highbits} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+431 & {\ttfamily\scriptsize            /transcript\_response\_aux} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+432 & {\ttfamily\scriptsize            /transcript\_public\_key\_challenge\_term} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+433 & {\ttfamily\scriptsize            /reconstructed\_highbits.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+434 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+435 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+436 & {\ttfamily\scriptsize lemma transcript\_active\_reconstructionE md tr :} & States checked lemma transcript\_active\_reconstructionE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+437 & {\ttfamily\scriptsize   active\_public\_reconstruction md tr =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+438 & {\ttfamily\scriptsize   verify\_reconstructed\_highbits md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+439 & {\ttfamily\scriptsize     (transcript\_pk tr) (transcript\_signature tr) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+440 & {\ttfamily\scriptsize   polyveck\_add md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+441 & {\ttfamily\scriptsize     (transcript\_response\_aux tr)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+442 & {\ttfamily\scriptsize     (transcript\_public\_key\_challenge\_term md tr).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+443 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+444 & {\ttfamily\scriptsize move=> \_.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+445 & {\ttfamily\scriptsize by apply transcript\_reconstructionE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+446 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+447 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+448 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_public\_challenge\_relation md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_public\_challenge\_relation.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+449 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+450 & {\ttfamily\scriptsize   fork\_public\_challenge\_relation md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+451 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+452 & {\ttfamily\scriptsize move=> valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+453 & {\ttfamily\scriptsize have recE :=} & Creates an intermediate claim.  This mirrors a mathematical proof that first proves a sub-inequality or invariant. \\
+454 & {\ttfamily\scriptsize   valid\_forking\_pair\_reconstructed\_highbits\_equal md tr1 tr2 valid\_pair.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+455 & {\ttfamily\scriptsize rewrite /fork\_public\_challenge\_relation.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+456 & {\ttfamily\scriptsize rewrite -(transcript\_reconstructionE md tr1).} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+457 & {\ttfamily\scriptsize rewrite -(transcript\_reconstructionE md tr2).} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+458 & {\ttfamily\scriptsize by apply recE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+459 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+460 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+461 & {\ttfamily\scriptsize lemma valid\_forking\_pair\_public\_reconstruction\_cases md tr1 tr2 :} & States checked lemma valid\_forking\_pair\_public\_reconstruction\_cases.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+462 & {\ttfamily\scriptsize   valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+463 & {\ttfamily\scriptsize   fork\_public\_reconstruction\_cases md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+464 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+465 & {\ttfamily\scriptsize move=> valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+466 & {\ttfamily\scriptsize rewrite /fork\_public\_reconstruction\_cases.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+467 & {\ttfamily\scriptsize by apply valid\_forking\_pair\_public\_challenge\_relation.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+468 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+469 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+470 & {\ttfamily\scriptsize op extraction\_success (md : mode) (tr1 tr2 : transcript) : bool =} & Defines predicate extraction\_success, an event or well-formedness condition used in later implications and game proofs. \\
+471 & {\ttfamily\scriptsize   extract\_module\_sis\_solution md tr1 tr2 <> None /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+472 & {\ttfamily\scriptsize   module\_sis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+473 & {\ttfamily\scriptsize     (module\_sis\_instance\_of\_fork md tr1 tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+474 & {\ttfamily\scriptsize     (oget (extract\_module\_sis\_solution md tr1 tr2)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+475 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+476 & {\ttfamily\scriptsize op forking\_extraction\_obligation (md : mode) : bool =} & Defines predicate forking\_extraction\_obligation, an event or well-formedness condition used in later implications and game proofs. \\
+477 & {\ttfamily\scriptsize   forall (tr1 tr2 : transcript),} & Part of a universal mathematical condition that must hold for all listed values. \\
+478 & {\ttfamily\scriptsize     valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+479 & {\ttfamily\scriptsize     bimodal\_extraction\_success md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+480 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+481 & {\ttfamily\scriptsize op fork\_public\_reconstruction\_obligation (md : mode) : bool =} & Defines predicate fork\_public\_reconstruction\_obligation, an event or well-formedness condition used in later implications and game proofs. \\
+482 & {\ttfamily\scriptsize   forall (tr1 tr2 : transcript),} & Part of a universal mathematical condition that must hold for all listed values. \\
+483 & {\ttfamily\scriptsize     valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+484 & {\ttfamily\scriptsize     fork\_public\_reconstruction\_cases md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+485 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+486 & {\ttfamily\scriptsize lemma forking\_difference\_solution\_wf md tr1 tr2 :} & States checked lemma forking\_difference\_solution\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+487 & {\ttfamily\scriptsize   module\_sis\_solution\_wf md (forking\_difference\_solution md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+488 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+489 & {\ttfamily\scriptsize by rewrite /module\_sis\_solution\_wf /forking\_difference\_solution} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+490 & {\ttfamily\scriptsize            polyvecl\_sub\_wf.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+491 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+492 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+493 & {\ttfamily\scriptsize lemma fork\_module\_matrix\_rows\_wf md tr1 tr2 :} & States checked lemma fork\_module\_matrix\_rows\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+494 & {\ttfamily\scriptsize   all (polyvecl\_wf md) (fork\_module\_matrix md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+495 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+496 & {\ttfamily\scriptsize rewrite /fork\_module\_matrix.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+497 & {\ttfamily\scriptsize apply/allP=> row /mkseqP [i [\_ ->]].} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+498 & {\ttfamily\scriptsize by apply deterministic\_unit\_polyvecl\_wf.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+499 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+500 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+501 & {\ttfamily\scriptsize lemma fork\_module\_matrix\_size md tr1 tr2 :} & States checked lemma fork\_module\_matrix\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+502 & {\ttfamily\scriptsize   size (fork\_module\_matrix md tr1 tr2) = mode\_k md.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+503 & {\ttfamily\scriptsize proof. by rewrite /fork\_module\_matrix size\_mkseq; case md. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+504 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+505 & {\ttfamily\scriptsize lemma bimodal\_forking\_solution\_valid md tr1 tr2 :} & States checked lemma bimodal\_forking\_solution\_valid.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+506 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+507 & {\ttfamily\scriptsize     (bimodal\_selftarget\_msis\_instance\_of\_fork md tr1 tr2)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+508 & {\ttfamily\scriptsize     (forking\_difference\_solution md tr1 tr2).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+509 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+510 & {\ttfamily\scriptsize rewrite /bimodal\_selftarget\_msis\_valid /module\_sis\_valid.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+511 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+512 & {\ttfamily\scriptsize + by apply forking\_difference\_solution\_wf.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+513 & {\ttfamily\scriptsize by rewrite /bimodal\_selftarget\_msis\_instance\_of\_fork /fork\_module\_target /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+514 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+515 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+516 & {\ttfamily\scriptsize lemma forking\_extraction\_obligation\_holds md :} & States checked lemma forking\_extraction\_obligation\_holds.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+517 & {\ttfamily\scriptsize   forking\_extraction\_obligation md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+518 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+519 & {\ttfamily\scriptsize rewrite /forking\_extraction\_obligation /bimodal\_extraction\_success.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+520 & {\ttfamily\scriptsize move=> tr1 tr2 valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+521 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+522 & {\ttfamily\scriptsize + by apply extract\_bimodal\_forking\_nonempty.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+523 & {\ttfamily\scriptsize + rewrite (extract\_bimodal\_forking\_some md tr1 tr2 valid\_pair) /=.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+524 & {\ttfamily\scriptsize   by apply bimodal\_forking\_solution\_valid.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+525 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+526 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+527 & {\ttfamily\scriptsize lemma fork\_public\_reconstruction\_obligation\_holds md :} & States checked lemma fork\_public\_reconstruction\_obligation\_holds.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+528 & {\ttfamily\scriptsize   fork\_public\_reconstruction\_obligation md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+529 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+530 & {\ttfamily\scriptsize rewrite /fork\_public\_reconstruction\_obligation.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+531 & {\ttfamily\scriptsize move=> tr1 tr2 valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+532 & {\ttfamily\scriptsize by apply valid\_forking\_pair\_public\_reconstruction\_cases.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+533 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+534 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+535 & {\ttfamily\scriptsize op bimodal\_to\_module\_sis\_lift\_obligation (md : mode) : bool =} & Defines predicate bimodal\_to\_module\_sis\_lift\_obligation, an event or well-formedness condition used in later implications and game proofs. \\
+536 & {\ttfamily\scriptsize   forall (x : bimodal\_selftarget\_msis\_instance)} & Part of a universal mathematical condition that must hold for all listed values. \\
+537 & {\ttfamily\scriptsize          (sol : bimodal\_selftarget\_msis\_solution),} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+538 & {\ttfamily\scriptsize     bimodal\_selftarget\_msis\_valid md x sol =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+539 & {\ttfamily\scriptsize     module\_sis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+540 & {\ttfamily\scriptsize       (bimodal\_to\_module\_sis\_instance md x)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+541 & {\ttfamily\scriptsize       (bimodal\_to\_module\_sis\_solution md x sol).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+542 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+543 & {\ttfamily\scriptsize lemma bimodal\_to\_module\_sis\_lift\_obligation\_holds md :} & States checked lemma bimodal\_to\_module\_sis\_lift\_obligation\_holds.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+544 & {\ttfamily\scriptsize   bimodal\_to\_module\_sis\_lift\_obligation md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+545 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+546 & {\ttfamily\scriptsize rewrite /bimodal\_to\_module\_sis\_lift\_obligation.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+547 & {\ttfamily\scriptsize move=> x sol valid.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+548 & {\ttfamily\scriptsize by apply bimodal\_to\_module\_sis\_valid.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+549 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+550 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+551 & {\ttfamily\scriptsize op special\_soundness\_obligation (md : mode) : bool =} & Defines predicate special\_soundness\_obligation, an event or well-formedness condition used in later implications and game proofs. \\
+552 & {\ttfamily\scriptsize   forall (tr1 tr2 : transcript),} & Part of a universal mathematical condition that must hold for all listed values. \\
+553 & {\ttfamily\scriptsize     valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+554 & {\ttfamily\scriptsize     extraction\_success md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+555 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+556 & {\ttfamily\scriptsize op special\_soundness\_with\_public\_reconstruction\_obligation (md : mode) : bool =} & Defines predicate special\_soundness\_with\_public\_reconstruction\_obligation, an event or well-formedness condition used in later implications and game proofs. \\
+557 & {\ttfamily\scriptsize   forall (tr1 tr2 : transcript),} & Part of a universal mathematical condition that must hold for all listed values. \\
+558 & {\ttfamily\scriptsize     valid\_forking\_pair md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+559 & {\ttfamily\scriptsize     fork\_public\_reconstruction\_cases md tr1 tr2 /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+560 & {\ttfamily\scriptsize     extraction\_success md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+561 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+562 & {\ttfamily\scriptsize lemma module\_sis\_extraction\_from\_bimodal md tr1 tr2 :} & States checked lemma module\_sis\_extraction\_from\_bimodal.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+563 & {\ttfamily\scriptsize   bimodal\_extraction\_success md tr1 tr2 =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+564 & {\ttfamily\scriptsize   bimodal\_to\_module\_sis\_lift\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+565 & {\ttfamily\scriptsize   extraction\_success md tr1 tr2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+566 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+567 & {\ttfamily\scriptsize rewrite /bimodal\_extraction\_success /bimodal\_to\_module\_sis\_lift\_obligation} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+568 & {\ttfamily\scriptsize         /extraction\_success /extract\_module\_sis\_solution} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+569 & {\ttfamily\scriptsize         /module\_sis\_instance\_of\_fork.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+570 & {\ttfamily\scriptsize move=> [nz valid] lift.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+571 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+572 & {\ttfamily\scriptsize + rewrite /extract\_module\_sis\_solution /= ifF.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+573 & {\ttfamily\scriptsize   + by apply nz.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+574 & {\ttfamily\scriptsize   by rewrite /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+575 & {\ttfamily\scriptsize rewrite /extract\_module\_sis\_solution /= ifF.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+576 & {\ttfamily\scriptsize + by apply nz.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+577 & {\ttfamily\scriptsize apply (lift (bimodal\_selftarget\_msis\_instance\_of\_fork md tr1 tr2)} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+578 & {\ttfamily\scriptsize             (oget (extract\_bimodal\_selftarget\_msis\_solution md tr1 tr2))).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+579 & {\ttfamily\scriptsize by apply valid.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+580 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+581 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+582 & {\ttfamily\scriptsize lemma special\_soundness\_from\_bimodal\_lift md :} & States checked lemma special\_soundness\_from\_bimodal\_lift.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+583 & {\ttfamily\scriptsize   forking\_extraction\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+584 & {\ttfamily\scriptsize   bimodal\_to\_module\_sis\_lift\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+585 & {\ttfamily\scriptsize   special\_soundness\_obligation md.} & Performs symbolic program simplification, exposing assignments and state updates. \\
+586 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+587 & {\ttfamily\scriptsize rewrite /forking\_extraction\_obligation /special\_soundness\_obligation.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+588 & {\ttfamily\scriptsize move=> fork lift tr1 tr2 valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+589 & {\ttfamily\scriptsize by apply module\_sis\_extraction\_from\_bimodal; [apply fork | apply lift].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+590 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+591 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+592 & {\ttfamily\scriptsize lemma special\_soundness\_with\_public\_reconstruction\_from\_bimodal\_lift md :} & States checked lemma special\_soundness\_with\_public\_reconstruction\_from\_bimodal\_lift.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+593 & {\ttfamily\scriptsize   fork\_public\_reconstruction\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+594 & {\ttfamily\scriptsize   forking\_extraction\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+595 & {\ttfamily\scriptsize   bimodal\_to\_module\_sis\_lift\_obligation md =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+596 & {\ttfamily\scriptsize   special\_soundness\_with\_public\_reconstruction\_obligation md.} & Performs symbolic program simplification, exposing assignments and state updates. \\
+597 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+598 & {\ttfamily\scriptsize rewrite /fork\_public\_reconstruction\_obligation} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+599 & {\ttfamily\scriptsize         /forking\_extraction\_obligation} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+600 & {\ttfamily\scriptsize         /special\_soundness\_with\_public\_reconstruction\_obligation.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+601 & {\ttfamily\scriptsize move=> public fork lift tr1 tr2 valid\_pair.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+602 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+603 & {\ttfamily\scriptsize + by apply public.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+604 & {\ttfamily\scriptsize by apply module\_sis\_extraction\_from\_bimodal; [apply fork | apply lift].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+605 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+606 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+607 & {\ttfamily\scriptsize op transcript\_from\_honest\_signing} & Defines operation transcript\_from\_honest\_signing, a total mathematical function or abbreviation used by later declarations. \\
+608 & {\ttfamily\scriptsize    (md : mode) (sk : skey) (m : message) (ctx : context)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+609 & {\ttfamily\scriptsize    (coins : random\_coins) : transcript =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+610 & {\ttfamily\scriptsize   transcript\_of\_signature md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+611 & {\ttfamily\scriptsize     (public\_key\_of\_secret md sk)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+612 & {\ttfamily\scriptsize     m ctx} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+613 & {\ttfamily\scriptsize     (sign\_internal md sk m ctx coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+614 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+615 & {\ttfamily\scriptsize lemma honest\_transcript\_verifies md sk m ctx coins :} & States checked lemma honest\_transcript\_verifies.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+616 & {\ttfamily\scriptsize   transcript\_verifies md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+617 & {\ttfamily\scriptsize     (transcript\_from\_honest\_signing md sk m ctx coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+618 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+619 & {\ttfamily\scriptsize rewrite /transcript\_from\_honest\_signing /transcript\_verifies} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+620 & {\ttfamily\scriptsize         /transcript\_of\_signature /transcript\_pk /transcript\_message} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+621 & {\ttfamily\scriptsize         /transcript\_context /transcript\_signature /=.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+622 & {\ttfamily\scriptsize by apply verify\_internal\_sign\_internal.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+623 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+624 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+625 & {\ttfamily\scriptsize lemma transcript\_of\_signature\_fields md pk m ctx sig :} & States checked lemma transcript\_of\_signature\_fields.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+626 & {\ttfamily\scriptsize   transcript\_commitment\_highbits} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+627 & {\ttfamily\scriptsize     (transcript\_of\_signature md pk m ctx sig) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+628 & {\ttfamily\scriptsize     sig\_commitment\_highbits sig /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+629 & {\ttfamily\scriptsize   transcript\_commitment\_lowbits} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+630 & {\ttfamily\scriptsize     (transcript\_of\_signature md pk m ctx sig) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+631 & {\ttfamily\scriptsize     sig\_commitment\_lowbits sig /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+632 & {\ttfamily\scriptsize   transcript\_message\_hash} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+633 & {\ttfamily\scriptsize     (transcript\_of\_signature md pk m ctx sig) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+634 & {\ttfamily\scriptsize     sig\_message\_hash sig /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+635 & {\ttfamily\scriptsize   transcript\_challenge} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+636 & {\ttfamily\scriptsize     (transcript\_of\_signature md pk m ctx sig) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+637 & {\ttfamily\scriptsize     sig\_challenge sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+638 & {\ttfamily\scriptsize proof. by rewrite /transcript\_of\_signature /=. qed.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+639 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+640 & {\ttfamily\scriptsize lemma transcript\_of\_signature\_matches\_signature md pk m ctx sig :} & States checked lemma transcript\_of\_signature\_matches\_signature.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+641 & {\ttfamily\scriptsize   transcript\_fields\_match\_signature} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+642 & {\ttfamily\scriptsize     (transcript\_of\_signature md pk m ctx sig).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+643 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+644 & {\ttfamily\scriptsize by rewrite /transcript\_fields\_match\_signature /transcript\_of\_signature /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+645 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+646 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+647 & {\ttfamily\scriptsize lemma honest\_transcript\_challenge md sk m ctx coins :} & States checked lemma honest\_transcript\_challenge.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+648 & {\ttfamily\scriptsize   transcript\_challenge} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+649 & {\ttfamily\scriptsize     (transcript\_from\_honest\_signing md sk m ctx coins) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+650 & {\ttfamily\scriptsize   challenge\_hash} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+651 & {\ttfamily\scriptsize     md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+652 & {\ttfamily\scriptsize     (commitment\_highbits md sk m ctx coins)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+653 & {\ttfamily\scriptsize     (commitment\_lowbits md sk m ctx coins)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+654 & {\ttfamily\scriptsize     (message\_hash (public\_key\_of\_secret md sk) ctx m).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+655 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+656 & {\ttfamily\scriptsize by rewrite /transcript\_from\_honest\_signing /transcript\_of\_signature} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+657 & {\ttfamily\scriptsize            /signature\_challenge /sig\_challenge /sign\_internal /=.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+658 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+659 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+660 & {\ttfamily\scriptsize end HAETAE\_Transcript.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

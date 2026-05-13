@@ -1,0 +1,519 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.75em}
+
+\newtheorem{remark}{Remark}
+\newtheorem{observation}{Observation}
+\newcommand{\code}[1]{\text{\texttt{#1}}}
+
+\title{A Formula Dictionary for the HAETAE NTT Verification in EasyCrypt}
+\author{Codex Proof Note}
+\date{22 April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note organizes the principal formulas underlying the HAETAE NTT
+verification project in EasyCrypt. Its purpose is not to restate the current
+proof status, but rather to index the development by mathematical task: for
+each task in the project, we record the central identities, invariants,
+representation maps, and target equivalences that must be established. The
+result is a formula-oriented guide to the project, written in the style of a
+mathematical aide-memoire for cryptographic verification.
+\end{abstract}
+
+\section{Global Verification Objective}
+
+Let \(p\) be a polynomial represented concretely by a byte array
+\(\texttt{rp} : \texttt{BArray1024.t}\). The final end-to-end objective of the
+project is the pair of Hoare-style statements
+\[
+\{\code{poly\_repr}(\texttt{rp},p)\}
+\ \texttt{poly\_ntt\_jazz}(\texttt{rp})\
+\{\code{poly\_repr}(\texttt{res}, \mathrm{Rq.ntt}(p))\},
+\]
+\[
+\{\code{poly\_repr}(\texttt{rp},p)\}
+\ \texttt{poly\_invntt\_jazz}(\texttt{rp})\
+\{\code{poly\_repr}(\texttt{res}, \mathrm{Rq.invntt}(p))\}.
+\]
+
+Every other formula in the project serves this final pair of correctness
+theorems.
+
+\section{Ambient Notation}
+
+The field is \(\mathbf{F}_q\) with
+\[
+q = 64513.
+\]
+The transform length is
+\[
+N = 256,
+\]
+and the chosen primitive \(512\)-th root of unity is
+\[
+zroot = 426 \in \mathbf{F}_q.
+\]
+The Montgomery constant used throughout the extracted arithmetic is
+\[
+R = 2^{32} \bmod q = 14321.
+\]
+The bit-reversal permutation on \(8\) bits is written
+\[
+\operatorname{br}(i) = \operatorname{bsrev}_8(i).
+\]
+
+\section{Task I: Imperative NTT Specifications}
+
+The forward imperative specification \(\texttt{NTT.ntt}\) executes
+Cooley--Tukey butterflies with layer lengths
+\[
+128, 64, 32, 16, 8, 4, 2, 1.
+\]
+The inverse imperative specification \(\texttt{NTT.invntt}\) executes inverse
+layers with lengths
+\[
+1, 2, 4, 8, 16, 32, 64, 128,
+\]
+followed by a global scaling by \(\operatorname{inv}(256)\).
+
+The forward butterfly is
+\[
+t = \zeta \cdot r_{j+\ell},\qquad
+r_{j+\ell}' = r_j - t,\qquad
+r_j' = r_j + t.
+\]
+The inverse butterfly is
+\[
+t = r_j,\qquad
+r_j' = t + r_{j+\ell},\qquad
+r_{j+\ell}' = \zeta \cdot (t - r_{j+\ell}).
+\]
+
+The formal tasks attached to these formulas are:
+\begin{itemize}
+\item prove losslessness of \(\texttt{NTT.ntt}\);
+\item prove losslessness of \(\texttt{NTT.invntt}\);
+\item use these imperative models as refinement targets for the extracted code.
+\end{itemize}
+
+\section{Task II: Termination Variants}
+
+For the forward procedure the variants are:
+\[
+V_{\mathrm{outer}} = \texttt{len},\qquad
+V_{\mathrm{middle}} = 256 - \texttt{start},\qquad
+V_{\mathrm{inner}} = \texttt{start} + \texttt{len} - \texttt{j}.
+\]
+For the inverse procedure one uses:
+\[
+V_{\mathrm{outer}} = 256 - \texttt{len},\qquad
+V_{\mathrm{middle}} = 256 - \texttt{start},\qquad
+V_{\mathrm{inner}} = \texttt{start} + \texttt{len} - \texttt{j},
+\]
+and for the final scaling loop
+\[
+V_{\mathrm{scale}} = 256 - \texttt{j}.
+\]
+
+These formulas belong to the purely structural task of proving
+\texttt{islossless}. They do not encode semantics of the transform itself, but
+they are indispensable for any subsequent program logic argument.
+
+\section{Task III: Root-of-Unity Structure}
+
+The transform depends on the order of \(zroot\). The essential identities are
+\[
+zroot^{128} = 28837,
+\qquad
+zroot^{256} = -1,
+\qquad
+zroot^{512} = 1.
+\]
+In EasyCrypt, the decisive lemma is
+\[
+\texttt{Zq.exp zroot 256 = incoeff (-1)}.
+\]
+
+This task supports:
+\begin{itemize}
+\item the correctness of the inverse transform;
+\item the algebraic interpretation of the twiddle tables;
+\item the final normalization by \(\operatorname{inv}(256)\).
+\end{itemize}
+
+\section{Task IV: Abstract NTT Formulas}
+
+The abstract forward transform in \texttt{Rq.ec} is
+\[
+\mathrm{ntt}(p)[i]
+=
+\begin{cases}
+\displaystyle \sum_{j=0}^{127} p_{2j}\, zroot^{(2\operatorname{br}(i/2)+1)j},
+& i \equiv 0 \pmod 2,\\[1.25em]
+\displaystyle \sum_{j=0}^{127} p_{2j+1}\, zroot^{(2\operatorname{br}(i/2)+1)j},
+& i \equiv 1 \pmod 2.
+\end{cases}
+\]
+
+The abstract inverse transform is
+\[
+\mathrm{invntt}(p)[i]
+=
+\begin{cases}
+\displaystyle \sum_{j=0}^{127} \operatorname{inv}(128)\, p_{2j}\,
+zroot^{-(2\operatorname{br}(j)+1)(i/2)},
+& i \equiv 0 \pmod 2,\\[1.25em]
+\displaystyle \sum_{j=0}^{127} \operatorname{inv}(128)\, p_{2j+1}\,
+zroot^{-(2\operatorname{br}(j)+1)(i/2)},
+& i \equiv 1 \pmod 2.
+\end{cases}
+\]
+
+This is the target mathematical semantics to which the imperative routines
+must eventually be shown equal.
+
+\section{Task V: Representation of Concrete Program State}
+
+The concrete-to-abstract bridge is given by
+\[
+\code{word\_to\_coeff}(w) = \operatorname{incoeff}(\code{to\_sint}(w)),
+\]
+\[
+\code{barray256\_to\_poly}(\texttt{rp})[i]
+=
+\code{word\_to\_coeff}(\texttt{BArray1024.get32}\; \texttt{rp}\; i),
+\]
+and
+\[
+\code{poly\_repr}(\texttt{rp},p)
+:\Longleftrightarrow
+\code{barray256\_to\_poly}(\texttt{rp}) = p.
+\]
+
+The formulas attached to this task are:
+\begin{itemize}
+\item pointwise readback:
+  \[
+  \code{poly\_repr}(\texttt{rp},p) \Longrightarrow
+  p[i] = \code{word\_to\_coeff}(\texttt{BArray1024.get32}\; \texttt{rp}\; i);
+  \]
+\item small signed-word conversion:
+  \[
+  |z| < q \Longrightarrow
+  \code{word\_to\_coeff}(\texttt{W32.of\_int}\; z) = \operatorname{incoeff}(z);
+  \]
+\item normalized representative conversion:
+  \[
+  |z| < q \Longrightarrow
+  \code{word\_to\_coeff}(\texttt{W32.of\_int}\; z)
+  =
+  \operatorname{incoeff}\!\bigl(\mathbf{if}\ 0 \le z\ \mathbf{then}\ z\ \mathbf{else}\ z+q\bigr).
+  \]
+\end{itemize}
+
+This task is the basic language in which all simulation statements are
+written.
+
+\section{Task VI: Twiddle Tables}
+
+\subsection{Forward Table}
+
+The abstract forward twiddle table is
+\[
+\zeta_k = zroot^{\operatorname{br}(k)}.
+\]
+Its Montgomery form is
+\[
+\zeta_k^{\mathrm{Mont}} = \zeta_k \cdot R.
+\]
+The concrete table \texttt{jzetas} stores precisely these Montgomery values,
+except that index \(0\) is padding:
+\[
+\texttt{jzetas}[0] = 0,
+\qquad
+\texttt{jzetas}[k] \leftrightsquigarrow \zeta_k \cdot R
+\quad (1 \le k \le 255).
+\]
+
+Thus the intended bridge formula is
+\[
+\code{barray256\_to\_poly}(\texttt{jzetas})
+=
+(\code{array256\_mont}(\zeta))[0 \leftarrow 0].
+\]
+
+\subsection{Inverse Table}
+
+The abstract inverse twiddle table is
+\[
+\zeta_k^{-1} = zroot^{-(\operatorname{br}(k)+1)}
+\quad (0 \le k \le 254),
+\]
+while the last slot is the inverse normalization:
+\[
+\zeta_{255}^{-1} = \operatorname{inv}(256).
+\]
+Its Montgomery form is
+\[
+(\zeta_k^{-1})^{\mathrm{Mont}} = \zeta_k^{-1}\cdot R.
+\]
+The concrete table \texttt{jzetas\_inv} matches this at indices
+\[
+0 \le k \le 254,
+\]
+but at index \(255\) it stores the machine value
+\[
+-29720,
+\]
+which encodes the final scaling constant in the format expected by the
+Montgomery multiplication routine.
+
+Accordingly, the bridge formula is
+\[
+\code{barray256\_to\_poly}(\texttt{jzetas\_inv})
+=
+(\code{array256\_mont\_inv}(\zeta^{-1}))[255 \leftarrow -29720].
+\]
+
+\begin{remark}
+This is the most delicate formula in the current project state. It is not
+conceptually difficult, but it sits precisely at the interface between the
+mathematics of twiddle factors and the byte-level normalization performed by
+the EasyCrypt libraries.
+\end{remark}
+
+\section{Task VII: Inverse Scaling Constant}
+
+Two related constants appear in the inverse transform:
+\[
+\code{scale255} = \operatorname{inv}(256) = -252 \pmod q,
+\]
+and the machine value
+\[
+f = -29720.
+\]
+The key identity is the Montgomery compatibility relation
+\[
+\operatorname{incoeff}(f)\cdot R^{-1}
+=
+\code{scale255}\cdot R.
+\]
+
+This formula serves the final loop of the inverse extracted code, where the
+program multiplies each coefficient by the machine word stored at
+\texttt{jzetas\_inv[255]} via the Montgomery multiplication routine.
+
+\section{Task VIII: Montgomery Multiplication}
+
+The extracted routine \texttt{M.\_\_fqmul} computes
+\[
+\mathrm{MontMul}(a,b)
+=
+a\cdot b\cdot R^{-1} \pmod q,
+\]
+with the result again in Montgomery representation when both inputs are
+already Montgomery-encoded.
+
+The intended correctness formula is
+\[
+\code{word\_to\_coeff}(\texttt{M.\_\_fqmul}(a,b))
+=
+\code{word\_to\_coeff}(a)\cdot \code{word\_to\_coeff}(b)\cdot R.
+\]
+
+This task depends on the Montgomery-reduction theorem from
+\texttt{Montgomery.ec} and supplies the arithmetic core of every butterfly
+simulation.
+
+\section{Task IX: Forward Butterfly Simulation}
+
+Let the concrete word read from the table represent \(\zeta\cdot R\). Let the
+current concrete coefficients represent \(x\) and \(y\). Then the extracted
+forward butterfly computes, at the field level,
+\[
+t = \zeta y,
+\qquad
+x' = x + t,
+\qquad
+y' = x - t.
+\]
+
+Thus the local proof obligation is:
+\[
+\text{concrete forward butterfly}
+\Longrightarrow
+\text{imperative forward butterfly in } \texttt{NTT.ntt}.
+\]
+
+This task combines the formulas from:
+\begin{itemize}
+\item the representation map;
+\item the forward twiddle bridge;
+\item Montgomery multiplication correctness;
+\item field addition and subtraction correctness.
+\end{itemize}
+
+\section{Task X: Inverse Butterfly Simulation}
+
+For the inverse transform one must prove the corresponding local statement:
+\[
+t = x,
+\qquad
+x' = x + y,
+\qquad
+y' = \zeta(x - y).
+\]
+
+At the program level the order of updates matters, so the precise proof must
+track the concrete sequence:
+\[
+t \leftarrow r_j,\quad
+r_j \leftarrow t + r_{j+\ell},\quad
+r_{j+\ell} \leftarrow t - r_{j+\ell},\quad
+r_{j+\ell} \leftarrow \zeta \cdot r_{j+\ell}.
+\]
+
+This task is the inverse analogue of the previous section, augmented by the
+final scaling formula from Task VII.
+
+\section{Task XI: Loop Invariants for the Extracted Jasmin Code}
+
+The forward and inverse extracted procedures each contain three nested loops.
+The invariants must express both control-state facts and semantic progress.
+
+Typical outer-loop ingredients are:
+\[
+0 < \texttt{len} \le 128,
+\qquad
+\texttt{len} = 2^\ell,
+\qquad
+\code{poly\_repr}(\texttt{rp}, r),
+\]
+together with the statement that all fully completed stages of the transform
+already agree on both sides.
+
+Typical inner-loop ingredients are:
+\[
+\texttt{start} \le \texttt{j} \le \texttt{start} + \texttt{len},
+\]
+and equality of all coefficients outside the active butterfly window.
+
+This task turns the local butterfly formulas into full procedure-level
+refinement theorems.
+
+\section{Task XII: Imperative-to-Abstract Identification}
+
+After the extracted code has been related to the imperative model, one must
+still prove the mathematical identities
+\[
+\texttt{NTT.ntt}(p,\zeta) = \mathrm{Rq.ntt}(p),
+\qquad
+\texttt{NTT.invntt}(p,\zeta^{-1}) = \mathrm{Rq.invntt}(p).
+\]
+
+The formulas governing this task are not low-level machine identities, but
+rather structural equalities between:
+\begin{itemize}
+\item staged butterfly decompositions;
+\item the bit-reversal exponents \(2\operatorname{br}(i)+1\);
+\item the closed-form sums in \texttt{Rq.ec}.
+\end{itemize}
+
+This is where the Cooley--Tukey factorization must be matched to the explicit
+ring-theoretic definition.
+
+\section{Task XIII: Final Composition}
+
+At the end of the project the formulas from all prior tasks are composed:
+\[
+\text{concrete state}
+\xrightarrow{\code{poly\_repr}}
+\text{abstract polynomial}
+\xrightarrow{\mathrm{Rq.ntt}\ \text{or}\ \mathrm{Rq.invntt}}
+\text{target polynomial},
+\]
+while the program side follows
+\[
+\texttt{poly\_ntt\_jazz}
+\quad\text{or}\quad
+\texttt{poly\_invntt\_jazz}.
+\]
+
+The completed chain should read:
+\[
+\texttt{poly\_ntt\_jazz}
+\sim
+\texttt{M.\_poly\_ntt}
+\sim
+\texttt{NTT.ntt}
+=
+\mathrm{Rq.ntt},
+\]
+and similarly
+\[
+\texttt{poly\_invntt\_jazz}
+\sim
+\texttt{M.\_poly\_invntt}
+\sim
+\texttt{NTT.invntt}
+=
+\mathrm{Rq.invntt}.
+\]
+
+\section{Task-to-Formula Table}
+
+\begin{center}
+\begin{longtable}{p{0.19\linewidth} p{0.31\linewidth} p{0.38\linewidth}}
+\toprule
+Task & Governing formula & Role in the proof \\
+\midrule
+\endfirsthead
+\toprule
+Task & Governing formula & Role in the proof \\
+\midrule
+\endhead
+Imperative specs & forward and inverse butterfly recurrences & semantic target for extracted-code refinement \\
+Losslessness & explicit integer variants for all loops & well-formedness of Hoare and pRHL reasoning \\
+Root structure & \(zroot^{256}=-1\), \(zroot^{512}=1\) & algebraic foundation for inverse correctness \\
+Representation & \(\code{poly\_repr}(\texttt{rp},p)\) & concrete-to-abstract state relation \\
+Forward zetas & \(\texttt{jzetas}[k] \leftrightsquigarrow zroot^{\operatorname{br}(k)}R\) & table-read interpretation in forward butterflies \\
+Inverse zetas & \(\texttt{jzetas\_inv}[k] \leftrightsquigarrow zroot^{-(\operatorname{br}(k)+1)}R\) & table-read interpretation in inverse butterflies \\
+Inverse scale & \(\operatorname{incoeff}(-29720)R^{-1} = \operatorname{inv}(256)R\) & final inverse normalization \\
+Montgomery multiply & \(a\cdot b\cdot R^{-1}\) modulo \(q\) & arithmetic core of extracted multiplication \\
+Forward local step & \((x,y)\mapsto (x+\zeta y,\ x-\zeta y)\) & atomic forward simulation \\
+Inverse local step & \((x,y)\mapsto (x+y,\ \zeta(x-y))\) & atomic inverse simulation \\
+Loop refinement & invariants on \(\texttt{len},\texttt{start},\texttt{j},\texttt{zetasctr}\) & global simulation of extracted routines \\
+Abstract identification & imperative staged transform \(=\) sum formula in \texttt{Rq.ec} & connection to mathematical specification \\
+Final theorem & \(\{\code{poly\_repr}\}\;P\;\{\code{poly\_repr}\circ \mathrm{Rq.ntt}\}\) & end-to-end program correctness \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section*{Conclusion}
+
+The project admits a clean mathematical decomposition. Each task is governed by
+a small family of formulas: arithmetic identities for roots of unity and
+Montgomery constants; representation formulas linking words to coefficients;
+local butterfly recurrences; global loop invariants; and finally the closed
+transform formulas from the ring-theoretic specification. Writing the project
+in this task-by-formula form makes its architecture transparent: the entire
+verification is the controlled composition of these formulas inside the proof
+language of EasyCrypt.
+
+\end{document}

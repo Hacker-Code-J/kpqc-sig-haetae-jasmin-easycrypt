@@ -1,0 +1,257 @@
+\chapter{Curated EasyCrypt Proof-Object Case Studies}
+\label{app:curated-easycrypt-case-studies}
+
+This appendix gives close readings of representative EasyCrypt objects.  The
+archived exhaustive catalog remains in \ec{dissertation/etc/}; the purpose here
+is different.  Each selected code fragment is a proof object with a mathematical
+meaning in the HAETAE security argument.
+
+\section{The generic signature interface}
+\label{app:case-sig-rom-interface}
+
+\begin{lstlisting}[language=EasyCrypt,caption={Signature objects and ROM-query objects in \ec{Sig\_ROM.ec}.},label={lst:sig-rom-types}]
+type pkey.
+type skey.
+type message.
+type context.
+type signature.
+type ro_query.
+type ro_output.
+
+type query = message * context.
+type signed_query = query * signature.
+\end{lstlisting}
+
+Mathematically, this declaration introduces carrier sets
+\[
+  \mathcal{PK},\mathcal{SK},\mathcal{M},\mathcal{C},\Sigma,
+  \mathcal{Q}_{RO},\mathcal{Y}_{RO}.
+\]
+The type \ec{query} is the product \(\mathcal{M}\times\mathcal{C}\).  The type
+\ec{signed\_query} is
+\((\mathcal{M}\times\mathcal{C})\times\Sigma\).  The product
+\(\mathcal{M}\times\mathcal{C}\) is the substrate for EUF-CMA freshness: a final
+forgery must verify and its message/context pair must not have been previously
+signed.  The signed-query product is used for the stronger freshness predicate in
+the strong-EUF-CMA style game, where the exact message/context/signature triple
+must not have been returned before.
+
+\begin{lstlisting}[language=EasyCrypt,caption={Scheme and adversary interfaces in \ec{Sig\_ROM.ec}.},label={lst:sig-rom-module-types}]
+module type POracle = {
+  proc get(q : ro_query) : ro_output
+}.
+
+module type Scheme (H : POracle) = {
+  proc kg() : pkey * skey
+  proc sign(sk : skey, m : message, ctx : context) : signature
+  proc verify(pk : pkey, m : message, ctx : context,
+              sig : signature) : bool
+}.
+
+module type SignOracle = {
+  proc sign(m : message, ctx : context) : signature
+}.
+
+module type Adversary (H : POracle, O : SignOracle) = {
+  proc forge(pk : pkey) : message * context * signature
+}.
+\end{lstlisting}
+
+The mathematical reading is a family of kernels indexed by an oracle
+implementation \(H\).  A concrete signature scheme is a functor from random
+oracles to probabilistic procedures.  A chosen-message adversary is likewise a
+module parameterized by the hash oracle and the signing oracle.
+
+\section{The HAETAE scheme wrapper}
+\label{app:case-haetae-scheme-wrapper}
+
+The signing procedure in \ec{HAETAE\_Scheme.ec} makes the proof-relevant oracle
+sites explicit.
+
+\begin{lstlisting}[language=EasyCrypt,caption={Signing wrapper in \ec{HAETAE\_Scheme.ec}.},label={lst:haetae-scheme-sign-wrapper}]
+coins <$ drandom_coins;
+ro_y <@ H.get(sampler_expand_query coins);
+coins <- ro_signing_coins ro_y;
+pk <- public_key_of_secret haetae_mode sk;
+ro_y <@ H.get(message_hash_query pk ctx m);
+mu <- ro_message_hash ro_y;
+highbits <- commitment_highbits haetae_mode sk m ctx coins;
+lowbits <- commitment_lowbits haetae_mode sk m ctx coins;
+ro_y <@ H.get(challenge_hash_query haetae_mode highbits lowbits mu);
+sig <- sign_internal haetae_mode sk m ctx coins;
+return sig;
+\end{lstlisting}
+
+This code denotes the kernel
+\[
+  \mathsf{Sign}^{H}(sk,m,ctx):1\to\mathcal{D}(\Sigma).
+\]
+The first ROM query is the sampler-expansion site, the second is the message
+hash site, and the third is the challenge hash site.  The proof depends on these
+sites being disjoint typed constructors; otherwise ROM programming for the
+sampler could interfere with ROM programming for the challenge.
+
+The snippet also exposes a model/spec issue.  Figure 8 of the specification
+derives signing randomness deterministically from \(K\) and \(\mu\).  The formal
+wrapper uses \ec{drandom\_coins} and a typed sampler ROM query.  The security
+proof is therefore a theorem about this modeled interface, and the dissertation
+records the remaining obligation to relate it to the deterministic specification
+path.  The main text now states this relation as the explicit modeling
+assumption in \Cref{assm:signing-randomness-modeling-bridge}; this appendix
+should be read as code-level evidence for the EasyCrypt side of that bridge, not
+as a machine-checked proof of the bridge itself.
+
+\section{Parameters as mathematical constants}
+\label{app:case-params}
+
+\begin{lstlisting}[language=EasyCrypt,caption={Representative parameter declarations in \ec{HAETAE\_Params.ec}.},label={lst:haetae-params-snippet}]
+op seedbytes : int = 32.
+op crhbytes : int = 64.
+op n : int = 256.
+op q : int = 64513.
+op dq : int = 2 * q.
+
+type mode = [ Mode2 | Mode3 | Mode5 ].
+
+op mode_k (md : mode) : int =
+  with md = Mode2 => 2
+  with md = Mode3 => 3
+  with md = Mode5 => 4.
+
+op mode_l (md : mode) : int =
+  with md = Mode2 => 4
+  with md = Mode3 => 6
+  with md = Mode5 => 7.
+
+op mode_tau (md : mode) : int =
+  with md = Mode2 => 58
+  with md = Mode3 => 80
+  with md = Mode5 => 128.
+\end{lstlisting}
+
+Mathematically, \ec{mode} indexes three parameterized schemes
+\(\haetae_2\), \(\haetae_3\), and \(\haetae_5\).  The functions \ec{mode\_k},
+\ec{mode\_l}, and \ec{mode\_tau} are not runtime computations in the proof
+argument; they are mode-indexed constants.  Lemmas over \ec{haetae\_mode}
+therefore mean theorems for the selected parameter instance.
+
+\section{The counted-ROM bound}
+\label{app:case-counted-rom-bound}
+
+\begin{lstlisting}[language=EasyCrypt,caption={Final counted-ROM bound expression.},label={lst:case-counted-rom-bound}]
+op counted_rom_programming_loss_term =
+  counted_rom_collision_term +
+  counted_rom_prequery_term +
+  counted_rom_min_entropy_term.
+
+op haetae_euf_counted_rom_bound =
+  mlwe_hardness_term +
+  bimodal_selftarget_msis_hardness_term +
+  counted_rom_programming_loss_term.
+\end{lstlisting}
+
+The mathematical conclusion of the final fixed-ledger composition lemmas is
+\[
+  \mathcal{H}_{\mathsf{hop}}
+  \wedge
+  \mathcal{H}_{\mathsf{hard}}
+  \Longrightarrow
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  \le
+  L_{\mathsf{MLWE}}
+  +L_{\mathsf{ModSIS}}
+  +L_{\mathsf{bimodal}\to\mathsf{MSIS}}
+  +L_{\mathsf{coll}}
+  +L_{\mathsf{pre}}
+  +L_{\mathsf{me}}.
+\]
+The EasyCrypt operation \ec{bimodal\_selftarget\_msis\_hardness\_term} expands
+to \ec{module\_sis\_hardness\_term + bimodal\_to\_msis\_reduction\_loss\_term}.
+Thus the final expression is a concrete algebraic object, not an informal bound
+name.
+
+\section{Lazy-ROM freshness}
+\label{app:case-lazy-rom-freshness}
+
+\begin{lstlisting}[language=EasyCrypt,caption={Concrete freshness lemma for a sampler ROM point.},label={lst:case-fresh-le}]
+lemma concrete_lazy_rom_sampler_expand_query_fresh_le
+    seed_coins (p : random_coins -> bool) &m :
+  sampler_expand_query seed_coins \notin HAETAE_RO.FRO.m{m} =>
+  Pr[HAETAE_RO.FRO.get(sampler_expand_query seed_coins) @ &m :
+       p (ro_signing_coins res)] <=
+  mu drandom_coins p.
+\end{lstlisting}
+
+This lemma says that if the sampler query is fresh for the lazy ROM table, then
+asking the random oracle at that point produces signing coins distributed no
+worse than the ideal \ec{drandom\_coins} measure for every predicate \(p\).  In
+measure-theoretic notation, for a fresh point \(q\),
+\[
+  \Pr[p(\mathsf{ro\_signing\_coins}(H(q)))]
+  \le
+  \mu_{D_{coins}}(p).
+\]
+The proof is the local semantic reason that the simulator may treat an
+unqueried sampler point as fresh randomness.
+
+\section{Active signing and clean lifting}
+\label{app:case-active-signing-clean-lifting}
+
+\begin{lstlisting}[language=EasyCrypt,caption={Clean sampler-ROM preservation across one active signing call.},label={lst:case-o-sign-clean}]
+lemma concrete_budgeted_ro_signing_attempt_o_sign_clean_sampler_fresh :
+  hoare[ROMInternalTranscriptBudgetedPaperSimAsNMA
+          (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+           HAETAE_RO.FRO).O.sign :
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries /\
+    ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery ==>
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries].
+\end{lstlisting}
+
+This displayed header is the local theorem surface needed for the mathematical
+reading:
+\[
+  \{C\}\;O_{\mathsf{attempt}}.\mathsf{sign}\;\{C\},
+\]
+where \(C\) contains sampler-ROM coverage and the absence of
+\ec{sampler\_bad\_prequery}.  This Hoare judgment establishes that the clean
+condition needed for the one-call surface lemma remains available after a
+signing query.  By itself it does not prove that the final NMA theorem path is
+non-vacuous; the later composition still has to consume this local surface
+instead of relying on coarse fallback probability bounds.
+
+\section{Hoare and equivalence judgments as proof objects}
+\label{app:case-hoare-equiv}
+
+A Hoare judgment
+\[
+  \ec{hoare}[c:P==>Q]
+\]
+is a partial-correctness statement: every terminating execution of \(c\) from a
+\(P\)-state ends in a \(Q\)-state.  When \(c\) is additionally proved lossless,
+the same support-inclusion fact can be read as probability-one postcondition
+preservation.  An equivalence
+judgment
+\[
+  \ec{equiv}[c_1 \sim c_2:P==>Q]
+\]
+is a coupling statement between two probabilistic programs.  In the HAETAE proof,
+Hoare judgments maintain invariants such as budget bounds and clean ROM state,
+while equivalence judgments justify exact game hops.  Probability lemmas then
+turn bad-event bounds and reduction assumptions into the final advantage
+inequality.
+
+\section{Why these cases are representative}
+\label{app:case-representative}
+
+The full proof contains many declarations, but the main mathematical burden is
+carried by a small number of object classes: the signature-game interface, the
+HAETAE scheme wrapper, mode-indexed parameters, lazy-ROM freshness lemmas,
+active-signing Hoare invariants, sampler/exactness lifting lemmas, and the final
+bound operations.  The archived exhaustive catalog can be used to audit names;
+the curated cases above explain why the names matter mathematically.

@@ -1,0 +1,142 @@
+\begin{figure}[p]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  >=Latex,
+  file/.style={
+    draw,
+    rounded corners=2pt,
+    align=center,
+    font=\tiny\ttfamily,
+    minimum height=8mm,
+    text width=36mm,
+    fill=white
+  },
+  layerbox/.style={
+    draw,
+    rounded corners=4pt,
+    fill=black!3,
+    inner xsep=5mm,
+    inner ysep=3.5mm
+  },
+  layerlabel/.style={font=\bfseries\small, text=black!75},
+  flow/.style={->, line width=0.45pt, draw=black!65},
+  broadflow/.style={->, line width=0.8pt, draw=black!55},
+  note/.style={font=\scriptsize, align=center, text=black!70}
+]
+
+\node[file, fill=red!9] (security) at (0,9.0)
+  {HAETAE\_Security.ec};
+
+\node[file, fill=orange!12] (hop) at (-3.7,7.35)
+  {HAETAE\_HopGames.ec};
+\node[file, fill=orange!12] (romprog) at (0,7.35)
+  {HAETAE\_ROM\_Programming.ec};
+\node[file, fill=orange!12] (reductions) at (3.7,7.35)
+  {HAETAE\_Reductions.ec};
+
+\node[file, fill=yellow!14] (scheme) at (-5.55,5.65)
+  {HAETAE\_Scheme.ec};
+\node[file, fill=yellow!14] (sigrom) at (-1.85,5.65)
+  {Sig\_ROM.ec};
+\node[file, fill=yellow!14] (haetaerom) at (1.85,5.65)
+  {HAETAE\_ROM.ec};
+\node[file, fill=yellow!14] (assumptions) at (5.55,5.65)
+  {HAETAE\_Assumptions.ec};
+
+\node[file, fill=green!10] (transcript) at (-3.7,3.95)
+  {HAETAE\_Transcript.ec};
+\node[file, fill=green!10] (events) at (0,3.95)
+  {HAETAE\_Events.ec};
+\node[file, fill=green!10] (rejection) at (3.7,3.95)
+  {HAETAE\_Rejection.ec};
+
+\node[file, fill=blue!8] (dist) at (-3.7,2.25)
+  {HAETAE\_Distributions.ec};
+\node[file, fill=blue!8] (algebra) at (0,2.25)
+  {HAETAE\_Algebra.ec};
+\node[file, fill=blue!8] (fips) at (3.7,2.25)
+  {HAETAE\_FIPS202.ec};
+
+\node[file, fill=violet!8] (params) at (-1.85,0.55)
+  {HAETAE\_Params.ec};
+\node[file, fill=violet!8] (keccak) at (1.85,0.55)
+  {HAETAE\_Keccak1600.ec};
+
+\node[layerbox, fit=(params)(keccak)] (layer0) {};
+\node[layerlabel, above left=1mm and 1mm of layer0.north west]
+  {Parameters and hash-state base};
+
+\node[layerbox, fit=(dist)(algebra)(fips)] (layer1) {};
+\node[layerlabel, above left=1mm and 1mm of layer1.north west]
+  {Deterministic algebra and sampler laws};
+
+\node[layerbox, fit=(transcript)(events)(rejection)] (layer2) {};
+\node[layerlabel, above left=1mm and 1mm of layer2.north west]
+  {Named proof predicates and rejection facts};
+
+\node[layerbox, fit=(scheme)(sigrom)(haetaerom)(assumptions)] (layer3) {};
+\node[layerlabel, above left=1mm and 1mm of layer3.north west]
+  {Game interfaces and assumption boundary};
+
+\node[layerbox, fit=(hop)(romprog)(reductions)] (layer4) {};
+\node[layerlabel, above left=1mm and 1mm of layer4.north west]
+  {Hybrid proof, ROM programming, and loss ledger};
+
+\node[layerbox, fit=(security)] (layer5) {};
+\node[layerlabel, above left=1mm and 1mm of layer5.north west]
+  {Final theorem assembly};
+
+\draw[flow] (keccak) -- (fips);
+\draw[flow] (params) -- (algebra);
+\draw[flow] (params) -- (dist);
+\draw[flow] (fips) -- (algebra);
+\draw[flow] (algebra) -- (dist);
+
+\draw[flow] (algebra) -- (transcript);
+\draw[flow] (algebra) -- (events);
+\draw[flow] (dist) -- (rejection);
+\draw[flow] (transcript) -- (rejection);
+\draw[flow] (events) -- (rejection);
+
+\draw[flow] (sigrom) -- (scheme);
+\draw[flow] (algebra) -- (scheme);
+\draw[flow] (dist) -- (scheme);
+\draw[flow] (algebra) -- (haetaerom);
+\draw[flow] (dist) -- (haetaerom);
+\draw[flow] (algebra) -- (assumptions);
+
+\draw[flow] (haetaerom) -- (romprog);
+\draw[flow] (transcript) -- (romprog);
+\draw[flow] (rejection) -- (romprog);
+\draw[flow] (events) -- (reductions);
+\draw[flow] (transcript) -- (hop);
+\draw[flow] (rejection) -- (hop);
+\draw[flow] (scheme) -- (hop);
+\draw[flow] (sigrom) -- (hop);
+\draw[flow] (haetaerom) -- (hop);
+\draw[flow] (assumptions) -- (hop);
+\draw[flow] (romprog) -- (hop);
+\draw[flow] (reductions) -- (hop);
+
+\draw[flow] (hop) -- (security);
+\draw[flow] (romprog) -- (security);
+\draw[flow] (reductions) -- (security);
+\draw[flow] (scheme) to[bend left=18] (security);
+\draw[flow] (sigrom) to[bend right=18] (security);
+\draw[flow] (assumptions) to[bend left=18] (security);
+
+\draw[broadflow] (layer0.east) to[out=0,in=0] (layer1.east);
+\draw[broadflow] (layer1.west) to[out=180,in=180] (layer2.west);
+\draw[broadflow] (layer2.east) to[out=0,in=0] (layer3.east);
+\draw[broadflow] (layer3.west) to[out=180,in=180] (layer4.west);
+\draw[broadflow] (layer4.east) to[out=0,in=0] (layer5.east);
+
+\node[note] at (0,-0.35)
+  {Arrows point from a file that supplies definitions or lemmas to a file that consumes them.};
+
+\end{tikzpicture}%
+}
+\caption{Layered structure of the active EasyCrypt files in the HAETAE provable-security proof surface.}
+\label{fig:ec-file-structure}
+\end{figure}

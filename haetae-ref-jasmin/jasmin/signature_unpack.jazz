@@ -1,0 +1,90 @@
+require "params.jinc"
+require "pack.jinc"
+require "encoding.jinc"
+require "sparse_encoding.jinc"
+require "encoding_tables.jinc"
+require "signature_unpack.jinc"
+
+export
+fn unpack_sig_mode2_full_jazz(reg mut ptr u32[HAETAE_N] cp,
+                              reg mut ptr u32[2048] lowp,
+                              reg mut ptr u32[2048] hbzp,
+                              reg mut ptr u32[2048] hp,
+                              reg mut ptr u64[1] badp,
+                              reg const ptr u8[2948] sigp)
+                              -> reg ptr u32[HAETAE_N],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u64[1]
+{
+  reg ptr u32[512] h_symbolwp hb_symbolwp;
+  reg ptr u32[132] h_dsymswp hb_dsymswp;
+
+  h_symbolwp = jmode2_h_symbol_words;
+  h_dsymswp = jmode2_h_dsyms_words;
+  hb_symbolwp = jmode2_hb_z1_symbol_words;
+  hb_dsymswp = jmode2_hb_z1_dsyms_words;
+  cp, lowp, hbzp, hp, badp = _unpack_sig_full(cp, lowp, hbzp, hp, badp, sigp,
+                                              h_symbolwp, h_dsymswp,
+                                              hb_symbolwp, hb_dsymswp,
+                                              4, 1024, 13, 6, 512, 13, 239,
+                                              132, 7, 416);
+  return cp, lowp, hbzp, hp, badp;
+}
+
+export
+fn unpack_sig_mode3_full_jazz(reg mut ptr u32[HAETAE_N] cp,
+                              reg mut ptr u32[2048] lowp,
+                              reg mut ptr u32[2048] hbzp,
+                              reg mut ptr u32[2048] hp,
+                              reg mut ptr u64[1] badp,
+                              reg const ptr u8[2948] sigp)
+                              -> reg ptr u32[HAETAE_N],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u64[1]
+{
+  reg ptr u32[512] h_symbolwp hb_symbolwp;
+  reg ptr u32[132] h_dsymswp hb_dsymswp;
+
+  h_symbolwp = jmode3_h_symbol_words;
+  h_dsymswp = jmode3_h_dsyms_words;
+  hb_symbolwp = jmode3_hb_z1_symbol_words;
+  hb_dsymswp = jmode3_hb_z1_dsyms_words;
+  cp, lowp, hbzp, hp, badp = _unpack_sig_full(cp, lowp, hbzp, hp, badp, sigp,
+                                              h_symbolwp, h_dsymswp,
+                                              hb_symbolwp, hb_dsymswp,
+                                              6, 1536, 17, 8, 768, 17, 235,
+                                              376, 127, 779);
+  return cp, lowp, hbzp, hp, badp;
+}
+
+export
+fn unpack_sig_mode5_full_jazz(reg mut ptr u32[HAETAE_N] cp,
+                              reg mut ptr u32[2048] lowp,
+                              reg mut ptr u32[2048] hbzp,
+                              reg mut ptr u32[2048] hp,
+                              reg mut ptr u64[1] badp,
+                              reg const ptr u8[2948] sigp)
+                              -> reg ptr u32[HAETAE_N],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u32[2048],
+                                 reg ptr u64[1]
+{
+  reg ptr u32[512] h_symbolwp hb_symbolwp;
+  reg ptr u32[132] h_dsymswp hb_dsymswp;
+
+  h_symbolwp = jmode5_h_symbol_words;
+  h_dsymswp = jmode5_h_dsyms_words;
+  hb_symbolwp = jmode5_hb_z1_symbol_words;
+  hb_dsymswp = jmode5_hb_z1_dsyms_words;
+  cp, lowp, hbzp, hp, badp = _unpack_sig_full(cp, lowp, hbzp, hp, badp, sigp,
+                                              h_symbolwp, h_dsymswp,
+                                              hb_symbolwp, hb_dsymswp,
+                                              7, 1792, 19, 9, 1024, 33, 471,
+                                              501, 358, 1122);
+  return cp, lowp, hbzp, hp, badp;
+}

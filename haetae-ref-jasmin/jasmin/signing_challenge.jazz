@@ -1,0 +1,331 @@
+require "params.jinc"
+require "keccak.jinc"
+require "challenge.jinc"
+require "decompose.jinc"
+require "pack.jinc"
+require "challenge_sampler.jinc"
+
+fn __sign_challenge_zero_highbuf(reg mut ptr u8[1152] bp,
+                                 reg u64 len) -> reg ptr u8[1152]
+{
+  reg u64 i;
+
+  i = 0;
+  while (i < len)
+  {
+    bp[i] = 0;
+    i += 1;
+  }
+
+  return bp;
+}
+
+fn __sign_challenge_shake256_absorb_buf(reg mut ptr u64[25] sp,
+                                        reg mut ptr u64[2] statep,
+                                        reg const ptr u8[1152] inp,
+                                        reg u64 inlen) -> reg ptr u64[25],
+                                                             reg ptr u64[2]
+{
+  reg u64 pos lane i t;
+  reg u8 b shift;
+
+  pos = statep[0];
+  i = 0;
+  while (i < inlen)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = inp[i];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    i += 1;
+    pos += 1;
+
+    if (pos == 136)
+    {
+      () = #spill(statep, inp, inlen, i, pos);
+      sp = _keccakf1600(sp);
+      () = #unspill(statep, inp, inlen, i, pos);
+      pos = 0;
+    }
+  }
+
+  statep[0] = pos;
+  return sp, statep;
+}
+
+fn __sign_challenge_shake256_absorb32(reg mut ptr u64[25] sp,
+                                      reg mut ptr u64[2] statep,
+                                      reg const ptr u8[32] inp)
+                                      -> reg ptr u64[25],
+                                         reg ptr u64[2]
+{
+  reg u64 pos lane i t;
+  reg u8 b shift;
+
+  pos = statep[0];
+  i = 0;
+  while (i < 32)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = inp[i];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    i += 1;
+    pos += 1;
+
+    if (pos == 136)
+    {
+      () = #spill(statep, inp, i, pos);
+      sp = _keccakf1600(sp);
+      () = #unspill(statep, inp, i, pos);
+      pos = 0;
+    }
+  }
+
+  statep[0] = pos;
+  return sp, statep;
+}
+
+fn __sign_challenge_absorb(reg mut ptr u64[25] sp,
+                           reg const ptr u8[1152] highp,
+                           reg u64 highlen,
+                           reg const ptr u8[32] lsbp,
+                           reg const ptr u8[32] mup) -> reg ptr u64[25]
+{
+  stack u64[2] st;
+  reg ptr u64[2] stp;
+
+  stp = st;
+  stp[0] = 0;
+  stp[1] = 136;
+
+  sp = _keccak_init_state(sp);
+  () = #spill(lsbp, mup);
+  sp, stp = __sign_challenge_shake256_absorb_buf(sp, stp, highp, highlen);
+  () = #unspill(lsbp, mup);
+  () = #spill(mup);
+  sp, stp = __sign_challenge_shake256_absorb32(sp, stp, lsbp);
+  () = #unspill(mup);
+  sp, stp = __sign_challenge_shake256_absorb32(sp, stp, mup);
+  sp = __poly_challenge_shake256_finalize(sp, stp);
+
+  return sp;
+}
+
+fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
+                        reg const ptr u8[1152] highp,
+                        reg u64 highlen,
+                        reg const ptr u8[32] lsbp,
+                        reg const ptr u8[32] mup,
+                        reg u64 tau) -> reg ptr u32[HAETAE_N]
+{
+  stack u64[25] state;
+  stack u8[136] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[136] bp;
+  reg u64 i pos bidx limit;
+  reg u32 b old;
+
+  sp = state;
+  bp = buf;
+  () = #spill(cp, tau);
+  sp = __sign_challenge_absorb(sp, highp, highlen, lsbp, mup);
+  () = #unspill(cp, tau);
+  () = #spill(cp, tau);
+  bp, sp = __poly_challenge_squeeze256_136(bp, sp);
+  () = #unspill(cp, tau);
+
+  cp = _poly_challenge_m23_init(cp);
+  i = HAETAE_N;
+  i -= tau;
+  pos = 0;
+  while (i < HAETAE_N)
+  {
+    if (pos >= 136)
+    {
+      () = #spill(cp, i);
+      bp, sp = __poly_challenge_squeeze256_136(bp, sp);
+      () = #unspill(cp, i);
+      pos = 0;
+    }
+
+    b = (32u)bp[pos];
+    pos += 1;
+    bidx = (64u)b;
+    limit = i;
+    limit += 1;
+
+    if (bidx < limit)
+    {
+      old = cp[bidx];
+      cp[i] = old;
+      cp[bidx] = 1;
+      i += 1;
+    }
+  }
+
+  return cp;
+}
+
+fn __sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
+                       reg const ptr u8[1152] highp,
+                       reg u64 highlen,
+                       reg const ptr u8[32] lsbp,
+                       reg const ptr u8[32] mup)
+                       -> reg ptr u32[HAETAE_N]
+{
+  stack u64[25] state;
+  stack u8[32] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[32] bp;
+
+  sp = state;
+  bp = buf;
+
+  () = #spill(cp);
+  sp = __sign_challenge_absorb(sp, highp, highlen, lsbp, mup);
+  () = #unspill(cp);
+  () = #spill(cp);
+  bp, sp = __poly_challenge_squeeze256_32(bp, sp);
+  () = #unspill(cp);
+
+  cp = _poly_challenge_m5_frombytes(cp, bp);
+  return cp;
+}
+
+inline fn _sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
+                              reg mut ptr u32[2048] highp,
+                              reg const ptr u32[2048] ayp,
+                              reg const ptr u32[HAETAE_N] y0p,
+                              reg const ptr u8[32] mup,
+                              inline int k_i,
+                              inline int highlen_i,
+                              inline int tau_i)
+                              -> reg ptr u32[HAETAE_N],
+                                 reg ptr u32[2048]
+{
+  stack u8[1152] highbuf;
+  stack u8[32] lsb;
+  reg ptr u8[1152] highbufp;
+  reg ptr u8[32] lsbp;
+  reg u64 count coeffs highlen tau;
+
+  highbufp = highbuf;
+  lsbp = lsb;
+  count = k_i;
+  coeffs = count;
+  coeffs *= HAETAE_N;
+  highlen = highlen_i;
+  tau = tau_i;
+
+  () = #spill(cp, ayp, y0p, mup, count, highlen, tau);
+  highp = _polyvec_highbits_hint_m23(highp, ayp, coeffs);
+  () = #unspill(cp, ayp, y0p, mup, count, highlen, tau);
+
+  () = #spill(cp, highp, y0p, mup, count, tau);
+  highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
+  () = #unspill(cp, highp, y0p, mup, count, tau);
+
+  () = #spill(cp, y0p, mup, tau);
+  highbufp = _pack_vec_highbits_m23(highbufp, highp, count);
+  () = #unspill(cp, y0p, mup, tau);
+
+  () = #spill(cp, highbufp, highlen, mup, tau);
+  lsbp = _pack_poly_lsb(lsbp, y0p);
+  () = #unspill(cp, highbufp, highlen, mup, tau);
+
+  cp = __sign_challenge_m23(cp, highbufp, highlen, lsbp, mup, tau);
+
+  return cp, highp;
+}
+
+inline fn _sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
+                             reg mut ptr u32[2048] highp,
+                             reg const ptr u32[2048] ayp,
+                             reg const ptr u32[HAETAE_N] y0p,
+                             reg const ptr u8[32] mup)
+                             -> reg ptr u32[HAETAE_N],
+                                reg ptr u32[2048]
+{
+  stack u8[1152] highbuf;
+  stack u8[32] lsb;
+  reg ptr u8[1152] highbufp;
+  reg ptr u8[32] lsbp;
+  reg u64 count coeffs highlen;
+
+  highbufp = highbuf;
+  lsbp = lsb;
+  count = 4;
+  coeffs = count;
+  coeffs *= HAETAE_N;
+  highlen = 1152;
+
+  () = #spill(cp, ayp, y0p, mup, count, highlen);
+  highp = _polyvec_highbits_hint_m5(highp, ayp, coeffs);
+  () = #unspill(cp, ayp, y0p, mup, count, highlen);
+
+  () = #spill(cp, highp, y0p, mup, count);
+  highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
+  () = #unspill(cp, highp, y0p, mup, count);
+
+  () = #spill(cp, y0p, mup);
+  highbufp = _pack_vec_highbits_m5(highbufp, highp, count);
+  () = #unspill(cp, y0p, mup);
+
+  () = #spill(cp, highbufp, highlen, mup);
+  lsbp = _pack_poly_lsb(lsbp, y0p);
+  () = #unspill(cp, highbufp, highlen, mup);
+
+  cp = __sign_challenge_m5(cp, highbufp, highlen, lsbp, mup);
+
+  return cp, highp;
+}
+
+export
+fn sign_challenge_mode2_jazz(reg mut ptr u32[HAETAE_N] cp,
+                             reg mut ptr u32[2048] highp,
+                             reg const ptr u32[2048] ayp,
+                             reg const ptr u32[HAETAE_N] y0p,
+                             reg const ptr u8[32] mup)
+                             -> reg ptr u32[HAETAE_N],
+                                reg ptr u32[2048]
+{
+  cp, highp = _sign_challenge_m23(cp, highp, ayp, y0p, mup, 2, 576, 58);
+  return cp, highp;
+}
+
+export
+fn sign_challenge_mode3_jazz(reg mut ptr u32[HAETAE_N] cp,
+                             reg mut ptr u32[2048] highp,
+                             reg const ptr u32[2048] ayp,
+                             reg const ptr u32[HAETAE_N] y0p,
+                             reg const ptr u8[32] mup)
+                             -> reg ptr u32[HAETAE_N],
+                                reg ptr u32[2048]
+{
+  cp, highp = _sign_challenge_m23(cp, highp, ayp, y0p, mup, 3, 864, 80);
+  return cp, highp;
+}
+
+export
+fn sign_challenge_mode5_jazz(reg mut ptr u32[HAETAE_N] cp,
+                             reg mut ptr u32[2048] highp,
+                             reg const ptr u32[2048] ayp,
+                             reg const ptr u32[HAETAE_N] y0p,
+                             reg const ptr u8[32] mup)
+                             -> reg ptr u32[HAETAE_N],
+                                reg ptr u32[2048]
+{
+  cp, highp = _sign_challenge_m5(cp, highp, ayp, y0p, mup);
+  return cp, highp;
+}

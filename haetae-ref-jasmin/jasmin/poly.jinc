@@ -1,0 +1,1238 @@
+require "params.jinc"
+require "reduce.jinc"
+require "zetas.jinc"
+
+/* Forward NTT (in-place, bit-reversed output).
+ * Mirrors C ntt(): 8 butterfly layers, no reduction between steps.
+ * Coefficients are int32_t stored as u32. */
+fn _poly_ntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 len;
+  reg ui64 start;
+  reg ui64 j;
+  reg ui64 cmp;
+  reg ui64 offset;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg ui64 zetasctr;
+
+  zetasp   = jzetas;
+  zetasctr = 0;
+  len      = 128;
+
+  while (len > 0)
+  {
+    start = 0;
+    while (start < HAETAE_N)
+    {
+      zetasctr += 1;
+      zeta = zetasp[zetasctr];
+
+      j   = start;
+      cmp = start; cmp += len;
+      while (j < cmp)
+      {
+        s      = rp[j];
+        offset = j; offset += len;
+        coeff  = rp[offset];
+
+        t      = __fqmul(zeta, coeff);   /* t = montgomery_reduce(zeta * coeff) */
+        coeff  = s;
+        coeff -= t;                      /* coeff = a[j] - t */
+        rp[offset] = coeff;
+        s     += t;                      /* s = a[j] + t */
+        rp[j]  = s;
+
+        j += 1;
+      }
+      start = j; start += len;
+    }
+    len >>= 1;
+  }
+
+  return rp;
+}
+
+/* Inverse NTT multiplied by Montgomery factor 2^32 (in-place).
+ * Mirrors C invntt_tomont(): 8 inverse butterfly layers + final scaling by f. */
+fn _poly_invntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 len;
+  reg ui64 start;
+  reg ui64 j;
+  reg ui64 cmp;
+  reg ui64 offset;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg ui64 zetasctr;
+
+  zetasp   = jzetas_inv;
+  zetasctr = 0;
+
+  len = 1;
+  while (len < HAETAE_N)
+  {
+    start = 0;
+    while (start < HAETAE_N)
+    {
+      zeta = zetasp[zetasctr];
+      zetasctr += 1;
+
+      j   = start;
+      cmp = start; cmp += len;
+      while (j < cmp)
+      {
+        t      = rp[j];
+        offset = j; offset += len;
+        coeff  = rp[offset];
+
+        s          = t;           /* copy a[j] */
+        s         += coeff;       /* s = a[j] + a[j+len] */
+        rp[j]      = s;
+        t         -= coeff;       /* t = a[j] - a[j+len] */
+        t          = __fqmul(zeta, t); /* montgomery_reduce(zeta * (a[j]-a[j+len])) */
+        rp[offset] = t;
+
+        j += 1;
+      }
+      start = j; start += len;
+    }
+    len <<= 1;
+  }
+
+  /* Final scaling by f = -29720 (jzetas_inv[255] = mont^2/256) */
+  zeta = zetasp[255];
+  j = 0;
+  while (j < HAETAE_N)
+  {
+    coeff  = rp[j];
+    t      = __fqmul(zeta, coeff);
+    rp[j]  = t;
+    j     += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_ntt(reg mut ptr u32[2048] xp,
+                reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 poly base;
+  reg u64 len;
+  reg u64 start;
+  reg u64 j;
+  reg u64 cmp;
+  reg u64 offset;
+  reg u64 idx;
+  reg u64 idx2;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg u64 zetasctr;
+
+  zetasp = jzetas;
+
+  poly = 0;
+  base = 0;
+  while (poly < count)
+  {
+    zetasctr = 0;
+    len = 128;
+
+    while (len > 0)
+    {
+      start = 0;
+      while (start < HAETAE_N)
+      {
+        zetasctr += 1;
+        zeta = zetasp[zetasctr];
+
+        j = start;
+        cmp = start; cmp += len;
+        while (j < cmp)
+        {
+          idx = base;
+          idx += j;
+          s = xp[idx];
+
+          offset = j; offset += len;
+          idx2 = base;
+          idx2 += offset;
+          coeff = xp[idx2];
+
+          t = __fqmul(zeta, coeff);
+          coeff = s;
+          coeff -= t;
+          xp[idx2] = coeff;
+          s += t;
+          xp[idx] = s;
+
+          j += 1;
+        }
+        start = j; start += len;
+      }
+      len >>= 1;
+    }
+
+    base += HAETAE_N;
+    poly += 1;
+  }
+
+  return xp;
+}
+
+fn _polyvec_invntt(reg mut ptr u32[2048] xp,
+                   reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 poly base;
+  reg u64 len;
+  reg u64 start;
+  reg u64 j;
+  reg u64 cmp;
+  reg u64 offset;
+  reg u64 idx;
+  reg u64 idx2;
+
+  reg u32 zeta;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+
+  reg ptr u32[256] zetasp;
+  reg u64 zetasctr;
+
+  zetasp = jzetas_inv;
+
+  poly = 0;
+  base = 0;
+  while (poly < count)
+  {
+    zetasctr = 0;
+
+    len = 1;
+    while (len < HAETAE_N)
+    {
+      start = 0;
+      while (start < HAETAE_N)
+      {
+        zeta = zetasp[zetasctr];
+        zetasctr += 1;
+
+        j = start;
+        cmp = start; cmp += len;
+        while (j < cmp)
+        {
+          idx = base;
+          idx += j;
+          t = xp[idx];
+
+          offset = j; offset += len;
+          idx2 = base;
+          idx2 += offset;
+          coeff = xp[idx2];
+
+          s = t;
+          s += coeff;
+          xp[idx] = s;
+          t -= coeff;
+          t = __fqmul(zeta, t);
+          xp[idx2] = t;
+
+          j += 1;
+        }
+        start = j; start += len;
+      }
+      len <<= 1;
+    }
+
+    zeta = zetasp[255];
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = base;
+      idx += j;
+      coeff = xp[idx];
+      t = __fqmul(zeta, coeff);
+      xp[idx] = t;
+      j += 1;
+    }
+
+    base += HAETAE_N;
+    poly += 1;
+  }
+
+  return xp;
+}
+
+/* Pointwise multiplication in NTT domain: r[i] = montgomery_reduce(a[i]*b[i]) */
+fn _poly_basemul(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a b r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    b = bp[i];
+    r = __fqmul(a, b);
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_add(reg mut ptr u32[HAETAE_N] rp,
+             reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a b r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    b = bp[i];
+    r = a + b;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_sub(reg mut ptr u32[HAETAE_N] rp,
+             reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a b r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    b = bp[i];
+    r = a - b;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_double(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a <<= 1;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_double_negate(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u64 a z;
+  reg u32 r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = (64s)rp[i];
+    a *= MONT;
+    a *= 2;
+    z = 0;
+    z -= a;
+    r = __montgomery_reduce(z);
+    rp[i] = r;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_frommont(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u64 a;
+  reg u32 r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = (64s)rp[i];
+    a *= MONTSQ;
+    r = __montgomery_reduce(a);
+    rp[i] = r;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_cneg(reg mut ptr u32[HAETAE_N] rp, reg u8 b) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a factor twice;
+
+  twice = (32u)b;
+  twice <<= 1;
+  factor = 1;
+  factor -= twice;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a *= factor;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_caddq(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a = __caddq(a);
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+inline fn _poly_cadddq2alpha(reg mut ptr u32[HAETAE_N] rp, inline int bound) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a add;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    add = a;
+    add >>s= 31;
+    add &= bound;
+    a += add;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+inline fn _poly_csubdq2alpha(reg mut ptr u32[HAETAE_N] rp, inline int bound) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a sub mask;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    sub = a;
+    sub -= bound;
+    sub >>s= 31;
+    mask = 0;
+    mask -= 1;
+    sub ^= mask;
+    sub &= bound;
+    a -= sub;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+inline fn _poly_mul_alpha(reg mut ptr u32[HAETAE_N] rp,
+                          reg const ptr u32[HAETAE_N] ap,
+                          inline int alpha) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    a *= alpha;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_div2(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a >>s= 1;
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_lsb(reg mut ptr u32[HAETAE_N] rp,
+             reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    a &= 1;
+    rp[i] = a;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_compose(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] hp lp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 h l r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    h = hp[i];
+    l = lp[i];
+    h <<= 8;
+    r = h + l;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_mismatch(reg const ptr u32[HAETAE_N] ap,
+                  reg const ptr u32[HAETAE_N] bp) -> reg u64
+{
+  reg u64 i acc t neg;
+  reg u32 a b diff;
+
+  i = 0;
+  acc = 0;
+  while (i < HAETAE_N)
+  {
+    a = ap[i];
+    b = bp[i];
+    diff = a;
+    diff ^= b;
+    t = (64u)diff;
+    acc |= t;
+    i += 1;
+  }
+
+  neg = 0;
+  neg -= acc;
+  acc |= neg;
+  acc >>= 63;
+  return acc;
+}
+
+fn _polyvec_compose(reg mut ptr u32[2048] rp,
+                    reg const ptr u32[2048] hp,
+                    reg const ptr u32[2048] lp,
+                    reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 h l r;
+
+  i = 0;
+  while (i < count)
+  {
+    h = hp[i];
+    l = lp[i];
+    h <<= 8;
+    r = h + l;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_fromcrt(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] up vp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 xq x2 mask add r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    xq = up[i];
+    x2 = vp[i];
+    mask = xq;
+    mask ^= x2;
+    mask &= 1;
+    add = 0;
+    add -= mask;
+    add &= HAETAE_Q;
+    r = xq + add;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_fromcrt0(reg mut ptr u32[HAETAE_N] rp,
+                  reg const ptr u32[HAETAE_N] up) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 xq mask add r;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    xq = up[i];
+    mask = xq;
+    mask &= 1;
+    add = 0;
+    add -= mask;
+    add &= HAETAE_Q;
+    r = xq + add;
+    rp[i] = r;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _polyveck_poly_fromcrt(reg mut ptr u32[2048] wp,
+                          reg const ptr u32[2048] up,
+                          reg const ptr u32[HAETAE_N] vp,
+                          reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 k j off idx;
+  reg u32 xq x2 mask add r;
+
+  j = 0;
+  while (j < HAETAE_N)
+  {
+    xq = up[j];
+    x2 = vp[j];
+    mask = xq;
+    mask ^= x2;
+    mask &= 1;
+    add = 0;
+    add -= mask;
+    add &= HAETAE_Q;
+    r = xq + add;
+    wp[j] = r;
+    j += 1;
+  }
+
+  k = 1;
+  off = HAETAE_N;
+  while (k < count)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = off;
+      idx += j;
+      xq = up[idx];
+      mask = xq;
+      mask &= 1;
+      add = 0;
+      add -= mask;
+      add &= HAETAE_Q;
+      r = xq + add;
+      wp[idx] = r;
+      j += 1;
+    }
+
+    off += HAETAE_N;
+    k += 1;
+  }
+
+  return wp;
+}
+
+fn _poly_reduce2q(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a = __reduce32_2q(a);
+    rp[i] = a;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_freeze(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a = __freeze(a);
+    rp[i] = a;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _poly_freeze2q(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = rp[i];
+    a = __freeze2q(a);
+    rp[i] = a;
+    i += 1;
+  }
+  return rp;
+}
+
+fn _polyvec_pointwise_acc(reg mut ptr u32[HAETAE_N] rp,
+                          reg const ptr u32[2048] up,
+                          reg const ptr u32[2048] vp,
+                          reg u64 count) -> reg ptr u32[HAETAE_N]
+{
+  reg u64 k j off idx;
+  reg u32 a b t acc;
+
+  j = 0;
+  while (j < HAETAE_N)
+  {
+    rp[j] = 0;
+    j += 1;
+  }
+
+  k = 0;
+  off = 0;
+  while (k < count)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = off;
+      idx += j;
+      a = up[idx];
+      b = vp[idx];
+      t = __fqmul(a, b);
+      acc = rp[j];
+      acc += t;
+      rp[j] = acc;
+      j += 1;
+    }
+
+    off += HAETAE_N;
+    k += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_poly_pointwise(reg mut ptr u32[2048] rp,
+                           reg const ptr u32[2048] up,
+                           reg const ptr u32[HAETAE_N] vp,
+                           reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 k j off idx;
+  reg u32 a b t;
+
+  k = 0;
+  off = 0;
+  while (k < count)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = off;
+      idx += j;
+      a = up[idx];
+      b = vp[j];
+      t = __fqmul(a, b);
+      rp[idx] = t;
+      j += 1;
+    }
+
+    off += HAETAE_N;
+    k += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_sqnorm2(reg const ptr u32[2048] ap, reg u64 count) -> reg u64
+{
+  reg u64 i total coeff prod;
+  reg u32 a;
+
+  total = 0;
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  return total;
+}
+
+fn _polyvec_add(reg mut ptr u32[2048] wp,
+                reg const ptr u32[2048] up,
+                reg const ptr u32[2048] vp,
+                reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a b;
+
+  i = 0;
+  while (i < count)
+  {
+    a = up[i];
+    b = vp[i];
+    a += b;
+    wp[i] = a;
+    i += 1;
+  }
+
+  return wp;
+}
+
+fn _polyvec_sub(reg mut ptr u32[2048] wp,
+                reg const ptr u32[2048] up,
+                reg const ptr u32[2048] vp,
+                reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a b;
+
+  i = 0;
+  while (i < count)
+  {
+    a = up[i];
+    b = vp[i];
+    a -= b;
+    wp[i] = a;
+    i += 1;
+  }
+
+  return wp;
+}
+
+fn _polyvec_reduce2q(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a = __reduce32_2q(a);
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_freeze(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a = __freeze(a);
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_freeze2q(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a = __freeze2q(a);
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_double(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a <<= 1;
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_double_negate(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u64 a z;
+  reg u32 r;
+
+  i = 0;
+  while (i < count)
+  {
+    a = (64s)vp[i];
+    a *= MONT;
+    a *= 2;
+    z = 0;
+    z -= a;
+    r = __montgomery_reduce(z);
+    vp[i] = r;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_frommont(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u64 a;
+  reg u32 r;
+
+  i = 0;
+  while (i < count)
+  {
+    a = (64s)vp[i];
+    a *= MONTSQ;
+    r = __montgomery_reduce(a);
+    vp[i] = r;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_cneg(reg mut ptr u32[2048] vp,
+                 reg u64 count,
+                 reg u8 b) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a factor twice;
+
+  twice = (32u)b;
+  twice <<= 1;
+  factor = 1;
+  factor -= twice;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a *= factor;
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_caddq(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a = __caddq(a);
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+inline fn _polyvec_cadddq2alpha(reg mut ptr u32[2048] vp,
+                                reg u64 count,
+                                inline int bound) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a add;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    add = a;
+    add >>s= 31;
+    add &= bound;
+    a += add;
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+inline fn _polyvec_csubdq2alpha(reg mut ptr u32[2048] vp,
+                                reg u64 count,
+                                inline int bound) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a sub mask;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    sub = a;
+    sub -= bound;
+    sub >>s= 31;
+    mask = 0;
+    mask -= 1;
+    sub ^= mask;
+    sub &= bound;
+    a -= sub;
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+inline fn _polyvec_mul_alpha(reg mut ptr u32[2048] wp,
+                             reg const ptr u32[2048] up,
+                             reg u64 count,
+                             inline int alpha) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = up[i];
+    a *= alpha;
+    wp[i] = a;
+    i += 1;
+  }
+
+  return wp;
+}
+
+fn _polyvec_div2(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = vp[i];
+    a >>s= 1;
+    vp[i] = a;
+    i += 1;
+  }
+
+  return vp;
+}
+
+fn _polymat_pointwise_acc(reg mut ptr u32[2048] tp,
+                          reg const ptr u32[8192] mp,
+                          reg const ptr u32[2048] vp,
+                          reg u64 rows,
+                          reg u64 cols) -> reg ptr u32[2048]
+{
+  reg u64 row col j row_out row_mat col_off midx vidx oidx;
+  reg u32 a b t acc;
+
+  row = 0;
+  row_out = 0;
+  row_mat = 0;
+  while (row < rows)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      oidx = row_out;
+      oidx += j;
+      tp[oidx] = 0;
+      j += 1;
+    }
+
+    col = 0;
+    col_off = 0;
+    while (col < cols)
+    {
+      j = 0;
+      while (j < HAETAE_N)
+      {
+        midx = row_mat;
+        midx += col_off;
+        midx += j;
+        vidx = col_off;
+        vidx += j;
+        oidx = row_out;
+        oidx += j;
+
+        a = mp[midx];
+        b = vp[vidx];
+        t = __fqmul(a, b);
+        acc = tp[oidx];
+        acc += t;
+        tp[oidx] = acc;
+        j += 1;
+      }
+
+      col_off += HAETAE_N;
+      col += 1;
+    }
+
+    row_mat += col_off;
+    row_out += HAETAE_N;
+    row += 1;
+  }
+
+  return tp;
+}
+
+fn _polymatkl_double(reg mut ptr u32[8192] mp,
+                     reg u64 rows,
+                     reg u64 cols) -> reg ptr u32[8192]
+{
+  reg u64 row col j row_off col_off idx;
+  reg u32 a;
+
+  row = 0;
+  row_off = 0;
+  while (row < rows)
+  {
+    col = 1;
+    col_off = HAETAE_N;
+    while (col < cols)
+    {
+      j = 0;
+      while (j < HAETAE_N)
+      {
+        idx = row_off;
+        idx += col_off;
+        idx += j;
+        a = mp[idx];
+        a <<= 1;
+        mp[idx] = a;
+        j += 1;
+      }
+
+      col_off += HAETAE_N;
+      col += 1;
+    }
+
+    row_off += col_off;
+    row += 1;
+  }
+
+  return mp;
+}
+
+fn _polymat_set_first_column(reg mut ptr u32[8192] mp,
+                             reg const ptr u32[2048] vp,
+                             reg u64 rows,
+                             reg u64 cols) -> reg ptr u32[8192]
+{
+  reg u64 row j row_off src_off midx vidx stride;
+  reg u32 a;
+
+  stride = cols;
+  stride *= HAETAE_N;
+  row = 0;
+  row_off = 0;
+  src_off = 0;
+  while (row < rows)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      midx = row_off;
+      midx += j;
+      vidx = src_off;
+      vidx += j;
+      a = vp[vidx];
+      mp[midx] = a;
+      j += 1;
+    }
+
+    row_off += stride;
+    src_off += HAETAE_N;
+    row += 1;
+  }
+
+  return mp;
+}

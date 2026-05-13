@@ -1,0 +1,80 @@
+\chapter{Reductions, Concrete Bounds, and Paper Algebra}
+\label{ch:bounds}
+
+\section{Reduction Terms}
+
+\code{HAETAE\_Reductions.ec} collects the algebra of the final security bound.
+It defines and relates terms for signing-query scaling, ROM collision losses,
+prequery losses, min-entropy losses, rejection-sampling losses, and bimodal to
+Module-SIS reduction losses.
+
+\section{Pen-and-Paper Bound Composition}
+
+Let the game hops produce losses \(\epsilon_1,\ldots,\epsilon_k\), and let the
+final extractor produce reductions \(B_1,\ldots,B_r\).  At the schematic
+paper-theorem level, the standard game-hop composition gives
+\[
+\Adv^{\eufcma}_{\haetae}(A)
+\le
+\sum_{j=1}^r \Adv_j(B_j) + \sum_{i=1}^k \epsilon_i.
+\]
+For \haetae{}, the intermediate \(\epsilon_i\) ledger includes ROM collision
+terms, programmed-site prequery terms, sampler-prequery terms, min-entropy
+terms, rejection-sampling losses, and exact-sampling replacement losses.  This
+is the paper-style hop ledger, not the final counted-ROM right-hand side.  In
+the final checked implication, the rejection and exact-sampling obligations are
+antecedents or bridge-lemma costs, while the displayed final bound adds only the
+hardness terms, the bimodal-to-Module-SIS reduction term, and the counted ROM
+collision/prequery/min-entropy terms.  This is a logical grouping statement, not
+by itself a non-vacuity statement: with the current constants the
+paper-style \ec{rejection\_sampling\_loss\_term} is larger than one, so any final
+antecedent that adds this term to a probability must be separately checked for
+satisfiability before the implication is cited as a useful concrete bound.
+The checked instantiation discussed in this dissertation replaces the schematic
+left-hand side by \(\Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)\), while the
+right-hand-side bound ledger is instantiated at \(q_H=q_S=2\).
+
+\begin{proof}[Pen-and-paper proof of composition]
+Let \(G_0\) be the real \eufcma{} game and \(G_k\) be the final reduction game.
+For each adjacent pair, prove either exact equality of the relevant event or a
+statistical-distance bound
+\(|\Pr[G_i]-\Pr[G_{i+1}]|\le\epsilon_i\).  By the triangle inequality,
+\(|\Pr[G_0]-\Pr[G_k]|\le\sum_i\epsilon_i\).  The final game success is bounded
+by the reduction advantages \(\sum_j\Adv_j(B_j)\).  Combining the inequalities
+gives the result.
+\end{proof}
+
+\section{Nonnegativity and Cardinality}
+
+Concrete bounds require side conditions.  The proof includes nonnegativity
+lemmas for budgets and loss terms, lower bounds for challenge support, and
+subunit bounds where probabilities must be at most one.  This arithmetic layer
+is critical: it ensures the final implication composes valid inequalities rather
+than relying on informal real-number reasoning.
+
+\section{Detailed EasyCrypt Code Analysis}
+
+\code{HAETAE\_Reductions.ec} should be read as the arithmetic ledger of the
+security proof.  Lemmas ending in \code{E} are usually expansion lemmas: they
+rewrite named loss terms into their concrete expressions.  Lemmas ending in
+\code{nonnegative}, \code{positive}, \code{le1}, or \code{subunit} discharge
+side conditions required by probability reasoning.
+
+For example, \code{counted\_rom\_programming\_loss\_term\_concreteE} connects a
+named loss to its concrete budget/support expression, while
+\code{counted\_rom\_programming\_loss\_term\_subunit} proves that the expression
+is a valid probability-scale quantity.  Similarly,
+\code{challenge\_support\_cardinality\_lower\_bound\_positive} prevents a hidden
+division-by-zero assumption in entropy-based bounds.
+
+The theorem file \code{HAETAE\_Security.ec} consumes these arithmetic facts
+rather than re-proving arithmetic at every hop.  This separation improves proof
+maintenance: changing a bound expression should affect the reduction ledger and
+a small number of bridge lemmas, not the entire game-hop development.
+
+\section{Hardness Boundary}
+
+The final proof is conditional on the assumptions encoded in
+\code{HAETAE\_Assumptions.ec}.  The machine-checked result therefore states
+that the modeled \haetae{} adversary's advantage is bounded by formal reduction
+advantages and checked loss terms under those assumptions.

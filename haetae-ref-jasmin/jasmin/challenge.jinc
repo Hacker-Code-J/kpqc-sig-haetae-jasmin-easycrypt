@@ -1,0 +1,155 @@
+require "params.jinc"
+
+inline fn __hamming_weight_8(reg u32 x) -> reg u32
+{
+  reg u32 y;
+
+  y = x;
+  y &= 85;
+  x >>= 1;
+  x &= 85;
+  x += y;
+
+  y = x;
+  y &= 51;
+  x >>= 2;
+  x &= 51;
+  x += y;
+
+  y = x;
+  y &= 15;
+  x >>= 4;
+  x &= 15;
+  x += y;
+
+  return x;
+}
+
+fn _poly_challenge_m5_frombytes(reg mut ptr u32[HAETAE_N] cp,
+                                reg const ptr u8[32] bp) -> reg ptr u32[HAETAE_N]
+{
+  inline int j;
+  reg u64 i idx;
+  reg u32 hwt cond mask cand w0 byte bit sel neg;
+
+  hwt = 0;
+  i = 0;
+  while (i < 32)
+  {
+    byte = (32u)bp[i];
+    byte = __hamming_weight_8(byte);
+    hwt += byte;
+    i += 1;
+  }
+
+  cond = 128;
+  cond -= hwt;
+
+  cand = cond;
+  cand >>= 8;
+  cand &= 255;
+
+  w0 = (32u)bp[0];
+  w0 &= 1;
+  mask = 0;
+  mask -= w0;
+  mask &= 255;
+  w0 = mask;
+
+  sel = cond;
+  neg = 0;
+  neg -= cond;
+  sel |= neg;
+  sel >>s= 31;
+  mask = cand;
+  mask ^= w0;
+  mask &= sel;
+  mask ^= w0;
+
+  i = 0;
+  while (i < 32)
+  {
+    byte = (32u)bp[i];
+    byte ^= mask;
+    for j = 0 to 8
+    {
+      idx = i;
+      idx *= 8;
+      idx += j;
+      bit = byte;
+      bit >>= j;
+      bit &= 1;
+      cp[idx] = bit;
+    }
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _poly_challenge_m23_init(reg mut ptr u32[HAETAE_N] cp) -> reg ptr u32[HAETAE_N]
+{
+  reg u64 i;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    cp[i] = 0;
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _poly_challenge_m23_frombytes(reg mut ptr u32[HAETAE_N] cp,
+                                 reg mut ptr u32[1] ip,
+                                 reg mut ptr u32[1] posp,
+                                 reg const ptr u8[1024] bp,
+                                 reg u64 buflen) -> reg ptr u32[HAETAE_N],
+                                                     reg ptr u32[1],
+                                                     reg ptr u32[1]
+{
+  reg u64 i pos bidx limit;
+  reg u32 run b old tmp;
+
+  tmp = ip[0];
+  i = (64u)tmp;
+  tmp = posp[0];
+  pos = (64u)tmp;
+  run = 1;
+
+  while (run > 0)
+  {
+    if (i < HAETAE_N)
+    {
+      if (pos < buflen)
+      {
+        b = (32u)bp[pos];
+        pos += 1;
+        bidx = (64u)b;
+        limit = i;
+        limit += 1;
+
+        if (bidx < limit)
+        {
+          old = cp[bidx];
+          cp[i] = old;
+          cp[bidx] = 1;
+          i += 1;
+        }
+      }
+      else
+      {
+        run = 0;
+      }
+    }
+    else
+    {
+      run = 0;
+    }
+  }
+
+  ip[0] = (32u)i;
+  posp[0] = (32u)pos;
+  return cp, ip, posp;
+}

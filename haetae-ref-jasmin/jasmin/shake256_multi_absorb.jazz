@@ -1,0 +1,41 @@
+require "keccak.jinc"
+require "shake256_multi_absorb.jinc"
+
+export
+fn shake256_absorb_twice_jazz(reg mut ptr u64[26] statep,
+                              reg ui64 in1p,
+                              reg u64 in1len,
+                              reg ui64 in2p,
+                              reg u64 in2len) -> reg ptr u64[26]
+{
+  statep = _shake256_absorb_twice(statep, in1p, in1len, in2p, in2len);
+  return statep;
+}
+
+export
+fn shake256_absorb_twice_start_jazz(reg mut ptr u64[26] statep,
+                                    reg ui64 in1p,
+                                    reg u64 in1len,
+                                    reg ui64 in2p,
+                                    reg u64 in2len) -> reg ptr u64[26]
+{
+  statep = _shake256_absorb_twice_start(statep, in1p, in1len, in2p, in2len);
+  return statep;
+}
+
+export
+fn shake256_absorb_final_jazz(reg mut ptr u64[26] statep,
+                              reg ui64 inp,
+                              reg u64 inlen) -> reg ptr u64[26]
+{
+  statep = _shake256_absorb_final(statep, inp, inlen);
+  return statep;
+}
+
+export
+fn shake256_absorb_thrice_jazz(reg mut ptr u64[26] statep,
+                               reg const ptr u64[6] descp) -> reg ptr u64[26]
+{
+  statep = _shake256_absorb_thrice_desc(statep, descp);
+  return statep;
+}

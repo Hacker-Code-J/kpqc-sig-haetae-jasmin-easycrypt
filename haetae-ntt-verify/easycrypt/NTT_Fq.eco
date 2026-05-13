@@ -1,7 +1,7 @@
 {
   "version": 3,
   "echash": "n/a",
-  "root": { "kind": "ec", "digest": "78e2af7490520b64539c70d8aeb8fd70" },
+  "root": { "kind": "ec", "digest": "b3fe2fc08d542d0236a74fe66628f432" },
   "depends": {
     "AES": {
       "direct": false,
@@ -24,7 +24,7 @@
       "digest": "f80cf2d4733ecae7ccf3edece998ec92"
     },
     "BArray1024": {
-      "direct": false,
+      "direct": true,
       "kind": "ec",
       "digest": "43345a6c4c3c05334a9a3fcc38c46b27"
     },
@@ -129,7 +129,7 @@
       "digest": "fe42b4f74d462df74c5932d8123988f2"
     },
     "Hpoly_extract": {
-      "direct": false,
+      "direct": true,
       "kind": "ec",
       "digest": "2afdda8c62732169052f5fd225c5339a"
     },
@@ -189,7 +189,7 @@
       "digest": "46d210eba49cc9a614bbbd892719084e"
     },
     "JWord": {
-      "direct": false,
+      "direct": true,
       "kind": "ec",
       "digest": "c93a6493c463cd47169369cd9116c30c"
     },

@@ -1,0 +1,909 @@
+require "params.jinc"
+require "poly.jinc"
+require "keccak.jinc"
+
+inline fn __sign_shake256_absorb_byte(reg mut ptr u64[25] sp,
+                                      reg u64 pos,
+                                      reg u8 b) -> reg ptr u64[25]
+{
+  reg u64 lane t;
+  reg u8 shift;
+
+  lane = pos;
+  lane >>= 3;
+  t = (64u)b;
+  shift = (8u)pos;
+  shift &= 7;
+  shift <<= 3;
+  t <<= (shift & 63);
+  sp[lane] ^= t;
+
+  return sp;
+}
+
+inline fn __sign_shake256_absorb_fixed(reg mut ptr u64[25] sp,
+                                       reg u64 pos,
+                                       reg ui64 inp,
+                                       inline int inlen) -> reg ptr u64[25],
+                                                            reg u64
+{
+  reg ui64 i off;
+  reg ui64 addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < inlen)
+  {
+    off = i;
+    addr = inp;
+    addr += off;
+    b = [:u8 (64u)addr];
+    sp = __sign_shake256_absorb_byte(sp, pos, b);
+    pos += 1;
+    i += 1;
+  }
+
+  return sp, pos;
+}
+
+inline fn __sign_shake256_squeeze_first(reg ui64 outp,
+                                        reg ptr u64[25] sp,
+                                        inline int outlen) -> reg ui64
+{
+  reg ui64 i;
+  reg u64 idx lane t;
+  reg ui64 addr;
+  reg u8 b shift;
+
+  i = 0;
+  idx = 0;
+  while (idx < outlen)
+  {
+    lane = idx;
+    lane >>= 3;
+    t = sp[lane];
+    shift = (8u)idx;
+    shift &= 7;
+    shift <<= 3;
+    t >>= (shift & 63);
+    b = (8u)t;
+    addr = outp;
+    addr += i;
+    [:u8 (64u)addr] = b;
+    i += 1;
+    idx += 1;
+  }
+
+  return outp;
+}
+
+fn _keypair_expand_seedbuf(reg ui64 outp,
+                           reg ui64 seedp) -> reg ui64
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 pos rate;
+  reg u8 domain;
+
+  sp = s;
+  sp = _keccak_init_state(sp);
+  pos = 0;
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, seedp, 32);
+  rate = 136;
+  domain = 0x1f;
+  sp = _keccak_finalize(sp, pos, rate, domain);
+  sp = _keccakf1600(sp);
+  outp = __sign_shake256_squeeze_first(outp, sp, 128);
+
+  return outp;
+}
+
+fn _sign_expand_seedbuf(reg ui64 outp,
+                        reg ui64 keyp,
+                        reg ui64 rndp,
+                        reg ui64 mup) -> reg ui64
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 pos rate;
+  reg u8 domain;
+
+  sp = s;
+  sp = _keccak_init_state(sp);
+  pos = 0;
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, keyp, 32);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, rndp, 32);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, mup, 64);
+  rate = 136;
+  domain = 0x1f;
+  sp = _keccak_finalize(sp, pos, rate, domain);
+  sp = _keccakf1600(sp);
+  outp = __sign_shake256_squeeze_first(outp, sp, 64);
+
+  return outp;
+}
+
+fn _sign_prepare_pre(reg mut ptr u8[257] prep,
+                     reg const ptr u8[256] ctxp,
+                     reg u64 ctxlen) -> reg ptr u8[257]
+{
+  reg u64 i idx;
+  reg u8 b;
+
+  b = (8u)ctxlen;
+  prep[0] = b;
+  i = 0;
+  while (i < ctxlen)
+  {
+    b = ctxp[i];
+    idx = i;
+    idx += 1;
+    prep[idx] = b;
+    i += 1;
+  }
+
+  return prep;
+}
+
+fn _sign_move_message_to_sm(reg ui64 smp,
+                            reg ui64 mp,
+                            reg ui64 mlen,
+                            reg ui64 sigbytes) -> reg ui64
+{
+  reg ui64 i off;
+  reg ui64 srcp dstp;
+  reg u8 b;
+
+  i = 0;
+  while (i < mlen)
+  {
+    off = mlen;
+    off -= 1;
+    off -= i;
+    srcp = mp;
+    srcp += off;
+    dstp = smp;
+    dstp += sigbytes;
+    dstp += off;
+    b = [:u8 (64u)srcp];
+    [:u8 (64u)dstp] = b;
+    i += 1;
+  }
+
+  return smp;
+}
+
+fn _sign_open_copy_message(reg ui64 mp,
+                           reg ui64 smp,
+                           reg ui64 sigbytes,
+                           reg ui64 mlen) -> reg ui64
+{
+  reg ui64 i;
+  reg ui64 srcp dstp;
+  reg u8 b;
+
+  i = 0;
+  while (i < mlen)
+  {
+    srcp = smp;
+    srcp += sigbytes;
+    srcp += i;
+    dstp = mp;
+    dstp += i;
+    b = [:u8 (64u)srcp];
+    [:u8 (64u)dstp] = b;
+    i += 1;
+  }
+
+  return mp;
+}
+
+fn _sign_open_zero_message(reg ui64 mp,
+                           reg ui64 smlen) -> reg ui64
+{
+  reg ui64 i;
+  reg ui64 dstp;
+
+  i = 0;
+  while (i < smlen)
+  {
+    dstp = mp;
+    dstp += i;
+    [:u8 (64u)dstp] = 0;
+    i += 1;
+  }
+
+  return mp;
+}
+
+fn _sign_prepare_cs(reg mut ptr u32[2048] cs1p,
+                    reg mut ptr u32[HAETAE_N] chatp,
+                    reg const ptr u32[HAETAE_N] cp) -> reg ptr u32[2048],
+                                                    reg ptr u32[HAETAE_N]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = cp[i];
+    cs1p[i] = a;
+    chatp[i] = a;
+    i += 1;
+  }
+
+  chatp = _poly_ntt(chatp);
+  return cs1p, chatp;
+}
+
+fn _sign_compute_cs1_tail(reg mut ptr u32[2048] cs1p,
+                          reg const ptr u32[HAETAE_N] chatp,
+                          reg const ptr u32[2048] s1p,
+                          reg u64 lcount) -> reg ptr u32[2048]
+{
+  reg u64 poly base srcbase;
+  reg u64 len;
+  reg u64 start;
+  reg u64 j;
+  reg u64 cmp;
+  reg u64 offset;
+  reg u64 idx;
+  reg u64 idx2;
+
+  reg u32 a;
+  reg u32 b;
+  reg u32 t;
+  reg u32 s;
+  reg u32 coeff;
+  reg u32 zeta;
+
+  reg ptr u32[256] zetasp;
+  reg u64 zetasctr;
+
+  poly = 1;
+  base = HAETAE_N;
+  srcbase = 0;
+  while (poly < lcount)
+  {
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = srcbase;
+      idx += j;
+      idx2 = base;
+      idx2 += j;
+      a = s1p[idx];
+      b = chatp[j];
+      t = __fqmul(a, b);
+      cs1p[idx2] = t;
+      j += 1;
+    }
+
+    base += HAETAE_N;
+    srcbase += HAETAE_N;
+    poly += 1;
+  }
+
+  zetasp = jzetas_inv;
+  poly = 1;
+  base = HAETAE_N;
+  while (poly < lcount)
+  {
+    zetasctr = 0;
+
+    len = 1;
+    while (len < HAETAE_N)
+    {
+      start = 0;
+      while (start < HAETAE_N)
+      {
+        zeta = zetasp[zetasctr];
+        zetasctr += 1;
+
+        j = start;
+        cmp = start;
+        cmp += len;
+        while (j < cmp)
+        {
+          idx = base;
+          idx += j;
+          t = cs1p[idx];
+
+          offset = j;
+          offset += len;
+          idx2 = base;
+          idx2 += offset;
+          coeff = cs1p[idx2];
+
+          s = t;
+          s += coeff;
+          cs1p[idx] = s;
+          t -= coeff;
+          t = __fqmul(zeta, t);
+          cs1p[idx2] = t;
+
+          j += 1;
+        }
+        start = j;
+        start += len;
+      }
+      len <<= 1;
+    }
+
+    zeta = zetasp[255];
+    j = 0;
+    while (j < HAETAE_N)
+    {
+      idx = base;
+      idx += j;
+      coeff = cs1p[idx];
+      t = __fqmul(zeta, coeff);
+      cs1p[idx] = t;
+      j += 1;
+    }
+
+    base += HAETAE_N;
+    poly += 1;
+  }
+
+  return cs1p;
+}
+
+inline fn _sign_verify_recover_w_z2(reg mut ptr u32[2048] wp,
+                                    reg mut ptr u32[2048] z2p,
+                                    reg const ptr u32[2048] highp,
+                                    reg const ptr u32[2048] hp,
+                                    reg const ptr u32[HAETAE_N] wprimep,
+                                    reg u64 count,
+                                    inline int half_alpha,
+                                    inline int log_alpha,
+                                    inline int bound,
+                                    inline int alpha) -> reg ptr u32[2048],
+                                                        reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 high w edge sub mask z add;
+
+  i = 0;
+  while (i < count)
+  {
+    high = highp[i];
+
+    w = high;
+    w += half_alpha;
+    w >>s= log_alpha;
+    edge = bound;
+    edge -= w;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= bound;
+    w -= sub;
+
+    add = hp[i];
+    w += add;
+    sub = w;
+    sub -= bound;
+    sub >>s= 31;
+    mask = 0;
+    mask -= 1;
+    sub ^= mask;
+    sub &= bound;
+    w -= sub;
+    wp[i] = w;
+
+    z = w;
+    z *= alpha;
+    z -= high;
+    if (i < HAETAE_N)
+    {
+      add = wprimep[i];
+      z += add;
+    }
+    z = __reduce32_2q(z);
+    z >>s= 1;
+    z2p[i] = z;
+
+    i += 1;
+  }
+
+  return wp, z2p;
+}
+
+fn _sign_verify_prepare_z1_wprime(reg ui64 z1p,
+                                  reg ui64 wprimep,
+                                  reg ui64 highzp,
+                                  reg ui64 lowzp,
+                                  reg ui64 cp,
+                                  reg ui64 lcount) -> reg u64
+{
+  reg ui64 i off addr;
+  reg u64 total coeff prod;
+  reg u32 high low z c w;
+
+  total = 0;
+  i = 0;
+  while (i < lcount)
+  {
+    off = i;
+    off <<= 2;
+    addr = highzp;
+    addr += off;
+    high = [:u32 (64u)addr];
+    addr = lowzp;
+    addr += off;
+    low = [:u32 (64u)addr];
+    high <<= 8;
+    z = high;
+    z += low;
+    addr = z1p;
+    addr += off;
+    [:u32 (64u)addr] = z;
+
+    coeff = (64s)z;
+    prod = coeff * coeff;
+    total += prod;
+
+    if (i < HAETAE_N)
+    {
+      addr = cp;
+      addr += off;
+      c = [:u32 (64u)addr];
+      w = z;
+      w -= c;
+      w &= 1;
+      addr = wprimep;
+      addr += off;
+      [:u32 (64u)addr] = w;
+    }
+
+    i += 1;
+  }
+
+  return total;
+}
+
+fn _sign_verify_norm_reject(reg const ptr u32[2048] z2p,
+                            reg u64 z1norm,
+                            reg u64 kcount,
+                            reg u64 bound) -> reg u64
+{
+  reg u64 total z2norm reject;
+
+  z2norm = _polyvec_sqnorm2(z2p, kcount);
+  total = z1norm;
+  total += z2norm;
+
+  reject = 0;
+  if (total > bound)
+  {
+    reject = 1;
+  }
+
+  return reject;
+}
+
+fn _sign_add_double_z2rnd(reg mut ptr u32[2048] ayp,
+                          reg mut ptr u32[2048] z2p,
+                          reg u64 count) -> reg ptr u32[2048],
+                                           reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 ay z;
+
+  i = 0;
+  while (i < count)
+  {
+    z = z2p[i];
+    z <<= 1;
+    z2p[i] = z;
+    ay = ayp[i];
+    ay += z;
+    ayp[i] = ay;
+    i += 1;
+  }
+
+  return ayp, z2p;
+}
+
+inline fn __sk_singular_value_minmax(reg u32 a b) -> reg u32, reg u32
+{
+  reg u32 ab c t;
+
+  ab = b;
+  ab ^= a;
+  c = b;
+  c -= a;
+  t = c;
+  t ^= b;
+  t &= ab;
+  c ^= t;
+  c >>s= 31;
+  c &= ab;
+  a ^= c;
+  b ^= c;
+
+  return a, b;
+}
+
+inline fn __sk_singular_value_mulrnd16(reg u32 x y) -> reg u32
+{
+  reg u64 xx yy r;
+  reg u32 out;
+
+  xx = (64s)x;
+  yy = (64s)y;
+  r = xx * yy;
+  r += 32768;
+  r >>s= 16;
+  out = (32u)r;
+  return out;
+}
+
+fn _sk_singular_value_accumulate_fft_sqabs(reg mut ptr u32[256] sump,
+                                           reg const ptr u32[512] inputp)
+                                           -> reg ptr u32[256]
+{
+  reg u64 i idx;
+  reg u32 real imag sq acc;
+
+  i = 0;
+  idx = 0;
+  while (i < HAETAE_N)
+  {
+    real = inputp[idx];
+    idx += 1;
+    imag = inputp[idx];
+    idx += 1;
+
+    sq = __sk_singular_value_mulrnd16(real, real);
+    acc = __sk_singular_value_mulrnd16(imag, imag);
+    sq += acc;
+
+    acc = sump[i];
+    acc += sq;
+    sump[i] = acc;
+
+    i += 1;
+  }
+
+  return sump;
+}
+
+inline fn _sk_singular_value_finish(reg ui64 sump,
+                                    inline int best_count,
+                                    inline int tau,
+                                    inline int rem) -> reg u64
+{
+  stack u32[5] bestm;
+  reg ui64 i j off addr;
+  reg u64 r;
+  reg u32 x y min fac notfac res tmp;
+
+  i = 0;
+  while (i < best_count)
+  {
+    off = i;
+    off <<= 2;
+    addr = sump;
+    addr += off;
+    x = [:u32 (64u)addr];
+    bestm[i] = x;
+    i += 1;
+  }
+
+  i = best_count;
+  while (i < HAETAE_N)
+  {
+    off = i;
+    off <<= 2;
+    addr = sump;
+    addr += off;
+    x = [:u32 (64u)addr];
+
+    j = 0;
+    while (j < best_count)
+    {
+      y = bestm[j];
+      x, y = __sk_singular_value_minmax(x, y);
+      bestm[j] = y;
+      j += 1;
+    }
+
+    i += 1;
+  }
+
+  min = bestm[0];
+  i = 1;
+  while (i < best_count)
+  {
+    tmp = bestm[i];
+    min, tmp = __sk_singular_value_minmax(min, tmp);
+    i += 1;
+  }
+
+  res = 0;
+  i = 0;
+  while (i < best_count)
+  {
+    tmp = bestm[i];
+    fac = min;
+    fac -= tmp;
+    fac >>s= 31;
+
+    notfac = fac;
+    notfac ^= 0xffffffff;
+    notfac &= rem;
+    fac &= tau;
+    fac ^= notfac;
+
+    tmp += 0x10200;
+    tmp >>s= 10;
+    tmp *= fac;
+    res += tmp;
+    i += 1;
+  }
+
+  r = (64s)res;
+  r += 32;
+  r >>s= 6;
+  return r;
+}
+
+inline fn _sign_make_hint(reg mut ptr u32[2048] hp,
+                          reg const ptr u32[2048] highbitsp,
+                          reg const ptr u32[2048] ayp,
+                          reg const ptr u32[2048] z2rndp,
+                          reg u64 count,
+                          inline int half_alpha,
+                          inline int log_alpha,
+                          inline int bound) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 ay z tmp hb edge sub h add;
+
+  i = 0;
+  while (i < count)
+  {
+    ay = ayp[i];
+    z = z2rndp[i];
+    z <<= 1;
+    tmp = ay;
+    tmp -= z;
+    tmp = __freeze2q(tmp);
+
+    hb = tmp;
+    hb += half_alpha;
+    hb >>s= log_alpha;
+    edge = bound;
+    edge -= hb;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= bound;
+    hb -= sub;
+
+    h = highbitsp[i];
+    h -= hb;
+    add = h;
+    add >>s= 31;
+    add &= bound;
+    h += add;
+    hp[i] = h;
+
+    i += 1;
+  }
+
+  return hp;
+}
+
+fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
+                          reg u8 b,
+                          reg u64 lcount,
+                          reg u64 kcount,
+                          reg u64 reject1_bound,
+                          reg u64 reject2_bound) -> reg u64
+{
+  stack u64 sz1p sz2p sz1tmpp sz2tmpp sy1p sy2p scs1p scs2p;
+  stack u64 stotal1 stotal2 sgate sreject1_bound sreject2_bound;
+  reg u64 i off total coeff prod reject1 reject2 addr;
+  reg u32 factor twice y cs z tmp;
+
+  sz1p = ptrsp[0];
+  sz2p = ptrsp[1];
+  sz1tmpp = ptrsp[2];
+  sz2tmpp = ptrsp[3];
+  sy1p = ptrsp[4];
+  sy2p = ptrsp[5];
+  scs1p = ptrsp[6];
+  scs2p = ptrsp[7];
+  sreject1_bound = reject1_bound;
+  sreject2_bound = reject2_bound;
+  total = (64u)b;
+  total &= 2;
+  total >>= 1;
+  sgate = total;
+
+  twice = (32u)b;
+  twice &= 1;
+  twice <<= 1;
+  factor = 1;
+  factor -= twice;
+
+  stotal1 = 0;
+  stotal2 = 0;
+
+  i = 0;
+  while (i < lcount)
+  {
+    off = i;
+    off <<= 2;
+    addr = sy1p;
+    addr += off;
+    y = [:u32 addr];
+    addr = scs1p;
+    addr += off;
+    cs = [:u32 addr];
+    cs *= factor;
+    cs *= HAETAE_LN;
+    z = y;
+    z += cs;
+    addr = sz1p;
+    addr += off;
+    [:u32 addr] = z;
+
+    coeff = (64s)z;
+    prod = coeff * coeff;
+    total = stotal1;
+    total += prod;
+    stotal1 = total;
+
+    tmp = z;
+    tmp <<= 1;
+    tmp -= y;
+    addr = sz1tmpp;
+    addr += off;
+    [:u32 addr] = tmp;
+
+    coeff = (64s)tmp;
+    prod = coeff * coeff;
+    total = stotal2;
+    total += prod;
+    stotal2 = total;
+
+    i += 1;
+  }
+
+  i = 0;
+  while (i < kcount)
+  {
+    off = i;
+    off <<= 2;
+    addr = sy2p;
+    addr += off;
+    y = [:u32 addr];
+    addr = scs2p;
+    addr += off;
+    cs = [:u32 addr];
+    cs *= factor;
+    cs *= HAETAE_LN;
+    z = y;
+    z += cs;
+    addr = sz2p;
+    addr += off;
+    [:u32 addr] = z;
+
+    coeff = (64s)z;
+    prod = coeff * coeff;
+    total = stotal1;
+    total += prod;
+    stotal1 = total;
+
+    tmp = z;
+    tmp <<= 1;
+    tmp -= y;
+    addr = sz2tmpp;
+    addr += off;
+    [:u32 addr] = tmp;
+
+    coeff = (64s)tmp;
+    prod = coeff * coeff;
+    total = stotal2;
+    total += prod;
+    stotal2 = total;
+
+    i += 1;
+  }
+
+  reject1 = sreject1_bound;
+  total = stotal1;
+  reject1 -= total;
+  reject1 >>= 63;
+  reject1 &= 1;
+
+  reject2 = stotal2;
+  total = sreject2_bound;
+  reject2 -= total;
+  reject2 >>= 63;
+  reject2 &= 1;
+  total = sgate;
+  reject2 &= total;
+
+  reject1 |= reject2;
+  return reject1;
+}
+
+fn _keypair_finalize_m23(reg mut ptr u32[2048] bp,
+                         reg mut ptr u32[2048] s2p,
+                         reg const ptr u32[2048] ap,
+                         reg u64 count) -> reg ptr u32[2048],
+                                          reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 b s2 a low tmp high;
+
+  i = 0;
+  while (i < count)
+  {
+    b = bp[i];
+    s2 = s2p[i];
+    a = ap[i];
+    b += s2;
+    b += a;
+    b = __freeze(b);
+
+    low = b;
+    low &= 1;
+    tmp = b;
+    tmp >>s= 1;
+    tmp &= low;
+    tmp <<= 1;
+    low -= tmp;
+
+    high = b;
+    high -= low;
+    high >>s= 1;
+    bp[i] = high;
+
+    s2 -= low;
+    s2p[i] = s2;
+
+    i += 1;
+  }
+
+  return bp, s2p;
+}
+
+fn _keypair_finalize_m5(reg mut ptr u32[2048] bp,
+                        reg const ptr u32[2048] s2hatp,
+                        reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u64 wide z;
+  reg u32 b s2;
+
+  i = 0;
+  while (i < count)
+  {
+    wide = (64s)bp[i];
+    wide *= MONTSQ;
+    b = __montgomery_reduce(wide);
+
+    s2 = s2hatp[i];
+    b += s2;
+
+    wide = (64s)b;
+    wide *= MONT;
+    wide *= 2;
+    z = 0;
+    z -= wide;
+    b = __montgomery_reduce(z);
+    b = __caddq(b);
+    bp[i] = b;
+
+    i += 1;
+  }
+
+  return bp;
+}

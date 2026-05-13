@@ -1,0 +1,120 @@
+fn _polyveck_expand_vecA(reg mut ptr u32[8192] vp,
+                         reg ui64 seedp,
+                         reg u64 k,
+                         reg u64 m) -> reg ptr u32[8192]
+{
+  reg u64 i base nonce;
+
+  nonce = k;
+  nonce <<= 8;
+  nonce += m;
+
+  i = 0;
+  base = 0;
+  while (i < k)
+  {
+    () = #spill(seedp, k, m, i, base, nonce);
+    vp = _poly_uniform_at(vp, base, seedp, nonce);
+    () = #unspill(seedp, k, m, i, base, nonce);
+    i += 1;
+    base += HAETAE_N;
+    nonce += 1;
+  }
+
+  return vp;
+}
+
+fn _polyvec_expand_eta(reg mut ptr u32[8192] vp,
+                       reg ui64 seedp,
+                       reg u64 nonce,
+                       reg u64 count) -> reg ptr u32[8192]
+{
+  reg u64 i base;
+
+  i = 0;
+  base = 0;
+  while (i < count)
+  {
+    () = #spill(seedp, nonce, count, i, base);
+    vp = _poly_uniform_eta_at(vp, base, seedp, nonce);
+    () = #unspill(seedp, nonce, count, i, base);
+    i += 1;
+    base += HAETAE_N;
+    nonce += 1;
+  }
+
+  return vp;
+}
+
+fn _polymatkl_expand_matA(reg mut ptr u32[8192] matp,
+                          reg ui64 seedp,
+                          reg u64 rows,
+                          reg u64 cols) -> reg ptr u32[8192]
+{
+  reg u64 i j m base nonce rowbase;
+
+  m = cols;
+  m -= 1;
+  i = 0;
+  rowbase = 0;
+  while (i < rows)
+  {
+    j = 0;
+    while (j < m)
+    {
+      nonce = i;
+      nonce <<= 8;
+      nonce += j;
+
+      base = rowbase;
+      base += j;
+      base += 1;
+      base *= HAETAE_N;
+
+      () = #spill(seedp, rows, cols, m, i, j, rowbase);
+      matp = _poly_uniform_at(matp, base, seedp, nonce);
+      () = #unspill(seedp, rows, cols, m, i, j, rowbase);
+      j += 1;
+    }
+
+    rowbase += cols;
+    i += 1;
+  }
+
+  return matp;
+}
+
+fn _polymatkm_expand_matA(reg mut ptr u32[8192] matp,
+                          reg ui64 seedp,
+                          reg u64 rows,
+                          reg u64 cols) -> reg ptr u32[8192]
+{
+  reg u64 i j base nonce rowbase;
+
+  i = 0;
+  rowbase = 0;
+  while (i < rows)
+  {
+    j = 0;
+    while (j < cols)
+    {
+      nonce = i;
+      nonce <<= 8;
+      nonce += j;
+
+      base = rowbase;
+      base += j;
+      base *= HAETAE_N;
+
+      () = #spill(seedp, rows, cols, i, j, rowbase);
+      matp = _poly_uniform_at(matp, base, seedp, nonce);
+      () = #unspill(seedp, rows, cols, i, j, rowbase);
+      j += 1;
+    }
+
+    rowbase += cols;
+    i += 1;
+  }
+
+  return matp;
+}

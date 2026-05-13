@@ -1,0 +1,395 @@
+%==============================================================================%
+% Chapter 4 – Formal Verification Framework
+%==============================================================================%
+
+\chapter{Formal Verification Framework}
+\label{ch:formal_framework}
+
+\section{Overview of the Verification Architecture}
+
+The verification of the \haetae{} NTT is structured as a
+\emph{vertical refinement chain}: a sequence of proof steps, each relating
+an implementation or specification at one abstraction level to a
+specification at the next.  \Cref{fig:arch} illustrates the overall structure.
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  box/.style = {rectangle, draw, rounded corners, minimum width=8cm,
+                minimum height=1.2cm, align=center, font=\small},
+  arrow/.style = {-Stealth, thick},
+  label/.style = {font=\footnotesize\itshape, midway, right=3pt}
+]
+  \node[box, fill=red!10]   (jasmin) at (0, 6)
+        {\textbf{Layer 0: Jasmin Source} \\ \texttt{poly.jinc, reduce.jinc, hpoly.jazz}};
+
+  \node[box, fill=orange!10] (extract) at (0, 4.2)
+        {\textbf{Layer 1: Extracted EasyCrypt Module} \\ \texttt{Hpoly\_extract.ec}};
+
+  \node[box, fill=yellow!10] (impspec) at (0, 2.4)
+        {\textbf{Layer 2: Imperative EasyCrypt Spec} \\ \texttt{NTT\_Fq.ec, Fq.ec}};
+
+  \node[box, fill=green!10]  (algspec) at (0, 0.6)
+        {\textbf{Layer 3: Algebraic/Spectral Spec} \\
+         \texttt{NTTFullSpec.ec, NTTFullAlgebra.ec}};
+
+  \draw[arrow] (jasmin) -- (extract)
+    node[label] {Jasmin compiler extraction};
+  \draw[arrow] (extract) -- (impspec)
+    node[label] {pRHL equivalence (RefJasminNTT.ec)};
+  \draw[arrow] (impspec) -- (algspec)
+    node[label] {Loop invariant / induction (NTTFullAlgebra.ec)};
+
+  \node[box, fill=blue!10, minimum width=4cm, minimum height=0.9cm]
+    (endtoend) at (5.5, 3.3)
+    {\textbf{End-to-End} \\ \texttt{NTTEndToEnd.ec}};
+
+  \draw[arrow, dashed, bend right=20] (jasmin.east) to
+    node[right=3pt, font=\footnotesize\itshape] {top-level theorem}
+    (endtoend.north);
+  \draw[arrow, dashed, bend left=20] (algspec.east) to (endtoend.south);
+\end{tikzpicture}
+\caption{Four-layer verification architecture for the \haetae{} NTT.
+         Solid arrows are machine-checked proof steps; dashed arrows indicate
+         the end-to-end composition.}
+\label{fig:arch}
+\end{figure}
+
+\section{Layer 0: Jasmin Source}
+
+The \jasmin{} source files implement the NTT algorithm in a style close to
+assembly but with structured control flow.  The key files are:
+\begin{itemize}
+  \item \texttt{poly.jinc}: The main NTT and inverse-NTT kernels,
+        implemented as \jasm{inline fn \_poly\_ntt} and
+        \jasm{inline fn \_poly\_invntt}.
+
+  \item \texttt{reduce.jinc}: The Montgomery reduction primitive
+        \jasm{inline fn \_\_montgomery\_reduce} and the derived
+        \jasm{inline fn \_\_fqmul}.
+
+  \item \texttt{zetas.jinc}: The 256-element twiddle-factor table as a
+        global constant.
+
+  \item \texttt{hpoly.jazz}: The exported entry points
+        \jasm{export fn poly\_ntt\_jazz} and
+        \jasm{export fn poly\_invntt\_jazz}.
+\end{itemize}
+
+The \jasmin{} compiler verifies safety properties (no array-out-of-bounds, no
+use-before-initialisation) and then simultaneously generates:
+\begin{enumerate}
+  \item x86-64 assembly (\texttt{hpoly.s}).
+  \item An \easycrypt{} module \texttt{Hpoly\_extract.ec} that is
+        semantically equivalent to the assembly by the Jasmin compiler
+        correctness theorem~\cite{Almeida2017}.
+\end{enumerate}
+
+\section{Layer 1: Extracted EasyCrypt Module}
+
+The extracted module \texttt{Hpoly\_extract.ec} (\texttt{extract/} folder)
+contains \easycrypt{} procedure definitions that mirror the \jasmin{}
+structure.  A fragment is shown in \Cref{lst:extract}.
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Fragment of extracted procedure in Hpoly\_extract.ec},
+  label={lst:extract}]
+module M = {
+  proc poly_ntt_jazz (rp : W32.t Array256.t) :
+      W32.t Array256.t = {
+    var zeta : W32.t;
+    var t    : W32.t;
+    var len  : int;
+    var start: int;
+    var j    : int;
+    (* ... body mirrors Jasmin structure ... *)
+    return rp;
+  }
+}.
+\end{lstlisting}
+
+This module is the ``ground truth'' for what the compiled assembly computes.
+All subsequent proof obligations are stated with respect to this module.
+
+\section{Layer 2: Imperative EasyCrypt Specification}
+
+The file \texttt{NTT\_Fq.ec} contains hand-written \easycrypt{} procedures
+that closely mirror the reference C implementation.  Unlike the extracted
+module, these procedures work with abstract integer arrays (type
+\ec{Array256.t} with \ec{int} elements) rather than machine-word arrays.
+
+The translation from machine words to integers is captured by the
+\emph{word-to-coefficient} relation: an array $\mathtt{rp} : \ec{W32.t Array256.t}$
+corresponds to a coefficient array $\mathtt{a} : \ec{int Array256.t}$ if
+$\mathtt{rp}[i] = W32.\mathrm{of\_int}(\mathtt{a}[i])$ for all $i$, i.e., if
+the 32-bit word encoding of each coefficient is faithful.
+
+The imperative specification exposes the full loop structure, making it
+amenable to Hoare-style invariant reasoning.
+
+\section{Layer 3: Abstract Spectral Specification}
+
+The files \texttt{NTTFullSpec.ec} and \texttt{NTTFullAlgebra.ec} define the
+NTT at the level of abstract algebra.  No loop structure is visible; the
+NTT is defined as a linear evaluation map over $\F_q^{256}$.
+
+\begin{definition}[Abstract forward NTT, \ec{NTTFullSpec.full\_ntt}]
+  Let $p : \F_q^{256}$.  The forward NTT of $p$ is the map
+  \[
+    \NTT(p)[i] = \sum_{j=0}^{255} p[j] \cdot \zeta_0^{(2 \brev_8(i)+1) \cdot j}
+    \pmod{q},\quad i = 0, \dots, 255.
+  \]
+\label{def:full_ntt}
+\end{definition}
+
+\begin{definition}[Abstract inverse NTT, \ec{NTTFullSpec.full\_invntt}]
+  Let $p : \F_q^{256}$.  The inverse NTT of $p$ is the map
+  \[
+    \INTT(p)[i] = \frac{1}{256} \sum_{j=0}^{255} p[j] \cdot
+    \zeta_0^{-((2\brev_8(j)+1) \cdot i)} \pmod{q},\quad i = 0, \dots, 255.
+  \]
+\label{def:full_intt}
+\end{definition}
+
+\section{End-to-End Composition}
+
+The file \texttt{NTTEndToEnd.ec} imports all three layers and states the
+main correctness theorems as pRHL judgements relating the extracted \jasmin{}
+procedures to the abstract NTT map:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={End-to-end theorem statement in NTTEndToEnd.ec},
+  label={lst:e2e}]
+lemma haetae_jasmin_ntt_correct
+  (rp : W32.t Array256.t) (a : int Array256.t) :
+  (forall i, 0 <= i < 256 =>
+     W32.to_sint rp.[i] = a.[i] /\ -2^15 < a.[i] < 2^15) =>
+  hoare[M.poly_ntt_jazz :
+    arg = rp ==>
+    let rp' = res in
+    forall i, 0 <= i < 256 =>
+      W32.to_sint rp'.[i] = NTTFullSpec.full_ntt a i].
+\end{lstlisting}
+
+This theorem statement captures the full vertical refinement: starting from
+a \jasmin{} export whose input array encodes a polynomial with 16-bit
+coefficients, the output encodes exactly the abstract spectral NTT.
+
+\section{Proof Methodology}
+
+\subsection{Proceeding Bottom-Up}
+
+We build proofs bottom-up, starting with the most concrete layer and
+moving toward the most abstract.  This order is forced by the dependency
+structure: the pRHL refinement proof (Layer 1 $\to$ Layer 2) requires
+that the imperative specification (Layer 2) is already proved correct with
+respect to the abstract specification (Layer 2 $\to$ Layer 3).
+
+\subsection{Hoare Logic for Loop Invariants}
+
+The main technical tool for Layers 2--3 is \emph{loop invariant reasoning}.
+Each NTT stage is characterised by an invariant asserting that a
+partial set of coefficients has been transformed.  The invariant is a
+conjunction of:
+\begin{enumerate}
+  \item A \emph{partial NTT} condition: indices below the current
+        counter have been transformed through the current stage.
+  \item A \emph{bounds condition}: transformed coefficients remain
+        within the established bit-width bounds.
+  \item A \emph{twiddle-factor synchronisation} condition: the twiddle
+        counter matches the current loop indices.
+\end{enumerate}
+
+\subsection{pRHL for Procedure Equivalence}
+
+The refinement from the extracted module to the imperative specification
+uses pRHL judgements of the form
+\[
+  \Pr[\ec{Extracted.ntt(rp)} \to \ec{rp'}] =
+  \Pr[\ec{NTT\_Fq.ntt(a)} \to \ec{a'}]
+  \quad \text{given } \ec{rp} \sim \ec{a},
+\]
+where $\ec{rp} \sim \ec{a}$ means that the word array \ec{rp} and the integer
+array \ec{a} encode the same coefficients.  Since both procedures are
+deterministic, this reduces to a functional equivalence assertion.
+
+\subsection{Field-Theory Automation}
+
+The abstract-level proofs rely on \easycrypt{}'s theory-cloning mechanism to
+instantiate the standard field axioms for $\F_q$ and to invoke automated
+tactics for polynomial identities.  Long algebraic chains are dispatched by
+the \ec{field} and \ec{ring} tactics, backed by CVC5 and Z3 for non-linear
+arithmetic goals.
+
+\section{File Dependency Graph}
+
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+  node distance=1.5cm and 2.5cm,
+  box/.style={rectangle, draw, rounded corners, font=\ttfamily\scriptsize,
+              minimum width=3.5cm, minimum height=0.8cm, align=center},
+  arr/.style={-Stealth}
+]
+\node[box] (fq)      {Fq.ec};
+\node[box, right=of fq] (gfq)     {GFq.ec};
+\node[box, right=of gfq] (rq)      {Rq.ec};
+
+\node[box, below=of fq]  (nttfq)   {NTT\_Fq.ec};
+\node[box, below=of gfq] (mont)    {Montgomery.ec};
+\node[box, below=of rq]  (fe)      {Fastexp.ec};
+
+\node[box, below=of nttfq] (fullspec) {NTTFullSpec.ec};
+\node[box, below=of mont]  (fullalg)  {NTTFullAlgebra.ec};
+
+\node[box, below=of fullspec] (refjasmin) {RefJasminNTT.ec};
+\node[box, below=of fullalg]  (extract)   {Hpoly\_extract.ec};
+
+\node[box, below right=1.2cm and -1cm of refjasmin] (e2e) {NTTEndToEnd.ec};
+
+\draw[arr] (fq) -- (nttfq);
+\draw[arr] (gfq) -- (nttfq);
+\draw[arr] (mont) -- (fq);
+\draw[arr] (fe) -- (nttfq);
+\draw[arr] (rq) -- (fullspec);
+\draw[arr] (gfq) -- (fullspec);
+\draw[arr] (fullspec) -- (fullalg);
+\draw[arr] (nttfq) -- (fullalg);
+\draw[arr] (fq) -- (refjasmin);
+\draw[arr] (nttfq) -- (refjasmin);
+\draw[arr] (extract) -- (refjasmin);
+\draw[arr] (refjasmin) -- (e2e);
+\draw[arr] (fullalg) -- (e2e);
+\draw[arr] (fullspec) -- (e2e);
+\end{tikzpicture}
+\caption{Core EasyCrypt file dependency graph for the \haetae{} NTT
+         verification.  Arrows point from dependency to dependent; low-level
+         Jasmin array clones and standard-library theories are omitted here
+         and recorded in \Cref{tab:ec_file_relationships}.}
+\label{fig:dep_graph}
+\end{figure}
+
+\section{Relationships Between the EasyCrypt Files}
+\label{sec:ec_file_relationships}
+
+\Cref{fig:dep_graph} gives the main proof-chain dependencies.  The table below
+records the role of each project \texttt{.ec} file and the reason it appears in
+the checked development.  This distinction matters because not every import has
+the same proof meaning: some files provide representation infrastructure, some
+state executable procedures, and the last files compose already-checked
+judgements into the final theorem.
+
+\begin{longtable}{p{0.22\textwidth}p{0.27\textwidth}p{0.40\textwidth}}
+\caption{Relationships between the EasyCrypt source files}
+\label{tab:ec_file_relationships}\\
+\toprule
+\textbf{File} & \textbf{Layer / role} & \textbf{Relationship to the proof} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{File} & \textbf{Layer / role} & \textbf{Relationship to the proof} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+\texttt{Array256.ec} &
+Array infrastructure &
+Clones the Jasmin fixed-size array theory at size 256.  It is the common
+container for polynomials, twiddle tables, and abstract NTT outputs. \\
+
+\texttt{BArray1024.ec} and \texttt{WArray1024.ec} &
+Concrete memory infrastructure &
+Instantiate byte-array and word-array theories used by the extracted Jasmin
+module.  They support table reads, word loads, and stores in
+\texttt{Hpoly\_extract.ec} and \texttt{RefJasminNTT.ec}. \\
+
+\texttt{GFq.ec} &
+Field foundation &
+Defines the \haetae{} modulus \(q=64513\) and clones the finite-field theory.
+It supplies the coefficient type used by \texttt{Rq.ec}, \texttt{NTT\_Fq.ec},
+\texttt{NTTFullSpec.ec}, and \texttt{NTTFullAlgebra.ec}. \\
+
+\texttt{Rq.ec} &
+Polynomial-ring vocabulary &
+Defines the polynomial type, ring operations, root \(\zeta\), bit-reversal
+notation, and big-sum infrastructure.  Its older \texttt{ntt} operator is kept
+for comparison, while the final target is the full transform in
+\texttt{NTTFullSpec.ec}. \\
+
+\texttt{Montgomery.ec} &
+Arithmetic foundation &
+Contains modular-reduction lemmas and Montgomery arithmetic facts used to prove
+the word-level routines in \texttt{Fq.ec} and reused by the Jasmin refinement
+proofs. \\
+
+\texttt{Fq.ec} &
+Word arithmetic correctness &
+Proves correctness of the extracted Montgomery reduction, field multiplication,
+addition, subtraction, and signed-word bounds.  These lemmas discharge the
+arithmetic side conditions inside \texttt{RefJasminNTT.ec}. \\
+
+\texttt{Fastexp.ec} &
+Exponentiation support &
+Provides generic finite-field exponentiation lemmas.  \texttt{NTT\_Fq.ec}
+clones this theory for the \haetae{} coefficient field. \\
+
+\texttt{Hpoly\_extract.ec} &
+Extracted Jasmin model &
+Contains the EasyCrypt procedures generated from the Jasmin implementation:
+\texttt{poly\_ntt\_jazz}, \texttt{poly\_invntt\_jazz}, their internal cores,
+and the concrete twiddle tables.  It is the concrete side of the refinement
+proof. \\
+
+\texttt{NTT\_Fq.ec} &
+Imperative specification &
+Defines the hand-written coefficient-level procedures
+\texttt{NTT.ntt} and \texttt{NTT.invntt}, the mathematical twiddle tables, and
+the representation predicates such as \texttt{poly\_repr\_bound}.  It is the
+target of \texttt{RefJasminNTT.ec} and the source of \texttt{NTTFullAlgebra.ec}. \\
+
+\texttt{NTTFullSpec.ec} &
+Closed-form abstract specification &
+Defines \texttt{full\_ntt} and \texttt{full\_invntt} as the full 256-point
+\haetae{} transforms.  It also records that \texttt{Rq.ntt} is not this full
+transform, preventing the end-to-end theorem from targeting the wrong
+operator. \\
+
+\texttt{NTTFullAlgebra.ec} &
+Imperative-to-abstract bridge &
+Proves the Hoare statements that running \texttt{NTT\_Fq.NTT.ntt} with the
+checked twiddle table returns \texttt{NTTFullSpec.full\_ntt}, and similarly for
+the inverse transform.  This file closes the algebraic loop-invariant part of
+the proof. \\
+
+\texttt{RefJasminNTT.ec} &
+Jasmin-to-imperative refinement &
+Proves pRHL equivalences between the extracted Jasmin cores in
+\texttt{Hpoly\_extract.ec} and the imperative procedures in \texttt{NTT\_Fq.ec}.
+It also lifts the internal-core result to the public Jasmin wrappers. \\
+
+\texttt{NTTEndToEnd.ec} &
+Final composition &
+Imports \texttt{RefJasminNTT.ec}, \texttt{NTTFullAlgebra.ec},
+\texttt{NTTFullSpec.ec}, \texttt{NTT\_Fq.ec}, and
+\texttt{Hpoly\_extract.ec}.  It composes the refinement and algebraic Hoare
+lemmas into the final forward and inverse Jasmin NTT correctness statements. \\
+
+\end{longtable}
+
+In short, the proof has two independent bridges that meet in
+\texttt{NTTEndToEnd.ec}.  The concrete bridge is
+\[
+  \texttt{Hpoly\_extract.ec}
+  \xrightarrow{\ \texttt{RefJasminNTT.ec}\ }
+  \texttt{NTT\_Fq.ec},
+\]
+which says that the extracted Jasmin procedures implement the imperative
+coefficient-level model.  The algebraic bridge is
+\[
+  \texttt{NTT\_Fq.ec}
+  \xrightarrow{\ \texttt{NTTFullAlgebra.ec}\ }
+  \texttt{NTTFullSpec.ec},
+\]
+which says that the imperative model computes the full closed-form
+\haetae{} NTT.  The end-to-end file imports both bridges and composes them.

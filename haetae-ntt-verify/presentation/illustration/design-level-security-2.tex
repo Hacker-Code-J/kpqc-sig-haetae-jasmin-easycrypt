@@ -1,0 +1,394 @@
+%\documentclass[tikz,border=10pt]{standalone}
+%\usepackage{amsmath}
+%\usetikzlibrary{positioning,arrows.meta,fit,calc,backgrounds}
+%
+%\begin{document}
+%	\begin{tikzpicture}[
+%		font=\small,
+%		>=Latex,
+%		box/.style={
+%			draw,
+%			rounded corners=3pt,
+%			thick,
+%			align=left,
+%			inner sep=6pt,
+%			text width=5.2cm,
+%			minimum height=1.0cm
+%		},
+%		titlebox/.style={
+%			draw,
+%			rounded corners=3pt,
+%			very thick,
+%			align=center,
+%			inner sep=6pt,
+%			text width=5.4cm,
+%			minimum height=0.9cm,
+%			font=\bfseries
+%		},
+%		note/.style={
+%			draw,
+%			rounded corners=3pt,
+%			dashed,
+%			align=left,
+%			inner sep=5pt,
+%			text width=5.2cm
+%		},
+%		flow/.style={->, thick},
+%		compare/.style={->, very thick, dashed}
+%		]
+%		
+%		% ------------------------------------------------------------------
+%		% Left column: Symbolic security
+%		% ------------------------------------------------------------------
+%		\node[titlebox] (symtitle) at (0,0) {Symbolic Security};
+%		
+%		\node[box, below=0.5cm of symtitle] (symmsg) {
+%			\textbf{Messages}\\
+%			Represented as \emph{symbolic terms}
+%		};
+%		
+%		\node[box, below=0.35cm of symmsg] (symprim) {
+%			\textbf{Cryptographic primitives}\\
+%			Idealized as black-box functions with equations
+%		};
+%		
+%		\node[box, below=0.35cm of symprim] (symeq) {
+%			\textbf{Canonical example}\\[2pt]
+%			\[
+%			\mathrm{Dec}(\mathrm{Enc}(m,k),k)=m
+%			\]
+%		};
+%		
+%		\node[box, below=0.35cm of symeq] (symadv) {
+%			\textbf{Adversary model}\\
+%			Manipulates terms using symbolic rules and the available equations
+%		};
+%		
+%		\node[note, below=0.45cm of symadv] (symgain) {
+%			\textbf{Main gain}\\
+%			Tractable automated reasoning about:
+%			\begin{itemize}
+%				\item protocol logic
+%				\item message flows
+%				\item authentication failures
+%				\item secrecy violations
+%				\item state-machine flaws
+%			\end{itemize}
+%		};
+%		
+%		% ------------------------------------------------------------------
+%		% Right column: Computational security
+%		% ------------------------------------------------------------------
+%		\node[titlebox] (comptitle) at (8.6,0) {Computational Security};
+%		
+%		\node[box, below=0.5cm of comptitle] (compmsg) {
+%			\textbf{Messages}\\
+%			Represented as \emph{bitstrings}
+%		};
+%		
+%		\node[box, below=0.35cm of compmsg] (compprim) {
+%			\textbf{Cryptographic primitives}\\
+%			Specified as probabilistic algorithms
+%		};
+%		
+%		\node[box, below=0.35cm of compprim] (compalg) {
+%			\textbf{Canonical example}\\[2pt]
+%			\[
+%			(\mathsf{Gen},\mathsf{Enc},\mathsf{Dec})
+%			\]
+%			Security is defined through formal experiments
+%		};
+%		
+%		\node[box, below=0.35cm of compalg] (compadv) {
+%			\textbf{Adversary model}\\
+%			Probabilistic polynomial-time attacker\\
+%			(or concrete attacker with explicit resource bounds)
+%		};
+%		
+%		\node[note, below=0.45cm of compadv] (compgain) {
+%			\textbf{Main gain}\\
+%			Faithful analysis in terms of:
+%			\begin{itemize}
+%				\item probabilities
+%				\item reductions
+%				\item adversarial resources
+%				\item hardness assumptions
+%			\end{itemize}
+%		};
+%		
+%		% ------------------------------------------------------------------
+%		% Vertical flows
+%		% ------------------------------------------------------------------
+%		\draw[flow] (symtitle) -- (symmsg);
+%		\draw[flow] (symmsg) -- (symprim);
+%		\draw[flow] (symprim) -- (symeq);
+%		\draw[flow] (symeq) -- (symadv);
+%		\draw[flow] (symadv) -- (symgain);
+%		
+%		\draw[flow] (comptitle) -- (compmsg);
+%		\draw[flow] (compmsg) -- (compprim);
+%		\draw[flow] (compprim) -- (compalg);
+%		\draw[flow] (compalg) -- (compadv);
+%		\draw[flow] (compadv) -- (compgain);
+%		
+%		% ------------------------------------------------------------------
+%		% Bottom comparison
+%		% ------------------------------------------------------------------
+%		\node[box, text width=5.0cm, minimum height=1.3cm, below=1.0cm of symgain] (symtrade) {
+%			\centering
+%			\textbf{Strength}\\
+%			More abstract, more tractable, easier to automate
+%		};
+%		
+%		\node[box, text width=5.0cm, minimum height=1.3cm, below=1.0cm of compgain] (comptrade) {
+%			\centering
+%			\textbf{Strength}\\
+%			More realistic, closer to standard provable cryptography
+%		};
+%		
+%		\draw[flow] (symgain) -- (symtrade);
+%		\draw[flow] (compgain) -- (comptrade);
+%		
+%		\draw[compare] (symtrade.east) -- node[above, align=center] {\textbf{Trade-off}} (comptrade.west);
+%		
+%		% ------------------------------------------------------------------
+%		% Overall caption-like label
+%		% ------------------------------------------------------------------
+%		\node[draw, rounded corners=3pt, very thick, align=center,
+%		inner sep=6pt, text width=12.2cm, below=1.1cm of $(symtrade)!0.5!(comptrade)$] (summary) {
+%			\textbf{Core contrast}\\
+%			Symbolic security abstracts cryptography into terms and equations to enable strong automation;\\
+%			computational security models algorithms, probabilities, and resources more faithfully, but is generally harder to automate completely.
+%		};
+%		
+%		% Background grouping
+%		\begin{scope}[on background layer]
+%			\node[draw, rounded corners=6pt, line width=0.9pt,
+%			fit=(symtitle)(symtrade), inner sep=8pt] {};
+%			\node[draw, rounded corners=6pt, line width=0.9pt,
+%			fit=(comptitle)(comptrade), inner sep=8pt] {};
+%		\end{scope}
+%		
+%	\end{tikzpicture}
+%\end{document}
+
+\documentclass[tikz,border=10pt]{standalone}
+\usepackage{amsmath,amssymb,mathtools}
+\usetikzlibrary{positioning,arrows.meta,fit,calc,backgrounds}
+
+\begin{document}
+	
+	\begin{tikzpicture}[
+		>=Latex,
+		font=\small,
+		paneltitle/.style={
+			draw,
+			rounded corners=3pt,
+			very thick,
+			align=center,
+			inner sep=6pt,
+			minimum height=10mm,
+			text width=7.0cm,
+			font=\bfseries
+		},
+		block/.style={
+			draw,
+			rounded corners=3pt,
+			thick,
+			align=left,
+			inner sep=6pt,
+			text width=7.0cm
+		},
+		smallblock/.style={
+			draw,
+			rounded corners=3pt,
+			thick,
+			align=left,
+			inner sep=5pt,
+			text width=6.7cm
+		},
+		arrow/.style={->, thick},
+		compare/.style={->, very thick, dashed}
+		]
+		
+		% =========================================================
+		% LEFT: SYMBOLIC
+		% =========================================================
+		\node[paneltitle] (symtitle) at (0,0) {Symbolic Security};
+		
+		\node[block, below=6mm of symtitle] (sym1) {%
+			\textbf{Message universe as a term algebra.}\\[2pt]
+			Let $\Sigma$ be a cryptographic signature, e.g.
+			\[
+			\Sigma \supseteq \{\mathsf{Enc},\mathsf{Dec},\mathsf{pair},\pi_1,\pi_2\}.
+			\]
+			Messages are symbolic terms
+			\[
+			t \in \mathcal{T}_{\Sigma}(X \cup \mathcal{N} \cup \mathcal{K}),
+			\]
+			where $X$ is a set of variables, $\mathcal{N}$ a set of nonces, and
+			$\mathcal{K}$ a set of keys.
+		};
+		
+		\node[block, below=4mm of sym1] (sym2) {%
+			\textbf{Cryptographic operators as ideal constructors/destructors.}\\[2pt]
+			Semantics is specified by an equational theory $E$ (or rewrite system), e.g.
+			\[
+			E \;=\;\bigl\{\,\mathsf{Dec}(\mathsf{Enc}(m,k),k)=m\,\bigr\}.
+			\]
+			Thus correctness is algebraic and exact, rather than probabilistic.
+			Bit-level representation, entropy, cost, and implementation effects are
+			abstracted away.
+		};
+		
+		\node[block, below=4mm of sym2] (sym3) {%
+			\textbf{Adversary as symbolic deduction.}\\[2pt]
+			Given initial knowledge $\mathcal{K}_0$, the adversary derives new terms by
+			closure under public operations and the equations in $E$:
+			\[
+			\mathcal{K}_{i+1} \;=\; \mathrm{cl}_{E}(\mathcal{K}_i),
+			\qquad
+			\mathcal{K}^{*} \;=\; \bigcup_{i\ge 0}\mathcal{K}_i.
+			\]
+			A ciphertext $\mathsf{Enc}(m,k)$ yields $m$ only when the adversary can
+			derive the \emph{entire} key term $k$.
+		};
+		
+		\node[block, below=4mm of sym3] (sym4) {%
+			\textbf{Typical proof obligations.}\\[2pt]
+			\[
+			\text{Secrecy: } s \notin \mathcal{K}^{*}
+			\qquad\qquad
+			\text{Authentication: } \neg\,\mathsf{BadTrace}
+			\]
+			\[
+			\text{Privacy / indistinguishability: } P \approx Q
+			\]
+			Hence symbolic methods are especially effective for protocol logic,
+			message-flow analysis, trace properties, equivalence properties, and
+			state-machine inconsistencies.
+		};
+		
+		\node[smallblock, below=6mm of sym4] (sym5) {%
+			\centering
+			\textbf{Mathematical character}\\[2pt]
+			Algebraic, term-based, proof-search friendly, highly automatable.
+		};
+		
+		% =========================================================
+		% RIGHT: COMPUTATIONAL
+		% =========================================================
+		\node[paneltitle] (comptitle) at (10.8,0) {Computational Security};
+		
+		\node[block, below=6mm of comptitle] (comp1) {%
+			\textbf{Message universe as bitstrings.}\\[2pt]
+			Messages live in
+			\[
+			m,c,k,r \in \{0,1\}^{*},
+			\]
+			and primitives are randomized polynomial-time algorithms operating on
+			bitstrings with an explicit security parameter $\lambda$.
+		};
+		
+		\node[block, below=4mm of comp1] (comp2) {%
+			\textbf{Cryptographic primitive as an algorithmic tuple.}\\[2pt]
+			A symmetric encryption scheme is
+			\[
+			\Pi=(\mathsf{Gen},\mathsf{Enc},\mathsf{Dec}),
+			\]
+			with
+			\[
+			k \leftarrow \mathsf{Gen}(1^\lambda), \qquad
+			c \leftarrow \mathsf{Enc}_k(m;r), \qquad
+			m' \leftarrow \mathsf{Dec}_k(c).
+			\]
+			Correctness is quantified over all legal keys and messages:
+			\[
+			\Pr\bigl[\mathsf{Dec}_k(\mathsf{Enc}_k(m;r)) = m\bigr]=1.
+			\]
+		};
+		
+		\node[block, below=4mm of comp2] (comp3) {%
+			\textbf{Adversary as a PPT machine.}\\[2pt]
+			The attacker is a probabilistic polynomial-time algorithm
+			\[
+			\mathcal{A} \in \mathrm{PPT}.
+			\]
+			Security is defined via experiments, reductions, and resource bounds.
+			A canonical example is IND-CPA security:
+			\[
+			\mathrm{Adv}^{\mathrm{ind\mbox{-}cpa}}_{\Pi}(\mathcal{A},\lambda)
+			=
+			\left|
+			\Pr\!\big[\mathsf{Exp}^{\mathrm{ind\mbox{-}cpa}}_{\Pi,\mathcal{A}}(\lambda)=1\big]
+			-\tfrac12
+			\right|.
+			\]
+		};
+		
+		\node[block, below=4mm of comp3] (comp4) {%
+			\textbf{Typical proof style.}\\[2pt]
+			One proves, for all $\mathcal{A}\in\mathrm{PPT}$,
+			\[
+			\mathrm{Adv}^{\mathrm{ind\mbox{-}cpa}}_{\Pi}(\mathcal{A},\lambda)
+			\le
+			\varepsilon(\lambda),
+			\]
+			or in concrete security,
+			\[
+			\forall\,\mathcal{A}\text{ with time }\le t:\quad
+			\mathrm{Adv}_{\Pi}(\mathcal{A}) \le \varepsilon.
+			\]
+			Proofs proceed by game hopping, reductions to hardness assumptions, and
+			explicit accounting of probability and running time.
+		};
+		
+		\node[smallblock, below=6mm of comp4] (comp5) {%
+			\centering
+			\textbf{Mathematical character}\\[2pt]
+			Probabilistic, complexity-theoretic, reduction-based, closer to
+			mainstream provable cryptography.
+		};
+		
+		% =========================================================
+		% FLOWS
+		% =========================================================
+		\draw[arrow] (symtitle) -- (sym1);
+		\draw[arrow] (sym1) -- (sym2);
+		\draw[arrow] (sym2) -- (sym3);
+		\draw[arrow] (sym3) -- (sym4);
+		\draw[arrow] (sym4) -- (sym5);
+		
+		\draw[arrow] (comptitle) -- (comp1);
+		\draw[arrow] (comp1) -- (comp2);
+		\draw[arrow] (comp2) -- (comp3);
+		\draw[arrow] (comp3) -- (comp4);
+		\draw[arrow] (comp4) -- (comp5);
+		
+		% =========================================================
+		% COMPARISON / BOTTOM
+		% =========================================================
+		\node[block, text width=15.7cm, align=center, below=11mm of $(sym5)!0.5!(comp5)$] (trade) {%
+			\textbf{Conceptual trade-off}\\[3pt]
+			\emph{Symbolic security} replaces cryptographic computation by algebraic structure
+			$(\mathcal{T}_{\Sigma},E)$, gaining tractability and automation. \qquad
+			\emph{Computational security} models actual randomized algorithms on bitstrings,
+			gaining fidelity to standard provable-security notions, but usually at a higher
+			proof and automation cost.
+		};
+		
+		\draw[compare] (sym5.east) -- node[above, align=center] {\textbf{abstraction $\;\longleftrightarrow\;$ fidelity}} (comp5.west);
+		
+		% =========================================================
+		% BACKGROUND GROUPS
+		% =========================================================
+		\begin{scope}[on background layer]
+			\node[draw, rounded corners=6pt, line width=0.9pt,
+			fit=(symtitle)(sym5), inner sep=8pt] {};
+			\node[draw, rounded corners=6pt, line width=0.9pt,
+			fit=(comptitle)(comp5), inner sep=8pt] {};
+		\end{scope}
+		
+	\end{tikzpicture}
+	
+\end{document}

@@ -1,0 +1,44 @@
+require "params.jinc"
+require "keccak.jinc"
+require "polynomial_sampler.jinc"
+require "expand.jinc"
+
+export
+fn polyveck_expand_vecA_jazz(reg mut ptr u32[8192] vp,
+                             reg ui64 seedp,
+                             reg u64 k,
+                             reg u64 m) -> reg ptr u32[8192]
+{
+  vp = _polyveck_expand_vecA(vp, seedp, k, m);
+  return vp;
+}
+
+export
+fn polyvec_expand_eta_jazz(reg mut ptr u32[8192] vp,
+                           reg ui64 seedp,
+                           reg u64 nonce,
+                           reg u64 count) -> reg ptr u32[8192]
+{
+  vp = _polyvec_expand_eta(vp, seedp, nonce, count);
+  return vp;
+}
+
+export
+fn polymatkl_expand_matA_jazz(reg mut ptr u32[8192] matp,
+                              reg ui64 seedp,
+                              reg u64 rows,
+                              reg u64 cols) -> reg ptr u32[8192]
+{
+  matp = _polymatkl_expand_matA(matp, seedp, rows, cols);
+  return matp;
+}
+
+export
+fn polymatkm_expand_matA_jazz(reg mut ptr u32[8192] matp,
+                              reg ui64 seedp,
+                              reg u64 rows,
+                              reg u64 cols) -> reg ptr u32[8192]
+{
+  matp = _polymatkm_expand_matA(matp, seedp, rows, cols);
+  return matp;
+}

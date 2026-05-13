@@ -1,0 +1,107 @@
+require "params.jinc"
+require "reduce.jinc"
+require "zetas.jinc"
+require "keccak.jinc"
+require "pack.jinc"
+require "poly.jinc"
+require "polynomial_sampler.jinc"
+require "expand.jinc"
+require "public_key_unpack.jinc"
+
+export
+fn unpack_vk_m23_full_jazz(reg mut ptr u32[8192] matp,
+                           reg const ptr u8[2752] vkp,
+                           reg ui64 seedu,
+                           reg u64 k,
+                           reg u64 l,
+                           reg u64 m) -> reg ptr u32[8192]
+{
+  matp = _unpack_vk_m23_full(matp, vkp, seedu, k, l, m);
+  return matp;
+}
+
+export
+fn unpack_vk_m5_full_jazz(reg mut ptr u32[8192] matp,
+                          reg const ptr u8[2752] vkp,
+                          reg ui64 seedu,
+                          reg u64 k,
+                          reg u64 l) -> reg ptr u32[8192]
+{
+  matp = _unpack_vk_m5_full(matp, vkp, seedu, k, l);
+  return matp;
+}
+
+export
+fn unpack_sk_mode2_full_jazz(reg mut ptr u32[8192] matp,
+                             reg mut ptr u32[2048] s0p,
+                             reg mut ptr u32[2048] s1p,
+                             reg mut ptr u8[32] keyp,
+                             reg const ptr u8[2752] skp,
+                             reg ui64 seedu) -> reg ptr u32[8192],
+                                               reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[32]
+{
+  reg u64 k l m vkbytes;
+
+  k = 2;
+  l = 4;
+  m = 3;
+  () = #spill(s0p, s1p, keyp, skp, k, m);
+  matp = _unpack_vk_m23_full(matp, skp, seedu, k, l, m);
+  () = #unspill(s0p, s1p, keyp, skp, k, m);
+
+  vkbytes = 992;
+  s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, m, k);
+  return matp, s0p, s1p, keyp;
+}
+
+export
+fn unpack_sk_mode3_full_jazz(reg mut ptr u32[8192] matp,
+                             reg mut ptr u32[2048] s0p,
+                             reg mut ptr u32[2048] s1p,
+                             reg mut ptr u8[32] keyp,
+                             reg const ptr u8[2752] skp,
+                             reg ui64 seedu) -> reg ptr u32[8192],
+                                               reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[32]
+{
+  reg u64 k l m vkbytes;
+
+  k = 3;
+  l = 6;
+  m = 5;
+  () = #spill(s0p, s1p, keyp, skp, k, m);
+  matp = _unpack_vk_m23_full(matp, skp, seedu, k, l, m);
+  () = #unspill(s0p, s1p, keyp, skp, k, m);
+
+  vkbytes = 1472;
+  s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, m, k);
+  return matp, s0p, s1p, keyp;
+}
+
+export
+fn unpack_sk_mode5_full_jazz(reg mut ptr u32[8192] matp,
+                             reg mut ptr u32[2048] s0p,
+                             reg mut ptr u32[2048] s1p,
+                             reg mut ptr u8[32] keyp,
+                             reg const ptr u8[2752] skp,
+                             reg ui64 seedu) -> reg ptr u32[8192],
+                                               reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[32]
+{
+  reg u64 k l m vkbytes;
+
+  k = 4;
+  l = 7;
+  m = 6;
+  () = #spill(s0p, s1p, keyp, skp, k, m);
+  matp = _unpack_vk_m5_full(matp, skp, seedu, k, l);
+  () = #unspill(s0p, s1p, keyp, skp, k, m);
+
+  vkbytes = 2080;
+  s0p, s1p, keyp = _unpack_sk_m5(s0p, s1p, keyp, skp, vkbytes, m, k);
+  return matp, s0p, s1p, keyp;
+}

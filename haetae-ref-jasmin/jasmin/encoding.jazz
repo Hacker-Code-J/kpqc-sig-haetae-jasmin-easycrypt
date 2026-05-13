@@ -1,0 +1,218 @@
+require "encoding.jinc"
+require "sparse_encoding.jinc"
+
+export
+fn encode_h_mode2_full_jazz(reg mut ptr u8[2048] outp,
+                            reg mut ptr u64[1] sizep,
+                            reg const ptr u32[2048] hp,
+                            reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                             reg ptr u64[1]
+{
+  reg u64 size count mh offset;
+
+  count = 512;
+  mh = 13;
+  offset = 239;
+  outp, size = _encode_h_full(outp, hp, esymsp, count, mh, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn encode_h_mode3_full_jazz(reg mut ptr u8[2048] outp,
+                            reg mut ptr u64[1] sizep,
+                            reg const ptr u32[2048] hp,
+                            reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                             reg ptr u64[1]
+{
+  reg u64 size count mh offset;
+
+  count = 768;
+  mh = 17;
+  offset = 235;
+  outp, size = _encode_h_full(outp, hp, esymsp, count, mh, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn encode_h_mode5_full_jazz(reg mut ptr u8[2048] outp,
+                            reg mut ptr u64[1] sizep,
+                            reg const ptr u32[2048] hp,
+                            reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                             reg ptr u64[1]
+{
+  reg u64 size count mh offset;
+
+  count = 1024;
+  mh = 33;
+  offset = 471;
+  outp, size = _encode_h_full(outp, hp, esymsp, count, mh, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn encode_hb_z1_mode2_full_jazz(reg mut ptr u8[2048] outp,
+                                reg mut ptr u64[1] sizep,
+                                reg const ptr u32[2048] hp,
+                                reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                                 reg ptr u64[1]
+{
+  reg u64 size count mhb offset;
+
+  count = 1024;
+  mhb = 13;
+  offset = 6;
+  outp, size = _encode_hb_z1_full(outp, hp, esymsp, count, mhb, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn encode_hb_z1_mode3_full_jazz(reg mut ptr u8[2048] outp,
+                                reg mut ptr u64[1] sizep,
+                                reg const ptr u32[2048] hp,
+                                reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                                 reg ptr u64[1]
+{
+  reg u64 size count mhb offset;
+
+  count = 1536;
+  mhb = 17;
+  offset = 8;
+  outp, size = _encode_hb_z1_full(outp, hp, esymsp, count, mhb, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn encode_hb_z1_mode5_full_jazz(reg mut ptr u8[2048] outp,
+                                reg mut ptr u64[1] sizep,
+                                reg const ptr u32[2048] hp,
+                                reg const ptr u32[132] esymsp) -> reg ptr u8[2048],
+                                                                 reg ptr u64[1]
+{
+  reg u64 size count mhb offset;
+
+  count = 1792;
+  mhb = 19;
+  offset = 9;
+  outp, size = _encode_hb_z1_full(outp, hp, esymsp, count, mhb, offset);
+  sizep[0] = size;
+  return outp, sizep;
+}
+
+export
+fn decode_h_mode2_full_jazz(reg mut ptr u32[2048] hp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u8[2048] bufp,
+                            reg u64 size_in,
+                            reg const ptr u32[512] symbolwp,
+                            reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                               reg ptr u64[1]
+{
+  reg u64 count mh offset;
+
+  count = 512;
+  mh = 13;
+  offset = 239;
+  hp, badp = _decode_h_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                            count, mh, offset);
+  return hp, badp;
+}
+
+export
+fn decode_h_mode3_full_jazz(reg mut ptr u32[2048] hp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u8[2048] bufp,
+                            reg u64 size_in,
+                            reg const ptr u32[512] symbolwp,
+                            reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                               reg ptr u64[1]
+{
+  reg u64 count mh offset;
+
+  count = 768;
+  mh = 17;
+  offset = 235;
+  hp, badp = _decode_h_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                            count, mh, offset);
+  return hp, badp;
+}
+
+export
+fn decode_h_mode5_full_jazz(reg mut ptr u32[2048] hp,
+                            reg mut ptr u64[1] badp,
+                            reg const ptr u8[2048] bufp,
+                            reg u64 size_in,
+                            reg const ptr u32[512] symbolwp,
+                            reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                               reg ptr u64[1]
+{
+  reg u64 count mh offset;
+
+  count = 1024;
+  mh = 33;
+  offset = 471;
+  hp, badp = _decode_h_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                            count, mh, offset);
+  return hp, badp;
+}
+
+export
+fn decode_hb_z1_mode2_full_jazz(reg mut ptr u32[2048] hp,
+                                reg mut ptr u64[1] badp,
+                                reg const ptr u8[2048] bufp,
+                                reg u64 size_in,
+                                reg const ptr u32[512] symbolwp,
+                                reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                                   reg ptr u64[1]
+{
+  reg u64 count mhb offset;
+
+  count = 1024;
+  mhb = 13;
+  offset = 6;
+  hp, badp = _decode_hb_z1_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                                count, mhb, offset);
+  return hp, badp;
+}
+
+export
+fn decode_hb_z1_mode3_full_jazz(reg mut ptr u32[2048] hp,
+                                reg mut ptr u64[1] badp,
+                                reg const ptr u8[2048] bufp,
+                                reg u64 size_in,
+                                reg const ptr u32[512] symbolwp,
+                                reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                                   reg ptr u64[1]
+{
+  reg u64 count mhb offset;
+
+  count = 1536;
+  mhb = 17;
+  offset = 8;
+  hp, badp = _decode_hb_z1_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                                count, mhb, offset);
+  return hp, badp;
+}
+
+export
+fn decode_hb_z1_mode5_full_jazz(reg mut ptr u32[2048] hp,
+                                reg mut ptr u64[1] badp,
+                                reg const ptr u8[2048] bufp,
+                                reg u64 size_in,
+                                reg const ptr u32[512] symbolwp,
+                                reg const ptr u32[132] dsymswp) -> reg ptr u32[2048],
+                                                                   reg ptr u64[1]
+{
+  reg u64 count mhb offset;
+
+  count = 1792;
+  mhb = 19;
+  offset = 9;
+  hp, badp = _decode_hb_z1_full(hp, badp, bufp, size_in, symbolwp, dsymswp,
+                                count, mhb, offset);
+  return hp, badp;
+}

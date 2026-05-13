@@ -1,0 +1,25 @@
+require "params.jinc"
+require "keccak.jinc"
+require "challenge.jinc"
+require "challenge_sampler.jinc"
+
+export
+fn poly_challenge_m23_jazz(reg mut ptr u32[HAETAE_N] cp,
+                           reg ui64 highbitsp,
+                           reg u64 highbitslen,
+                           reg ui64 mup,
+                           reg u64 tau) -> reg ptr u32[HAETAE_N]
+{
+  cp = _poly_challenge_m23(cp, highbitsp, highbitslen, mup, tau);
+  return cp;
+}
+
+export
+fn poly_challenge_m5_jazz(reg mut ptr u32[HAETAE_N] cp,
+                          reg ui64 highbitsp,
+                          reg u64 highbitslen,
+                          reg ui64 mup) -> reg ptr u32[HAETAE_N]
+{
+  cp = _poly_challenge_m5(cp, highbitsp, highbitslen, mup);
+  return cp;
+}

@@ -1,0 +1,99 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Events.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Named rejection and acceptance events.
+
+\section*{How To Read This Script}
+Read this file as event vocabulary.  It gives stable names to predicates that later game hops should cite without unfolding.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore.} & Imports AllCore.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Params HAETAE\_Algebra.} & Imports HAETAE\_Params HAETAE\_Algebra.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_Events.} & Begins the namespace HAETAE\_Events, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Params.} & Opens HAETAE\_Params so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize import HAETAE\_Algebra.} & Opens HAETAE\_Algebra so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+9 & {\ttfamily\scriptsize op keygen\_rejection\_failure (md : mode) (pk : pkey) (sk : skey) : bool =} & Defines predicate keygen\_rejection\_failure, an event or well-formedness condition used in later implications and game proofs. \\
+10 & {\ttfamily\scriptsize   ! valid\_keypair md pk sk \textbackslash{}/ ! secret\_norm\_ok md sk.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+11 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+12 & {\ttfamily\scriptsize op signing\_rejection\_failure (md : mode) (sig : signature) : bool =} & Defines predicate signing\_rejection\_failure, an event or well-formedness condition used in later implications and game proofs. \\
+13 & {\ttfamily\scriptsize   ! valid\_signature md sig \textbackslash{}/ ! response\_norm\_ok md sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+14 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+15 & {\ttfamily\scriptsize op verification\_rejection\_failure (md : mode) (sig : signature) : bool =} & Defines predicate verification\_rejection\_failure, an event or well-formedness condition used in later implications and game proofs. \\
+16 & {\ttfamily\scriptsize   ! valid\_signature md sig \textbackslash{}/ ! verify\_norm\_ok md sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+17 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+18 & {\ttfamily\scriptsize op any\_rejection\_failure (md : mode) (pk : pkey) (sk : skey)} & Defines operation any\_rejection\_failure, a total mathematical function or abbreviation used by later declarations. \\
+19 & {\ttfamily\scriptsize                          (sig : signature) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+20 & {\ttfamily\scriptsize   keygen\_rejection\_failure md pk sk \textbackslash{}/} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+21 & {\ttfamily\scriptsize   signing\_rejection\_failure md sig \textbackslash{}/} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+22 & {\ttfamily\scriptsize   verification\_rejection\_failure md sig.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+23 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+24 & {\ttfamily\scriptsize lemma keygen\_rejection\_free\_current md sd :} & States checked lemma keygen\_rejection\_free\_current.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+25 & {\ttfamily\scriptsize   ! keygen\_rejection\_failure md (keygen\_internal md sd).`1} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+26 & {\ttfamily\scriptsize       (keygen\_internal md sd).`2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+27 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+28 & {\ttfamily\scriptsize by rewrite /keygen\_rejection\_failure /valid\_keypair /secret\_norm\_ok} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+29 & {\ttfamily\scriptsize            /secret\_norm\_sq /keygen\_internal /secret\_key\_of\_seed; case md.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+31 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+32 & {\ttfamily\scriptsize lemma signing\_rejection\_free\_current md sk m ctx coins :} & States checked lemma signing\_rejection\_free\_current.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+33 & {\ttfamily\scriptsize   ! signing\_rejection\_failure md (sign\_internal md sk m ctx coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+34 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+35 & {\ttfamily\scriptsize rewrite /signing\_rejection\_failure.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+36 & {\ttfamily\scriptsize rewrite valid\_signature\_sign\_internal response\_norm\_ok\_current.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+37 & {\ttfamily\scriptsize by rewrite /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+38 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+39 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+40 & {\ttfamily\scriptsize lemma verification\_rejection\_free\_current md sk m ctx coins :} & States checked lemma verification\_rejection\_free\_current.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+41 & {\ttfamily\scriptsize   ! verification\_rejection\_failure md (sign\_internal md sk m ctx coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+43 & {\ttfamily\scriptsize rewrite /verification\_rejection\_failure.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+44 & {\ttfamily\scriptsize rewrite valid\_signature\_sign\_internal verify\_norm\_ok\_current.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+45 & {\ttfamily\scriptsize by rewrite /=.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+46 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+47 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+48 & {\ttfamily\scriptsize lemma accepted\_transcript\_rejection\_free\_current md sd m ctx coins :} & States checked lemma accepted\_transcript\_rejection\_free\_current.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+49 & {\ttfamily\scriptsize   ! any\_rejection\_failure md (keygen\_internal md sd).`1} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+50 & {\ttfamily\scriptsize       (keygen\_internal md sd).`2} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+51 & {\ttfamily\scriptsize       (sign\_internal md (keygen\_internal md sd).`2 m ctx coins).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+52 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+53 & {\ttfamily\scriptsize by rewrite /any\_rejection\_failure keygen\_rejection\_free\_current} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+54 & {\ttfamily\scriptsize            signing\_rejection\_free\_current verification\_rejection\_free\_current.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+55 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+56 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+57 & {\ttfamily\scriptsize end HAETAE\_Events.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

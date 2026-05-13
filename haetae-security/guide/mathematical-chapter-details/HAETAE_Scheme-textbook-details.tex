@@ -1,0 +1,240 @@
+\subsection*{Textbook Formal Inventory}
+This subsection records the exact formal material in \file{HAETAE_Scheme.ec}.  It is generated from the proof-surface EasyCrypt file, so the line numbers and statements are meant to be read next to the checked source.
+
+\noindent\textbf{Chapter role.} HAETAE instantiation of the generic signature scheme interface.
+
+\noindent\textbf{Inventory size.} 9 context declarations, 5 definitions/game objects, 0 lemmas or relational theorems, and 0 explicit Hoare/Phoare judgments were found.
+
+\subsubsection*{Theory Context, Imports, and Quantified Modules}
+\paragraph{Context 1 (line 1)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import AllCore.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 2 (line 2)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import Sig_ROM HAETAE_Params HAETAE_Algebra HAETAE_Distributions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 3 (line 3)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_ROM.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 4 (line 5)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE_Scheme
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+theory HAETAE_Scheme.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This begins a namespace for the formal development in this file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 5 (line 7)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Params.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 6 (line 8)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 7 (line 9)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Distributions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 8 (line 10)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_ROM.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 9 (line 12)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+cloned theory
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+clone import Sig_ROM as SIG with
+  type pkey <- pkey,
+  type skey <- skey,
+  type message <- message,
+  type context <- context,
+  type signature <- signature,
+  type ro_query <- ro_query,
+  type ro_output <- ro_output,
+  op dro_output <- dro_output.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\subsubsection*{Definitions, Carrier Sets, Operations, Games, and Procedures}
+\begin{formaldefinition}[EasyCrypt line 22]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_mode
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op haetae_mode : mode.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 24]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module HAETAE(H : SIG.POracle) = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a probabilistic program/game or a module adapter.  Its procedures induce the probability space used by the game-based proof.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 25]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+kg
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc kg() : pkey * skey = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 38]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+sign
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc sign(sk : skey, m : message, ctx : context) : signature = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 60]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+verify
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+proc verify(pk : pkey, m : message, ctx : context,
+              sig : signature) : bool = {
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This procedure is a command in the probabilistic program.  Its return value, state updates, and oracle calls are the operational content of the game.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It supplies an executable component of the formal probabilistic model.
+
+\end{formaldefinition}
+
+\medskip
+\noindent\emph{End of generated formal inventory for \file{HAETAE_Scheme.ec}.}

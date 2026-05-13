@@ -1,0 +1,2896 @@
+\subsection*{Textbook Formal Inventory}
+This subsection records the exact formal material in \file{HAETAE_Security.ec}.  It is generated from the proof-surface EasyCrypt file, so the line numbers and statements are meant to be read next to the checked source.
+
+\noindent\textbf{Chapter role.} top-level correctness and EUF-CMA theorem composition.
+
+\noindent\textbf{Inventory size.} 65 context declarations, 1 definitions/game objects, 40 lemmas or relational theorems, and 1 explicit Hoare/Phoare judgments were found.
+
+\subsubsection*{Theory Context, Imports, and Quantified Modules}
+\paragraph{Context 1 (line 1)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import AllCore Real Distr StdOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 2 (line 2)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import Sig_ROM HAETAE_Scheme HAETAE_Algebra HAETAE_Distributions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 3 (line 3)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Reductions HAETAE_Assumptions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 4 (line 4)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Rejection.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 5 (line 5)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Transcript HAETAE_ROM_Programming.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 6 (line 6)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_HopGames.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 7 (line 8)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE_Security
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+theory HAETAE_Security.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This begins a namespace for the formal development in this file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 8 (line 10)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Algebra.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 9 (line 11)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Distributions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 10 (line 12)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Reductions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 11 (line 13)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Assumptions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 12 (line 14)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Rejection.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 13 (line 15)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Transcript.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 14 (line 16)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_ROM_Programming.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 15 (line 17)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_HopGames.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 16 (line 18)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Scheme.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 17 (line 19)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import RealOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 18 (line 35)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section_line_35
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 19 (line 37)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 20 (line 38)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.CORR_ADV {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 21 (line 73)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+NoSigningSecurity
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section NoSigningSecurity.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 22 (line 75)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 23 (line 76)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE, -SIG.EUF_CMA}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 24 (line 77)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 25 (line 78)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 26 (line 79)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bsis
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bsis <: ModuleSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 27 (line 127)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section_line_127
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 28 (line 129)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 29 (line 130)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 30 (line 131)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 31 (line 132)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 32 (line 133)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 33 (line 134)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bsis
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bsis <: ModuleSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 34 (line 211)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+FullReductionWithSimulatorHop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section FullReductionWithSimulatorHop.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 35 (line 213)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA, -EUF_CMA_SimulatedSign,
+                                 -RealSigningSimulator}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 36 (line 215)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE, -SIG.EUF_CMA,
+                                    -EUF_CMA_SimulatedSign,
+                                    -RealSigningSimulator}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 37 (line 218)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 38 (line 219)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 39 (line 220)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 40 (line 221)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bsis
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bsis <: ModuleSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 41 (line 306)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+FullReductionWithROMTranscriptHop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section FullReductionWithROMTranscriptHop.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 42 (line 308)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA,
+                                 -EUF_CMA_InternalTranscriptSign,
+                                 -EUF_CMA_ROMInternalTranscriptSign}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 43 (line 311)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE, -SIG.EUF_CMA,
+                                    -EUF_CMA_InternalTranscriptSign,
+                                    -EUF_CMA_ROMInternalTranscriptSign}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 44 (line 314)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 45 (line 315)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 46 (line 316)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 47 (line 317)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bsis
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bsis <: ModuleSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 48 (line 407)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MechanizedBimodalModuleSISLift
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section MechanizedBimodalModuleSISLift.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 49 (line 409)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA, -EUF_CMA_SimulatedSign,
+                                 -RealSigningSimulator}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 50 (line 411)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE, -SIG.EUF_CMA,
+                                    -EUF_CMA_SimulatedSign,
+                                    -RealSigningSimulator}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 51 (line 414)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 52 (line 415)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 53 (line 416)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 54 (line 461)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MechanizedROMTranscriptBimodalLift
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section MechanizedROMTranscriptBimodalLift.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 55 (line 463)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA,
+                                 -EUF_CMA_InternalTranscriptSign,
+                                 -EUF_CMA_ROMInternalTranscriptSign}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 56 (line 466)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE, -SIG.EUF_CMA,
+                                    -EUF_CMA_InternalTranscriptSign,
+                                    -EUF_CMA_ROMInternalTranscriptSign}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 57 (line 469)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+N
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module N <: SIG.NMA_Adversary {-H, -HAETAE}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 58 (line 470)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 59 (line 471)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 60 (line 598)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+MechanizedROMTranscriptConstructedNMALift
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+section MechanizedROMTranscriptConstructedNMALift.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This opens a scoped block of hypotheses, module parameters, and lemmas.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 61 (line 600)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+H
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module H <: SIG.Oracle {-SIG.EUF_CMA,
+                                 -EUF_CMA_InternalTranscriptSign,
+                                 -EUF_CMA_ROMInternalTranscriptSign,
+                                 -ROMInternalTranscriptAsNMA,
+                                 -ROMInternalTranscriptPublicSimAsNMA,
+                                 -ROMInternalTranscriptPaperSimAsNMA,
+                                 -ROMInternalTranscriptBudgetedPaperSimAsNMA,
+                                 -ROMPaperSimSigningSampler,
+                                 -RealSigningPaperSimSampler,
+                                 -ROSigningAttemptPaperSimSampler,
+                                 -HAETAERejectionPaperSimSampler,
+                                 -ExactHyperballHAETAERejectionPaperSimSampler,
+                                 -ExactHyperballPaperSimSampler,
+                                 -ROExactHyperballPaperSimSampler}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 62 (line 614)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+A
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module A <: SIG.Adversary {-H, -HAETAE, -SIG.EUF_CMA,
+                                    -EUF_CMA_InternalTranscriptSign,
+                                    -EUF_CMA_ROMInternalTranscriptSign,
+                                    -ROMInternalTranscriptAsNMA,
+                                    -ROMInternalTranscriptPublicSimAsNMA,
+                                    -ROMInternalTranscriptPaperSimAsNMA,
+                                    -ROMInternalTranscriptBudgetedPaperSimAsNMA,
+                                    -ROMPaperSimSigningSampler,
+                                    -RealSigningPaperSimSampler,
+                                    -ROSigningAttemptPaperSimSampler,
+                                    -HAETAERejectionPaperSimSampler,
+                                    -ExactHyperballHAETAERejectionPaperSimSampler,
+                                    -ExactHyperballPaperSimSampler,
+                                    -ROExactHyperballPaperSimSampler}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 63 (line 628)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Samp
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Samp <: PaperSimSigningSampler {-H, -A,
+                                               -ROMInternalTranscriptPaperSimAsNMA}.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 64 (line 630)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bmlwe
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bmlwe <: MLWE_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 65 (line 631)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+declare module Bbimodal <: BimodalSelfTargetMSIS_Reduction.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This is universal quantification over an adversary, oracle, scheme, sampler, or reduction module satisfying the stated interface and memory restrictions.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\subsubsection*{Definitions, Carrier Sets, Operations, Games, and Procedures}
+\begin{formaldefinition}[EasyCrypt line 21]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+correctness_obligation
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op correctness_obligation =
+  forall (sd : seed) (coins : random_coins)
+         (m : message) (ctx : context),
+    verify_internal haetae_mode (keygen_internal haetae_mode sd).`1 m ctx
+      (sign_internal haetae_mode
+        (keygen_internal haetae_mode sd).`2 m ctx coins).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\subsubsection*{Lemmas, Theorems, Relational Equivalences, and Their Proof Dependencies}
+\begin{formaltheorem}[EasyCrypt line 28]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+correctness_obligation_holds
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma correctness_obligation_holds : correctness_obligation.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves a structural correctness fact needed by later extraction or verification arguments.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coins
+correctness_obligation
+ctx
+keygen_internal
+sd
+verify_internal_sign_internal
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 40]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+correctness_perfect
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma correctness_perfect &m :
+  Pr[SIG.Correctness(H, HAETAE, A).main() @ &m : res] = 0%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] = B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves a structural correctness fact needed by later extraction or verification arguments.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{byphoare}, \ec{hoare}, \ec{proc}, \ec{inline}, \ec{wp}, \ec{call}, \ec{rnd}, \ec{conseq}, \ec{rewrite}, \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+coins
+keygen_internal
+result
+result0
+sd
+valid_signature_sign_internal
+verify_internal
+verify_norm_ok_current
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 81]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_no_signing
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_no_signing &m :
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, SIG.NMA_As_CMA(N)).main() @ &m : res] <=
+    haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalSelfTargetMSIS_Game
+Bmlwe
+Bsis
+HAETAE
+MLWE_Game
+ModuleSIS_Game
+Pr
+SIG
+UF_NMA
+bimodal_hop
+bimodal_to_msis_reduction_loss_term
+h_nma_msis
+haetae_euf_bound_rejection_groupedE
+ler_add
+ler_addl
+ler_trans
+lerr
+main
+mlwe_bound
+mlwe_hardness_term
+module_sis_hardness_term
+msis_bound
+nma_as_cma_exact
+nma_hop
+rejection_bound_parts_nonnegative
+rejection_sampling_bound_obligation_holds
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 136]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security &m :
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{have}, \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalSelfTargetMSIS_Game
+Bmlwe
+Bsis
+HAETAE
+MLWE_Game
+ModuleSIS_Game
+Pr
+SIG
+UF_NMA
+bimodal_hop
+bimodal_to_msis_reduction_loss_term
+fs_hop
+fs_with_aborts_min_entropy_term
+fs_with_aborts_reprogramming_term
+h_nma_msis
+haetae_euf_bound_groupedE
+ler_add
+ler_trans
+lerr
+main
+mlwe_bound
+msis_bound
+nma_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 188]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_with_hop_interfaces
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_with_hop_interfaces &m :
+  fs_with_aborts_interfaces_ready haetae_mode =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_hop
+euf_cma_security
+fs_hop
+mlwe_bound
+msis_bound
+nma_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 223]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_simulated_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_simulated_hop &m :
+  fs_with_aborts_interfaces_ready haetae_mode =>
+  Pr[EUF_CMA_SimulatedSign(H, HAETAE, A, RealSigningSimulator(HAETAE)).main()
+       @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalSelfTargetMSIS_Game
+Bmlwe
+Bsis
+HAETAE
+MLWE_Game
+ModuleSIS_Game
+Pr
+SIG
+UF_NMA
+bimodal_hop
+bimodal_to_msis_reduction_loss_term
+fs_with_aborts_min_entropy_term
+fs_with_aborts_reprogramming_term
+h_nma_msis
+haetae_euf_bound_groupedE
+iface
+ler_add
+ler_trans
+lerr
+main
+mlwe_bound
+msis_bound
+nma_hop
+real_signing_simulator_exact
+sim_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 278]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_explicit_boundaries
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_explicit_boundaries &m :
+  Pr[EUF_CMA_SimulatedSign(H, HAETAE, A, RealSigningSimulator(HAETAE)).main()
+       @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_hop
+euf_cma_security_from_simulated_hop
+fs_with_aborts_interfaces_ready_holds
+mlwe_bound
+msis_bound
+nma_hop
+sim_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 319]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_internal_transcript_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_internal_transcript_hop &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+    Pr[ModuleSIS_Game(Bsis).main() @ &m : res] +
+    bimodal_to_msis_reduction_loss_term =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(Bsis).main() @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+Bmlwe
+Bsis
+bimodal_hop
+euf_cma_security
+haetae_rom_internal_transcript_erasure_exact
+mlwe_bound
+msis_bound
+nma_hop
+rom_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 344]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_internal_transcript_hop_from_clear_site_reduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rom_internal_transcript_hop_from_clear_site_reduction &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m :
+      res /\
+      transcript_log_signature_programming_sites_clear haetae_mode
+        EUF_CMA_ROMInternalTranscriptSign.transcripts] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] =>
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{have}, \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+EUF_CMA_ROMInternalTranscriptSign
+Pr
+clear_reduction
+haetae_mode
+ler_add
+main
+mu_split
+rom_internal_transcript_bad_forgery_bound
+split_success
+transcript_log_signature_programming_sites_clear
+transcripts
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 375]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_internal_transcript_hop_from_clear_site_counted_reduction
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rom_internal_transcript_hop_from_clear_site_counted_reduction &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m :
+      res /\
+      transcript_log_signature_programming_sites_clear haetae_mode
+        EUF_CMA_ROMInternalTranscriptSign.transcripts] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] =>
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{have}, \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+EUF_CMA_ROMInternalTranscriptSign
+Pr
+clear_reduction
+haetae_mode
+ler_add
+main
+mu_split
+rom_internal_transcript_bad_forgery_counted_bound
+split_success
+transcript_log_signature_programming_sites_clear
+transcripts
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 418]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_module_sis_reduction_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_to_module_sis_reduction_bound &m :
+  Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] <=
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] +
+    bimodal_to_msis_reduction_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalMSIS_As_ModuleSIS
+ModuleSIS_Game
+Pr
+bimodal_msis_as_module_sis_exact
+bimodal_to_msis_reduction_loss_termE
+lerr
+main
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 434]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_mechanized_boundaries
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_mechanized_boundaries &m :
+  Pr[EUF_CMA_SimulatedSign(H, HAETAE, A, RealSigningSimulator(HAETAE)).main()
+       @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalMSIS_As_ModuleSIS
+Bmlwe
+bimodal_to_module_sis_reduction_bound
+euf_cma_security_from_simulated_hop
+fs_with_aborts_interfaces_ready_holds
+mlwe_bound
+msis_bound
+nma_hop
+sim_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 473]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_transcript_and_mechanized_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_transcript_and_mechanized_bimodal &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term) =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalMSIS_As_ModuleSIS
+Bmlwe
+bimodal_to_module_sis_reduction_bound
+euf_cma_security_from_rom_internal_transcript_hop
+mlwe_bound
+msis_bound
+nma_hop
+rom_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 496]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_transcript_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_transcript_and_counted_bimodal &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m : res] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] +
+    counted_rom_programming_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{have}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+BimodalMSIS_As_ModuleSIS
+BimodalSelfTargetMSIS_Game
+Bmlwe
+HAETAE
+MLWE_Game
+ModuleSIS_Game
+Pr
+SIG
+UF_NMA
+bimodal_to_module_sis_reduction_bound
+bimodal_to_msis_reduction_loss_term
+counted_rom_programming_loss_term
+h_nma_msis
+haetae_euf_counted_rom_bound_groupedE
+haetae_rom_internal_transcript_erasure_exact
+ler_add
+ler_trans
+lerr
+main
+mlwe_bound
+msis_bound
+nma_hop
+rom_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 547]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_clear_site_and_mechanized_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_clear_site_and_mechanized_bimodal &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m :
+      res /\
+      transcript_log_signature_programming_sites_clear haetae_mode
+        EUF_CMA_ROMInternalTranscriptSign.transcripts] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+clear_reduction
+euf_cma_security_from_rom_transcript_and_mechanized_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_transcript_hop_from_clear_site_reduction
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 571]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_clear_site_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_clear_site_and_counted_bimodal &m :
+  Pr[EUF_CMA_ROMInternalTranscriptSign(H, A).main() @ &m :
+      res /\
+      transcript_log_signature_programming_sites_clear haetae_mode
+        EUF_CMA_ROMInternalTranscriptSign.transcripts] <=
+    Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE, N).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+clear_reduction
+euf_cma_security_from_rom_transcript_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_transcript_hop_from_clear_site_counted_reduction
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 633]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_structural_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_structural_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE, ROMInternalTranscriptAsNMA(A)).main()
+       @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+Bbimodal
+Bmlwe
+ROMInternalTranscriptAsNMA
+euf_cma_security_from_rom_clear_site_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_transcript_clear_site_structural_nma_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 653]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_public_sim_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_public_sim_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE, ROMInternalTranscriptPublicSimAsNMA(A)).main()
+       @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_structural_nma_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_nma_public_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 673]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_paper_sim_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_paper_sim_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE, ROMInternalTranscriptPublicSimAsNMA(A)).main()
+       @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA(A, Samp)).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA(A, Samp)).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE
+Pr
+ROMInternalTranscriptPaperSimAsNMA
+SIG
+Samp
+UF_NMA
+euf_cma_security_from_public_sim_nma_and_counted_bimodal
+ler_trans
+main
+mlwe_bound
+msis_bound
+paper_nma_hop
+public_sim_to_paper_sim_nma_hop_from_sampling_hop
+rejection_sampling_loss_term
+sampling_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 704]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_rom_paper_sim_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_rom_paper_sim_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROMPaperSimSigningSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_public_sim_nma_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_nma_public_sim_rom_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 725]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_real_signing_paper_sim_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_real_signing_paper_sim_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_structural_nma_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_nma_real_signing_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 746]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_real_signing_paper_sim_nma_and_counted_bimodal
+mlwe_bound
+msis_bound
+nma_hop
+rom_internal_nma_real_signing_haetae_rejection_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 768]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+exact_hyperball_haetae_rejection_nma_bound_from_paper_sim
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma exact_hyperball_haetae_rejection_nma_bound_from_paper_sim &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballHAETAERejectionPaperSimSampler(H))).main()
+       @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+nma_hop
+rom_internal_nma_exact_hyperball_rejection_paper_sim_no_fallback_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 787]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_rejection_nma_bound_from_exact_hyperball_sampling_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_rejection_nma_bound_from_exact_hyperball_sampling_hop &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballHAETAERejectionPaperSimSampler(H))).main()
+       @ &m : res] + rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res].
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ExactHyperballHAETAERejectionPaperSimSampler
+HAETAE
+Pr
+ROMInternalTranscriptPaperSimAsNMA
+SIG
+UF_NMA
+exact_nma_hop
+ler_trans
+main
+rejection_sampling_loss_term
+rom_internal_nma_exact_hyperball_rejection_paper_sim_no_fallback_exact
+sampling_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 819]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_rejection_exact_hyperball_sampling_hop_from_real_signing_exact_hyperball_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_rejection_exact_hyperball_sampling_hop_from_real_signing_exact_hyperball_hop &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballHAETAERejectionPaperSimSampler(H))).main()
+       @ &m : res] + rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_exact_hop
+rom_internal_nma_exact_hyperball_rejection_paper_sim_no_fallback_exact
+rom_internal_nma_real_signing_haetae_rejection_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 843]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_rejection_ro_exact_hyperball_sampling_hop_from_real_signing_ro_exact_hyperball_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_rejection_ro_exact_hyperball_sampling_hop_from_real_signing_ro_exact_hyperball_hop &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_ro_exact_hop
+rom_internal_nma_real_signing_haetae_rejection_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 865]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ro_attempt_hop
+rom_internal_nma_real_signing_ro_attempt_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 886]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop_loss
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop_loss
+  &m (loss : real) :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    loss =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    loss.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ro_attempt_hop
+rom_internal_nma_real_signing_ro_attempt_paper_sim_exact
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 908]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_from_budgeted_lifting
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma real_signing_ro_exact_hyperball_hop_from_budgeted_lifting &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] =>
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rom_signature_query_budget * rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+attempt_unbudgeted_to_budgeted
+exact_budgeted_to_unbudgeted
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop_loss
+rejection_sampling_loss_term
+rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_budgeted_lifting
+rom_signature_query_budget
+sample_loss
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 943]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_rejection_ro_exact_hyperball_sampling_hop_from_budgeted_lifting
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_rejection_ro_exact_hyperball_sampling_hop_from_budgeted_lifting
+  &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] =>
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rom_signature_query_budget * rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It proves an exact game replacement or simulator equivalence.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+attempt_unbudgeted_to_budgeted
+exact_budgeted_to_unbudgeted
+real_signing_ro_exact_hyperball_hop_from_budgeted_lifting
+rom_internal_nma_real_signing_haetae_rejection_paper_sim_exact
+sample_loss
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 974]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_exact_hyperball_paper_sim_bridge_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_exact_hyperball_paper_sim_bridge_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballHAETAERejectionPaperSimSampler(H))).main()
+       @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+ExactHyperballHAETAERejectionPaperSimSampler
+HAETAE
+Pr
+ROMInternalTranscriptPaperSimAsNMA
+SIG
+UF_NMA
+euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal
+exact_bridge
+exact_hyperball_haetae_rejection_nma_bound_from_paper_sim
+exact_nma_hop
+ler_trans
+main
+mlwe_bound
+msis_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1007]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_exact_hyperball_sampling_hop_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_exact_hyperball_sampling_hop_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, HAETAERejectionPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballHAETAERejectionPaperSimSampler(H))).main()
+       @ &m : res] + rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal
+exact_nma_hop
+haetae_rejection_nma_bound_from_exact_hyperball_sampling_hop
+mlwe_bound
+msis_bound
+sampling_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1036]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE
+Pr
+ROExactHyperballPaperSimSampler
+ROMInternalTranscriptPaperSimAsNMA
+SIG
+UF_NMA
+euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal
+haetae_rejection_ro_exact_hyperball_sampling_hop_from_real_signing_ro_exact_hyperball_hop
+ler_trans
+main
+mlwe_bound
+msis_bound
+real_ro_exact_hop
+rejection_sampling_loss_term
+ro_exact_nma_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1072]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_ro_signing_attempt_to_ro_exact_hyperball_hop_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_ro_signing_attempt_to_ro_exact_hyperball_hop_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal
+mlwe_bound
+msis_bound
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop
+ro_attempt_hop
+ro_exact_nma_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1102]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_checked_from_loss_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma real_signing_ro_exact_hyperball_hop_checked_from_loss_budget &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop
+rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1116]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+real_signing_ro_exact_hyperball_hop_from_paper_sample_lifting
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma real_signing_ro_exact_hyperball_hop_from_paper_sample_lifting &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lifted_loss
+real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop
+rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_paper_sample_lifting
+sample_loss
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1140]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_paper_sample_lifting_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_paper_sample_lifting_and_counted_bimodal &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal
+lifted_loss
+mlwe_bound
+msis_bound
+real_signing_ro_exact_hyperball_hop_from_paper_sample_lifting
+ro_exact_nma_hop
+sample_loss
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1170]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_budgeted_paper_sample_lifting_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_budgeted_paper_sample_lifting_and_counted_bimodal
+  &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(H))).main() @ &m : res] =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] =>
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rom_signature_query_budget * rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE
+Pr
+ROExactHyperballPaperSimSampler
+ROMInternalTranscriptPaperSimAsNMA
+SIG
+UF_NMA
+attempt_unbudgeted_to_budgeted
+euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal
+exact_budgeted_to_unbudgeted
+haetae_rejection_ro_exact_hyperball_sampling_hop_from_budgeted_lifting
+ler_trans
+main
+mlwe_bound
+msis_bound
+rejection_sampling_loss_term
+ro_exact_nma_hop
+rom_signature_query_budget
+sample_loss
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1217]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal
+mlwe_bound
+msis_bound
+real_signing_ro_exact_hyperball_hop_checked_from_loss_budget
+ro_exact_nma_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 1239]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_real_signing_exact_hyperball_hop_and_counted_bimodal
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma euf_cma_security_from_real_signing_exact_hyperball_hop_and_counted_bimodal &m :
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, RealSigningPaperSimSampler(H))).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(H, HAETAE,
+       ROMInternalTranscriptPaperSimAsNMA
+         (A, ExactHyperballPaperSimSampler(H))).main() @ &m : res] +
+    rejection_sampling_loss_term <=
+    Pr[MLWE_Game(Bmlwe).main() @ &m : res] +
+    Pr[BimodalSelfTargetMSIS_Game(Bbimodal).main() @ &m : res] =>
+  Pr[MLWE_Game(Bmlwe).main() @ &m : res] <= mlwe_hardness_term =>
+  Pr[ModuleSIS_Game(BimodalMSIS_As_ModuleSIS(Bbimodal)).main()
+       @ &m : res] <= module_sis_hardness_term =>
+  Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <=
+    haetae_euf_counted_rom_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This theorem has the form \(\Pr[G:E] \le B\) is a game-probability statement.  It is one of the exact hops, bad-event bounds, or final advantage inequalities used in the reduction.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+euf_cma_security_from_exact_hyperball_sampling_hop_and_counted_bimodal
+exact_nma_hop
+haetae_rejection_exact_hyperball_sampling_hop_from_real_signing_exact_hyperball_hop
+mlwe_bound
+msis_bound
+real_exact_hop
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\subsubsection*{Explicit Program-Logic Judgments Used Inside Proof Scripts}
+\begin{formaljudgment}[EasyCrypt line 44]
+\noindent\textbf{Checked EasyCrypt judgment.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hoare.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.} This is a Hoare judgment.  It states partial correctness of the displayed procedure from the displayed precondition to the displayed postcondition.
+\end{formaljudgment}
+
+\medskip
+\noindent\emph{End of generated formal inventory for \file{HAETAE_Security.ec}.}

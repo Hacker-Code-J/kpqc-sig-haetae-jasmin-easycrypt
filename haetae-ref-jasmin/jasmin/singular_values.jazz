@@ -1,0 +1,33 @@
+require "params.jinc"
+require "fft.jinc"
+require "fft_pipeline.jinc"
+require "sign.jinc"
+require "fft_tables.jinc"
+require "singular_values.jinc"
+
+export
+fn sk_singular_value_full_m2_jazz(reg const ptr u32[2048] s1p,
+                                  reg const ptr u32[2048] s2p) -> reg u64
+{
+  reg u64 r;
+  r = _singular_full(s1p, s2p, 3, 2, 5, 58, 24);
+  return r;
+}
+
+export
+fn sk_singular_value_full_m3_jazz(reg const ptr u32[2048] s1p,
+                                  reg const ptr u32[2048] s2p) -> reg u64
+{
+  reg u64 r;
+  r = _singular_full(s1p, s2p, 5, 3, 4, 80, 16);
+  return r;
+}
+
+export
+fn sk_singular_value_full_m5_jazz(reg const ptr u32[2048] s1p,
+                                  reg const ptr u32[2048] s2p) -> reg u64
+{
+  reg u64 r;
+  r = _singular_full(s1p, s2p, 6, 4, 3, 128, 0);
+  return r;
+}

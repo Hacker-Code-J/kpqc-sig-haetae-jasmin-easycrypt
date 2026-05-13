@@ -1,0 +1,27 @@
+require "params.jinc"
+require "keccak.jinc"
+require "polynomial_sampler.jinc"
+
+export
+fn poly_uniform_jazz(reg mut ptr u32[8192] ap,
+                     reg ui64 seedp,
+                     reg u64 nonce) -> reg ptr u32[8192]
+{
+  reg u64 base;
+
+  base = 0;
+  ap = _poly_uniform_at(ap, base, seedp, nonce);
+  return ap;
+}
+
+export
+fn poly_uniform_eta_jazz(reg mut ptr u32[8192] ap,
+                         reg ui64 seedp,
+                         reg u64 nonce) -> reg ptr u32[8192]
+{
+  reg u64 base;
+
+  base = 0;
+  ap = _poly_uniform_eta_at(ap, base, seedp, nonce);
+  return ap;
+}

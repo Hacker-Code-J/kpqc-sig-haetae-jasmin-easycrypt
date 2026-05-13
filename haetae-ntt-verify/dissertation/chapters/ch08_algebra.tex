@@ -1,0 +1,267 @@
+%==============================================================================%
+% Chapter 8 – Algebraic NTT Infrastructure (NTTFullAlgebra.ec)
+%==============================================================================%
+
+\chapter{Algebraic NTT Infrastructure}
+\label{ch:algebra}
+
+\section{Overview of \texttt{NTTFullSpec.ec} and \texttt{NTTFullAlgebra.ec}}
+
+The abstract spectral NTT specification lives in two files:
+\begin{itemize}
+  \item \texttt{NTTFullSpec.ec} (160 lines) defines the abstract evaluation
+        maps \ec{full\_ntt} and \ec{full\_invntt} and states the main
+        correctness lemmas.
+  \item \texttt{NTTFullAlgebra.ec} (1000+ lines) develops the algebraic
+        machinery needed to prove those lemmas: primitive root properties,
+        bit-reversal identities, and butterfly-stage decompositions.
+\end{itemize}
+
+\section{Primitive Root Properties}
+
+\subsection{Existence and Uniqueness}
+
+The prime $q = 64513$ satisfies $q \equiv 1 \pmod{512}$.  Therefore $\F_q^*$
+contains an element of order $512$, i.e., a primitive $512$th root of unity.
+
+\begin{theorem}[Primitive root existence]
+  The element $\zeta_0 = 426 \in \F_q$ has multiplicative order exactly $512$.
+\label{thm:zeta_order}
+\end{theorem}
+
+\begin{proof}
+  We verify:
+  \begin{enumerate}
+    \item $\zeta_0^{512} \equiv 1 \pmod{64513}$ (direct computation).
+    \item For all $d \mid 512$ with $d < 512$:
+          $\zeta_0^d \not\equiv 1 \pmod{64513}$.
+          It suffices to check $d = 256$ and $d = 128$ (since $512 = 2^9$
+          and the order must divide $512$).
+  \end{enumerate}
+  Both computations are discharged by the \ec{smt} tactic.
+\end{proof}
+
+\begin{corollary}
+  $\zeta_0^{256} \equiv -1 \pmod{q}$ and $\zeta_0^{128} \not\equiv \pm 1 \pmod{q}$.
+\label{cor:zeta256}
+\end{corollary}
+
+\subsection{Orthogonality}
+
+The $512$th roots of unity in $\F_q$ are $\{\zeta_0^k : k = 0, 1, \dots, 511\}$.
+The primitive roots are those $\zeta_0^k$ with $\gcd(k, 512) = 1$.  The NTT
+formula uses the set of \emph{odd} powers $\{\zeta_0^{2i+1} : i = 0, \dots, 255\}$,
+which are exactly the primitive roots.
+
+\begin{lemma}[Orthogonality relation]
+  For $i, j \in \{0, \dots, 255\}$ with $i \ne j$:
+  \[
+    \sum_{k=0}^{255} \zeta_0^{(2i+1)k} \cdot \zeta_0^{-(2j+1)k} = 0 \in \F_q.
+  \]
+  For $i = j$, the sum equals $256$.
+\label{lem:orthogonality}
+\end{lemma}
+
+\begin{proof}
+  For $i \ne j$: the sum is a geometric series with ratio
+  $r = \zeta_0^{2(i-j)}$.  Since $\zeta_0$ has order 512, $r$ is a
+  $256$th root of unity.  The exponent $2(i-j) \not\equiv 0 \pmod{256}$
+  (because $|i-j| < 256$, so $2|i-j| < 512$, and $2(i-j) \ne 0$).
+  Thus $r^{256} = \zeta_0^{512(i-j)} = 1$ and $r \ne 1$, so
+  $\sum_{k=0}^{255} r^k = (r^{256} - 1)/(r-1) = 0$.
+
+  For $i = j$: each term is $\zeta_0^0 = 1$, and there are 256 terms.
+\end{proof}
+
+\section{Bit-Reversal Permutation}
+\label{sec:brev}
+
+\subsection{Definition}
+
+The bit-reversal permutation $\brev_8 : \{0,\dots,255\} \to \{0,\dots,255\}$
+reverses the 8 binary digits of its input:
+\[
+  \brev_8(b_7 b_6 b_5 b_4 b_3 b_2 b_1 b_0) = b_0 b_1 b_2 b_3 b_4 b_5 b_6 b_7.
+\]
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Bit-reversal definition in \texttt{NTTFullAlgebra.ec}},
+  label={lst:brev}]
+op bsrev (n k : int) : int =
+  bsrev8 k.   (* 8-bit bit reversal *)
+
+op bsrev8 (k : int) : int =
+  let k0 = k %% 2 in
+  let k1 = (k %/ 2) %% 2 in
+  (* ... *)
+  let k7 = (k %/ 128) %% 2 in
+  k0 * 128 + k1 * 64 + k2 * 32 + k3 * 16 +
+  k4 * 8   + k5 * 4  + k6 * 2  + k7.
+\end{lstlisting}
+
+\subsection{Key Properties}
+
+\begin{lemma}[Bit-reversal involutivity]
+  $\brev_8(\brev_8(k)) = k$ for all $k \in [0, 256)$.
+\label{lem:brev_invol}
+\end{lemma}
+
+\begin{lemma}[Bit-reversal and halving]
+  For $k \in [1, 256)$ and $\ell = 2^s$ (a power of 2 with $s \le 7$):
+  \[
+    \brev_8(k \bmod \ell) = \brev_8(k) / (256 / \ell) \cdot (256 / \ell) + \brev_8(k) \bmod (256 / \ell).
+  \]
+\label{lem:brev_halve}
+\end{lemma}
+
+This lemma, though technical, is essential for connecting the loop index $k$
+to the spectral index $\brev_8(k)$.
+
+\subsection{Bit-Reversal and Twiddle Factor Indexing}
+
+\begin{lemma}[Twiddle factor ordering]
+  In the forward NTT outer loop with half-length $\ell = 2^{7-s}$, after
+  completing $g$ groups of stage $s$, the twiddle counter satisfies
+  $k = 2^s + g$, and the twiddle factor is $\zeta_0^{\brev_8(2^s + g)}$.
+\label{lem:twiddle_index}
+\end{lemma}
+
+\begin{proof}
+  By induction on $s$ (outer loops) and $g$ (groups within a stage).
+  The key observation is that as the outer counter increments,
+  the bit-reversal of the counter gives exactly the correct spectral index
+  for the butterfly group.
+\end{proof}
+
+\section{Stage Decomposition Theorem}
+
+\subsection{Partial NTT}
+
+\begin{definition}[Stage-$s$ partial NTT]
+  For $0 \le s \le 8$, the stage-$s$ partial NTT of a vector
+  $f \in \F_q^{256}$ is defined by:
+  \[
+    \NTT_s(f)[i] = \sum_{j \equiv i \pmod{2^s}} f[j] \cdot
+    \zeta_0^{\brev_8(\floor{i/2^s}) \cdot j},\quad i = 0, \dots, 255.
+  \]
+\label{def:partial_ntt}
+\end{definition}
+
+The full NTT corresponds to $\NTT_8$ (all 8 stages completed).  The identity
+$\NTT_0(f) = f$ holds trivially (the empty product is 1).
+
+\subsection{Butterfly Stage Lemma}
+
+\begin{lemma}[Single-stage butterfly correctness]
+  For all $s \in \{0, \dots, 7\}$ and $f \in \F_q^{256}$:
+  \[
+    \NTT_{s+1}(f) = \op{butterfly\_stage}(s, \NTT_s(f)),
+  \]
+  where $\op{butterfly\_stage}(s, a)$ applies one complete pass of butterflies
+  with half-length $\ell = 2^{7-s}$.
+\label{lem:butterfly_stage}
+\end{lemma}
+
+\begin{proof}
+  Fix an index $i$ and let $g = \floor{i / 2^{s+1}}$ (the group number),
+  $r = i \bmod 2^{s+1}$ (the position within the group),
+  $r_0 = r \bmod 2^s$ (the low-half position).
+
+  The butterfly for group $g$ uses twiddle factor $w = \zeta_0^{\brev_8(2^s + g)}$.
+
+  Case $r < 2^s$ (upper butterfly input):
+  \begin{align*}
+    \op{butterfly\_stage}(s, a)[i]
+    &= a[i] + w \cdot a[i + 2^s] \\
+    &= \sum_{j \equiv r_0 \pmod{2^s}} f[j] \zeta_0^{\brev_8(g) j}
+     + \zeta_0^{\brev_8(2^s+g)} \sum_{j \equiv r_0 \pmod{2^s}} f[j+2^s] \zeta_0^{\brev_8(g) j}.
+  \end{align*}
+  (By the inductive hypothesis $\NTT_s(f)[i] = \sum_{j \equiv i \pmod{2^s}} f[j]
+  \zeta_0^{\brev_8(\floor{i/2^s})j}$.)
+
+  Combining the sums over $j$ and $j + 2^s$, and using the identity
+  $\brev_8(2^s + g) = \brev_8(g)/2 + 2^{7-s} \cdot (g \bmod 2^s)$
+  (from \Cref{lem:brev_halve}), one can verify that the result equals
+  $\NTT_{s+1}(f)[i]$ by direct algebraic manipulation.
+
+  The case $r \ge 2^s$ is symmetric.  The full algebraic proof in
+  \easycrypt{} uses the \ec{ring} tactic after reducing to finite sums.
+\end{proof}
+
+\subsection{Full NTT Correctness}
+
+\begin{theorem}[Forward NTT correctness]
+  The imperative procedure \ec{NTT.ntt} computes the full NTT:
+  \[
+    \forall a \in \Z_q^{256}.\;
+    \ec{NTT.ntt}(a) = \NTT_8(a) = \op{full\_ntt}(a).
+  \]
+\label{thm:ntt_correct}
+\end{theorem}
+
+\begin{proof}
+  By induction on the outer loop iteration, using \Cref{lem:butterfly_stage}
+  as the inductive step.  The loop invariant asserts that after $s$ outer
+  loop iterations, the array equals $\NTT_s$ of the input.
+
+  The base case ($s = 0$): the array is unchanged, matching $\NTT_0 = \op{id}$.
+  The inductive step: applying the butterfly stage transforms $\NTT_s$ to
+  $\NTT_{s+1}$ by \Cref{lem:butterfly_stage}.
+  The final case ($s = 8$): $\NTT_8 = \op{full\_ntt}$ by \Cref{def:full_ntt}.
+\end{proof}
+
+\section{Inverse NTT Algebra}
+
+\subsection{Abstract Inverse NTT}
+
+\begin{definition}[Abstract inverse NTT, \ec{full\_invntt}]
+  \[
+    \INTT(p)[i] = 256^{-1} \sum_{j=0}^{255} p[j] \cdot \zeta_0^{-((2\brev_8(j)+1) \cdot i)}
+  \]
+\label{def:full_intt2}
+\end{definition}
+
+\begin{theorem}[Inverse NTT correctness]
+  $\op{full\_invntt}(\op{full\_ntt}(p)) = p$ for all $p \in \Z_q^{256}$.
+\label{thm:intt_correct}
+\end{theorem}
+
+\begin{proof}
+  Substituting the definition of $\op{full\_ntt}$:
+  \begin{align*}
+    \INTT(\NTT(p))[i]
+    &= 256^{-1} \sum_{j=0}^{255} \NTT(p)[j] \cdot \zeta_0^{-((2\brev_8(j)+1) i)} \\
+    &= 256^{-1} \sum_{j=0}^{255}
+       \left(\sum_{k=0}^{255} p[k] \cdot \zeta_0^{(2\brev_8(j)+1)k}\right)
+       \cdot \zeta_0^{-((2\brev_8(j)+1)i)} \\
+    &= 256^{-1} \sum_{k=0}^{255} p[k]
+       \sum_{j=0}^{255} \zeta_0^{(2\brev_8(j)+1)(k-i)}.
+  \end{align*}
+
+  For $k = i$: the inner sum is $\sum_{j=0}^{255} 1 = 256$.
+  For $k \ne i$: the inner sum is 0 by a variant of \Cref{lem:orthogonality}
+  (substituting $m = \brev_8(j)$ and using that $\brev_8$ is a bijection on $[0,256)$).
+
+  Thus $\INTT(\NTT(p))[i] = 256^{-1} \cdot p[i] \cdot 256 = p[i]$.
+\end{proof}
+
+\section{The Critical Difference from MLKEM}
+
+\begin{remark}[HAETAE vs.\ MLKEM exponent structure]
+  In MLKEM, the twiddle factor for position $(s, g)$ in the loop is
+  $\zeta^{\brev_8(2g+1)}$ (with a $2g+1$ structure), which corresponds to
+  the \emph{incomplete} $128$-point transform used in that scheme.  The
+  algebra lemmas for MLKEM are stated in terms of $\brev_7$ (7-bit reversal)
+  rather than $\brev_8$.
+
+  In \haetae{}, the twiddle factor is $\zeta^{\brev_8(2^s + g)}$, where the
+  bit-reversal acts on an index that includes the stage counter.  This produces
+  the \emph{complete} $256$-point negacyclic NTT.  The corresponding algebra
+  lemmas require $\brev_8$ (8-bit reversal) and the orthogonality relation over
+  all $256$ primitive $512$th roots of unity.
+
+  This distinction is the primary obstacle to reusing MLKEM's EasyCrypt
+  proofs, and is the motivation for developing \texttt{NTTFullAlgebra.ec}
+  from scratch.
+\label{rem:haetae_mlkem}
+\end{remark}

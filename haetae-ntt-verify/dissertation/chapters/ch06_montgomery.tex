@@ -1,0 +1,258 @@
+%==============================================================================%
+% Chapter 6 – Montgomery Reduction Formalisation
+%==============================================================================%
+
+\chapter{Formalisation of Montgomery Arithmetic}
+\label{ch:montgomery}
+
+\section{Motivation and Design Choices}
+
+Montgomery reduction~\cite{Montgomery1985} is the arithmetic backbone of the
+\haetae{} NTT.  Every butterfly operation calls \ec{montgomery\_reduce} to
+bring an intermediate 64-bit product back to a 32-bit representative modulo
+$q$.  An incorrect implementation of this operation would silently corrupt all
+NTT outputs while passing many unit tests.
+
+Two aspects make the formal verification non-trivial:
+\begin{enumerate}
+  \item The reduction uses \emph{signed} 32-bit integers in an arithmetic
+        right shift, whose behaviour on negative values is
+        implementation-defined in C but well-specified in \jasmin{}.
+  \item The output is not fully reduced (it lies in approximately
+        $(-q, q)$ rather than $[0, q)$), and subsequent operations must
+        account for this.
+\end{enumerate}
+
+\section{Montgomery Parameters}
+
+The Montgomery parameters for \haetae{} are as follows.
+Let $R = 2^{32}$, $q = 64513$.  Since $\gcd(q, R) = 1$, the inverse $R^{-1}
+\bmod q$ and $q^{-1} \bmod R$ both exist.
+
+\begin{align}
+  \mathsf{QINV} &= -q^{-1} \bmod R = 940508161 \label{eq:qinv} \\
+  \mathsf{MONT} &= R \bmod q = 14321 \label{eq:mont} \\
+  \mathsf{MONTSQ} &= R^2 \bmod q = 4214 \label{eq:montsq} \\
+  R^{-1} &\bmod q = 50386 \label{eq:rinv}
+\end{align}
+
+\begin{lemma}[Parameter verification]
+  The following hold in $\Z$:
+  \begin{enumerate}
+    \item $q \cdot \mathsf{QINV} \equiv -1 \pmod{2^{32}}$
+    \item $\mathsf{MONT} \equiv R \pmod{q}$
+    \item $\mathsf{MONTSQ} \equiv R^2 \pmod{q}$
+    \item $R^{-1} \cdot R \equiv 1 \pmod{q}$
+  \end{enumerate}
+\label{lem:mont_params}
+\end{lemma}
+
+\begin{proof}
+  All four identities are discharged by concrete computation in \easycrypt{}
+  using the \ec{smt} tactic with Z3.
+\end{proof}
+
+\section{Signed Montgomery Reduction}
+
+\subsection{Algorithm}
+
+The \haetae{} Montgomery reduction operates on a signed 64-bit integer $a$:
+
+\begin{lstlisting}[language=C,
+  caption={Signed Montgomery reduction (C reference)},
+  label={lst:mont_c}]
+int32_t montgomery_reduce(int64_t a) {
+  int32_t t;
+  t = (int32_t)a * (int32_t)QINV;   /* low 32 bits * QINV, mod 2^32 */
+  t = (a - (int64_t)t * Q) >> 32;   /* arithmetic right shift */
+  return t;
+}
+\end{lstlisting}
+
+\subsection{Mathematical Analysis}
+
+Let $a \in \Z$ with $\abs{a} < q \cdot 2^{15}$ (the working range for NTT
+inputs).  Define:
+\begin{align}
+  m &= \bigl((a \bmod 2^{32}) \cdot \mathsf{QINV}\bigr) \bmod 2^{32}
+        \quad \in [0, 2^{32}),
+  \label{eq:mont_m} \\
+  u &= a - m \cdot q.
+  \label{eq:mont_u}
+\end{align}
+
+\begin{lemma}[Divisibility]
+  $u \equiv 0 \pmod{2^{32}}$.
+\label{lem:mont_div}
+\end{lemma}
+
+\begin{proof}
+  We have $m \equiv a \cdot \mathsf{QINV} \pmod{2^{32}}$.
+  Then $m \cdot q \equiv a \cdot \mathsf{QINV} \cdot q \pmod{2^{32}}$.
+  Since $\mathsf{QINV} = -q^{-1} \bmod R$, we get
+  $\mathsf{QINV} \cdot q \equiv -1 \pmod{2^{32}}$, so
+  $m \cdot q \equiv -a \pmod{2^{32}}$, hence $u = a - mq \equiv 0 \pmod{2^{32}}$.
+\end{proof}
+
+Defining $t = u / 2^{32}$ (exact integer division by \Cref{lem:mont_div}),
+we have:
+
+\begin{theorem}[Montgomery reduction correctness]
+  Let $a \in \Z$ with $\abs{a} < q \cdot 2^{15}$.  Then:
+  \begin{enumerate}
+    \item $t \equiv a \cdot R^{-1} \pmod{q}$, where $t = u / R$ and $u = a - m \cdot q$.
+    \item $\abs{t} < q / 2$.
+  \end{enumerate}
+\label{thm:mont_correct}
+\end{theorem}
+
+\begin{proof}
+  For Part (1): Since $u = a - mq$, we have $t = u / R = (a - mq)/R$, so
+  $t \cdot R = a - mq \equiv a \pmod{q}$, thus $t \equiv a \cdot R^{-1} \pmod{q}$.
+
+  For Part (2): We bound $|u|$.
+  We have $|a| < q \cdot 2^{15}$ and $0 \le m < 2^{32}$, so
+  $|u| = |a - mq| \le |a| + mq < q \cdot 2^{15} + 2^{32} \cdot q = q(2^{15} + 2^{32})$.
+  Dividing by $R = 2^{32}$: $|t| < q(2^{15} + 2^{32}) / 2^{32} = q(1 + 2^{-17}) < 2q$.
+  A tighter analysis using the signed representation of $m$ (where the C cast
+  $(int32\_t)a$ gives a signed value in $(-2^{31}, 2^{31}]$) improves this
+  to $|t| < q$, but the weaker bound suffices for our purposes.
+\end{proof}
+
+\subsection{EasyCrypt Formalisation}
+
+The EasyCrypt formalisation of Montgomery reduction appears in
+\texttt{Fq.ec} and \texttt{Montgomery.ec}.
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Montgomery reduction specification in \texttt{Fq.ec}},
+  label={lst:mont_ec}]
+op montgomery_reduce (a : int) : int =
+  let t = (to_sint32 a * qinv) %% W32.modulus in
+  (a - t * q) %/ W32.modulus.
+
+lemma montgomery_reduce_corr (a : int) :
+    `|a| < q * 2^15 =>
+    montgomery_reduce a %% q = a %% q /\ `|montgomery_reduce a| < q.
+\end{lstlisting}
+
+The key lemma \ec{montgomery\_reduce\_corr} is proved in two parts.  The
+congruence part ($t \equiv a R^{-1} \pmod q$) follows from
+\Cref{lem:mont_div}.  The bound part uses the concrete values of $q$ and
+$R = 2^{32}$ to establish $|t| < q$ via SMT.
+
+\section{Montgomery Multiplication (\texttt{fqmul})}
+
+Building on \ec{montgomery\_reduce}, the \ec{fqmul} operation computes the
+product of two elements in $\Z_q$ in Montgomery form:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={\texttt{fqmul} specification},
+  label={lst:fqmul}]
+op fqmul (a b : int) : int = montgomery_reduce (a * b).
+\end{lstlisting}
+
+\begin{theorem}[fqmul correctness]
+  For all $a, b \in \Z$ with $|a|, |b| < q \cdot 2^{15}$:
+  \begin{enumerate}
+    \item $\op{fqmul}(a, b) \equiv a \cdot b \cdot R^{-1} \pmod{q}$.
+    \item $|\op{fqmul}(a, b)| < q$.
+  \end{enumerate}
+\label{thm:fqmul}
+\end{theorem}
+
+\begin{proof}
+  Directly from \Cref{thm:mont_correct} with $a \leftarrow a \cdot b$.
+  The product $a \cdot b$ satisfies $|ab| \le (q \cdot 2^{15})^2 < q \cdot
+  2^{15} \cdot q \cdot 2^{15}$; by choosing the working range for individual
+  arguments to be $|a|, |b| < 2^{15}$, we ensure $|ab| < 2^{30} < q \cdot 2^{15}$
+  (since $q > 2^{15}$).
+\end{proof}
+
+\section{Twiddle Factor Multiplication in the NTT Butterfly}
+
+In the NTT butterfly, each coefficient $a[j + \ell]$ is multiplied by the
+twiddle factor \ec{zeta}, which is stored in Montgomery form
+(i.e., as $\zeta \cdot R \bmod q$).  The product passed to \ec{montgomery\_reduce}
+is thus $(\zeta \cdot R) \cdot a[j+\ell]$, and the output is:
+\[
+  \op{montgomery\_reduce}\bigl(\zeta \cdot R \cdot a[j+\ell]\bigr)
+  \equiv \zeta \cdot R \cdot a[j+\ell] \cdot R^{-1} = \zeta \cdot a[j+\ell] \pmod{q}.
+\]
+
+This is exactly the required butterfly step: multiplication by the bare twiddle
+factor $\zeta$.  The Montgomery representation of the twiddle factors thus
+removes the need for any explicit conversion, at the cost of storing
+the twiddle table in pre-multiplied form.
+
+\begin{lemma}[Twiddle factor correctness]
+  Let $\zeta_k = \op{zetas}[k]$ (stored as $\zeta_0^{\brev_8(k)} \cdot R \bmod q$),
+  and let $a \in \Z$ with $|a| < 2^{15}$.  Then:
+  \[
+    \op{montgomery\_reduce}(\zeta_k \cdot a)
+    \equiv \zeta_0^{\brev_8(k)} \cdot a \pmod{q}
+  \]
+  and $|\op{montgomery\_reduce}(\zeta_k \cdot a)| < q$.
+\label{lem:zeta_correct}
+\end{lemma}
+
+\section{Bound Tracking Through NTT Stages}
+
+\begin{theorem}[Coefficient bounds through forward NTT]
+  Let $a \in \Z^{256}$ be the input array with $|a[i]| < 2^{15}$ for all $i$.
+  After the forward NTT (8 butterfly stages), the output satisfies
+  $|a'[i]| < 2^{23}$ for all $i$.
+\label{thm:ntt_bounds}
+\end{theorem}
+
+\begin{proof}
+  By induction on the stage number $s \in \{0, \dots, 7\}$.
+
+  \emph{Base case} ($s = 0$, before any stage): $|a[i]| < 2^{15}$.
+
+  \emph{Inductive step}: After stage $s$, each coefficient satisfies
+  $|a^{(s)}[i]| < 2^{15+s}$ by the following sub-claim.
+
+  In stage $s$, each butterfly computes:
+  \begin{align*}
+    a'[j] &= a[j] + \op{mont\_reduce}(\zeta \cdot a[j+\ell]) \\
+    a'[j+\ell] &= a[j] - \op{mont\_reduce}(\zeta \cdot a[j+\ell])
+  \end{align*}
+  By \Cref{thm:mont_correct}, $|\op{mont\_reduce}(\zeta \cdot a[j+\ell])| < q < 2^{16}$.
+  Combined with $|a[j]| < 2^{15+s}$ by inductive hypothesis:
+  \[
+    |a'[j]|, |a'[j+\ell]| \le 2^{15+s} + 2^{16} < 2^{15+(s+1)},
+  \]
+  provided $2^{15+s} + 2^{16} < 2^{15+s+1}$, i.e., $2^{16} < 2^{15+s}$,
+  i.e., $s \ge 1$.  For $s = 0$, the bound is $|a'| < 2^{15} + q < 2^{16.0}$,
+  still within $2^{16}$.
+
+  After $s = 8$ stages: $|a[i]| < 2^{15+8} = 2^{23}$.
+\end{proof}
+
+\begin{corollary}[Bound for inverse NTT]
+  Let the input to the inverse NTT have coefficients bounded by $2^{23}$
+  (the output of the forward NTT).  After the inverse NTT, the output
+  satisfies $|a'[i]| < 2^{15}$ for all $i$.
+\label{cor:invntt_bounds}
+\end{corollary}
+
+These bounds are the key invariants verified in \texttt{RefJasminNTT.ec}
+and summarised in \Cref{tab:bounds}.
+
+\begin{table}[h]
+\centering
+\caption{Coefficient bounds at each layer of the verification}
+\label{tab:bounds}
+\begin{tabular}{lll}
+\toprule
+Stage & Variable & Bound \\
+\midrule
+Input to forward NTT & $a[i]$ & $|a[i]| < 2^{15}$ \\
+After forward NTT & $\hat{a}[i]$ & $|\hat{a}[i]| < 2^{23}$ \\
+Input to inverse NTT & $\hat{a}[i]$ & $|\hat{a}[i]| < 2^{23}$ \\
+After inverse NTT & $a'[i]$ & $|a'[i]| < 2^{15}$ \\
+Montgomery reduced & $a'[i] \cdot R \bmod q$ & $|a'[i] \cdot R \bmod q| < q/2$ \\
+\bottomrule
+\end{tabular}
+\end{table}

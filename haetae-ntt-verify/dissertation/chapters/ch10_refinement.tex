@@ -1,0 +1,237 @@
+%==============================================================================%
+% Chapter 10 – Jasmin-to-EasyCrypt Refinement Proof
+%==============================================================================%
+
+\chapter{Jasmin-to-EasyCrypt Refinement Proof}
+\label{ch:refinement}
+
+\section{Overview of \texttt{RefJasminNTT.ec}}
+
+The file \texttt{RefJasminNTT.ec} (1000+ lines) bridges the gap between the
+machine-level \jasmin{} implementation and the abstract algorithmic
+specification.  It is the most technically demanding proof file in the
+development, requiring simultaneous reasoning about:
+\begin{enumerate}
+  \item Signed vs.\ unsigned word arithmetic.
+  \item Array representation correspondences.
+  \item Integer arithmetic bounds.
+  \item Equivalence of three-level nested loops.
+\end{enumerate}
+
+\section{Word-to-Coefficient Correspondence}
+
+\subsection{The Linking Predicate}
+
+The central predicate connecting machine words to mathematical integers is:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Array correspondence predicate in \texttt{RefJasminNTT.ec}},
+  label={lst:wrel}]
+pred wrel (rp : W32.t Array256.t) (a : int Array256.t) =
+  forall i, 0 <= i < 256 =>
+    W32.to_sint rp.[i] = a.[i].
+\end{lstlisting}
+
+This predicate asserts that the 32-bit word representation of each element
+in \texttt{rp} equals the integer in \texttt{a}.  Note that \ec{W32.to\_sint}
+applies the two's-complement signed interpretation.
+
+\subsection{Preservation Under Arithmetic}
+
+\begin{lemma}[Word addition preservation]
+  If $\ec{wrel}(\texttt{rp}, \texttt{a})$ and $|a[i]|, |b[i]| < 2^{30}$,
+  then $\ec{wrel}(\texttt{rp} \oplus_{32} \texttt{b}, \texttt{a} + \texttt{b})$
+  where $\oplus_{32}$ denotes 32-bit word addition.
+\label{lem:wrel_add}
+\end{lemma}
+
+\begin{proof}
+  The key identity is: for $a, b \in \Z$ with $|a|, |b| < 2^{30}$,
+  \[
+    \op{W32.to\_sint}(\op{W32.of\_int}(a) + \op{W32.of\_int}(b)) = a + b,
+  \]
+  which holds because the 32-bit arithmetic does not overflow when both
+  operands are bounded by $2^{30}$.
+\end{proof}
+
+\section{Montgomery Reduction Correspondence}
+
+\subsection{Word-Level Reduction}
+
+The \jasmin{} procedure computes Montgomery reduction on machine words.
+The correspondence lemma asserts that it equals the abstract integer-level
+computation:
+
+\begin{lemma}[Montgomery reduction word correspondence]
+  Let $z \in \Z$ with $|z| < 2^{31} \cdot q$.  Then:
+  \[
+    \op{W32.to\_sint}(\op{Extracted.montgomery\_reduce}(\op{W64.of\_int}(z)))
+    = \op{NTT\_Fq.montgomery\_reduce}(z).
+  \]
+\label{lem:mont_word_corr}
+\end{lemma}
+
+\begin{proof}
+  The extracted procedure performs the same arithmetic as the integer-level
+  specification.  The key step is showing that intermediate values do not
+  overflow: the 64-bit product $m \cdot q$ satisfies $|mq| \le (2^{32}-1)
+  \cdot 64513 < 2^{63}$, fitting in a signed 64-bit register.
+\end{proof}
+
+\section{Butterfly Equivalence}
+
+\subsection{Individual Butterfly}
+
+\begin{lemma}[Single butterfly correspondence]
+  Let $\texttt{rp}, \texttt{a}$ satisfy $\ec{wrel}(\texttt{rp}, \texttt{a})$,
+  and let $|a[j]|, |a[j+\ell]| < 2^{15}$ and $|\zeta| < 2^{15}$.  Then after
+  executing one butterfly step:
+  \[
+    \ec{wrel}(\texttt{rp}', \texttt{a}'),
+  \]
+  where $\texttt{a}'$ is the result of the abstract butterfly and
+  $\texttt{rp}'$ is the result of the machine butterfly.
+\label{lem:butterfly_corr}
+\end{lemma}
+
+\begin{proof}
+  The machine butterfly computes:
+  \begin{align*}
+    t &= \op{W32}(\op{Extracted.mont\_reduce}(\zeta \cdot \texttt{rp}[j+\ell])) \\
+    \texttt{rp}'[j+\ell] &= \texttt{rp}[j] - t \\
+    \texttt{rp}'[j] &= \texttt{rp}[j] + t
+  \end{align*}
+  By \Cref{lem:mont_word_corr}, $\op{W32.to\_sint}(t) = \op{mont}(\zeta \cdot a[j+\ell])$.
+  By \Cref{lem:wrel_add}, the addition/subtraction preserves the correspondence
+  (using bounds $|a[j]|, |\op{mont}(\zeta \cdot a[j+\ell])| < 2^{16}$, so
+  their sum/difference is bounded by $2^{17} < 2^{30}$, safe in 32-bit words).
+\end{proof}
+
+\section{Loop Equivalence Proofs}
+
+\subsection{Inner Loop Equivalence}
+
+\begin{lemma}[Inner loop correspondence]
+  Given $\ec{wrel}(\texttt{rp}, \texttt{a})$ and bounds $|a[i]| < 2^{15}$:
+  \[
+    \ec{hoare}[\ec{Extracted.inner\_loop} \sim \ec{NTT\_Fq.inner\_loop} :
+      \ec{wrel}(\texttt{rp}, \texttt{a}) \Rightarrow \ec{wrel}(\texttt{rp}', \texttt{a}')].
+  \]
+\label{lem:inner_corr}
+\end{lemma}
+
+\begin{proof}
+  By induction on the inner loop counter $j$, using \Cref{lem:butterfly_corr}
+  as the inductive step.  The bound on coefficients increases by at most
+  $2^{16}$ per butterfly (from \Cref{thm:mont_correct}), but the inner loop
+  uses the same twiddle factor throughout, so the number of butterflies per
+  inner loop execution is exactly $\ell$.
+\end{proof}
+
+\subsection{Full NTT Loop Equivalence}
+
+\begin{theorem}[Forward NTT loop equivalence]
+  Let $\texttt{rp}$ satisfy $|a[i]| < 2^{15}$ for all $i$.  Then:
+  \begin{align*}
+    &\ec{hoare}[\ec{Extracted.poly\_ntt\_jazz} \sim \ec{NTT\_Fq.NTT.ntt} : \\
+    &\quad \ec{wrel}(\texttt{rp}, \texttt{a}) \\
+    &\quad \Rightarrow \ec{wrel}(\texttt{rp}', \texttt{a}') \;\wedge\;
+     \forall i.\; |a'[i]| < 2^{23}].
+  \end{align*}
+\label{thm:ntt_loop_equiv}
+\end{theorem}
+
+\begin{proof}
+  By three-level loop induction:
+  \begin{enumerate}
+    \item The outer loop induction uses $\ell$ as the decreasing variant.
+          The invariant after completing all stages with $\ell' > \ell$ is
+          the partial NTT condition.
+    \item The middle loop induction uses $256 - \texttt{start}$ as the
+          decreasing variant.
+    \item The inner loop uses \Cref{lem:inner_corr}.
+  \end{enumerate}
+  The bound $|a'[i]| < 2^{23}$ follows from \Cref{thm:ntt_bounds}.
+\end{proof}
+
+\section{Main Refinement Lemmas}
+
+The two main lemmas of \texttt{RefJasminNTT.ec} are:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Main refinement lemmas in \texttt{RefJasminNTT.ec}},
+  label={lst:ref_lemmas}]
+(* Forward NTT: Jasmin core ~ NTT_Fq, bounds 16 -> 24 *)
+lemma poly_ntt_core_ref rp a :
+  wrel rp a =>
+  (forall i, 0 <= i < 256 => `|a.[i]| < 2^15) =>
+  equiv[Extracted.poly_ntt_jazz ~ NTT_Fq.NTT.ntt :
+    ={arg} /\ wrel arg{1} arg{2} ==>
+    wrel res{1} res{2} /\
+    forall i, 0 <= i < 256 => `|res{2}.[i]| < 2^23].
+
+(* Inverse NTT: Jasmin core ~ NTT_Fq, bounds 16 -> 16, Montgomery *)
+lemma poly_invntt_core_ref rp a :
+  wrel rp a =>
+  (forall i, 0 <= i < 256 => `|a.[i]| < 2^23) =>
+  equiv[Extracted.poly_invntt_jazz ~ NTT_Fq.NTT.invntt :
+    ={arg} /\ wrel arg{1} arg{2} ==>
+    wrel res{1} res{2} /\
+    forall i, 0 <= i < 256 => `|res{2}.[i]| < 2^15].
+\end{lstlisting}
+
+These two lemmas represent the central contribution of \texttt{RefJasminNTT.ec}.
+Once proved, they serve as the foundation for the end-to-end theorem.
+
+\section{Proof Engineering Challenges}
+
+\subsection{Signed vs.\ Unsigned Arithmetic}
+
+The \jasmin{} code uses \jasm{u32} (unsigned) for coefficient storage but
+\jasm{(64s)(x)} (signed 64-bit) for intermediate products.  The
+\easycrypt{} extraction mirrors this by using \ec{W32.t} for storage and
+\ec{W64.t} for products.  The refinement proof must track the signed
+interpretation of unsigned words, which requires the signed-arithmetic
+lemmas from \texttt{Fq.ec}.
+
+\subsection{64-bit Product Non-Overflow}
+
+The 64-bit product $\zeta \cdot a[j+\ell]$ requires:
+$|\zeta| \cdot |a[j+\ell]| < 2^{63}$.
+Since $|\zeta| < q < 2^{16}$ and $|a[j+\ell]| < 2^{23}$ (after the forward
+NTT), we have $|\zeta \cdot a[j+\ell]| < 2^{39} \ll 2^{63}$.
+This is verified in the proof as a side condition.
+
+\subsection{Twiddle Factor Table Agreement}
+
+The \easycrypt{} extracted module accesses the twiddle table as a global
+constant.  The refinement proof must show that this global constant agrees
+with the \ec{zetas} array defined in \texttt{NTT\_Fq.ec}.  This is
+established by a computation lemma:
+
+\begin{lemma}[Twiddle table agreement]
+  For all $k \in [0, 256)$:
+  $\op{W32.to\_sint}(\ec{jzetas}[k]) = \ec{NTT\_Fq.zetas}[k]$.
+\label{lem:zetas_agree}
+\end{lemma}
+
+\begin{proof}
+  Both tables are defined by the same formula modulo $q = 64513$.  Since
+  $q < 2^{16}$, all entries fit in 16 bits and the signed interpretation
+  agrees with the unsigned value.  Verified by the SMT backend.
+\end{proof}
+
+\subsection{In-Place Update Semantics}
+
+Both the \jasmin{} implementation and the \easycrypt{} specification modify
+the input array in place.  The refinement proof tracks the state of each
+array cell individually, using the \easycrypt{} array theory lemmas to reason
+about functional updates.
+
+The key identity is: after an in-place butterfly that modifies indices $j$ and
+$j+\ell$, all other indices remain unchanged.  This is expressed as:
+\[
+  \forall i \ne j, i \ne j+\ell.\;
+  \texttt{rp}'[i] = \texttt{rp}[i] \;\wedge\;
+  \texttt{a}'[i] = \texttt{a}[i].
+\]

@@ -1,0 +1,119 @@
+\chapter{Random Oracle Programming: Paper Proof and Code Analysis}
+\label{ch:rom-programming}
+
+\section{Lazy ROM State}
+
+The random oracle is modeled by a finite map and query log.  On a new query it
+samples and records an answer; on a repeated query it returns the stored answer.
+This lazy representation allows the proof to state exactly what the adversary
+has queried and exactly when programming is safe.
+
+Formally, the lazy ROM invariant says that the table \(T\) is a partial
+realization of an ideal function.  If \(x\notin\operatorname{dom}(T)\), then the
+conditional law of \(H(x)\), given the current transcript, is still the declared
+output law \(D_x\).  If \(x\in\operatorname{dom}(T)\), then consistency requires
+all future calls on \(x\) to return the stored value.  Thus the table domain is
+the mathematical object that separates fresh randomness from already observed
+randomness.
+
+For HAETAE, the input space is not a single untyped string space in the proof.
+The EasyCrypt model uses typed constructors for message hashing, challenge
+hashing, matrix expansion, and sampler expansion.  This typed interface is a
+formal domain-separation discipline.  It prevents a proof about one oracle site
+from accidentally applying to another site with a different mathematical role.
+
+\section{Pen-and-Paper Programming Lemma}
+
+\begin{lemma}[ROM programming at a fresh point]
+Let \(H\) be a random oracle and let \(x\) be a point sampled independently of
+an adversary's prior query set \(Q\).  If \(|Q|\le q_H\) and \(x\) has support
+min-entropy at least \(\log_2 N\) against the adversary's view, equivalently
+every point has conditional probability at most \(1/N\), then
+\[
+\Pr[x\in Q] \le \frac{q_H}{N}.
+\]
+Conditioned on \(x\notin Q\), assigning a value to \(H(x)\) changes no
+adversary-visible answer to any previous query.  If the assigned value is sampled
+from the same conditional output law \(D_x\), independently of the prior view,
+then the future lazy-oracle interface has the same distribution as ordinary lazy
+sampling at \(x\).  If instead the simulator assigns a fixed or otherwise
+biased value, freshness alone gives only the previous-answer preservation fact;
+the distributional effect of future queries to \(x\) must be justified by the
+reduction or accounted for as a separate game-hop condition.
+\end{lemma}
+
+\begin{proof}
+For any fixed query set \(Q\), the union bound gives
+\(\Pr[x\in Q]\le \sum_{u\in Q}\Pr[x=u]\).  If every point has probability at
+most \(1/N\), this is at most \(|Q|/N\le q_H/N\).  If \(x\notin Q\), the lazy
+random oracle has not assigned a value to \(x\).  Assigning a value at \(x\)
+therefore leaves the map entries for all previous queries unchanged.  When the
+assigned value has law \(D_x\), the programmed table is distributed exactly as if
+the lazy oracle had sampled \(H(x)\) on its first future query.  Without that
+same-law condition, the lemma should be used only as a preservation statement for
+the already observed oracle answers.
+\end{proof}
+
+\section{Programming Sites}
+
+A programming site is the oracle input where the simulator wants to control the
+challenge.  The file \code{HAETAE\_ROM\_Programming.ec} proves that honest
+signing produces programming sites with the necessary structural and freshness
+properties.  Lemmas such as
+\code{programming\_site\_self\_no\_reprogramming\_failure} and
+\code{honest\_signing\_programming\_site\_query\_spread\_bound} capture the
+core obligations.
+
+The relevant mathematical object is a random variable \(X_{\mathsf{prog}}\)
+whose value is the site to be programmed.  The proof must establish three facts:
+the site equation identifying \(X_{\mathsf{prog}}\) with the query produced by
+the signing or challenge construction, the freshness or spread bound against the
+adversary's log, and the preservation statement saying that programming
+\(X_{\mathsf{prog}}\) changes no previously visible oracle answer.  Missing any
+one of these facts invalidates the programming step.
+
+\section{Detailed EasyCrypt Code Analysis}
+
+\code{HAETAE\_ROM\_Programming.ec} separates four concerns that are often merged
+in paper proofs.
+
+First, the counted lazy ROM lemmas, such as
+\code{counted\_lazy\_rom\_init\_clears} and
+\code{counted\_lazy\_rom\_get\_preserves\_clear}, establish basic state
+invariants.  These lemmas say that initialization clears logs and that ordinary
+queries do not accidentally set programming-failure flags.
+
+Second, programming-site lemmas characterize the exact query that honest
+signing will need.  For example,
+\code{honest\_signing\_programming\_site\_queryE} is an equation-style lemma:
+it identifies the formal query produced by the signing algorithm.  Without such
+lemmas, later freshness statements would refer to a site whose connection to
+signing is only informal.
+
+Third, spread and budget lemmas translate entropy into probability bounds.
+\code{honest\_signing\_programming\_site\_query\_spread\_bound} is the
+machine-checked counterpart of the paper inequality \(\Pr[x\in Q]\le q_H/N\).
+The EasyCrypt proof must explicitly name the distribution, support, and query
+log.
+
+Fourth, bad-event lemmas connect the local ROM facts to game-level losses.
+Lemmas such as
+\code{programmed\_site\_prequery\_one\_step\_challenge\_concrete\_bound} and
+\code{programmed\_site\_prequery\_one\_step\_message\_hash\_counter\_bound}
+are the concrete interface consumed by the hop games.
+
+\section{Bad Events and Fundamental Lemma Use}
+
+The proof makes bad events explicit.  Prequery events, reprogramming conflicts,
+and entropy failures are represented by predicates or flags.  Fundamental-lemma
+arguments then bound the difference between games by the probability of these
+bad events.  In the EasyCrypt code, this means proving both a relational
+similarity condition before the bad event and a probability bound for setting
+that event.
+
+This is the point where informal proofs most often hide work.  A statement such
+as ``the adversary did not query this point except with probability \(q_H/N\)''
+contains an independence claim, a support-size claim, a query-budget claim, and
+a union-bound argument.  The checked development separates these into concrete
+lemmas so that the final ROM loss is not a heuristic estimate but the result of
+named program invariants and probability judgments.

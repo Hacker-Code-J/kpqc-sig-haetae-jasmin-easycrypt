@@ -1,0 +1,201 @@
+%==============================================================================%
+% PhD Dissertation: Formal Verification of the Number-Theoretic Transform
+%                   in the HAETAE Signature Scheme
+% Author: [Author Name]
+% Institution: [Institution Name]
+% Year: 2026
+%==============================================================================%
+
+\documentclass[12pt, a4paper, twoside, openright]{book}
+
+%--- Encoding & Fonts ---------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+%--- Mathematics --------------------------------------------------------------
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{stmaryrd}   % \llbracket, \rrbracket
+
+%--- Layout & Typography ------------------------------------------------------
+\usepackage[top=3cm, bottom=3cm, left=3.5cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{emptypage}
+\usepackage{fancyhdr}
+
+%--- Colors (must come before hyperref) ---------------------------------------
+\usepackage[dvipsnames, table]{xcolor}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{keyword}{RGB}{0,0,180}
+\definecolor{comment}{RGB}{60,120,60}
+\definecolor{string}{RGB}{160,0,0}
+\definecolor{number}{RGB}{100,60,0}
+
+%--- References & Hyperlinks --------------------------------------------------
+\usepackage[backend=bibtex, style=alphabetic, sorting=anyt, maxnames=4]{biblatex}
+\addbibresource{bibliography/refs.bib}
+\usepackage[colorlinks=true,
+            linkcolor=NavyBlue,
+            citecolor=OliveGreen,
+            urlcolor=BrickRed]{hyperref}
+\usepackage{cleveref}
+
+%--- Listings & Code ----------------------------------------------------------
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%--- Graphics & Tables --------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{
+  arrows.meta, positioning, shapes.geometric, shapes.multipart,
+  fit, calc, matrix, backgrounds, patterns,
+  decorations.pathreplacing, decorations.markings,
+  shadows.blur,
+}
+\usepackage{ifthen}
+
+%--- Theorem Environments -----------------------------------------------------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{notation}[theorem]{Notation}
+
+%--- Code Style ---------------------------------------------------------------
+\lstdefinelanguage{EasyCrypt}{
+  keywords={require, import, theory, end, op, type, abbrev, lemma, proof,
+            done, qed, by, forall, exists, fun, if, then, else, match, with,
+            let, in, return, proc, while, do, module, abstract, clone, as,
+            include, export, local, global, print, axiom, hint, rewrite,
+            apply, exact, split, left, right, intro, move, have, case,
+            elim, congr, ring, field, smt, auto, trivial, assumption},
+  morecomment=[l]{(*},
+  morecomment=[s]{(*}{*)},
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstdefinelanguage{Jasmin}{
+  keywords={fn, export, inline, reg, stack, ptr, u8, u16, u32, u64, u128,
+            u256, bool, int, return, if, else, while, for, to, downto,
+            param, global, mut},
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\color{comment}\itshape,
+  stringstyle=\color{string},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  framesep=4pt,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=15pt,
+  xrightmargin=5pt,
+}
+
+%--- Custom Commands ----------------------------------------------------------
+\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
+\newcommand{\Zq}{\ensuremath{\mathbb{Z}_q}}
+\newcommand{\Rq}{\ensuremath{\mathbb{Z}_q[X]/(X^{256}+1)}}
+\newcommand{\F}{\ensuremath{\mathbb{F}}}
+\newcommand{\Fq}{\ensuremath{\mathbb{F}_q}}
+\newcommand{\NTT}{\ensuremath{\mathsf{NTT}}}
+\newcommand{\INTT}{\ensuremath{\mathsf{INTT}}}
+\newcommand{\brev}{\ensuremath{\mathsf{brev}}}
+\newcommand{\mont}{\ensuremath{\mathsf{mont}}}
+\newcommand{\MONT}{\ensuremath{\mathsf{MONT}}}
+\newcommand{\qinv}{\ensuremath{\mathsf{QINV}}}
+\newcommand{\haetae}{\textsc{Haetae}}
+\newcommand{\jasmin}{\textsf{Jasmin}}
+\newcommand{\easycrypt}{\textsf{EasyCrypt}}
+\newcommand{\ec}[1]{\texttt{#1}}
+\newcommand{\jasm}[1]{\texttt{#1}}
+\newcommand{\op}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\abs}[1]{\ensuremath{\left|#1\right|}}
+\newcommand{\norm}[1]{\ensuremath{\left\|#1\right\|}}
+\newcommand{\floor}[1]{\ensuremath{\left\lfloor #1 \right\rfloor}}
+\newcommand{\ceil}[1]{\ensuremath{\left\lceil #1 \right\rceil}}
+\newcommand{\modulo}{\ensuremath{\mathbin{\%}}}
+\newcommand{\pRHL}{\texorpdfstring{\ensuremath{\mathsf{pRHL}}}{pRHL}}
+\newcommand{\HL}{\texorpdfstring{\ensuremath{\mathsf{HL}}}{HL}}
+
+%--- Header / Footer ----------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\itshape\leftmark}
+\fancyhead[RO]{\small\itshape\rightmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%==============================================================================%
+\begin{document}
+%==============================================================================%
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+
+\frontmatter
+\include{chapters/titlepage}
+\include{chapters/abstract}
+\include{chapters/acknowledgements}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+
+\mainmatter
+\include{chapters/ch01_introduction}
+\include{chapters/ch02_background}
+\include{chapters/ch03_haetae_ntt}
+\include{chapters/ch04_formal_framework}
+\include{chapters/ch05_field_ring}
+\include{chapters/ch06_montgomery}
+\include{chapters/ch07_ntt_spec}
+\include{chapters/ch08_algebra}
+\include{chapters/ch09_jasmin_impl}
+\include{chapters/ch10_refinement}
+\include{chapters/ch11_end_to_end}
+\include{chapters/ch12_conclusion}
+
+%--- Appendix: TikZ Figure Gallery -------------------------------------------
+\appendix
+\chapter{Visualisation Gallery}
+\label{app:figures}
+\addcontentsline{toc}{chapter}{Appendix: Visualisation Gallery}
+
+The following ten figures are provided as standalone reference visualisations
+to support the narrative in the main chapters.  Each figure is also
+reproduced inline at the point where it is first referenced.
+
+\input{chapters/tikz_figures}
+
+\backmatter
+\printbibliography[heading=bibintoc, title={Bibliography}]
+
+\end{document}

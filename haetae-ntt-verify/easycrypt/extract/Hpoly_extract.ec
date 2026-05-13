@@ -336,3 +336,21 @@ module M = {
     return rp;
   }
 }.
+
+lemma poly_ntt_jazz_wrapper :
+  equiv [M.poly_ntt_jazz ~ M._poly_ntt :
+    ={rp} ==> ={res}].
+proof.
+proc.
+inline*.
+sim.
+qed.
+
+lemma poly_invntt_jazz_wrapper :
+  equiv [M.poly_invntt_jazz ~ M._poly_invntt :
+    ={rp} ==> ={res}].
+proof.
+proc.
+inline*.
+sim.
+qed.

@@ -1,7 +1,9 @@
 require import AllCore List IntDiv Ring StdOrder BitEncoding.
+from Jasmin require import JWord.
 require import Array256.
 require import Fq Fastexp.
 require import GFq Rq.
+require import BArray1024 Hpoly_extract.
 import Zq IntOrder BitReverse.
 
 theory NTT_Fq.
@@ -103,16 +105,217 @@ module NTT = {
 
 (* -------------------------------------------------------------------- *)
 (* Losslessness of NTT procedures                                        *)
+(* Each nested while loop terminates via a strictly-decreasing non-neg   *)
+(* integer variant.  No probabilistic choices exist so losslessness is   *)
+(* equivalent to termination.                                            *)
 (* -------------------------------------------------------------------- *)
 
-lemma ntt_spec_ll : islossless NTT.ntt.
+lemma ntt_middle_right start len j0 :
+  0 < len =>
+  ! j0 < start + len =>
+  256 - (j0 + len) < 256 - start.
 proof.
-admit.
+  move=> hlen0 hj0.
+  have hle : start + len <= j0 by rewrite -lezNgt in hj0.
+  rewrite ltr_subr_addr.
+  have -> : 256 - (j0 + len) + start = start - (j0 + len) + 256 by ring.
+  have -> : 256 = 0 + 256 by ring.
+  rewrite ltr_add2r ltr_subl_addr add0r.
+  have hsj0 : start <= j0.
+  + apply (lez_trans _ _ _ _ hle).
+    rewrite lez_addl.
+    apply ltrW.
+    exact hlen0.
+  have hj0len : j0 < j0 + len.
+  + rewrite ltz_addl.
+    exact hlen0.
+  exact (ler_lt_trans _ _ _ hsj0 hj0len).
 qed.
 
+lemma inv_middle_right start len j0 :
+  0 < len =>
+  ! j0 < start + len =>
+  256 - (j0 + len) < 256 - start.
+proof.
+  move=> hlen0 hj0.
+  have hle : start + len <= j0 by rewrite -lezNgt in hj0.
+  rewrite ltr_subr_addr.
+  have -> : 256 - (j0 + len) + start = start - (j0 + len) + 256 by ring.
+  have -> : 256 = 0 + 256 by ring.
+  rewrite ltr_add2r ltr_subl_addr add0r.
+  have hsj0 : start <= j0.
+  + apply (lez_trans _ _ _ _ hle).
+    rewrite lez_addl.
+    apply ltrW.
+    exact hlen0.
+  have hj0len : j0 < j0 + len.
+  + rewrite ltz_addl.
+    exact hlen0.
+  exact (ler_lt_trans _ _ _ hsj0 hj0len).
+qed.
+
+lemma inv_outer_progress len :
+  0 < len =>
+  len < 256 =>
+  forall start0,
+    (256 - start0 <= 0 => ! start0 < 256) /\
+    (! start0 < 256 => 0 < len * 2 /\ 256 - len * 2 < 256 - len).
+proof.
+move=> hlen hlt256 start0; split.
++ move=> h.
+  rewrite -lezNgt.
+  move: h.
+  rewrite ler_subl_addr add0r.
+  trivial.
+move=> _.
+split.
++ have -> : len * 2 = len + len by ring.
+  have -> : 0 = 0 + 0 by ring.
+  exact (ltr_add _ _ _ _ hlen hlen).
+have -> : 256 - len * 2 = 256 - (len + len) by ring.
+have -> : 256 - len = (256 - (len + len)) + len by ring.
+rewrite ltr_addl.
+exact hlen.
+qed.
+
+lemma ntt_init_progress len0 :
+  (len0 <= 0 => ! 1 <= len0) /\ true.
+proof.
+  split.
+  + move=> h.
+    apply/negP.
+    move=> h1.
+    have h10 : 1 <= 0 by exact (lez_trans _ _ _ h1 h).
+    trivial.
+  + trivial.
+qed.
+
+(* Forward NTT:
+   outer:  len starts at 128, halved each step  → variant = len
+   middle: start advances by 2*len              → variant = 256 - start
+   inner:  j increments by 1                   → variant = start + len - j  *)
+lemma ntt_spec_ll : islossless NTT.ntt.
+proof.
+proc.
+wp.
+while (true) len.
++ move=> z.
+  wp.
+  while (0 < len) (256 - start).
+  + move=> z'.
+    wp.
+    while (0 < len) (start + len - j).
+    + move=> z''.
+      wp.
+      skip => &hr [[hlen hj] hz] /=.
+      split; first exact hlen.
+      rewrite -hz.
+      have -> : start{hr} + len{hr} - (j{hr} + 1) = start{hr} + len{hr} - j{hr} - 1 by ring.
+      have -> : start{hr} + len{hr} - j{hr} = (start{hr} + len{hr} - j{hr} - 1) + 1 by ring.
+      rewrite ltz_addl.
+      trivial.
+    wp.
+    skip => &hr [[hlen0 hstart0] hz'] /=.
+    split; first exact hlen0.
+    move=> j0; split.
+    + move=> h.
+      rewrite -lezNgt.
+      move: h.
+      rewrite ler_subl_addr add0r.
+      trivial.
+    move=> hj0.
+    move=> hlen1.
+    split; first exact hlen1.
+    rewrite -hz'.
+    apply (ntt_middle_right start{hr} len{hr} j0); first exact hlen1.
+    exact hj0.
+  auto => />.
+  move=> hz1; split.
+  + have h01 : 0 < 1 by trivial.
+    exact (ltr_le_trans _ _ _ h01 hz1).
+  move=> start0; split.
+  + move=> _ h.
+    rewrite -lezNgt.
+    move: h.
+    rewrite ler_subl_addr add0r.
+    trivial.
+  move=> _ hz0.
+  rewrite ltz_divLR.
+  + trivial.
+  have -> : z * 2 = z + z by ring.
+  rewrite ltz_addl.
+  exact hz0.
+  + wp.
+    skip => &hr /= len0.
+    exact (ntt_init_progress len0).
+qed.
+
+(* Inverse NTT:
+   outer:  len starts at 1, doubled each step, stops when len ≥ 256
+           → variant = 256 - len  (decreases by len each step, len ≥ 1)
+   middle: start advances by 2*len              → variant = 256 - start
+   inner:  j increments by 1                   → variant = start + len - j
+   final:  j increments from 0 to 255          → variant = 256 - j         *)
 lemma invntt_spec_ll : islossless NTT.invntt.
 proof.
-admit.
+proc.
+wp.
+while (true) (256 - j).
++ move=> z.
+  wp.
+  skip => &hr [hj hz] /=.
+  rewrite -hz.
+  have -> : 256 - j{hr} = (256 - (j{hr} + 1)) + 1 by ring.
+  rewrite ltz_addl.
+  trivial.
+wp.
+while (0 < len) (256 - len).
++ move=> z.
+  wp.
+  while (0 < len) (256 - start).
+  + move=> z'.
+    wp.
+    while (0 < len) (start + len - j).
+    + move=> z''.
+      wp.
+      skip => &hr [[hlen hj] hz] /=.
+      split; first exact hlen.
+      rewrite -hz.
+      have -> : start{hr} + len{hr} - (j{hr} + 1) = start{hr} + len{hr} - j{hr} - 1 by ring.
+      have -> : start{hr} + len{hr} - j{hr} = (start{hr} + len{hr} - j{hr} - 1) + 1 by ring.
+      rewrite ltz_addl.
+      trivial.
+    wp.
+    skip => &hr [[hlen0 hstart0] hz'] /=.
+    split; first exact hlen0.
+    move=> j0; split.
+    + move=> h.
+      rewrite -lezNgt.
+      move: h.
+      rewrite ler_subl_addr add0r.
+      trivial.
+    move=> hj0.
+    move=> hlen1.
+    split; first exact hlen1.
+    rewrite -hz'.
+    apply (inv_middle_right start{hr} len{hr} j0); first exact hlen1.
+    exact hj0.
+  auto => />.
+  move=> &hr hlen hlt256.
+  exact (inv_outer_progress len{hr} hlen hlt256).
+wp.
+skip => &hr /=.
+move=> len0; split.
++ move=> _ h.
+  rewrite -lezNgt.
+  move: h.
+  rewrite ler_subl_addr add0r.
+  trivial.
++ move=> _ _ j0 h.
+  rewrite -lezNgt.
+  move: h.
+  rewrite ler_subl_addr add0r.
+  trivial.
 qed.
 
 
@@ -129,6 +332,218 @@ op scale255 = incoeff (-252).
 
 op array256_mont_inv (p : coeff Array256.t) =
   Array256.map (fun x => x * R) p.
+
+op word_to_coeff (w : W32.t) : coeff =
+  incoeff (W32.to_sint w).
+
+op barray256_to_poly (rp : BArray1024.t) : coeff Array256.t =
+  Array256.init (fun i => word_to_coeff (BArray1024.get32 rp i)).
+
+op poly_repr (rp : BArray1024.t) (p : coeff Array256.t) : bool =
+  barray256_to_poly rp = p.
+
+op barray256_bound (rp : BArray1024.t) (sz : int) : bool =
+  forall i, i \in range 0 256 => Fq.bw32 (BArray1024.get32 rp i) sz.
+
+op poly_repr_bound (rp : BArray1024.t) (p : coeff Array256.t) (sz : int) : bool =
+  poly_repr rp p /\ barray256_bound rp sz.
+
+lemma bw32_weaken (w : W32.t) sz1 sz2 :
+  0 <= sz1 <= sz2 =>
+  Fq.bw32 w sz1 =>
+  Fq.bw32 w sz2.
+proof.
+rewrite /Fq.bw32.
+move=> [hsz10 hsz12] [hlo hhi].
+have hpow : 2^sz1 <= 2^sz2.
++ by smt(StdOrder.IntOrder.ler_weexpn2l).
+by smt().
+qed.
+
+lemma barray256_bound_weaken rp sz1 sz2 :
+  0 <= sz1 <= sz2 =>
+  barray256_bound rp sz1 =>
+  barray256_bound rp sz2.
+proof.
+move=> hsz hbound i hi.
+exact (bw32_weaken (BArray1024.get32 rp i) sz1 sz2 hsz (hbound i hi)).
+qed.
+
+lemma poly_repr_bound_repr rp p sz :
+  poly_repr_bound rp p sz =>
+  poly_repr rp p.
+proof. by move=> [h _]. qed.
+
+lemma poly_repr_bound_bound rp p sz :
+  poly_repr_bound rp p sz =>
+  barray256_bound rp sz.
+proof. by move=> [_ h]. qed.
+
+lemma barray256_to_polyE rp i :
+  i \in range 0 256 =>
+  (barray256_to_poly rp).[i] = word_to_coeff (BArray1024.get32 rp i).
+proof.
+move=> /mem_range hi.
+by rewrite /barray256_to_poly initiE.
+qed.
+
+lemma poly_repr_get rp p i :
+  poly_repr rp p =>
+  i \in range 0 256 =>
+  p.[i] = word_to_coeff (BArray1024.get32 rp i).
+proof.
+move=> h hi.
+rewrite -h.
+by rewrite barray256_to_polyE.
+qed.
+
+lemma poly_repr_bound_get rp p sz i :
+  poly_repr_bound rp p sz =>
+  i \in range 0 256 =>
+  p.[i] = word_to_coeff (BArray1024.get32 rp i) /\
+  Fq.bw32 (BArray1024.get32 rp i) sz.
+proof.
+move=> [hrepr hbound] hi.
+split.
++ exact (poly_repr_get rp p i hrepr hi).
+exact (hbound i hi).
+qed.
+
+lemma barray256_to_poly_set32E rp i w j :
+  0 <= i < 256 =>
+  j \in range 0 256 =>
+  (barray256_to_poly (BArray1024.set32 rp i w)).[j] =
+    if j = i then word_to_coeff w else (barray256_to_poly rp).[j].
+proof.
+move=> [hi0 hi256] /mem_range hj.
+have hleft :
+  (barray256_to_poly (BArray1024.set32 rp i w)).[j] =
+  word_to_coeff (BArray1024.get32 (BArray1024.set32 rp i w) j).
++ by rewrite barray256_to_polyE 1:/#.
+have hright :
+  (barray256_to_poly rp).[j] = word_to_coeff (BArray1024.get32 rp j).
++ by rewrite barray256_to_polyE 1:/#.
+have hset : 4 * (i + 1) <= 1024 by smt().
+have hget :
+  word_to_coeff (BArray1024.get32 (BArray1024.set32 rp i w) j) =
+  word_to_coeff (if i = j then w else BArray1024.get32 rp j).
++ change (word_to_coeff (BArray1024.get32d (BArray1024.set32d rp (4 * i) w) (4 * j)) =
+           word_to_coeff (if i = j then w else BArray1024.get32d rp (4 * j))).
+   by rewrite BArray1024.get_set32E 1:/# 1:/#.
+rewrite hleft hright hget.
+case: (i = j) => [->|neqij].
++ by smt().
+by smt().
+qed.
+
+lemma poly_repr_set32 rp p i w :
+  poly_repr rp p =>
+  0 <= i < 256 =>
+  poly_repr (BArray1024.set32 rp i w) (p.[i <- word_to_coeff w]).
+proof.
+move=> hrepr hi.
+apply/Array256.ext_eq => j /mem_range hj.
+rewrite barray256_to_poly_set32E 1:/# 1:/#.
+rewrite hrepr Array256.get_set_if /=.
+case: (j = i) => _; by smt().
+qed.
+
+lemma barray256_bound_set32 rp i w sz :
+  barray256_bound rp sz =>
+  0 <= i < 256 =>
+  Fq.bw32 w sz =>
+  barray256_bound (BArray1024.set32 rp i w) sz.
+proof.
+move=> hbound hi hbw j hj.
+have hget :
+  BArray1024.get32 (BArray1024.set32 rp i w) j =
+  if i = j then w else BArray1024.get32 rp j.
++ change (BArray1024.get32d (BArray1024.set32d rp (4 * i) w) (4 * j) =
+          if i = j then w else BArray1024.get32d rp (4 * j)).
+  by rewrite BArray1024.get_set32E 1:/# 1:/#.
+rewrite hget.
+case: (i = j) => hij.
++ exact hbw.
+exact (hbound j hj).
+qed.
+
+lemma poly_repr_bound_set32 rp p i w sz :
+  poly_repr_bound rp p sz =>
+  0 <= i < 256 =>
+  Fq.bw32 w sz =>
+  poly_repr_bound (BArray1024.set32 rp i w)
+    (p.[i <- word_to_coeff w]) sz.
+proof.
+move=> [hrepr hbound] hi hbw.
+split.
++ exact (poly_repr_set32 rp p i w hrepr hi).
+exact (barray256_bound_set32 rp i w sz hbound hi hbw).
+qed.
+
+lemma word_to_coeff_of_int z :
+  W32.min_sint <= z <= W32.max_sint =>
+  word_to_coeff (W32.of_int z) = incoeff z.
+proof.
+move=> hz.
+by rewrite /word_to_coeff W32.to_sintK_small.
+qed.
+
+lemma w32_q_to_sint :
+  W32.to_sint (W32.of_int q) = q.
+proof.
+  by rewrite W32.of_sintK /W32.smod /q /=.
+qed.
+
+lemma w32_negq_to_sint :
+  W32.to_sint (W32.of_int (-q)) = -q.
+proof.
+  by rewrite W32.of_sintK /W32.smod /q /=.
+qed.
+
+lemma word_to_coeff_small z :
+  `|z| < q =>
+  word_to_coeff (W32.of_int z) = incoeff z.
+proof.
+move=> hz.
+have hmin : W32.min_sint <= -q.
++ have hq := W32.to_sint_cmp (W32.of_int (-q)).
+   by rewrite w32_negq_to_sint in hq; case: hq.
+have hmax : q <= W32.max_sint.
++ have hq := W32.to_sint_cmp (W32.of_int q).
+   by rewrite w32_q_to_sint in hq; case: hq.
+apply word_to_coeff_of_int.
+split; smt().
+qed.
+
+lemma incoeff_signed_repr z :
+  `|z| < q =>
+  incoeff z = incoeff (if 0 <= z then z else z + q).
+proof.
+move=> hz.
+rewrite -eq_incoeff /q /=.
+case: (0 <= z) => hz0; smt().
+qed.
+
+lemma word_to_coeff_repr z :
+  `|z| < q =>
+  word_to_coeff (W32.of_int z) = incoeff (if 0 <= z then z else z + q).
+proof.
+move=> hz.
+rewrite word_to_coeff_small 1://.
+by rewrite incoeff_signed_repr.
+qed.
+
+lemma word_to_coeff_neg16505 :
+  word_to_coeff (W32.of_int (-16505)) = incoeff 48008.
+proof.
+by rewrite word_to_coeff_repr /q /=.
+qed.
+
+lemma word_to_coeff_26964 :
+  word_to_coeff (W32.of_int 26964) = incoeff 26964.
+proof.
+by rewrite word_to_coeff_repr /q /=.
+qed.
 
 (* -------------------------------------------------------------------- *)
 (* Mathematical definition of inverse NTT zetas.
@@ -213,9 +628,19 @@ proof.
   by apply/unitE; rewrite -eq_incoeff /q.
 qed.
 
-(* inv(256) mod q, needed for the final scaling proof *)
-lemma exp_zroot_256 : Zq.exp zroot 256 = incoeff (-1).
-proof. admit. qed.
+lemma unit_R :
+  Zq.unit R.
+proof.
+by apply/unitE; rewrite /R /Fq.SignedReductions.R -eq_incoeff /q /=.
+qed.
+
+lemma inv_R :
+  inv R = incoeff 50386.
+proof.
+apply/(ZqRing.mulrI R); first exact unit_R.
+rewrite ZqRing.mulrV; first exact unit_R.
+by rewrite /R /Fq.SignedReductions.R /= -incoeffM /Zq.one -eq_incoeff /q /=.
+qed.
 
 (* These are powers of roots of unity in Mont form and
    bitwise permuted indices.  zetas_inv above needs to be
@@ -260,6 +685,88 @@ lemma zetas_inv_vals : array256_mont_inv zetas_inv =
 proof.
   rewrite zetas_invE /array256_mont_inv /R /Fq.SignedReductions.R /scale255 /=.
   by rewrite -Array256.ext_eq_all /all_eq /= -!incoeffM_mod /q /=.
+qed.
+
+(* jzetas_inv stores Montgomery-form twiddle factors at indices 0..254.
+   Index 255 is special: it stores f = mont^2/256 = -29720, used for the
+   final scaling.  Therefore the full array equality is FALSE at index 255
+   and we restrict the pointwise statement to i in [0, 254]. *)
+(* The value stored at index 255 of jzetas_inv is f = -29720 = mont^2/256.
+   word_to_coeff gives incoeff(-29720); the Montgomery relationship is:
+   incoeff(-29720) * inv(R) = scale255 * R                                    *)
+lemma jzetas_inv_255_get32E :
+  BArray1024.get32 Hpoly_extract.jzetas_inv 255 = W32.of_int (-29720).
+proof.
+rewrite /Hpoly_extract.jzetas_inv.
+rewrite BArray1024.get32_of_list32 1://.
+do 300!(rewrite /=).
+by [].
+qed.
+
+lemma jzetas_inv_255_wordE :
+  word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas_inv 255) = incoeff (-29720).
+proof.
+rewrite jzetas_inv_255_get32E.
+by rewrite (word_to_coeff_small (-29720)) 1:/#.
+qed.
+
+lemma jzetas_inv_poly_vals i :
+  0 <= i < 255 =>
+  (barray256_to_poly Hpoly_extract.jzetas_inv).[i] = (array256_mont_inv zetas_inv).[i].
+proof.
+move=> hi.
+rewrite barray256_to_polyE 1:/#.
+rewrite /Hpoly_extract.jzetas_inv.
+rewrite BArray1024.get32_of_list32 1:/#.
+rewrite zetas_inv_vals /=.
+have hi_mem : i \in range 0 255 by rewrite mem_range.
+move: hi_mem.
+do 255!(rewrite range_ltn //=; move => [->> /=|];
+          [by try rewrite /word_to_coeff; try rewrite W32.of_sintK;
+              try rewrite /W32.smod /q /=; try rewrite -eq_incoeff /q /=; smt()|]).
+by rewrite range_geq.
+qed.
+
+lemma jzetas_inv_get i :
+  i \in range 0 255 =>
+  (array256_mont_inv zetas_inv).[i] = word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas_inv i).
+proof.
+move=> /mem_range hi.
+rewrite -(jzetas_inv_poly_vals i hi).
+by rewrite barray256_to_polyE 1:/#.
+qed.
+
+lemma jzetas_inv_polyE :
+  barray256_to_poly Hpoly_extract.jzetas_inv =
+  (array256_mont_inv zetas_inv).[255 <- incoeff (-29720)].
+proof.
+apply/Array256.ext_eq => i /mem_range hi.
+rewrite Array256.get_set_if /=.
+case: (i = 255) => [->|neqi].
++ rewrite barray256_to_polyE 1:/#.
+   by rewrite jzetas_inv_255_wordE.
++ have hi255 : 0 <= i < 255 by smt().
+  rewrite (jzetas_inv_poly_vals i hi255).
+   by [].
+qed.
+
+lemma zetas_inv_255_montE :
+  (array256_mont_inv zetas_inv).[255] = scale255 * R.
+proof.
+  rewrite zetas_inv_vals get_of_list //=.
+  by rewrite /scale255 /R -incoeffM_mod /q /=.
+qed.
+
+(* f = -29720 satisfies the Montgomery identity:
+   incoeff(-29720) * inv(R) = scale255 * R
+   Proof: multiply both sides by R and use -29720 ≡ scale255 * R^2 (mod q),
+   which holds since (-252) * 14321^2 mod 64513 = (-252 * 4214) mod 64513
+   = (-1061928) mod 64513 = 34793 = (-29720) mod 64513.                       *)
+lemma jzetas_inv_255_scaleE :
+  word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas_inv 255) * inv R = scale255 * R.
+proof.
+rewrite jzetas_inv_255_wordE.
+by rewrite inv_R /scale255 /R -!incoeffM_mod /q /=.
 qed.
 
 op array256_mont (p : coeff Array256.t) =
@@ -364,6 +871,118 @@ lemma zetas_vals : array256_mont zetas =
 proof.
   rewrite zetasE /array256_mont Array256.mapE /R /=.
   by rewrite -Array256.ext_eq_all /all_eq /= -!incoeffM_mod /q /=.
+qed.
+
+lemma jzetas_1_poly :
+  (barray256_to_poly Hpoly_extract.jzetas).[1] = (array256_mont zetas).[1].
+proof.
+  rewrite barray256_to_polyE ?mem_range 1:/#.
+  rewrite BArray1024.get32_of_list32 1://.
+  rewrite zetas_vals get_of_list //=.
+  by rewrite word_to_coeff_26964.
+qed.
+
+lemma jzetas_1_word_montE :
+  word_to_coeff (W32.of_int 26964) = (array256_mont zetas).[1].
+proof.
+  rewrite zetas_vals get_of_list //=.
+  by rewrite word_to_coeff_26964.
+qed.
+
+lemma jzetas_1_get32E :
+  word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas 1) = (array256_mont zetas).[1].
+proof.
+  rewrite BArray1024.get32_of_list32 1://.
+  rewrite zetas_vals get_of_list //=.
+  by rewrite word_to_coeff_26964.
+qed.
+
+lemma jzetas_1_get32dE :
+  word_to_coeff (BArray1024.get32d Hpoly_extract.jzetas (4 * 1)) = (array256_mont zetas).[1].
+proof.
+  rewrite BArray1024.get32_of_list32 1://.
+  rewrite zetas_vals get_of_list //=.
+  by rewrite word_to_coeff_26964.
+qed.
+
+lemma jzetas_polyE :
+  barray256_to_poly Hpoly_extract.jzetas =
+  (array256_mont zetas).[0 <- incoeff 0].
+proof.
+apply/Array256.ext_eq => i hi_range.
+have hi : 0 <= i < 256 by exact hi_range.
+have hi_mem : i \in range 0 256 by rewrite mem_range.
+rewrite barray256_to_polyE 1:/#.
+rewrite /Hpoly_extract.jzetas.
+rewrite BArray1024.get32_of_list32 1:/#.
+rewrite Array256.get_set_if /=.
+case: (i = 0) => eqi.
++ by rewrite word_to_coeff_repr /q /=.
++ rewrite zetas_vals.
+  have hi_tail : i \in range 1 256 by rewrite mem_range; smt().
+  move: hi_tail.
+  do 255!(rewrite range_ltn //=; move => [->> /=|];
+            [by try rewrite /word_to_coeff; try rewrite W32.of_sintK;
+                try rewrite /W32.smod /q /=; try rewrite -eq_incoeff /q /=; smt()|]).
+  by rewrite range_geq.
+qed.
+
+(* jzetas stores Montgomery-form twiddle factors at indices 1..255.
+   Index 0 is padding (value 0); it is never accessed in the forward NTT
+   since zetasctr is incremented before the first access.  The full array
+   equality is therefore FALSE at index 0 (jzetas[0]=0 but
+   (array256_mont zetas)[0] = R = 14321), so we restrict to i in [1, 255]. *)
+lemma jzetas_poly_vals i :
+  1 <= i < 256 =>
+  (barray256_to_poly Hpoly_extract.jzetas).[i] = (array256_mont zetas).[i].
+proof.
+move=> hi.
+rewrite jzetas_polyE Array256.get_set_if /=.
+case: (i = 0) => [eqi|neqi].
++ move: hi eqi => /#.
++ by [].
+qed.
+
+lemma jzetas_get i :
+  1 <= i < 256 =>
+  (array256_mont zetas).[i] = word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas i).
+proof.
+  move=> [hi1 hi2].
+  rewrite -(jzetas_poly_vals i _) 1:/# /barray256_to_poly initiE 1:/# //.
+qed.
+
+lemma zetas_1_montE :
+  (array256_mont zetas).[1] = incoeff 26964.
+proof.
+  by rewrite zetas_vals get_of_list //=.
+qed.
+
+lemma jzetas_1E :
+  word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas 1) =
+  (array256_mont zetas).[1].
+proof.
+  by rewrite -(jzetas_get 1 _).
+qed.
+
+lemma jzetas_1_wordE :
+  word_to_coeff (BArray1024.get32 Hpoly_extract.jzetas 1) = incoeff 26964.
+proof.
+  by rewrite jzetas_1E zetas_1_montE.
+qed.
+
+(* inv(256) mod q, needed for the final scaling proof *)
+lemma exp_zroot_256 : Zq.exp zroot 256 = incoeff (-1).
+proof.
+have h128 : Zq.exp zroot 128 = incoeff 28837.
++ have hz : zetas.[1] = Zq.exp zroot 128.
++   by rewrite /zetas initiE ?mem_range //= bsrev1 //=.
+  have hz1 : zetas.[1] = incoeff 28837 by rewrite zetasE get_of_list //=.
+  by rewrite -hz hz1.
+have -> : Zq.exp zroot 256 = Zq.exp zroot 128 * Zq.exp zroot 128.
++ rewrite (_ : 256 = 128 + 128) 1://.
+   by rewrite (ZqField.exprD_nneg zroot 128 128) 1,2://.
+rewrite h128 -incoeffM_mod /q /=.
+by rewrite -eq_incoeff /q /=.
 qed.
 
 end NTT_Fq.

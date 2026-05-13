@@ -1,0 +1,504 @@
+fn _fixpoint_add(reg mut ptr u64[2] rp,
+                 reg const ptr u64[2] ap,
+                 reg const ptr u64[2] bp) -> reg ptr u64[2]
+{
+  reg u64 a b;
+
+  a = ap[0];
+  b = bp[0];
+  a += b;
+  rp[0] = a;
+
+  a = ap[1];
+  b = bp[1];
+  a += b;
+  rp[1] = a;
+
+  return rp;
+}
+
+inline fn __mul48(reg u64 a b) -> reg u64, reg u64
+{
+  reg u64 lo hi top mask rax rdx;
+
+  rax = a;
+  rdx, rax = rax * b;
+  lo = rax;
+  hi = rdx;
+  hi <<= 16;
+  top = lo;
+  top >>= 48;
+  hi ^= top;
+  mask = 0xffffffffffff;
+  lo &= mask;
+
+  return lo, hi;
+}
+
+inline fn __renormalize48(reg u64 x0 x1) -> reg u64, reg u64
+{
+  reg u64 carry mask;
+
+  mask = 0xffffffffffff;
+  carry = x0;
+  carry >>= 48;
+  x1 += carry;
+  x0 &= mask;
+
+  return x0, x1;
+}
+
+inline fn __bit_at_u8(reg u32 x, reg u8 shift) -> reg u8
+{
+  reg u8 r;
+
+  if (shift == 1)
+  {
+    x >>= 1;
+  }
+  if (shift == 2)
+  {
+    x >>= 2;
+  }
+  if (shift == 3)
+  {
+    x >>= 3;
+  }
+  if (shift == 4)
+  {
+    x >>= 4;
+  }
+  if (shift == 5)
+  {
+    x >>= 5;
+  }
+  if (shift == 6)
+  {
+    x >>= 6;
+  }
+  if (shift == 7)
+  {
+    x >>= 7;
+  }
+
+  x &= 1;
+  r = (8u)x;
+  return r;
+}
+
+inline fn __copy_cneg_regs(reg u64 x0 x1 sign) -> reg u64, reg u64
+{
+  reg u64 mask lowmask y0 y1;
+
+  lowmask = 0xffffffffffff;
+  mask = 0;
+  mask -= sign;
+
+  y0 = mask;
+  y0 &= lowmask;
+  y0 ^= x0;
+  y1 = x1;
+  y1 ^= mask;
+  y0 += sign;
+  y0, y1 = __renormalize48(y0, y1);
+
+  return y0, y1;
+}
+
+inline fn __sub_regs(reg u64 x0 x1 y0 y1) -> reg u64, reg u64
+{
+  reg u64 n0 n1;
+
+  n0, n1 = __copy_cneg_regs(y0, y1, 1);
+  x0 += n0;
+  x1 += n1;
+
+  return x0, x1;
+}
+
+inline fn __sub_from_threehalves_regs(reg u64 x0 x1) -> reg u64, reg u64
+{
+  reg u64 add;
+
+  x0, x1 = __copy_cneg_regs(x0, x1, 1);
+  add = 3;
+  add <<= 27;
+  x1 += add;
+  x0, x1 = __renormalize48(x0, x1);
+
+  return x0, x1;
+}
+
+inline fn __fixpoint_mul_regs(reg u64 x0 x1 y0 y1) -> reg u64, reg u64
+{
+  reg u64 lo hi r0 r1 tmp mask;
+
+  mask = 0xffffffffffff;
+
+  lo, hi = __mul48(x0, y0);
+  tmp = lo;
+  tmp >>= 47;
+  tmp += 1;
+  tmp >>= 1;
+  r0 = hi;
+  r0 += tmp;
+
+  lo, hi = __mul48(x0, y1);
+  r0 += lo;
+  r1 = hi;
+
+  lo, hi = __mul48(x1, y0);
+  r0 += lo;
+  r1 += hi;
+
+  tmp = 1;
+  tmp <<= 27;
+  r0 += tmp;
+  r0 >>= 28;
+  tmp = r1;
+  tmp <<= 20;
+  tmp &= mask;
+  r0 += tmp;
+  r1 >>= 28;
+
+  tmp = x1;
+  hi, tmp = tmp * y1;
+  lo = tmp;
+  tmp = lo;
+  tmp <<= 20;
+  tmp &= mask;
+  r0 += tmp;
+  lo >>= 28;
+  hi <<= 36;
+  lo += hi;
+  r1 += lo;
+
+  tmp = r0;
+  tmp >>= 48;
+  r1 += tmp;
+  r0 &= mask;
+
+  return r0, r1;
+}
+
+inline fn __fixpoint_square_regs(reg u64 x0 x1) -> reg u64, reg u64
+{
+  reg u64 lo hi r0 r1 tmp mask;
+
+  mask = 0xffffffffffff;
+
+  lo, hi = __mul48(x0, x0);
+  r0 = lo;
+  r0 >>= 48;
+  r0 += hi;
+
+  lo, hi = __mul48(x0, x1);
+  lo <<= 1;
+  r0 += lo;
+  r1 = hi;
+  r1 <<= 1;
+
+  r0 >>= 28;
+  tmp = r1;
+  tmp <<= 20;
+  tmp &= mask;
+  r0 += tmp;
+  r1 >>= 28;
+
+  tmp = x1;
+  hi, tmp = tmp * x1;
+  lo = tmp;
+  tmp = lo;
+  tmp <<= 20;
+  tmp &= mask;
+  r0 += tmp;
+  lo >>= 28;
+  hi <<= 36;
+  lo += hi;
+  r1 += lo;
+
+  tmp = r0;
+  tmp >>= 48;
+  r1 += tmp;
+  r0 &= mask;
+
+  return r0, r1;
+}
+
+inline fn __fixpoint_unsigned_signed_mul_regs(reg u64 xy0 xy1 y0 y1)
+                                              -> reg u64, reg u64
+{
+  reg u64 sign x0 x1 z0 z1;
+
+  sign = y1;
+  sign >>= 63;
+  sign &= 1;
+  x0, x1 = __copy_cneg_regs(y0, y1, sign);
+  z0, z1 = __fixpoint_mul_regs(x0, x1, xy0, xy1);
+  z0, z1 = __copy_cneg_regs(z0, z1, sign);
+
+  return z0, z1;
+}
+
+fn _fixpoint_square(reg mut ptr u64[2] rp,
+                    reg const ptr u64[2] xp) -> reg ptr u64[2]
+{
+  reg u64 x0 x1 r0 r1;
+
+  x0 = xp[0];
+  x1 = xp[1];
+  r0, r1 = __fixpoint_square_regs(x0, x1);
+
+  rp[0] = r0;
+  rp[1] = r1;
+
+  return rp;
+}
+
+inline fn __fixpoint_mul_rnd13_regs(reg u64 x y0 y1 sign) -> reg u32
+{
+  reg u64 x0 x1 r0 r1 res mask;
+  reg u32 ret;
+
+  x1 = x;
+  x1 >>= 32;
+  x0 = x;
+  x0 &= 0xffffffff;
+  x0 <<= 16;
+
+  r0, r1 = __fixpoint_mul_regs(x0, x1, y0, y1);
+
+  res = r1;
+  res += 16384;
+  res >>= 15;
+
+  mask = 0;
+  mask -= sign;
+  res ^= mask;
+  res += sign;
+
+  ret = (32u)res;
+  return ret;
+}
+
+inline fn __fixpoint_mul_high_regs(reg u64 x0 x1 y) -> reg u64, reg u64
+{
+  reg u64 r0 r1 tmp0 tmp1 t add mask;
+
+  mask = 0xffffffffffff;
+
+  r0, r1 = __mul48(x0, y);
+  tmp0, tmp1 = __mul48(x1, y);
+  r1 += tmp0;
+
+  add = 1;
+  add <<= 27;
+  r0 += add;
+  r0 >>= 28;
+  t = r1;
+  t <<= 20;
+  t &= mask;
+  r0 += t;
+  r1 >>= 28;
+
+  tmp1 <<= 20;
+  r1 += tmp1;
+  r0, r1 = __renormalize48(r0, r1);
+
+  return r0, r1;
+}
+
+fn _fixpoint_mul_rnd13(reg u64 x,
+                       reg const ptr u64[2] yp,
+                       reg u8 sign) -> reg u32
+{
+  reg u64 y0 y1 s;
+  reg u32 ret;
+
+  y0 = yp[0];
+  y1 = yp[1];
+  s = (64u)sign;
+  ret = __fixpoint_mul_rnd13_regs(x, y0, y1, s);
+  return ret;
+}
+
+fn _fixpoint_mul(reg mut ptr u64[2] rp,
+                 reg const ptr u64[2] xp,
+                 reg const ptr u64[2] yp) -> reg ptr u64[2]
+{
+  reg u64 x0 x1 y0 y1 r0 r1;
+
+  x0 = xp[0];
+  x1 = xp[1];
+  y0 = yp[0];
+  y1 = yp[1];
+  r0, r1 = __fixpoint_mul_regs(x0, x1, y0, y1);
+
+  rp[0] = r0;
+  rp[1] = r1;
+
+  return rp;
+}
+
+fn _fixpoint_mul_high(reg mut ptr u64[2] rp,
+                      reg const ptr u64[2] xp,
+                      reg u64 y) -> reg ptr u64[2]
+{
+  reg u64 x0 x1 r0 r1;
+
+  x0 = xp[0];
+  x1 = xp[1];
+  r0, r1 = __fixpoint_mul_high_regs(x0, x1, y);
+  rp[0] = r0;
+  rp[1] = r1;
+
+  return rp;
+}
+
+fn _fixpoint_half_round(reg mut ptr u64[2] xp) -> reg ptr u64[2]
+{
+  reg u64 x0 x1 t;
+
+  x0 = xp[0];
+  x1 = xp[1];
+
+  x0 += 1;
+  x0 >>= 1;
+  t = x1;
+  t &= 1;
+  t <<= 47;
+  x0 += t;
+  x1 >>= 1;
+  x0, x1 = __renormalize48(x0, x1);
+
+  xp[0] = x0;
+  xp[1] = x1;
+
+  return xp;
+}
+
+fn _fixpoint_newton_invsqrt(reg mut ptr u64[2] rp,
+                            reg const ptr u64[2] xhalfp,
+                            reg const ptr u64[2] start_cubep,
+                            reg const ptr u64[2] start_threep)
+                            -> reg ptr u64[2]
+{
+  reg u64 x0 x1 sc0 sc1 st0 st1 inv0 inv1 tmp0 tmp1 tmp20 tmp21 i;
+
+  x0 = xhalfp[0];
+  x1 = xhalfp[1];
+  sc0 = start_cubep[0];
+  sc1 = start_cubep[1];
+  st0 = start_threep[0];
+  st1 = start_threep[1];
+
+  tmp0, tmp1 = __fixpoint_mul_regs(x0, x1, sc0, sc1);
+  inv0, inv1 = __sub_regs(st0, st1, tmp0, tmp1);
+
+  i = 0;
+  while (i < 6)
+  {
+    tmp0, tmp1 = __fixpoint_square_regs(inv0, inv1);
+    tmp20, tmp21 = __fixpoint_mul_regs(x0, x1, tmp0, tmp1);
+    tmp20, tmp21 = __sub_from_threehalves_regs(tmp20, tmp21);
+    inv0, inv1 = __fixpoint_unsigned_signed_mul_regs(inv0, inv1, tmp20, tmp21);
+    i += 1;
+  }
+
+  rp[0] = inv0;
+  rp[1] = inv1;
+
+  return rp;
+}
+
+fn _polyfixveclk_scale_samples(reg mut ptr u32[2048] y1p,
+                               reg mut ptr u32[2048] y2p,
+                               reg const ptr u64[4096] samplesp,
+                               reg const ptr u8[512] signsp,
+                               reg const ptr u64[2] scalep,
+                               reg u64 counts) -> reg ptr u32[2048],
+                                                 reg ptr u32[2048]
+{
+  stack ptr u32[2048] sy1p sy2p;
+  stack ptr u64[4096] ssamplesp;
+  stack ptr u8[512] ssignsp;
+  stack ptr u64[2] sscalep;
+  stack u64 si sj slcount stotal;
+  reg ptr u32[2048] outp;
+  reg const ptr u64[4096] samplesp_tmp;
+  reg const ptr u8[512] signsp_tmp;
+  reg const ptr u64[2] scalep_tmp;
+  reg u64 i j lcount total byte_idx sample;
+  reg u32 sign32 r;
+  reg u8 shift sign8;
+
+  sy1p = y1p;
+  sy2p = y2p;
+  ssamplesp = samplesp;
+  ssignsp = signsp;
+  sscalep = scalep;
+
+  lcount = counts;
+  lcount &= 0xffffffff;
+  total = counts;
+  total >>= 32;
+  slcount = lcount;
+  stotal = total;
+
+  si = 0;
+  while { i = si; lcount = slcount; } (i < lcount)
+  {
+    byte_idx = i;
+    byte_idx >>= 3;
+    signsp_tmp = ssignsp;
+    sign32 = (32u)signsp_tmp[byte_idx];
+    shift = (8u)i;
+    shift &= 7;
+    sign8 = __bit_at_u8(sign32, shift);
+
+    samplesp_tmp = ssamplesp;
+    sample = samplesp_tmp[i];
+    si = i;
+    scalep_tmp = sscalep;
+    r = _fixpoint_mul_rnd13(sample, scalep_tmp, sign8);
+    i = si;
+    outp = sy1p;
+    outp[i] = r;
+    sy1p = outp;
+
+    i += 1;
+    si = i;
+  }
+
+  sj = 0;
+  while { i = si; total = stotal; } (i < total)
+  {
+    byte_idx = i;
+    byte_idx >>= 3;
+    signsp_tmp = ssignsp;
+    sign32 = (32u)signsp_tmp[byte_idx];
+    shift = (8u)i;
+    shift &= 7;
+    sign8 = __bit_at_u8(sign32, shift);
+
+    samplesp_tmp = ssamplesp;
+    sample = samplesp_tmp[i];
+    si = i;
+    scalep_tmp = sscalep;
+    r = _fixpoint_mul_rnd13(sample, scalep_tmp, sign8);
+    i = si;
+    j = sj;
+    outp = sy2p;
+    outp[j] = r;
+    sy2p = outp;
+
+    i += 1;
+    j += 1;
+    si = i;
+    sj = j;
+  }
+
+  y1p = sy1p;
+  y2p = sy2p;
+  return y1p, y2p;
+}

@@ -1,0 +1,346 @@
+\chapter{Proof Scope and Repository Structure}
+\label{ch:proof-scope}
+
+\section{Separated Dissertation and Proof Folders}
+
+The repository now contains a dissertation folder with the same structure as the
+reference NTT dissertation:
+
+\begin{lstlisting}[language=bash]
+dissertation/
+  main.tex
+  Makefile
+  bibliography/refs.bib
+  chapters/
+  figures/README.txt
+  record.md
+\end{lstlisting}
+
+The proof itself is managed separately under:
+
+\begin{lstlisting}[language=bash]
+provable-security/
+  proof-files.txt
+  verify-provable-security.sh
+  easycrypt/
+  logs/
+\end{lstlisting}
+
+The dissertation folder explains the proof.  The \code{provable-security/}
+folder defines and checks the proof surface.
+
+\section{Supplemental Material}
+
+Material that is useful for traceability but too mechanical for the main
+argument is stored under:
+
+\begin{lstlisting}[language=bash]
+dissertation/etc/
+\end{lstlisting}
+
+This includes the exhaustive generated individual EasyCrypt correspondence
+appendix.  The main dissertation keeps curated proof-object analyses and
+mathematical ledgers; the supplemental folder preserves the generated audit
+material without forcing the reader through thousands of templated entries.
+
+\section{Proof Manifest}
+
+The manifest lists the EasyCrypt files that constitute the provable-security
+proof gate.  It includes the main theorem layer, generic signature games, hop
+games, reductions, ROM programming, scheme and transcript definitions,
+distribution and algebra support, parameters, and modeled hash-interface support.
+
+\section{EasyCrypt File Relationships}
+\label{sec:easycrypt-file-relationships}
+
+The files in the manifest form a directed proof-dependency graph.  In
+Table~\ref{tab:easycrypt-file-relationships}, an entry \(F \leftarrow G\)
+means that \(F\) imports \(G\) directly through an EasyCrypt
+\code{require import} declaration.  Standard EasyCrypt library imports such as
+\code{AllCore}, \code{Real}, \code{List}, \code{Distr}, and \code{PROM} are
+omitted; Figure~\ref{fig:easycrypt-dependency-graph} and the table record only
+relationships between manifest files.
+
+Read from the leaves upward, the graph has five layers.  First,
+\code{HAETAE\_Keccak1600.ec}, \code{HAETAE\_FIPS202.ec}, and
+\code{HAETAE\_Params.ec} provide the hash and parameter foundations.  Second,
+\code{HAETAE\_Algebra.ec}, \code{HAETAE\_Distributions.ec},
+\code{HAETAE\_Assumptions.ec}, and \code{HAETAE\_Events.ec} define the
+algebraic, probabilistic, hardness-relation, and event vocabulary.  Third,
+\code{Sig\_ROM.ec}, \code{HAETAE\_ROM.ec}, \code{HAETAE\_Scheme.ec},
+\code{HAETAE\_Transcript.ec}, \code{HAETAE\_Rejection.ec}, and
+\code{HAETAE\_ROM\_Programming.ec} build the signature, transcript, rejection,
+and random-oracle programming interfaces.  Fourth,
+\code{HAETAE\_HopGames.ec} proves the hybrid and simulation relationships.
+Finally, \code{HAETAE\_Security.ec} imports the
+supporting layers and assembles the correctness and \eufcma{} theorem family.
+
+\begin{figure}[p]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  file/.style={
+    rectangle,
+    rounded corners=2pt,
+    draw=black!55,
+    line width=0.35pt,
+    align=center,
+    inner xsep=5pt,
+    inner ysep=4pt,
+    minimum width=2.65cm,
+    minimum height=0.72cm,
+    font=\scriptsize\ttfamily
+  },
+  rootfile/.style={file, fill=BrickRed!10, draw=BrickRed!70!black},
+  hopfile/.style={file, fill=NavyBlue!8, draw=NavyBlue!70!black},
+  interfacefile/.style={file, fill=OliveGreen!8, draw=OliveGreen!70!black},
+  supportfile/.style={file, fill=Goldenrod!12, draw=Goldenrod!70!black},
+  basefile/.style={file, fill=gray!10, draw=gray!70!black},
+  dep/.style={
+    -{Stealth[length=2.1mm,width=1.5mm]},
+    draw=black!38,
+    line width=0.32pt,
+    shorten >=1.5pt,
+    shorten <=1.5pt
+  },
+  spine/.style={
+    -{Stealth[length=2.3mm,width=1.7mm]},
+    draw=black!72,
+    line width=0.55pt,
+    shorten >=1.5pt,
+    shorten <=1.5pt
+  }
+]
+  \node[rootfile] (security) at (0,0) {HAETAE\_Security.ec};
+
+  \node[hopfile] (hopgames) at (0,-1.45) {HAETAE\_HopGames.ec};
+
+  \node[interfacefile] (sig) at (-7.3,-3.05) {Sig\_ROM.ec};
+  \node[interfacefile] (scheme) at (-4.35,-3.05) {HAETAE\_Scheme.ec};
+  \node[interfacefile] (romprog) at (-1.25,-3.05) {HAETAE\_ROM\\\_Programming.ec};
+  \node[interfacefile] (rejection) at (2.0,-3.05) {HAETAE\_Rejection.ec};
+  \node[interfacefile] (transcript) at (5.2,-3.05) {HAETAE\_Transcript.ec};
+  \node[interfacefile] (rom) at (8.25,-3.05) {HAETAE\_ROM.ec};
+
+  \node[supportfile] (reductions) at (-5.9,-4.9) {HAETAE\_Reductions.ec};
+  \node[supportfile] (events) at (-2.7,-4.9) {HAETAE\_Events.ec};
+  \node[supportfile] (assumptions) at (0.75,-4.9) {HAETAE\_Assumptions.ec};
+  \node[supportfile] (distributions) at (4.25,-4.9) {HAETAE\\\_Distributions.ec};
+
+  \node[basefile] (algebra) at (-2.65,-6.55) {HAETAE\_Algebra.ec};
+  \node[basefile] (params) at (1.15,-6.55) {HAETAE\_Params.ec};
+  \node[basefile] (fips) at (5.05,-6.55) {HAETAE\_FIPS202.ec};
+  \node[basefile] (keccak) at (5.05,-8.05) {HAETAE\\\_Keccak1600.ec};
+
+  \draw[spine] (security) -- (hopgames);
+  \draw[spine] (security) -- (romprog);
+  \draw[spine] (security) -- (rejection);
+  \draw[spine] (security) -- (transcript);
+  \draw[spine] (security) -- (reductions);
+
+  \draw[dep] (security) -- (sig);
+  \draw[dep] (security) -- (scheme);
+  \draw[dep] (security) -- (algebra);
+  \draw[dep] (security) -- (distributions);
+  \draw[dep] (security) -- (assumptions);
+
+  \draw[dep] (hopgames) -- (sig);
+  \draw[dep] (hopgames) -- (scheme);
+  \draw[dep] (hopgames) -- (params);
+  \draw[dep] (hopgames) -- (algebra);
+  \draw[dep] (hopgames) -- (distributions);
+  \draw[dep] (hopgames) -- (assumptions);
+  \draw[dep] (hopgames) -- (transcript);
+  \draw[dep] (hopgames) -- (reductions);
+  \draw[dep] (hopgames) -- (rejection);
+  \draw[dep] (hopgames) -- (rom);
+  \draw[dep] (hopgames) -- (romprog);
+
+  \draw[dep] (romprog) -- (params);
+  \draw[dep] (romprog) -- (algebra);
+  \draw[dep] (romprog) -- (distributions);
+  \draw[dep] (romprog) -- (rom);
+  \draw[dep] (romprog) -- (transcript);
+  \draw[dep] (romprog) -- (rejection);
+  \draw[dep] (romprog) -- (reductions);
+
+  \draw[dep] (scheme) -- (sig);
+  \draw[dep] (scheme) -- (params);
+  \draw[dep] (scheme) -- (algebra);
+  \draw[dep] (scheme) -- (distributions);
+  \draw[dep] (scheme) -- (rom);
+
+  \draw[dep] (transcript) -- (params);
+  \draw[dep] (transcript) -- (algebra);
+  \draw[dep] (transcript) -- (rom);
+  \draw[dep] (transcript) -- (assumptions);
+
+  \draw[dep] (rejection) -- (params);
+  \draw[dep] (rejection) -- (algebra);
+  \draw[dep] (rejection) -- (distributions);
+  \draw[dep] (rejection) -- (events);
+  \draw[dep] (rejection) -- (reductions);
+  \draw[dep] (rejection) -- (transcript);
+
+  \draw[dep] (rom) -- (params);
+  \draw[dep] (rom) -- (algebra);
+  \draw[dep] (rom) -- (distributions);
+
+  \draw[dep] (reductions) -- (events);
+  \draw[dep] (events) -- (params);
+  \draw[dep] (events) -- (algebra);
+  \draw[dep] (assumptions) -- (params);
+  \draw[dep] (assumptions) -- (algebra);
+  \draw[dep] (distributions) -- (params);
+  \draw[dep] (distributions) -- (algebra);
+  \draw[dep] (algebra) -- (params);
+  \draw[dep] (algebra) -- (fips);
+  \draw[dep] (fips) -- (keccak);
+\end{tikzpicture}%
+}
+\caption{Manifest-level dependency graph for the HAETAE EasyCrypt proof.  An
+arrow points from an importing file to a directly imported manifest file; the
+darker arrows highlight the main top-level assembly paths.}
+\label{fig:easycrypt-dependency-graph}
+\end{figure}
+
+\begin{longtable}{p{0.30\textwidth}p{0.58\textwidth}}
+\caption{Immediate manifest-file relationships induced by EasyCrypt imports.}
+\label{tab:easycrypt-file-relationships}\\
+\toprule
+\textbf{File} & \textbf{Direct manifest imports} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{File} & \textbf{Direct manifest imports} \\
+\midrule
+\endhead
+\code{HAETAE\_Security.ec} &
+\code{Sig\_ROM.ec}, \code{HAETAE\_Scheme.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_Distributions.ec}, \code{HAETAE\_Reductions.ec},
+\code{HAETAE\_Assumptions.ec}, \code{HAETAE\_Rejection.ec},
+\code{HAETAE\_Transcript.ec},
+\code{HAETAE\_ROM\_Programming.ec}, \code{HAETAE\_HopGames.ec}. \\
+\midrule
+\code{Sig\_ROM.ec} &
+None inside the manifest; it depends only on EasyCrypt library files. \\
+\midrule
+\code{HAETAE\_HopGames.ec} &
+\code{Sig\_ROM.ec}, \code{HAETAE\_Scheme.ec}, \code{HAETAE\_Params.ec},
+\code{HAETAE\_Algebra.ec}, \code{HAETAE\_Distributions.ec},
+\code{HAETAE\_Assumptions.ec}, \code{HAETAE\_Transcript.ec},
+\code{HAETAE\_Reductions.ec}, \code{HAETAE\_Rejection.ec},
+\code{HAETAE\_ROM.ec}, \code{HAETAE\_ROM\_Programming.ec}. \\
+\midrule
+\code{HAETAE\_Reductions.ec} &
+\code{HAETAE\_Events.ec}. \\
+\midrule
+\code{HAETAE\_ROM.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_Distributions.ec}. \\
+\midrule
+\code{HAETAE\_ROM\_Programming.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_Distributions.ec}, \code{HAETAE\_ROM.ec},
+\code{HAETAE\_Transcript.ec}, \code{HAETAE\_Rejection.ec},
+\code{HAETAE\_Reductions.ec}. \\
+\midrule
+\code{HAETAE\_Scheme.ec} &
+\code{Sig\_ROM.ec}, \code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_Distributions.ec}, \code{HAETAE\_ROM.ec}. \\
+\midrule
+\code{HAETAE\_Transcript.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_ROM.ec}, \code{HAETAE\_Assumptions.ec}. \\
+\midrule
+\code{HAETAE\_Events.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec}. \\
+\midrule
+\code{HAETAE\_Assumptions.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec}. \\
+\midrule
+\code{HAETAE\_Distributions.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec}. \\
+\midrule
+\code{HAETAE\_Rejection.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_Algebra.ec},
+\code{HAETAE\_Distributions.ec}, \code{HAETAE\_Events.ec},
+\code{HAETAE\_Reductions.ec}, \code{HAETAE\_Transcript.ec}. \\
+\midrule
+\code{HAETAE\_Algebra.ec} &
+\code{HAETAE\_Params.ec}, \code{HAETAE\_FIPS202.ec}. \\
+\midrule
+\code{HAETAE\_Params.ec} &
+None inside the manifest; it depends only on EasyCrypt library files. \\
+\midrule
+\code{HAETAE\_FIPS202.ec} &
+\code{HAETAE\_Keccak1600.ec}. \\
+\midrule
+\code{HAETAE\_Keccak1600.ec} &
+None inside the manifest; it depends only on EasyCrypt library files. \\
+\bottomrule
+\end{longtable}
+
+\section{Theorem Dependency Classes}
+
+To avoid overstating the proof, the dissertation classifies every final security
+claim into one of four dependency classes.
+
+\begin{longtable}{p{0.20\textwidth}p{0.68\textwidth}}
+\caption{Dependency classes used for theorem-scope statements.}
+\label{tab:dependency-classes}\\
+\toprule
+\textbf{Class} & \textbf{Meaning} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Class} & \textbf{Meaning} \\
+\midrule
+\endhead
+Checked & A statement accepted by EasyCrypt for the files in
+\code{provable-security/proof-files.txt}. \\
+\midrule
+Assumed & A named modeling hypothesis needed to read the checked EasyCrypt model
+as the intended HAETAE specification model. \\
+\midrule
+Audited & A specification-to-model correspondence supported by local inspection
+and tables, but not by a checked equivalence theorem. \\
+\midrule
+Out of scope & A claim deliberately not proved by the EasyCrypt security
+development, such as concrete SHAKE standard-model security, implementation
+parsing correctness, concrete MLWE/Module-SIS bit estimates, or reduction
+runtime bounds. \\
+\bottomrule
+\end{longtable}
+
+The central theorem is in the checked class only for the EasyCrypt formal model.
+The specification-level reading is conditional on the assumed and audited
+classes.  This dependency discipline is part of the proof artifact: it prevents
+a verified game proof from being silently promoted into a stronger end-to-end
+certification claim.
+
+\section{Excluded Generated KAT Artifact}
+
+\code{HAETAE\_FIPS202\_KAT\_Empty\_Generated.ec} is not part of the
+provable-security gate.  It is a generated FIPS202 known-answer-test artifact.
+It may be useful for implementation validation or certification evidence, but
+it is not a reduction step in the \eufcma{} proof.  This distinction prevents a
+large generated file from obscuring the status of the security proof.
+
+The same distinction applies to modeled hash-interface support more generally.  The
+security theorem is a random-oracle-model theorem for the formal model.  FIPS202
+and Keccak support files help define or validate modeled hash objects, but they
+do not by themselves prove standard-model security of a concrete SHAKE
+instantiation.
+
+\section{ROM-to-FIPS202 Boundary}
+
+The proof uses typed random-oracle queries and lazy-ROM laws to reason about
+freshness, programming, and adversarial prequeries.  The FIPS202 and Keccak
+files are therefore not a replacement for the ROM theorem; they occupy a
+different verification layer.  They may support implementation conformance or
+hash-interface documentation, but the security theorem continues to assume the
+random-oracle abstraction.  Any theorem replacing the ROM by SHAKE would need an
+additional assumption or proof principle, for example an indifferentiability or
+computational random-oracle-instantiation argument.  No such theorem is part of
+the checked provable-security gate described here.

@@ -1,0 +1,258 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.75em}
+\emergencystretch=3em
+
+\newcommand{\ec}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\Fq}{\mathbf F_q}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\br}{\operatorname{br}_8}
+\newcommand{\zetaNTT}{\zeta}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{obligation}{Obligation}
+\newtheorem{remark}{Remark}
+
+\title{End-to-End HAETAE NTT Correctness: Checked Core and Remaining Algebraic Bridge}
+\author{Codex Proof Notes}
+\date{29 April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note states the intended end-to-end correctness theorem for the HAETAE
+Jasmin NTT, records the portions that are currently machine-checked in
+EasyCrypt, and identifies the exact missing algebraic bridge.  The main point is
+that the already checked pRHL development proves the extracted Jasmin cores
+against the imperative procedures \ec{NTT_Fq.NTT.ntt} and
+\ec{NTT_Fq.NTT.invntt}; it does not yet prove those imperative procedures
+against the full closed-form polynomial NTT.  The file \ec{NTTFullSpec.ec}
+therefore introduces the correct full transform and proves that the older
+\ec{Rq.ntt} operator is not the full HAETAE NTT.
+\end{abstract}
+
+\section{The Correct Abstract Forward Transform}
+
+Let \(q=64513\), let \(\Fq=\Z/q\Z\), and let
+\(\zetaNTT=\ec{zroot}=\ec{incoeff 426}\).  For a coefficient array
+\(p\in\Fq^{256}\), the full HAETAE negacyclic NTT is the array
+\[
+  \widehat p_i
+  =
+  \sum_{j=0}^{255}
+    p_j\,\zetaNTT^{(2\br(i)+1)j},
+  \qquad 0\le i<256,
+\]
+where \(\br(i)=\ec{bsrev 8 i}\).  This is formalized in
+\ec{NTTFullSpec.full_ntt}.
+
+\begin{lemma}[bit-reversed partial specification]
+The predicate \ec{NTTFullSpec.full_ntt_spec r p} states equivalently that
+\[
+  r_{\br(s)}
+  =
+  \sum_{j=0}^{255}
+    p_{\br(j)}\,
+    \zetaNTT^{(2s+1)\br(j)}
+  \qquad (0\le s<256).
+\]
+\end{lemma}
+
+\begin{proof}
+This is the definition of \ec{partial_ntt} at length \(256\), block index
+\(0\), and start index \(s\).  The summation is indexed in bit-reversed input
+order because the loop-level NTT proof naturally tracks the array positions
+visited by the Cooley--Tukey butterflies.
+\end{proof}
+
+\begin{proposition}[checked in \ec{NTTFullSpec.ec}]
+\[
+  \ec{full_ntt_spec r p}\quad\Longrightarrow\quad
+  r=\ec{full_ntt p}.
+\]
+\end{proposition}
+
+\begin{proof}
+The EasyCrypt lemma is \ec{full_ntt_spec_imp}.  For an output index \(i\), apply
+the specification at \(s=\br(i)\).  Since bit reversal is an involution on
+\(\{0,\ldots,255\}\), the left-hand side becomes \(r_i\).  The right-hand side
+is then reindexed along the permutation \(j\mapsto \br(j)\).  Commutativity of
+the finite sum and the identity \(\br(\br(j))=j\) convert the bit-reversed
+partial sum into the closed-form coefficient of \ec{full_ntt}.
+\end{proof}
+
+\section{Why the Existing \texorpdfstring{\ec{Rq.ntt}}{Rq.ntt} Is Not Enough}
+
+The operator \ec{Rq.ntt} is an incomplete even/odd transform:
+even output coefficients sum only even input coefficients, and odd output
+coefficients sum only odd input coefficients.  In formulas,
+\[
+  (\ec{Rq.ntt}(p))_{2i}
+  =
+  \sum_{j=0}^{127}
+    p_{2j}\,\zetaNTT^{(2\br(i)+1)j},
+  \qquad
+  (\ec{Rq.ntt}(p))_{2i+1}
+  =
+  \sum_{j=0}^{127}
+    p_{2j+1}\,\zetaNTT^{(2\br(i)+1)j}.
+\]
+This is not the full \(256\)-point transform above.
+
+\begin{proposition}[checked in \ec{NTTFullSpec.ec}]
+\[
+  \ec{Rq.ntt Rq.one} \ne \ec{NTTFullSpec.full_ntt Rq.one}.
+\]
+\end{proposition}
+
+\begin{proof}
+At output index \(1\), the incomplete transform sees only odd input
+coefficients.  The polynomial \(\ec{Rq.one}\) has coefficient \(1\) at index
+\(0\) and \(0\) elsewhere, so \((\ec{Rq.ntt Rq.one})_1=0\).  The full transform
+at index \(1\), however, contains the \(j=0\) term \(1\cdot \zetaNTT^0=1\) and
+all other terms vanish, so \((\ec{full_ntt Rq.one})_1=1\).  Since \(1\ne0\) in
+\(\Fq\), the arrays are unequal.  This is the EasyCrypt lemma
+\ec{rq_ntt_is_not_full_ntt_on_one}.
+\end{proof}
+
+\section{Checked Implementation Refinement Layer}
+
+The file \ec{RefJasminNTT.ec} proves the direct pRHL connection from the
+extracted Jasmin cores to the imperative EasyCrypt model.
+
+\begin{theorem}[forward core refinement, checked]
+If the input byte array \(\rho\) represents \(p\) with 16-bit word bounds, then
+running \ec{Hpoly_extract.M._poly_ntt} on \(\rho\) and running
+\ec{NTT_Fq.NTT.ntt} on \(p\) with \ec{NTT_Fq.zetas} produce related outputs:
+\[
+  \ec{poly_repr_bound}(\rho,p,16)
+  \Longrightarrow
+  \ec{poly_repr_bound}(\rho',r',24).
+\]
+\end{theorem}
+
+\begin{proof}
+This is \ec{RefJasminNTT.poly_ntt_core_ref}.  The proof synchronizes the three
+nested loops of the extracted Jasmin core with the three nested loops of
+\ec{NTT_Fq.NTT.ntt}.  The invariant tracks equal loop counters, equality of
+twiddle indices, the table bridge between Montgomery-encoded machine constants
+and abstract twiddles, and pointwise bounds showing that word addition,
+subtraction, and Montgomery multiplication do not overflow.  Each butterfly is
+closed by a local field equality:
+\[
+  \operatorname{word}(\ec{fqmul}(z,x))
+  =
+  \operatorname{word}(z)\operatorname{word}(x)R^{-1},
+\]
+followed by cancellation of \(R\) using the table lemmas.
+\end{proof}
+
+\begin{theorem}[inverse core refinement, checked]
+If the input byte array \(\rho\) represents \(p\) with 16-bit word bounds, then
+\ec{Hpoly_extract.M._poly_invntt} refines \ec{NTT_Fq.NTT.invntt}; the concrete
+output represents the Montgomery-scaled version of the imperative inverse
+output:
+\[
+  \ec{poly_repr_bound}(\rho,p,16)
+  \Longrightarrow
+  \ec{poly_repr_bound}(\rho',\ec{array256_mont}(r'),16).
+\]
+\end{theorem}
+
+\begin{proof}
+This is \ec{RefJasminNTT.poly_invntt_core_ref}.  The butterfly-loop argument is
+the inverse analogue of the forward proof.  The final scaling loop is handled by
+a separate prefix invariant: processed coefficients have been multiplied by the
+special table entry at index \(255\), while unprocessed coefficients still
+represent the pre-scaling abstract state.  The special table lemma
+\[
+  \operatorname{word}(\ec{jzetas_inv}[255])R^{-1}
+  =
+  \ec{scale255}\,R
+\]
+explains the Montgomery factor in the postcondition.
+\end{proof}
+
+\section{The Missing End-to-End Bridge}
+
+The inverse side now has the same specification-side conversion as the forward
+side.  The EasyCrypt predicate \ec{full_invntt_spec r p} states the inverse
+closed form at bit-reversed output indices, and the checked lemma
+\ec{full_invntt_spec_imp} proves that this predicate implies
+\(r=\ec{full_invntt p}\).  Thus the remaining inverse work is not a
+closed-form reindexing problem; it is the loop algebra showing that
+\ec{NTT_Fq.NTT.invntt} establishes \ec{full_invntt_spec}.
+
+To obtain the full forward theorem for the Jasmin core, one still needs the
+following Hoare statement.
+
+\begin{obligation}[forward imperative algebra]
+\[
+  \ec{NTT_Fq.NTT.ntt}(p,\ec{NTT_Fq.zetas})
+  =
+  \ec{NTTFullSpec.full_ntt}(p).
+\]
+\end{obligation}
+
+Equivalently, a loop proof may establish \ec{full_ntt_spec res p} at the end of
+\ec{NTT_Fq.NTT.ntt}, then use \ec{full_ntt_spec_imp}.  The stage invariant must
+use the full-transform exponent
+\[
+  \br(s\bmod \ell),
+\]
+not the MLKEM incomplete-transform exponent
+\[
+  \br(2(s\bmod \ell)).
+\]
+The latter only describes the even/odd split transform.
+
+\begin{obligation}[inverse imperative algebra]
+\[
+  \ec{NTT_Fq.NTT.invntt}(p,\ec{NTT_Fq.zetas_inv})
+  =
+  \ec{NTTFullSpec.full_invntt}(p).
+\]
+\end{obligation}
+
+This inverse theorem must also be reconciled with the Montgomery-scaled
+postcondition of \ec{poly_invntt_core_ref}.  The composed Jasmin theorem should
+therefore either state the output relation against
+\(\ec{array256_mont}(\ec{full_invntt}(p))\), or use a representation relation
+whose codomain is explicitly Montgomery encoded.
+
+\section{Conclusion}
+
+The present EasyCrypt development is strong enough to justify the statement:
+
+\begin{quote}
+The extracted Jasmin HAETAE NTT cores have been machine-checked against the
+imperative EasyCrypt NTT procedures, with word-level overflow obligations and
+Montgomery table bridges included.
+\end{quote}
+
+It is not yet strong enough to justify the stronger statement:
+
+\begin{quote}
+The complete HAETAE Jasmin NTT implementation has been machine-checked against
+the full abstract polynomial NTT specification.
+\end{quote}
+
+That stronger claim becomes valid only after the two imperative algebra
+obligations above are proved in EasyCrypt without \ec{admit}, \ec{abort}, or new
+axioms and then composed with \ec{poly_ntt_core_ref} and
+\ec{poly_invntt_core_ref}.
+
+\end{document}

@@ -1,0 +1,77 @@
+\chapter{Sampler Freshness and Exact Hyperball Sampling}
+\label{ch:sampler}
+
+\section{Sampler Interfaces}
+
+The proof contains several sampling modules, including
+\code{ROSigningAttemptPaperSimSampler}, \code{HAETAERejectionPaperSimSampler},
+\code{ExactHyperballPaperSimSampler}, and \code{ROExactHyperballPaperSimSampler}.
+These modules allow the proof to compare paper-style structural sampling with
+exact formal sampling.
+
+\section{Pen-and-Paper Freshness Bound}
+
+\begin{lemma}[Sampler prequery bound]
+Let \(s\) be fresh sampler seed coins drawn from the distribution
+\(D_{\mathrm{seed}}\).  Let \(\mathsf{expand}(s)\) be the random-oracle query
+used by the sampler.  Let \(Q_A\) be the set of adversarial hash queries logged
+before sampling, let \(Q_{\mathsf{sampler}}\) be the sampler self-log from
+earlier signing calls, and let
+\(Q=Q_A\cup Q_{\mathsf{sampler}}\).  If \(|Q_A|\le q_H\),
+\(|Q_{\mathsf{sampler}}|\le q_S\), and \(\mathsf{expand}(s)\) has min-entropy at
+least \(\log_2 N\), then
+\[
+\Pr[\mathsf{expand}(s)\in Q_A\cup Q_{\mathsf{sampler}}]
+\le (q_H+q_S)/N.
+\]
+\end{lemma}
+
+\begin{proof}
+Condition on the game view before the fresh seed is drawn.  The joint logged
+query set \(Q_A\cup Q_{\mathsf{sampler}}\) is then fixed and has cardinality at
+most \(q_H+q_S\).  The min-entropy condition says that every query value has
+probability at most \(1/N\).  The union bound over all entries in the joint log
+gives the result.  The conditioning is valid because the seed is sampled after
+the logged adversarial queries and earlier sampler self-queries and is
+independent of both logs.
+\end{proof}
+
+\section{The sampler\_bad\_prequery Event}
+
+A central event is \code{sampler\_bad\_prequery}.  It records whether the
+random-oracle input derived from fresh sampler seed coins has already appeared
+in the adversary hash log or in the sampler self-log from earlier signing calls.
+The tight proof routes adversary hash queries and sampler self-queries through
+logs and proves that a fresh seed collides with the joint log only with
+probability bounded by the combined query budget.
+
+\section{Clean-Conditioned Lifting}
+
+Under the clean condition that \code{sampler\_bad\_prequery} is false, the
+proof lifts the one-step structural-to-exact sampling result through the
+budgeted signing-oracle wrapper.  This is represented by lemmas such as
+\code{concrete\_rom\_internal\_budgeted\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_clean\_conditioned\_lifting}.
+
+\section{Detailed EasyCrypt Code Analysis}
+
+The EasyCrypt code decomposes sampler freshness into local and lifted facts.
+Local lemmas such as
+\code{concrete\_lazy\_rom\_sampler\_expand\_query\_fresh\_phoare} reason about
+one ROM call and one seed.  Structural lemmas such as
+\code{concrete\_ro\_signing\_attempt\_sample\_with\_seed\_fresh\_structural\_le}
+connect that local fact to the signing-attempt sampler.  Guarded-clean lemmas
+then add the condition that the bad event is false.
+
+The exact-hyperball lemmas, including
+\code{concrete\_ro\_exact\_hyperball\_sample\_with\_seed\_exact} and
+\code{concrete\_ro\_signing\_attempt\_to\_exact\_hyperball\_sample\_with\_seed\_clean\_loss},
+form the bridge from the structural paper sampler to the exact formal sampler.
+The code is written this way because each level has a different proof burden:
+ROM freshness is local, sample distribution equivalence is sampler-specific,
+and lifting through the adversary is game-specific.
+
+A reviewer should pay close attention to the distinction between lemmas ending
+in \code{fresh\_loss}, \code{clean\_loss}, and \code{clean\_conditioned\_lifting}.
+The first bounds the probability of a collision.  The second states the loss
+under the clean event.  The third transports the result through the full
+budgeted game wrapper.

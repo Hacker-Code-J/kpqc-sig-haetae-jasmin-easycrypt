@@ -1,0 +1,77 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+Digital signatures are a basic mechanism for public-key authentication.  A
+signature scheme allows a signer with a secret key to authenticate messages so
+that anyone with the corresponding public key can verify them.  The standard
+adaptive security notion for signatures is existential unforgeability under
+chosen-message attack, or \eufcma{}.  In this notion an adversary receives a
+public key, adaptively queries a signing oracle, and wins if it outputs a valid
+signature on a message that the signing oracle did not sign.
+
+The post-quantum transition makes the assurance problem more difficult.  Modern
+lattice-based signatures combine algebraic structure, randomized sampling,
+Fiat-Shamir transformations, rejection sampling, and concrete hash functions.
+Their proofs involve many games and many small probability losses.  A missing
+freshness side condition or an incorrectly counted oracle query can invalidate a
+security claim even when the high-level proof idea is correct.
+
+This dissertation documents a machine-checked provable-security proof surface
+for a formal \haetae{} random-oracle model in \easycrypt{}.  The qualifier
+``formal model'' is essential: the checked surface is a conditional implication
+about the EasyCrypt game model and its counted random-oracle interface, not a
+separate machine-checked equivalence proof for every line of the February 2026
+HAETAE specification or for a concrete SHAKE implementation.  It is
+``machine checked'' because the games, modules, lemmas, and inequalities are
+accepted by EasyCrypt rather than only argued in prose.  Its current
+cryptographic reading must remain conditional: the final counted-ROM conclusion
+depends on explicit hop and hardness premises, and one final hop premise is
+vacuous under the present \ec{rejection\_sampling\_loss\_term} constants unless
+that premise or loss normalization is strengthened in future proof work.
+
+\section{Problem Statement}
+
+The problem addressed by this work is the following:
+
+\begin{quote}
+How can the random-oracle-model proof of the formal \haetae{} scheme's
+\eufcma{} security be represented, checked, maintained, and audited as an
+EasyCrypt development whose provable-security surface is clearly separated from
+unrelated generated certification artifacts, while the model/specification
+boundary remains explicit?
+\end{quote}
+
+This formulation has two parts.  The first is mathematical: the proof must
+connect the \eufcma{} game to the underlying assumptions through valid game
+hops and reductions.  The second is engineering-oriented: the proof repository
+must make it clear which EasyCrypt files are part of the security theorem and
+how to re-run the proof.
+
+\section{Contributions}
+
+The dissertation records six contributions.
+
+\begin{enumerate}[label=\textbf{C\arabic*.}]
+\item A separated EasyCrypt proof-management folder for \haetae{} provable
+security under \code{provable-security/}.
+\item A manifest-driven verification gate that compiles only the files needed
+for the formal security proof.
+\item A structured account of the theorem chain from generic signature games to
+\haetae{}-specific \eufcma{} security.
+\item A detailed explanation of checked random-oracle programming, sampler
+freshness, budgeted lifting, rejection sampling, and concrete bound algebra.
+\item A dependency ledger separating checked theorem content from modeling
+assumptions, audited specification correspondences, and out-of-scope
+cryptanalytic or implementation claims.
+\item A clear boundary between provable-security artifacts, modeled hash
+interfaces, concrete FIPS202/SHAKE validation material, and generated
+known-answer-test files.
+\end{enumerate}
+
+\section{Reading Guide}
+
+\Cref{ch:background} reviews the cryptographic and formal background.
+\Cref{ch:proof-scope} defines the checked proof surface.  Later chapters follow
+the proof architecture: EasyCrypt framework, signature games, ROM programming,
+sampler freshness, transcript hops, budgeted lifting, reductions, and
+reproducibility.

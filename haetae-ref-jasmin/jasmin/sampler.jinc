@@ -1,0 +1,618 @@
+require "params.jinc"
+
+u32[64] jcdt = {
+  3266,  6520,  9748,  12938, 16079, 19159, 22168, 25096,
+  27934, 30674, 33309, 35833, 38241, 40531, 42698, 44742,
+  46663, 48460, 50135, 51690, 53128, 54454, 55670, 56781,
+  57794, 58712, 59541, 60287, 60956, 61554, 62085, 62556,
+  62972, 63337, 63657, 63936, 64178, 64388, 64569, 64724,
+  64857, 64970, 65066, 65148, 65216, 65273, 65321, 65361,
+  65394, 65422, 65444, 65463, 65478, 65490, 65500, 65508,
+  65514, 65519, 65523, 65527, 65529, 65531, 65533, 65534
+};
+
+fn _sample_gauss16(reg u64 rand16) -> reg u64
+{
+  reg ptr u32[64] cdtp;
+  reg u64 i r t;
+  reg u32 c;
+
+  cdtp = jcdt;
+  i = 0;
+  r = 0;
+  while (i < 64)
+  {
+    c = cdtp[i];
+    t = (64u)c;
+    t -= rand16;
+    t >>= 63;
+    t &= 1;
+    r += t;
+    i += 1;
+  }
+
+  return r;
+}
+
+fn __smulh48(reg u64 a b) -> reg u64
+{
+  reg u64 hi lo r tmp round rax rdx;
+
+  rax = a;
+  _, _, _, _, _, rdx, rax = #IMUL_64(rax, b);
+  hi = rdx;
+  lo = rax;
+  round = 0x800000000000;
+  lo += round;
+  if (lo < round)
+  {
+    hi += 1;
+  }
+  r = hi;
+  r <<= 16;
+  tmp = lo;
+  tmp >>= 48;
+  r |= tmp;
+
+  return r;
+}
+
+fn _approx_exp(reg u64 x) -> reg u64
+{
+  reg u64 result;
+
+  result = -0x0000B6C6340925AE;
+  result = __smulh48(result, x);
+  result += 4;
+  result >>s= 3;
+  result += 0x0000B4BD4DF85227;
+
+  result = __smulh48(result, x);
+  result += 4;
+  result >>s= 3;
+  result -= 0x0000887F727491E2;
+
+  result = __smulh48(result, x);
+  result += 2;
+  result >>s= 2;
+  result += 0x0000AAAA643C7E8D;
+
+  result = __smulh48(result, x);
+  result += 2;
+  result >>s= 2;
+  result -= 0x0000AAAAA98179E6;
+
+  result = __smulh48(result, x);
+  result += 1;
+  result >>s= 1;
+  result += 0x0000FFFFFFFB2E7A;
+
+  result = __smulh48(result, x);
+  result += 1;
+  result >>s= 1;
+  result -= 0x0000FFFFFFFFF85F;
+
+  result = __smulh48(result, x);
+  result += 0x0000FFFFFFFFFFFC;
+
+  return result;
+}
+
+fn __sample_gauss_sigma76_regs(reg const ptr u8[17] randp)
+                                -> reg u64, reg u64, reg u64, reg u64
+{
+  stack u64[2] y;
+  stack u64[2] sqrbuf;
+  reg ptr u64[2] yp;
+  reg ptr u64[2] sqrp;
+  reg u64 rand_gauss16 rand_rej x y0 y1 rounded exp_in exp;
+  reg u64 t u accepted sqr0 sqr1;
+  reg u8 byte;
+
+  byte = randp[0];
+  rand_gauss16 = (64u)byte;
+  byte = randp[1];
+  t = (64u)byte;
+  t <<= 8;
+  rand_gauss16 |= t;
+
+  byte = randp[2];
+  rand_rej = (64u)byte;
+  byte = randp[3];
+  t = (64u)byte;
+  t <<= 8;
+  rand_rej |= t;
+  byte = randp[4];
+  t = (64u)byte;
+  t <<= 16;
+  rand_rej |= t;
+  byte = randp[5];
+  t = (64u)byte;
+  t <<= 24;
+  rand_rej |= t;
+  byte = randp[6];
+  t = (64u)byte;
+  t <<= 32;
+  rand_rej |= t;
+  byte = randp[7];
+  t = (64u)byte;
+  t <<= 40;
+  rand_rej |= t;
+
+  x = _sample_gauss16(rand_gauss16);
+
+  byte = randp[8];
+  y0 = (64u)byte;
+  byte = randp[9];
+  t = (64u)byte;
+  t <<= 8;
+  y0 |= t;
+  byte = randp[10];
+  t = (64u)byte;
+  t <<= 16;
+  y0 |= t;
+  byte = randp[11];
+  t = (64u)byte;
+  t <<= 24;
+  y0 |= t;
+  byte = randp[12];
+  t = (64u)byte;
+  t <<= 32;
+  y0 |= t;
+  byte = randp[13];
+  t = (64u)byte;
+  t <<= 40;
+  y0 |= t;
+
+  byte = randp[14];
+  y1 = (64u)byte;
+  byte = randp[15];
+  t = (64u)byte;
+  t <<= 8;
+  y1 |= t;
+  byte = randp[16];
+  t = (64u)byte;
+  t <<= 16;
+  y1 |= t;
+  t = x;
+  t <<= 24;
+  y1 |= t;
+
+  rounded = y0;
+  rounded >>= 15;
+  t = y1;
+  t <<= 33;
+  rounded ^= t;
+  rounded += 1;
+  rounded >>= 1;
+
+  y[0] = y0;
+  y[1] = y1;
+  yp = y;
+  sqrp = sqrbuf;
+  sqrp = _fixpoint_square(sqrp, yp);
+  sqr0 = sqrp[0];
+  sqr1 = sqrp[1];
+
+  exp_in = sqr1;
+  t = x;
+  t *= x;
+  t <<= 20;
+  exp_in -= t;
+  exp_in <<= 20;
+  t = sqr0;
+  t >>= 28;
+  exp_in |= t;
+  exp_in += 1;
+  exp_in >>= 1;
+
+  exp = _approx_exp(exp_in);
+  accepted = rand_rej;
+  t = rand_rej;
+  t &= 1;
+  accepted ^= t;
+  accepted -= exp;
+  accepted >>s= 63;
+
+  t = 0;
+  t -= rounded;
+  u = rounded;
+  u |= t;
+  u >>= 63;
+  u |= rand_rej;
+  accepted &= u;
+  accepted &= 1;
+
+  return rounded, sqr0, sqr1, accepted;
+}
+
+fn _sample_gauss_sigma76(reg mut ptr u64[1] rp,
+                         reg mut ptr u64[2] sqrp,
+                         reg mut ptr u32[1] acceptedp,
+                         reg const ptr u8[17] randp)
+                         -> reg ptr u64[1],
+                            reg ptr u64[2],
+                            reg ptr u32[1]
+{
+  reg u64 sample sqr0 sqr1 accepted;
+
+  sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+  rp[0] = sample;
+  sqrp[0] = sqr0;
+  sqrp[1] = sqr1;
+  acceptedp[0] = (32u)accepted;
+
+  return rp, sqrp, acceptedp;
+}
+
+fn _sample_gauss(reg mut ptr u64[512] rp,
+                 reg mut ptr u64[2] sqsump,
+                 reg mut ptr u64[1] coefcntp,
+                 reg const ptr u8[8192] bufp,
+                 reg u64 counts,
+                 reg u64 dont_write_last) -> reg ptr u64[512],
+                                            reg ptr u64[2],
+                                            reg ptr u64[1]
+{
+  stack ptr u64[512] srp;
+  stack ptr u64[2] ssqsump;
+  stack ptr u64[1] scoefcntp;
+  stack ptr u8[8192] sbufp;
+  stack u64 slen sbytecnt spos scoefcnt sdont;
+  stack u8[17] randbuf;
+  reg ptr u64[512] rp_tmp;
+  reg ptr u64[2] sqsum_tmp;
+  reg ptr u64[1] coefcntp_tmp;
+  reg const ptr u8[8192] bufp_tmp;
+  reg ptr u8[17] randp;
+  inline int k;
+  reg u64 len bytecnt pos coefcnt last sample accepted accepted64 dont;
+  reg u64 s0 s1 sqr0 sqr1 mask carry;
+  reg u8 byte;
+
+  srp = rp;
+  ssqsump = sqsump;
+  scoefcntp = coefcntp;
+  sbufp = bufp;
+  sdont = dont_write_last;
+
+  len = counts;
+  len &= 0xffffffff;
+  bytecnt = counts;
+  bytecnt >>= 32;
+  slen = len;
+  sbytecnt = bytecnt;
+  spos = 0;
+  scoefcnt = 0;
+
+  randp = randbuf;
+
+  while { coefcnt = scoefcnt; len = slen; } (coefcnt < len)
+  {
+    bytecnt = sbytecnt;
+    if (bytecnt < 17)
+    {
+      slen = coefcnt;
+    }
+    else
+    {
+      pos = spos;
+      bufp_tmp = sbufp;
+      for k = 0 to 17
+      {
+        byte = bufp_tmp[pos + k];
+        randp[k] = byte;
+      }
+
+      sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+
+      last = len;
+      last -= 1;
+      dont = sdont;
+      rp_tmp = srp;
+      if (dont != 0)
+      {
+        if (coefcnt == last)
+        {
+          accepted64 = accepted;
+        }
+        else
+        {
+          rp_tmp[coefcnt] = sample;
+          srp = rp_tmp;
+          accepted64 = accepted;
+        }
+      }
+      else
+      {
+        rp_tmp[coefcnt] = sample;
+        srp = rp_tmp;
+        accepted64 = accepted;
+      }
+
+      coefcnt += accepted64;
+      pos += 17;
+      bytecnt -= 17;
+
+      mask = 0;
+      mask -= accepted64;
+      sqr0 &= mask;
+      sqr1 &= mask;
+      sqsum_tmp = ssqsump;
+      s0 = sqsum_tmp[0];
+      s1 = sqsum_tmp[1];
+      s0 += sqr0;
+      s1 += sqr1;
+      sqsum_tmp[0] = s0;
+      sqsum_tmp[1] = s1;
+      ssqsump = sqsum_tmp;
+      scoefcnt = coefcnt;
+      spos = pos;
+      sbytecnt = bytecnt;
+    }
+  }
+
+  sqsum_tmp = ssqsump;
+  s0 = sqsum_tmp[0];
+  s1 = sqsum_tmp[1];
+  carry = s0;
+  carry >>= 48;
+  s1 += carry;
+  mask = 0xffffffffffff;
+  s0 &= mask;
+  sqsum_tmp[0] = s0;
+  sqsum_tmp[1] = s1;
+  ssqsump = sqsum_tmp;
+
+  coefcnt = scoefcnt;
+  coefcntp_tmp = scoefcntp;
+  coefcntp_tmp[0] = coefcnt;
+  scoefcntp = coefcntp_tmp;
+
+  rp = srp;
+  sqsump = ssqsump;
+  coefcntp = scoefcntp;
+  return rp, sqsump, coefcntp;
+}
+
+fn _sample_gauss_N_copy_signs(reg mut ptr u8[1024] signsp,
+                              reg const ptr u8[8192] bufp,
+                              reg u64 signbytes) -> reg ptr u8[1024]
+{
+  reg u64 i;
+  reg u8 b;
+
+  i = 0;
+  while (i < signbytes)
+  {
+    b = bufp[i];
+    signsp[i] = b;
+    i += 1;
+  }
+
+  return signsp;
+}
+
+fn _sample_gauss_N_carry(reg mut ptr u8[8192] bufp,
+                         reg u64 bytecnt,
+                         reg u64 signbytes,
+                         reg u64 firstflag,
+                         reg u64 off) -> reg ptr u8[8192]
+{
+  reg u64 i src idx;
+  reg u8 b;
+
+  src = bytecnt;
+  if (firstflag != 0)
+  {
+    src += signbytes;
+  }
+  src -= off;
+
+  i = 0;
+  while (i < off)
+  {
+    idx = src;
+    idx += i;
+    b = bufp[idx];
+    bufp[i] = b;
+    i += 1;
+  }
+
+  return bufp;
+}
+
+fn _rej_uniform(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+                reg u64 len, reg const ptr u8[1024] bp,
+                reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  reg u64 ctr pos rem;
+  reg u8 byte;
+  reg u32 t u;
+
+  ctr = 0;
+  pos = 0;
+  while (ctr < len)
+  {
+    rem = buflen;
+    rem -= pos;
+    if (rem < 2)
+    {
+      len = ctr;
+    }
+    else
+    {
+      byte = bp[pos];
+      t = (32u)byte;
+      pos += 1;
+      byte = bp[pos];
+      u = (32u)byte;
+      pos += 1;
+      u <<= 8;
+      t |= u;
+
+      if (t < HAETAE_Q)
+      {
+        ap[ctr] = t;
+        ctr += 1;
+      }
+    }
+  }
+
+  ctrp[0] = (32u)ctr;
+  return ap, ctrp;
+}
+
+inline fn __mod3(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __mod3_leq26(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __mod3_leq8(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 2;
+  u = t;
+  u &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+fn _rej_eta(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+            reg u64 len, reg const ptr u8[1024] bp,
+            reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  reg u64 ctr pos;
+  reg u8 byte;
+  reg u32 t r;
+
+  ctr = 0;
+  pos = 0;
+  while (ctr < len)
+  {
+    if (pos < buflen)
+    {
+      byte = bp[pos];
+      t = (32u)byte;
+      pos += 1;
+      if (t < 243)
+      {
+        r = __mod3(t);
+        ap[ctr] = r;
+        ctr += 1;
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3_leq26(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3_leq8(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = t;
+          r >>= 1;
+          r *= 3;
+          t -= r;
+          ap[ctr] = t;
+          ctr += 1;
+        }
+      }
+    }
+    else
+    {
+      len = ctr;
+    }
+  }
+
+  ctrp[0] = (32u)ctr;
+  return ap, ctrp;
+}

@@ -1,0 +1,759 @@
+fn _keccak_load64(reg const ptr u8[8] xp) -> reg u64
+{
+  reg u64 r t;
+
+  r = (64u)xp[0];
+  t = (64u)xp[1];
+  t <<= 8;
+  r |= t;
+  t = (64u)xp[2];
+  t <<= 16;
+  r |= t;
+  t = (64u)xp[3];
+  t <<= 24;
+  r |= t;
+  t = (64u)xp[4];
+  t <<= 32;
+  r |= t;
+  t = (64u)xp[5];
+  t <<= 40;
+  r |= t;
+  t = (64u)xp[6];
+  t <<= 48;
+  r |= t;
+  t = (64u)xp[7];
+  t <<= 56;
+  r |= t;
+
+  return r;
+}
+
+fn _keccak_store64(reg mut ptr u8[8] xp,
+                   reg u64 u) -> reg ptr u8[8]
+{
+  reg u64 t;
+  reg u8 b;
+
+  t = u;
+  b = (8u)t;
+  xp[0] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[1] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[2] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[3] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[4] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[5] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[6] = b;
+  t >>= 8;
+  b = (8u)t;
+  xp[7] = b;
+
+  return xp;
+}
+
+fn _keccak_init_state(reg mut ptr u64[25] sp) -> reg ptr u64[25]
+{
+  reg u64 i;
+
+  i = 0;
+  while (i < 25)
+  {
+    sp[i] = 0;
+    i += 1;
+  }
+
+  return sp;
+}
+
+fn _shake_store_nonce(reg mut ptr u8[2] tp,
+                      reg u64 nonce) -> reg ptr u8[2]
+{
+  reg u64 t;
+  reg u8 b;
+
+  t = nonce;
+  b = (8u)t;
+  tp[0] = b;
+  t >>= 8;
+  b = (8u)t;
+  tp[1] = b;
+
+  return tp;
+}
+
+fn _keccak_finalize(reg mut ptr u64[25] sp,
+                    reg u64 pos,
+                    reg u64 rate,
+                    reg u8 domain) -> reg ptr u64[25]
+{
+  reg u64 lane t;
+  reg u8 shift;
+
+  lane = pos;
+  lane >>= 3;
+  shift = (8u)pos;
+  shift &= 7;
+  shift <<= 3;
+  t = (64u)domain;
+  t <<= (shift & 63);
+  sp[lane] ^= t;
+
+  lane = rate;
+  lane >>= 3;
+  lane -= 1;
+  t = 1;
+  t <<= 63;
+  sp[lane] ^= t;
+
+  return sp;
+}
+
+param int HAETAE_KECCAK_ROUNDS = 24;
+
+u64[24] haetae_keccak1600_rc =
+{
+  0x0000000000000001,
+  0x0000000000008082,
+  0x800000000000808a,
+  0x8000000080008000,
+  0x000000000000808b,
+  0x0000000080000001,
+  0x8000000080008081,
+  0x8000000000008009,
+  0x000000000000008a,
+  0x0000000000000088,
+  0x0000000080008009,
+  0x000000008000000a,
+  0x000000008000808b,
+  0x800000000000008b,
+  0x8000000000008089,
+  0x8000000000008003,
+  0x8000000000008002,
+  0x8000000000000080,
+  0x000000000000800a,
+  0x800000008000000a,
+  0x8000000080008081,
+  0x8000000000008080,
+  0x0000000080000001,
+  0x8000000080008008
+};
+
+inline fn __keccakf1600_index(inline int x,
+                              inline int y) -> inline int
+{
+  inline int r;
+
+  r = (x % 5) + 5 * (y % 5);
+  return r;
+}
+
+inline fn __keccakf1600_rho_offset(inline int i) -> inline int
+{
+  inline int r x y z t;
+
+  r = 0;
+  x = 1;
+  y = 0;
+
+  for t = 0 to 24
+  {
+    if (i == x + 5 * y)
+    {
+      r = ((t + 1) * (t + 2) / 2) % 64;
+    }
+    z = (2 * x + 3 * y) % 5;
+    x = y;
+    y = z;
+  }
+
+  return r;
+}
+
+inline fn __keccakf1600_rho(inline int x,
+                            inline int y) -> inline int
+{
+  inline int i r;
+
+  i = __keccakf1600_index(x, y);
+  r = __keccakf1600_rho_offset(i);
+  return r;
+}
+
+inline fn __rol_u64(reg u64 x,
+                    inline int i) -> reg u64
+{
+  if (i != 0)
+  {
+    _, _, x = #ROL_64(x, i);
+  }
+
+  return x;
+}
+
+inline fn __andn_u64(reg u64 a,
+                     reg u64 b) -> reg u64
+{
+  reg u64 t;
+
+  t = !a & b;
+  return t;
+}
+
+inline fn __keccak_theta_sum(reg ptr u64[25] a) -> reg u64[5]
+{
+  inline int x y;
+  reg u64[5] c;
+
+  for x = 0 to 5
+  {
+    c[x] = a[x];
+  }
+
+  for y = 1 to 5
+  {
+    for x = 0 to 5
+    {
+      c[x] ^= a[x + y * 5];
+    }
+  }
+
+  return c;
+}
+
+inline fn __keccak_theta_rol(reg u64[5] c) -> reg u64[5]
+{
+  inline int x;
+  reg u64[5] d;
+
+  for x = 0 to 5
+  {
+    d[x] = c[(x + 1) % 5];
+    d[x] = __rol_u64(d[x], 1);
+    d[x] ^= c[(x - 1 + 5) % 5];
+  }
+
+  return d;
+}
+
+inline fn __keccak_rol_sum(reg ptr u64[25] a,
+                           reg u64[5] d,
+                           inline int y) -> reg u64[5]
+{
+  inline int r x xp yp;
+  reg u64[5] b;
+
+  for x = 0 to 5
+  {
+    xp = (x + 3 * y) % 5;
+    yp = x;
+    r = __keccakf1600_rho(xp, yp);
+    b[x] = a[xp + yp * 5];
+    b[x] ^= d[xp];
+    b[x] = __rol_u64(b[x], r);
+  }
+
+  return b;
+}
+
+inline fn __keccak_set_row(reg ptr u64[25] e,
+                           reg u64[5] b,
+                           inline int y) -> reg ptr u64[25]
+{
+  inline int x x1 x2;
+  reg u64 t;
+
+  for x = 0 to 5
+  {
+    x1 = (x + 1) % 5;
+    x2 = (x + 2) % 5;
+    t = __andn_u64(b[x1], b[x2]);
+    t ^= b[x];
+    e[x + y * 5] = t;
+  }
+
+  return e;
+}
+
+fn _keccak_pround(reg ptr u64[25] e,
+                  reg ptr u64[25] a) -> reg ptr u64[25]
+{
+  inline int y;
+  reg u64[5] b c d;
+
+  c = __keccak_theta_sum(a);
+  d = __keccak_theta_rol(c);
+
+  for y = 0 to 5
+  {
+    b = __keccak_rol_sum(a, d, y);
+    e = __keccak_set_row(e, b, y);
+  }
+
+  return e;
+}
+
+inline fn __keccakf1600_statepermute(reg ptr u64[25] a) -> reg ptr u64[25]
+{
+  stack u64[25] se;
+  reg ptr u64[25] e;
+  reg ptr u64[24] rcp;
+  reg ui64 c;
+  reg u64 rc;
+
+  e = se;
+  c = 0;
+
+  while
+  {
+    () = #spill(c);
+    e = _keccak_pround(e, a);
+    a, e = #swap(e, a);
+    rcp = haetae_keccak1600_rc;
+    rc = rcp[c];
+    e[0] ^= rc;
+
+    a = _keccak_pround(a, e);
+    a, e = #swap(e, a);
+    rcp = haetae_keccak1600_rc;
+    rc = rcp[c + 1];
+    a[0] ^= rc;
+    () = #unspill(c);
+    c += 2;
+  }
+  (c < HAETAE_KECCAK_ROUNDS - 1)
+
+  return a;
+}
+
+fn _keccakf1600(reg mut ptr u64[25] sp) -> reg ptr u64[25]
+{
+  sp = __keccakf1600_statepermute(sp);
+  return sp;
+}
+
+fn _keccak_absorb_once(reg mut ptr u64[25] sp,
+                       reg u64 rate,
+                       reg ui64 inp,
+                       reg u64 inlen,
+                       reg u8 domain) -> reg ptr u64[25]
+{
+  reg u64 i lane t;
+  reg u8 b shift;
+
+  sp = _keccak_init_state(sp);
+
+  while (inlen >= rate)
+  {
+    i = 0;
+    while (i < rate)
+    {
+      lane = i;
+      lane >>= 3;
+      t = [:u64 (64u)inp];
+      sp[lane] ^= t;
+      inp += 8;
+      i += 8;
+    }
+
+    inlen -= rate;
+    () = #spill(rate, inp, inlen, domain);
+    sp = _keccakf1600(sp);
+    () = #unspill(rate, inp, inlen, domain);
+  }
+
+  i = 0;
+  while (i < inlen)
+  {
+    lane = i;
+    lane >>= 3;
+    b = [:u8 (64u)inp];
+    t = (64u)b;
+    shift = (8u)i;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    inp += 1;
+    i += 1;
+  }
+
+  sp = _keccak_finalize(sp, i, rate, domain);
+
+  return sp;
+}
+
+fn _keccak_squeezeblocks(reg ui64 outp,
+                         reg u64 nblocks,
+                         reg mut ptr u64[25] sp,
+                         reg u64 rate) -> reg ptr u64[25]
+{
+  reg u64 i lane t;
+
+  while (nblocks != 0)
+  {
+    () = #spill(outp, nblocks, rate);
+    sp = _keccakf1600(sp);
+    () = #unspill(outp, nblocks, rate);
+
+    i = 0;
+    while (i < rate)
+    {
+      lane = i;
+      lane >>= 3;
+      t = sp[lane];
+      [:u64 (64u)outp] = t;
+      outp += 8;
+      i += 8;
+    }
+
+    nblocks -= 1;
+  }
+
+  return sp;
+}
+
+fn _keccak_absorb(reg mut ptr u64[25] sp,
+                  reg mut ptr u64[2] statep,
+                  reg ui64 inp,
+                  reg u64 inlen) -> reg ptr u64[25],
+                                     reg ptr u64[2]
+{
+  reg u64 pos rate i end lane delta t;
+  reg u8 b shift;
+
+  pos = statep[0];
+  rate = statep[1];
+
+  end = pos;
+  end += inlen;
+  while (end >= rate)
+  {
+    i = pos;
+    while (i < rate)
+    {
+      lane = i;
+      lane >>= 3;
+      b = [:u8 (64u)inp];
+      t = (64u)b;
+      shift = (8u)i;
+      shift &= 7;
+      shift <<= 3;
+      t <<= (shift & 63);
+      sp[lane] ^= t;
+      inp += 1;
+      i += 1;
+    }
+
+    delta = rate;
+    delta -= pos;
+    inlen -= delta;
+    () = #spill(rate, inp, inlen);
+    sp = _keccakf1600(sp);
+    () = #unspill(rate, inp, inlen);
+    pos = 0;
+    end = inlen;
+  }
+
+  end = pos;
+  end += inlen;
+  i = pos;
+  while (i < end)
+  {
+    lane = i;
+    lane >>= 3;
+    b = [:u8 (64u)inp];
+    t = (64u)b;
+    shift = (8u)i;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    inp += 1;
+    i += 1;
+  }
+
+  statep[0] = i;
+  return sp, statep;
+}
+
+fn _keccak_squeeze(reg mut ptr u64[25] sp,
+                   reg mut ptr u64[2] statep,
+                   reg ui64 outp,
+                   reg u64 outlen) -> reg ptr u64[25],
+                                      reg ptr u64[2]
+{
+  reg u64 pos rate i end lane delta t;
+  reg u8 b shift;
+
+  pos = statep[0];
+  rate = statep[1];
+
+  while (outlen != 0)
+  {
+    if (pos == rate)
+    {
+      () = #spill(rate, outp, outlen);
+      sp = _keccakf1600(sp);
+      () = #unspill(rate, outp, outlen);
+      pos = 0;
+    }
+
+    end = pos;
+    end += outlen;
+    end = rate if end > rate;
+
+    i = pos;
+    while (i < end)
+    {
+      lane = i;
+      lane >>= 3;
+      t = sp[lane];
+      shift = (8u)i;
+      shift &= 7;
+      shift <<= 3;
+      t >>= (shift & 63);
+      b = (8u)t;
+      [:u8 (64u)outp] = b;
+      outp += 1;
+      i += 1;
+    }
+
+    delta = i;
+    delta -= pos;
+    outlen -= delta;
+    pos = i;
+  }
+
+  statep[0] = pos;
+  return sp, statep;
+}
+
+fn _keccak_absorb_nonce16(reg mut ptr u64[25] sp,
+                          reg mut ptr u64[2] statep,
+                          reg u64 nonce) -> reg ptr u64[25],
+                                             reg ptr u64[2]
+{
+  inline int k;
+  reg u64 pos lane t;
+  reg u8 b shift;
+
+  pos = statep[0];
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)nonce;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    nonce >>= 8;
+    pos += 1;
+  }
+
+  statep[0] = pos;
+  return sp, statep;
+}
+
+fn _shake_stream_init(reg mut ptr u64[26] statep,
+                      reg u64 rate,
+                      reg ui64 seedp,
+                      reg u64 seedlen,
+                      reg u64 nonce) -> reg ptr u64[26]
+{
+  reg ptr u64[25] sp;
+  reg u64 pos lane t;
+  reg u8 b shift domain;
+  inline int k;
+
+  sp = statep[0:25];
+  sp = _keccak_init_state(sp);
+
+  pos = 0;
+  while (pos < seedlen)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 (64u)seedp];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    seedp += 1;
+    pos += 1;
+  }
+
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)nonce;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    nonce >>= 8;
+    pos += 1;
+  }
+
+  domain = 0x1f;
+  sp = _keccak_finalize(sp, pos, rate, domain);
+  statep[0:25] = sp;
+  statep.[:u32 200] = 0;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+fn _shake_state_init(reg mut ptr u64[26] statep) -> reg ptr u64[26]
+{
+  reg ptr u64[25] sp;
+
+  sp = statep[0:25];
+  sp = _keccak_init_state(sp);
+
+  statep[0:25] = sp;
+  statep.[:u32 200] = 0;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+inline fn _shake_state_absorb(reg mut ptr u64[26] statep,
+                              reg ui64 inp,
+                              reg u64 inlen,
+                              inline int rate) -> reg ptr u64[26]
+{
+  stack u64[2] st;
+  reg ptr u64[2] stp;
+  reg ptr u64[25] sp;
+  reg u64 pos;
+  reg u32 pos32;
+
+  sp = statep[0:25];
+  stp = st;
+  pos32 = statep.[:u32 200];
+  pos = (64u)pos32;
+  stp[0] = pos;
+  stp[1] = rate;
+
+  () = #spill(statep);
+  sp, stp = _keccak_absorb(sp, stp, inp, inlen);
+  () = #unspill(statep);
+
+  statep[0:25] = sp;
+  pos = stp[0];
+  pos32 = (32u)pos;
+  statep.[:u32 200] = pos32;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+inline fn _shake_state_finalize(reg mut ptr u64[26] statep,
+                                inline int rate) -> reg ptr u64[26]
+{
+  reg ptr u64[25] sp;
+  reg u64 pos ratev;
+  reg u32 pos32;
+  reg u8 domain;
+
+  sp = statep[0:25];
+  pos32 = statep.[:u32 200];
+  pos = (64u)pos32;
+  ratev = rate;
+  domain = 0x1f;
+
+  sp = _keccak_finalize(sp, pos, ratev, domain);
+
+  statep[0:25] = sp;
+  statep.[:u32 200] = rate;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+inline fn _shake_state_squeeze(reg mut ptr u64[26] statep,
+                               reg ui64 outp,
+                               reg u64 outlen,
+                               inline int rate) -> reg ptr u64[26]
+{
+  stack u64[2] st;
+  reg ptr u64[2] stp;
+  reg ptr u64[25] sp;
+  reg u64 pos;
+  reg u32 pos32;
+
+  sp = statep[0:25];
+  stp = st;
+  pos32 = statep.[:u32 200];
+  pos = (64u)pos32;
+  stp[0] = pos;
+  stp[1] = rate;
+
+  () = #spill(statep);
+  sp, stp = _keccak_squeeze(sp, stp, outp, outlen);
+  () = #unspill(statep);
+
+  statep[0:25] = sp;
+  pos = stp[0];
+  pos32 = (32u)pos;
+  statep.[:u32 200] = pos32;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+inline fn _shake_state_absorb_once(reg mut ptr u64[26] statep,
+                                   reg ui64 inp,
+                                   reg u64 inlen,
+                                   inline int rate) -> reg ptr u64[26]
+{
+  reg ptr u64[25] sp;
+  reg u64 ratev;
+  reg u8 domain;
+
+  sp = statep[0:25];
+  ratev = rate;
+  domain = 0x1f;
+  sp = _keccak_absorb_once(sp, ratev, inp, inlen, domain);
+
+  statep[0:25] = sp;
+  statep.[:u32 200] = rate;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+inline fn _shake_state_squeezeblocks(reg mut ptr u64[26] statep,
+                                     reg ui64 outp,
+                                     reg u64 nblocks,
+                                     inline int rate) -> reg ptr u64[26]
+{
+  reg ptr u64[25] sp;
+  reg u64 ratev;
+
+  sp = statep[0:25];
+  ratev = rate;
+  sp = _keccak_squeezeblocks(outp, nblocks, sp, ratev);
+  statep[0:25] = sp;
+
+  return statep;
+}

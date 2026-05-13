@@ -1,7 +1,7 @@
 {
   "version": 3,
   "echash": "n/a",
-  "root": { "kind": "ec", "digest": "2afdda8c62732169052f5fd225c5339a" },
+  "root": { "kind": "ec", "digest": "6ba65156706024dc872710d900e5030b" },
   "depends": {
     "AES": {
       "direct": false,

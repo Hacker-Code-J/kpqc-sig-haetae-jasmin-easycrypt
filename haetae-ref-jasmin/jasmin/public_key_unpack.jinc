@@ -1,0 +1,236 @@
+fn __unpack_vk_m23_coeffs(reg mut ptr u32[2048] bp,
+                          reg const ptr u8[2752] vkp,
+                          reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i poly coeff_base in_base off base;
+  reg u32 r part;
+
+  poly = 0;
+  coeff_base = 0;
+  in_base = 32;
+  while (poly < count)
+  {
+    i = 0;
+    off = in_base;
+    while (i < 32)
+    {
+      base = coeff_base;
+      base += 8 * i;
+
+      r = (32u)vkp[off + 0];
+      part = (32u)vkp[off + 1]; part &= 127; part <<= 8; r |= part;
+      bp[base + 0] = r;
+
+      r = (32u)vkp[off + 1]; r >>= 7;
+      part = (32u)vkp[off + 2]; part <<= 1; r |= part;
+      part = (32u)vkp[off + 3]; part &= 63; part <<= 9; r |= part;
+      bp[base + 1] = r;
+
+      r = (32u)vkp[off + 3]; r >>= 6;
+      part = (32u)vkp[off + 4]; part <<= 2; r |= part;
+      part = (32u)vkp[off + 5]; part &= 31; part <<= 10; r |= part;
+      bp[base + 2] = r;
+
+      r = (32u)vkp[off + 5]; r >>= 5;
+      part = (32u)vkp[off + 6]; part <<= 3; r |= part;
+      part = (32u)vkp[off + 7]; part &= 15; part <<= 11; r |= part;
+      bp[base + 3] = r;
+
+      r = (32u)vkp[off + 7]; r >>= 4;
+      part = (32u)vkp[off + 8]; part <<= 4; r |= part;
+      part = (32u)vkp[off + 9]; part &= 7; part <<= 12; r |= part;
+      bp[base + 4] = r;
+
+      r = (32u)vkp[off + 9]; r >>= 3;
+      part = (32u)vkp[off + 10]; part <<= 5; r |= part;
+      part = (32u)vkp[off + 11]; part &= 3; part <<= 13; r |= part;
+      bp[base + 5] = r;
+
+      r = (32u)vkp[off + 11]; r >>= 2;
+      part = (32u)vkp[off + 12]; part <<= 6; r |= part;
+      part = (32u)vkp[off + 13]; part &= 1; part <<= 14; r |= part;
+      bp[base + 6] = r;
+
+      r = (32u)vkp[off + 13]; r >>= 1; r &= 127;
+      part = (32u)vkp[off + 14]; part <<= 7; r |= part;
+      bp[base + 7] = r;
+
+      i += 1;
+      off += 15;
+    }
+
+    coeff_base += HAETAE_N;
+    in_base += 480;
+    poly += 1;
+  }
+
+  return bp;
+}
+
+fn __unpack_vk_m5_coeffs(reg mut ptr u32[2048] bp,
+                         reg const ptr u8[2752] vkp,
+                         reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i poly coeff_base in_base off idx;
+  reg u32 b0 b1 r;
+
+  poly = 0;
+  coeff_base = 0;
+  in_base = 32;
+  while (poly < count)
+  {
+    i = 0;
+    off = in_base;
+    while (i < HAETAE_N)
+    {
+      idx = coeff_base;
+      idx += i;
+      b0 = (32u)vkp[off + 0];
+      b1 = (32u)vkp[off + 1];
+      r = b0;
+      b1 <<= 8;
+      r |= b1;
+      bp[idx] = r;
+      i += 1;
+      off += 2;
+    }
+
+    coeff_base += HAETAE_N;
+    in_base += 512;
+    poly += 1;
+  }
+
+  return bp;
+}
+
+fn __polyvec_sub_left_inplace(reg mut ptr u32[2048] bp,
+                              reg const ptr u32[8192] matp,
+                              reg u64 l,
+                              reg u64 rows) -> reg ptr u32[2048]
+{
+  reg u64 row j bpidx matidx rowbase stride;
+  reg u32 a b;
+
+  stride = l;
+  stride *= HAETAE_N;
+  row = 0;
+  bpidx = 0;
+  rowbase = 0;
+  while (row < rows)
+  {
+    j = 0;
+    matidx = rowbase;
+    while (j < HAETAE_N)
+    {
+      a = matp[matidx];
+      b = bp[bpidx];
+      a -= b;
+      bp[bpidx] = a;
+      bpidx += 1;
+      matidx += 1;
+      j += 1;
+    }
+
+    rowbase += stride;
+    row += 1;
+  }
+
+  return bp;
+}
+
+fn __polymatkl_expand_matA_with_vecA(reg mut ptr u32[8192] matp,
+                                     reg ui64 seedp,
+                                     reg u64 rows,
+                                     reg u64 cols,
+                                     reg u64 m) -> reg ptr u32[8192]
+{
+  reg u64 i j base nonce;
+
+  i = 0;
+  base = 0;
+  while (i < rows)
+  {
+    nonce = rows;
+    nonce <<= 8;
+    nonce += m;
+    nonce += i;
+
+    () = #spill(seedp, rows, cols, m, i, base);
+    matp = _poly_uniform_at(matp, base, seedp, nonce);
+    () = #unspill(seedp, rows, cols, m, i, base);
+    base += HAETAE_N;
+
+    j = 0;
+    while (j < m)
+    {
+      nonce = i;
+      nonce <<= 8;
+      nonce += j;
+
+      () = #spill(seedp, rows, cols, m, i, j, base);
+      matp = _poly_uniform_at(matp, base, seedp, nonce);
+      () = #unspill(seedp, rows, cols, m, i, j, base);
+      j += 1;
+      base += HAETAE_N;
+    }
+
+    i += 1;
+  }
+
+  return matp;
+}
+
+fn _unpack_vk_m23_full(reg mut ptr u32[8192] matp,
+                       reg const ptr u8[2752] vkp,
+                       reg ui64 seedu,
+                       reg u64 k,
+                       reg u64 l,
+                       reg u64 m) -> reg ptr u32[8192]
+{
+  stack u32[2048] b;
+  reg ptr u32[2048] bp;
+  reg u64 count;
+
+  bp = b;
+
+  bp = __unpack_vk_m23_coeffs(bp, vkp, k);
+
+  () = #spill(bp, k, l, m);
+  matp = __polymatkl_expand_matA_with_vecA(matp, seedu, k, l, m);
+  () = #unspill(bp, k, l, m);
+  matp = _polymatkl_double(matp, k, l);
+
+  count = k;
+  count *= HAETAE_N;
+  bp = _polyvec_double(bp, count);
+  bp = __polyvec_sub_left_inplace(bp, matp, l, k);
+  bp = _polyvec_double(bp, count);
+  () = #spill(matp, k, l);
+  bp = _polyvec_ntt(bp, k);
+  () = #unspill(matp, k, l);
+  matp = _polymat_set_first_column(matp, bp, k, l);
+
+  return matp;
+}
+
+fn _unpack_vk_m5_full(reg mut ptr u32[8192] matp,
+                      reg const ptr u8[2752] vkp,
+                      reg ui64 seedu,
+                      reg u64 k,
+                      reg u64 l) -> reg ptr u32[8192]
+{
+  stack u32[2048] b;
+  reg ptr u32[2048] bp;
+
+  bp = b;
+
+  bp = __unpack_vk_m5_coeffs(bp, vkp, k);
+
+  () = #spill(bp, k, l);
+  matp = _polymatkl_expand_matA(matp, seedu, k, l);
+  () = #unspill(bp, k, l);
+  matp = _polymatkl_double(matp, k, l);
+  matp = _polymat_set_first_column(matp, bp, k, l);
+
+  return matp;
+}

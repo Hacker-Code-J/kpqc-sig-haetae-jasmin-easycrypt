@@ -1,0 +1,5 @@
+easycrypt compile NTTFullSpec.ec -I .
+easycrypt compile NTT_Fq.ec -I .
+easycrypt compile RefJasminNTT.ec -I .
+easycrypt compile NTTFullAlgebra.ec -I .
+easycrypt compile NTTEndToEnd.ec -I .

@@ -1,0 +1,198 @@
+require "keccak.jinc"
+
+inline fn __fips202_absorb_once_fixed(reg mut ptr u64[25] sp,
+                                      reg ui64 inp,
+                                      reg u64 inlen,
+                                      reg u8 domain,
+                                      inline int rate) -> reg ptr u64[25]
+{
+  reg u64 i lane t;
+  reg u8 b shift;
+
+  sp = _keccak_init_state(sp);
+
+  while (inlen >= rate)
+  {
+    i = 0;
+    while (i < rate)
+    {
+      lane = i;
+      lane >>= 3;
+      t = [:u64 (64u)inp];
+      sp[lane] ^= t;
+      inp += 8;
+      i += 8;
+    }
+
+    inlen -= rate;
+    () = #spill(inp, inlen, domain);
+    sp = _keccakf1600(sp);
+    () = #unspill(inp, inlen, domain);
+  }
+
+  i = 0;
+  while (i < inlen)
+  {
+    lane = i;
+    lane >>= 3;
+    b = [:u8 (64u)inp];
+    t = (64u)b;
+    shift = (8u)i;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    inp += 1;
+    i += 1;
+  }
+
+  lane = i;
+  lane >>= 3;
+  shift = (8u)i;
+  shift &= 7;
+  shift <<= 3;
+  t = (64u)domain;
+  t <<= (shift & 63);
+  sp[lane] ^= t;
+
+  lane = rate;
+  lane >>= 3;
+  lane -= 1;
+  t = 1;
+  t <<= 63;
+  sp[lane] ^= t;
+
+  return sp;
+}
+
+inline fn __fips202_shake_once(reg ui64 outp,
+                               reg u64 outlen,
+                               reg ui64 inp,
+                               reg u64 inlen,
+                               inline int rate) -> reg ui64
+{
+  stack u64[25] st;
+  reg ptr u64[25] sp;
+  reg u64 i lane t ratev;
+  reg u8 b shift domain;
+
+  sp = st;
+  domain = 0x1f;
+  () = #spill(outp, outlen);
+  sp = __fips202_absorb_once_fixed(sp, inp, inlen, domain, rate);
+  () = #unspill(outp, outlen);
+  ratev = rate;
+
+  while (outlen >= ratev)
+  {
+    () = #spill(outp, outlen, ratev);
+    sp = _keccakf1600(sp);
+    () = #unspill(outp, outlen, ratev);
+
+    i = 0;
+    while (i < ratev)
+    {
+      lane = i;
+      lane >>= 3;
+      t = sp[lane];
+      [:u64 (64u)outp] = t;
+      outp += 8;
+      i += 8;
+    }
+
+    outlen -= ratev;
+  }
+
+  if (outlen != 0)
+  {
+    () = #spill(outp, outlen);
+    sp = _keccakf1600(sp);
+    () = #unspill(outp, outlen);
+
+    i = 0;
+    while (i < outlen)
+    {
+      lane = i;
+      lane >>= 3;
+      t = sp[lane];
+      shift = (8u)i;
+      shift &= 7;
+      shift <<= 3;
+      t >>= (shift & 63);
+      b = (8u)t;
+      [:u8 (64u)outp] = b;
+      outp += 1;
+      i += 1;
+    }
+  }
+
+  return outp;
+}
+
+inline fn __fips202_sha3(reg ui64 hp,
+                         reg ui64 inp,
+                         reg u64 inlen,
+                         inline int rate,
+                         inline int lanes) -> reg ui64
+{
+  stack u64[25] st;
+  reg ptr u64[25] sp;
+  reg u64 i t;
+  reg u8 domain;
+
+  sp = st;
+  domain = 0x06;
+  () = #spill(hp);
+  sp = __fips202_absorb_once_fixed(sp, inp, inlen, domain, rate);
+  sp = _keccakf1600(sp);
+  () = #unspill(hp);
+
+  i = 0;
+  while (i < lanes)
+  {
+    t = sp[i];
+    [:u64 (64u)hp] = t;
+    hp += 8;
+    i += 1;
+  }
+
+  return hp;
+}
+
+export
+fn fips202_shake128_jazz(reg ui64 outp,
+                         reg u64 outlen,
+                         reg ui64 inp,
+                         reg u64 inlen) -> reg ui64
+{
+  outp = __fips202_shake_once(outp, outlen, inp, inlen, 168);
+  return outp;
+}
+
+export
+fn fips202_shake256_jazz(reg ui64 outp,
+                         reg u64 outlen,
+                         reg ui64 inp,
+                         reg u64 inlen) -> reg ui64
+{
+  outp = __fips202_shake_once(outp, outlen, inp, inlen, 136);
+  return outp;
+}
+
+export
+fn fips202_sha3_256_jazz(reg ui64 hp,
+                         reg ui64 inp,
+                         reg u64 inlen) -> reg ui64
+{
+  hp = __fips202_sha3(hp, inp, inlen, 136, 4);
+  return hp;
+}
+
+export
+fn fips202_sha3_512_jazz(reg ui64 hp,
+                         reg ui64 inp,
+                         reg u64 inlen) -> reg ui64
+{
+  hp = __fips202_sha3(hp, inp, inlen, 72, 8);
+  return hp;
+}

@@ -1,0 +1,419 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Assumptions.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Abstract hardness games and reduction interfaces.
+
+\section*{How To Read This Script}
+Read this file as the formal trust boundary.  It represents MLWE, Module-SIS, and bimodal assumptions as explicit game probabilities.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore Distr List.} & Imports AllCore Distr List.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Params HAETAE\_Algebra.} & Imports HAETAE\_Params HAETAE\_Algebra.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_Assumptions.} & Begins the namespace HAETAE\_Assumptions, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Params.} & Opens HAETAE\_Params so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize import HAETAE\_Algebra.} & Opens HAETAE\_Algebra so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+9 & {\ttfamily\scriptsize type mlwe\_instance.} & Declares carrier set mlwe\_instance.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+10 & {\ttfamily\scriptsize type module\_sis\_instance = matrix * polyveck.} & Declares carrier set module\_sis\_instance.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+11 & {\ttfamily\scriptsize type module\_sis\_solution = polyvecl.} & Declares carrier set module\_sis\_solution.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+12 & {\ttfamily\scriptsize type bimodal\_selftarget\_msis\_instance = module\_sis\_instance.} & Declares carrier set bimodal\_selftarget\_msis\_instance.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+13 & {\ttfamily\scriptsize type bimodal\_selftarget\_msis\_solution = module\_sis\_solution.} & Declares carrier set bimodal\_selftarget\_msis\_solution.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+14 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+15 & {\ttfamily\scriptsize op [lossless] dmlwe\_real : mode -> mlwe\_instance distr.} & Defines dmlwe\_real as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+16 & {\ttfamily\scriptsize op [lossless] dmlwe\_random : mode -> mlwe\_instance distr.} & Defines dmlwe\_random as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+17 & {\ttfamily\scriptsize op [lossless] dmodule\_sis\_instance : mode -> module\_sis\_instance distr.} & Defines dmodule\_sis\_instance as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+18 & {\ttfamily\scriptsize op [lossless] dbimodal\_selftarget\_msis\_instance :} & Defines operation dbimodal\_selftarget\_msis\_instance, a total mathematical function or abbreviation used by later declarations. \\
+19 & {\ttfamily\scriptsize   mode -> bimodal\_selftarget\_msis\_instance distr.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+20 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+21 & {\ttfamily\scriptsize op module\_sis\_eval} & Defines operation module\_sis\_eval, a total mathematical function or abbreviation used by later declarations. \\
+22 & {\ttfamily\scriptsize    (md : mode) (x : module\_sis\_instance)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+23 & {\ttfamily\scriptsize    (sol : module\_sis\_solution) : polyveck =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+24 & {\ttfamily\scriptsize   polyveck\_sub md (matrix\_vec\_mul md x.`1 sol) x.`2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+25 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+26 & {\ttfamily\scriptsize op module\_sis\_zero\_instance (md : mode) : module\_sis\_instance =} & Defines operation module\_sis\_zero\_instance, a total mathematical function or abbreviation used by later declarations. \\
+27 & {\ttfamily\scriptsize   ([], polyveck\_zero md).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+28 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+29 & {\ttfamily\scriptsize op module\_sis\_solution\_wf (md : mode) (sol : module\_sis\_solution) : bool =} & Defines predicate module\_sis\_solution\_wf, an event or well-formedness condition used in later implications and game proofs. \\
+30 & {\ttfamily\scriptsize   polyvecl\_wf md sol.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+31 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+32 & {\ttfamily\scriptsize op module\_sis\_valid} & Defines operation module\_sis\_valid, a total mathematical function or abbreviation used by later declarations. \\
+33 & {\ttfamily\scriptsize    (md : mode) (x : module\_sis\_instance)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+34 & {\ttfamily\scriptsize    (sol : module\_sis\_solution) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+35 & {\ttfamily\scriptsize   module\_sis\_solution\_wf md sol /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+36 & {\ttfamily\scriptsize   matrix\_vec\_mul md x.`1 sol = x.`2.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+37 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+38 & {\ttfamily\scriptsize op bimodal\_selftarget\_msis\_valid} & Defines operation bimodal\_selftarget\_msis\_valid, a total mathematical function or abbreviation used by later declarations. \\
+39 & {\ttfamily\scriptsize    (md : mode) (x : bimodal\_selftarget\_msis\_instance)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+40 & {\ttfamily\scriptsize    (sol : bimodal\_selftarget\_msis\_solution) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+41 & {\ttfamily\scriptsize   module\_sis\_valid md x sol.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+43 & {\ttfamily\scriptsize lemma module\_sis\_eval\_zero\_instance md sol :} & States checked lemma module\_sis\_eval\_zero\_instance.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+44 & {\ttfamily\scriptsize   module\_sis\_eval md (module\_sis\_zero\_instance md) sol = polyveck\_zero md.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+45 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+46 & {\ttfamily\scriptsize by rewrite /module\_sis\_eval /module\_sis\_zero\_instance} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+47 & {\ttfamily\scriptsize            /matrix\_vec\_mul /polyveck\_sub /polyveck\_add /polyveck\_neg.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+48 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+49 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+50 & {\ttfamily\scriptsize lemma module\_sis\_zero\_valid md :} & States checked lemma module\_sis\_zero\_valid.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+51 & {\ttfamily\scriptsize   module\_sis\_valid md (module\_sis\_zero\_instance md) (polyvecl\_zero md).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+52 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+53 & {\ttfamily\scriptsize rewrite /module\_sis\_valid /module\_sis\_solution\_wf /module\_sis\_zero\_instance.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+54 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+55 & {\ttfamily\scriptsize + by apply polyvecl\_zero\_wf.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+56 & {\ttfamily\scriptsize by rewrite /matrix\_vec\_mul.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+57 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+58 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+59 & {\ttfamily\scriptsize lemma module\_sis\_eval\_wf md x sol :} & States checked lemma module\_sis\_eval\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+60 & {\ttfamily\scriptsize   polyveck\_wf md (module\_sis\_eval md x sol).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize proof. by rewrite /module\_sis\_eval; apply polyveck\_sub\_wf. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+62 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+63 & {\ttfamily\scriptsize lemma module\_sis\_valid\_target\_wf md x sol :} & States checked lemma module\_sis\_valid\_target\_wf.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+64 & {\ttfamily\scriptsize   module\_sis\_valid md x sol =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+65 & {\ttfamily\scriptsize   polyveck\_wf md x.`2.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+66 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+67 & {\ttfamily\scriptsize rewrite /module\_sis\_valid.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+68 & {\ttfamily\scriptsize move=> [\_ targetE].} & Introduces universally quantified variables or hypotheses into the proof context. \\
+69 & {\ttfamily\scriptsize by rewrite -targetE; apply matrix\_vec\_mul\_wf.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+70 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+71 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+72 & {\ttfamily\scriptsize op bimodal\_to\_module\_sis\_instance :} & Defines operation bimodal\_to\_module\_sis\_instance, a total mathematical function or abbreviation used by later declarations. \\
+73 & {\ttfamily\scriptsize   mode -> bimodal\_selftarget\_msis\_instance -> module\_sis\_instance =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+74 & {\ttfamily\scriptsize   fun (\_ : mode) x => x.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+75 & {\ttfamily\scriptsize op bimodal\_to\_module\_sis\_solution :} & Defines operation bimodal\_to\_module\_sis\_solution, a total mathematical function or abbreviation used by later declarations. \\
+76 & {\ttfamily\scriptsize   mode -> bimodal\_selftarget\_msis\_instance ->} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+77 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_solution -> module\_sis\_solution =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+78 & {\ttfamily\scriptsize   fun (\_ : mode) (\_ : bimodal\_selftarget\_msis\_instance) sol => sol.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+79 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+80 & {\ttfamily\scriptsize lemma bimodal\_to\_module\_sis\_valid md x sol :} & States checked lemma bimodal\_to\_module\_sis\_valid.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+81 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_valid md x sol =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+82 & {\ttfamily\scriptsize   module\_sis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+83 & {\ttfamily\scriptsize     (bimodal\_to\_module\_sis\_instance md x)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+84 & {\ttfamily\scriptsize     (bimodal\_to\_module\_sis\_solution md x sol).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+85 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+86 & {\ttfamily\scriptsize by rewrite /bimodal\_selftarget\_msis\_valid} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+87 & {\ttfamily\scriptsize            /bimodal\_to\_module\_sis\_instance} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+88 & {\ttfamily\scriptsize            /bimodal\_to\_module\_sis\_solution.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+89 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+90 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+91 & {\ttfamily\scriptsize module type MLWE\_Distinguisher = \{} & Defines module interface MLWE\_Distinguisher.  It specifies the procedures that later games or adversaries may call. \\
+92 & {\ttfamily\scriptsize   proc distinguish(x : mlwe\_instance) : bool} & Defines procedure distinguish.  Its body is a probabilistic program whose result becomes part of a game event. \\
+93 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+94 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+95 & {\ttfamily\scriptsize module MLWE\_Real\_Game(B : MLWE\_Distinguisher) = \{} & Defines module MLWE\_Real\_Game, a probabilistic program or game used to create events and success probabilities. \\
+96 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+97 & {\ttfamily\scriptsize     var x : mlwe\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+98 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+99 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+100 & {\ttfamily\scriptsize     x <\$ dmlwe\_real md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+101 & {\ttfamily\scriptsize     b <@ B.distinguish(x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+102 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+103 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+104 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+105 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+106 & {\ttfamily\scriptsize module MLWE\_Random\_Game(B : MLWE\_Distinguisher) = \{} & Defines module MLWE\_Random\_Game, a probabilistic program or game used to create events and success probabilities. \\
+107 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+108 & {\ttfamily\scriptsize     var x : mlwe\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+109 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+110 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+111 & {\ttfamily\scriptsize     x <\$ dmlwe\_random md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+112 & {\ttfamily\scriptsize     b <@ B.distinguish(x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+113 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+114 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+115 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+116 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+117 & {\ttfamily\scriptsize module type ModuleSIS\_Solver = \{} & Defines module interface ModuleSIS\_Solver.  It specifies the procedures that later games or adversaries may call. \\
+118 & {\ttfamily\scriptsize   proc solve(x : module\_sis\_instance) : module\_sis\_solution option} & Defines procedure solve.  Its body is a probabilistic program whose result becomes part of a game event. \\
+119 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+120 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+121 & {\ttfamily\scriptsize module ModuleSIS\_Relation\_Game(B : ModuleSIS\_Solver) = \{} & Defines module ModuleSIS\_Relation\_Game, a probabilistic program or game used to create events and success probabilities. \\
+122 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+123 & {\ttfamily\scriptsize     var x : module\_sis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+124 & {\ttfamily\scriptsize     var sol : module\_sis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+125 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+126 & {\ttfamily\scriptsize     x <\$ dmodule\_sis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+127 & {\ttfamily\scriptsize     sol <@ B.solve(x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+128 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} module\_sis\_valid md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+129 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+130 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+131 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+132 & {\ttfamily\scriptsize module type BimodalSelfTargetMSIS\_Solver = \{} & Defines module interface BimodalSelfTargetMSIS\_Solver.  It specifies the procedures that later games or adversaries may call. \\
+133 & {\ttfamily\scriptsize   proc solve(x : bimodal\_selftarget\_msis\_instance) :} & Defines procedure solve.  Its body is a probabilistic program whose result becomes part of a game event. \\
+134 & {\ttfamily\scriptsize     bimodal\_selftarget\_msis\_solution option} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+135 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+136 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+137 & {\ttfamily\scriptsize module BimodalSelfTargetMSIS\_Relation\_Game(} & Defines module BimodalSelfTargetMSIS\_Relation\_Game, a probabilistic program or game used to create events and success probabilities. \\
+138 & {\ttfamily\scriptsize   B : BimodalSelfTargetMSIS\_Solver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+139 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+140 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+141 & {\ttfamily\scriptsize     var x : bimodal\_selftarget\_msis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+142 & {\ttfamily\scriptsize     var sol : bimodal\_selftarget\_msis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+143 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+144 & {\ttfamily\scriptsize     x <\$ dbimodal\_selftarget\_msis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+145 & {\ttfamily\scriptsize     sol <@ B.solve(x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+146 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} bimodal\_selftarget\_msis\_valid md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+147 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+148 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+149 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+150 & {\ttfamily\scriptsize op lift\_bimodal\_solution\_option} & Defines operation lift\_bimodal\_solution\_option, a total mathematical function or abbreviation used by later declarations. \\
+151 & {\ttfamily\scriptsize    (md : mode) (x : bimodal\_selftarget\_msis\_instance)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+152 & {\ttfamily\scriptsize    (sol : bimodal\_selftarget\_msis\_solution option) :} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+153 & {\ttfamily\scriptsize    module\_sis\_solution option =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+154 & {\ttfamily\scriptsize   if sol = None then None} & Splits proof obligations according to a conditional branch in the program or formula. \\
+155 & {\ttfamily\scriptsize   else Some (bimodal\_to\_module\_sis\_solution md x (oget sol)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+156 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+157 & {\ttfamily\scriptsize op dmodule\_sis\_from\_bimodal (md : mode) : module\_sis\_instance distr =} & Defines dmodule\_sis\_from\_bimodal as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+158 & {\ttfamily\scriptsize   dmap (dbimodal\_selftarget\_msis\_instance md)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+159 & {\ttfamily\scriptsize     (bimodal\_to\_module\_sis\_instance md).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+160 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+161 & {\ttfamily\scriptsize lemma dmodule\_sis\_from\_bimodalE md :} & States checked lemma dmodule\_sis\_from\_bimodalE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+162 & {\ttfamily\scriptsize   dmodule\_sis\_from\_bimodal md = dbimodal\_selftarget\_msis\_instance md.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+163 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+164 & {\ttfamily\scriptsize by rewrite /dmodule\_sis\_from\_bimodal /bimodal\_to\_module\_sis\_instance dmap\_id.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+165 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+166 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+167 & {\ttfamily\scriptsize lemma dmodule\_sis\_from\_bimodal\_lossless md :} & States checked lemma dmodule\_sis\_from\_bimodal\_lossless.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+168 & {\ttfamily\scriptsize   is\_lossless (dmodule\_sis\_from\_bimodal md).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+169 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+170 & {\ttfamily\scriptsize rewrite dmodule\_sis\_from\_bimodalE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+171 & {\ttfamily\scriptsize by apply dbimodal\_selftarget\_msis\_instance\_ll.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+172 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+173 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+174 & {\ttfamily\scriptsize module BimodalToModuleSIS\_Lift\_Game(} & Defines module BimodalToModuleSIS\_Lift\_Game, a probabilistic program or game used to create events and success probabilities. \\
+175 & {\ttfamily\scriptsize   B : BimodalSelfTargetMSIS\_Solver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+176 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+177 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+178 & {\ttfamily\scriptsize     var x : bimodal\_selftarget\_msis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+179 & {\ttfamily\scriptsize     var lifted\_x : module\_sis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+180 & {\ttfamily\scriptsize     var sol : bimodal\_selftarget\_msis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+181 & {\ttfamily\scriptsize     var lifted\_sol : module\_sis\_solution;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+182 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+183 & {\ttfamily\scriptsize     x <\$ dbimodal\_selftarget\_msis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+184 & {\ttfamily\scriptsize     sol <@ B.solve(x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+185 & {\ttfamily\scriptsize     lifted\_x <- bimodal\_to\_module\_sis\_instance md x;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+186 & {\ttfamily\scriptsize     lifted\_sol <- bimodal\_to\_module\_sis\_solution md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+187 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} module\_sis\_valid md lifted\_x lifted\_sol;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+188 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+189 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+190 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+191 & {\ttfamily\scriptsize lemma bimodal\_lift\_successE md x sol :} & States checked lemma bimodal\_lift\_successE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+192 & {\ttfamily\scriptsize   (sol <> None /\textbackslash{} bimodal\_selftarget\_msis\_valid md x (oget sol)) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+193 & {\ttfamily\scriptsize   (lift\_bimodal\_solution\_option md x sol <> None /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+194 & {\ttfamily\scriptsize    module\_sis\_valid md} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+195 & {\ttfamily\scriptsize      (bimodal\_to\_module\_sis\_instance md x)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+196 & {\ttfamily\scriptsize      (oget (lift\_bimodal\_solution\_option md x sol))).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+197 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+198 & {\ttfamily\scriptsize case: (sol = None) => sol\_none.} & Performs case analysis or induction, splitting the mathematical proof by constructors or list structure. \\
+199 & {\ttfamily\scriptsize + by rewrite /lift\_bimodal\_solution\_option sol\_none.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+200 & {\ttfamily\scriptsize + by rewrite /lift\_bimodal\_solution\_option sol\_none /bimodal\_selftarget\_msis\_valid} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+201 & {\ttfamily\scriptsize              /bimodal\_to\_module\_sis\_instance} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+202 & {\ttfamily\scriptsize              /bimodal\_to\_module\_sis\_solution.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+203 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+204 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+205 & {\ttfamily\scriptsize section BimodalSolverLift.} & Starts section BimodalSolverLift, a scoped region for related declarations and hypotheses. \\
+206 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+207 & {\ttfamily\scriptsize declare module B <: BimodalSelfTargetMSIS\_Solver.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+208 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+209 & {\ttfamily\scriptsize lemma bimodal\_solver\_lift\_exact \&m md :} & States checked lemma bimodal\_solver\_lift\_exact.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+210 & {\ttfamily\scriptsize   Pr[BimodalSelfTargetMSIS\_Relation\_Game(B).main(md) @ \&m : res] =} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+211 & {\ttfamily\scriptsize   Pr[BimodalToModuleSIS\_Lift\_Game(B).main(md) @ \&m : res].} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+212 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+213 & {\ttfamily\scriptsize byequiv (: =\{glob B, md\} ==> =\{res\}) => //.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+214 & {\ttfamily\scriptsize proc.} & Enters procedure-body proof mode for a module procedure. \\
+215 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+216 & {\ttfamily\scriptsize call (: =\{glob B, x\} ==> =\{glob B, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+217 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+218 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+219 & {\ttfamily\scriptsize rnd.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+220 & {\ttfamily\scriptsize by auto => />; rewrite /bimodal\_selftarget\_msis\_valid} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+221 & {\ttfamily\scriptsize                   /bimodal\_to\_module\_sis\_instance} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+222 & {\ttfamily\scriptsize                   /bimodal\_to\_module\_sis\_solution.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+223 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+224 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+225 & {\ttfamily\scriptsize end section BimodalSolverLift.} & Closes the current section, discharging local module and variable scope. \\
+226 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+227 & {\ttfamily\scriptsize module type ModuleSIS\_ModeSolver = \{} & Defines module interface ModuleSIS\_ModeSolver.  It specifies the procedures that later games or adversaries may call. \\
+228 & {\ttfamily\scriptsize   proc solve(md : mode, x : module\_sis\_instance) :} & Defines procedure solve.  Its body is a probabilistic program whose result becomes part of a game event. \\
+229 & {\ttfamily\scriptsize     module\_sis\_solution option} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+230 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+231 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+232 & {\ttfamily\scriptsize module type BimodalSelfTargetMSIS\_ModeSolver = \{} & Defines module interface BimodalSelfTargetMSIS\_ModeSolver.  It specifies the procedures that later games or adversaries may call. \\
+233 & {\ttfamily\scriptsize   proc solve(md : mode, x : bimodal\_selftarget\_msis\_instance) :} & Defines procedure solve.  Its body is a probabilistic program whose result becomes part of a game event. \\
+234 & {\ttfamily\scriptsize     bimodal\_selftarget\_msis\_solution option} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+235 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+236 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+237 & {\ttfamily\scriptsize module ModuleSIS\_ModeRelation\_Game(} & Defines module ModuleSIS\_ModeRelation\_Game, a probabilistic program or game used to create events and success probabilities. \\
+238 & {\ttfamily\scriptsize   B : ModuleSIS\_ModeSolver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+239 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+240 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+241 & {\ttfamily\scriptsize     var x : module\_sis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+242 & {\ttfamily\scriptsize     var sol : module\_sis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+243 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+244 & {\ttfamily\scriptsize     x <\$ dmodule\_sis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+245 & {\ttfamily\scriptsize     sol <@ B.solve(md, x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+246 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} module\_sis\_valid md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+247 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+248 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+249 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+250 & {\ttfamily\scriptsize module BimodalSelfTargetMSIS\_ModeRelation\_Game(} & Defines module BimodalSelfTargetMSIS\_ModeRelation\_Game, a probabilistic program or game used to create events and success probabilities. \\
+251 & {\ttfamily\scriptsize   B : BimodalSelfTargetMSIS\_ModeSolver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+252 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+253 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+254 & {\ttfamily\scriptsize     var x : bimodal\_selftarget\_msis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+255 & {\ttfamily\scriptsize     var sol : bimodal\_selftarget\_msis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+256 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+257 & {\ttfamily\scriptsize     x <\$ dbimodal\_selftarget\_msis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+258 & {\ttfamily\scriptsize     sol <@ B.solve(md, x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+259 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} bimodal\_selftarget\_msis\_valid md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+260 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+261 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+262 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+263 & {\ttfamily\scriptsize module ModuleSIS\_LiftedDistribution\_Relation\_Game(} & Defines module ModuleSIS\_LiftedDistribution\_Relation\_Game, a probabilistic program or game used to create events and success probabilities. \\
+264 & {\ttfamily\scriptsize   B : ModuleSIS\_ModeSolver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+265 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+266 & {\ttfamily\scriptsize   proc main(md : mode) : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+267 & {\ttfamily\scriptsize     var x : module\_sis\_instance;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+268 & {\ttfamily\scriptsize     var sol : module\_sis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+269 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+270 & {\ttfamily\scriptsize     x <\$ dbimodal\_selftarget\_msis\_instance md;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+271 & {\ttfamily\scriptsize     sol <@ B.solve(md, x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+272 & {\ttfamily\scriptsize     return sol <> None /\textbackslash{} module\_sis\_valid md x (oget sol);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+273 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+274 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+275 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+276 & {\ttfamily\scriptsize module BimodalModeSolver\_As\_ModuleSIS(} & Defines module BimodalModeSolver\_As\_ModuleSIS, a probabilistic program or game used to create events and success probabilities. \\
+277 & {\ttfamily\scriptsize   B : BimodalSelfTargetMSIS\_ModeSolver} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+278 & {\ttfamily\scriptsize ) = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+279 & {\ttfamily\scriptsize   proc solve(md : mode, x : module\_sis\_instance) :} & Defines procedure solve.  Its body is a probabilistic program whose result becomes part of a game event. \\
+280 & {\ttfamily\scriptsize     module\_sis\_solution option = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+281 & {\ttfamily\scriptsize     var sol : bimodal\_selftarget\_msis\_solution option;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+282 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+283 & {\ttfamily\scriptsize     sol <@ B.solve(md, x);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+284 & {\ttfamily\scriptsize     return sol;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+285 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+286 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+287 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+288 & {\ttfamily\scriptsize section BimodalModeSolverLiftedDistribution.} & Starts section BimodalModeSolverLiftedDistribution, a scoped region for related declarations and hypotheses. \\
+289 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+290 & {\ttfamily\scriptsize declare module B <: BimodalSelfTargetMSIS\_ModeSolver.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+291 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+292 & {\ttfamily\scriptsize lemma bimodal\_mode\_solver\_lifted\_distribution\_exact \&m md :} & States checked lemma bimodal\_mode\_solver\_lifted\_distribution\_exact.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+293 & {\ttfamily\scriptsize   Pr[BimodalSelfTargetMSIS\_ModeRelation\_Game(B).main(md) @ \&m : res] =} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+294 & {\ttfamily\scriptsize   Pr[ModuleSIS\_LiftedDistribution\_Relation\_Game(} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+295 & {\ttfamily\scriptsize        BimodalModeSolver\_As\_ModuleSIS(B)).main(md) @ \&m : res].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+296 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+297 & {\ttfamily\scriptsize byequiv (: =\{glob B, md\} ==> =\{res\}) => //.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+298 & {\ttfamily\scriptsize proc.} & Enters procedure-body proof mode for a module procedure. \\
+299 & {\ttfamily\scriptsize inline BimodalModeSolver\_As\_ModuleSIS(B).solve.} & Unfolds a procedure body so the proof can reason about its concrete commands. \\
+300 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+301 & {\ttfamily\scriptsize call (: =\{glob B, md, x\} ==> =\{glob B, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+302 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+303 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+304 & {\ttfamily\scriptsize rnd.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+305 & {\ttfamily\scriptsize by auto => />; rewrite /bimodal\_selftarget\_msis\_valid.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+306 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+307 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+308 & {\ttfamily\scriptsize end section BimodalModeSolverLiftedDistribution.} & Closes the current section, discharging local module and variable scope. \\
+309 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+310 & {\ttfamily\scriptsize module type MLWE\_Reduction = \{} & Defines module interface MLWE\_Reduction.  It specifies the procedures that later games or adversaries may call. \\
+311 & {\ttfamily\scriptsize   proc main() : bool} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+312 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+313 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+314 & {\ttfamily\scriptsize module type BimodalSelfTargetMSIS\_Reduction = \{} & Defines module interface BimodalSelfTargetMSIS\_Reduction.  It specifies the procedures that later games or adversaries may call. \\
+315 & {\ttfamily\scriptsize   proc main() : bool} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+316 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+317 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+318 & {\ttfamily\scriptsize module type ModuleSIS\_Reduction = \{} & Defines module interface ModuleSIS\_Reduction.  It specifies the procedures that later games or adversaries may call. \\
+319 & {\ttfamily\scriptsize   proc main() : bool} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+320 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+321 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+322 & {\ttfamily\scriptsize module MLWE\_Game(B : MLWE\_Reduction) = \{} & Defines module MLWE\_Game, a probabilistic program or game used to create events and success probabilities. \\
+323 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+324 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+325 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+326 & {\ttfamily\scriptsize     b <@ B.main();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+327 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+328 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+329 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+330 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+331 & {\ttfamily\scriptsize module BimodalSelfTargetMSIS\_Game(B : BimodalSelfTargetMSIS\_Reduction) = \{} & Defines module BimodalSelfTargetMSIS\_Game, a probabilistic program or game used to create events and success probabilities. \\
+332 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+333 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+334 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+335 & {\ttfamily\scriptsize     b <@ B.main();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+336 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+337 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+338 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+339 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+340 & {\ttfamily\scriptsize module ModuleSIS\_Game(B : ModuleSIS\_Reduction) = \{} & Defines module ModuleSIS\_Game, a probabilistic program or game used to create events and success probabilities. \\
+341 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+342 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+343 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+344 & {\ttfamily\scriptsize     b <@ B.main();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+345 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+346 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+347 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+348 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+349 & {\ttfamily\scriptsize module BimodalMSIS\_As\_ModuleSIS(B : BimodalSelfTargetMSIS\_Reduction) = \{} & Defines module BimodalMSIS\_As\_ModuleSIS, a probabilistic program or game used to create events and success probabilities. \\
+350 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+351 & {\ttfamily\scriptsize     var b : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+352 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+353 & {\ttfamily\scriptsize     b <@ B.main();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+354 & {\ttfamily\scriptsize     return b;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+355 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+356 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+357 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+358 & {\ttfamily\scriptsize section BimodalModuleSISReduction.} & Starts section BimodalModuleSISReduction, a scoped region for related declarations and hypotheses. \\
+359 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+360 & {\ttfamily\scriptsize declare module B <: BimodalSelfTargetMSIS\_Reduction.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+361 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+362 & {\ttfamily\scriptsize lemma bimodal\_msis\_as\_module\_sis\_exact \&m :} & States checked lemma bimodal\_msis\_as\_module\_sis\_exact.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+363 & {\ttfamily\scriptsize   Pr[BimodalSelfTargetMSIS\_Game(B).main() @ \&m : res] =} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+364 & {\ttfamily\scriptsize   Pr[ModuleSIS\_Game(BimodalMSIS\_As\_ModuleSIS(B)).main() @ \&m : res].} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+365 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+366 & {\ttfamily\scriptsize byequiv (: =\{glob B\} ==> =\{res\}) => //.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+367 & {\ttfamily\scriptsize proc.} & Enters procedure-body proof mode for a module procedure. \\
+368 & {\ttfamily\scriptsize inline BimodalMSIS\_As\_ModuleSIS(B).main.} & Unfolds a procedure body so the proof can reason about its concrete commands. \\
+369 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+370 & {\ttfamily\scriptsize call (: =\{glob B\} ==> =\{glob B, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+371 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+372 & {\ttfamily\scriptsize by auto.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+373 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+374 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+375 & {\ttfamily\scriptsize end section BimodalModuleSISReduction.} & Closes the current section, discharging local module and variable scope. \\
+376 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+377 & {\ttfamily\scriptsize end HAETAE\_Assumptions.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

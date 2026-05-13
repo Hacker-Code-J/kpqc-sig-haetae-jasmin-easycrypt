@@ -1,0 +1,252 @@
+require "params.jinc"
+require "keccak.jinc"
+require "fixpoint.jinc"
+require "sampler.jinc"
+require "polynomial_sampler.jinc"
+require "gaussian_sampler.jinc"
+require "polyfix.jinc"
+require "hyperball_phase.jinc"
+
+fn _hyperball_b_raw(reg mut ptr u8[1] bp,
+                    reg ui64 seedu,
+                    reg u64 nonce) -> reg ptr u8[1]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg ui64 src;
+  reg u64 i lane t;
+  reg u8 shift b;
+
+  sp = s;
+  sp = _keccak_init_state(sp);
+
+  src = seedu;
+  i = 0;
+  while (i < 64)
+  {
+    b = [:u8 (64u)src];
+    t = (64u)b;
+    lane = i;
+    lane >>= 3;
+    shift = (8u)i;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    src += 1;
+    i += 1;
+  }
+
+  b = (8u)nonce;
+  t = (64u)b;
+  sp[8] ^= t;
+  nonce >>= 8;
+  b = (8u)nonce;
+  t = (64u)b;
+  t <<= 8;
+  sp[8] ^= t;
+
+  t = 0x1f;
+  t <<= 16;
+  sp[8] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[16] ^= t;
+
+  sp = _keccakf1600(sp);
+  t = sp[0];
+  b = (8u)t;
+  bp[0] = b;
+
+  return bp;
+}
+
+fn _hyperball_full(reg mut ptr u32[2048] y1p,
+                   reg mut ptr u32[2048] y2p,
+                   reg mut ptr u8[1] bp,
+                   reg mut ptr u64[1] counterp,
+                   reg ui64 seedu,
+                   reg u64 lcount,
+                   reg u64 kcount,
+                   reg u64 scale_const,
+                   reg u64 bound_const,
+                   reg u64 cube0,
+                   reg u64 cube1,
+                   reg u64 three0,
+                   reg u64 three1) -> reg ptr u32[2048],
+                                         reg ptr u32[2048],
+                                         reg ptr u8[1],
+                                         reg ptr u64[1]
+{
+  stack u64[4096] samples;
+  stack u8[512] signs;
+  stack u64[2] sqsum;
+  stack u64[2] invsqrt;
+  stack u64[2] start_cube;
+  stack u64[2] start_three;
+  stack u64[4] state;
+  reg ptr u64[4096] samplesp;
+  reg ptr u8[512] signsp;
+  reg ptr u64[2] sqsump invsqrtp cubep threep;
+  reg ptr u64[4] statep;
+  reg u64 ni accepted idx total len sampleoff signoff scale lcoeffs tcoeffs;
+
+  samplesp = samples;
+  signsp = signs;
+  sqsump = sqsum;
+  invsqrtp = invsqrt;
+  cubep = start_cube;
+  threep = start_three;
+  statep = state;
+
+  cubep[0] = cube0;
+  cubep[1] = cube1;
+  threep[0] = three0;
+  threep[1] = three1;
+
+  ni = counterp[0];
+  accepted = 0;
+  while (accepted == 0)
+  {
+    sqsump[0] = 0;
+    sqsump[1] = 0;
+
+    len = HAETAE_N;
+    len += 1;
+    sampleoff = 0;
+    signoff = 0;
+    samplesp, signsp, sqsump = _sample_gauss_N_full_at(samplesp, signsp,
+                                                       sqsump, seedu, ni, len,
+                                                       sampleoff, signoff);
+    ni += 1;
+
+    sampleoff = HAETAE_N;
+    signoff = 32;
+    samplesp, signsp, sqsump = _sample_gauss_N_full_at(samplesp, signsp,
+                                                       sqsump, seedu, ni, len,
+                                                       sampleoff, signoff);
+    ni += 1;
+
+    total = lcount;
+    total += kcount;
+    idx = 2;
+    while (idx < total)
+    {
+      len = HAETAE_N;
+      sampleoff = idx;
+      sampleoff *= HAETAE_N;
+      signoff = idx;
+      signoff *= 32;
+      samplesp, signsp, sqsump = _sample_gauss_N_full_at(samplesp, signsp,
+                                                         sqsump, seedu, ni,
+                                                         len, sampleoff,
+                                                         signoff);
+      ni += 1;
+      idx += 1;
+    }
+
+    sqsump = _fixpoint_half_round(sqsump);
+    invsqrtp = _fixpoint_newton_invsqrt(invsqrtp, sqsump, cubep, threep);
+    scale = scale_const;
+    sqsump = _fixpoint_mul_high(sqsump, invsqrtp, scale);
+
+    lcoeffs = lcount;
+    lcoeffs <<= 8;
+    tcoeffs = total;
+    tcoeffs <<= 8;
+    statep[0] = lcoeffs;
+    statep[1] = tcoeffs;
+    statep[2] = bound_const;
+    statep[3] = 0;
+    y1p, y2p, statep = _polyfixveclk_scale_and_check(y1p, y2p, statep,
+                                                     samplesp, signsp,
+                                                     sqsump);
+    accepted = statep[3];
+  }
+
+  bp = _hyperball_b_raw(bp, seedu, ni);
+  counterp[0] = ni;
+
+  return y1p, y2p, bp, counterp;
+}
+
+export
+fn polyfixveclk_sample_hyperball_mode2_jazz(reg mut ptr u32[2048] y1p,
+                                            reg mut ptr u32[2048] y2p,
+                                            reg mut ptr u8[1] bp,
+                                            reg mut ptr u64[1] counterp,
+                                            reg ui64 seedu)
+                                            -> reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[1],
+                                               reg ptr u64[1]
+{
+  reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+
+  lcount = 4;
+  kcount = 2;
+  scale_const = 2643021496320;
+  bound_const = 6505809026482176;
+  cube0 = 0x770077e2e41a;
+  cube1 = 0x1162;
+  three0 = 0x693861ad937b;
+  three1 = 0x9caa56;
+  y1p, y2p, bp, counterp = _hyperball_full(
+      y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
+      cube0, cube1, three0, three1);
+  return y1p, y2p, bp, counterp;
+}
+
+export
+fn polyfixveclk_sample_hyperball_mode3_jazz(reg mut ptr u32[2048] y1p,
+                                            reg mut ptr u32[2048] y2p,
+                                            reg mut ptr u8[1] bp,
+                                            reg mut ptr u64[1] counterp,
+                                            reg ui64 seedu)
+                                            -> reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[1],
+                                               reg ptr u64[1]
+{
+  reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+
+  lcount = 6;
+  kcount = 3;
+  scale_const = 4916390789120;
+  bound_const = 22510896139993088;
+  cube0 = 0x1a2935cfae68;
+  cube1 = 0x978;
+  three0 = 0x7ad215218533;
+  three1 = 0x7ff1c9;
+  y1p, y2p, bp, counterp = _hyperball_full(
+      y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
+      cube0, cube1, three0, three1);
+  return y1p, y2p, bp, counterp;
+}
+
+export
+fn polyfixveclk_sample_hyperball_mode5_jazz(reg mut ptr u32[2048] y1p,
+                                            reg mut ptr u32[2048] y2p,
+                                            reg mut ptr u8[1] bp,
+                                            reg mut ptr u64[1] counterp,
+                                            reg ui64 seedu)
+                                            -> reg ptr u32[2048],
+                                               reg ptr u32[2048],
+                                               reg ptr u8[1],
+                                               reg ptr u64[1]
+{
+  reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+
+  lcount = 7;
+  kcount = 4;
+  scale_const = 5997831421952;
+  bound_const = 33503371683954688;
+  cube0 = 0x700ff3e8890d;
+  cube1 = 0x702;
+  three0 = 0x5768588eed31;
+  three1 = 0x73bd40;
+  y1p, y2p, bp, counterp = _hyperball_full(
+      y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
+      cube0, cube1, three0, three1);
+  return y1p, y2p, bp, counterp;
+}

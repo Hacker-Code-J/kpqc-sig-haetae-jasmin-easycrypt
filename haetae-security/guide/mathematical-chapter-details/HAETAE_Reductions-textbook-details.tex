@@ -1,0 +1,1969 @@
+\subsection*{Textbook Formal Inventory}
+This subsection records the exact formal material in \file{HAETAE_Reductions.ec}.  It is generated from the proof-surface EasyCrypt file, so the line numbers and statements are meant to be read next to the checked source.
+
+\noindent\textbf{Chapter role.} real-valued security-loss ledger and final arithmetic normal forms.
+
+\noindent\textbf{Inventory size.} 5 context declarations, 26 definitions/game objects, 50 lemmas or relational theorems, and 0 explicit Hoare/Phoare judgments were found.
+
+\subsubsection*{Theory Context, Imports, and Quantified Modules}
+\paragraph{Context 1 (line 1)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import AllCore Real RealExp StdOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 2 (line 2)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+imported theories
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+require import HAETAE_Events.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 3 (line 4)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+HAETAE_Reductions
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+theory HAETAE_Reductions.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This begins a namespace for the formal development in this file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 4 (line 6)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import HAETAE_Events.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\paragraph{Context 5 (line 7)}
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+opened namespace
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+import RealOrder.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical context. This line imports or specializes earlier theories, making their carrier sets, functions, modules, and theorems available to the current file.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It fixes the proof context, imported mathematical language, or quantified module parameters for the following statements.
+
+\subsubsection*{Definitions, Carrier Sets, Operations, Games, and Procedures}
+\begin{formaldefinition}[EasyCrypt line 9]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+mlwe_hardness_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op mlwe_hardness_term : real.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 10]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+module_sis_hardness_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op module_sis_hardness_term : real.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 11]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_msis_reduction_loss_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op bimodal_to_msis_reduction_loss_term : real = 0%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 13]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_hardness_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op bimodal_selftarget_msis_hardness_term =
+  module_sis_hardness_term + bimodal_to_msis_reduction_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 16]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signature_query_count
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signature_query_count : real = 2%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 17]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_count
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hash_query_count : real = 2%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 18]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signature_query_budget_count
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signature_query_budget_count : int = 2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 19]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_budget_count
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op hash_query_budget_count : int = 2.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 20]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+abort_probability
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op abort_probability : real = 0%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 21]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+min_entropy_loss_factor
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op min_entropy_loss_factor : real = 2%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 22]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_bits_lower_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op challenge_support_bits_lower_bound : int = 58.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 23]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op challenge_support_cardinality_lower_bound : real =
+  288230376151711744%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 26]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_hash_query_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op rom_hash_query_budget : real = hash_query_count.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 27]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_signature_query_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op rom_signature_query_budget : real = signature_query_count.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 28]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_total_query_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op rom_total_query_budget =
+  rom_hash_query_budget + rom_signature_query_budget + 1%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 31]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op counted_rom_collision_term =
+  (rom_total_query_budget * rom_total_query_budget) /
+    challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 35]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op counted_rom_prequery_term =
+  (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) /
+    challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 39]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_min_entropy_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op counted_rom_min_entropy_term =
+  (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) /
+    challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 43]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op counted_rom_prequery_reprogramming_term =
+  counted_rom_collision_term + counted_rom_prequery_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 46]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op counted_rom_programming_loss_term =
+  counted_rom_collision_term +
+  counted_rom_prequery_term +
+  counted_rom_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 51]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_query_scale
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op signing_query_scale =
+  signature_query_count / (1%r - abort_probability).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is part of the exact formal vocabulary used by subsequent lemmas and games.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 54]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_reprogramming_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op fs_with_aborts_reprogramming_term =
+  sqrt signing_query_scale *
+    (hash_query_count + 1%r + sqrt signing_query_scale).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 58]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op fs_with_aborts_min_entropy_term =
+  min_entropy_loss_factor *
+    (signing_query_scale * (hash_query_count + 1%r)).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 62]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rejection_sampling_loss_term
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op rejection_sampling_loss_term =
+  fs_with_aborts_reprogramming_term + fs_with_aborts_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 65]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op haetae_euf_bound =
+  mlwe_hardness_term +
+  bimodal_selftarget_msis_hardness_term +
+  rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\begin{formaldefinition}[EasyCrypt line 70]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_counted_rom_bound
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+op haetae_euf_counted_rom_bound =
+  mlwe_hardness_term +
+  bimodal_selftarget_msis_hardness_term +
+  counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical definition. This is a total EasyCrypt operation.  The exact displayed statement gives the domain, codomain, and defining equation when present.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It names a numerical term that appears in a game-hop or final security inequality.
+
+\end{formaldefinition}
+
+\subsubsection*{Lemmas, Theorems, Relational Equivalences, and Their Proof Dependencies}
+\begin{formaltheorem}[EasyCrypt line 75]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_boundE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_euf_boundE :
+  haetae_euf_bound =
+    mlwe_hardness_term +
+    module_sis_hardness_term +
+    bimodal_to_msis_reduction_loss_term +
+    fs_with_aborts_reprogramming_term +
+    fs_with_aborts_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_hardness_term
+haetae_euf_bound
+rejection_sampling_loss_term
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 87]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_bound_groupedE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_euf_bound_groupedE :
+  haetae_euf_bound =
+    (mlwe_hardness_term +
+      (module_sis_hardness_term + bimodal_to_msis_reduction_loss_term)) +
+    (fs_with_aborts_reprogramming_term +
+      fs_with_aborts_min_entropy_term).
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_hardness_term
+haetae_euf_bound
+rejection_sampling_loss_term
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 98]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_bound_rejection_groupedE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_euf_bound_rejection_groupedE :
+  haetae_euf_bound =
+    (mlwe_hardness_term +
+      (module_sis_hardness_term + bimodal_to_msis_reduction_loss_term)) +
+    rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_hardness_term
+haetae_euf_bound
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 107]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+haetae_euf_counted_rom_bound_groupedE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma haetae_euf_counted_rom_bound_groupedE :
+  haetae_euf_counted_rom_bound =
+    (mlwe_hardness_term +
+      (module_sis_hardness_term + bimodal_to_msis_reduction_loss_term)) +
+    counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_selftarget_msis_hardness_term
+haetae_euf_counted_rom_bound
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 117]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_query_scaleE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_query_scaleE :
+  signing_query_scale = signature_query_count.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+abort_probability
+ring
+signature_query_count
+signing_query_scale
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 123]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signing_query_scale_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signing_query_scale_nonnegative :
+  0%r <= signing_query_scale.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signature_query_count
+signing_query_scaleE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 129]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_reprogramming_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma fs_with_aborts_reprogramming_term_nonnegative :
+  0%r <= fs_with_aborts_reprogramming_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+fs_with_aborts_reprogramming_term
+ge0_sqrt
+hash_query_count
+mulr_ge0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 140]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma fs_with_aborts_min_entropy_term_nonnegative :
+  0%r <= fs_with_aborts_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+fs_with_aborts_min_entropy_term
+hash_query_count
+min_entropy_loss_factor
+mulr_ge0
+signing_query_scale_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 151]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_hash_query_budget_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rom_hash_query_budget_nonnegative :
+  0%r <= rom_hash_query_budget.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 155]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_signature_query_budget_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rom_signature_query_budget_nonnegative :
+  0%r <= rom_signature_query_budget.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 159]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_budget_countE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hash_query_budget_countE :
+  hash_query_count = (hash_query_budget_count)%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 163]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signature_query_budget_countE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signature_query_budget_countE :
+  signature_query_count = (signature_query_budget_count)%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 167]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_budget_count_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma hash_query_budget_count_nonnegative :
+  0 <= hash_query_budget_count.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 171]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+signature_query_budget_count_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma signature_query_budget_count_nonnegative :
+  0 <= signature_query_budget_count.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 175]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+min_entropy_loss_factor_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma min_entropy_loss_factor_nonnegative :
+  0%r <= min_entropy_loss_factor.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 179]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_positive
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma challenge_support_cardinality_lower_bound_positive :
+  0%r < challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 183]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma challenge_support_cardinality_lower_bound_nonnegative :
+  0%r <= challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_positive
+ltrW
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 189]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rom_total_query_budget_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rom_total_query_budget_nonnegative :
+  0%r <= rom_total_query_budget.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+rom_hash_query_budget_nonnegative
+rom_signature_query_budget_nonnegative
+rom_total_query_budget
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 200]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_collision_term_nonnegative :
+  0%r <= counted_rom_collision_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_nonnegative
+counted_rom_collision_term
+divr_ge0
+mulr_ge0
+rom_total_query_budget_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 209]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_term_nonnegative :
+  0%r <= counted_rom_prequery_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+challenge_support_cardinality_lower_bound_nonnegative
+counted_rom_prequery_term
+divr_ge0
+mulr_ge0
+rom_hash_query_budget_nonnegative
+rom_signature_query_budget_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 220]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_min_entropy_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_min_entropy_term_nonnegative :
+  0%r <= counted_rom_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+challenge_support_cardinality_lower_bound_nonnegative
+counted_rom_min_entropy_term
+divr_ge0
+mulr_ge0
+rom_hash_query_budget_nonnegative
+rom_signature_query_budget_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 231]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_term_nonnegative :
+  0%r <= counted_rom_prequery_reprogramming_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+counted_rom_collision_term_nonnegative
+counted_rom_prequery_reprogramming_term
+counted_rom_prequery_term_nonnegative
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 240]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_nonnegative :
+  0%r <= counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+counted_rom_collision_term_nonnegative
+counted_rom_min_entropy_term_nonnegative
+counted_rom_prequery_term_nonnegative
+counted_rom_programming_loss_term
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 251]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_collision_termE :
+  counted_rom_collision_term =
+    25%r / challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_term
+hash_query_count
+ring
+rom_hash_query_budget
+rom_signature_query_budget
+rom_total_query_budget
+signature_query_count
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 263]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_termE :
+  counted_rom_prequery_term =
+    6%r / challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_term
+hash_query_count
+ring
+rom_hash_query_budget
+rom_signature_query_budget
+signature_query_count
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 274]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_min_entropy_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_min_entropy_termE :
+  counted_rom_min_entropy_term =
+    6%r / challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_min_entropy_term
+hash_query_count
+ring
+rom_hash_query_budget
+rom_signature_query_budget
+signature_query_count
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 285]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_termE :
+  counted_rom_prequery_reprogramming_term =
+    31%r / challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_termE
+counted_rom_prequery_reprogramming_term
+counted_rom_prequery_termE
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 294]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_termE :
+  counted_rom_programming_loss_term =
+    37%r / challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_collision_termE
+counted_rom_min_entropy_termE
+counted_rom_prequery_termE
+counted_rom_programming_loss_term
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 304]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_subunit
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_subunit :
+  counted_rom_programming_loss_term < 1%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound
+challenge_support_cardinality_lower_bound_positive
+counted_rom_programming_loss_termE
+ltr_pdivr_mulr
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 313]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_positive
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_positive :
+  0%r < counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_positive
+counted_rom_programming_loss_termE
+divr_gt0
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 322]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_le1
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_le1 :
+  1%r >= counted_rom_programming_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_subunit
+ltrW
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 328]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_budget_numeratorE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_budget_numeratorE :
+  (rom_total_query_budget * rom_total_query_budget) +
+  (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) =
+  31%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_count
+ring
+rom_hash_query_budget
+rom_signature_query_budget
+rom_total_query_budget
+signature_query_count
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 340]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_budget_numeratorE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_budget_numeratorE :
+  (rom_total_query_budget * rom_total_query_budget) +
+  (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) +
+  (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) =
+  37%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+hash_query_count
+ring
+rom_hash_query_budget
+rom_signature_query_budget
+rom_total_query_budget
+signature_query_count
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 353]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_cardinalityE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_cardinalityE :
+  counted_rom_programming_loss_term =
+    ((rom_total_query_budget * rom_total_query_budget) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) /
+    challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_budget_numeratorE
+counted_rom_programming_loss_termE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 364]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term_cardinalityE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_term_cardinalityE :
+  counted_rom_prequery_reprogramming_term =
+    ((rom_total_query_budget * rom_total_query_budget) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) /
+    challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_budget_numeratorE
+counted_rom_prequery_reprogramming_termE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 374]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_concreteE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_concreteE :
+  counted_rom_programming_loss_term =
+    37%r / 288230376151711744%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound
+counted_rom_programming_loss_termE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 382]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term_concreteE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_term_concreteE :
+  counted_rom_prequery_reprogramming_term =
+    31%r / 288230376151711744%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound
+counted_rom_prequery_reprogramming_termE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 390]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_checked_subunit
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_term_checked_subunit :
+  0%r < counted_rom_programming_loss_term /\
+  counted_rom_programming_loss_term < 1%r /\
+  counted_rom_programming_loss_term =
+    37%r / 288230376151711744%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{split}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_term_concreteE
+counted_rom_programming_loss_term_positive
+counted_rom_programming_loss_term_subunit
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 403]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_support_lower_bound_summary
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_support_lower_bound_summary :
+  challenge_support_bits_lower_bound = 58 /\
+  challenge_support_cardinality_lower_bound =
+    288230376151711744%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{split}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_bits_lower_bound
+challenge_support_cardinality_lower_bound
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 413]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_support_dominates_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_support_dominates_budget :
+  37%r < challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 417]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_support_dominates_budget
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_support_dominates_budget :
+  31%r < challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 421]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term_subunit
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_term_subunit :
+  counted_rom_prequery_reprogramming_term < 1%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This lemma is a universally quantified proposition over the variables shown in the EasyCrypt statement.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+challenge_support_cardinality_lower_bound_positive
+counted_rom_prequery_reprogramming_support_dominates_budget
+counted_rom_prequery_reprogramming_termE
+ltr_pdivr_mulr
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 430]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_from_query_budgets_and_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_prequery_reprogramming_from_query_budgets_and_support :
+  counted_rom_prequery_reprogramming_term =
+    ((rom_total_query_budget * rom_total_query_budget) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) /
+    challenge_support_cardinality_lower_bound /\
+  ((rom_total_query_budget * rom_total_query_budget) +
+   (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) <
+  challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{split}, \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_budget_numeratorE
+counted_rom_prequery_reprogramming_support_dominates_budget
+counted_rom_prequery_reprogramming_term_cardinalityE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 445]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_programming_loss_splitE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_programming_loss_splitE :
+  counted_rom_programming_loss_term =
+    counted_rom_prequery_reprogramming_term +
+    counted_rom_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_prequery_reprogramming_term
+counted_rom_programming_loss_term
+ring
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 454]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_loss_from_query_budgets_and_support
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma counted_rom_loss_from_query_budgets_and_support :
+  counted_rom_programming_loss_term =
+    ((rom_total_query_budget * rom_total_query_budget) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) +
+     (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) /
+    challenge_support_cardinality_lower_bound /\
+  ((rom_total_query_budget * rom_total_query_budget) +
+   (rom_signature_query_budget * (rom_hash_query_budget + 1%r)) +
+   (rom_signature_query_budget * (rom_hash_query_budget + 1%r))) <
+  challenge_support_cardinality_lower_bound.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{split}, \ec{apply}, \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+counted_rom_budget_numeratorE
+counted_rom_programming_loss_term_cardinalityE
+counted_rom_support_dominates_budget
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 471]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rejection_sampling_loss_term_nonnegative
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rejection_sampling_loss_term_nonnegative :
+  0%r <= rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{apply}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+addr_ge0
+fs_with_aborts_min_entropy_term_nonnegative
+fs_with_aborts_reprogramming_term_nonnegative
+rejection_sampling_loss_term
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 479]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma fs_with_aborts_min_entropy_termE :
+  fs_with_aborts_min_entropy_term = 12%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_term
+hash_query_count
+min_entropy_loss_factor
+ring
+signature_query_count
+signing_query_scaleE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 486]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_term_ge1
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma fs_with_aborts_min_entropy_term_ge1 :
+  1%r <= fs_with_aborts_min_entropy_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It is a reusable checked theorem cited by later proof scripts.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_termE
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 492]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+rejection_sampling_loss_term_ge1
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma rejection_sampling_loss_term_ge1 :
+  1%r <= rejection_sampling_loss_term.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an inequality, usually an arithmetic loss bound, event inclusion bound, or monotonicity fact used to compose probabilities.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+Proof-script reading. The machine proof decomposes the theorem into rewrites, program-logic obligations, relational equivalences, and arithmetic side conditions.
+\emph{Main tactics visible in the proof script:} \ec{rewrite}, \ec{smt}.
+\emph{Named identifiers syntactically cited in the proof block:}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+fs_with_aborts_min_entropy_term_ge1
+fs_with_aborts_reprogramming_term_nonnegative
+rejection_sampling_loss_term
+\end{lstlisting}
+
+\end{formaltheorem}
+
+\begin{formaltheorem}[EasyCrypt line 500]
+\noindent\textbf{EasyCrypt name.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+bimodal_to_msis_reduction_loss_termE
+\end{lstlisting}
+\noindent\textbf{Checked EasyCrypt statement.}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\scriptsize]
+lemma bimodal_to_msis_reduction_loss_termE :
+  bimodal_to_msis_reduction_loss_term = 0%r.
+\end{lstlisting}
+\noindent\textbf{Formal mathematical reading.}
+Mathematical theorem. This is an equality or definitional expansion used for rewriting and normalization.
+
+\noindent\textbf{Role in the proof.}
+Use in this chapter. It contributes directly to an advantage bound, bad-event bound, or real-arithmetic composition step.
+
+\noindent\textbf{Proof-script interpretation.}
+No proof block was collected for this item.
+
+\end{formaltheorem}
+
+\medskip
+\noindent\emph{End of generated formal inventory for \file{HAETAE_Reductions.ec}.}

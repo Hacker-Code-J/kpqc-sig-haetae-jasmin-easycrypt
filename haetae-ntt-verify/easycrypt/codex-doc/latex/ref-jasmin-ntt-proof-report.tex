@@ -1,0 +1,659 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.75em}
+
+\newcommand{\ec}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\Fq}{\mathbf{F}_q}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Range}[2]{\{#1,\ldots,#2\}}
+
+\newtheorem{observation}{Observation}
+\newtheorem{invariant}{Invariant}
+\newtheorem{remark}{Remark}
+
+\title{Proof Report for \texorpdfstring{\ec{RefJasminNTT.ec}}{RefJasminNTT.ec}}
+\author{Codex Proof Report}
+\date{28 April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report documents what was proved in \ec{RefJasminNTT.ec} and how the
+proof is structured. The file establishes direct loop-level pRHL refinements
+from the extracted Jasmin NTT cores in \ec{Hpoly_extract.M} to the imperative
+EasyCrypt reference procedures in \ec{NTT_Fq.NTT}. The forward theorem proves
+that \ec{Hpoly_extract.M._poly_ntt} refines \ec{NTT_Fq.NTT.ntt}. The inverse
+theorem proves that \ec{Hpoly_extract.M._poly_invntt} refines
+\ec{NTT_Fq.NTT.invntt}, with the representation relation strengthened at the
+postcondition to account for the final Montgomery-encoded scaling performed by
+the Jasmin routine. The proof is not an algebraic proof of the NTT against
+\ec{Rq}; it is the concrete extraction-to-imperative-specification layer.
+\end{abstract}
+
+\section{Scope of the File}
+
+\ec{RefJasminNTT.ec} is deliberately narrower than the algebraic correctness
+development. Its header states the intended boundary: it targets
+\ec{extract/Hpoly_extract.ec} and stops at refinement to the imperative
+EasyCrypt NTT procedures in \ec{NTT_Fq.ec}. Thus the proof chain covered here is
+\[
+\text{extracted Jasmin core}
+\quad\Longrightarrow\quad
+\text{imperative EasyCrypt NTT model}.
+\]
+The later mathematical step
+\[
+\text{imperative EasyCrypt NTT model}
+\quad\Longrightarrow\quad
+\text{abstract ring-theoretic NTT}
+\]
+is outside the scope of this file.
+
+The two central theorems are:
+\begin{align*}
+&\ec{poly_ntt_core_ref},\\
+&\ec{poly_invntt_core_ref}.
+\end{align*}
+Two wrapper equivalences are also proved:
+\[
+\ec{poly_ntt_jazz_ref}
+\qquad\text{and}\qquad
+\ec{poly_invntt_jazz_ref},
+\]
+showing that the public extracted wrappers are just inlined calls to the core
+procedures. These wrapper proofs are short \ec{proc; inline*; sim} arguments;
+the substantial work is in the core refinements.
+
+\section{Target Procedures}
+
+The right-hand programs are the imperative specifications in \ec{NTT_Fq.NTT}.
+The forward procedure \ec{NTT.ntt} uses the standard descending layer lengths
+\[
+128,\ 64,\ 32,\ 16,\ 8,\ 4,\ 2,\ 1
+\]
+and, for each butterfly, computes
+\[
+t = \zeta \cdot r_{j+\ell},\qquad
+r_{j+\ell}' = r_j - t,\qquad
+r_j' = r_j + t.
+\]
+
+The inverse procedure \ec{NTT.invntt} uses ascending layer lengths
+\[
+1,\ 2,\ 4,\ 8,\ 16,\ 32,\ 64,\ 128
+\]
+and computes
+\[
+t = r_j,\qquad
+r_j' = t + r_{j+\ell},\qquad
+r_{j+\ell}' = \zeta \cdot (t - r_{j+\ell}).
+\]
+After the inverse butterfly layers, \ec{NTT.invntt} performs a final scaling
+loop:
+\[
+r_j' = r_j \cdot \ec{zetas_inv[255]}.
+\]
+
+The left-hand programs are the corresponding extracted Jasmin cores:
+\[
+\ec{Hpoly_extract.M._poly_ntt}
+\qquad\text{and}\qquad
+\ec{Hpoly_extract.M._poly_invntt}.
+\]
+These programs manipulate \ec{BArray1024.t} buffers containing 256 signed
+32-bit coefficients and call the extracted Montgomery multiplication routine
+\ec{Hpoly_extract.M.__fqmul}.
+
+\section{Representation Relations}
+
+\subsection{Base Representation}
+
+The base representation is inherited from \ec{NTT_Fq.ec}. A machine word is
+interpreted as a field coefficient by
+\[
+\ec{word_to_coeff}(w)
+  = \operatorname{incoeff}(\ec{W32.to_sint}(w)).
+\]
+The polynomial readback from a 1024-byte buffer is
+\[
+\ec{barray256_to_poly}(rp)[i]
+  =
+\ec{word_to_coeff}(\ec{BArray1024.get32}\; rp\; i).
+\]
+The relation
+\[
+\ec{poly_repr}(rp,p)
+\]
+states that this readback equals the coefficient array \(p\).
+
+The bounded relation used by the final theorems is
+\[
+\ec{poly_repr_bound}(rp,p,s)
+  \equiv
+\ec{poly_repr}(rp,p)
+\land
+\forall i \in \Range{0}{255}.\,
+\ec{Fq.bw32}(\ec{BArray1024.get32}\; rp\; i,\ s).
+\]
+Here \ec{Fq.bw32 w s} records that the signed value of \(w\) is representable
+within the signed bound \(2^s\). This is the central device used to rule out
+machine-word overflow in additions, subtractions, and products supplied to
+\ec{__fqmul}.
+
+\subsection{Pointwise Bounds}
+
+\ec{RefJasminNTT.ec} introduces a more flexible pointwise bounded relation:
+\[
+\ec{barray256_bound_by}(rp,bd)
+  \equiv
+\forall i \in \Range{0}{255}.\,
+\ec{Fq.bw32}(\ec{BArray1024.get32}\; rp\; i,\ bd(i)).
+\]
+and
+\[
+\ec{poly_repr_bound_by}(rp,p,bd)
+  \equiv
+\ec{poly_repr}(rp,p)\land \ec{barray256_bound_by}(rp,bd).
+\]
+The pointwise form is necessary because, inside a butterfly loop, some
+coefficients in the current stage have already been updated and therefore have
+a larger bound than coefficients still waiting to be processed.
+
+The following structural lemmas make this relation usable in loop invariants:
+\begin{itemize}
+\item \ec{barray256_bound_by_get}: extracts the bound for a concrete index;
+\item \ec{barray256_bound_by_weaken}: weakens a pointwise bound;
+\item \ec{barray256_bound_by_set32}: preserves a bound after one store;
+\item \ec{barray256_bound_by_set32_change}: changes the pointwise bound after
+      one store while weakening all untouched entries;
+\item \ec{barray256_bound_by_const} and \ec{barray256_bound_by_const_bound}:
+      convert between uniform bounds and pointwise constant bounds.
+\end{itemize}
+
+\section{Montgomery Table Bridges}
+
+The extracted Jasmin multiplication is Montgomery multiplication. Consequently,
+twiddle constants loaded from \ec{jzetas} and \ec{jzetas_inv} are Montgomery
+encoded. \ec{RefJasminNTT.ec} imports the concrete table facts from
+\ec{NTT_Fq.ec} and packages them as cancellation lemmas.
+
+For the forward table, the key bridge is
+\[
+\ec{jzetas_get_cancel}:
+\quad
+\ec{word_to_coeff}(\ec{jzetas}[i])\cdot R^{-1}
+  =
+\ec{zetas}[i]
+\quad (1 \le i < 256).
+\]
+For the inverse table, the analogous bridge is
+\[
+\ec{jzetas_inv_get_cancel}:
+\quad
+\ec{word_to_coeff}(\ec{jzetas_inv}[i])\cdot R^{-1}
+  =
+\ec{zetas_inv}[i]
+\quad (0 \le i < 255).
+\]
+
+The final inverse scaling entry is special. The table entry at index \(255\)
+is used by the Jasmin final loop. Its cancellation lemma is
+\[
+\ec{jzetas_inv_255_scale_cancel}:
+\quad
+\ec{word_to_coeff}(\ec{jzetas_inv}[255])\cdot R^{-1}
+  =
+\ec{scale255}\cdot R.
+\]
+This identity explains why the inverse theorem does not end with
+\ec{poly_repr_bound res{1} res{2} 16}. The Jasmin final loop produces a
+Montgomery-scaled image of the right-hand EasyCrypt result.
+
+\section{Arithmetic Correctness of Extracted Multiplication}
+
+The proof factors every call to \ec{Hpoly_extract.M.__fqmul} through
+specialized Hoare and probabilistic Hoare lemmas. At the lowest level,
+\ec{fqmul_word_to_coeff_mul_bound_h} proves that if the signed integer product
+of the two inputs lies in the range accepted by the signed Montgomery reducer,
+then the result has both the correct field value and a 16-bit signed bound:
+\[
+\begin{aligned}
+&\ec{word_to_coeff}(res)
+  =
+\operatorname{incoeff}(a)\cdot \operatorname{incoeff}(b)\cdot R^{-1},\\
+&\ec{Fq.bw32}(res,16).
+\end{aligned}
+\]
+The probabilistic version \ec{fqmul_word_to_coeff_mul_bound_ph} adds the
+losslessness side condition, using \ec{Fq.fqmul_ll}.
+
+The product bound used by all butterfly calls is
+\[
+\ec{fqmul_product_bound_16_24}.
+\]
+It states that a 16-bit twiddle multiplied by a 24-bit coefficient fits in the
+input range required by the Montgomery reduction proof:
+\[
+-\frac{R}{2}q
+\le
+\ec{to_sint}(a)\ec{to_sint}(b)
+<
+\frac{R}{2}q.
+\]
+The forward and inverse loop invariants are designed precisely so that every
+coefficient supplied to \ec{__fqmul} can be weakened to a 24-bit bound, while
+every twiddle table entry has a 16-bit bound.
+
+\section{Forward Refinement}
+
+\subsection{Statement}
+
+The forward core theorem is:
+\[
+\begin{array}{l}
+\ec{equiv poly_ntt_core_ref :}\\
+\quad
+\ec{Hpoly_extract.M._poly_ntt ~ NTT_Fq.NTT.ntt :}\\
+\quad
+\ec{NTT_Fq.poly_repr_bound rp\{1\} r\{2\} 16 /\\}\\
+\quad
+\ec{zetas\{2\} = NTT_Fq.zetas}\\
+\quad
+\ec{==> NTT_Fq.poly_repr_bound res\{1\} res\{2\} 24.}
+\end{array}
+\]
+
+The precondition says that the Jasmin input buffer represents the right-hand
+coefficient array and all input words are initially 16-bit bounded. The
+postcondition says that the two procedures return represented arrays, with a
+24-bit output bound. The 24-bit bound is not accidental: each forward stage can
+increase the coefficient bound by one bit, and there are eight butterfly
+layers.
+
+\subsection{Stage Bookkeeping}
+
+Forward loop control is summarized by:
+\[
+\ec{fwd_len_ok}(len)
+\]
+for the allowed values \(128,64,\ldots,1,0\), and
+\[
+\ec{fwd_stage_bound}(len)
+\]
+for the uniform stage bound:
+\[
+\begin{array}{c|ccccccccc}
+len & 128&64&32&16&8&4&2&1&0\\
+\midrule
+\ec{fwd_stage_bound}(len)&16&17&18&19&20&21&22&23&24.
+\end{array}
+\]
+The table counter is tracked by
+\[
+\ec{fwd_zbase}(len),
+\]
+whose values correspond to the first twiddle index of the current layer:
+\[
+0,1,3,7,15,31,63,127,255.
+\]
+The lemmas \ec{fwd_stage_next}, \ec{fwd_len_next_ok}, and
+\ec{fwd_zbase_next} prove that these values evolve exactly as the two programs
+update \ec{len} and \ec{zetasctr}.
+
+\subsection{Nested Loop Invariants}
+
+The proof uses three nested pRHL \ec{while} invariants matching the three nested
+loops of the programs.
+
+\paragraph{Outer invariant.}
+At the start of each layer:
+\[
+\begin{aligned}
+&\ec{poly_repr}(rp_1,r_2),\\
+&\ec{barray256_bound_by}(rp_1,\lambda i.\ec{fwd_stage_bound}(len_1)),\\
+&\ec{zetasp_1 = jzetas},\qquad
+\ec{zetas_2 = NTT_Fq.zetas},\\
+&\ec{zetasctr_1 = zetasctr_2},\qquad
+\ec{len_1 = len_2},\\
+&\ec{fwd_len_ok}(len_1),\qquad
+\ec{zetasctr_1 = fwd_zbase}(len_1).
+\end{aligned}
+\]
+This invariant aligns the two programs at layer boundaries and asserts the
+uniform bound for the current stage.
+
+\paragraph{Middle invariant.}
+Inside a layer, \ec{start} marks how much of the array has already been
+processed. The bound is
+\[
+\ec{fwd_middle_bound}(sz,start,i)
+  =
+\begin{cases}
+sz+1,&0\le i<start,\\
+sz,&\text{otherwise}.
+\end{cases}
+\]
+Thus coefficients in completed blocks have grown by one bit, while the rest of
+the layer remains at the original stage bound.
+
+\paragraph{Inner invariant.}
+Inside one block, the inner-loop bound is
+\[
+\ec{fwd_inner_bound}(sz,\ell,start,j,i).
+\]
+It gives bound \(sz+1\) to coefficients in completed butterflies and bound
+\(sz\) to the two current butterfly inputs. The lemmas
+\ec{fwd_inner_current}, \ec{fwd_inner_weaken_unchanged}, and
+\ec{fwd_inner_exit_to_middle} justify, respectively, reading the current input
+bounds, preserving untouched entries after a store, and converting the inner
+bound back to the middle bound when the block ends.
+
+\subsection{Butterfly Step}
+
+The forward butterfly proof is split into two conceptual pieces.
+
+First, \ec{forward_twiddle_product_bound_call_ph} verifies the call to
+\ec{__fqmul}. It uses:
+\begin{itemize}
+\item \ec{jzetas_get_cancel} to convert the Montgomery table entry into the
+      abstract \(\zeta\);
+\item \ec{forward_twiddle_product_bound_from_inner} to prove the machine-word
+      product bound required by \ec{__fqmul};
+\item \ec{fqmul_word_to_coeff_mul_bound_ph} to obtain both semantic
+      correctness and a 16-bit result bound.
+\end{itemize}
+
+Second, \ec{forward_butterfly_step_bound_by} verifies the two stores:
+\[
+r_{j+\ell}\leftarrow r_j-t,\qquad
+r_j\leftarrow r_j+t.
+\]
+The field-level equality is obtained through \ec{word_to_coeff_add} and
+\ec{word_to_coeff_sub}; their preconditions are exactly the pointwise
+\ec{bw32} bounds carried in the invariant. The output bound is raised from
+\(sz\) to \(sz+1\) on the two updated positions using
+\ec{forward_butterfly_bounds}.
+
+\subsection{Completion of the Forward Proof}
+
+At inner-loop exit, the proof derives \(j=start+\ell\) and converts
+\ec{fwd_inner_bound} to \ec{fwd_middle_bound}. At middle-loop exit, it derives
+\(start=256\), upgrades the whole layer to \(sz+1\), and uses
+\ec{fwd_stage_next} to re-enter the outer invariant at the next value
+\(\ell/2\). At outer-loop exit, \(\ell=0\), and
+\ec{fwd_stage_bound}(0) is 24, giving the final postcondition
+\[
+\ec{poly_repr_bound}(res_1,res_2,24).
+\]
+
+\section{Inverse Refinement}
+
+\subsection{Statement}
+
+The inverse core theorem is:
+\[
+\begin{array}{l}
+\ec{equiv poly_invntt_core_ref :}\\
+\quad
+\ec{Hpoly_extract.M._poly_invntt ~ NTT_Fq.NTT.invntt :}\\
+\quad
+\ec{NTT_Fq.poly_repr_bound rp\{1\} r\{2\} 16 /\\}\\
+\quad
+\ec{zetas_inv\{2\} = NTT_Fq.zetas_inv}\\
+\quad
+\ec{==> NTT_Fq.poly_repr_bound res\{1\}}\\
+\quad\qquad
+\ec{(NTT_Fq.array256_mont res\{2\}) 16.}
+\end{array}
+\]
+
+The postcondition is intentionally strengthened relative to a plain
+coefficient representation. The right-hand program multiplies by
+\ec{zetas_inv[255]} at the abstract coefficient level, whereas the left-hand
+Jasmin code calls Montgomery multiplication with the concrete table entry
+\ec{jzetas_inv[255]}. The table bridge proves that this machine operation
+produces the Montgomery-scaled coefficient
+\[
+r_j\cdot \ec{scale255}\cdot R.
+\]
+Therefore the final represented polynomial is
+\[
+\ec{array256_mont}(res_2),
+\]
+not \(res_2\) itself.
+
+\subsection{Inverse Stage Bookkeeping}
+
+The inverse layer control is summarized by:
+\[
+\ec{inv_len_ok}(len)
+\]
+for the values \(1,2,\ldots,128,256\), and
+\[
+\ec{inv_stage_bound}(len)
+\]
+with values:
+\[
+\begin{array}{c|ccccccccc}
+len&1&2&4&8&16&32&64&128&256\\
+\midrule
+\ec{inv_stage_bound}(len)&16&17&18&19&20&21&22&23&24.
+\end{array}
+\]
+The inverse table counter is described by
+\[
+\ec{inv_zbase}(len)
+ =
+0,128,192,224,240,248,252,254,255.
+\]
+The lemmas \ec{inv_stage_next}, \ec{inv_len_next_ok}, and
+\ec{inv_stage_zbase_exit} prove that these values match the update
+\(\ell\leftarrow 2\ell\) and the inverse table traversal.
+
+\subsection{Inverse Butterfly Layers}
+
+The inverse proof reuses the same three-level invariant shape as the forward
+proof, replacing \ec{fwd_*} operators with \ec{inv_*}. The important semantic
+difference is the butterfly:
+\[
+r_j' = r_j+r_{j+\ell},\qquad
+r_{j+\ell}' = \zeta\cdot(r_j-r_{j+\ell}).
+\]
+The extracted code computes the difference in a temporary word and then calls
+\ec{__fqmul}. The proof therefore needs two additional facts:
+\begin{itemize}
+\item \ec{inverse_twiddle_product_bound_from_inner}: the word difference
+      \(rp[j]-rp[j+\ell]\) is bounded by \ec{inv_stage_bound len + 1};
+\item \ec{inverse_twiddle_product_call_bound_from_inner}: after weakening this
+      difference to a 24-bit bound and combining it with a 16-bit inverse
+      twiddle, the product satisfies the Montgomery reducer input bound.
+\end{itemize}
+
+The call to \ec{__fqmul} is discharged by
+\ec{inverse_twiddle_product_bound_call_ph}. The post-call store reasoning is
+handled by \ec{inverse_butterfly_step_bound_by}. The array update shape of the
+right-hand specification differs slightly from the extracted code order, so
+\ec{inverse_spec_updateE} proves the extensional equality between the generated
+store expression and the compact mathematical update:
+\[
+(p[j\leftarrow p[j]+p[j+\ell]])[j+\ell\leftarrow
+\zeta(p[j]-p[j+\ell])].
+\]
+
+\subsection{Final Scaling Loop}
+
+After the eight inverse butterfly layers, the coefficients have a uniform
+24-bit bound. The final loop applies \ec{__fqmul} at each index with
+\ec{jzetas_inv[255]}. This loop has its own representation and bound
+invariant:
+\[
+\ec{poly_repr}(rp_1,\ec{final_mont_array}(r_2,j_2))
+\land
+\ec{barray256_bound_by}(rp_1,\ec{final_bound}(j_1)).
+\]
+The ghost array
+\[
+\ec{final_mont_array}(p,j)[i]
+ =
+\begin{cases}
+p[i]\cdot R,&0\le i<j,\\
+p[i],&\text{otherwise}
+\end{cases}
+\]
+records that the prefix already processed by the final loop has been
+Montgomery-scaled. The corresponding bound function is
+\[
+\ec{final_bound}(j,i)
+ =
+\begin{cases}
+16,&0\le i<j,\\
+24,&\text{otherwise}.
+\end{cases}
+\]
+Thus processed entries are known to be fresh 16-bit Montgomery multiplication
+outputs, while unprocessed entries still carry the 24-bit bound inherited from
+the inverse butterfly layers.
+
+The key final-loop lemmas are:
+\begin{itemize}
+\item \ec{final_mont_array_start}: before the loop, the ghost array is the
+      unscaled right-hand result;
+\item \ec{final_mont_array_setE}: one iteration advances the Montgomery-scaled
+      prefix by one entry;
+\item \ec{final_mont_array_exit}: after \(j=256\), the ghost array equals
+      \ec{NTT_Fq.array256_mont p};
+\item \ec{inverse_final_product_bound_call_ph}: the \ec{__fqmul} call at
+      index \(255\) computes \(coeff\cdot\ec{scale255}\cdot R\) and returns a
+      16-bit word;
+\item \ec{inverse_final_product_bound_from_inv}: every final-loop product
+      satisfies the signed Montgomery reducer range because the scale entry is
+      16-bit and the current unprocessed coefficient is at most 24-bit.
+\end{itemize}
+
+\subsection{Completion of the Inverse Proof}
+
+The inverse theorem is organized as two pRHL loops after \ec{proc; wp}. First,
+the proof discharges the final scaling loop because it appears syntactically
+last and is therefore encountered first by weakest precondition reasoning.
+Then it proves the nested inverse butterfly loops.
+
+At the exit of the inverse butterfly loops, the invariant gives
+\[
+\ec{poly_repr}(rp_1,r_2)
+\land
+\ec{barray256_bound_by}(rp_1,\lambda i.24).
+\]
+This state is converted into the precondition of the final-loop invariant by
+\ec{final_mont_array_start} and \ec{final_bound_start}. At the exit of the
+final loop, \(j=256\); \ec{final_mont_array_exit} converts the representation
+target to \ec{NTT_Fq.array256_mont res{2}}, and \ec{final_bound} gives the
+uniform 16-bit postcondition.
+
+\section{Machine-Word Overflow Argument}
+
+The overflow argument is not a separate after-the-fact side condition. It is
+threaded through all pRHL invariants.
+
+The core facts are:
+\begin{enumerate}
+\item All input coefficients begin with a 16-bit bound.
+\item Every butterfly layer can increase updated coefficient bounds by at most
+      one bit, as proved by \ec{forward_butterfly_bounds} and
+      \ec{inverse_butterfly_bounds}.
+\item There are eight butterfly layers, so a coefficient entering a
+      Montgomery multiplication is never worse than 24-bit.
+\item All twiddle-table entries used in multiplication are 16-bit:
+      \ec{jzetas_bound16} and \ec{jzetas_inv_bound16}.
+\item A 16-bit twiddle times a 24-bit coefficient satisfies the reducer
+      precondition by \ec{fqmul_product_bound_16_24}.
+\item Every result of \ec{__fqmul} is reduced back to a 16-bit word.
+\end{enumerate}
+
+This is why the forward theorem ends with a 24-bit bound, while the inverse
+theorem ends with a 16-bit bound on the Montgomery-scaled output: the inverse
+has the same eight-layer growth to 24 bits, followed by a final multiplication
+that reduces every entry back to 16 bits.
+
+\section{Proof Engineering Pattern}
+
+The proof uses a consistent engineering pattern throughout:
+\begin{enumerate}
+\item Define a small stage-indexing model for the loop counter values.
+\item Define a pointwise bound function that distinguishes completed,
+      current, and untouched coefficients.
+\item Prove arithmetic transition lemmas for that bound function.
+\item Verify the extracted Montgomery multiplication call with a dedicated
+      \ec{phoare} lemma.
+\item Verify the subsequent stores by combining field representation lemmas
+      with machine-word add/subtract bounds.
+\item Close each loop by converting the inner invariant to the middle
+      invariant, then the middle invariant to the next outer stage invariant.
+\end{enumerate}
+
+This structure keeps the pRHL proof direct: the left and right programs are
+related at the actual loop level, without replacing the extracted code by a
+separate hand-written model.
+
+\section{Checked Artifacts}
+
+The relevant checked artifacts are:
+\begin{itemize}
+\item \ec{RefJasminNTT.ec}, containing the pRHL refinements and the supporting
+      representation and bound lemmas;
+\item \ec{NTT_Fq.ec}, containing the imperative NTT procedures, table
+      definitions, table bridges, and base representation relation;
+\item \ec{extract/Hpoly_extract.ec}, containing the extracted Jasmin
+      procedures and concrete twiddle tables.
+\end{itemize}
+
+The proof was checked with:
+\begin{verbatim}
+easycrypt compile RefJasminNTT.ec -I .
+easycrypt compile NTT_Fq.ec -I .
+\end{verbatim}
+and the proof-marker scan
+\begin{verbatim}
+rg -n "admit|abort|axiom" RefJasminNTT.ec NTT_Fq.ec
+\end{verbatim}
+reported no proof holes in \ec{RefJasminNTT.ec}. The only reported matches were
+the word ``axiom'' in an explanatory comment in \ec{NTT_Fq.ec}.
+
+\section{Summary}
+
+\ec{RefJasminNTT.ec} proves the direct loop-level extraction refinements for
+both NTT cores. The forward proof establishes:
+\[
+\ec{Hpoly_extract.M._poly_ntt}
+\sim
+\ec{NTT_Fq.NTT.ntt}
+\]
+under a 16-bit input representation relation, producing a 24-bit represented
+output. The inverse proof establishes:
+\[
+\ec{Hpoly_extract.M._poly_invntt}
+\sim
+\ec{NTT_Fq.NTT.invntt}
+\]
+under the analogous inverse-table precondition, producing a 16-bit represented
+output for \ec{array256_mont} of the right-hand result.
+
+The main technical content is the pointwise machine-word bound infrastructure.
+It rules out overflow locally at every butterfly and at every Montgomery
+multiplication call, while simultaneously preserving the field-level
+representation relation needed for the pRHL simulation.
+
+\end{document}

@@ -1,0 +1,294 @@
+%==============================================================================%
+% Chapter 9 – Jasmin Implementation
+%==============================================================================%
+
+\chapter{Jasmin Implementation}
+\label{ch:jasmin_impl}
+
+\section{Overview}
+
+The high-assurance implementation of the \haetae{} NTT is written in the
+\jasmin{} programming language.  Three source files collectively implement the
+forward NTT, inverse NTT, and base multiplication:
+
+\begin{itemize}
+  \item \texttt{reduce.jinc}: Montgomery reduction and field multiplication.
+  \item \texttt{zetas.jinc}: Precomputed twiddle factor table.
+  \item \texttt{poly.jinc}: Forward and inverse NTT kernels.
+  \item \texttt{hpoly.jazz}: Exported entry points callable from C.
+\end{itemize}
+
+The \jasmin{} source is compiled to x86-64 assembly (\texttt{hpoly.s}) and
+simultaneously extracted to an \easycrypt{} module for formal verification.
+
+\section{Montgomery Reduction in Jasmin}
+
+\subsection{Source Code}
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Montgomery reduction in \texttt{reduce.jinc}},
+  label={lst:mont_jasmin}]
+param int JPRIME = 64513;
+param int JQINV  = 940508161;
+
+inline fn __montgomery_reduce(reg u64 a) -> reg u32 {
+  reg u64 t64;
+  reg u32 t, r;
+
+  t    = (32u)(a);          /* low 32 bits of a */
+  t   *= (u32)(JQINV);      /* t = (a mod 2^32) * QINV mod 2^32 */
+  t64  = (64s)(t);          /* sign-extend to 64 bits */
+  t64 *= (u64)(JPRIME);     /* t64 = t * q (64-bit) */
+  t64  = a - t64;           /* t64 = a - t*q */
+  r    = (32u)(t64 >> 32);  /* r = (a - t*q) / 2^32 (arithmetic shift) */
+  return r;
+}
+\end{lstlisting}
+
+\subsection{Jasmin Semantics}
+
+The \jasmin{} code uses explicit types to control the width and signedness
+of arithmetic:
+\begin{itemize}
+  \item \jasm{(32u)(a)}: truncate 64-bit value to 32 bits (unsigned).
+  \item \jasm{(u32)(JQINV)}: interpret the literal as a 32-bit unsigned value.
+  \item \jasm{(64s)(t)}: sign-extend a 32-bit value to 64 bits.
+  \item \jasm{(32u)(t64 >> 32)}: arithmetic right shift and truncate.
+\end{itemize}
+
+The \jasm{>>} operator on a signed 64-bit value in \jasmin{} performs an
+\emph{arithmetic} right shift, matching the C behaviour for signed integers.
+
+\subsection{Correspondence to C}
+
+The \jasmin{} code directly implements the C reference in \Cref{lst:mont_c}:
+\begin{itemize}
+  \item \jasm{(32u)(a) * (u32)(JQINV)} corresponds to
+        \texttt{(int32\_t)a * (int32\_t)QINV}.
+  \item The sign extension \jasm{(64s)(t)} followed by multiplication by
+        \jasm{JPRIME} corresponds to \texttt{(int64\_t)t * Q}.
+  \item The arithmetic right shift \jasm{>> 32} corresponds to
+        \texttt{>> 32} on a signed value.
+\end{itemize}
+
+\section{Field Multiplication}
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Field multiplication in \texttt{reduce.jinc}},
+  label={lst:fqmul_jasmin}]
+inline fn __fqmul(reg u32 a, reg u32 b) -> reg u32 {
+  reg u64 t64;
+  reg u32 r;
+
+  t64 = (64s)(a);
+  t64 *= (64s)(b);
+  r   = __montgomery_reduce(t64);
+  return r;
+}
+\end{lstlisting}
+
+This computes $a \cdot b \cdot R^{-1} \bmod q$ where both $a$ and $b$ are
+expected to be in the range $(-2^{15}, 2^{15})$, so their 64-bit product
+does not overflow.
+
+\section{Forward NTT Kernel}
+
+\subsection{Source Code}
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Forward NTT kernel in \texttt{poly.jinc}},
+  label={lst:ntt_jasmin}]
+inline fn _poly_ntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  reg u32 zeta, t;
+  reg u64 t64;
+  reg int len, start, j, k;
+
+  k = 1;
+  len = 128;
+
+  while (len > 0) {
+    start = 0;
+    while (start < 256) {
+      zeta = (u32) jzetas[k];
+      k += 1;
+
+      j = start;
+      while (j < start + len) {
+        t64  = (64s)(zeta);
+        t64 *= (64s)(rp[j + len]);
+        t    = __montgomery_reduce(t64);
+
+        rp[j + len] = rp[j] - t;
+        rp[j]       = rp[j] + t;
+        j += 1;
+      }
+      start += 2 * len;
+    }
+    len >>= 1;
+  }
+  return rp;
+}
+\end{lstlisting}
+
+\subsection{Structural Correspondence}
+
+The \jasmin{} kernel \texttt{\_poly\_ntt} has a direct structural
+correspondence to the C reference (\Cref{lst:c_ntt}) and the \easycrypt{}
+specification (\Cref{lst:ntt_spec}):
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Aspect & C reference & \jasmin{} \\
+\midrule
+Outer loop & \texttt{for (len = 128; len > 0; len >>= 1)} &
+             \texttt{while (len > 0) \{...; len >>= 1;\}} \\
+Middle loop & \texttt{for (start = 0; start < 256; start += 2*len)} &
+              equivalent \texttt{while} \\
+Inner loop & \texttt{for (j = start; j < start+len; j++)} &
+             equivalent \texttt{while} \\
+Twiddle & \texttt{zetas[k++]} & \texttt{jzetas[k]; k += 1} \\
+Butterfly & \texttt{t = mont\_reduce(zeta * a[j+len])} & same \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The key difference is the use of explicit type casts in \jasmin{} to manage
+word widths.
+
+\subsection{Array Access Pattern}
+
+In \jasmin{}, the global constant table \texttt{jzetas} is accessed as a
+\jasm{u32} array.  The entry at index $k$ is the Montgomery form of the
+$k$-th twiddle factor.  The access pattern \jasm{jzetas[k]} with $k$
+starting at 1 and incrementing each iteration of the middle loop ensures
+that consecutive twiddle factors are consumed in order.
+
+\section{Inverse NTT Kernel}
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Inverse NTT kernel in \texttt{poly.jinc} (condensed)},
+  label={lst:invntt_jasmin}]
+inline fn _poly_invntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  reg u32 zeta, t, f;
+  reg u64 t64;
+  reg int len, start, j, k;
+
+  k = 255;
+  len = 1;
+
+  while (len < 256) {
+    start = 0;
+    while (start < 256) {
+      zeta = (u32) jzetas_inv[k];
+      k -= 1;
+
+      j = start;
+      while (j < start + len) {
+        t           = rp[j];
+        rp[j]       = t + rp[j + len];
+
+        t64  = (64s)(zeta);
+        t64 *= (64s)(t - rp[j + len]);
+        rp[j + len] = __montgomery_reduce(t64);
+
+        j += 1;
+      }
+      start += 2 * len;
+    }
+    len <<= 1;
+  }
+
+  /* Final scaling */
+  f = (u32) jzetas_inv[255];
+  j = 0;
+  while (j < 256) {
+    t64  = (64s)(f);
+    t64 *= (64s)(rp[j]);
+    rp[j] = __montgomery_reduce(t64);
+    j += 1;
+  }
+  return rp;
+}
+\end{lstlisting}
+
+\subsection{Inverse Butterfly Structure}
+
+The inverse butterfly in \jasmin{} computes:
+\begin{align*}
+  t &\gets \texttt{rp}[j] \\
+  \texttt{rp}[j] &\gets t + \texttt{rp}[j+\ell] \\
+  \texttt{rp}[j+\ell] &\gets \op{mont}(\zeta \cdot (t - \texttt{rp}[j+\ell]))
+\end{align*}
+
+This is the inverse (Gentleman--Sande) butterfly.  It is the algebraic inverse
+of the Cooley--Tukey butterfly: if the forward butterfly computes $(a+b, a-b)$
+with twiddle $w$ applied to the lower output, the inverse butterfly computes
+$(a+b, w(a-b))$ and is composed with the twiddle application on the upper
+output in the forward case.
+
+\section{Exported Entry Points}
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Exported functions in \texttt{hpoly.jazz}},
+  label={lst:hpoly}]
+export fn poly_ntt_jazz(reg mut ptr u32[256] rp)
+    -> reg ptr u32[256] {
+  rp = _poly_ntt(rp);
+  return rp;
+}
+
+export fn poly_invntt_jazz(reg mut ptr u32[256] rp)
+    -> reg ptr u32[256] {
+  rp = _poly_invntt(rp);
+  return rp;
+}
+
+export fn poly_basemul_jazz(
+    reg mut ptr u32[256] rp,
+    reg ptr u32[256] ap,
+    reg ptr u32[256] bp)
+    -> reg ptr u32[256] {
+  rp = _poly_basemul(rp, ap, bp);
+  return rp;
+}
+\end{lstlisting}
+
+The \jasm{export} keyword triggers both assembly generation and \easycrypt{}
+extraction.  The ABI of \jasm{poly\_ntt\_jazz} takes a pointer to a 256-word
+array in a register and returns the same pointer after in-place modification.
+
+\section{Safety Verification}
+
+The \jasmin{} safety checker verifies that all array accesses are in bounds:
+\begin{itemize}
+  \item \texttt{rp[j]} and \texttt{rp[j+len]} are accessed with
+        $j \in [\texttt{start}, \texttt{start}+\texttt{len})$ and
+        $j + \texttt{len} \in [\texttt{start}+\texttt{len}, \texttt{start}+2\texttt{len})$.
+        Both ranges are within $[0, 256)$ by the loop bounds.
+  \item \texttt{jzetas[k]} is accessed with $k \in [1, 256)$, which is
+        within the bounds of the 256-element twiddle table.
+\end{itemize}
+
+All safety conditions are discharged automatically by the \jasmin{} compiler's
+safety analysis.
+
+\section{Generated Assembly}
+
+The compiled assembly \texttt{hpoly.s} contains straightforward x86-64 code.
+Key assembly features include:
+\begin{itemize}
+  \item Register allocation: loop variables (\texttt{len}, \texttt{start},
+        \texttt{j}, \texttt{k}) are assigned to general-purpose registers
+        \texttt{r8}--\texttt{r15}.
+  \item Montgomery reduction uses \texttt{imul} (signed 64-bit multiply)
+        and \texttt{sar} (arithmetic shift right) instructions.
+  \item No SIMD instructions are used in the scalar implementation; a
+        vectorised (AVX2) version is possible but beyond the scope of this
+        dissertation.
+\end{itemize}
+
+The correspondence between the \jasmin{} source, the generated assembly, and
+the \easycrypt{} extraction is guaranteed by the \jasmin{} compiler
+correctness theorem~\cite{Almeida2017}, which is itself a machine-checked
+proof in the Coq proof assistant.

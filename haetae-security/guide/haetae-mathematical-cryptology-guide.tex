@@ -1,0 +1,1082 @@
+\documentclass[11pt]{report}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{listings}
+\usetikzlibrary{arrows.meta,fit,positioning}
+
+\setlength{\emergencystretch}{3em}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!55!black,
+  urlcolor=blue!55!black
+}
+
+\lstdefinelanguage{EasyCrypt}{
+  morekeywords={
+    require,import,theory,end,section,lemma,proof,qed,op,pred,type,module,
+    declare,clone,proc,if,then,else,while,return,forall,exists,real,int,bool,
+    equiv,hoare,phoare,byequiv,byphoare
+  },
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{(*}{*)},
+  morestring=[b]"
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  framerule=0.3pt,
+  rulecolor=\color{black!30},
+  xleftmargin=0.5em,
+  xrightmargin=0.5em,
+  aboveskip=0.7em,
+  belowskip=0.7em
+}
+
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\newcommand{\ec}[1]{\nolinkurl{#1}}
+\newcommand{\ecchapter}[2]{\chapter{\texorpdfstring{\texttt{#1}}{#2}}}
+\newcommand{\Adv}{\operatorname{Adv}}
+\newcommand{\PrEC}[1]{\Pr\!\left[#1\right]}
+\newcommand{\ROM}{\mathsf{RO}}
+\newcommand{\HAETAE}{\mathsf{HAETAE}}
+\newcommand{\EUFCMA}{\mathsf{EUF\mbox{-}CMA}}
+\newcommand{\UFNMA}{\mathsf{UF\mbox{-}NMA}}
+\newcommand{\MLWE}{\mathsf{MLWE}}
+\newcommand{\MSIS}{\mathsf{Module\mbox{-}SIS}}
+\newcommand{\BMSIS}{\mathsf{BimodalSelfTargetMSIS}}
+\newcommand{\Bool}{\mathsf{Bool}}
+\newcommand{\Distr}{\mathsf{Distr}}
+
+\theoremstyle{definition}
+\newtheorem{formaldefinition}{Definition}[chapter]
+\theoremstyle{plain}
+\newtheorem{formaltheorem}{Theorem}[chapter]
+\theoremstyle{definition}
+\newtheorem{formaljudgment}{Program-Logic Judgment}[chapter]
+
+\title{File-by-File Mathematical and Cryptographic Guide to the HAETAE EasyCrypt Proof}
+\author{HAETAE machine-checked provable-security guide}
+\date{May 2026}
+
+\begin{document}
+\pagenumbering{roman}
+\maketitle
+\setcounter{page}{2}
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+This guide reorganizes the checked HAETAE EasyCrypt proof by source file.  Each
+chapter corresponds to one \file{.ec} file in
+\file{provable-security/proof-files.txt}.  The intended reader is a
+mathematician or cryptologist: the text explains the security meaning of the
+definitions, the mathematical role of the lemmas, and how each file contributes
+to the final random-oracle EUF-CMA theorem.  It is not a tactic manual; for
+line-level EasyCrypt syntax, use the companion line-by-line guides.
+
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+
+\chapter*{Orientation}
+\addcontentsline{toc}{chapter}{Orientation}
+
+The checked theorem is a conditional, game-based proof for the EasyCrypt model
+of HAETAE.  In cryptographic notation, the final bound has the form
+\[
+  \Adv_{\EUFCMA}^{\HAETAE}(A)
+  \le
+  \epsilon_{\MLWE}
+  + \epsilon_{\MSIS}
+  + \delta_{\BMSIS\to\MSIS}
+  + \Delta_{\ROM}.
+\]
+The terms \(\epsilon_{\MLWE}\) and \(\epsilon_{\MSIS}\) are assumption terms,
+\(\delta_{\BMSIS\to\MSIS}\) is the loss for lifting the bimodal
+self-target extraction relation to Module-SIS, and \(\Delta_{\ROM}\) is the
+random-oracle/signing-simulation loss.  In the counted-ROM proof path,
+\[
+  \Delta_{\ROM}
+  =
+  \frac{(q_h+q_s+1)^2}{|\mathcal{C}|}
+  + \frac{q_s(q_h+1)}{|\mathcal{C}|}
+  + \frac{q_s(q_h+1)}{|\mathcal{C}|}.
+\]
+The three summands correspond to collision, prequery/reprogramming, and
+min-entropy bad events.  The checked constants instantiate
+\(q_h=2\), \(q_s=2\), and \(|\mathcal{C}|\ge 2^{58}\).
+
+The proof does not claim implementation-level constant-time security, concrete
+lattice hardness estimates, or a standard-model replacement for the random
+oracle.  It proves that the formal HAETAE model satisfies the stated
+unforgeability bound under the formal MLWE, Module-SIS, and random-oracle
+assumptions.
+
+\chapter*{Narrative Mathematical Guide}
+\addcontentsline{toc}{chapter}{Narrative Mathematical Guide}
+
+This chapter gives the continuous mathematical reading that a cryptologist
+would use before opening individual EasyCrypt files.  The later numbered
+chapters refine this narrative file by file; this section explains the proof as
+one argument.
+
+\section*{The Theorem as a Cryptographic Statement}
+\addcontentsline{toc}{section}{The Theorem as a Cryptographic Statement}
+
+The checked result is a random-oracle EUF-CMA theorem for the HAETAE model.  An
+adversary receives a public key and access to a signing oracle, asks a bounded
+number of random-oracle and signing queries, and wins if it outputs a fresh
+valid signature.  Freshness means that the message/signature pair is not merely
+a replay of a signing-oracle answer.
+
+The theorem is conditional in the standard reductionist sense.  The proof
+separates the adversary's success probability into three conceptual sources:
+solving the modeled MLWE instance behind the public key, solving the modeled
+Module-SIS relation extracted from a successful fork, or hitting a bad
+random-oracle/programming event.  In symbols, the proof has the shape
+\[
+  \PrEC{\mathsf{EUF\mbox{-}CMA}_{\HAETAE}(A)}
+  \le
+  \epsilon_{\MLWE}
+  + \epsilon_{\MSIS}
+  + \delta_{\BMSIS\to\MSIS}
+  + \Delta_{\ROM}.
+\]
+The EasyCrypt theorem names these terms rather than hiding them in asymptotic
+notation.  This is important for checking: each transition must either be an
+exact equivalence, an event inclusion, or an explicit arithmetic inequality.
+
+\section*{What EasyCrypt Is Checking}
+\addcontentsline{toc}{section}{What EasyCrypt Is Checking}
+
+The proof script is not a prose proof transcribed linearly.  It is a collection
+of typed probabilistic programs and machine-checked judgments about them.
+Mathematically, the main EasyCrypt forms should be read as follows:
+\[
+  \begin{array}{lll}
+  \texttt{type} & \leftrightarrow & \text{carrier set or abstract domain},\\
+  \texttt{op} & \leftrightarrow & \text{total function, predicate, or constant},\\
+  \texttt{module} & \leftrightarrow & \text{oracle machine or game},\\
+  \texttt{lemma} & \leftrightarrow & \text{mathematical proposition},\\
+  \texttt{hoare} & \leftrightarrow & \text{partial-correctness judgment},\\
+  \texttt{equiv} & \leftrightarrow & \text{relational equality of two programs},\\
+  \texttt{phoare} & \leftrightarrow & \text{probabilistic Hoare bound}.
+  \end{array}
+\]
+Thus a long EasyCrypt proof is often a short cryptographic idea decomposed into
+many local verification obligations.  For example, a paper proof may say that a
+simulator's transcript is distributed as in the real game except with small
+bad-event probability.  In EasyCrypt this becomes a sequence of relational
+program equivalences, preservation lemmas for maps and counters, support lemmas
+for samplers, and real-arithmetic facts about the accumulated loss.
+
+\section*{Game-Hopping Structure}
+\addcontentsline{toc}{section}{Game-Hopping Structure}
+
+The proof follows the usual game-hopping method.  Starting from the real
+EUF-CMA game, it replaces concrete subprocedures by simulated ones until a
+successful forgery can be interpreted as either an MLWE distinguisher, a
+Module-SIS solution, or a random-oracle bad event.  The individual hops have
+four mathematical flavors.
+
+\paragraph{Exact code transformations.}
+Some games differ only by inlining, dead-state removal, or reordering of
+independent computations.  EasyCrypt proves these by \texttt{equiv} judgments.
+The mathematical claim is equality of output distributions.
+
+\paragraph{Bad-event transitions.}
+Some games are identical until an exceptional event occurs.  The proof records
+the event as a predicate on game state, proves that the two games agree outside
+that predicate, and then upper-bounds the event probability.  This is the
+formal version of the fundamental lemma of game playing.
+
+\paragraph{Programming transitions.}
+Random-oracle games must justify when an oracle value can be sampled lazily,
+when it can be programmed, and when programming is invalid because the
+adversary already queried the same point.  The checked proof keeps explicit
+logs and counters, so the final loss can mention the number of hash and signing
+queries.
+
+\paragraph{Reduction transitions.}
+At the end of the hop chain, a successful adversary is converted into an
+algorithm for a hardness game.  EasyCrypt checks that the constructed adversary
+uses the same information as the game allows and that its success predicate is
+the advertised algebraic predicate.
+
+\section*{Random-Oracle Programming}
+\addcontentsline{toc}{section}{Random-Oracle Programming}
+
+HAETAE is modeled in the random-oracle setting.  The proof separates the random
+oracle into typed domains: message-hash queries, challenge queries, expansion
+queries, and signing-randomness queries.  This typing is not merely cosmetic.
+It prevents the proof from accidentally using a value sampled for one
+cryptographic role as though it came from another.
+
+The counted-ROM part of the proof introduces three losses.  The collision term
+accounts for two relevant challenge points mapping in a way that prevents
+clean extraction.  The prequery term accounts for the adversary querying a
+point before the simulator needs to program it.  The min-entropy term accounts
+for insufficient unpredictability of the point selected for programming.  In
+the checked parameter setting these terms are grouped as
+\[
+  \frac{(q_h+q_s+1)^2}{|\mathcal{C}|}
+  + \frac{q_s(q_h+1)}{|\mathcal{C}|}
+  + \frac{q_s(q_h+1)}{|\mathcal{C}|}.
+\]
+The important mathematical point is that the proof does not use an informal
+"random oracle behaves randomly" step.  It accounts for the finite challenge
+space and the exact query counters that appear in the game.
+
+\section*{Transcript Extraction and Forking}
+\addcontentsline{toc}{section}{Transcript Extraction and Forking}
+
+The forking part of the proof packages an accepting signature execution as a
+transcript.  A transcript records the public key, message, commitment-like
+values, challenge, response, and verification facts needed by the algebraic
+extractor.  If two accepting transcripts share the same target and differ in
+challenge, their response equations can be subtracted.  This is the
+Fiat-Shamir special-soundness step:
+\[
+  A z_1 - c_1 t = y
+  \quad\text{and}\quad
+  A z_2 - c_2 t = y
+  \quad\Longrightarrow\quad
+  A(z_1-z_2) = (c_1-c_2)t.
+\]
+The exact symbols in the EasyCrypt model are HAETAE-specific, but the
+mathematical role is this standard extraction pattern.  The proof then checks
+that the extracted vector is nonzero and norm-bounded under the rejection and
+verification predicates.  Those facts are what connect the forgery to a
+Module-SIS-style relation.
+
+\section*{Lattice Assumptions}
+\addcontentsline{toc}{section}{Lattice Assumptions}
+
+The model uses two abstract hardness interfaces.  MLWE accounts for replacing
+or interpreting the public key distribution, while Module-SIS accounts for the
+short relation obtained from forking.  A third interface, bimodal
+self-target MSIS, is used internally because the extracted relation is shaped
+by the Fiat-Shamir transcript and by HAETAE's bimodal response structure.
+
+The proof does not estimate the concrete hardness of these assumptions.  It
+keeps them as symbolic advantage terms.  This is a deliberate trust boundary:
+the machine checks the reduction from HAETAE forgery to those assumption games,
+but it does not replace cryptanalytic parameter assessment.
+
+\section*{Rejection Sampling and Distributional Support}
+\addcontentsline{toc}{section}{Rejection Sampling and Distributional Support}
+
+HAETAE signing uses rejection sampling to ensure that the published response has
+the right distributional shape and norm bounds.  In a prose proof this often
+appears as a short lemma saying that the accepted response is statistically
+close to an ideal sample.  In EasyCrypt it becomes several obligations:
+samplers must be lossless, sampled values must lie in the promised support,
+acceptance predicates must imply verification-side norm predicates, and the
+probability of rejection must be bounded by an explicit loss term.
+
+This decomposition explains why the distribution and rejection files contain
+many small lemmas.  They are not independent cryptographic ideas; they are the
+local facts needed so that the game hops can replace idealized signing coins
+with structurally sampled signing attempts without silently changing the
+distribution.
+
+\section*{Algebraic Model and Hash Boundary}
+\addcontentsline{toc}{section}{Algebraic Model and Hash Boundary}
+
+The algebra file supplies the ring, module, vector, matrix, packing, and
+verification operations used by the proof.  Its mathematical purpose is to make
+the public-key relation, signing equation, verification predicate, and norm
+checks precise enough for the game proof to mention them.  The proof relies on
+these operations as the formal HAETAE model.
+
+The FIPS202 and Keccak files are different in character.  They model
+deterministic SHAKE/Keccak-shaped computations needed by the EasyCrypt model,
+but the security theorem remains a random-oracle theorem.  No part of the
+checked proof claims that concrete SHAKE instantiates the random oracle in the
+standard model.
+
+\section*{How to Read the File-by-File Chapters}
+\addcontentsline{toc}{section}{How to Read the File-by-File Chapters}
+
+The chapters below follow the proof manifest.  They should be read as the
+indexed expansion of this narrative.  When a chapter discusses a type,
+operation, lemma, Hoare judgment, or equivalence judgment, interpret it through
+the symbolic correspondence above: carrier sets and functions define the
+mathematical language, games define probability spaces, and lemmas prove either
+exact equalities, bad-event bounds, or reductions to assumptions.
+
+The chapters below follow the manifest order.  Read them as a dependency chain:
+top-level composition first, then the generic game interface, then hop games
+and losses, then the algebraic and distributional infrastructure.
+
+\section*{Structure Diagram and Design Rationale}
+\addcontentsline{toc}{section}{Structure Diagram and Design Rationale}
+
+Figure~\ref{fig:ec-file-structure} gives the structural view of the active
+\file{.ec} files.  An arrow \(F\to G\) means that \(F\) supplies definitions,
+games, predicates, or lemmas that are consumed by \(G\).  The diagram therefore
+shows proof-use flow, not every EasyCrypt standard-library import.
+
+\input{ec-file-structure-diagram.tex}
+
+\begin{formaldefinition}[Layered proof-surface structure]
+Let \(\mathcal{F}\) be the set of active EasyCrypt files in
+\file{provable-security/proof-files.txt}.  The HAETAE proof surface is
+organized as a stratification
+\[
+  \mathcal{F}
+  =
+  L_0\cup L_1\cup L_2\cup L_3\cup L_4\cup L_5
+\]
+where
+\[
+\begin{array}{rcl}
+L_0 &=& \{\text{\normalfont\ttfamily HAETAE\_Params.ec},
+          \text{\normalfont\ttfamily HAETAE\_Keccak1600.ec}\},\\
+L_1 &=& \{\text{\normalfont\ttfamily HAETAE\_FIPS202.ec},
+          \text{\normalfont\ttfamily HAETAE\_Algebra.ec},
+          \text{\normalfont\ttfamily HAETAE\_Distributions.ec}\},\\
+L_2 &=& \{\text{\normalfont\ttfamily HAETAE\_Transcript.ec},
+          \text{\normalfont\ttfamily HAETAE\_Events.ec},
+          \text{\normalfont\ttfamily HAETAE\_Rejection.ec}\},\\
+L_3 &=& \{\text{\normalfont\ttfamily Sig\_ROM.ec},
+          \text{\normalfont\ttfamily HAETAE\_ROM.ec},
+          \text{\normalfont\ttfamily HAETAE\_Scheme.ec},
+          \text{\normalfont\ttfamily HAETAE\_Assumptions.ec}\},\\
+L_4 &=& \{\text{\normalfont\ttfamily HAETAE\_ROM\_Programming.ec},
+          \text{\normalfont\ttfamily HAETAE\_HopGames.ec},
+          \text{\normalfont\ttfamily HAETAE\_Reductions.ec}\},\\
+L_5 &=& \{\text{\normalfont\ttfamily HAETAE\_Security.ec}\}.
+\end{array}
+\]
+The intended invariant of the stratification is that lower layers introduce
+the mathematical language and reusable local facts, while higher layers consume
+those facts to define games, prove game transitions, account for losses, and
+assemble the final theorem.
+\end{formaldefinition}
+
+\begin{formaltheorem}[Design adequacy of the layered structure]
+The layered structure above is appropriate for a machine-checked
+provable-security proof of HAETAE because it separates the five different
+mathematical tasks that occur in the reduction:
+\[
+  \begin{gathered}
+    \text{model definition}
+    \;\longrightarrow\;
+    \text{local mathematical facts}\\
+    \longrightarrow\;
+    \text{game and event definitions}
+    \;\longrightarrow\;
+    \text{probability/loss bounds}\\
+    \longrightarrow\;
+    \text{final advantage composition}.
+  \end{gathered}
+\]
+Consequently, the final theorem in \file{HAETAE\_Security.ec} can be checked as
+a composition of named obligations rather than as a monolithic proof that hides
+algebra, sampling, random-oracle programming, and hardness assumptions in one
+script.
+\end{formaltheorem}
+
+\begin{proof}[Mathematical explanation]
+The lowest layer fixes finite parameters and the Keccak state vocabulary.  This
+is necessary because later carrier sets, byte lengths, bounds, and hash-shaped
+operations must be well typed before any probability space is defined.
+
+The next layer separates deterministic algebra and distribution laws from the
+game proof.  Algebraic facts such as verification equations, packing
+properties, and norm predicates are pure statements about the modeled carrier
+sets.  Distribution facts such as losslessness, support, and point-probability
+bounds are measure-theoretic local facts about samplers.  They are reusable and
+should not be reproved inside every game equivalence.
+
+The transcript, event, and rejection layer names the predicates that appear in
+the fundamental-lemma arguments.  This is mathematically important because a
+bad-event proof must state exactly which event accounts for the difference
+between two games.  Naming these predicates once prevents the proof from using
+slightly different informal notions of acceptance, freshness, or rejection in
+different hops.
+
+The interface layer separates the generic random-oracle signature experiment
+from the HAETAE instantiation and from the cryptographic assumptions.  This is
+the main trust-boundary reason for the structure.  The files
+\file{Sig\_ROM.ec}, \file{HAETAE\_ROM.ec}, and \file{HAETAE\_Scheme.ec} say
+what experiment is being run, while \file{HAETAE\_Assumptions.ec} says which
+hardness games are assumed.  The theorem therefore depends on explicit game
+advantages, not on hidden axioms.
+
+The hybrid layer contains exactly the material that changes probabilities:
+random-oracle programming, stateful game hops, sampler replacements,
+bad-event bounds, and real-valued loss normalization.  These arguments are
+kept out of \file{HAETAE\_Security.ec} so that every loss term in the final
+bound can be traced to a local lemma in \file{HAETAE\_ROM\_Programming.ec},
+\file{HAETAE\_HopGames.ec}, or \file{HAETAE\_Reductions.ec}.
+
+Finally, \file{HAETAE\_Security.ec} is a theorem-composition layer.  Its role
+is to combine already checked statements by transitivity of inequalities,
+nonnegativity, and rewriting of named bound expressions.  This is the right
+shape for the public theorem: a cryptologist can inspect the final statement
+and then follow each premise back to the lower layer where it is proved.
+\end{proof}
+
+\ecchapter{HAETAE\_Security.ec}{HAETAE Security.ec}
+
+\paragraph{Mathematical role.}
+This is the theorem-composition file.  It imports all previous definitions and
+lemmas and proves that the individual game hops, reductions, and arithmetic
+loss facts imply the final HAETAE security theorem.  It is the closest file to
+the statement a cryptologist would put in a paper.
+
+\paragraph{Correctness.}
+The operation \ec{correctness_obligation} states that an honestly generated
+keypair and honestly generated signature always verify:
+\[
+  \forall sd,coins,m,ctx,\quad
+  \mathsf{VerifyInternal}(pk,m,ctx,\sigma)=1,
+\]
+where
+\[
+  (pk,sk)=\mathsf{KeyGenInternal}(sd), \qquad
+  \sigma=\mathsf{SignInternal}(sk,m,ctx,coins).
+\]
+The lemma \ec{correctness_perfect} turns this deterministic obligation into
+the generic signature correctness game:
+\[
+  \Pr[\mathsf{Correctness}^{\HAETAE}(A)=\mathsf{fail}]=0.
+\]
+
+\paragraph{Security composition.}
+The file contains a sequence of security lemmas with increasingly explicit
+premises.  The basic pattern is:
+\[
+\begin{aligned}
+  \Pr[\EUFCMA(A)]
+  &\le \Pr[\UFNMA(N)] + \Delta_{\ROM},\\
+  \Pr[\UFNMA(N)]
+  &\le \Pr[\MLWE(B_1)] + \Pr[\BMSIS(B_2)],\\
+  \Pr[\BMSIS(B_2)]
+  &\le \Pr[\MSIS(B_3)] + \delta_{\BMSIS\to\MSIS}.
+\end{aligned}
+\]
+The final real-arithmetic step substitutes the hardness bounds for MLWE and
+Module-SIS and rewrites the result to the named bound from
+\file{HAETAE_Reductions.ec}.
+
+\paragraph{Main theorem variants.}
+The many lemmas are not competing theorems.  They expose different proof
+boundaries:
+\begin{itemize}[leftmargin=*]
+  \item \ec{euf_cma_security}: a compact theorem assuming an abstract
+  Fiat-Shamir-with-aborts hop.
+  \item \ec{euf_cma_security_from_rom_transcript_and_counted_bimodal}: a more
+  mechanized theorem using counted random-oracle programming.
+  \item \ec{euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal}:
+  the final checked counted-ROM path, after the explicit sampling hop has been
+  discharged.
+\end{itemize}
+For a cryptologist, this file should be read as the final proof tree: every
+premise is either a previously checked game hop, an assumption game bound, or a
+real-arithmetic nonnegativity fact.
+
+\input{mathematical-chapter-details/HAETAE_Security-textbook-details.tex}
+
+\ecchapter{Sig\_ROM.ec}{Sig ROM.ec}
+
+\paragraph{Mathematical role.}
+This file defines the generic signature security games over a random oracle. It
+is intentionally independent of HAETAE-specific algebra.
+
+\paragraph{Objects.}
+The abstract types are
+\[
+  \mathsf{pkey}, \mathsf{skey}, \mathsf{message}, \mathsf{context},
+  \mathsf{signature}, \mathsf{ro\_query}, \mathsf{ro\_output}.
+\]
+The oracle is a lazy random oracle
+\[
+  H : \mathsf{ro\_query}\to\mathsf{ro\_output},
+\]
+with outputs sampled from \ec{dro_output}.
+
+\paragraph{Games.}
+The EUF-CMA game records signing queries and accepts a forgery only if the
+message/context pair is fresh:
+\[
+  \mathsf{win}_{\EUFCMA}
+  \Longleftrightarrow
+  \mathsf{Verify}(pk,m,ctx,\sigma)=1
+  \land (m,ctx)\notin Q_{\mathsf{sign}}.
+\]
+The UF-NMA game has no signing oracle:
+\[
+  \mathsf{win}_{\UFNMA}
+  \Longleftrightarrow
+  \mathsf{Verify}(pk,m,ctx,\sigma)=1.
+\]
+The strong unforgeability game is also present, with freshness over
+\(((m,ctx),\sigma)\), but it is not the central theorem target here.
+
+\paragraph{Key lemma.}
+\ec{nma_as_cma_exact} proves that an NMA adversary embedded into the CMA
+interface without using the signing oracle has exactly the same success
+probability.  This is a bookkeeping lemma, but it matters: it lets later
+theorems move between generic CMA syntax and NMA-style reduction games without
+paying any loss.
+
+\input{mathematical-chapter-details/Sig_ROM-textbook-details.tex}
+
+\ecchapter{HAETAE\_HopGames.ec}{HAETAE HopGames.ec}
+
+\paragraph{Mathematical role.}
+This is the game-hopping file.  It is large because handwritten phrases such as
+``identical until bad'', ``replace the signing oracle by a simulator'', and
+``program the random oracle at the challenge point'' are expanded into explicit
+typed games, state invariants, oracle logs, and probability inequalities.
+
+\paragraph{Cryptographic chain.}
+The file implements the following conceptual sequence:
+\[
+\begin{array}{rcl}
+G_0 &:& \text{real EUF-CMA game with HAETAE signing},\\
+G_1 &:& \text{game with transcript logging},\\
+G_2 &:& \text{internal transcript and ROM-programming game},\\
+G_3 &:& \text{NMA-style game after signing is simulated},\\
+G_4 &:& \text{paper-simulation game},\\
+G_5 &:& \text{exact-hyperball sampling game},\\
+G_6 &:& \text{game exposing MLWE and bimodal MSIS extraction}.
+\end{array}
+\]
+The EasyCrypt module names are more detailed than this schematic chain because
+some games carry counted logs, budgeted counters, or direct-sampler variants.
+
+\paragraph{Types of transitions.}
+The file proves four kinds of statements.
+\begin{enumerate}[leftmargin=*]
+  \item Exact relational equivalences:
+  \[
+    \Pr[G_i=1] = \Pr[G_{i+1}=1].
+  \]
+  These appear as \ec{equiv} lemmas such as oracle-erasure and simulator
+  equivalences.
+  \item Bad-event inequalities:
+  \[
+    \Pr[G_i=1]\le \Pr[G_{i+1}=1]+\Pr[\mathsf{Bad}].
+  \]
+  The bad events are reprogramming conflicts, prequeries, and entropy failures.
+  \item Sampler-replacement bounds:
+  \[
+    \Pr[G_i=1]\le \Pr[G_{i+1}=1]+\Delta_{\mathrm{sample}}.
+  \]
+  These are the rejection and exact-hyperball transitions.
+  \item Reduction steps:
+  \[
+    \Pr[G_i=1]\le
+    \Pr[\MLWE(B_1)=1]+\Pr[\BMSIS(B_2)=1].
+  \]
+\end{enumerate}
+
+\paragraph{Why so many preservation lemmas?}
+The adversary is arbitrary and may call the random oracle adaptively.  Each
+oracle or signing call must preserve invariants such as query budgets,
+programmed-site freshness, transcript validity, and min-entropy clearance.
+Those invariants are what justify the eventual bad-event bounds.  Mathematicians
+should read these lemmas as the formal version of ``the simulation maintains
+the same view unless a listed bad event occurs.''
+
+\paragraph{Special-soundness interface.}
+Near the end of the file, the proof introduces forking adversaries and
+transcript extractors.  The game \ec{BimodalSpecialSoundness_Game} captures the
+standard Fiat-Shamir idea that two accepting transcripts with the same target
+and different challenges yield an algebraic witness.  The lifting lemmas then
+connect that witness to Module-SIS through \file{HAETAE_Assumptions.ec}.
+
+\input{mathematical-chapter-details/HAETAE_HopGames-textbook-details.tex}
+
+\ecchapter{HAETAE\_Reductions.ec}{HAETAE Reductions.ec}
+
+\paragraph{Mathematical role.}
+This is the loss ledger.  It names every numerical term in the final theorem
+and proves the real-arithmetic facts needed to compose inequalities.
+
+\paragraph{Hardness and lifting terms.}
+The file declares abstract real numbers
+\[
+  \epsilon_{\MLWE},\qquad \epsilon_{\MSIS},
+\]
+as \ec{mlwe_hardness_term} and \ec{module_sis_hardness_term}.  The bimodal
+lifting loss is
+\[
+  \delta_{\BMSIS\to\MSIS}
+  = \texttt{bimodal\_to\_msis\_reduction\_loss\_term}=0.
+\]
+Thus the bimodal hardness term is defined as
+\[
+  \epsilon_{\BMSIS}
+  = \epsilon_{\MSIS}+\delta_{\BMSIS\to\MSIS}.
+\]
+
+\paragraph{Random-oracle losses.}
+The counted-ROM loss is
+\[
+  \Delta_{\mathrm{counted}}
+  =
+  \frac{(q_h+q_s+1)^2}{|\mathcal{C}|}
+  +
+  \frac{q_s(q_h+1)}{|\mathcal{C}|}
+  +
+  \frac{q_s(q_h+1)}{|\mathcal{C}|}.
+\]
+EasyCrypt names these summands
+\ec{counted_rom_collision_term}, \ec{counted_rom_prequery_term}, and
+\ec{counted_rom_min_entropy_term}.  The lemmas prove positivity, subunit
+bounds, and equivalent expanded forms.
+
+\paragraph{Why this file matters.}
+In a paper proof, the final inequality is often simplified by informal algebra.
+Here every simplification is a lemma, for example
+\ec{haetae_euf_counted_rom_bound_groupedE}.  This prevents accidental loss of a
+term when composing the game-hop chain.
+
+\input{mathematical-chapter-details/HAETAE_Reductions-textbook-details.tex}
+
+\ecchapter{HAETAE\_ROM.ec}{HAETAE ROM.ec}
+
+\paragraph{Mathematical role.}
+This file specializes the generic random oracle to HAETAE.  The domain is a
+sum type with four query classes:
+\[
+\begin{array}{ll}
+\mathsf{MessageHashQuery}(pk,ctx,m),&
+\mathsf{ChallengeHashQuery}(md,w_1,w_0,\mu),\\
+\mathsf{MatrixExpandQuery}(md,\rho),&
+\mathsf{SamplerExpandQuery}(coins).
+\end{array}
+\]
+The codomain is a product
+\[
+  \mathsf{ro\_output}
+  = \mathsf{crh}\times\mathsf{challenge}\times\mathsf{matrix}\times
+    \mathsf{random\_coins}.
+\]
+
+\paragraph{Typed distributions.}
+The distribution \ec{dro_output} chooses the relevant component according to
+the query class.  A message-hash query samples a \(\mathsf{crh}\), a challenge
+query samples a challenge, a matrix-expansion query samples a matrix, and a
+sampler-expansion query samples signing coins.  The unused components are set
+to fixed zero values.
+
+\paragraph{Cryptographic reading.}
+This typed oracle prevents category mistakes.  The same lazy random oracle
+machinery is used throughout the proof, but the type of the query determines
+which cryptographic object the answer represents.  The lemma
+\ec{sampler_expand_query_dro_output_ro_signing_coins} states that reading the
+coin component from a sampler-expansion output has exactly the intended
+signing-coin distribution.
+
+\input{mathematical-chapter-details/HAETAE_ROM-textbook-details.tex}
+
+\ecchapter{HAETAE\_ROM\_Programming.ec}{HAETAE ROM Programming.ec}
+
+\paragraph{Mathematical role.}
+This file formalizes the events involved in programming the random oracle at
+signature challenge points.  It is the probability-theoretic core behind the
+counted-ROM loss.
+
+\paragraph{Programming sites.}
+A programming site is a pair
+\[
+  (q,y)\in \mathsf{ro\_query}\times\mathsf{ro\_output}.
+\]
+For a transcript \(tr\), the file defines the challenge query and the output
+that would make the transcript consistent.  The key questions are:
+\begin{itemize}[leftmargin=*]
+  \item was the query already asked by the adversary?
+  \item does programming the site conflict with an old oracle value?
+  \item does the challenge query have enough min-entropy?
+\end{itemize}
+
+\paragraph{Bad events.}
+The central bad events are reprogramming failure, prequery failure, and
+min-entropy failure.  Their counted version is summarized by
+\ec{rom_counted_programming_bad}.  In mathematical notation:
+\[
+  \Pr[\mathsf{Bad}]
+  \le
+  \Delta_{\mathrm{collision}}
+  + \Delta_{\mathrm{prequery}}
+  + \Delta_{\mathrm{entropy}}.
+\]
+
+\paragraph{Counted lazy oracle.}
+The module \ec{CountedLazyROM} extends the lazy random oracle with logs and
+counters.  The preservation lemmas show that initialization clears the logs,
+nonchallenge oracle calls do not increase the challenge-query count, fresh
+programming preserves a clear state, and a clear state implies the bad flag is
+false.  These are the formal ingredients behind the informal statement ``the
+simulation is perfect unless the adversary hits a programmed challenge point.''
+
+\input{mathematical-chapter-details/HAETAE_ROM_Programming-textbook-details.tex}
+
+\ecchapter{HAETAE\_Scheme.ec}{HAETAE Scheme.ec}
+
+\paragraph{Mathematical role.}
+This file instantiates the generic signature interface from \file{Sig_ROM.ec}
+with the HAETAE operations and the HAETAE random-oracle interface.
+
+\paragraph{Key generation.}
+The modeled key-generation procedure samples a seed, queries the matrix
+expansion oracle, and calls the deterministic internal key-generation function:
+\[
+  sd\gets D_{\mathsf{seed}},\qquad
+  \rho'=\mathsf{KeyGenRhoPrime}(sd),\qquad
+  (pk,sk)=\mathsf{KeyGenInternal}(\rho').
+\]
+
+\paragraph{Signing.}
+Signing first samples randomness and then obtains oracle-derived signing coins:
+\[
+  coins\gets D_{\mathsf{coins}},\qquad
+  coins' = \mathsf{ROSignCoins}(H(\mathsf{SamplerExpandQuery}(coins))).
+\]
+It then hashes the public key, context, and message to \(\mu\), computes
+commitment high/low bits, queries the challenge oracle, and returns
+\(\mathsf{SignInternal}\).  The important proof design is that probabilistic
+sampling is separated from deterministic algebra.
+
+\paragraph{Verification.}
+Verification is simply \(\mathsf{VerifyInternal}(pk,m,ctx,\sigma)\).  The
+correctness proof in \file{HAETAE_Security.ec} relies on the algebraic lemmas
+from \file{HAETAE_Algebra.ec} showing that honest signatures satisfy this
+predicate.
+
+\input{mathematical-chapter-details/HAETAE_Scheme-textbook-details.tex}
+
+\ecchapter{HAETAE\_Transcript.ec}{HAETAE Transcript.ec}
+
+\paragraph{Mathematical role.}
+This file defines the transcript abstraction used for forking and
+special-soundness.  A transcript is the tuple
+\[
+  tr=(pk,m,ctx,w_1,w_0,\mu,c,\sigma).
+\]
+The projections \ec{transcript_pk}, \ec{transcript_message}, and so on are
+ordinary tuple projections.
+
+\paragraph{Validity.}
+The predicate \ec{transcript_valid} combines three conditions:
+\begin{enumerate}[leftmargin=*]
+  \item the signature fields agree with the transcript;
+  \item the challenge query is the one determined by \((w_1,w_0,\mu)\);
+  \item the public verification equation is satisfied.
+\end{enumerate}
+This is the formal replacement for the paper phrase ``an accepting
+transcript.''
+
+\paragraph{Forking and extraction.}
+A valid forking pair consists of two transcripts for the same target with
+distinct challenges.  Conceptually, subtracting two valid verification
+equations cancels the shared commitment:
+\[
+  A z_1 - c_1 t = w,\qquad
+  A z_2 - c_2 t = w,
+\]
+so
+\[
+  A(z_1-z_2) = (c_1-c_2)t.
+\]
+The file defines the corresponding extracted bimodal self-target MSIS instance
+and solution, proves well-formedness, and then provides the special-soundness
+obligations consumed by \file{HAETAE_HopGames.ec}.
+
+\input{mathematical-chapter-details/HAETAE_Transcript-textbook-details.tex}
+
+\ecchapter{HAETAE\_Events.ec}{HAETAE Events.ec}
+
+\paragraph{Mathematical role.}
+This file names the rejection-failure predicates used throughout the proof.
+It separates three possible failures:
+\[
+\begin{array}{ll}
+\mathsf{KeyGenFailure}: & \text{invalid keypair or bad secret norm},\\
+\mathsf{SignFailure}: & \text{invalid signature or bad response norm},\\
+\mathsf{VerifyFailure}: & \text{invalid signature or bad verification norm}.
+\end{array}
+\]
+
+\paragraph{Why it is separate.}
+The game-hop files need compact event names.  Instead of repeatedly expanding
+validity and norm predicates, they use these named events.  The lemmas prove
+that current honest key generation and signing are rejection-free:
+\[
+  \Pr[\mathsf{AnyRejectionFailure}\text{ for an honest transcript}]=0.
+\]
+
+\input{mathematical-chapter-details/HAETAE_Events-textbook-details.tex}
+
+\ecchapter{HAETAE\_Assumptions.ec}{HAETAE Assumptions.ec}
+
+\paragraph{Mathematical role.}
+This file defines the assumption games.  It does not prove lattice hardness; it
+defines the formal games whose probabilities are used by the final theorem.
+
+\paragraph{MLWE.}
+The MLWE part defines real and random instance distributions and a distinguisher
+interface.  The security theorem later assumes that any reduction's success in
+the MLWE game is bounded by \ec{mlwe_hardness_term}.
+
+\paragraph{Module-SIS.}
+A Module-SIS instance is represented as \((A,t)\), and a solution is a vector
+\(z\).  The validity predicate is
+\[
+  \mathsf{module\_sis\_valid}(A,t,z)
+  \Longleftrightarrow
+  z\text{ is well formed}\land A z=t.
+\]
+This is the target relation for the extraction argument.
+
+\paragraph{Bimodal self-target MSIS.}
+The forking extractor first yields a bimodal self-target MSIS solution.  This
+file models that problem with the same carrier as Module-SIS and proves exact
+lifting lemmas:
+\[
+  \Pr[\BMSIS(B)=1]
+  =
+  \Pr[\MSIS(\mathsf{Lift}(B))=1].
+\]
+The final theorem still keeps a named loss term for this lifting step so the
+bound records the reduction boundary explicitly.
+
+\input{mathematical-chapter-details/HAETAE_Assumptions-textbook-details.tex}
+
+\ecchapter{HAETAE\_Distributions.ec}{HAETAE Distributions.ec}
+
+\paragraph{Mathematical role.}
+This file defines the probability distributions used by the model and proves
+their support, losslessness, and point-probability facts.  It is the measure
+theory layer of the proof.
+
+\paragraph{Basic distributions.}
+The file defines byte, seed, CRH, coefficient, polynomial, vector, matrix, and
+challenge distributions.  Typical lemmas state:
+\[
+  \mathsf{is\_lossless}(D),\qquad
+  x\in\operatorname{supp}(D)\Rightarrow P(x),\qquad
+  \mu(D,\{x\})\le b.
+\]
+
+\paragraph{Signing randomness.}
+Signing randomness is represented through an entropy token of cardinality
+\[
+  288230376151711744 = 2^{58}.
+\]
+This is the source of the challenge-support lower bound used in the counted
+ROM losses.  The point-bound lemmas are what justify replacing adversarial hit
+probabilities by \(1/|\mathcal{C}|\)-style bounds.
+
+\paragraph{Exact hyperball samplers.}
+The proof introduces structural, bounded-unit, checked-hyperball, and
+exact-hyperball signing-sample distributions.  Cryptographically, these are
+different ways of sampling the signing response space.  The transition from
+structural signing samples to exact hyperball samples is one of the main places
+where rejection-sampling loss enters the proof.
+
+\input{mathematical-chapter-details/HAETAE_Distributions-textbook-details.tex}
+
+\ecchapter{HAETAE\_Rejection.ec}{HAETAE Rejection.ec}
+
+\paragraph{Mathematical role.}
+This file formalizes rejection sampling at the level of a signing attempt.  It
+defines the state of a signing attempt, the acceptance predicates, and the
+distributions over attempts used in the sampling hops.
+
+\paragraph{Signing attempt state.}
+A signing attempt records the sampled vectors, commitment pieces, challenge,
+response, auxiliary response, hint, signature, and rejection-branch data.  This
+turns the informal signing procedure into a single mathematical object
+\(st\) with predicates such as:
+\[
+  \mathsf{fields\_match}(st),\quad
+  \mathsf{challenge\_consistent}(st),\quad
+  \mathsf{public\_equation\_consistent}(st),\quad
+  \mathsf{accepts}(st).
+\]
+
+\paragraph{Acceptance and aborts.}
+The file separates rejection causes: response norm failure, hint norm failure,
+packing failure, reference rejection failure, and bimodal reject-2 branch
+failure.  This separation lets the proof use union bounds rather than hiding
+all rejection events under one opaque predicate.
+
+\paragraph{Loss obligations.}
+The named obligations
+\ec{structural_to_exact_hyperball_sample_pair_loss_obligation},
+\ec{structural_to_exact_hyperball_attempt_loss_obligation}, and
+\ec{rejection_sampling_bound_obligation} are the bridge from concrete rejection
+predicates to the abstract loss term used in the theorem.  Many lemmas prove
+zero-probability aborts for the current model; others show that a remaining
+abort probability is bounded by the named rejection-sampling term.
+
+\input{mathematical-chapter-details/HAETAE_Rejection-textbook-details.tex}
+
+\ecchapter{HAETAE\_Algebra.ec}{HAETAE Algebra.ec}
+
+\paragraph{Mathematical role.}
+This file is the deterministic algebraic model of HAETAE.  It defines the
+carrier types, arithmetic operations, key-generation equations, signing
+equations, verification predicate, and packing/unpacking facts.
+
+\paragraph{Carrier types.}
+Polynomials are lists of integer coefficients, and vectors/matrices are lists
+of polynomials.  Well-formedness predicates enforce the expected lengths:
+\[
+  \mathsf{poly\_wf}(p)\Longleftrightarrow |p|=n,\qquad
+  \mathsf{polyveck\_wf}(v)\Longleftrightarrow |v|=k.
+\]
+Coefficient arithmetic is reduced modulo \(q=64513\).
+
+\paragraph{Linear algebra.}
+The operations \ec{matrix_vec_mul}, \ec{polyveck_add}, and
+\ec{polyveck_sub} define the algebraic relation underlying the public key:
+\[
+  t = A s + e.
+\]
+For modes 2 and 3 the public vector is a high-bits projection of an adjusted
+raw vector; for mode 5 it is a negated doubled raw vector.  The predicate
+\ec{public_key_relation} records the mode-dependent relation.
+
+\paragraph{Signing and verification.}
+The later definitions build the commitment, message hash, challenge embedding,
+response, auxiliary response, hint, and final signature.  Verification checks
+that the signature is well formed, that the challenge is consistent with the
+public reconstruction, and that the response and hint satisfy the norm
+conditions.  The key correctness lemmas used by the top-level file are
+\ec{valid_signature_sign_internal}, \ec{verify_internal_sign_internal},
+\ec{response_norm_ok_current}, and \ec{verify_norm_ok_current}.
+
+\paragraph{Packing and reference correspondence.}
+The long middle and late parts of this file prove that byte-level packing and
+unpacking operations preserve the mathematical public-key object.  These lemmas
+are not the main security reduction, but they prevent the model from silently
+using an inconsistent public-key representation.
+
+\input{mathematical-chapter-details/HAETAE_Algebra-textbook-details.tex}
+
+\ecchapter{HAETAE\_Params.ec}{HAETAE Params.ec}
+
+\paragraph{Mathematical role.}
+This file fixes the public parameter functions used by all other files.  It
+defines the seed length, CRH length, polynomial dimension, modulus, and the
+three HAETAE modes.
+
+\paragraph{Parameters.}
+The global constants are
+\[
+  \mathsf{seedbytes}=32,\quad
+  \mathsf{crhbytes}=64,\quad
+  n=256,\quad
+  q=64513.
+\]
+The modes determine vector dimensions and bounds:
+\[
+\begin{array}{c|ccc}
+\text{mode} & k & \ell & \tau\\
+\hline
+2 & 2 & 4 & 58\\
+3 & 3 & 6 & 80\\
+5 & 4 & 7 & 128
+\end{array}
+\]
+
+\paragraph{Proof obligations.}
+The lemmas are small but important arithmetic facts: positivity of lengths and
+bounds, \(\tau\le n\), and public-key byte-size positivity.  These facts are
+used by distribution, list-size, and packing proofs throughout the development.
+
+\input{mathematical-chapter-details/HAETAE_Params-textbook-details.tex}
+
+\ecchapter{HAETAE\_FIPS202.ec}{HAETAE FIPS202.ec}
+
+\paragraph{Mathematical role.}
+This file gives a compact model of the FIPS202/SHAKE256 interface used by the
+HAETAE algebraic model.  It is not a cryptographic proof of SHAKE; it supplies
+deterministic functions and size facts so the EasyCrypt model can talk about
+hash-derived byte strings.
+
+\paragraph{SHAKE model.}
+The state has \(200\) bytes, the SHAKE256 rate is \(136\) bytes, and the
+capacity is \(64\) bytes.  The one-block absorb operation adds the SHAKE domain
+separator and final padding, applies the modeled Keccak permutation, and
+squeezes bytes by taking the requested state prefix.
+
+\paragraph{Use in the proof.}
+The size lemmas guarantee that the seed-expansion operations in
+\file{HAETAE_Algebra.ec} produce byte strings of the expected length.  The
+security proof treats the random oracle abstractly; this file is support for
+the deterministic hash-shaped computations inside the model.
+
+\input{mathematical-chapter-details/HAETAE_FIPS202-textbook-details.tex}
+
+\ecchapter{HAETAE\_Keccak1600.ec}{HAETAE Keccak1600.ec}
+
+\paragraph{Mathematical role.}
+This file models the Keccak-f1600 permutation at the lane/bit level.  It
+defines lanes, states, byte/lane conversions, and the theta, rho-pi, chi, and
+iota round functions.
+
+\paragraph{Bit-level equations.}
+The file proves equations such as \ec{keccak_theta_bitE},
+\ec{keccak_rho_pi_bitE}, \ec{keccak_chi_bitE}, and
+\ec{keccak_round_bitE}.  Mathematically these are expansion lemmas: they let
+later proofs replace a named Keccak step by its bitwise definition.
+
+\paragraph{Cryptographic boundary.}
+The HAETAE security theorem does not rely on proving Keccak collision
+resistance or indifferentiability.  The random oracle is still the idealized
+object used in the reduction.  This file only keeps the modeled FIPS202 support
+well typed and internally consistent.
+
+\input{mathematical-chapter-details/HAETAE_Keccak1600-textbook-details.tex}
+
+\chapter*{How to Use This Guide}
+\addcontentsline{toc}{chapter}{How to Use This Guide}
+
+For conceptual reading, start with \file{HAETAE_Security.ec},
+\file{Sig_ROM.ec}, \file{HAETAE_Reductions.ec}, and
+\file{HAETAE_Assumptions.ec}.  Then read \file{HAETAE_Transcript.ec} and
+\file{HAETAE_HopGames.ec} together: the former explains what is extracted from
+two accepting transcripts, while the latter shows how the games reach that
+extraction setting.  Finally read the infrastructure files
+\file{HAETAE_Distributions.ec}, \file{HAETAE_Rejection.ec}, and
+\file{HAETAE_Algebra.ec} when a theorem premise refers to sampling support,
+rejection loss, or deterministic verification.
+
+To rebuild the checked proof, run:
+\begin{lstlisting}[language=bash]
+sh provable-security/verify-provable-security.sh
+\end{lstlisting}
+
+To rebuild this guide from \file{haetae-security/guide}, run:
+\begin{lstlisting}[language=bash]
+python3 generate-mathematical-chapter-details.py
+pdflatex -interaction=nonstopmode -halt-on-error haetae-mathematical-cryptology-guide.tex
+pdflatex -interaction=nonstopmode -halt-on-error haetae-mathematical-cryptology-guide.tex
+\end{lstlisting}
+
+\end{document}

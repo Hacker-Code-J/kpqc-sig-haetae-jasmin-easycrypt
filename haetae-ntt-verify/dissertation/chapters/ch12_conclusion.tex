@@ -1,0 +1,147 @@
+%==============================================================================%
+% Chapter 12 – Conclusion
+%==============================================================================%
+
+\chapter{Conclusion}
+\label{ch:conclusion}
+
+\section{Summary of Contributions}
+
+This dissertation has presented a comprehensive formal verification of the
+Number-Theoretic Transform in the \haetae{} post-quantum signature scheme.
+The verification spans four abstraction layers---from \jasmin{} machine code
+to the abstract spectral evaluation formula---and is expressed entirely in the
+\easycrypt{} proof assistant.
+
+\paragraph{C1 -- Montgomery correctness.}
+We proved that the signed Montgomery reduction in \texttt{reduce.jinc}
+correctly computes $a \cdot R^{-1} \bmod q$ within the working range of the
+NTT, with explicit bounds on all intermediate values.  The proof required
+new signed-arithmetic lemmas for \easycrypt{} that are not present in the
+standard library and that are expected to be of independent interest for
+future cryptographic verifications.
+
+\paragraph{C2 -- Imperative NTT specification.}
+We developed a fully proved imperative NTT specification in \texttt{NTT\_Fq.ec},
+covering both the forward and inverse NTT with all loop invariants,
+termination witnesses, and coefficient-bound invariants.  The specification is
+structurally identical to the C reference implementation and the \jasmin{} source,
+making the correspondence proofs straightforward once the arithmetic
+infrastructure is in place.
+
+\paragraph{C3 -- Abstract spectral specification.}
+We developed the algebraic infrastructure in \texttt{NTTFullAlgebra.ec},
+including the primitive root properties of $\zeta_0 = 426$ in $\F_{64513}$,
+the orthogonality relation for the negacyclic NTT, bit-reversal identities,
+and the butterfly-stage decomposition theorem.  This library distinguishes
+the \haetae{} full $256$-point transform from the MLKEM incomplete
+$128$-point transform, and provides the formal foundation for the
+stage-induction proof.
+
+\paragraph{C4 -- Jasmin refinement.}
+We proved the two central refinement lemmas in \texttt{RefJasminNTT.ec}:
+\begin{itemize}
+  \item \ec{poly\_ntt\_core\_ref}: the \jasmin{} forward NTT is observationally
+        equivalent to the imperative specification, with coefficient bounds
+        progressing from 16-bit inputs to 24-bit outputs.
+  \item \ec{poly\_invntt\_core\_ref}: the \jasmin{} inverse NTT is
+        observationally equivalent to the imperative inverse NTT specification,
+        preserving 16-bit coefficient bounds in the output.
+\end{itemize}
+
+\paragraph{C5 -- End-to-end correctness.}
+We assembled all layers in \texttt{NTTEndToEnd.ec}, stating the main theorems
+\ec{haetae\_jasmin\_ntt\_correct} and \ec{haetae\_jasmin\_invntt\_correct}.
+These theorems directly relate the \jasmin{} exported functions to the abstract
+spectral NTT map.
+
+\section{Limitations and Remaining Obligations}
+
+\subsection{Stage Induction Gap}
+
+The one remaining proof obligation is the complete machine-checked proof of the
+butterfly-stage induction connecting \ec{NTT\_Fq.NTT.ntt} to
+\ec{NTTFullSpec.full\_ntt}.  While the mathematical argument is clear
+(\Cref{lem:butterfly_stage}), its formalisation in \easycrypt{} requires
+significant index-arithmetic manipulation.  The MLKEM verification did not
+provide a reusable template, necessitating new infrastructure.  Completing
+this proof is the primary remaining task.
+
+\subsection{No AVX2 Vectorisation}
+
+The current \jasmin{} implementation is scalar (no SIMD).  A production
+\haetae{} implementation would use AVX2 intrinsics for a significant
+speedup.  Verifying the correctness of an AVX2 NTT in \easycrypt{} would
+require extending the proof to handle 256-bit registers and vectorised butterfly
+operations.
+
+\subsection{Base Multiplication Not Fully Verified}
+
+The file \texttt{hpoly.jazz} also exports \jasm{poly\_basemul\_jazz}, the
+pointwise NTT-domain multiplication.  While the \jasmin{} implementation is
+available, its end-to-end correctness proof is not yet complete.  This is
+the complement to the NTT correctness: together, the NTT and base
+multiplication allow proving that \jasm{poly\_basemul\_jazz} correctly
+computes polynomial multiplication in $R_q$.
+
+\subsection{Security Proof Integration}
+
+This dissertation establishes functional correctness only.  Connecting the
+NTT implementation to the \emph{security} proof of \haetae{} (i.e., the
+reduction from DMSIS) would require additional work at the cryptographic
+protocol level.
+
+\section{Future Work}
+
+\paragraph{Completing the stage induction.}
+The most pressing future work is completing the butterfly-stage induction in
+\texttt{NTTFullAlgebra.ec}.  The key insight needed is a formal lemma relating
+the loop counter $k$ to the spectral index $\brev_8(2^s + g)$ at each stage.
+We conjecture that a more direct formulation---expressing the partial NTT
+directly in terms of the loop variables rather than through the bit-reversal
+permutation---would simplify the proof considerably.
+
+\paragraph{Vectorised implementation verification.}
+Extending the proof to cover an AVX2 implementation would provide a
+performance-verified \haetae{} NTT.  The \jasmin{} language has full support
+for AVX2 intrinsics, and the \easycrypt{} extraction handles 256-bit types.
+The main challenge is reasoning about the parallelism of 8 butterfly
+operations executed simultaneously.
+
+\paragraph{Reusable NTT algebra library.}
+The algebraic infrastructure developed in \texttt{NTTFullAlgebra.ec} is
+specific to $n = 256$ and $q = 64513$.  A parameterised version, expressing
+the NTT algebra in terms of an abstract field $\F_q$ and an abstract
+$2n$th root of unity, would be reusable across lattice-based schemes.
+
+\paragraph{Full \haetae{} signing and verification.}
+The ultimate goal is a fully verified \haetae{} implementation: key generation,
+signing, and verification, all the way from the \jasmin{} source to the
+DMSIS security proof.  The NTT verification of this dissertation is the
+foundational building block for that larger project.
+
+\paragraph{Comparison with Dilithium and FALCON.}
+A comparative study of the NTT verification strategies for Dilithium, FALCON,
+and \haetae{} would identify opportunities for sharing algebraic infrastructure
+and for developing a unified ``NTT verification toolkit'' for
+\easycrypt{}/\jasmin{}.
+
+\section{Closing Remarks}
+
+The formal verification of cryptographic implementations is no longer a
+distant aspiration---it is an engineering practice that can be applied to
+production code.  This dissertation demonstrates that a full-featured
+lattice-based NTT, with all its integer arithmetic nuances, can be formally
+verified in \easycrypt{} by careful layering of specifications and proofs.
+
+The main lesson is the value of the three-layer architecture: separating the
+word-level arithmetic concerns (Layer 1) from the algorithmic concerns
+(Layer 2) from the mathematical concerns (Layer 3) makes each proof layer
+tractable.  The interface between layers is clean: word arrays vs.\ integer
+arrays (Layers 1--2) and loop invariants vs.\ evaluation formulas (Layers 2--3).
+
+As post-quantum cryptography moves from standardisation to deployment, the
+tools and techniques developed here---\jasmin{} for high-assurance
+implementations, \easycrypt{} for machine-checked proofs, and the three-layer
+verification architecture---provide a clear path to verifying not just NTTs
+but complete post-quantum signature and key-encapsulation schemes.

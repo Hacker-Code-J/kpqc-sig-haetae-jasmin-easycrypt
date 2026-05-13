@@ -1,0 +1,147 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_FIPS202.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Modeled FIPS202/SHAKE support.
+
+\section*{How To Read This Script}
+Read this file as deterministic hash-interface support for the model, not as a standard-model security proof for SHAKE.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore IntDiv List.} & Imports AllCore IntDiv List.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Keccak1600.} & Imports HAETAE\_Keccak1600.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_FIPS202.} & Begins the namespace HAETAE\_FIPS202, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Keccak1600.} & Opens HAETAE\_Keccak1600 so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+8 & {\ttfamily\scriptsize type fips\_byte = int.} & Declares carrier set fips\_byte.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+9 & {\ttfamily\scriptsize type fips202\_state = fips\_byte list.} & Declares carrier set fips202\_state.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+10 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+11 & {\ttfamily\scriptsize op fips202\_state\_bytes : int = 200.} & Defines integer-valued parameter fips202\_state\_bytes, used for dimensions, budgets, support sizes, or bounds. \\
+12 & {\ttfamily\scriptsize op shake256\_rate\_bytes : int = 136.} & Defines integer-valued parameter shake256\_rate\_bytes, used for dimensions, budgets, support sizes, or bounds. \\
+13 & {\ttfamily\scriptsize op shake256\_capacity\_bytes : int = 64.} & Defines integer-valued parameter shake256\_capacity\_bytes, used for dimensions, budgets, support sizes, or bounds. \\
+14 & {\ttfamily\scriptsize op shake256\_domain\_separator : fips\_byte = 31.} & Defines operation shake256\_domain\_separator, a total mathematical function or abbreviation used by later declarations. \\
+15 & {\ttfamily\scriptsize op fips202\_final\_padding\_byte : fips\_byte = 128.} & Defines operation fips202\_final\_padding\_byte, a total mathematical function or abbreviation used by later declarations. \\
+16 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+17 & {\ttfamily\scriptsize op fips202\_keccak\_f1600 (st : fips202\_state) : fips202\_state =} & Defines operation fips202\_keccak\_f1600, a total mathematical function or abbreviation used by later declarations. \\
+18 & {\ttfamily\scriptsize   keccak\_f1600\_bytes st.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+19 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+20 & {\ttfamily\scriptsize op shake256\_absorb\_once\_short\_domain} & Defines operation shake256\_absorb\_once\_short\_domain, a total mathematical function or abbreviation used by later declarations. \\
+21 & {\ttfamily\scriptsize    (\_ : fips\_byte list) (inlen : int) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+22 & {\ttfamily\scriptsize   0 <= inlen /\textbackslash{} inlen < shake256\_rate\_bytes.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+23 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+24 & {\ttfamily\scriptsize op shake256\_absorb\_once\_short\_block\_byte} & Defines operation shake256\_absorb\_once\_short\_block\_byte, a total mathematical function or abbreviation used by later declarations. \\
+25 & {\ttfamily\scriptsize    (input : fips\_byte list) (inlen i : int) : fips\_byte =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+26 & {\ttfamily\scriptsize   if 0 <= i /\textbackslash{} i < inlen then nth 0 input i} & Splits proof obligations according to a conditional branch in the program or formula. \\
+27 & {\ttfamily\scriptsize   else if i = inlen /\textbackslash{} i = shake256\_rate\_bytes - 1 then} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+28 & {\ttfamily\scriptsize     shake256\_domain\_separator + fips202\_final\_padding\_byte} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+29 & {\ttfamily\scriptsize   else if i = inlen then shake256\_domain\_separator} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+30 & {\ttfamily\scriptsize   else if i = shake256\_rate\_bytes - 1 then fips202\_final\_padding\_byte} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+31 & {\ttfamily\scriptsize   else 0.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+32 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+33 & {\ttfamily\scriptsize op shake256\_absorb\_once\_short\_state} & Defines operation shake256\_absorb\_once\_short\_state, a total mathematical function or abbreviation used by later declarations. \\
+34 & {\ttfamily\scriptsize    (input : fips\_byte list) (inlen : int) : fips202\_state =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+35 & {\ttfamily\scriptsize   mkseq} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+36 & {\ttfamily\scriptsize     (fun i =>} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+37 & {\ttfamily\scriptsize        if i < shake256\_rate\_bytes} & Splits proof obligations according to a conditional branch in the program or formula. \\
+38 & {\ttfamily\scriptsize        then shake256\_absorb\_once\_short\_block\_byte input inlen i} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+39 & {\ttfamily\scriptsize        else 0)} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+40 & {\ttfamily\scriptsize     fips202\_state\_bytes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+41 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+42 & {\ttfamily\scriptsize op shake256\_absorb\_once} & Defines operation shake256\_absorb\_once, a total mathematical function or abbreviation used by later declarations. \\
+43 & {\ttfamily\scriptsize    (input : fips\_byte list) (inlen : int) : fips202\_state =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+44 & {\ttfamily\scriptsize   fips202\_keccak\_f1600} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+45 & {\ttfamily\scriptsize     (shake256\_absorb\_once\_short\_state input inlen).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+46 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+47 & {\ttfamily\scriptsize op shake256\_squeeze (st : fips202\_state) (outlen : int) : fips\_byte list =} & Defines integer-valued parameter shake256\_squeeze, used for dimensions, budgets, support sizes, or bounds. \\
+48 & {\ttfamily\scriptsize   mkseq (fun i => nth 0 st i) outlen.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+49 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+50 & {\ttfamily\scriptsize op shake256} & Defines operation shake256, a total mathematical function or abbreviation used by later declarations. \\
+51 & {\ttfamily\scriptsize    (input : fips\_byte list) (inlen outlen : int) : fips\_byte list =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+52 & {\ttfamily\scriptsize   shake256\_squeeze (shake256\_absorb\_once input inlen) outlen.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+53 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+54 & {\ttfamily\scriptsize lemma fips202\_state\_bytesE :} & States checked lemma fips202\_state\_bytesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+55 & {\ttfamily\scriptsize   fips202\_state\_bytes = 200.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+56 & {\ttfamily\scriptsize proof. by rewrite /fips202\_state\_bytes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+57 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+58 & {\ttfamily\scriptsize lemma shake256\_rate\_bytesE :} & States checked lemma shake256\_rate\_bytesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+59 & {\ttfamily\scriptsize   shake256\_rate\_bytes = 136.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+60 & {\ttfamily\scriptsize proof. by rewrite /shake256\_rate\_bytes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+62 & {\ttfamily\scriptsize lemma shake256\_capacity\_bytesE :} & States checked lemma shake256\_capacity\_bytesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+63 & {\ttfamily\scriptsize   shake256\_capacity\_bytes = 64.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+64 & {\ttfamily\scriptsize proof. by rewrite /shake256\_capacity\_bytes. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+65 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+66 & {\ttfamily\scriptsize lemma shake256\_domain\_separatorE :} & States checked lemma shake256\_domain\_separatorE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+67 & {\ttfamily\scriptsize   shake256\_domain\_separator = 31.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+68 & {\ttfamily\scriptsize proof. by rewrite /shake256\_domain\_separator. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+70 & {\ttfamily\scriptsize lemma fips202\_final\_padding\_byteE :} & States checked lemma fips202\_final\_padding\_byteE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+71 & {\ttfamily\scriptsize   fips202\_final\_padding\_byte = 128.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+72 & {\ttfamily\scriptsize proof. by rewrite /fips202\_final\_padding\_byte. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+73 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+74 & {\ttfamily\scriptsize lemma shake256\_rate\_capacity\_state\_bytesE :} & States checked lemma shake256\_rate\_capacity\_state\_bytesE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+75 & {\ttfamily\scriptsize   shake256\_rate\_bytes + shake256\_capacity\_bytes = fips202\_state\_bytes.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+76 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+77 & {\ttfamily\scriptsize by rewrite /shake256\_rate\_bytes /shake256\_capacity\_bytes} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+78 & {\ttfamily\scriptsize            /fips202\_state\_bytes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+79 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+80 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+81 & {\ttfamily\scriptsize lemma shake256\_absorb\_once\_short\_state\_size input inlen :} & States checked lemma shake256\_absorb\_once\_short\_state\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+82 & {\ttfamily\scriptsize   size (shake256\_absorb\_once\_short\_state input inlen) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+83 & {\ttfamily\scriptsize   fips202\_state\_bytes.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+84 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+85 & {\ttfamily\scriptsize by rewrite /shake256\_absorb\_once\_short\_state size\_mkseq.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+86 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+87 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+88 & {\ttfamily\scriptsize lemma shake256\_squeeze\_size st outlen :} & States checked lemma shake256\_squeeze\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+89 & {\ttfamily\scriptsize   0 <= outlen =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+90 & {\ttfamily\scriptsize   size (shake256\_squeeze st outlen) = outlen.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+91 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+92 & {\ttfamily\scriptsize move=> ge0\_outlen.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+93 & {\ttfamily\scriptsize rewrite /shake256\_squeeze size\_mkseq.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+94 & {\ttfamily\scriptsize by smt().} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+95 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+96 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+97 & {\ttfamily\scriptsize lemma shake256\_size input inlen outlen :} & States checked lemma shake256\_size.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+98 & {\ttfamily\scriptsize   0 <= outlen =>} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+99 & {\ttfamily\scriptsize   size (shake256 input inlen outlen) = outlen.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+100 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+101 & {\ttfamily\scriptsize move=> ge0\_outlen.} & Introduces universally quantified variables or hypotheses into the proof context. \\
+102 & {\ttfamily\scriptsize by rewrite /shake256 shake256\_squeeze\_size.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+103 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+104 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+105 & {\ttfamily\scriptsize end HAETAE\_FIPS202.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

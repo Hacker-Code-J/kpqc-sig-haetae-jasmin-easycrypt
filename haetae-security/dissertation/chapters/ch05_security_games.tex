@@ -1,0 +1,155 @@
+\chapter{Signature Games, Theorem Chain, and Paper Proof}
+\label{ch:games}
+
+\section{Generic ROM Signature Interface}
+
+The file \code{Sig\_ROM.ec} defines the generic games.  Important declarations
+include \code{Oracle}, \code{POracle}, \code{Scheme}, \code{SignOracle},
+\code{Adversary}, \code{NMA\_Adversary}, \code{EUF\_CMA}, and \code{UF\_NMA}.
+These definitions give the proof a stable target: \haetae{} security means
+security in this game interface.
+
+The distinction between EUF-CMA and UF-NMA is proof-theoretic.  The chosen
+message game gives the adversary an adaptive signing oracle.  The no-message
+game removes that oracle and is therefore closer to the algebraic extraction
+surface.  Much of the theorem chain is devoted to justifying that signing-oracle
+access can be simulated and internalized without changing the adversary's view
+except for explicitly bounded losses.  In paper notation this is often a single
+sentence; in the checked development it becomes a sequence of modules and
+relational lemmas.
+
+\section{Game-Hopping Calculus}
+
+Let \(G_0,\ldots,G_n\) be a sequence of games with the same Boolean success
+event.  The standard telescoping inequality is
+\[
+  \left|\Pr[G_0\Rightarrow 1]-\Pr[G_n\Rightarrow 1]\right|
+  \le
+  \sum_{i=0}^{n-1}
+  \left|\Pr[G_i\Rightarrow 1]-\Pr[G_{i+1}\Rightarrow 1]\right|.
+\]
+Each adjacent term must be justified by either perfect equivalence, a
+fundamental-lemma bad-event bound, or a reduction to a hardness assumption.  The
+HAETAE proof is long because the adjacent games are not cosmetic.  They expose
+oracle logs, signing transcripts, sampler sites, rejection events, and exact
+sampling distributions at different stages.
+
+This calculus also explains why loss ledgers are delicate.  A loss should appear
+exactly once: either as a local bad-event probability, as a statistical-distance
+term, or as part of a reduction advantage.  Double-counting makes the theorem
+weaker and conceptually inaccurate; omitting a term makes it false.
+
+\section{Pen-and-Paper EUF-CMA Game}
+
+Let \(\Pi=(\mathsf{KeyGen},\mathsf{Sign},\mathsf{Verify})\) be the modeled
+\haetae{} signature scheme.  The \eufcma{} experiment is:
+
+\begin{enumerate}
+\item Sample \((pk,sk)\leftarrow \mathsf{KeyGen}()\).
+\item Give \(pk\) and random-oracle access to an adversary \(A\).
+\item Answer each signing query \((m,ctx)\) with
+\(\sigma\leftarrow\mathsf{Sign}(sk,m,ctx)\), and record \((m,ctx)\).
+\item Let \(A\) output \((m^*,ctx^*,\sigma^*)\).
+\item The adversary wins if
+\(\mathsf{Verify}(pk,m^*,ctx^*,\sigma^*)=1\) and \((m^*,ctx^*)\) was not a
+previous signing query.
+\end{enumerate}
+
+The advantage is the probability of this event over key generation, oracle
+randomness, signing randomness, and adversarial randomness.
+
+The resource parameters \(q_H\) and \(q_S\) are part of the paper-style loss
+ledger and of the budgeted wrapper games, not syntactic caps on the source
+\code{Sig\_ROM.EUF\_CMA} game.  In a concrete proof, these parameters enter
+collision bounds, freshness bounds, and wrapper lemmas.  A theorem checked only
+for fixed wrapper constants \(q_H,q_S\) should not be cited as a symbolic-query
+or arbitrary-query theorem without a separate parameterized development.
+
+\paragraph{Schematic paper-style ledger.}
+A fully parameterized paper theorem would have the form
+\[
+\Adv^{\eufcma}_{\haetae}(A)
+\le
+\sum_i \Adv_i(B_i) + \mathsf{Loss}_{\mathrm{ROM}}(q_H,q_S)
++ \mathsf{Loss}_{\mathrm{local}}(q_H,q_S),
+\]
+where \(\mathsf{Loss}_{\mathrm{local}}\) denotes intermediate rejection,
+sampling, and lifting costs before they are composed into a final implication.
+The dissertation does not claim that this symbolic-query statement has been
+checked as written.  The checked counted-ROM implication fixes \(q_H=q_S=2\) and
+uses the concrete bound \code{haetae\_euf\_counted\_rom\_bound}; in that final
+bound, rejection and exact-sampling obligations are discharged inside the hop
+premises rather than added again as separate final summands.
+
+\begin{proof}[Pen-and-paper proof sketch]
+The proof proceeds by a sequence of games.  First, replace real signing by a
+signing simulator while preserving the adversary-visible distribution.  Second,
+expose internal signing transcripts and erase components not visible to the
+adversary.  Third, move from chosen-message access to an NMA-style game by
+embedding signatures into simulated transcript generation.  Fourth, program the
+random oracle at challenge sites and account for the event that the adversary
+prequeried a programmed point.  Fifth, pass through the rejection-sampling and
+paper-simulation sampler surface, recording the checked rejection and lifting
+obligations.  Sixth, replace the paper/structural sampler view by the exact
+hyperball sampler used in the formal model, then apply special soundness and the
+bimodal-to-Module-SIS bridge to turn a forgery into a lattice-assumption
+adversary.  Summing the statistical distances and bad-event probabilities gives
+the schematic inequality above; the machine-checked counted theorem uses the
+fixed-ledger composition and grouping described later in the dissertation.
+\end{proof}
+
+The proof sketch is intentionally schematic.  The checked proof strengthens it
+by replacing each informal distributional claim with an EasyCrypt theorem.  For
+example, ``preserving the adversary-visible distribution'' becomes a relational
+equivalence between games; ``account for the event that the adversary prequeried
+a programmed point'' becomes a logged-ROM bad-event probability bound; and
+``summing the losses'' becomes arithmetic over named bound operations in
+\code{HAETAE\_Reductions.ec}.
+
+\section{Machine-Checked Theorem Chain}
+
+\code{HAETAE\_Security.ec} contains the top-level composition chain.  Representative
+lemmas include \code{correctness\_perfect}, \code{euf\_cma\_security},
+\code{euf\_cma\_security\_with\_hop\_interfaces}, and later bridge lemmas that
+connect ROM transcript games, counted bimodal reductions, paper-simulation NMA
+games, rejection sampling, and exact hyperball sampling.
+
+The proof follows the paper argument, but each paper step is made explicit:
+
+\begin{longtable}{p{0.33\textwidth}p{0.56\textwidth}}
+\toprule
+\textbf{Paper step} & \textbf{EasyCrypt realization} \\
+\midrule
+Real EUF-CMA game & \code{Sig\_ROM.EUF\_CMA} and \code{HAETAE\_Security.euf\_cma\_security}. \\
+Signing simulation & \code{EUF\_CMA\_SimulatedSign} and \code{RealSigningSimulator}. \\
+Transcript exposure & \code{EUF\_CMA\_TranscriptSimulatedSign}, \code{EUF\_CMA\_InternalTranscriptSign}. \\
+ROM-internal transcript game & \code{EUF\_CMA\_ROMInternalTranscriptSign}. \\
+NMA reduction surface & \code{ROMInternalTranscriptAsNMA} and budgeted variants. \\
+Paper sampling to exact sampling & \code{ROSigningAttemptPaperSimSampler}, \code{ROExactHyperballPaperSimSampler}. \\
+Final concrete bound & \code{HAETAE\_Reductions.ec} grouped bound lemmas. \\
+\bottomrule
+\end{longtable}
+
+\section{Detailed EasyCrypt Code Analysis}
+
+The design of \code{Sig\_ROM.ec} is intentionally parametric.  The module type
+\code{Scheme(O : POracle)} prevents the proof from assuming a concrete hash
+implementation in the generic security game.  The adversary receives only the
+interfaces exposed by \code{POracle} and \code{SignOracle}; therefore, any
+state used internally by the simulator must be hidden unless explicitly exposed
+by a later game.
+
+The \haetae{}-specific theorem file does not redefine security.  Instead, it
+instantiates and bounds the generic security game.  This is a crucial design
+choice.  If \code{HAETAE\_Security.ec} had its own custom forgery game, the
+proof would also need a separate theorem showing equivalence with the standard
+signature notion.  By reusing \code{Sig\_ROM.ec}, the development makes the
+security target auditable.
+
+The long chain of lemmas in \code{HAETAE\_Security.ec} should be read as a
+machine-checked proof outline.  Lemmas with names containing
+\code{from\_rom\_transcript}, \code{from\_structural\_nma},
+\code{from\_paper\_sim\_nma}, and \code{from\_exact\_hyperball} correspond to
+successive paper-proof transformations.  This naming discipline is valuable:
+it lets a reviewer locate the exact checked boundary for each cryptographic
+claim.

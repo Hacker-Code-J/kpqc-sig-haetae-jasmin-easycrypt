@@ -1,0 +1,116 @@
+\chapter{Curated EasyCrypt Proof-Object Case Studies}
+\label{app:curated-easycrypt-case-studies}
+
+This appendix replaces the least persuasive part of a purely generated
+correspondence appendix with selected proof-object analyses.  The archived
+exhaustive catalog remains in \ec{dissertation/etc/}; this appendix explains the
+representative EasyCrypt objects that carry the main mathematical burden.
+
+\section{Top-level theorem object}
+
+The theorem family around \ec{euf\_cma\_security} and
+\ec{haetae\_euf\_counted\_rom\_bound} is the formal version of the final
+cryptographic claim:
+\[
+  \Adv_{\haetae,\rom}^{\eufcma}(A)
+  \le
+  \ec{haetae\_euf\_counted\_rom\_bound}.
+\]
+Mathematically, this is a universally quantified statement over adversary
+modules satisfying the game interface and query-budget predicates.  Its proof is
+not a single monolithic argument; it composes correctness, game-hop, sampler,
+ROM, rejection, and reduction lemmas.
+
+\section{Experiment module}
+
+The signature ROM experiment in \ec{Sig\_ROM.ec} is read as a probabilistic
+kernel:
+\[
+  \llbracket \mathsf{EUF\mbox{-}CMA}^{H,O}_{\haetae}(A)\rrbracket
+  : S\to\mathcal{D}(S\times\{0,1\}).
+\]
+Its return bit is the forgery event.  This is the formal object whose return
+probability defines the adversary's advantage.
+
+\section{Lazy random oracle module}
+
+The concrete lazy ROM in \ec{HAETAE\_ROM.ec} is a stateful oracle model.  Its
+state contains the finite map of sampled answers and the logs needed by the ROM
+programming proof.  The mathematical invariant is consistency:
+\[
+  q\in\operatorname{dom}(H_{\mathsf{tab}})
+  \Rightarrow
+  H(q)=H_{\mathsf{tab}}(q),
+\]
+and freshness:
+\[
+  q\notin\operatorname{dom}(H_{\mathsf{tab}})
+  \Rightarrow
+  H(q)\leftarrow D_H
+\]
+for the appropriate output distribution \(D_H\).
+
+\section{ROM freshness lemma}
+
+The sampler-prequery instrumentation proves a statement of the form
+\[
+  \Pr[\mathsf{sampler\_expand\_query}(\rho)\in Q_H]
+  \le
+  L_{\mathsf{ROM\mbox{-}pre}}.
+\]
+This is the exact mathematical content behind the informal phrase ``the simulator
+programs a fresh random-oracle point.''  The important point is that \(Q_H\) is
+the adversary's logged hash-query set, not an informal meta-level set.
+
+\section{Sampler exactness lemma}
+
+The transition from
+\ec{ROSigningAttemptPaperSimSampler(HAETAE\_RO.FRO)} to
+\ec{ROExactHyperballPaperSimSampler(HAETAE\_RO.FRO)} represents a statistical
+comparison between an executable signing-side sampler and the exact paper
+sampling distribution:
+\[
+  \Delta(\mathsf{Attempt},\mathsf{Exact})\le L_{\mathsf{sample}}.
+\]
+The proof obligations are support membership, rejection conditioning, and ROM
+coverage.  This is where the proof pays the sampler and rejection losses.
+
+\section{Active signing Hoare/equiv case}
+
+The active signing oracle proof is centered on \ec{O.sign}.  The paper-level
+statement is a clean-conditioned one-call theorem:
+\[
+  \Pr[O_{\mathsf{attempt}}.\mathsf{sign}:E\wedge C]
+  \le
+  \Pr[O_{\mathsf{exact}}.\mathsf{sign}:E]+\epsilon_{\mathsf{one}}.
+\]
+The condition \(C\) includes sampler coverage, public-key consistency, ROM
+consistency, and absence of sampler prequery.  The checked proof matters because
+chosen-message security requires this invariant to survive adaptive signing
+queries.
+
+\section{Reduction case}
+
+The bimodal/MSIS reduction modules convert a successful final-game forgery into
+a solver for the declared hardness relation.  Mathematically, the reduction is a
+module transformer
+\[
+  A \mapsto B_A
+\]
+with a probability inequality
+\[
+  \Pr[G_{\mathsf{final}}(A):\mathsf{Forge}]
+  \le
+  \Adv_{\mathsf{Hard}}(B_A)+L_{\mathsf{extract}}.
+\]
+The corresponding EasyCrypt evidence appears in the reduction and hop-game
+modules for bimodal self-target MSIS and Module-SIS lifting.
+
+\section{Why these cases are enough for exposition}
+
+The exhaustive declaration catalog is useful for audit, but a reader does not
+learn the proof by reading thousands of templated semantic lines.  The case
+studies above identify the proof objects that carry the cryptographic argument:
+the final theorem, the experiment module, the lazy ROM, the sampler freshness
+lemma, the sampler exactness lemma, the active signing proof, and the hardness
+reduction.

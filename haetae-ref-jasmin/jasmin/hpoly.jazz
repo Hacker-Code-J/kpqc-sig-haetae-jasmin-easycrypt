@@ -1,0 +1,1673 @@
+require "params.jinc"
+require "poly.jinc"
+require "pack.jinc"
+require "decompose.jinc"
+require "polyfix.jinc"
+require "challenge.jinc"
+require "fixpoint.jinc"
+require "hyperball_phase.jinc"
+require "sampler.jinc"
+require "sign.jinc"
+require "encoding.jinc"
+require "keccak.jinc"
+require "fft.jinc"
+
+export
+fn randombytes_seed32_jazz(reg mut ptr u8[32] outp) -> reg ptr u8[32]
+{
+  outp = #randombytes(outp);
+  return outp;
+}
+
+export
+fn keccak_load64_jazz(reg const ptr u8[8] xp) -> reg u64
+{
+  reg u64 r;
+  r = _keccak_load64(xp);
+  return r;
+}
+
+export
+fn keccak_store64_jazz(reg mut ptr u8[8] xp, reg u64 u) -> reg ptr u8[8]
+{
+  xp = _keccak_store64(xp, u);
+  return xp;
+}
+
+export
+fn keccak_init_state_jazz(reg mut ptr u64[25] sp) -> reg ptr u64[25]
+{
+  sp = _keccak_init_state(sp);
+  return sp;
+}
+
+export
+fn keccakf1600_statepermute_jazz(reg mut ptr u64[25] sp) -> reg ptr u64[25]
+{
+  sp = _keccakf1600(sp);
+  return sp;
+}
+
+export
+fn keccak_finalize_jazz(reg mut ptr u64[25] sp,
+                        reg u64 pos,
+                        reg u64 rate,
+                        reg u8 domain) -> reg ptr u64[25]
+{
+  sp = _keccak_finalize(sp, pos, rate, domain);
+  return sp;
+}
+
+export
+fn keccak_absorb_once_jazz(reg mut ptr u64[25] sp,
+                           reg u64 rate,
+                           reg ui64 inp,
+                           reg u64 inlen,
+                           reg u8 domain) -> reg ptr u64[25]
+{
+  sp = _keccak_absorb_once(sp, rate, inp, inlen, domain);
+  return sp;
+}
+
+export
+fn keccak_absorb_jazz(reg mut ptr u64[25] sp,
+                      reg mut ptr u64[2] statep,
+                      reg ui64 inp,
+                      reg u64 inlen) -> reg ptr u64[25],
+                                         reg ptr u64[2]
+{
+  sp, statep = _keccak_absorb(sp, statep, inp, inlen);
+  return sp, statep;
+}
+
+export
+fn keccak_squeeze_jazz(reg mut ptr u64[25] sp,
+                       reg mut ptr u64[2] statep,
+                       reg ui64 outp,
+                       reg u64 outlen) -> reg ptr u64[25],
+                                          reg ptr u64[2]
+{
+  sp, statep = _keccak_squeeze(sp, statep, outp, outlen);
+  return sp, statep;
+}
+
+export
+fn keccak_squeezeblocks_jazz(reg mut ptr u64[25] sp,
+                             reg ui64 outp,
+                             reg u64 nblocks,
+                             reg u64 rate) -> reg ptr u64[25]
+{
+  sp = _keccak_squeezeblocks(outp, nblocks, sp, rate);
+  return sp;
+}
+
+export
+fn fips202_shake128_init_jazz(reg mut ptr u64[26] statep) -> reg ptr u64[26]
+{
+  statep = _shake_state_init(statep);
+  return statep;
+}
+
+export
+fn fips202_shake256_init_jazz(reg mut ptr u64[26] statep) -> reg ptr u64[26]
+{
+  statep = _shake_state_init(statep);
+  return statep;
+}
+
+export
+fn fips202_shake128_absorb_jazz(reg mut ptr u64[26] statep,
+                                reg ui64 inp,
+                                reg u64 inlen) -> reg ptr u64[26]
+{
+  statep = _shake_state_absorb(statep, inp, inlen, 168);
+  return statep;
+}
+
+export
+fn fips202_shake256_absorb_jazz(reg mut ptr u64[26] statep,
+                                reg ui64 inp,
+                                reg u64 inlen) -> reg ptr u64[26]
+{
+  statep = _shake_state_absorb(statep, inp, inlen, 136);
+  return statep;
+}
+
+export
+fn fips202_shake128_finalize_jazz(reg mut ptr u64[26] statep) -> reg ptr u64[26]
+{
+  statep = _shake_state_finalize(statep, 168);
+  return statep;
+}
+
+export
+fn fips202_shake256_finalize_jazz(reg mut ptr u64[26] statep) -> reg ptr u64[26]
+{
+  statep = _shake_state_finalize(statep, 136);
+  return statep;
+}
+
+export
+fn fips202_shake128_squeeze_jazz(reg mut ptr u64[26] statep,
+                                 reg ui64 outp,
+                                 reg u64 outlen)
+                                 -> reg ptr u64[26]
+{
+  statep = _shake_state_squeeze(statep, outp, outlen, 168);
+  return statep;
+}
+
+export
+fn fips202_shake256_squeeze_jazz(reg mut ptr u64[26] statep,
+                                 reg ui64 outp,
+                                 reg u64 outlen)
+                                 -> reg ptr u64[26]
+{
+  statep = _shake_state_squeeze(statep, outp, outlen, 136);
+  return statep;
+}
+
+export
+fn fips202_shake128_absorb_once_jazz(reg mut ptr u64[26] statep,
+                                     reg ui64 inp,
+                                     reg u64 inlen) -> reg ptr u64[26]
+{
+  statep = _shake_state_absorb_once(statep, inp, inlen, 168);
+  return statep;
+}
+
+export
+fn fips202_shake256_absorb_once_jazz(reg mut ptr u64[26] statep,
+                                     reg ui64 inp,
+                                     reg u64 inlen) -> reg ptr u64[26]
+{
+  statep = _shake_state_absorb_once(statep, inp, inlen, 136);
+  return statep;
+}
+
+export
+fn fips202_shake128_squeezeblocks_jazz(reg mut ptr u64[26] statep,
+                                       reg ui64 outp,
+                                       reg u64 nblocks)
+                                       -> reg ptr u64[26]
+{
+  statep = _shake_state_squeezeblocks(statep, outp, nblocks, 168);
+  return statep;
+}
+
+export
+fn fips202_shake256_squeezeblocks_jazz(reg mut ptr u64[26] statep,
+                                       reg ui64 outp,
+                                       reg u64 nblocks)
+                                       -> reg ptr u64[26]
+{
+  statep = _shake_state_squeezeblocks(statep, outp, nblocks, 136);
+  return statep;
+}
+
+export
+fn shake_store_nonce_jazz(reg mut ptr u8[2] tp,
+                          reg u64 nonce) -> reg ptr u8[2]
+{
+  tp = _shake_store_nonce(tp, nonce);
+  return tp;
+}
+
+export
+fn fft_init_and_bitrev_jazz(reg mut ptr u32[512] rp,
+                            reg const ptr u32[256] xp,
+                            reg const ptr u32[512] rootsp,
+                            reg const ptr u16[256] brvp) -> reg ptr u32[512]
+{
+  rp = _fft_init_and_bitrev(rp, xp, rootsp, brvp);
+  return rp;
+}
+
+export
+fn fft_butterfly_jazz(reg mut ptr u32[512] datap,
+                      reg const ptr u32[512] rootsp,
+                      reg u64 even,
+                      reg u64 odd,
+                      reg u64 twid) -> reg ptr u32[512]
+{
+  datap = _fft_butterfly(datap, rootsp, even, odd, twid);
+  return datap;
+}
+
+export
+fn complex_fp_sqabs_jazz(reg u32 real,
+                         reg u32 imag) -> reg u32
+{
+  reg u32 r;
+
+  r = _complex_fp_sqabs(real, imag);
+  return r;
+}
+
+export
+fn shake128_stream_init_jazz(reg mut ptr u64[26] statep,
+                             reg ui64 seedp,
+                             reg u64 nonce) -> reg ptr u64[26]
+{
+  reg u64 rate seedlen;
+
+  rate = 168;
+  seedlen = 32;
+  statep = _shake_stream_init(statep, rate, seedp, seedlen, nonce);
+  return statep;
+}
+
+export
+fn shake256_stream_init_jazz(reg mut ptr u64[26] statep,
+                             reg ui64 seedp,
+                             reg u64 nonce) -> reg ptr u64[26]
+{
+  reg u64 rate seedlen;
+
+  rate = 136;
+  seedlen = 64;
+  statep = _shake_stream_init(statep, rate, seedp, seedlen, nonce);
+  return statep;
+}
+
+export
+fn poly_ntt_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_ntt(rp);
+  return rp;
+}
+
+export
+fn poly_invntt_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_invntt(rp);
+  return rp;
+}
+
+export
+fn polyvec_ntt_jazz(reg mut ptr u32[2048] xp,
+                    reg u64 count) -> reg ptr u32[2048]
+{
+  xp = _polyvec_ntt(xp, count);
+  return xp;
+}
+
+export
+fn polyvec_invntt_jazz(reg mut ptr u32[2048] xp,
+                       reg u64 count) -> reg ptr u32[2048]
+{
+  xp = _polyvec_invntt(xp, count);
+  return xp;
+}
+
+export
+fn poly_basemul_jazz(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_basemul(rp, ap, bp);
+  return rp;
+}
+
+export
+fn poly_add_jazz(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_add(rp, ap, bp);
+  return rp;
+}
+
+export
+fn poly_sub_jazz(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_sub(rp, ap, bp);
+  return rp;
+}
+
+export
+fn poly_double_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_double(rp);
+  return rp;
+}
+
+export
+fn poly_double_negate_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_double_negate(rp);
+  return rp;
+}
+
+export
+fn poly_frommont_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_frommont(rp);
+  return rp;
+}
+
+export
+fn poly_cneg_jazz(reg mut ptr u32[HAETAE_N] rp, reg u8 b) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_cneg(rp, b);
+  return rp;
+}
+
+export
+fn poly_caddq_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_caddq(rp);
+  return rp;
+}
+
+export
+fn poly_cadddq2alpha_m23_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_cadddq2alpha(rp, HAETAE_HINT_BOUND_M23);
+  return rp;
+}
+
+export
+fn poly_cadddq2alpha_m5_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_cadddq2alpha(rp, HAETAE_HINT_BOUND_M5);
+  return rp;
+}
+
+export
+fn poly_csubdq2alpha_m23_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_csubdq2alpha(rp, HAETAE_HINT_BOUND_M23);
+  return rp;
+}
+
+export
+fn poly_csubdq2alpha_m5_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_csubdq2alpha(rp, HAETAE_HINT_BOUND_M5);
+  return rp;
+}
+
+export
+fn poly_mul_alpha_m23_jazz(reg mut ptr u32[HAETAE_N] rp,
+                           reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_mul_alpha(rp, ap, 512);
+  return rp;
+}
+
+export
+fn poly_mul_alpha_m5_jazz(reg mut ptr u32[HAETAE_N] rp,
+                          reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_mul_alpha(rp, ap, 256);
+  return rp;
+}
+
+export
+fn poly_div2_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_div2(rp);
+  return rp;
+}
+
+export
+fn poly_lsb_jazz(reg mut ptr u32[HAETAE_N] rp,
+                 reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_lsb(rp, ap);
+  return rp;
+}
+
+export
+fn poly_compose_jazz(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u32[HAETAE_N] hp lp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_compose(rp, hp, lp);
+  return rp;
+}
+
+export
+fn poly_mismatch_jazz(reg const ptr u32[HAETAE_N] ap,
+                      reg const ptr u32[HAETAE_N] bp) -> reg u64
+{
+  reg u64 r;
+  r = _poly_mismatch(ap, bp);
+  return r;
+}
+
+export
+fn polyvec_compose_jazz(reg mut ptr u32[2048] rp,
+                        reg const ptr u32[2048] hp,
+                        reg const ptr u32[2048] lp,
+                        reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_compose(rp, hp, lp, count);
+  return rp;
+}
+
+export
+fn poly_fromcrt_jazz(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u32[HAETAE_N] up vp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_fromcrt(rp, up, vp);
+  return rp;
+}
+
+export
+fn poly_fromcrt0_jazz(reg mut ptr u32[HAETAE_N] rp,
+                      reg const ptr u32[HAETAE_N] up) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_fromcrt0(rp, up);
+  return rp;
+}
+
+export
+fn polyveck_poly_fromcrt_jazz(reg mut ptr u32[2048] wp,
+                              reg const ptr u32[2048] up,
+                              reg const ptr u32[HAETAE_N] vp,
+                              reg u64 count) -> reg ptr u32[2048]
+{
+  wp = _polyveck_poly_fromcrt(wp, up, vp, count);
+  return wp;
+}
+
+export
+fn poly_reduce2q_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_reduce2q(rp);
+  return rp;
+}
+
+export
+fn poly_freeze_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_freeze(rp);
+  return rp;
+}
+
+export
+fn poly_freeze2q_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_freeze2q(rp);
+  return rp;
+}
+
+export
+fn poly_decomposed_pack_jazz(reg mut ptr u8[HAETAE_N] bp,
+                             reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[HAETAE_N]
+{
+  bp = _poly_decomposed_pack(bp, ap);
+  return bp;
+}
+
+export
+fn poly_decomposed_unpack_jazz(reg mut ptr u32[HAETAE_N] rp,
+                               reg const ptr u8[HAETAE_N] bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_decomposed_unpack(rp, bp);
+  return rp;
+}
+
+export
+fn pack_poly_lsb_jazz(reg mut ptr u8[32] bp,
+                      reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[32]
+{
+  bp = _pack_poly_lsb(bp, ap);
+  return bp;
+}
+
+export
+fn pack_sig_prefix_jazz(reg mut ptr u8[2948] sigp,
+                        reg const ptr u32[HAETAE_N] cp,
+                        reg const ptr u32[2048] lowp,
+                        reg u64 lcount,
+                        reg u64 sigbytes) -> reg ptr u8[2948]
+{
+  sigp = _pack_sig_prefix(sigp, cp, lowp, lcount, sigbytes);
+  return sigp;
+}
+
+export
+fn unpack_sig_prefix_jazz(reg mut ptr u32[HAETAE_N] cp,
+                          reg mut ptr u32[2048] lowp,
+                          reg const ptr u8[2948] sigp,
+                          reg u64 lcount) -> reg ptr u32[HAETAE_N],
+                                             reg ptr u32[2048]
+{
+  cp, lowp = _unpack_sig_prefix(cp, lowp, sigp, lcount);
+  return cp, lowp;
+}
+
+export
+fn pack_sig_suffix_jazz(reg mut ptr u8[2948] sigp,
+                        reg const ptr u8[2048] hbencp,
+                        reg const ptr u8[2048] hencp,
+                        reg u64 hbsize,
+                        reg u64 hsize,
+                        reg u64 offsets) -> reg ptr u8[2948]
+{
+  sigp = _pack_sig_suffix(sigp, hbencp, hencp, hbsize, hsize, offsets);
+  return sigp;
+}
+
+export
+fn pack_sig_size_offsets_jazz(reg mut ptr u64[5] statep) -> reg ptr u64[5]
+{
+  statep = _pack_sig_size_offsets(statep);
+  return statep;
+}
+
+export
+fn unpack_sig_size_offsets_jazz(reg mut ptr u64[4] statep,
+                                reg const ptr u8[2948] sigp) -> reg ptr u64[4]
+{
+  statep = _unpack_sig_size_offsets(statep, sigp);
+  return statep;
+}
+
+export
+fn sig_zero_padding_nonzero_jazz(reg const ptr u8[2948] sigp,
+                                 reg u64 padlen) -> reg u64
+{
+  padlen = _sig_zero_padding_nonzero(sigp, padlen);
+  return padlen;
+}
+
+export
+fn pack_poly_eta_jazz(reg mut ptr u8[64] bp,
+                      reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[64]
+{
+  bp = _pack_poly_eta(bp, ap);
+  return bp;
+}
+
+export
+fn unpack_poly_eta_jazz(reg mut ptr u32[HAETAE_N] rp,
+                        reg const ptr u8[64] bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _unpack_poly_eta(rp, bp);
+  return rp;
+}
+
+export
+fn pack_poly2_eta_jazz(reg mut ptr u8[96] bp,
+                       reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[96]
+{
+  bp = _pack_poly2_eta(bp, ap);
+  return bp;
+}
+
+export
+fn unpack_poly2_eta_jazz(reg mut ptr u32[HAETAE_N] rp,
+                         reg const ptr u8[96] bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _unpack_poly2_eta(rp, bp);
+  return rp;
+}
+
+export
+fn pack_poly_q_m23_jazz(reg mut ptr u8[480] bp,
+                        reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[480]
+{
+  bp = _pack_poly_q_m23(bp, ap);
+  return bp;
+}
+
+export
+fn unpack_poly_q_m23_jazz(reg mut ptr u32[HAETAE_N] rp,
+                          reg const ptr u8[480] bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _unpack_poly_q_m23(rp, bp);
+  return rp;
+}
+
+export
+fn pack_poly_q_m5_jazz(reg mut ptr u8[512] bp,
+                       reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[512]
+{
+  bp = _pack_poly_q_m5(bp, ap);
+  return bp;
+}
+
+export
+fn unpack_poly_q_m5_jazz(reg mut ptr u32[HAETAE_N] rp,
+                         reg const ptr u8[512] bp) -> reg ptr u32[HAETAE_N]
+{
+  rp = _unpack_poly_q_m5(rp, bp);
+  return rp;
+}
+
+export
+fn pack_vk_m23_jazz(reg mut ptr u8[2080] vkp,
+                    reg const ptr u32[2048] bp,
+                    reg const ptr u8[32] seedp,
+                    reg u64 count) -> reg ptr u8[2080]
+{
+  vkp = _pack_vk_m23(vkp, bp, seedp, count);
+  return vkp;
+}
+
+export
+fn pack_vk_m5_jazz(reg mut ptr u8[2080] vkp,
+                   reg const ptr u32[2048] bp,
+                   reg const ptr u8[32] seedp,
+                   reg u64 count) -> reg ptr u8[2080]
+{
+  vkp = _pack_vk_m5(vkp, bp, seedp, count);
+  return vkp;
+}
+
+export
+fn unpack_vk_m23_jazz(reg mut ptr u32[2048] bp,
+                      reg mut ptr u8[32] seedp,
+                      reg const ptr u8[2080] vkp,
+                      reg u64 count) -> reg ptr u32[2048], reg ptr u8[32]
+{
+  bp, seedp = _unpack_vk_m23(bp, seedp, vkp, count);
+  return bp, seedp;
+}
+
+export
+fn unpack_vk_m5_jazz(reg mut ptr u32[2048] bp,
+                     reg mut ptr u8[32] seedp,
+                     reg const ptr u8[2080] vkp,
+                     reg u64 count) -> reg ptr u32[2048], reg ptr u8[32]
+{
+  bp, seedp = _unpack_vk_m5(bp, seedp, vkp, count);
+  return bp, seedp;
+}
+
+export
+fn pack_sk_mode2_jazz(reg mut ptr u8[2752] skp,
+                      reg const ptr u8[2080] vkp,
+                      reg const ptr u32[2048] s0p,
+                      reg const ptr u32[2048] s1p,
+                      reg const ptr u8[32] keyp) -> reg ptr u8[2752]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 992;
+  mcount = 3;
+  kcount = 2;
+  skp = _pack_sk_m23(skp, vkp, s0p, s1p, keyp, vkbytes, mcount, kcount);
+  return skp;
+}
+
+export
+fn unpack_sk_mode2_jazz(reg mut ptr u32[2048] s0p,
+                        reg mut ptr u32[2048] s1p,
+                        reg mut ptr u8[32] keyp,
+                        reg const ptr u8[2752] skp) -> reg ptr u32[2048],
+                                                               reg ptr u32[2048],
+                                                               reg ptr u8[32]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 992;
+  mcount = 3;
+  kcount = 2;
+  s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, mcount, kcount);
+  return s0p, s1p, keyp;
+}
+
+export
+fn pack_sk_mode3_jazz(reg mut ptr u8[2752] skp,
+                      reg const ptr u8[2080] vkp,
+                      reg const ptr u32[2048] s0p,
+                      reg const ptr u32[2048] s1p,
+                      reg const ptr u8[32] keyp) -> reg ptr u8[2752]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 1472;
+  mcount = 5;
+  kcount = 3;
+  skp = _pack_sk_m23(skp, vkp, s0p, s1p, keyp, vkbytes, mcount, kcount);
+  return skp;
+}
+
+export
+fn unpack_sk_mode3_jazz(reg mut ptr u32[2048] s0p,
+                        reg mut ptr u32[2048] s1p,
+                        reg mut ptr u8[32] keyp,
+                        reg const ptr u8[2752] skp) -> reg ptr u32[2048],
+                                                               reg ptr u32[2048],
+                                                               reg ptr u8[32]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 1472;
+  mcount = 5;
+  kcount = 3;
+  s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, mcount, kcount);
+  return s0p, s1p, keyp;
+}
+
+export
+fn pack_sk_mode5_jazz(reg mut ptr u8[2752] skp,
+                      reg const ptr u8[2080] vkp,
+                      reg const ptr u32[2048] s0p,
+                      reg const ptr u32[2048] s1p,
+                      reg const ptr u8[32] keyp) -> reg ptr u8[2752]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 2080;
+  mcount = 6;
+  kcount = 4;
+  skp = _pack_sk_m5(skp, vkp, s0p, s1p, keyp, vkbytes, mcount, kcount);
+  return skp;
+}
+
+export
+fn unpack_sk_mode5_jazz(reg mut ptr u32[2048] s0p,
+                        reg mut ptr u32[2048] s1p,
+                        reg mut ptr u8[32] keyp,
+                        reg const ptr u8[2752] skp) -> reg ptr u32[2048],
+                                                               reg ptr u32[2048],
+                                                               reg ptr u8[32]
+{
+  reg u64 vkbytes mcount kcount;
+  vkbytes = 2080;
+  mcount = 6;
+  kcount = 4;
+  s0p, s1p, keyp = _unpack_sk_m5(s0p, s1p, keyp, skp, vkbytes, mcount, kcount);
+  return s0p, s1p, keyp;
+}
+
+export
+fn pack_poly_highbits_m23_jazz(reg mut ptr u8[HAETAE_N] bp,
+                               reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[HAETAE_N]
+{
+  bp = _pack_poly_highbits_m23(bp, ap);
+  return bp;
+}
+
+export
+fn pack_poly_highbits_m5_jazz(reg mut ptr u8[288] bp,
+                              reg const ptr u32[HAETAE_N] ap) -> reg ptr u8[288]
+{
+  bp = _pack_poly_highbits_m5(bp, ap);
+  return bp;
+}
+
+export
+fn pack_vec_highbits_m23_jazz(reg mut ptr u8[1152] bp,
+                              reg const ptr u32[2048] ap,
+                              reg u64 count) -> reg ptr u8[1152]
+{
+  bp = _pack_vec_highbits_m23(bp, ap, count);
+  return bp;
+}
+
+export
+fn pack_vec_highbits_m5_jazz(reg mut ptr u8[1152] bp,
+                             reg const ptr u32[2048] ap,
+                             reg u64 count) -> reg ptr u8[1152]
+{
+  bp = _pack_vec_highbits_m5(bp, ap, count);
+  return bp;
+}
+
+export
+fn poly_highbits_jazz(reg mut ptr u32[HAETAE_N] rp,
+                      reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_highbits_z1(rp, ap);
+  return rp;
+}
+
+export
+fn poly_lowbits_jazz(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_lowbits_z1(rp, ap);
+  return rp;
+}
+
+export
+fn polyvec_highbits_jazz(reg mut ptr u32[2048] rp,
+                         reg const ptr u32[2048] ap,
+                         reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_highbits_z1(rp, ap, count);
+  return rp;
+}
+
+export
+fn polyvec_lowbits_jazz(reg mut ptr u32[2048] rp,
+                        reg const ptr u32[2048] ap,
+                        reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_lowbits_z1(rp, ap, count);
+  return rp;
+}
+
+export
+fn polyvec_decompose_z1_jazz(reg mut ptr u32[2048] lowp,
+                             reg mut ptr u32[2048] highp,
+                             reg const ptr u32[2048] ap,
+                             reg u64 count) -> reg ptr u32[2048],
+                                              reg ptr u32[2048]
+{
+  lowp, highp = _polyvec_decompose_z1(lowp, highp, ap, count);
+  return lowp, highp;
+}
+
+export
+fn poly_highbits_hint_m23_jazz(reg mut ptr u32[HAETAE_N] rp,
+                               reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_highbits_hint_m23(rp, ap);
+  return rp;
+}
+
+export
+fn poly_highbits_hint_m5_jazz(reg mut ptr u32[HAETAE_N] rp,
+                              reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  rp = _poly_highbits_hint_m5(rp, ap);
+  return rp;
+}
+
+export
+fn polyvec_highbits_hint_m23_jazz(reg mut ptr u32[2048] rp,
+                                  reg const ptr u32[2048] ap,
+                                  reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_highbits_hint_m23(rp, ap, count);
+  return rp;
+}
+
+export
+fn polyvec_highbits_hint_m5_jazz(reg mut ptr u32[2048] rp,
+                                 reg const ptr u32[2048] ap,
+                                 reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_highbits_hint_m5(rp, ap, count);
+  return rp;
+}
+
+export
+fn poly_decompose_vk_jazz(reg mut ptr u32[HAETAE_N] lowp,
+                          reg mut ptr u32[HAETAE_N] highp) -> reg ptr u32[HAETAE_N],
+                                                                    reg ptr u32[HAETAE_N]
+{
+  lowp, highp = _poly_decompose_vk(lowp, highp);
+  return lowp, highp;
+}
+
+export
+fn polyvec_decompose_vk_jazz(reg mut ptr u32[2048] lowp,
+                             reg mut ptr u32[2048] highp,
+                             reg u64 count) -> reg ptr u32[2048],
+                                               reg ptr u32[2048]
+{
+  lowp, highp = _polyvec_decompose_vk(lowp, highp, count);
+  return lowp, highp;
+}
+
+export
+fn polyvec_pointwise_acc_jazz(reg mut ptr u32[HAETAE_N] rp,
+                              reg const ptr u32[2048] up,
+                              reg const ptr u32[2048] vp,
+                              reg u64 count) -> reg ptr u32[HAETAE_N]
+{
+  rp = _polyvec_pointwise_acc(rp, up, vp, count);
+  return rp;
+}
+
+export
+fn polyvec_poly_pointwise_jazz(reg mut ptr u32[2048] rp,
+                               reg const ptr u32[2048] up,
+                               reg const ptr u32[HAETAE_N] vp,
+                               reg u64 count) -> reg ptr u32[2048]
+{
+  rp = _polyvec_poly_pointwise(rp, up, vp, count);
+  return rp;
+}
+
+export
+fn polyvec_sqnorm2_jazz(reg const ptr u32[2048] ap, reg u64 count) -> reg u64
+{
+  count = _polyvec_sqnorm2(ap, count);
+  return count;
+}
+
+export
+fn sign_prepare_pre_jazz(reg mut ptr u8[257] prep,
+                         reg const ptr u8[256] ctxp,
+                         reg u64 ctxlen) -> reg ptr u8[257]
+{
+  prep = _sign_prepare_pre(prep, ctxp, ctxlen);
+  return prep;
+}
+
+export
+fn sign_move_message_to_sm_jazz(reg ui64 smp,
+                                reg ui64 mp,
+                                reg ui64 mlen,
+                                reg ui64 sigbytes) -> reg ui64
+{
+  smp = _sign_move_message_to_sm(smp, mp, mlen, sigbytes);
+  return smp;
+}
+
+export
+fn sign_open_copy_message_jazz(reg ui64 mp,
+                               reg ui64 smp,
+                               reg ui64 sigbytes,
+                               reg ui64 mlen) -> reg ui64
+{
+  mp = _sign_open_copy_message(mp, smp, sigbytes, mlen);
+  return mp;
+}
+
+export
+fn sign_open_zero_message_jazz(reg ui64 mp,
+                               reg ui64 smlen) -> reg ui64
+{
+  mp = _sign_open_zero_message(mp, smlen);
+  return mp;
+}
+
+export
+fn keypair_expand_seedbuf_jazz(reg ui64 outp,
+                               reg ui64 seedp) -> reg ui64
+{
+  outp = _keypair_expand_seedbuf(outp, seedp);
+  return outp;
+}
+
+export
+fn sign_expand_seedbuf_jazz(reg ui64 outp,
+                            reg ui64 keyp,
+                            reg ui64 rndp,
+                            reg ui64 mup) -> reg ui64
+{
+  outp = _sign_expand_seedbuf(outp, keyp, rndp, mup);
+  return outp;
+}
+
+export
+fn sign_prepare_cs_jazz(reg mut ptr u32[2048] cs1p,
+                        reg mut ptr u32[HAETAE_N] chatp,
+                        reg const ptr u32[HAETAE_N] cp) -> reg ptr u32[2048],
+                                                                reg ptr u32[HAETAE_N]
+{
+  cs1p, chatp = _sign_prepare_cs(cs1p, chatp, cp);
+  return cs1p, chatp;
+}
+
+export
+fn sign_compute_cs1_tail_jazz(reg mut ptr u32[2048] cs1p,
+                              reg const ptr u32[HAETAE_N] chatp,
+                              reg const ptr u32[2048] s1p,
+                              reg u64 lcount) -> reg ptr u32[2048]
+{
+  cs1p = _sign_compute_cs1_tail(cs1p, chatp, s1p, lcount);
+  return cs1p;
+}
+
+export
+fn sign_verify_recover_w_z2_m23_jazz(reg mut ptr u32[2048] wp,
+                                     reg mut ptr u32[2048] z2p,
+                                     reg const ptr u32[2048] highp,
+                                     reg const ptr u32[2048] hp,
+                                     reg const ptr u32[HAETAE_N] wprimep,
+                                     reg u64 count) -> reg ptr u32[2048],
+                                                      reg ptr u32[2048]
+{
+  wp, z2p = _sign_verify_recover_w_z2(wp, z2p, highp, hp, wprimep, count,
+                                      HAETAE_HINT_HALF_ALPHA_M23,
+                                      HAETAE_HINT_LOG_ALPHA_M23,
+                                      HAETAE_HINT_BOUND_M23,
+                                      512);
+  return wp, z2p;
+}
+
+export
+fn sign_verify_recover_w_z2_m5_jazz(reg mut ptr u32[2048] wp,
+                                    reg mut ptr u32[2048] z2p,
+                                    reg const ptr u32[2048] highp,
+                                    reg const ptr u32[2048] hp,
+                                    reg const ptr u32[HAETAE_N] wprimep,
+                                    reg u64 count) -> reg ptr u32[2048],
+                                                     reg ptr u32[2048]
+{
+  wp, z2p = _sign_verify_recover_w_z2(wp, z2p, highp, hp, wprimep, count,
+                                      HAETAE_HINT_HALF_ALPHA_M5,
+                                      HAETAE_HINT_LOG_ALPHA_M5,
+                                      HAETAE_HINT_BOUND_M5,
+                                      256);
+  return wp, z2p;
+}
+
+export
+fn sign_verify_prepare_z1_wprime_jazz(reg ui64 z1p,
+                                      reg ui64 wprimep,
+                                      reg ui64 highzp,
+                                      reg ui64 lowzp,
+                                      reg ui64 cp,
+                                      reg ui64 lcount) -> reg u64
+{
+  reg u64 norm;
+
+  norm = _sign_verify_prepare_z1_wprime(z1p, wprimep, highzp, lowzp, cp,
+                                        lcount);
+  return norm;
+}
+
+export
+fn sign_verify_norm_reject_jazz(reg const ptr u32[2048] z2p,
+                                reg u64 z1norm,
+                                reg u64 kcount,
+                                reg u64 bound) -> reg u64
+{
+  reg u64 reject;
+
+  reject = _sign_verify_norm_reject(z2p, z1norm, kcount, bound);
+  return reject;
+}
+
+export
+fn sign_add_double_z2rnd_jazz(reg mut ptr u32[2048] ayp,
+                              reg mut ptr u32[2048] z2p,
+                              reg u64 count) -> reg ptr u32[2048],
+                                               reg ptr u32[2048]
+{
+  ayp, z2p = _sign_add_double_z2rnd(ayp, z2p, count);
+  return ayp, z2p;
+}
+
+export
+fn sk_singular_value_accumulate_fft_sqabs_jazz(reg mut ptr u32[256] sump,
+                                               reg const ptr u32[512] inputp)
+                                               -> reg ptr u32[256]
+{
+  sump = _sk_singular_value_accumulate_fft_sqabs(sump, inputp);
+  return sump;
+}
+
+export
+fn sk_singular_value_finish_m2_jazz(reg ui64 sump) -> reg u64
+{
+  reg u64 r;
+
+  r = _sk_singular_value_finish(sump, 5, 58, 24);
+  return r;
+}
+
+export
+fn sk_singular_value_finish_m3_jazz(reg ui64 sump) -> reg u64
+{
+  reg u64 r;
+
+  r = _sk_singular_value_finish(sump, 4, 80, 16);
+  return r;
+}
+
+export
+fn sk_singular_value_finish_m5_jazz(reg ui64 sump) -> reg u64
+{
+  reg u64 r;
+
+  r = _sk_singular_value_finish(sump, 3, 128, 0);
+  return r;
+}
+
+export
+fn sign_make_hint_m23_jazz(reg mut ptr u32[2048] hp,
+                           reg const ptr u32[2048] highbitsp,
+                           reg const ptr u32[2048] ayp,
+                           reg const ptr u32[2048] z2rndp,
+                           reg u64 count) -> reg ptr u32[2048]
+{
+  hp = _sign_make_hint(hp, highbitsp, ayp, z2rndp, count,
+                       HAETAE_HINT_HALF_ALPHA_M23,
+                       HAETAE_HINT_LOG_ALPHA_M23,
+                       HAETAE_HINT_BOUND_M23);
+  return hp;
+}
+
+export
+fn sign_make_hint_m5_jazz(reg mut ptr u32[2048] hp,
+                          reg const ptr u32[2048] highbitsp,
+                          reg const ptr u32[2048] ayp,
+                          reg const ptr u32[2048] z2rndp,
+                          reg u64 count) -> reg ptr u32[2048]
+{
+  hp = _sign_make_hint(hp, highbitsp, ayp, z2rndp, count,
+                       HAETAE_HINT_HALF_ALPHA_M5,
+                       HAETAE_HINT_LOG_ALPHA_M5,
+                       HAETAE_HINT_BOUND_M5);
+  return hp;
+}
+
+export
+fn keypair_finalize_m23_jazz(reg mut ptr u32[2048] bp,
+                             reg mut ptr u32[2048] s2p,
+                             reg const ptr u32[2048] ap,
+                             reg u64 count) -> reg ptr u32[2048],
+                                              reg ptr u32[2048]
+{
+  bp, s2p = _keypair_finalize_m23(bp, s2p, ap, count);
+  return bp, s2p;
+}
+
+export
+fn keypair_finalize_m5_jazz(reg mut ptr u32[2048] bp,
+                            reg const ptr u32[2048] s2hatp,
+                            reg u64 count) -> reg ptr u32[2048]
+{
+  bp = _keypair_finalize_m5(bp, s2hatp, count);
+  return bp;
+}
+
+export
+fn sign_add_cs_and_check_jazz(reg const ptr u64[8] ptrsp,
+                              reg u8 b,
+                              reg u64 lcount,
+                              reg u64 kcount,
+                              reg u64 reject1_bound,
+                              reg u64 reject2_bound) -> reg u64
+{
+  reg u64 reject;
+
+  reject = _sign_add_cs_and_check(ptrsp, b, lcount, kcount, reject1_bound,
+                                  reject2_bound);
+  return reject;
+}
+
+export
+fn encode_h_prepare_jazz(reg mut ptr u8[2048] symsp,
+                         reg mut ptr u64[1] badp,
+                         reg const ptr u32[2048] hp,
+                         reg u64 count,
+                         reg u64 mh,
+                         reg u64 offset) -> reg ptr u8[2048],
+                                           reg ptr u64[1]
+{
+  symsp, badp = _encode_h_prepare(symsp, badp, hp, count, mh, offset);
+  return symsp, badp;
+}
+
+export
+fn encode_hb_z1_prepare_jazz(reg mut ptr u8[2048] symsp,
+                             reg mut ptr u64[1] badp,
+                             reg const ptr u32[2048] hp,
+                             reg u64 count,
+                             reg u64 mhb,
+                             reg u64 offset) -> reg ptr u8[2048],
+                                               reg ptr u64[1]
+{
+  symsp, badp = _encode_hb_z1_prepare(symsp, badp, hp, count, mhb, offset);
+  return symsp, badp;
+}
+
+export
+fn rans_encode_jazz(reg mut ptr u8[2048] encp,
+                    reg mut ptr u64[2] statep,
+                    reg const ptr u8[2048] symsp,
+                    reg const ptr u32[132] esymsp,
+                    reg u64 count) -> reg ptr u8[2048],
+                                      reg ptr u64[2]
+{
+  encp, statep = _rans_encode(encp, statep, symsp, esymsp, count);
+  return encp, statep;
+}
+
+export
+fn rans_decode_jazz(reg mut ptr u8[2048] symsp,
+                    reg mut ptr u64[3] statep,
+                    reg const ptr u8[2048] bufp,
+                    reg const ptr u32[512] symbolwp,
+                    reg const ptr u32[132] dsymswp) -> reg ptr u8[2048],
+                                                       reg ptr u64[3]
+{
+  symsp, statep = _rans_decode(symsp, statep, bufp, symbolwp, dsymswp);
+  return symsp, statep;
+}
+
+export
+fn decode_h_apply_jazz(reg mut ptr u32[2048] hp,
+                       reg const ptr u8[2048] symsp,
+                       reg u64 count,
+                       reg u64 hcut,
+                       reg u64 offset) -> reg ptr u32[2048]
+{
+  hp = _decode_h_apply(hp, symsp, count, hcut, offset);
+  return hp;
+}
+
+export
+fn decode_hb_z1_apply_jazz(reg mut ptr u32[2048] hp,
+                           reg const ptr u8[2048] symsp,
+                           reg u64 count,
+                           reg u64 offset) -> reg ptr u32[2048]
+{
+  hp = _decode_hb_z1_apply(hp, symsp, count, offset);
+  return hp;
+}
+
+export
+fn polyvec_add_jazz(reg mut ptr u32[2048] wp,
+                    reg const ptr u32[2048] up,
+                    reg const ptr u32[2048] vp,
+                    reg u64 count) -> reg ptr u32[2048]
+{
+  wp = _polyvec_add(wp, up, vp, count);
+  return wp;
+}
+
+export
+fn polyvec_sub_jazz(reg mut ptr u32[2048] wp,
+                    reg const ptr u32[2048] up,
+                    reg const ptr u32[2048] vp,
+                    reg u64 count) -> reg ptr u32[2048]
+{
+  wp = _polyvec_sub(wp, up, vp, count);
+  return wp;
+}
+
+export
+fn polyvec_reduce2q_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_reduce2q(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_freeze_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_freeze(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_freeze2q_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_freeze2q(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_double_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_double(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_double_negate_jazz(reg mut ptr u32[2048] vp,
+                              reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_double_negate(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_frommont_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_frommont(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_cneg_jazz(reg mut ptr u32[2048] vp,
+                     reg u64 count,
+                     reg u8 b) -> reg ptr u32[2048]
+{
+  vp = _polyvec_cneg(vp, count, b);
+  return vp;
+}
+
+export
+fn polyvec_caddq_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_caddq(vp, count);
+  return vp;
+}
+
+export
+fn polyvec_cadddq2alpha_m23_jazz(reg mut ptr u32[2048] vp,
+                                 reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_cadddq2alpha(vp, count, HAETAE_HINT_BOUND_M23);
+  return vp;
+}
+
+export
+fn polyvec_cadddq2alpha_m5_jazz(reg mut ptr u32[2048] vp,
+                                reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_cadddq2alpha(vp, count, HAETAE_HINT_BOUND_M5);
+  return vp;
+}
+
+export
+fn polyvec_csubdq2alpha_m23_jazz(reg mut ptr u32[2048] vp,
+                                 reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_csubdq2alpha(vp, count, HAETAE_HINT_BOUND_M23);
+  return vp;
+}
+
+export
+fn polyvec_csubdq2alpha_m5_jazz(reg mut ptr u32[2048] vp,
+                                reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_csubdq2alpha(vp, count, HAETAE_HINT_BOUND_M5);
+  return vp;
+}
+
+export
+fn polyvec_mul_alpha_m23_jazz(reg mut ptr u32[2048] wp,
+                              reg const ptr u32[2048] up,
+                              reg u64 count) -> reg ptr u32[2048]
+{
+  wp = _polyvec_mul_alpha(wp, up, count, 512);
+  return wp;
+}
+
+export
+fn polyvec_mul_alpha_m5_jazz(reg mut ptr u32[2048] wp,
+                             reg const ptr u32[2048] up,
+                             reg u64 count) -> reg ptr u32[2048]
+{
+  wp = _polyvec_mul_alpha(wp, up, count, 256);
+  return wp;
+}
+
+export
+fn polyvec_div2_jazz(reg mut ptr u32[2048] vp, reg u64 count) -> reg ptr u32[2048]
+{
+  vp = _polyvec_div2(vp, count);
+  return vp;
+}
+
+export
+fn polymat_pointwise_acc_jazz(reg mut ptr u32[2048] tp,
+                              reg const ptr u32[8192] mp,
+                              reg const ptr u32[2048] vp,
+                              reg u64 rows,
+                              reg u64 cols) -> reg ptr u32[2048]
+{
+  tp = _polymat_pointwise_acc(tp, mp, vp, rows, cols);
+  return tp;
+}
+
+export
+fn polymatkl_double_jazz(reg mut ptr u32[8192] mp,
+                         reg u64 rows,
+                         reg u64 cols) -> reg ptr u32[8192]
+{
+  mp = _polymatkl_double(mp, rows, cols);
+  return mp;
+}
+
+export
+fn polymat_set_first_column_jazz(reg mut ptr u32[8192] mp,
+                                 reg const ptr u32[2048] vp,
+                                 reg u64 rows,
+                                 reg u64 cols) -> reg ptr u32[8192]
+{
+  mp = _polymat_set_first_column(mp, vp, rows, cols);
+  return mp;
+}
+
+export
+fn polyfix_add_jazz(reg mut ptr u32[4096] cp,
+                    reg const ptr u32[4096] ap,
+                    reg const ptr u32[2048] bp,
+                    reg u64 count) -> reg ptr u32[4096]
+{
+  cp = _polyfix_add(cp, ap, bp, count);
+  return cp;
+}
+
+export
+fn polyfixfix_sub_jazz(reg mut ptr u32[4096] cp,
+                       reg const ptr u32[4096] ap,
+                       reg const ptr u32[4096] bp,
+                       reg u64 count) -> reg ptr u32[4096]
+{
+  cp = _polyfixfix_sub(cp, ap, bp, count);
+  return cp;
+}
+
+export
+fn polyfix_double_jazz(reg mut ptr u32[4096] cp,
+                       reg const ptr u32[4096] ap,
+                       reg u64 count) -> reg ptr u32[4096]
+{
+  cp = _polyfix_double(cp, ap, count);
+  return cp;
+}
+
+export
+fn polyfix_round_jazz(reg mut ptr u32[2048] cp,
+                      reg const ptr u32[4096] ap,
+                      reg u64 count) -> reg ptr u32[2048]
+{
+  cp = _polyfix_round(cp, ap, count);
+  return cp;
+}
+
+export
+fn polyfixveclk_hyperball_b_jazz(reg mut ptr u8[1] bp,
+                                 reg const ptr u8[64] seed,
+                                 reg u64 nonce) -> reg ptr u8[1]
+{
+  bp = _polyfixveclk_hyperball_b(bp, seed, nonce);
+  return bp;
+}
+
+export
+fn polyfixveclk_sqnorm2_jazz(reg const ptr u32[4096] ap,
+                             reg u64 acount,
+                             reg const ptr u32[4096] bp,
+                             reg u64 bcount) -> reg u64
+{
+  reg u64 total;
+  total = _polyfixveclk_sqnorm2(ap, acount, bp, bcount);
+  return total;
+}
+
+export
+fn poly_challenge_m5_frombytes_jazz(reg mut ptr u32[HAETAE_N] cp,
+                                    reg const ptr u8[32] bp) -> reg ptr u32[HAETAE_N]
+{
+  cp = _poly_challenge_m5_frombytes(cp, bp);
+  return cp;
+}
+
+export
+fn poly_challenge_m23_init_jazz(reg mut ptr u32[HAETAE_N] cp) -> reg ptr u32[HAETAE_N]
+{
+  cp = _poly_challenge_m23_init(cp);
+  return cp;
+}
+
+export
+fn poly_challenge_m23_frombytes_jazz(reg mut ptr u32[HAETAE_N] cp,
+                                     reg mut ptr u32[1] ip,
+                                     reg mut ptr u32[1] posp,
+                                     reg const ptr u8[1024] bp,
+                                     reg u64 buflen) -> reg ptr u32[HAETAE_N],
+                                                       reg ptr u32[1],
+                                                       reg ptr u32[1]
+{
+  cp, ip, posp = _poly_challenge_m23_frombytes(cp, ip, posp, bp, buflen);
+  return cp, ip, posp;
+}
+
+export
+fn fixpoint_add_jazz(reg mut ptr u64[2] rp,
+                     reg const ptr u64[2] ap,
+                     reg const ptr u64[2] bp) -> reg ptr u64[2]
+{
+  rp = _fixpoint_add(rp, ap, bp);
+  return rp;
+}
+
+export
+fn fixpoint_square_jazz(reg mut ptr u64[2] rp,
+                        reg const ptr u64[2] ap) -> reg ptr u64[2]
+{
+  rp = _fixpoint_square(rp, ap);
+  return rp;
+}
+
+export
+fn fixpoint_mul_jazz(reg mut ptr u64[2] rp,
+                     reg const ptr u64[2] ap,
+                     reg const ptr u64[2] bp) -> reg ptr u64[2]
+{
+  rp = _fixpoint_mul(rp, ap, bp);
+  return rp;
+}
+
+export
+fn fixpoint_mul_rnd13_jazz(reg u64 x,
+                           reg const ptr u64[2] yp,
+                           reg u8 sign) -> reg u32
+{
+  reg u32 r;
+  r = _fixpoint_mul_rnd13(x, yp, sign);
+  return r;
+}
+
+export
+fn fixpoint_mul_high_jazz(reg mut ptr u64[2] rp,
+                          reg const ptr u64[2] xp,
+                          reg u64 y) -> reg ptr u64[2]
+{
+  rp = _fixpoint_mul_high(rp, xp, y);
+  return rp;
+}
+
+export
+fn fixpoint_half_round_jazz(reg mut ptr u64[2] xp) -> reg ptr u64[2]
+{
+  xp = _fixpoint_half_round(xp);
+  return xp;
+}
+
+export
+fn fixpoint_newton_invsqrt_jazz(reg mut ptr u64[2] rp,
+                                reg const ptr u64[2] xhalfp,
+                                reg const ptr u64[2] start_cubep,
+                                reg const ptr u64[2] start_threep)
+                                -> reg ptr u64[2]
+{
+  rp = _fixpoint_newton_invsqrt(rp, xhalfp, start_cubep, start_threep);
+  return rp;
+}
+
+export
+fn polyfixveclk_scale_samples_jazz(reg mut ptr u32[2048] y1p,
+                                   reg mut ptr u32[2048] y2p,
+                                   reg const ptr u64[4096] samplesp,
+                                   reg const ptr u8[512] signsp,
+                                   reg const ptr u64[2] scalep,
+                                   reg u64 counts) -> reg ptr u32[2048],
+                                                     reg ptr u32[2048]
+{
+  y1p, y2p = _polyfixveclk_scale_samples(y1p, y2p, samplesp, signsp, scalep,
+                                         counts);
+  return y1p, y2p;
+}
+
+export
+fn polyfixveclk_scale_and_check_jazz(reg mut ptr u32[2048] y1p,
+                                     reg mut ptr u32[2048] y2p,
+                                     reg mut ptr u64[4] statep,
+                                     reg const ptr u64[4096] samplesp,
+                                     reg const ptr u8[512] signsp,
+                                     reg const ptr u64[2] scalep)
+                                     -> reg ptr u32[2048],
+                                        reg ptr u32[2048],
+                                        reg ptr u64[4]
+{
+  y1p, y2p, statep = _polyfixveclk_scale_and_check(y1p, y2p, statep,
+                                                   samplesp, signsp, scalep);
+  return y1p, y2p, statep;
+}
+
+export
+fn sample_gauss16_jazz(reg u64 rand16) -> reg u64
+{
+  reg u64 r;
+  r = _sample_gauss16(rand16);
+  return r;
+}
+
+export
+fn approx_exp_jazz(reg u64 x) -> reg u64
+{
+  reg u64 r;
+  r = _approx_exp(x);
+  return r;
+}
+
+export
+fn sample_gauss_sigma76_jazz(reg mut ptr u64[1] rp,
+                             reg mut ptr u64[2] sqrp,
+                             reg mut ptr u32[1] acceptedp,
+                             reg const ptr u8[17] randp)
+                             -> reg ptr u64[1],
+                                reg ptr u64[2],
+                                reg ptr u32[1]
+{
+  rp, sqrp, acceptedp = _sample_gauss_sigma76(rp, sqrp, acceptedp, randp);
+  return rp, sqrp, acceptedp;
+}
+
+export
+fn sample_gauss_jazz(reg mut ptr u64[512] rp,
+                     reg mut ptr u64[2] sqsump,
+                     reg mut ptr u64[1] coefcntp,
+                     reg const ptr u8[8192] bufp,
+                     reg u64 counts,
+                     reg u64 dont_write_last) -> reg ptr u64[512],
+                                               reg ptr u64[2],
+                                               reg ptr u64[1]
+{
+  rp, sqsump, coefcntp = _sample_gauss(rp, sqsump, coefcntp, bufp, counts,
+                                       dont_write_last);
+  return rp, sqsump, coefcntp;
+}
+
+export
+fn sample_gauss_N_copy_signs_jazz(reg mut ptr u8[1024] signsp,
+                                  reg const ptr u8[8192] bufp,
+                                  reg u64 signbytes) -> reg ptr u8[1024]
+{
+  signsp = _sample_gauss_N_copy_signs(signsp, bufp, signbytes);
+  return signsp;
+}
+
+export
+fn sample_gauss_N_carry_jazz(reg mut ptr u8[8192] bufp,
+                             reg u64 bytecnt,
+                             reg u64 signbytes,
+                             reg u64 firstflag,
+                             reg u64 off) -> reg ptr u8[8192]
+{
+  bufp = _sample_gauss_N_carry(bufp, bytecnt, signbytes, firstflag, off);
+  return bufp;
+}
+
+export
+fn rej_uniform_jazz(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+                    reg u64 len, reg const ptr u8[1024] bp,
+                    reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  ap, ctrp = _rej_uniform(ap, ctrp, len, bp, buflen);
+  return ap, ctrp;
+}
+
+export
+fn rej_eta_jazz(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+                reg u64 len, reg const ptr u8[1024] bp,
+                reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  ap, ctrp = _rej_eta(ap, ctrp, len, bp, buflen);
+  return ap, ctrp;
+}

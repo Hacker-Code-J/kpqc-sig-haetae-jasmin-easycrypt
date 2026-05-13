@@ -1,0 +1,10 @@
+require "fft.jinc"
+require "fft_pipeline.jinc"
+
+export
+fn fft_full_jazz(reg mut ptr u32[512] datap,
+                 reg const ptr u32[512] rootsp) -> reg ptr u32[512]
+{
+  datap = _fft_full(datap, rootsp);
+  return datap;
+}

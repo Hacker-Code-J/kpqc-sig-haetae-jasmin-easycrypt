@@ -1,0 +1,43 @@
+require "params.jinc"
+require "keccak.jinc"
+require "challenge.jinc"
+require "poly.jinc"
+require "pack.jinc"
+require "challenge_sampler.jinc"
+require "verification_transcript.jinc"
+
+export
+fn sign_verify_tail_mode2_jazz(reg const ptr u32[2048] wp,
+                               reg const ptr u32[HAETAE_N] wprimep,
+                               reg const ptr u32[HAETAE_N] cp,
+                               reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+
+  reject = _sign_verify_tail_m23(wp, wprimep, cp, descp, 2, 576, 992, 58);
+  return reject;
+}
+
+export
+fn sign_verify_tail_mode3_jazz(reg const ptr u32[2048] wp,
+                               reg const ptr u32[HAETAE_N] wprimep,
+                               reg const ptr u32[HAETAE_N] cp,
+                               reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+
+  reject = _sign_verify_tail_m23(wp, wprimep, cp, descp, 3, 864, 1472, 80);
+  return reject;
+}
+
+export
+fn sign_verify_tail_mode5_jazz(reg const ptr u32[2048] wp,
+                               reg const ptr u32[HAETAE_N] wprimep,
+                               reg const ptr u32[HAETAE_N] cp,
+                               reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+
+  reject = _sign_verify_tail_m5(wp, wprimep, cp, descp);
+  return reject;
+}

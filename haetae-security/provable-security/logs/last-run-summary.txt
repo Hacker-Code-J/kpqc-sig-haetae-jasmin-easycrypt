@@ -1,0 +1,41 @@
+HAETAE provable-security EasyCrypt verification
+Root: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security
+Proof dir: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security/provable-security/easycrypt
+Manifest: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security/provable-security/proof-files.txt
+Per-file timeout: 900s
+Attempts per file: 4
+
+=== HAETAE_Security.ec ===
+PASS HAETAE_Security.ec attempt=1
+=== Sig_ROM.ec ===
+PASS Sig_ROM.ec attempt=1
+=== HAETAE_HopGames.ec ===
+PASS HAETAE_HopGames.ec attempt=1
+=== HAETAE_Reductions.ec ===
+PASS HAETAE_Reductions.ec attempt=1
+=== HAETAE_ROM.ec ===
+PASS HAETAE_ROM.ec attempt=1
+=== HAETAE_ROM_Programming.ec ===
+PASS HAETAE_ROM_Programming.ec attempt=1
+=== HAETAE_Scheme.ec ===
+PASS HAETAE_Scheme.ec attempt=1
+=== HAETAE_Transcript.ec ===
+PASS HAETAE_Transcript.ec attempt=1
+=== HAETAE_Events.ec ===
+PASS HAETAE_Events.ec attempt=1
+=== HAETAE_Assumptions.ec ===
+PASS HAETAE_Assumptions.ec attempt=1
+=== HAETAE_Distributions.ec ===
+PASS HAETAE_Distributions.ec attempt=1
+=== HAETAE_Rejection.ec ===
+PASS HAETAE_Rejection.ec attempt=1
+=== HAETAE_Algebra.ec ===
+PASS HAETAE_Algebra.ec attempt=1
+=== HAETAE_Params.ec ===
+PASS HAETAE_Params.ec attempt=1
+=== HAETAE_FIPS202.ec ===
+PASS HAETAE_FIPS202.ec attempt=1
+=== HAETAE_Keccak1600.ec ===
+PASS HAETAE_Keccak1600.ec attempt=1
+
+RESULT: PASS

@@ -1,0 +1,2304 @@
+\chapter{Extracted EasyCrypt Declaration Index}
+\label{app:easycrypt-declaration-index}
+
+\providecommand{\ecfile}[1]{\nolinkurl{#1}}
+
+This appendix is generated from \ecfile{provable-security/proof-files.txt}.  It records the exact EasyCrypt declaration headers used by the HAETAE provable-security proof surface.  The mathematical interpretation of each listed header is given by Appendix~\ref{app:formal-easycrypt-semantics}.  Multi-line proof bodies are intentionally not reproduced; this index records the proof objects and program-logic commands that the EasyCrypt checker accepts from the manifest files.
+
+\section*{\ecfile{HAETAE_Security.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op correctness_obligation =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma correctness_obligation_holds : correctness_obligation.
+lemma correctness_perfect &m :
+lemma euf_cma_security_no_signing &m :
+lemma euf_cma_security &m :
+lemma euf_cma_security_with_hop_interfaces &m :
+lemma euf_cma_security_from_simulated_hop &m :
+lemma euf_cma_security_from_explicit_boundaries &m :
+lemma euf_cma_security_from_rom_internal_transcript_hop &m :
+lemma rom_internal_transcript_hop_from_clear_site_reduction &m :
+lemma rom_internal_transcript_hop_from_clear_site_counted_reduction &m :
+lemma bimodal_to_module_sis_reduction_bound &m :
+lemma euf_cma_security_from_mechanized_boundaries &m :
+lemma euf_cma_security_from_rom_transcript_and_mechanized_bimodal &m :
+lemma euf_cma_security_from_rom_transcript_and_counted_bimodal &m :
+lemma euf_cma_security_from_rom_clear_site_and_mechanized_bimodal &m :
+lemma euf_cma_security_from_rom_clear_site_and_counted_bimodal &m :
+lemma euf_cma_security_from_structural_nma_and_counted_bimodal &m :
+lemma euf_cma_security_from_public_sim_nma_and_counted_bimodal &m :
+lemma euf_cma_security_from_paper_sim_nma_and_counted_bimodal &m :
+lemma euf_cma_security_from_rom_paper_sim_nma_and_counted_bimodal &m :
+lemma euf_cma_security_from_real_signing_paper_sim_nma_and_counted_bimodal &m :
+lemma euf_cma_security_from_haetae_rejection_paper_sim_nma_and_counted_bimodal &m :
+lemma exact_hyperball_haetae_rejection_nma_bound_from_paper_sim &m :
+lemma haetae_rejection_nma_bound_from_exact_hyperball_sampling_hop &m :
+lemma haetae_rejection_exact_hyperball_sampling_hop_from_real_signing_exact_hyperball_hop &m :
+lemma haetae_rejection_ro_exact_hyperball_sampling_hop_from_real_signing_ro_exact_hyperball_hop &m :
+lemma real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop &m :
+lemma real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop_loss
+lemma real_signing_ro_exact_hyperball_hop_from_budgeted_lifting &m :
+lemma haetae_rejection_ro_exact_hyperball_sampling_hop_from_budgeted_lifting
+lemma euf_cma_security_from_exact_hyperball_paper_sim_bridge_and_counted_bimodal &m :
+lemma euf_cma_security_from_exact_hyperball_sampling_hop_and_counted_bimodal &m :
+lemma euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal &m :
+lemma euf_cma_security_from_ro_signing_attempt_to_ro_exact_hyperball_hop_and_counted_bimodal &m :
+lemma real_signing_ro_exact_hyperball_hop_checked_from_loss_budget &m :
+lemma real_signing_ro_exact_hyperball_hop_from_paper_sample_lifting &m :
+lemma euf_cma_security_from_paper_sample_lifting_and_counted_bimodal &m :
+lemma euf_cma_security_from_budgeted_paper_sample_lifting_and_counted_bimodal
+lemma euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal &m :
+lemma euf_cma_security_from_real_signing_exact_hyperball_hop_and_counted_bimodal &m :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+hoare.
+\end{lstlisting}
+
+\section*{\ecfile{Sig_ROM.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type pkey.
+type skey.
+type message.
+type context.
+type signature.
+type ro_query.
+type ro_output.
+type query = message * context.
+type signed_query = query * signature.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op [lossless] dro_output : ro_query -> ro_output distr.
+op fresh_msg (qs : query list) (m : message) (ctx : context) : bool =
+op fresh_sig (qs : signed_query list) (m : message) (ctx : context)
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+clone import FullRO as RO with
+module type Oracle = {
+module type POracle = {
+module type Scheme(O : POracle) = {
+module type CORR_ADV(O : POracle) = {
+module Correctness(H : Oracle, S : Scheme, A : CORR_ADV) = {
+module type SignOracle = {
+module type Adversary(H : POracle, O : SignOracle) = {
+module type NMA_Adversary(H : POracle) = {
+module NMA_As_CMA(A : NMA_Adversary) (H : POracle, O : SignOracle) = {
+module EUF_CMA(H : Oracle, S : Scheme, A : Adversary) = {
+module UF_NMA(H : Oracle, S : Scheme, A : NMA_Adversary) = {
+module SUF_CMA(H : Oracle, S : Scheme, A : Adversary) = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma fresh_msg_nil m ctx : fresh_msg [] m ctx.
+lemma fresh_sig_nil m ctx sig : fresh_sig [] m ctx sig.
+lemma nma_as_cma_exact &m :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+byequiv (: ={glob H, glob S, glob A} ==> ={res}) => //.
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_HopGames.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type paper_sim_signature_sample = sig_token * poly * int.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op transcript_log_consistent
+op transcript_log_ready (md : mode) (trs : transcript list) : bool =
+op budgeted_programmed_query_count_discipline
+op budgeted_paper_sim_signing_count_discipline
+op budgeted_paper_sim_sampler_freshness_discipline
+op sampler_rom_covered
+op budgeted_programmed_reprogram_discipline
+op budgeted_programmed_challenge_query_discipline
+op internal_transcript_state_sound
+op public_sim_source
+op public_sim_response_aux_vector :
+op public_sim_response_vector :
+op public_sim_hint_vector :
+op public_sim_commitment_lowbits :
+op public_sim_commitment_challenge :
+op public_sim_commitment_highbits :
+op public_sim_signature_token :
+op public_sim_signature :
+op paper_sim_sample_token (s : paper_sim_signature_sample) : sig_token =
+op paper_sim_sample_lowbits_carrier
+op paper_sim_sample_entropy (s : paper_sim_signature_sample) : int =
+op paper_sim_sample_response (s : paper_sim_signature_sample) : polyvecl =
+op paper_sim_sample_response_aux
+op paper_sim_sample_hint (s : paper_sim_signature_sample) : hint_t =
+op paper_sim_commitment_lowbits
+op paper_sim_commitment_challenge
+op paper_sim_commitment_highbits
+op paper_sim_signature
+op paper_sim_signature_sample_wf
+op public_sim_lowbits_carrier
+op paper_sim_sample_from_public_coins
+op real_signing_lowbits_carrier
+op paper_sim_sample_from_real_signing_coins
+op paper_sim_sample_from_rejection_attempt
+op paper_sim_abort_fallback_sample
+op haetae_rejection_sample_from_attempt
+op structural_to_exact_hyperball_paper_sample_loss_obligation
+op special_soundness_interfaces_ready (md : mode) : bool =
+op signing_simulator_sound (md : mode) : bool =
+op fs_with_aborts_interfaces_ready (md : mode) : bool =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+module type SigningSimulator(H : SIG.POracle) = {
+module RealSigningSimulator(S : SIG.Scheme) (H : SIG.POracle) = {
+module EUF_CMA_SimulatedSign(
+module EUF_CMA_TranscriptSimulatedSign(
+module EUF_CMA_InternalTranscriptSign(
+module EUF_CMA_ROMInternalTranscriptSign(
+module ROMInternalTranscriptAsNMA(A : SIG.Adversary) (H : SIG.POracle) = {
+module ROMInternalTranscriptPublicSimAsNMA(A : SIG.Adversary)
+module type PaperSimSigningSampler = {
+module ROMPaperSimSigningSampler(H : SIG.POracle) : PaperSimSigningSampler = {
+module RealSigningPaperSimSampler(H : SIG.POracle) : PaperSimSigningSampler = {
+module ROSigningAttemptPaperSimSampler(H : SIG.POracle)
+module HAETAERejectionPaperSimSampler(H : SIG.POracle)
+module ExactHyperballHAETAERejectionPaperSimSampler(H : SIG.POracle)
+module ExactHyperballPaperSimSampler(H : SIG.POracle)
+module ROExactHyperballPaperSimSampler(H : SIG.POracle)
+module StructuralAttemptPaperSample = {
+module ExactHyperballPaperSample = {
+module ROMInternalTranscriptPaperSimAsNMA(
+module ROMInternalTranscriptBudgetedPaperSimAsNMA(
+module EUF_CMA_ROMInternalTranscriptCountedSign(
+module EUF_CMA_ROMProgrammedTranscriptCountedSign(
+module EUF_CMA_ROMProgrammedTranscriptBudgetedCountedSign(
+module EUF_CMA_ROMProgrammedTranscriptBudgetedSampledSign(
+module type ForkingAdversary(H : SIG.POracle) = {
+module type TranscriptExtractor = {
+module type BimodalTranscriptExtractor = {
+module BimodalSpecialSoundness_Game(
+module SpecialSoundness_Game(
+module BimodalTranscriptExtractor_As_ModuleSIS(
+module type BimodalToModuleSIS = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma transcript_log_consistent_nil md pk :
+lemma transcript_log_consistent_cons md pk qs trs rs m ctx sig tr :
+lemma transcript_log_consistent_no_min_entropy md pk qs trs rs :
+lemma transcript_log_consistent_valid md pk qs trs rs :
+lemma sampler_rom_covered_fresh_after_clean_seed
+lemma sampler_rom_covered_self_log_preserves
+lemma sampler_rom_covered_old_log_clean_boundary
+lemma transcript_log_consistent_ready md pk qs trs rs :
+lemma transcript_log_valid_member md trs tr :
+lemma transcript_log_min_entropy_clear_member md trs tr :
+lemma transcript_log_ready_member_valid md trs tr :
+lemma transcript_log_ready_member_no_min_entropy md trs tr :
+lemma transcript_log_ready_no_failure_for_matching_site md trs tr site :
+lemma transcript_log_ready_no_failure_for_programming_site md trs tr y :
+lemma transcript_log_ready_no_failure_for_signature_programming_site
+lemma transcript_log_ready_actual_signature_site_clear_member md trs tr :
+lemma transcript_log_ready_signature_sites_clear md trs :
+lemma internal_transcript_state_sound_nil md sk :
+lemma internal_transcript_state_sound_keygen md sd :
+lemma internal_transcript_state_sound_no_min_entropy
+lemma internal_transcript_state_sound_valid md pk sk qs trs rs :
+lemma internal_transcript_state_sound_log_ready md pk sk qs trs rs :
+lemma transcript_log_consistent_sign_internal_cons
+lemma internal_transcript_state_sound_sign_internal_cons
+lemma sign_internal_transcript_no_min_entropy md pk sk m ctx coins :
+lemma public_sim_commitment_lowbitsE md sk m ctx coins :
+lemma public_sim_response_aux_vectorE md sk m ctx coins :
+lemma public_sim_commitment_challengeE md sk m ctx coins :
+lemma public_sim_commitment_highbitsE md sk m ctx coins :
+lemma public_sim_response_vectorE md sk m ctx coins :
+lemma public_sim_hint_vectorE md sk m ctx coins :
+lemma public_sim_signature_tokenE md sk m ctx coins :
+lemma public_sim_signatureE md sk m ctx coins :
+lemma paper_sim_commitment_lowbits_wf md s :
+lemma paper_sim_signature_valid md pk m ctx s :
+lemma public_sim_lowbits_carrier_wf md pk m ctx coins :
+lemma paper_sim_sample_from_public_coins_wf md pk m ctx coins :
+lemma paper_sim_sample_response_public_coinsE md pk m ctx coins :
+lemma paper_sim_sample_response_aux_public_coinsE md pk m ctx coins :
+lemma paper_sim_sample_hint_public_coinsE md pk m ctx coins :
+lemma paper_sim_sample_token_public_coinsE md pk m ctx coins :
+lemma paper_sim_commitment_lowbits_public_coinsE md pk m ctx coins :
+lemma paper_sim_commitment_challenge_public_coinsE md pk m ctx coins :
+lemma paper_sim_commitment_highbits_public_coinsE md pk m ctx coins :
+lemma paper_sim_signature_public_coinsE md pk m ctx coins :
+lemma real_signing_lowbits_carrier_wf md sk m ctx coins :
+lemma paper_sim_sample_from_real_signing_coins_wf md sk m ctx coins :
+lemma paper_sim_sample_response_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_sample_response_aux_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_sample_hint_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_sample_token_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_commitment_lowbits_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_commitment_challenge_real_signing_coinsE
+lemma paper_sim_commitment_highbits_real_signing_coinsE
+lemma paper_sim_signature_real_signing_coinsE md sk m ctx coins :
+lemma paper_sim_abort_fallback_sample_wf md :
+lemma paper_sim_sample_from_rejection_attempt_of_coinsE md sk m ctx coins :
+lemma paper_sim_commitment_lowbits_rejection_attemptE md st :
+lemma paper_sim_commitment_challenge_rejection_attemptE md pk m ctx st :
+lemma paper_sim_commitment_highbits_rejection_attemptE md pk m ctx st :
+lemma paper_sim_signature_rejection_attempt_fieldsE md pk m ctx st :
+lemma paper_sim_signature_rejection_attempt_matches_state md pk m ctx st :
+lemma paper_sim_signature_rejection_attempt_of_coinsE md sk m ctx coins :
+lemma haetae_rejection_sample_from_attempt_signatureE md pk m ctx st :
+lemma haetae_rejection_sample_from_attempt_no_fallback md pk m ctx st :
+lemma haetae_rejection_sample_from_attempt_of_coinsE md sk m ctx coins :
+lemma haetae_rejection_sample_from_attempt_of_coins_wf md sk m ctx coins :
+lemma budgeted_paper_sim_sign_oracle_preserves_signing_count :
+lemma adversary_budgeted_paper_sim_signing_count_preserved :
+lemma budgeted_paper_sim_main_signing_count_preserved :
+lemma sampler_expand_query_point_bound q :
+lemma sampler_expand_query_log_fset_bound (qs : ro_query list) :
+lemma sampler_expand_query_log_budget_bound (qs : ro_query list) hc :
+lemma sampler_expand_query_joint_log_budget_bound
+lemma concrete_lazy_rom_sampler_expand_query_fresh_le
+lemma concrete_lazy_rom_sampler_expand_query_fresh_eq
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered_arg
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered_budgeted_logs :
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered_hash_cons
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered_sampler_cons
+lemma sampler_bad_prequery_one_step_bound_nonnegative :
+lemma budgeted_paper_sim_sampler_bad_prequery_forge_fel_bound pk &m :
+lemma budgeted_paper_sim_sampler_bad_prequery_forge_fel_phoare :
+lemma budgeted_paper_sim_sampler_bad_prequery_nma_fel_bound &m :
+lemma concrete_lazy_rom_sampler_expand_query_fresh_phoare
+lemma concrete_lazy_rom_sampler_expand_query_fresh_arg_phoare
+lemma concrete_lazy_rom_sampler_expand_query_fresh_arg_clean_phoare
+lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_le
+lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_arg_le
+lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_arg_clean_le
+lemma concrete_lazy_rom_sampler_expand_query_guarded_clean_phoare
+lemma concrete_ro_signing_attempt_sample_with_seed_guarded_clean_structural_arg_le
+lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_eq
+lemma concrete_ro_exact_hyperball_sample_with_seed_exact
+lemma concrete_ro_exact_hyperball_sample_with_seed_exact_no_seed
+lemma concrete_ro_exact_hyperball_sample_with_seed_exact_pr
+lemma concrete_ro_signing_attempt_sample_with_seed_preserves_sampler_rom_covered
+lemma concrete_ro_exact_hyperball_sample_with_seed_preserves_sampler_rom_covered
+lemma concrete_ro_signing_attempt_sample_with_seed_preserves_sampler_rom_covered_budgeted_logs :
+lemma concrete_ro_exact_hyperball_sample_with_seed_preserves_sampler_rom_covered_budgeted_logs :
+lemma concrete_budgeted_ro_signing_attempt_o_sign_preserves_sampler_rom_covered :
+lemma concrete_budgeted_ro_exact_hyperball_o_sign_preserves_sampler_rom_covered :
+lemma concrete_budgeted_ro_signing_attempt_o_sign_clean_sampler_fresh :
+lemma internal_transcript_sign_oracle_preserves_state :
+lemma adversary_internal_transcript_state_preserved :
+lemma internal_transcript_sign_main_state_sound :
+lemma internal_transcript_sign_main_transcripts_valid :
+lemma internal_transcript_sign_main_log_ready :
+lemma internal_transcript_sign_main_no_min_entropy :
+lemma rom_internal_transcript_sign_oracle_preserves_state :
+lemma adversary_rom_internal_transcript_state_preserved :
+lemma rom_internal_transcript_sign_main_state_sound :
+lemma rom_internal_transcript_sign_main_transcripts_valid :
+lemma rom_internal_transcript_sign_main_log_ready :
+lemma rom_internal_transcript_sign_main_no_min_entropy :
+lemma rom_internal_transcript_sign_main_no_failure_for_signature_site :
+lemma rom_internal_transcript_sign_main_signature_sites_clear :
+lemma rom_internal_transcript_bad_forgery_zero &m :
+lemma rom_internal_transcript_bad_forgery_bound &m :
+lemma rom_internal_transcript_bad_forgery_counted_bound &m :
+lemma counted_rom_internal_transcript_sign_oracle_preserves_budget_state :
+lemma adversary_counted_rom_internal_transcript_budget_state_preserved :
+lemma counted_rom_internal_transcript_main_bad_clear :
+lemma counted_rom_internal_transcript_main_bad_false :
+lemma counted_rom_internal_transcript_counted_bad_zero &m :
+lemma counted_rom_internal_transcript_budget_sound &m :
+lemma counted_rom_internal_transcript_counted_bad_subunit &m :
+lemma programmed_counted_sign_oracle_preserves_min_entropy_clear :
+lemma adversary_programmed_counted_min_entropy_preserved :
+lemma programmed_counted_main_min_entropy_clear :
+lemma programmed_counted_min_entropy_bad_zero &m :
+lemma programmed_counted_min_entropy_bad_bound &m :
+lemma programmed_counted_prequery_reprogramming_bad_bound_from_budget_expr &m :
+lemma budgeted_counted_lazy_rom_get_true :
+lemma budgeted_counted_lazy_rom_init_true :
+lemma budgeted_counted_lazy_rom_bad_true :
+lemma budgeted_programmed_hash_get_preserves_challenge_query_discipline :
+lemma budgeted_programmed_sign_oracle_preserves_challenge_query_discipline :
+lemma adversary_budgeted_programmed_challenge_query_discipline_preserved :
+lemma budgeted_programmed_main_challenge_query_discipline :
+lemma budgeted_programmed_main_challenge_query_count_bound :
+lemma budgeted_programmed_adaptive_prequery_lift
+lemma budgeted_programmed_adaptive_prequery_lift_checked_31
+lemma budgeted_programmed_hash_get_preserves_discipline :
+lemma budgeted_programmed_reprogram_discipline_after_actual_signature
+lemma budgeted_programmed_sign_oracle_preserves_discipline :
+lemma adversary_budgeted_programmed_discipline_preserved :
+lemma budgeted_programmed_main_reprogram_clear :
+lemma budgeted_programmed_bad_reprogram_zero &m :
+lemma budgeted_programmed_prequery_reprogram_bad_bound_from_prequery &m :
+lemma budgeted_programmed_hash_get_preserves_query_budget :
+lemma budgeted_programmed_sign_oracle_preserves_query_budget :
+lemma adversary_budgeted_programmed_query_budget_preserved :
+lemma budgeted_programmed_main_query_budget_preserved :
+lemma budgeted_programmed_query_budget_certifies_branch_bound &m :
+lemma budgeted_programmed_query_budget_certifies_branch_bound_from_prequery
+lemma budgeted_programmed_query_budget_certifies_checked_31_bound
+lemma budgeted_sampled_direct_counted_lazy_rom_get_true :
+lemma budgeted_sampled_direct_counted_lazy_rom_init_true :
+lemma budgeted_sampled_direct_counted_lazy_rom_bad_true :
+lemma budgeted_sampled_direct_hash_get_preserves_challenge_query_discipline :
+lemma budgeted_sampled_direct_sign_oracle_preserves_challenge_query_discipline :
+lemma adversary_budgeted_sampled_direct_challenge_query_discipline_preserved :
+lemma budgeted_sampled_direct_main_challenge_query_discipline :
+lemma budgeted_sampled_direct_hash_get_preserves_discipline :
+lemma budgeted_sampled_direct_sign_oracle_preserves_discipline :
+lemma adversary_budgeted_sampled_direct_discipline_preserved :
+lemma budgeted_sampled_direct_main_reprogram_clear :
+lemma budgeted_sampled_direct_bad_reprogram_zero &m :
+lemma budgeted_sampled_direct_one_step_bound_nonnegative :
+lemma budgeted_sampled_direct_sampler_message_hash_prequery_bound
+lemma budgeted_sampled_direct_bad_prequery_bound &m :
+lemma budgeted_sampled_direct_prequery_reprogram_bad_bound &m :
+lemma budgeted_sampled_direct_prequery_reprogram_bad_checked_31 &m :
+lemma budgeted_programmed_counted_sampled_direct_prequery_reprogram_bad_exact
+lemma budgeted_programmed_prequery_reprogram_bad_checked_31_via_direct_sampler
+lemma haetae_rom_internal_transcript_erasure_exact &m :
+lemma rom_internal_transcript_structural_nma_bound &m :
+lemma rom_internal_transcript_clear_site_structural_nma_bound &m :
+lemma rom_internal_nma_public_sim_exact &m :
+lemma rom_internal_nma_public_sim_rom_paper_sim_exact &m :
+lemma rom_internal_nma_real_signing_paper_sim_exact &m :
+lemma rom_internal_nma_real_signing_ro_attempt_paper_sim_exact &m :
+lemma concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_fresh_loss
+lemma concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_loss
+lemma concrete_budgeted_o_sign_sample_with_seed_clean_loss_surface
+lemma concrete_budgeted_o_sign_old_log_sample_with_seed_clean_loss_surface
+lemma concrete_budgeted_o_sign_old_log_signature_from_sample_clean_loss_surface
+lemma concrete_budgeted_o_sign_old_log_signature_clean_event_loss_surface
+lemma concrete_frozen_old_log_sample_clean_event_loss_surface
+lemma concrete_frozen_old_log_signature_clean_event_loss_surface
+lemma concrete_frozen_old_log_self_logged_signature_clean_event_loss_surface
+lemma concrete_budgeted_self_logged_signature_clean_event_loss_surface
+lemma concrete_lazy_rom_get_lossless :
+lemma structural_attempt_exact_hyperball_paper_sample_one_step_loss
+lemma exact_hyperball_paper_sample_one_step_upper
+lemma rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_paper_sample_lifting &m :
+lemma rom_internal_budgeted_ro_signing_attempt_signing_call_loss_bound &m :
+lemma rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_paper_sample_lifting &m :
+lemma rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_clean_lifting &m :
+lemma rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting &m :
+lemma rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_checked_clean_lifting &m :
+lemma rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_budgeted_lifting &m :
+lemma rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_budgeted_checked_clean_lifting &m :
+lemma rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound &m :
+lemma concrete_lazy_rom_get_preserves_signature_event
+lemma concrete_lazy_rom_get_preserves_signature_event_with_pk
+lemma concrete_lazy_rom_get_preserves_current_signature_event
+lemma concrete_lazy_rom_get_true :
+lemma concrete_lazy_rom_get_preserves_budgeted_clean_signature_event
+lemma concrete_lazy_rom_get_preserves_budgeted_clean_signature_event_hoare
+lemma concrete_ro_signing_attempt_sample_with_seed_lossless :
+lemma concrete_budgeted_ro_signing_attempt_o_sign_active_clean_signature_structural_le
+lemma concrete_budgeted_ro_exact_hyperball_o_sign_active_signature_exact
+lemma concrete_budgeted_ro_exact_hyperball_sample_with_seed_to_o_sign_active_projection
+lemma concrete_budgeted_ro_signing_attempt_o_sign_to_self_logged_sample_active_projection
+lemma concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface
+lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting &m :
+lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_clean_lifting &m :
+lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_loss_from_paper_sample_lifting &m :
+lemma rom_internal_nma_real_signing_haetae_rejection_paper_sim_exact &m :
+lemma rom_internal_nma_exact_hyperball_rejection_paper_sim_no_fallback_exact &m :
+lemma public_sim_to_paper_sim_nma_hop_from_sampling_hop &m :
+lemma transcript_logging_erasure_exact &m :
+lemma real_signing_simulator_exact &m :
+lemma bimodal_special_soundness_lift_exact &m md :
+lemma special_soundness_interfaces_ready_from_forking md :
+lemma special_soundness_interfaces_public_reconstruction md :
+lemma special_soundness_interfaces_ready_sound md :
+lemma special_soundness_interfaces_ready_sound_with_public_reconstruction md :
+lemma signing_simulator_sound_current md :
+lemma rejection_sampling_bound_from_fs_bound :
+lemma fs_with_aborts_interfaces_ready_from_parts md :
+lemma fs_with_aborts_interfaces_ready_from_forking md :
+lemma fs_with_aborts_interfaces_ready_holds md :
+lemma structural_to_exact_hyperball_paper_sample_loss_from_obligation
+lemma structural_to_exact_hyperball_paper_sample_loss_from_attempt_loss
+lemma structural_to_exact_hyperball_paper_sample_loss_obligation_from_attempt_loss
+lemma structural_to_exact_hyperball_paper_sample_loss_from_coin_sample_pair_loss
+lemma structural_to_exact_hyperball_paper_sample_loss_obligation_from_coin_sample_pair_loss
+lemma dexact_hyperball_reference_paper_sim_attempt_boundary_ready
+lemma dexact_hyperball_full_rejection_paper_sim_attempt_boundary_ready
+lemma dexact_hyperball_haetae_rejection_sample_no_fallback_mu
+lemma dexact_hyperball_haetae_rejection_sample_signature_no_fallback_mu
+lemma dexact_hyperball_paper_sim_rejection_attempt_signature_mu
+lemma dexact_hyperball_haetae_rejection_sample_signature_mu
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+    hoare.
+  hoare.
+hoare.
+hoare.
+hoare.
+hoare.
+hoare.
+    hoare.
+  hoare.
+				    hoare.
+	  hoare.
+equiv budgeted_programmed_counted_sampled_direct_hash_get_equiv :
+equiv budgeted_programmed_counted_sampled_direct_sign_equiv :
+equiv adversary_budgeted_programmed_counted_sampled_direct_equiv :
+equiv budgeted_programmed_counted_sampled_direct_main_equiv :
+byequiv budgeted_programmed_counted_sampled_direct_main_equiv => //.
+equiv haetae_rom_internal_oracle_erasure :
+equiv adversary_haetae_rom_internal_erasure :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv rom_internal_oracle_structural_nma :
+equiv adversary_rom_internal_structural_nma :
+byequiv (: ={glob H, glob A} ==> res{1} => res{2}) => //.
+equiv rom_internal_public_sim_nma_oracle :
+equiv adversary_rom_internal_public_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv rom_internal_public_sim_rom_paper_sim_nma_oracle :
+equiv adversary_rom_internal_public_sim_rom_paper_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv rom_internal_real_signing_paper_sim_nma_oracle :
+equiv adversary_rom_internal_real_signing_paper_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv real_signing_ro_attempt_paper_sim_nma_oracle :
+equiv adversary_real_signing_ro_attempt_paper_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv real_signing_rejection_paper_sim_nma_oracle :
+equiv adversary_real_signing_rejection_paper_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv exact_hyperball_haetae_rejection_paper_sim_nma_oracle :
+equiv adversary_exact_hyperball_haetae_rejection_paper_sim_nma :
+byequiv (: ={glob H, glob A} ==> ={res}) => //.
+equiv transcript_logging_oracle_erasure :
+equiv adversary_transcript_logging_erasure :
+byequiv (: ={glob H, glob S, glob A, glob Sim} ==> ={res}) => //.
+equiv real_signing_oracle_equiv :
+equiv adversary_real_signing_equiv :
+byequiv (: ={glob H, glob S, glob A} ==> ={res}) => //.
+byequiv (: ={glob H, glob S, glob F, glob X} ==> ={res}) => //.
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Reductions.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op mlwe_hardness_term : real.
+op module_sis_hardness_term : real.
+op bimodal_to_msis_reduction_loss_term : real = 0%r.
+op bimodal_selftarget_msis_hardness_term =
+op signature_query_count : real = 2%r.
+op hash_query_count : real = 2%r.
+op signature_query_budget_count : int = 2.
+op hash_query_budget_count : int = 2.
+op abort_probability : real = 0%r.
+op min_entropy_loss_factor : real = 2%r.
+op challenge_support_bits_lower_bound : int = 58.
+op challenge_support_cardinality_lower_bound : real =
+op rom_hash_query_budget : real = hash_query_count.
+op rom_signature_query_budget : real = signature_query_count.
+op rom_total_query_budget =
+op counted_rom_collision_term =
+op counted_rom_prequery_term =
+op counted_rom_min_entropy_term =
+op counted_rom_prequery_reprogramming_term =
+op counted_rom_programming_loss_term =
+op signing_query_scale =
+op fs_with_aborts_reprogramming_term =
+op fs_with_aborts_min_entropy_term =
+op rejection_sampling_loss_term =
+op haetae_euf_bound =
+op haetae_euf_counted_rom_bound =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma haetae_euf_boundE :
+lemma haetae_euf_bound_groupedE :
+lemma haetae_euf_bound_rejection_groupedE :
+lemma haetae_euf_counted_rom_bound_groupedE :
+lemma signing_query_scaleE :
+lemma signing_query_scale_nonnegative :
+lemma fs_with_aborts_reprogramming_term_nonnegative :
+lemma fs_with_aborts_min_entropy_term_nonnegative :
+lemma rom_hash_query_budget_nonnegative :
+lemma rom_signature_query_budget_nonnegative :
+lemma hash_query_budget_countE :
+lemma signature_query_budget_countE :
+lemma hash_query_budget_count_nonnegative :
+lemma signature_query_budget_count_nonnegative :
+lemma min_entropy_loss_factor_nonnegative :
+lemma challenge_support_cardinality_lower_bound_positive :
+lemma challenge_support_cardinality_lower_bound_nonnegative :
+lemma rom_total_query_budget_nonnegative :
+lemma counted_rom_collision_term_nonnegative :
+lemma counted_rom_prequery_term_nonnegative :
+lemma counted_rom_min_entropy_term_nonnegative :
+lemma counted_rom_prequery_reprogramming_term_nonnegative :
+lemma counted_rom_programming_loss_term_nonnegative :
+lemma counted_rom_collision_termE :
+lemma counted_rom_prequery_termE :
+lemma counted_rom_min_entropy_termE :
+lemma counted_rom_prequery_reprogramming_termE :
+lemma counted_rom_programming_loss_termE :
+lemma counted_rom_programming_loss_term_subunit :
+lemma counted_rom_programming_loss_term_positive :
+lemma counted_rom_programming_loss_term_le1 :
+lemma counted_rom_prequery_reprogramming_budget_numeratorE :
+lemma counted_rom_budget_numeratorE :
+lemma counted_rom_programming_loss_term_cardinalityE :
+lemma counted_rom_prequery_reprogramming_term_cardinalityE :
+lemma counted_rom_programming_loss_term_concreteE :
+lemma counted_rom_prequery_reprogramming_term_concreteE :
+lemma counted_rom_programming_loss_term_checked_subunit :
+lemma counted_rom_support_lower_bound_summary :
+lemma counted_rom_support_dominates_budget :
+lemma counted_rom_prequery_reprogramming_support_dominates_budget :
+lemma counted_rom_prequery_reprogramming_term_subunit :
+lemma counted_rom_prequery_reprogramming_from_query_budgets_and_support :
+lemma counted_rom_programming_loss_splitE :
+lemma counted_rom_loss_from_query_budgets_and_support :
+lemma rejection_sampling_loss_term_nonnegative :
+lemma fs_with_aborts_min_entropy_termE :
+lemma fs_with_aborts_min_entropy_term_ge1 :
+lemma rejection_sampling_loss_term_ge1 :
+lemma bimodal_to_msis_reduction_loss_termE :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_ROM.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type ro_query =
+type ro_output = crh * challenge * matrix * random_coins.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op message_hash_query (pk : pkey) (ctx : context) (m : message) : ro_query =
+op challenge_hash_query
+op matrix_expand_query (md : mode) (sd : seed) : ro_query =
+op sampler_expand_query (coins : random_coins) : ro_query =
+op ro_crh_zero : crh = nseq crhbytes 0.
+op ro_challenge_zero : challenge = poly_zero.
+op ro_matrix_zero : matrix = [].
+op ro_random_coins_zero : random_coins = nseq seedbytes 0.
+op ro_output_zero : ro_output =
+op ro_output_to_crh (y : ro_output) : crh = y.`1.
+op ro_output_to_challenge (y : ro_output) : challenge = y.`2.
+op ro_output_to_matrix (y : ro_output) : matrix = y.`3.
+op ro_output_to_random_coins (y : ro_output) : random_coins = y.`4.
+op ro_output_of_crh (mu : crh) : ro_output =
+op ro_output_of_challenge (ch : challenge) : ro_output =
+op ro_output_of_matrix (a : matrix) : ro_output =
+op ro_output_of_random_coins (coins : random_coins) : ro_output =
+op dmatrix_for_query (x : mode * seed) : matrix distr = dmatrix x.`1.
+op dro_output (q : ro_query) : ro_output distr =
+op ro_message_hash (y : ro_output) : crh = ro_output_to_crh y.
+op ro_challenge_hash (y : ro_output) : challenge = ro_output_to_challenge y.
+op ro_matrix (y : ro_output) : matrix = ro_output_to_matrix y.
+op ro_signing_coins (y : ro_output) : random_coins =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+clone import FullRO as HAETAE_RO with
+module type Oracle = {
+module type POracle = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma matrix_query_distribution_lossless x :
+lemma ro_output_distribution_lossless q :
+lemma sampler_expand_query_dro_output_ro_signing_coins
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_ROM_Programming.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type programming_site = ro_query * ro_output.
+type counted_rom_event =
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op programming_site_query (site : programming_site) : ro_query = site.`1.
+op programming_site_output (site : programming_site) : ro_output = site.`2.
+op programming_site_of_transcript
+op signature_programming_site_of_transcript
+op transcript_signature_challenge_output (tr : transcript) : ro_output =
+op actual_signature_programming_site
+op honest_signing_programming_site
+op honest_signing_programming_site_query
+op programmed_site_query_min_entropy_bound_for
+op programmed_site_query_min_entropy_bound
+op programming_site_matches_transcript
+op reprogramming_failure
+op challenge_entropy_support_ok (md : mode) (tr : transcript) : bool =
+op min_entropy_failure (md : mode) (tr : transcript) : bool =
+op transcript_log_min_entropy_clear (md : mode) (trs : transcript list) : bool =
+op signing_record_log_min_entropy_clear
+op fs_with_aborts_failure
+op transcript_signature_programming_site_clear
+op transcript_log_signature_programming_sites_clear
+op fs_with_aborts_bound_obligation : bool =
+op counted_event_is_hash_query (ev : counted_rom_event) : bool =
+op counted_event_is_signature_site (ev : counted_rom_event) : bool =
+op counted_event_is_programmed_site (ev : counted_rom_event) : bool =
+op counted_event_is_min_entropy_check (ev : counted_rom_event) : bool =
+op ro_query_is_challenge (q : ro_query) : bool =
+op challenge_query_log_count (qs : ro_query list) : int =
+op counted_trace_hash_queries (evs : counted_rom_event list) : int =
+op counted_trace_signature_sites (evs : counted_rom_event list) : int =
+op counted_trace_programmed_sites (evs : counted_rom_event list) : int =
+op counted_trace_min_entropy_checks (evs : counted_rom_event list) : int =
+op programming_sites_same_query
+op programming_sites_conflict
+op programming_site_prequeried
+op programming_site_reprograms
+op programming_site_fresh
+op programming_transcript_fresh
+op rom_counted_programming_bad
+op rom_counted_state_bad
+op counted_rom_programming_bound_obligation : bool =
+op programmed_site_entropy_token_from_query (q : ro_query) : int =
+op programming_site_conflict_free
+op programming_site_log_conflict_free_for_honest
+op counted_lazy_rom_bad_flags_budget_sound (p : real) : bool =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+module CountedLazyROM(O : Oracle) = {
+module type SigningCoinSampler = {
+module DirectSigningCoinSampler : SigningCoinSampler = {
+module type CountedROMInterface = {
+module type CountedROMClient(C : CountedROMInterface) = {
+module CountedLazyROMBadGame(
+module ProgramChallenge(O : Oracle) = {
+module type TranscriptProgrammer(O : Oracle) = {
+module TranscriptProgrammerFromSite(O : Oracle) = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma challenge_query_log_count_cons_le q qs :
+lemma challenge_query_log_count_nonchallenge_cons q qs :
+lemma challenge_query_log_count_message_cons pk ctx m qs :
+lemma challenge_query_log_count_matrix_cons md sd qs :
+lemma challenge_query_log_count_sampler_cons coins qs :
+lemma counted_lazy_rom_init_clears :
+lemma counted_lazy_rom_init_clears_hash_queries :
+lemma counted_lazy_rom_get_preserves_clear :
+lemma counted_lazy_rom_get_nonchallenge_preserves_challenge_query_count n :
+lemma counted_lazy_rom_get_preserves_bad_clear :
+lemma counted_lazy_rom_get_preserves_min_entropy_clear :
+lemma counted_lazy_rom_observe_transcript_preserves_clear :
+lemma counted_lazy_rom_observe_transcript_preserves_min_entropy_clear :
+lemma counted_lazy_rom_observe_transcript_preserves_bad_clear :
+lemma counted_lazy_rom_program_preserves_bad_clear_if_fresh :
+lemma counted_lazy_rom_program_preserves_min_entropy_clear :
+lemma counted_lazy_rom_bad_preserves_min_entropy_clear :
+lemma counted_lazy_rom_bad_false_when_clear :
+lemma programming_site_self_matches md tr y :
+lemma programming_site_self_no_reprogramming_failure md tr y :
+lemma fs_with_aborts_failureE md tr site :
+lemma programming_site_prequeried_cons qs site :
+lemma programming_site_prequeried_cons_preserve q qs site :
+lemma programming_site_prequeried_output_irrelevant qs q y1 y2 :
+lemma programming_site_prequeried_witness qs q y :
+lemma honest_signing_programming_site_queryE md sk m ctx coins :
+lemma honest_signing_programming_site_query_entropy_token
+lemma honest_signing_programming_site_query_token_injective
+lemma signing_distribution_programming_site_query_spread
+lemma honest_signing_programming_site_query_spread
+lemma honest_signing_programming_site_query_spread_bound
+lemma honest_signing_programming_site_query_spread_bound_for
+lemma honest_signing_programming_site_query_is_challenge
+lemma programming_site_prequeried_honest_challenge_filter
+lemma programming_site_prequeried_honest_message_consE
+lemma honest_signing_programming_site_outputE md sk m ctx coins :
+lemma honest_signing_programming_site_functional_output
+lemma honest_signing_programming_sites_no_conflict
+lemma actual_signature_programming_site_sign_internalE
+lemma actual_signature_programming_site_sign_internal_any_pkE
+lemma actual_signature_programming_site_prequeried_after_cons
+lemma actual_signature_programming_site_prequeried_after_message_hash
+lemma actual_signature_programming_site_prequeried_message_hashE
+lemma actual_signature_programming_site_prequeried_message_hash_any_pkE
+lemma programming_site_log_conflict_free_for_honest_nil md sk :
+lemma programming_site_log_conflict_free_for_honest_cons
+lemma programming_site_conflict_free_no_reprograms site sites :
+lemma actual_signature_programming_site_sign_internal_conflict_step
+lemma programmed_site_reprogram_one_step_conflict_free_zero
+lemma programmed_site_prequery_one_step_fset_bound_for
+lemma programmed_site_prequery_one_step_fset_bound
+lemma programmed_site_prequery_one_step_budget_bound_for
+lemma programmed_site_prequery_one_step_budget_bound
+lemma programmed_site_prequery_one_step_challenge_fset_bound_for
+lemma programmed_site_prequery_one_step_challenge_fset_bound
+lemma programmed_site_prequery_one_step_challenge_budget_bound_for
+lemma programmed_site_prequery_one_step_challenge_budget_bound
+lemma programmed_site_prequery_one_step_challenge_concrete_bound
+lemma programmed_site_prequery_one_step_challenge_concrete_bound_for
+lemma challenge_query_log_count_budget_card_bound hc qs :
+lemma programmed_site_prequery_one_step_challenge_counter_bound
+lemma programmed_site_prequery_one_step_challenge_counter_bound_for
+lemma programmed_site_prequery_one_step_message_hash_counter_bound
+lemma direct_signing_coin_sampler_prequery_bound
+lemma direct_signing_coin_sampler_budgeted_prequery_bound
+lemma direct_signing_coin_sampler_message_hash_prequery_bound
+lemma direct_signing_coin_sampler_message_hash_budgeted_prequery_bound
+lemma programmed_site_prequery_one_step_concrete_bound
+lemma programmed_site_prequery_reprogram_one_step_concrete_bound
+lemma programmed_site_query_min_entropy_bound_constant_impossible
+lemma programming_site_reprograms_conflict_cons site old programmed :
+lemma rom_counted_programming_bad_min_entropy queries programmed :
+lemma rom_counted_programming_bad_prequery_cons queries programmed site
+lemma counted_rom_programming_bound_obligation_holds :
+lemma counted_lazy_rom_bad_flags_universal_bound &m :
+lemma counted_lazy_rom_bad_flags_query_budget_bound &m :
+lemma counted_lazy_rom_bad_flags_query_budget_bound_subunit &m :
+lemma fs_with_aborts_no_programming_failure md tr y :
+lemma transcript_signature_challenge_output_matches tr :
+lemma honest_transcript_challenge_entropy_support md sk m ctx coins :
+lemma honest_transcript_no_min_entropy_failure md sk m ctx coins :
+lemma signing_transcript_relation_challenge_entropy_support
+lemma signing_transcript_relation_no_min_entropy_failure
+lemma signing_record_relation_no_min_entropy_failure md pk r :
+lemma signing_record_log_sound_no_min_entropy md pk rs :
+lemma signing_record_log_sound_transcripts_no_min_entropy md pk rs :
+lemma fs_with_aborts_no_failure_for_signing_relation
+lemma fs_with_aborts_no_failure_for_signing_record md pk r site :
+lemma fs_with_aborts_no_failure_for_honest_programming md sk m ctx coins y :
+lemma transcript_valid_programming_site_signature_query md tr y :
+lemma transcript_valid_signature_programming_site_matches md tr y :
+lemma transcript_valid_signature_programming_site_no_reprogramming
+lemma transcript_valid_actual_signature_programming_site_matches md tr :
+lemma transcript_valid_actual_signature_programming_site_no_reprogramming
+lemma valid_forking_pair_signature_programming_site_query md tr1 tr2 y1 y2 :
+lemma valid_forking_pair_programming_site_query md tr1 tr2 y1 y2 :
+lemma valid_forking_pair_self_programming_sites_no_reprogramming
+lemma fs_bound_parts_nonnegative :
+lemma fs_with_aborts_bound_obligation_holds :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Scheme.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op haetae_mode : mode.
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+clone import Sig_ROM as SIG with
+module HAETAE(H : SIG.POracle) = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Transcript.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type transcript =
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op signature_commitment_highbits :
+op signature_commitment_lowbits :
+op signature_message_hash :
+op signature_challenge :
+op transcript_pk (tr : transcript) : pkey = tr.`1.
+op transcript_message (tr : transcript) : message = tr.`2.
+op transcript_context (tr : transcript) : context = tr.`3.
+op transcript_commitment_highbits (tr : transcript) : polyveck = tr.`4.
+op transcript_commitment_lowbits (tr : transcript) : poly = tr.`5.
+op transcript_message_hash (tr : transcript) : crh = tr.`6.
+op transcript_challenge (tr : transcript) : challenge = tr.`7.
+op transcript_signature (tr : transcript) : signature = tr.`8.
+op transcript_of_signature :
+op transcript_challenge_query (md : mode) (tr : transcript) : ro_query =
+op transcript_signature_challenge_query (md : mode) (tr : transcript) :
+op transcript_verifies (md : mode) (tr : transcript) : bool =
+op transcript_challenge_matches (tr : transcript) (y : ro_output) : bool =
+op transcript_signature_challenge_matches
+op transcript_fields_match_signature (tr : transcript) : bool =
+op transcript_valid (md : mode) (tr : transcript) : bool =
+op transcript_public_equation (md : mode) (tr : transcript) : bool =
+op same_fork_target (tr1 tr2 : transcript) : bool =
+op distinct_fork_challenges (tr1 tr2 : transcript) : bool =
+op valid_forking_pair (md : mode) (tr1 tr2 : transcript) : bool =
+op transcript_response (tr : transcript) : polyvecl =
+op transcript_response_aux (tr : transcript) : polyveck =
+op transcript_public_key_challenge_term (md : mode) (tr : transcript) :
+op active_public_reconstruction (md : mode) (tr : transcript) : bool =
+op inactive_public_reconstruction (md : mode) (tr : transcript) : bool =
+op forking_difference_solution
+op fork_response_aux_difference (md : mode) (tr1 tr2 : transcript) :
+op fork_public_challenge_relation (md : mode) (tr1 tr2 : transcript) : bool =
+op fork_response_aux_relation (tr1 tr2 : transcript) : bool =
+op fork_left_active_public_challenge_relation
+op fork_right_active_public_challenge_relation
+op fork_public_reconstruction_cases
+op fork_matrix_source (tr1 tr2 : transcript) : byte list =
+op fork_module_matrix (md : mode) (tr1 tr2 : transcript) : matrix =
+op fork_module_target (md : mode) (tr1 tr2 : transcript) : polyveck =
+op bimodal_selftarget_msis_instance_of_fork :
+op extract_bimodal_selftarget_msis_solution :
+op module_sis_instance_of_fork :
+op extract_module_sis_solution :
+op bimodal_extraction_success (md : mode) (tr1 tr2 : transcript) : bool =
+op extraction_success (md : mode) (tr1 tr2 : transcript) : bool =
+op forking_extraction_obligation (md : mode) : bool =
+op fork_public_reconstruction_obligation (md : mode) : bool =
+op bimodal_to_module_sis_lift_obligation (md : mode) : bool =
+op special_soundness_obligation (md : mode) : bool =
+op special_soundness_with_public_reconstruction_obligation (md : mode) : bool =
+op transcript_from_honest_signing
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma extract_bimodal_forking_some md tr1 tr2 :
+lemma extract_bimodal_forking_nonempty md tr1 tr2 :
+lemma transcript_fields_match_signature_challenge_query md tr :
+lemma transcript_fields_match_signature_challenge_matches tr y :
+lemma transcript_valid_signature_challenge_query md tr :
+lemma transcript_valid_signature_challenge_matches md tr y :
+lemma transcript_valid_signature_challengeE md tr :
+lemma transcript_valid_public_equation md tr :
+lemma transcript_valid_commitment_reconstruction md tr :
+lemma valid_forking_pair_public_equations md tr1 tr2 :
+lemma same_fork_target_challenge_query md tr1 tr2 :
+lemma valid_forking_pair_challenge_query md tr1 tr2 :
+lemma valid_forking_pair_signature_challenge_query md tr1 tr2 :
+lemma valid_forking_pair_distinct_signature_challenges md tr1 tr2 :
+lemma same_fork_target_commitment_highbits tr1 tr2 :
+lemma valid_forking_pair_commitment_highbits md tr1 tr2 :
+lemma valid_forking_pair_reconstructed_highbits_equal md tr1 tr2 :
+lemma transcript_reconstructionE md tr :
+lemma transcript_active_reconstructionE md tr :
+lemma valid_forking_pair_public_challenge_relation md tr1 tr2 :
+lemma valid_forking_pair_public_reconstruction_cases md tr1 tr2 :
+lemma forking_difference_solution_wf md tr1 tr2 :
+lemma fork_module_matrix_rows_wf md tr1 tr2 :
+lemma fork_module_matrix_size md tr1 tr2 :
+lemma bimodal_forking_solution_valid md tr1 tr2 :
+lemma forking_extraction_obligation_holds md :
+lemma fork_public_reconstruction_obligation_holds md :
+lemma bimodal_to_module_sis_lift_obligation_holds md :
+lemma module_sis_extraction_from_bimodal md tr1 tr2 :
+lemma special_soundness_from_bimodal_lift md :
+lemma special_soundness_with_public_reconstruction_from_bimodal_lift md :
+lemma honest_transcript_verifies md sk m ctx coins :
+lemma transcript_of_signature_fields md pk m ctx sig :
+lemma transcript_of_signature_matches_signature md pk m ctx sig :
+lemma honest_transcript_challenge md sk m ctx coins :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Events.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op keygen_rejection_failure (md : mode) (pk : pkey) (sk : skey) : bool =
+op signing_rejection_failure (md : mode) (sig : signature) : bool =
+op verification_rejection_failure (md : mode) (sig : signature) : bool =
+op any_rejection_failure (md : mode) (pk : pkey) (sk : skey)
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma keygen_rejection_free_current md sd :
+lemma signing_rejection_free_current md sk m ctx coins :
+lemma verification_rejection_free_current md sk m ctx coins :
+lemma accepted_transcript_rejection_free_current md sd m ctx coins :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Assumptions.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type mlwe_instance.
+type module_sis_instance = matrix * polyveck.
+type module_sis_solution = polyvecl.
+type bimodal_selftarget_msis_instance = module_sis_instance.
+type bimodal_selftarget_msis_solution = module_sis_solution.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op [lossless] dmlwe_real : mode -> mlwe_instance distr.
+op [lossless] dmlwe_random : mode -> mlwe_instance distr.
+op [lossless] dmodule_sis_instance : mode -> module_sis_instance distr.
+op [lossless] dbimodal_selftarget_msis_instance :
+op module_sis_eval
+op module_sis_zero_instance (md : mode) : module_sis_instance =
+op module_sis_solution_wf (md : mode) (sol : module_sis_solution) : bool =
+op module_sis_valid
+op bimodal_selftarget_msis_valid
+op bimodal_to_module_sis_instance :
+op bimodal_to_module_sis_solution :
+op lift_bimodal_solution_option
+op dmodule_sis_from_bimodal (md : mode) : module_sis_instance distr =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+module type MLWE_Distinguisher = {
+module MLWE_Real_Game(B : MLWE_Distinguisher) = {
+module MLWE_Random_Game(B : MLWE_Distinguisher) = {
+module type ModuleSIS_Solver = {
+module ModuleSIS_Relation_Game(B : ModuleSIS_Solver) = {
+module type BimodalSelfTargetMSIS_Solver = {
+module BimodalSelfTargetMSIS_Relation_Game(
+module BimodalToModuleSIS_Lift_Game(
+module type ModuleSIS_ModeSolver = {
+module type BimodalSelfTargetMSIS_ModeSolver = {
+module ModuleSIS_ModeRelation_Game(
+module BimodalSelfTargetMSIS_ModeRelation_Game(
+module ModuleSIS_LiftedDistribution_Relation_Game(
+module BimodalModeSolver_As_ModuleSIS(
+module type MLWE_Reduction = {
+module type BimodalSelfTargetMSIS_Reduction = {
+module type ModuleSIS_Reduction = {
+module MLWE_Game(B : MLWE_Reduction) = {
+module BimodalSelfTargetMSIS_Game(B : BimodalSelfTargetMSIS_Reduction) = {
+module ModuleSIS_Game(B : ModuleSIS_Reduction) = {
+module BimodalMSIS_As_ModuleSIS(B : BimodalSelfTargetMSIS_Reduction) = {
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma module_sis_eval_zero_instance md sol :
+lemma module_sis_zero_valid md :
+lemma module_sis_eval_wf md x sol :
+lemma module_sis_valid_target_wf md x sol :
+lemma bimodal_to_module_sis_valid md x sol :
+lemma dmodule_sis_from_bimodalE md :
+lemma dmodule_sis_from_bimodal_lossless md :
+lemma bimodal_lift_successE md x sol :
+lemma bimodal_solver_lift_exact &m md :
+lemma bimodal_mode_solver_lifted_distribution_exact &m md :
+lemma bimodal_msis_as_module_sis_exact &m :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+byequiv (: ={glob B, md} ==> ={res}) => //.
+byequiv (: ={glob B, md} ==> ={res}) => //.
+byequiv (: ={glob B} ==> ={res}) => //.
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Distributions.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type signing_randomness_source = int.
+type signing_sample_pair = polyvecl * polyveck.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op dbyte : byte distr = dinter 0 255.
+op dseed : seed distr = dlist dbyte seedbytes.
+op dcrh : crh distr = dlist dbyte crhbytes.
+op signing_entropy_token_cardinality : int = 288230376151711744.
+op signing_entropy_token_in_range (x : int) : bool =
+op signing_randomness_byte_ok (b : byte) : bool = 0 <= b /\ b < 256.
+op signing_entropy_token_to_coins (x : int) : random_coins =
+op signing_randomness_domain (coins : random_coins) : bool =
+op dsigning_entropy_token : int distr =
+op dsigning_randomness_source : signing_randomness_source distr =
+op signing_randomness_source_valid (src : signing_randomness_source) : bool =
+op signing_randomness_from_source (src : signing_randomness_source) :
+op dsigning_randomness : random_coins distr =
+op drandom_coins : random_coins distr = dsigning_randomness.
+op signing_randomness_point_bound : real =
+op signing_randomness_token_spread (d : random_coins distr) : bool =
+op signing_randomness_distribution_ok (d : random_coins distr) : bool =
+op dcoeff : coeff distr = dinter 0 (q - 1).
+op dpoly : poly distr = dlist dcoeff n.
+op dpolyveck (md : mode) : polyveck distr = dlist dpoly (mode_k md).
+op dpolyvecl (md : mode) : polyvecl distr = dlist dpoly (mode_l md).
+op dmatrix (md : mode) : matrix distr = dlist (dpolyvecl md) (mode_k md).
+op dchallenge (md : mode) : challenge distr =
+op signing_sample_pair_y1 (s : signing_sample_pair) : polyvecl = s.`1.
+op signing_sample_pair_y2 (s : signing_sample_pair) : polyveck = s.`2.
+op signing_sample_pair_wf (md : mode) (s : signing_sample_pair) : bool =
+op signing_sample_pair_unit (md : mode) (s : signing_sample_pair) : bool =
+op signing_sample_bound (md : mode) : int = mode_ln md.
+op coeff_bounded_by (b : int) (x : coeff) : bool =
+op poly_bounded_by (b : int) (p : poly) : bool =
+op polyvecl_bounded_by (md : mode) (b : int) (xs : polyvecl) : bool =
+op polyveck_bounded_by (md : mode) (b : int) (xs : polyveck) : bool =
+op signing_sample_pair_bounded (md : mode) (s : signing_sample_pair) : bool =
+op signing_sample_pair_sample_ok (md : mode) (s : signing_sample_pair) : bool =
+op signing_sample_pair_of_coins
+op dstructural_signing_sample_pair
+op dsigning_unit_coeff : coeff distr = duniform [-1; 1].
+op dsigning_unit_poly : poly distr = dlist dsigning_unit_coeff n.
+op dsigning_unit_polyvecl (md : mode) : polyvecl distr =
+op dsigning_unit_polyveck (md : mode) : polyveck distr =
+op signing_bounded_coeff_cardinality (md : mode) : int =
+op signing_bounded_coeff_point_bound (md : mode) : real =
+op dsigning_bounded_coeff (md : mode) : coeff distr =
+op dsigning_bounded_poly (md : mode) : poly distr =
+op dsigning_bounded_polyvecl (md : mode) : polyvecl distr =
+op dsigning_bounded_polyveck (md : mode) : polyveck distr =
+op dbounded_unit_signing_sample_pair (md : mode) :
+op dchecked_hyperball_signing_sample_pair (md : mode) :
+op hyperball_coeff_ok (md : mode) (c : coeff) : bool =
+op hyperball_poly_ok (md : mode) (p : poly) : bool =
+op hyperball_polyvecl_ok (md : mode) (y1 : polyvecl) : bool =
+op hyperball_polyveck_ok (md : mode) (y2 : polyveck) : bool =
+op hyperball_sample_ok (md : mode) (s : signing_sample_pair) : bool =
+op dhyperball_coeff (md : mode) : coeff distr =
+op dhyperball_poly (md : mode) : poly distr =
+op dhyperball_polyvecl (md : mode) : polyvecl distr =
+op dhyperball_polyveck (md : mode) : polyveck distr =
+op hyperball_coeff_point_bound (md : mode) : real =
+op hyperball_poly_point_bound (md : mode) : real =
+op hyperball_polyvecl_point_bound (md : mode) : real =
+op hyperball_polyveck_point_bound (md : mode) : real =
+op hyperball_sample_pair_point_bound (md : mode) : real =
+op dexact_hyperball_signing_sample_pair (md : mode) :
+op signing_sample_pair_distribution_ok
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma byte_distribution_lossless : is_lossless dbyte.
+lemma seed_distribution_lossless : is_lossless dseed.
+lemma crh_distribution_lossless : is_lossless dcrh.
+lemma signing_entropy_token_cardinality_positive :
+lemma signing_entropy_token_distribution_lossless :
+lemma signing_randomness_source_distribution_lossless :
+lemma signing_coin_distribution_lossless : is_lossless drandom_coins.
+lemma signing_entropy_token_to_coins_tokenK x :
+lemma signing_randomness_from_source_tokenK src :
+lemma signing_entropy_token_to_coins_size x :
+lemma signing_entropy_token_to_coins_byte_domain x :
+lemma signing_entropy_token_to_coins_domain x :
+lemma signing_randomness_from_source_domain src :
+lemma signing_entropy_token_distribution_point_bound x :
+lemma signing_randomness_source_distribution_point_bound src :
+lemma signing_coin_distribution_token_point_bound token :
+lemma signing_coin_distribution_token_spread :
+lemma signing_coin_distribution_domain coins :
+lemma signing_coin_distribution_domain_full :
+lemma signing_coin_distribution_ok :
+lemma coeff_distribution_lossless : is_lossless dcoeff.
+lemma poly_distribution_lossless : is_lossless dpoly.
+lemma polyveck_distribution_lossless md : is_lossless (dpolyveck md).
+lemma polyvecl_distribution_lossless md : is_lossless (dpolyvecl md).
+lemma matrix_distribution_lossless md : is_lossless (dmatrix md).
+lemma challenge_distribution_lossless md : is_lossless (dchallenge md).
+lemma signing_sample_pair_of_coins_wf md sk m ctx coins :
+lemma signing_sample_pair_of_coins_unit md sk m ctx coins :
+lemma signing_sample_bound_gt0 md :
+lemma unit_coeff_bounded_by_signing_sample_bound md c :
+lemma poly_unit_bounded_by_signing_sample_bound md p :
+lemma polyvecl_unit_bounded_by_signing_sample_bound md y1 :
+lemma polyveck_unit_bounded_by_signing_sample_bound md y2 :
+lemma signing_sample_pair_unit_bounded md s :
+lemma signing_sample_pair_of_coins_sample_ok md sk m ctx coins :
+lemma structural_signing_sample_pair_lossless md sk m ctx coins :
+lemma structural_signing_sample_pair_support md sk m ctx coins s :
+lemma structural_signing_sample_pair_sample_ok md sk m ctx coins s :
+lemma structural_signing_sample_pair_distribution_ok md sk m ctx coins :
+lemma signing_unit_coeff_lossless :
+lemma signing_unit_coeff_support c :
+lemma signing_bounded_coeff_cardinality_positive md :
+lemma signing_bounded_coeff_lossless md :
+lemma signing_bounded_coeff_support md c :
+lemma signing_bounded_coeff_supportP md c :
+lemma signing_bounded_coeff_point_bound md c :
+lemma signing_bounded_coeff_point_bound_nonnegative md :
+lemma dlist_size_point_bound ['a] (d : 'a distr) bd xs :
+lemma dlist_point_bound ['a] (d : 'a distr) len bd xs :
+lemma hyperball_coeff_point_bound_nonnegative md :
+lemma hyperball_coeff_point_boundE md c :
+lemma signing_unit_poly_lossless :
+lemma signing_unit_poly_support p :
+lemma signing_bounded_poly_lossless md :
+lemma signing_bounded_poly_support md p :
+lemma signing_bounded_poly_supportP md p :
+lemma hyperball_poly_point_bound_nonnegative md :
+lemma hyperball_poly_lossless md :
+lemma hyperball_poly_support md p :
+lemma hyperball_poly_supportP md p :
+lemma hyperball_poly_point_boundE md p :
+lemma signing_unit_polyvecl_lossless md :
+lemma signing_unit_polyveck_lossless md :
+lemma signing_bounded_polyvecl_lossless md :
+lemma signing_bounded_polyveck_lossless md :
+lemma signing_unit_polyvecl_support md y1 :
+lemma signing_unit_polyveck_support md y2 :
+lemma signing_bounded_polyvecl_support md y1 :
+lemma signing_bounded_polyvecl_supportP md y1 :
+lemma signing_bounded_polyveck_support md y2 :
+lemma signing_bounded_polyveck_supportP md y2 :
+lemma hyperball_polyvecl_point_bound_nonnegative md :
+lemma hyperball_polyveck_point_bound_nonnegative md :
+lemma hyperball_sample_pair_point_bound_nonnegative md :
+lemma hyperball_polyvecl_lossless md :
+lemma hyperball_polyveck_lossless md :
+lemma hyperball_polyvecl_support md y1 :
+lemma hyperball_polyvecl_supportP md y1 :
+lemma hyperball_polyveck_support md y2 :
+lemma hyperball_polyveck_supportP md y2 :
+lemma hyperball_polyvecl_point_boundE md y1 :
+lemma hyperball_polyveck_point_boundE md y2 :
+lemma bounded_unit_signing_sample_pair_lossless md :
+lemma bounded_unit_signing_sample_pair_support md s :
+lemma bounded_unit_signing_sample_pair_sample_ok md s :
+lemma bounded_unit_signing_sample_pair_distribution_ok md :
+lemma checked_hyperball_signing_sample_pair_lossless md :
+lemma checked_hyperball_signing_sample_pair_support md s :
+lemma checked_hyperball_signing_sample_pair_distribution_ok md :
+lemma hyperball_sample_ok_sample_ok md s :
+lemma exact_hyperball_signing_sample_pair_lossless md :
+lemma exact_hyperball_signing_sample_pair_support md s :
+lemma exact_hyperball_signing_sample_pair_supportP md s :
+lemma exact_hyperball_signing_sample_pair_sample_ok md s :
+lemma exact_hyperball_signing_sample_pair_distribution_ok md :
+lemma exact_hyperball_signing_sample_pair_point_bound md s :
+lemma exact_hyperball_signing_sample_pair_checkedE md :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Rejection.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type signing_transcript_record = message * context * signature * transcript.
+type signing_attempt_sample = polyvecl * polyveck * polyveck.
+type signing_attempt_state =
+type signing_attempt_coin_sample_pair = random_coins * signing_sample_pair.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op signing_attempt_state_coins
+op signing_attempt_state_sample
+op signing_attempt_sample_y1 (s : signing_attempt_sample) : polyvecl =
+op signing_attempt_sample_y2 (s : signing_attempt_sample) : polyveck =
+op signing_attempt_sample_commitment_raw
+op signing_attempt_state_sampled_y1
+op signing_attempt_state_sampled_y2
+op signing_attempt_state_sampled_y
+op signing_attempt_state_highbits
+op signing_attempt_state_lowbits
+op signing_attempt_state_challenge
+op signing_attempt_state_response
+op signing_attempt_state_response_aux
+op signing_attempt_state_hint
+op signing_attempt_state_signature
+op signature_rejection_branch_byte (sig : signature) : int =
+op signing_attempt_state_reject2_branch_byte
+op signing_attempt_state_reject2_branch_bit
+op polyvecl_double (md : mode) (xs : polyvecl) : polyvecl =
+op signing_attempt_state_reject2_sampled_y1
+op signing_attempt_state_reject2_sampled_y2
+op signing_attempt_state_reject2_balance_response
+op signing_attempt_state_reject2_balance_aux
+op signing_attempt_state_lowbits_carrier
+op signing_attempt_state_token
+op signing_attempt_state_programmed_lowbits
+op signing_attempt_state_lowbits_consistent
+op signing_attempt_state_programmed_challenge
+op signing_attempt_state_challenge_consistent
+op signing_attempt_state_reconstructed_highbits
+op signing_attempt_state_public_equation_consistent
+op signing_attempt_state_signature_of_fields
+op signing_attempt_state_fields_match_signature
+op signing_attempt_state_field_accepts
+op signing_attempt_state_of_coins
+op signing_attempt_sample_of_pair
+op signing_attempt_state_of_sample_pair
+op signing_attempt_state_valid_signature_accepts
+op signing_attempt_state_response_norm_accepts
+op signing_attempt_state_hint_norm_accepts
+op signing_attempt_state_accepts
+op signing_attempt_reject1_bound (md : mode) : int =
+op signing_attempt_reject2_bound (md : mode) : int =
+op signing_attempt_reject2_balance_norm_sq
+op signing_attempt_reject2_concrete_aborts
+op signing_attempt_state_reject1_norm_sq
+op signing_attempt_state_reject1_accepts
+op signing_attempt_state_balance_norm_sq
+op signing_attempt_state_bimodal_reject2_branch
+op signing_attempt_state_reject2_under_bound
+op signing_attempt_state_reject2_aborts
+op signing_attempt_state_reject2_accepts
+op signing_attempt_state_pack_accepts
+op signing_attempt_state_reference_rejection_accepts
+op signing_attempt_state_reference_rejection_aborts
+op signing_attempt_state_reject1_aborts
+op signing_attempt_state_pack_aborts
+op signing_attempt_state_verification_accepts
+op signing_attempt_state_rejection_accepts
+op signing_attempt_state_rejection_aborts
+op signing_attempt_state_response_norm_aborts
+op signing_attempt_state_hint_norm_aborts
+op signing_attempt_state_rejection_sampling_aborts
+op signing_attempt_state_aborts
+op signing_accepts
+op dsigning_attempt_state
+op signing_sample_pair_sampler_ok
+op dsigning_attempt_state_from_sample_pair_sampler
+op signing_attempt_state_of_coin_sample_pair
+op dstructural_signing_attempt_coin_sample_pair
+op dexact_hyperball_signing_attempt_coin_sample_pair
+op dstructural_signing_attempt_state
+op dstructural_signing_attempt_state_from_sampler
+op dbounded_unit_signing_attempt_state
+op dchecked_hyperball_signing_attempt_state
+op dexact_hyperball_signing_attempt_state
+op signing_attempt_state_sample_pair_wf
+op signing_attempt_state_sample_pair_unit
+op signing_attempt_state_sample_pair_bounded
+op signing_attempt_relation
+op signing_simulation_relation
+op signing_transcript_relation
+op signing_record_message (r : signing_transcript_record) : message = r.`1.
+op signing_record_context (r : signing_transcript_record) : context = r.`2.
+op signing_record_signature (r : signing_transcript_record) : signature = r.`3.
+op signing_record_transcript (r : signing_transcript_record) : transcript =
+op signing_record_query (r : signing_transcript_record) : message * context =
+op signing_record_relation
+op signing_record_queries (rs : signing_transcript_record list) :
+op signing_record_transcripts (rs : signing_transcript_record list) :
+op signing_record_log_sound
+op transcript_log_valid (md : mode) (trs : transcript list) : bool =
+op structural_to_exact_hyperball_sample_pair_point_loss_obligation : bool =
+op structural_to_exact_hyperball_sample_pair_loss_obligation : bool =
+op structural_to_exact_hyperball_coin_sample_pair_loss_obligation : bool =
+op structural_to_exact_hyperball_attempt_loss_obligation : bool =
+op rejection_sampling_bound_obligation : bool =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma signing_attempt_verifies md pk sk m ctx coins sig :
+lemma signing_simulation_verifies md pk m ctx sig :
+lemma signing_attempt_simulates md pk sk m ctx coins sig :
+lemma sign_internal_attempt_relation md sk m ctx coins :
+lemma signing_attempt_sample_of_pair_currentE md sk m ctx coins :
+lemma signing_attempt_state_of_sample_pair_currentE md sk m ctx coins :
+lemma structural_signing_sample_pair_sampler_ok md sk m ctx :
+lemma bounded_unit_signing_sample_pair_sampler_ok md :
+lemma checked_hyperball_signing_sample_pair_sampler_ok md :
+lemma exact_hyperball_signing_sample_pair_sampler_ok md :
+lemma dsigning_attempt_state_from_sample_pair_sampler_lossless
+lemma dsigning_attempt_state_from_sample_pair_sampler_sample_ok
+lemma dstructural_signing_attempt_state_lossless md sk m ctx :
+lemma dstructural_signing_attempt_state_from_sampler_lossless
+lemma dbounded_unit_signing_attempt_state_lossless md sk m ctx :
+lemma dbounded_unit_signing_attempt_state_sample_ok md sk m ctx st :
+lemma dchecked_hyperball_signing_attempt_state_lossless md sk m ctx :
+lemma dchecked_hyperball_signing_attempt_state_sample_ok md sk m ctx st :
+lemma dexact_hyperball_signing_attempt_state_lossless md sk m ctx :
+lemma dexact_hyperball_signing_attempt_state_sample_ok md sk m ctx st :
+lemma dexact_hyperball_signing_attempt_state_supportP md sk m ctx st :
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_bound1
+lemma dexact_hyperball_signing_attempt_state_mu_pullback
+lemma signing_attempt_state_reference_rejection_aborts_componentE md st :
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_split
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_union_bound
+lemma signing_attempt_state_of_sample_pair_signatureE
+lemma signing_attempt_state_of_sample_pair_pack_accepts
+lemma signing_attempt_state_of_sample_pair_pack_no_abort
+lemma dexact_hyperball_signing_attempt_state_pack_abort_zero
+lemma dstructural_signing_attempt_state_from_samplerE md sk m ctx :
+lemma dstructural_signing_attempt_stateE md sk m ctx :
+lemma dstructural_signing_attempt_state_from_sampler_coin_sample_pairE
+lemma dexact_hyperball_signing_attempt_state_coin_sample_pairE
+lemma mu_dlet_le_add_all ['a 'b 'c]
+lemma structural_to_exact_hyperball_sample_pair_loss_from_point_loss :
+lemma structural_to_exact_hyperball_coin_sample_pair_loss_from_sample_pair_loss :
+lemma structural_to_exact_hyperball_attempt_loss_from_coin_sample_pair_loss :
+lemma signing_attempt_state_of_coins_signatureE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_sampled_y1E md sk m ctx coins :
+lemma signing_attempt_state_of_coins_sampled_y2E md sk m ctx coins :
+lemma signing_attempt_state_of_coins_sampled_yE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_highbitsE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_lowbitsE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_challengeE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_responseE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_response_auxE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_hintE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_lowbits_carrierE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_tokenE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_programmed_lowbitsE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_lowbits_consistent md sk m ctx coins :
+lemma signing_attempt_state_of_coins_programmed_challengeE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_challenge_consistent md sk m ctx coins :
+lemma signing_attempt_state_of_coins_reconstructed_highbitsE
+lemma signing_attempt_state_of_coins_public_equation_consistent
+lemma signing_attempt_state_of_coins_signature_of_fieldsE md sk m ctx coins :
+lemma signing_attempt_state_of_coins_fields_match_signature md sk m ctx coins :
+lemma signing_attempt_state_of_coins_field_accepts md sk m ctx coins :
+lemma signing_attempt_state_of_coins_accepts_current md sk m ctx coins :
+lemma signing_attempt_reject1_bound_ge_response_bound md :
+lemma signing_attempt_state_reject1_accepts_from_response_norm_ok md st :
+lemma signing_attempt_state_balance_norm_sq_concreteE md st :
+lemma signing_attempt_state_reject2_under_bound_concreteE md st :
+lemma signing_attempt_state_reject2_aborts_concreteE md st :
+lemma signing_attempt_state_reject2_accepts_from_branch_clear md st :
+lemma signing_attempt_state_of_sample_pair_reject2_branch_clear
+lemma signing_attempt_state_of_sample_pair_reject2_accepts
+lemma signing_attempt_state_of_sample_pair_reject2_no_abort
+lemma dexact_hyperball_signing_attempt_state_reject2_abort_zero
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_reduced_bound
+lemma signing_attempt_state_of_sample_pair_response_norm_accepts
+lemma signing_attempt_state_of_sample_pair_reject1_accepts
+lemma signing_attempt_state_of_sample_pair_reject1_no_abort
+lemma dexact_hyperball_signing_attempt_state_reject1_abort_zero
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_hint_bound
+lemma signing_attempt_state_of_sample_pair_hint_norm_accepts
+lemma signing_attempt_state_of_sample_pair_hint_norm_no_abort
+lemma dexact_hyperball_signing_attempt_state_hint_norm_abort_zero
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_abort_zero
+lemma signing_attempt_state_of_coins_reject2_branch_clear_current
+lemma signing_attempt_state_of_coins_reject2_sampled_y1E md sk m ctx coins :
+lemma signing_attempt_state_of_coins_reject2_sampled_y2E md sk m ctx coins :
+lemma signing_attempt_state_of_coins_reject2_balance_norm_sqE
+lemma signing_attempt_state_of_coins_balance_norm_sq_current
+lemma signing_attempt_state_of_coins_reject2_accepts_current
+lemma signing_attempt_state_pack_accepts_from_valid md st :
+lemma signing_attempt_state_reference_rejection_accepts_from_accepts md st :
+lemma signing_attempt_state_of_coins_reference_rejection_accepts_current
+lemma signing_attempt_state_of_coins_verification_accepts_current
+lemma signing_attempt_state_of_coins_rejection_accepts_current
+lemma signing_attempt_state_of_coins_rejection_no_abort_current
+lemma signing_attempt_state_of_coins_no_abort_current md sk m ctx coins :
+lemma signing_attempt_state_distribution_lossless md sk m ctx :
+lemma signing_attempt_state_distribution_token_spread
+lemma signing_attempt_state_distribution_reference_rejection_abort_zero_current
+lemma signing_attempt_state_distribution_rejection_abort_zero_current
+lemma sign_internal_simulation_relation md sk m ctx coins :
+lemma signing_attempt_transcript_valid md pk sk m ctx coins sig :
+lemma signing_attempt_transcript_relation md pk sk m ctx coins sig :
+lemma sign_internal_transcript_relation md sk m ctx coins :
+lemma sign_internal_record_relation md sk m ctx coins :
+lemma signing_record_relation_sound md pk r :
+lemma signing_record_log_sound_cons md pk r rs :
+lemma signing_record_log_sound_transcripts_valid md pk rs :
+lemma signing_record_queries_cons r rs :
+lemma signing_record_transcripts_cons r rs :
+lemma rejection_bound_parts_nonnegative :
+lemma rejection_sampling_bound_obligation_holds :
+lemma signing_attempt_state_of_sample_pair_sampled_yE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_highbitsE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_lowbitsE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_challengeE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_responseE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_response_auxE
+lemma signing_attempt_state_of_sample_pair_hintE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_lowbits_carrierE
+lemma signing_attempt_state_of_sample_pair_tokenE md sk m ctx coins sample :
+lemma signing_attempt_state_of_sample_pair_programmed_lowbitsE
+lemma signing_attempt_state_of_sample_pair_lowbits_consistent
+lemma signing_attempt_state_of_sample_pair_programmed_challengeE
+lemma signing_attempt_state_of_sample_pair_challenge_consistent
+lemma signing_attempt_state_of_sample_pair_reconstructed_highbitsE
+lemma signing_attempt_state_of_sample_pair_public_equation_consistent
+lemma signing_attempt_state_of_sample_pair_signature_of_fieldsE
+lemma signing_attempt_state_of_sample_pair_fields_match_signature
+lemma signing_attempt_state_of_sample_pair_field_accepts
+lemma signing_attempt_state_of_sample_pair_valid_signature_accepts
+lemma signing_attempt_state_of_sample_pair_accepts_current
+lemma signing_attempt_state_of_sample_pair_verification_accepts_current
+lemma signing_attempt_state_of_sample_pair_reference_rejection_accepts
+lemma signing_attempt_state_of_sample_pair_reference_rejection_no_abort
+lemma signing_attempt_state_of_sample_pair_rejection_accepts_current
+lemma signing_attempt_state_of_sample_pair_rejection_no_abort_current
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_accepts
+lemma dexact_hyperball_signing_attempt_state_reference_rejection_no_abort
+lemma dexact_hyperball_signing_attempt_state_rejection_accepts
+lemma dexact_hyperball_signing_attempt_state_rejection_no_abort
+lemma dexact_hyperball_signing_attempt_state_rejection_abort_zero
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Algebra.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type byte = int.
+type seed = byte list.
+type crh = byte list.
+type random_coins = byte list.
+type xof256_state = byte list.
+type message = byte list.
+type context = byte list.
+type coeff = int.
+type poly = coeff list.
+type challenge = poly.
+type polyveck = poly list.
+type polyvecl = poly list.
+type polyvecm = poly list.
+type matrix = poly list list.
+type hint_t = polyveck.
+type sig_token = polyvecl * polyveck * hint_t.
+type pkey = seed * polyveck.
+type encoded_pkey = byte list.
+type skey = seed * int.
+type signature = polyveck * poly * crh * challenge * sig_token * int * int.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op secret_key_of_seed (_ : mode) (sd : seed) : skey = (sd, 0).
+op poly_zero : poly = nseq n 0.
+op polyveck_zero (md : mode) : polyveck = nseq (mode_k md) poly_zero.
+op polyvecl_zero (md : mode) : polyvecl = nseq (mode_l md) poly_zero.
+op polyvecm_zero (md : mode) : polyvecm = nseq (mode_m md) poly_zero.
+op matrix_zero (md : mode) : matrix =
+op poly_wf (p : poly) : bool = size p = n.
+op polyveck_wf (md : mode) (xs : polyveck) : bool =
+op polyvecl_wf (md : mode) (xs : polyvecl) : bool =
+op crh_wf (mu : crh) : bool = size mu = crhbytes.
+op challenge_coeff_ok (x : coeff) : bool = x = -1 \/ x = 0 \/ x = 1.
+op challenge_wf (ch : challenge) : bool =
+op unit_coeff_ok (x : coeff) : bool = x = -1 \/ x = 1.
+op challenge_sparse_at (md : mode) (i : int) (x : coeff) : bool =
+op challenge_sparse (md : mode) (ch : challenge) : bool =
+op poly_unit (p : poly) : bool = poly_wf p /\ all unit_coeff_ok p.
+op polyveck_unit (md : mode) (xs : polyveck) : bool =
+op polyvecl_unit (md : mode) (xs : polyvecl) : bool =
+op coeff_mod (x : coeff) : coeff = x %% q.
+op coeff_add (x y : coeff) : coeff = coeff_mod (x + y).
+op coeff_neg (x : coeff) : coeff = coeff_mod (-x).
+op coeff_sub (x y : coeff) : coeff = coeff_add x (coeff_neg y).
+op coeff_mul (x y : coeff) : coeff = coeff_mod (x * y).
+op coeff_double (x : coeff) : coeff = coeff_add x x.
+op poly_coeff (p : poly) (i : int) : coeff = nth 0 p i.
+op poly_normalize (p : poly) : poly =
+op poly_add (p r : poly) : poly =
+op poly_neg (p : poly) : poly =
+op poly_sub (p r : poly) : poly = poly_add p (poly_neg r).
+op poly_double (p : poly) : poly =
+op poly_mul_term (p r : poly) (i j : int) : coeff =
+op poly_mul (p r : poly) : poly =
+op poly_dot (row : poly list) (v : poly list) : poly =
+op matrix_vec_mul (md : mode) (a : matrix) (v : polyvecl) : polyveck =
+op polyveck_add (md : mode) (xs ys : polyveck) : polyveck =
+op polyveck_neg (md : mode) (xs : polyveck) : polyveck =
+op polyveck_sub (md : mode) (xs ys : polyveck) : polyveck =
+op polyveck_double (md : mode) (xs : polyveck) : polyveck =
+op polyvecl_sub (md : mode) (xs ys : polyvecl) : polyvecl =
+op coeff_q_bound (x : coeff) : bool = 0 <= x < q.
+op poly_coeffs_q_bound (p : poly) : bool =
+op polyveck_coeffs_q_bound (md : mode) (xs : polyveck) : bool =
+op z1_alpha : int = 256.
+op coeff_decompose_z1_low (x : coeff) : coeff =
+op coeff_decompose_z1_high (x : coeff) : coeff =
+op coeff_lsb (x : coeff) : coeff = x %% 2.
+op coeff_decompose_vk_low (x : coeff) : coeff =
+op coeff_decompose_vk_high (x : coeff) : coeff =
+op coeff_decompose_hint_high (md : mode) (x : coeff) : coeff =
+op coeff_compose_z1 (hi lo : coeff) : coeff = hi * z1_alpha + lo.
+op poly_highbits (p : poly) : poly =
+op poly_lowbits (p : poly) : poly =
+op poly_lsb (p : poly) : poly =
+op poly_vk_lowbits (p : poly) : poly =
+op poly_vk_highbits (p : poly) : poly =
+op poly_compose_z1 (hi lo : poly) : poly =
+op poly_hint_highbits (md : mode) (p : poly) : poly =
+op polyvecl_highbits (md : mode) (xs : polyvecl) : polyvecl =
+op polyvecl_lowbits (md : mode) (xs : polyvecl) : polyvecl =
+op polyveck_highbits_hint (md : mode) (xs : polyveck) : polyveck =
+op polyveck_vk_lowbits (md : mode) (xs : polyveck) : polyveck =
+op polyveck_vk_highbits (md : mode) (xs : polyveck) : polyveck =
+op polyveck_mul_alpha (md : mode) (xs : polyveck) : polyveck =
+op public_key_seed_poly (tag : int) (src : byte list) : poly =
+op public_key_seed_polyvecl
+op public_key_seed_polyveck
+op haetae_keygen_seedbuf_bytes : int = 2 * seedbytes + crhbytes.
+op haetae_reference_keygen_seedbuf_bytes : int =
+op haetae_reference_keygen_xof_absorb_bytes : int = seedbytes.
+op haetae_reference_keygen_xof_squeeze_bytes : int =
+op haetae_keygen_rhoprime_offset : int = 0.
+op haetae_keygen_sigma_offset : int = seedbytes.
+op haetae_keygen_key_offset : int = seedbytes + crhbytes.
+op haetae_shake256_rate_bytes : int = shake256_rate_bytes.
+op haetae_shake256_domain_separator : byte = shake256_domain_separator.
+op haetae_shake256_bytes (input : byte list) (outlen : int) : byte list =
+op haetae_seed_slice (src : byte list) (offset len : int) : byte list =
+op haetae_xof256_absorb_input
+op haetae_xof256_absorb_once
+op haetae_xof256_squeeze
+op haetae_xof256_absorb_once_squeeze
+op haetae_reference_keygen_seedbuf_after_memcpy (sd : seed) : byte list =
+op haetae_reference_keygen_xof_input (sd : seed) : byte list =
+op haetae_keygen_xof_seedbuf (sd : seed) : byte list =
+op haetae_reference_keygen_xof256_seedbuf (sd : seed) : byte list =
+op haetae_keygen_seedbuf_rhoprime (seedbuf : byte list) : seed =
+op haetae_keygen_seedbuf_sigma (seedbuf : byte list) : crh =
+op haetae_keygen_seedbuf_key (seedbuf : byte list) : seed =
+op haetae_keygen_seedbuf_layout_wf (seedbuf : byte list) : bool =
+op haetae_reference_keygen_xof_call_wf
+op haetae_keygen_rhoprime (sd : seed) : seed =
+op haetae_keygen_sigma (sd : seed) : crh =
+op haetae_keygen_key (sd : seed) : seed =
+op haetae_keygen_counter_next (md : mode) (counter : int) : int =
+op haetae_keygen_first_accept_counter (_ : mode) (_ : seed) : int = 0.
+op haetae_keygen_sampler_seed (sigma : crh) (counter : int) : seed =
+op public_matrix_seed (md : mode) (sd : seed) : matrix =
+op public_secret_vector_seed (md : mode) (sd : seed) : polyvecl =
+op public_error_vector_seed (md : mode) (sd : seed) : polyveck =
+op public_rounding_vector_seed (md : mode) (sd : seed) : polyveck =
+op haetae_keygen_a0_matrix (md : mode) (sd : seed) : matrix =
+op haetae_keygen_secret_vector (md : mode) (sd : seed) : polyvecl =
+op haetae_keygen_error_vector (md : mode) (sd : seed) : polyveck =
+op haetae_keygen_raw_public_vector (md : mode) (sd : seed) : polyveck =
+op haetae_keygen_mode23_predecompose_vector
+op haetae_keygen_mode23_public_vector
+op haetae_keygen_mode23_rounding_lowbits
+op haetae_keygen_mode23_adjusted_error_vector
+op haetae_keygen_mode5_public_vector
+op haetae_public_key_vector_from_relation
+op haetae_keygen_public_vector (md : mode) (sd : seed) : polyveck =
+op public_key_vector_seed (md : mode) (sd : seed) : polyveck =
+op public_key_relation
+op public_key_equation_holds (md : mode) (pk : pkey) : bool =
+op haetae_reference_polymatkm_expand_matA
+op haetae_reference_polyveck_expand_vecA
+op haetae_reference_polyvecmk_expand_S_s1
+op haetae_reference_polyvecmk_expand_S_s2
+op haetae_reference_keygen_secret_vector
+op haetae_reference_keygen_error_vector
+op haetae_reference_keygen_a0_matrix
+op haetae_reference_keygen_raw_public_vector
+op haetae_reference_keygen_mode23_predecompose_vector
+op haetae_reference_keygen_mode23_public_vector
+op haetae_reference_keygen_mode23_rounding_lowbits
+op haetae_reference_keygen_mode23_adjusted_error_vector
+op haetae_reference_keygen_mode5_public_vector
+op haetae_reference_keygen_public_vector
+op packed_haetae_reference_public_key
+op haetae_reference_keygen_seed_flow_wf (md : mode) (sd : seed) : bool =
+op haetae_mode23_qj_vector (md : mode) (sd : seed) : polyveck =
+op haetae_mode23_verification_column
+op haetae_mode5_verification_column
+op public_key_mode23_column (md : mode) (pk : pkey) : polyveck =
+op public_key_mode5_column (md : mode) (pk : pkey) : polyveck =
+op public_key_verification_column (md : mode) (pk : pkey) : polyveck =
+op haetae_verification_column_from_unpacked
+op haetae_verification_matrix_from_unpacked
+op packed_haetae_public_key (md : mode) (sd : seed) : pkey =
+op packed_haetae_verification_matrix (md : mode) (pk : pkey) : matrix =
+op packed_haetae_keygen_verification_matrix (md : mode) (sd : seed) :
+op public_verification_matrix (md : mode) (pk : pkey) : matrix =
+op challenge_embedding (md : mode) (ch : challenge) : polyvecl =
+op public_key_challenge_term
+op reconstructed_highbits
+op public_key_of_secret (md : mode) (sk : skey) : pkey =
+op haetae_public_key_body_bytes (md : mode) : int =
+op haetae_public_key_bytes (md : mode) : int =
+op haetae_public_key_encoding_wf (md : mode) (enc : encoded_pkey) : bool =
+op haetae_public_key_unpacked_wf (md : mode) (pk : pkey) : bool =
+op haetae_pack_seed (sd : seed) : byte list =
+op haetae_unpack_seed (enc : encoded_pkey) : seed =
+op haetae_pack_poly_q (md : mode) (p : poly) : byte list =
+op haetae_unpack_poly_q_at
+op haetae_byte_modulus : int = 256.
+op haetae_polyq_mode23_bound : int = 32768.
+op haetae_polyq_mode5_bound : int = 65536.
+op haetae_byte_norm (x : int) : byte = x %% haetae_byte_modulus.
+op haetae_polyq_coeff_bound (md : mode) : int =
+op haetae_polyq_coeffs_wf (md : mode) (p : poly) : bool =
+op haetae_polyveck_polyq_coeffs_wf
+op haetae_pack_poly_q_mode23_byte
+op haetae_pack_poly_q_mode5_byte (p : poly) (j : int) : byte =
+op haetae_pack_poly_q_ref (md : mode) (p : poly) : byte list =
+op haetae_unpack_poly_q_mode23_coeff_at
+op haetae_unpack_poly_q_mode5_coeff_at
+op haetae_unpack_poly_q_ref_at
+op haetae_pack_polyveck_body_ref (md : mode) (b : polyveck) : byte list =
+op haetae_unpack_polyveck_body_ref
+op haetae_pack_vk_ref (md : mode) (b : polyveck) (sd : seed) : encoded_pkey =
+op haetae_unpack_vk_public_key_ref
+op haetae_pack_polyveck_body (md : mode) (b : polyveck) : byte list =
+op haetae_unpack_polyveck_body
+op haetae_pack_vk (md : mode) (b : polyveck) (sd : seed) : encoded_pkey =
+op haetae_unpack_vk_public_key
+op haetae_unpack_vk_matrix (md : mode) (enc : encoded_pkey) : matrix =
+op haetae_pack_public_key_bytes (md : mode) (pk : pkey) : encoded_pkey =
+op haetae_unpack_public_key_bytes
+op concrete_haetae_keygen_packed_public_key
+op concrete_haetae_keygen_unpacked_public_key
+op concrete_haetae_keygen_verification_matrix (md : mode) (sd : seed) :
+op haetae_pack_public_key_bytes_ref (md : mode) (pk : pkey) :
+op haetae_unpack_public_key_bytes_ref
+op concrete_haetae_keygen_packed_public_key_ref
+op concrete_haetae_keygen_unpacked_public_key_ref
+op concrete_haetae_keygen_verification_matrix_ref
+op concrete_haetae_reference_keygen_packed_public_key_ref
+op concrete_haetae_reference_keygen_unpacked_public_key_ref
+op concrete_haetae_reference_keygen_verification_matrix_ref
+op haetae_public_key_roundtrip_ok (md : mode) (pk : pkey) : bool =
+op haetae_keygen_public_key_roundtrip_ok (md : mode) (sd : seed) : bool =
+op valid_mode : mode -> bool = fun _ => true.
+op valid_keypair (md : mode) (pk : pkey) (sk : skey) : bool =
+op valid_signature (md : mode) (sig : signature) : bool =
+op sig_commitment_highbits (sig : signature) : polyveck = sig.`1.
+op sig_commitment_lowbits (sig : signature) : poly = sig.`2.
+op sig_message_hash (sig : signature) : crh = sig.`3.
+op sig_challenge (sig : signature) : challenge = sig.`4.
+op sig_token_value (sig : signature) : sig_token = sig.`5.
+op sig_response (sig : signature) : polyvecl = (sig_token_value sig).`1.
+op sig_response_aux (sig : signature) : polyveck = (sig_token_value sig).`2.
+op sig_hint (sig : signature) : hint_t = (sig_token_value sig).`3.
+op encode_poly (p : poly) : byte list = p.
+op encode_polyveck (xs : polyveck) : byte list = flatten xs.
+op encode_pkey (pk : pkey) : byte list = pk.`1 ++ encode_polyveck pk.`2.
+op deterministic_poly (tag : int) (src : byte list) : poly =
+op deterministic_polyveck (md : mode) (src : byte list) : polyveck =
+op deterministic_unit_coeff (tag : int) (src : byte list) (i : int) :
+op deterministic_unit_poly (tag : int) (src : byte list) : poly =
+op deterministic_unit_polyveck
+op deterministic_unit_polyvecl
+op commitment_source
+op commitment_raw :
+op response_source
+op response_aux_vector :
+op signing_sample_y1 :
+op signing_sample_y2 :
+op signing_entropy_token_of_coins (coins : random_coins) : int =
+op commitment_lowbits :
+op message_hash : pkey -> context -> message -> crh =
+op challenge_source (highbits : polyveck) (lowbits : poly) (mu : crh) :
+op challenge_from_seed (md : mode) (src : byte list) : challenge =
+op challenge_hash : mode -> polyveck -> poly -> crh -> challenge =
+op commitment_challenge :
+op commitment_highbits :
+op response_vector :
+op hint_vector :
+op signature_token :
+op keygen_internal (md : mode) (sd : seed) : pkey * skey =
+op sign_internal :
+op verify_challenge_consistent
+op verify_reconstructed_highbits
+op verify_public_equation
+op coeff_norm_sq (x : coeff) : int = x * x.
+op poly_norm_sq (p : poly) : int =
+op polyvecl_norm_sq (md : mode) (xs : polyvecl) : int =
+op polyveck_norm_sq (md : mode) (xs : polyveck) : int =
+op signature_response_norm_sq (md : mode) (sig : signature) : int =
+op signature_verify_norm_sq (md : mode) (sig : signature) : int =
+op secret_norm_sq (sk : skey) : int = sk.`2.
+op response_norm_sq (md : mode) (sig : signature) : int =
+op verify_norm_sq (md : mode) (sig : signature) : int =
+op secret_norm_ok (md : mode) (sk : skey) : bool =
+op response_norm_ok (md : mode) (sig : signature) : bool =
+op verify_norm_ok (md : mode) (sig : signature) : bool =
+op verify_internal :
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma poly_zero_size :
+lemma polyveck_zero_size md :
+lemma polyvecl_zero_size md :
+lemma polyvecm_zero_size md :
+lemma polyveck_wf_nth md b row :
+lemma poly_zero_wf : poly_wf poly_zero.
+lemma polyveck_zero_wf md : polyveck_wf md (polyveck_zero md).
+lemma polyvecl_zero_wf md : polyvecl_wf md (polyvecl_zero md).
+lemma polyvecl_sub_size md xs ys :
+lemma poly_add_wf p r : poly_wf (poly_add p r).
+lemma poly_normalize_wf p : poly_wf (poly_normalize p).
+lemma poly_neg_wf p : poly_wf (poly_neg p).
+lemma poly_sub_wf p r : poly_wf (poly_sub p r).
+lemma poly_double_wf p : poly_wf (poly_double p).
+lemma poly_mul_wf p r : poly_wf (poly_mul p r).
+lemma poly_dot_wf row v : poly_wf (poly_dot row v).
+lemma matrix_vec_mul_wf md a v : polyveck_wf md (matrix_vec_mul md a v).
+lemma polyveck_add_wf md xs ys : polyveck_wf md (polyveck_add md xs ys).
+lemma polyveck_neg_wf md xs : polyveck_wf md (polyveck_neg md xs).
+lemma polyveck_sub_wf md xs ys : polyveck_wf md (polyveck_sub md xs ys).
+lemma polyveck_double_wf md xs : polyveck_wf md (polyveck_double md xs).
+lemma polyvecl_sub_wf md xs ys : polyvecl_wf md (polyvecl_sub md xs ys).
+lemma coeff_mod_q_bound x : coeff_q_bound (coeff_mod x).
+lemma poly_zero_coeffs_q_bound : poly_coeffs_q_bound poly_zero.
+lemma poly_add_coeffs_q_bound p r :
+lemma poly_neg_coeffs_q_bound p :
+lemma poly_sub_coeffs_q_bound p r :
+lemma poly_double_coeffs_q_bound p :
+lemma poly_mul_coeffs_q_bound p r :
+lemma poly_dot_coeffs_q_bound row v :
+lemma matrix_vec_mul_coeffs_q_bound md a v :
+lemma polyveck_zero_coeffs_q_bound md :
+lemma polyveck_add_coeffs_q_bound md xs ys :
+lemma polyveck_neg_coeffs_q_bound md xs :
+lemma polyveck_sub_coeffs_q_bound md xs ys :
+lemma polyveck_double_coeffs_q_bound md xs :
+lemma poly_highbits_wf p : poly_wf (poly_highbits p).
+lemma poly_lowbits_wf p : poly_wf (poly_lowbits p).
+lemma poly_lsb_wf p : poly_wf (poly_lsb p).
+lemma poly_vk_lowbits_wf p : poly_wf (poly_vk_lowbits p).
+lemma poly_vk_highbits_wf p : poly_wf (poly_vk_highbits p).
+lemma poly_compose_z1_wf hi lo : poly_wf (poly_compose_z1 hi lo).
+lemma poly_hint_highbits_wf md p : poly_wf (poly_hint_highbits md p).
+lemma polyvecl_highbits_wf md xs :
+lemma polyvecl_lowbits_wf md xs :
+lemma polyveck_highbits_hint_wf md xs :
+lemma polyveck_vk_lowbits_wf md xs :
+lemma polyveck_vk_highbits_wf md xs :
+lemma polyveck_mul_alpha_wf md xs :
+lemma coeff_decompose_hint_high_polyq_bound md x :
+lemma poly_hint_highbits_polyq_wf md p :
+lemma polyveck_highbits_hint_polyq_wf md xs :
+lemma coeff_decompose_vk_high_mode23_polyq_bound md x :
+lemma poly_vk_highbits_mode23_polyq_wf md p :
+lemma polyveck_vk_highbits_mode23_polyq_wf md xs :
+lemma coeff_q_bound_mode5_polyq_bound x :
+lemma poly_q_bound_mode5_polyq_wf p :
+lemma polyveck_q_bound_mode5_polyq_wf xs :
+lemma public_key_seed_poly_wf tag src :
+lemma public_key_seed_polyvecl_wf md tag src :
+lemma public_key_seed_polyveck_wf md tag src :
+lemma haetae_keygen_seedbuf_bytes_gt0 :
+lemma haetae_reference_keygen_seedbuf_bytesE :
+lemma haetae_reference_keygen_xof_absorb_bytesE :
+lemma haetae_reference_keygen_xof_squeeze_bytesE :
+lemma haetae_keygen_rhoprime_offsetE :
+lemma haetae_keygen_sigma_offsetE :
+lemma haetae_keygen_key_offsetE :
+lemma haetae_shake256_rate_bytesE :
+lemma haetae_shake256_domain_separatorE :
+lemma haetae_shake256_bytes_size input outlen :
+lemma haetae_xof256_squeeze_size st outlen :
+lemma haetae_xof256_absorb_once_squeeze_size input inlen outlen :
+lemma haetae_reference_keygen_seedbuf_after_memcpy_size sd :
+lemma haetae_keygen_xof_seedbuf_size sd :
+lemma haetae_reference_keygen_xof256_seedbuf_size sd :
+lemma haetae_seed_slice_size src offset len :
+lemma haetae_reference_keygen_xof_input_size sd :
+lemma haetae_xof256_absorb_input_size input inlen :
+lemma haetae_reference_keygen_xof_absorb_inputE sd :
+lemma haetae_reference_keygen_shake256_domain sd :
+lemma haetae_reference_keygen_xof_squeeze_bytes_lt_rate :
+lemma haetae_reference_keygen_xof_absorb_once_stateE sd :
+lemma haetae_keygen_xof_seedbuf_incrementalE sd :
+lemma haetae_keygen_xof_seedbuf_shake256E sd :
+lemma haetae_keygen_seedbuf_rhoprime_size seedbuf :
+lemma haetae_keygen_seedbuf_sigma_size seedbuf :
+lemma haetae_keygen_seedbuf_key_size seedbuf :
+lemma haetae_reference_keygen_xof_seedbuf_layout_wf sd :
+lemma haetae_reference_keygen_xof_call_wf_ok sd :
+lemma haetae_keygen_rhoprime_ref_sliceE sd :
+lemma haetae_keygen_sigma_ref_sliceE sd :
+lemma haetae_keygen_key_ref_sliceE sd :
+lemma haetae_keygen_rhoprime_size sd :
+lemma haetae_keygen_sigma_size sd :
+lemma haetae_keygen_key_size sd :
+lemma haetae_keygen_sampler_seed_size sigma counter :
+lemma haetae_keygen_counter_next_gt counter md :
+lemma public_matrix_seed_size md sd :
+lemma public_matrix_seed_rows_wf md sd :
+lemma public_secret_vector_seed_wf md sd :
+lemma public_error_vector_seed_wf md sd :
+lemma public_rounding_vector_seed_wf md sd :
+lemma haetae_reference_polymatkm_expand_matA_size md rhoprime :
+lemma haetae_reference_polymatkm_expand_matA_rows_wf md rhoprime :
+lemma haetae_reference_polyveck_expand_vecA_wf md rhoprime :
+lemma haetae_reference_polyvecmk_expand_S_s1_wf md sigma counter :
+lemma haetae_reference_polyvecmk_expand_S_s2_wf md sigma counter :
+lemma haetae_reference_keygen_secret_vector_wf md sd :
+lemma haetae_reference_keygen_error_vector_wf md sd :
+lemma haetae_reference_keygen_raw_public_vector_wf md sd :
+lemma haetae_reference_keygen_raw_public_vector_coeffs_q_bound md sd :
+lemma haetae_reference_keygen_mode23_predecompose_vector_wf md sd :
+lemma haetae_reference_keygen_mode23_predecompose_vector_coeffs_q_bound
+lemma haetae_reference_keygen_mode23_public_vector_polyq_wf md sd :
+lemma haetae_reference_keygen_mode23_adjusted_error_vector_wf md sd :
+lemma haetae_reference_keygen_mode5_public_vector_wf sd :
+lemma haetae_reference_keygen_mode5_public_vector_coeffs_q_bound sd :
+lemma haetae_reference_keygen_mode5_public_vector_polyq_wf sd :
+lemma haetae_keygen_raw_public_vector_wf md sd :
+lemma haetae_keygen_raw_public_vector_coeffs_q_bound md sd :
+lemma haetae_keygen_mode23_predecompose_vector_wf md sd :
+lemma haetae_keygen_mode23_predecompose_vector_coeffs_q_bound md sd :
+lemma haetae_keygen_mode23_public_vector_polyq_wf md sd :
+lemma haetae_keygen_mode23_rounding_lowbits_wf md sd :
+lemma haetae_keygen_mode23_adjusted_error_vector_wf md sd :
+lemma haetae_keygen_mode5_public_vector_wf sd :
+lemma haetae_keygen_mode5_public_vector_coeffs_q_bound sd :
+lemma haetae_keygen_mode5_public_vector_polyq_wf sd :
+lemma haetae_public_key_vector_from_relation_polyq_wf md sd s e :
+lemma haetae_reference_keygen_public_vector_polyq_wf md sd :
+lemma haetae_keygen_public_vector_polyq_wf md sd :
+lemma public_key_vector_seed_wf md sd :
+lemma public_key_mode23_column_wf md pk :
+lemma haetae_verification_column_from_unpacked_wf md sd b :
+lemma public_key_verification_column_wf md pk :
+lemma public_verification_matrix_size md pk :
+lemma public_verification_matrix_rows_wf md pk :
+lemma challenge_embedding_wf md ch :
+lemma public_key_of_secret_wf md sk :
+lemma haetae_pack_seed_size sd :
+lemma haetae_unpack_seed_size enc :
+lemma haetae_unpack_seed_pack sd :
+lemma haetae_unpack_seed_pack_cat sd tail :
+lemma haetae_polyq_coeff_bound_gt0 md :
+lemma haetae_byte_norm_bounds x :
+lemma haetae_byte_norm_small x :
+lemma haetae_byte_norm_idempotent x :
+lemma haetae_unpack15_coeff0 c0 c1 :
+lemma haetae_unpack15_coeff1 c0 c1 c2 :
+lemma haetae_unpack15_coeff2 c1 c2 c3 :
+lemma haetae_unpack15_coeff3 c2 c3 c4 :
+lemma haetae_unpack15_coeff4 c3 c4 c5 :
+lemma haetae_unpack15_coeff5 c4 c5 c6 :
+lemma haetae_unpack15_coeff6 c5 c6 c7 :
+lemma haetae_unpack15_coeff7 c6 c7 :
+lemma haetae_pack_poly_q_ref_size md p :
+lemma haetae_unpack_poly_q_ref_at_wf md enc offset :
+lemma haetae_pack_polyveck_body_ref_size md b :
+lemma haetae_unpack_polyveck_body_ref_wf md enc offset :
+lemma haetae_pack_vk_ref_size md b sd :
+lemma haetae_unpack_vk_public_key_ref_wf md enc :
+lemma nth_cat_size_plus ['a] (d : 'a) (xs ys : 'a list) j :
+lemma haetae_pack_polyveck_body_ref_nth md b row k :
+lemma haetae_pack_polyveck_body_ref_mode5_nth b row k :
+lemma haetae_unpack_poly_q_mode23_coeff_at_cat prefix bytes blk ofs :
+lemma haetae_polyq_mode23_coeff_rng md p j :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs0 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs1 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs2 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs3 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs4 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs5 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs6 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff_ofs7 md p blk :
+lemma haetae_unpack_poly_q_ref_pack_mode23_coeff md p i :
+lemma haetae_unpack_poly_q_ref_pack_mode23_at md prefix p :
+lemma haetae_unpack_poly_q_mode23_coeff_at_body md prefix b row blk ofs :
+lemma haetae_unpack_polyveck_body_ref_pack_mode23_coeff md prefix b row i :
+lemma haetae_unpack_polyveck_body_ref_pack_mode23 md prefix b :
+lemma haetae_pack_vk_ref_roundtrip_mode23 md sd b :
+lemma haetae_unpack_poly_q_ref_pack_mode5_coeff p i :
+lemma haetae_unpack_poly_q_ref_pack_mode5_at prefix p :
+lemma haetae_unpack_polyveck_body_ref_pack_mode5_coeff prefix b row i :
+lemma haetae_unpack_polyveck_body_ref_pack_mode5 prefix b :
+lemma haetae_pack_vk_ref_roundtrip_mode5 sd b :
+lemma haetae_public_key_ref_roundtrip md (pk : pkey) :
+lemma haetae_keygen_public_key_ref_roundtrip md sd :
+lemma haetae_pack_polyveck_body_size md b :
+lemma haetae_pack_poly_q_size md p :
+lemma haetae_unpack_poly_q_at_wf md enc offset :
+lemma haetae_unpack_poly_q_pack_at md prefix p :
+lemma haetae_unpack_polyveck_body_wf md enc offset :
+lemma haetae_body_index_div md row col :
+lemma haetae_body_index_mod md row col :
+lemma haetae_body_index_lt md row col :
+lemma haetae_unpack_polyveck_body_pack_at md prefix b :
+lemma haetae_unpack_polyveck_body_pack md sd b :
+lemma haetae_public_key_roundtrip md pk :
+lemma haetae_pack_public_key_bytes_size md pk :
+lemma haetae_pack_public_key_bytes_wf md pk :
+lemma haetae_pack_public_key_bytes_ref_size md pk :
+lemma haetae_pack_public_key_bytes_ref_wf md pk :
+lemma haetae_unpack_public_key_bytes_wf md enc :
+lemma haetae_unpack_public_key_bytes_ref_wf md enc :
+lemma concrete_haetae_keygen_packed_public_key_wf md sd :
+lemma concrete_haetae_keygen_unpacked_public_key_wf md sd :
+lemma concrete_haetae_keygen_packed_public_key_ref_wf md sd :
+lemma concrete_haetae_keygen_unpacked_public_key_ref_wf md sd :
+lemma packed_haetae_reference_public_key_wf md sd :
+lemma packed_haetae_reference_public_key_polyq_wf md sd :
+lemma packed_haetae_reference_public_key_unpacked_wf md sd :
+lemma concrete_haetae_reference_keygen_packed_public_key_ref_wf md sd :
+lemma concrete_haetae_reference_keygen_unpacked_public_key_ref_wf md sd :
+lemma haetae_reference_keygen_public_key_ref_roundtrip md sd :
+lemma public_key_of_secret_relation md sk :
+lemma public_key_of_secret_equation_holds md sk :
+lemma deterministic_poly_wf tag src :
+lemma deterministic_polyveck_wf md src :
+lemma deterministic_unit_poly_wf tag src :
+lemma deterministic_unit_poly_unit tag src :
+lemma deterministic_unit_polyveck_wf md tag src :
+lemma deterministic_unit_polyveck_unit md tag src :
+lemma deterministic_unit_polyvecl_wf md tag src :
+lemma deterministic_unit_polyvecl_unit md tag src :
+lemma commitment_raw_wf md sk m ctx coins :
+lemma commitment_highbits_wf md sk m ctx coins :
+lemma commitment_lowbits_wf md sk m ctx coins :
+lemma commitment_lowbits_entropy_token md sk m ctx coins :
+lemma challenge_from_seed_wf md src :
+lemma challenge_from_seed_sparse md src :
+lemma challenge_hash_wf md w1 w0 mu :
+lemma challenge_hash_sparse md w1 w0 mu :
+lemma response_vector_wf md sk m ctx coins :
+lemma response_vector_unit md sk m ctx coins :
+lemma response_aux_vector_wf md sk m ctx coins :
+lemma response_aux_vector_unit md sk m ctx coins :
+lemma signing_sample_y1_wf md sk m ctx coins :
+lemma signing_sample_y1_unit md sk m ctx coins :
+lemma signing_sample_y2_wf md sk m ctx coins :
+lemma signing_sample_y2_unit md sk m ctx coins :
+lemma hint_vector_wf md sk m ctx coins :
+lemma hint_vector_unit md sk m ctx coins :
+lemma message_hash_size pk ctx m :
+lemma challenge_hash_size md w1 w0 mu :
+lemma keygen_internal_valid md sd :
+lemma public_key_of_keygen md sd :
+lemma public_key_vector_seed_keygen_equation md sd :
+lemma public_key_vector_seed_mode23_keygen_equation md sd :
+lemma public_key_vector_seed_mode5_keygen_equation sd :
+lemma haetae_keygen_raw_public_vector_keygen_equation md sd :
+lemma haetae_reference_keygen_raw_public_vector_equation md sd :
+lemma haetae_reference_keygen_mode23_public_vector_equation md sd :
+lemma haetae_reference_keygen_mode23_adjusted_error_equation md sd :
+lemma haetae_reference_keygen_mode5_public_vector_equation sd :
+lemma packed_haetae_reference_public_key_seedE md sd :
+lemma packed_haetae_reference_public_key_bodyE md sd :
+lemma haetae_reference_keygen_seed_flow_wf_ok md sd :
+lemma packed_haetae_public_key_wf md sd :
+lemma packed_haetae_public_key_polyq_wf md sd :
+lemma packed_haetae_public_key_unpacked_wf md sd :
+lemma haetae_keygen_public_key_roundtrip md sd :
+lemma public_key_of_secret_packed md sk :
+lemma keygen_public_key_packed md sd :
+lemma public_verification_matrix_packedE md pk :
+lemma packed_haetae_keygen_verification_matrixE md sd :
+lemma honest_public_verification_matrix_eq_packed_keygen md sd :
+lemma concrete_keygen_public_verification_matrix_correct md sd :
+lemma concrete_keygen_public_verification_matrix_ref_correct md sd :
+lemma concrete_reference_keygen_public_verification_matrix_ref_correct md sd :
+lemma concrete_keygen_public_verification_matrix_size md sd :
+lemma concrete_keygen_public_verification_matrix_ref_size md sd :
+lemma concrete_reference_keygen_public_verification_matrix_ref_size md sd :
+lemma concrete_keygen_public_verification_matrix_rows_wf md sd :
+lemma concrete_keygen_public_verification_matrix_ref_rows_wf md sd :
+lemma concrete_reference_keygen_public_verification_matrix_ref_rows_wf md sd :
+lemma valid_signature_sign_internal md sk m ctx coins :
+lemma verify_challenge_consistent_sign_internal md sk m ctx coins :
+lemma secret_norm_ok_current md sd :
+lemma response_norm_ok_current md sk m ctx coins :
+lemma verify_norm_ok_current md sk m ctx coins :
+lemma verify_internal_sign_internal md sk m ctx coins :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Params.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type mode = [ Mode2 | Mode3 | Mode5 ].
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op seedbytes : int = 32.
+op crhbytes : int = 64.
+op n : int = 256.
+op q : int = 64513.
+op dq : int = 2 * q.
+op mode_k (md : mode) : int =
+op mode_l (md : mode) : int =
+op mode_tau (md : mode) : int =
+op mode_b0sq (md : mode) : int =
+op mode_b1sq (md : mode) : int =
+op mode_b2sq (md : mode) : int =
+op mode_ln (_ : mode) : int = 8192.
+op mode_alpha_hint (md : mode) : int =
+op mode_m (md : mode) : int = mode_l md - 1.
+op mode_crypto_bytes (md : mode) : int =
+op mode_polyq_packedbytes (md : mode) : int =
+op mode_publickeybytes (md : mode) : int =
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma seedbytes_gt0 : 0 < seedbytes by rewrite /seedbytes.
+lemma crhbytes_gt0 : 0 < crhbytes by rewrite /crhbytes.
+lemma n_gt0 : 0 < n by rewrite /n.
+lemma q_gt0 : 0 < q by rewrite /q.
+lemma dqE : dq = 129026 by rewrite /dq /q.
+lemma mode_k_gt0 md : 0 < mode_k md.
+lemma mode_l_gt0 md : 0 < mode_l md.
+lemma mode_tau_gt0 md : 0 < mode_tau md.
+lemma mode_tau_le_n md : mode_tau md <= n.
+lemma mode_b0sq_gt0 md : 0 < mode_b0sq md.
+lemma mode_b1sq_gt0 md : 0 < mode_b1sq md.
+lemma mode_b2sq_gt0 md : 0 < mode_b2sq md.
+lemma mode_ln_gt0 md : 0 < mode_ln md.
+lemma mode_alpha_hint_gt0 md : 0 < mode_alpha_hint md.
+lemma mode_m_gt0 md : 0 < mode_m md.
+lemma mode_crypto_bytes_gt0 md : 0 < mode_crypto_bytes md.
+lemma mode_polyq_packedbytes_gt0 md : 0 < mode_polyq_packedbytes md.
+lemma n_le_mode_polyq_packedbytes md : n <= mode_polyq_packedbytes md.
+lemma mode_publickeybytes_gt0 md : 0 < mode_publickeybytes md.
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_FIPS202.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type fips_byte = int.
+type fips202_state = fips_byte list.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op fips202_state_bytes : int = 200.
+op shake256_rate_bytes : int = 136.
+op shake256_capacity_bytes : int = 64.
+op shake256_domain_separator : fips_byte = 31.
+op fips202_final_padding_byte : fips_byte = 128.
+op fips202_keccak_f1600 (st : fips202_state) : fips202_state =
+op shake256_absorb_once_short_domain
+op shake256_absorb_once_short_block_byte
+op shake256_absorb_once_short_state
+op shake256_absorb_once
+op shake256_squeeze (st : fips202_state) (outlen : int) : fips_byte list =
+op shake256
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma fips202_state_bytesE :
+lemma shake256_rate_bytesE :
+lemma shake256_capacity_bytesE :
+lemma shake256_domain_separatorE :
+lemma fips202_final_padding_byteE :
+lemma shake256_rate_capacity_state_bytesE :
+lemma shake256_absorb_once_short_state_size input inlen :
+lemma shake256_squeeze_size st outlen :
+lemma shake256_size input inlen outlen :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\section*{\ecfile{HAETAE_Keccak1600.ec}}
+
+\subsection*{Types}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+type keccak_byte = int.
+type keccak_lane = bool list.
+type keccak_state = keccak_lane list.
+\end{lstlisting}
+
+\subsection*{Ops and abbreviations}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+op keccak_lane_bits : int = 64.
+op keccak_state_lanes : int = 25.
+op keccak_state_bytes : int = 200.
+op keccak_byte_norm (b : keccak_byte) : keccak_byte = b %% 256.
+op keccak_byte_bit (b : keccak_byte) (i : int) : bool =
+op keccak_word_norm (w : int) : int = w %% (2 ^ keccak_lane_bits).
+op keccak_word_bit (w : int) (i : int) : bool =
+op keccak_lane_zero : keccak_lane = nseq keccak_lane_bits false.
+op keccak_lane_bit (lane : keccak_lane) (i : int) : bool =
+op keccak_lane_wf (lane : keccak_lane) : bool =
+op keccak_lane_xor (a b : keccak_lane) : keccak_lane =
+op keccak_lane_and (a b : keccak_lane) : keccak_lane =
+op keccak_lane_not (a : keccak_lane) : keccak_lane =
+op keccak_lane_rotl (a : keccak_lane) (offset : int) : keccak_lane =
+op keccak_lane_of_int (x : int) : keccak_lane =
+op keccak_lane_to_byte (lane : keccak_lane) (byte_index : int) : keccak_byte =
+op keccak_bytes_to_lane (bs : keccak_byte list) (lane_index : int) :
+op keccak_lanes_of_bytes (bs : keccak_byte list) : keccak_state =
+op keccak_bytes_of_lanes (st : keccak_state) : keccak_byte list =
+op keccak_lane_index (x y : int) : int =
+op keccak_state_lane (st : keccak_state) (x y : int) : keccak_lane =
+op keccak_rho_offsets : int list =
+op keccak_round_constants : int list =
+op keccak_theta_c (st : keccak_state) (x : int) : keccak_lane =
+op keccak_theta_d (st : keccak_state) (x : int) : keccak_lane =
+op keccak_theta (st : keccak_state) : keccak_state =
+op keccak_rho_pi (st : keccak_state) : keccak_state =
+op keccak_chi (st : keccak_state) : keccak_state =
+op keccak_iota (st : keccak_state) (rc : keccak_lane) : keccak_state =
+op keccak_round (st : keccak_state) (rc : keccak_lane) : keccak_state =
+op keccak_f1600_lanes (st : keccak_state) : keccak_state =
+op keccak_f1600_bytes (st : keccak_byte list) : keccak_byte list =
+op keccak_theta_c_bit_index_value
+op keccak_theta_d_bit_index_value
+\end{lstlisting}
+
+\subsection*{Modules, module types, and clones}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}
+
+\subsection*{Lemmas}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+lemma keccak_lane_bitsE :
+lemma keccak_state_lanesE :
+lemma keccak_state_bytesE :
+lemma keccak_lane_zero_wf :
+lemma keccak_lane_xor_wf a b :
+lemma keccak_lane_and_wf a b :
+lemma keccak_lane_not_wf a :
+lemma keccak_lane_rotl_wf a offset :
+lemma keccak_lane_of_int_wf x :
+lemma keccak_lane_mod_range x :
+lemma keccak_word_modulus_pos :
+lemma keccak_word_norm_small w :
+lemma keccak_pow2_0E :
+lemma keccak_pow2_1E :
+lemma keccak_pow2_2E :
+lemma keccak_pow2_3E :
+lemma keccak_pow2_4E :
+lemma keccak_pow2_5E :
+lemma keccak_pow2_6E :
+lemma keccak_pow2_7E :
+lemma keccak_bytes_to_lane_wf bs lane_index :
+lemma keccak_rho_offsets_size :
+lemma keccak_round_constants_size :
+lemma keccak_lanes_of_bytes_size bs :
+lemma keccak_lanes_of_bytes_lane_wf bs lane :
+lemma keccak_lanes_of_bytes_bitE bs lane bit :
+lemma keccak_lane_xor_bitE a b bit :
+lemma keccak_lane_and_bitE a b bit :
+lemma keccak_lane_not_bitE a bit :
+lemma keccak_lane_rotl_bitE a offset bit :
+lemma keccak_lane_of_int_bitE x bit :
+lemma keccak_state_lane_bitE st x y bit :
+lemma keccak_theta_c_bitE st x bit :
+lemma keccak_theta_c_bit_indexE st x bit :
+lemma keccak_theta_d_bitE st x bit :
+lemma keccak_theta_d_bit_indexE st x bit :
+lemma keccak_theta_bitE st lane bit :
+lemma keccak_theta_bit_indexE st lane bit :
+lemma keccak_rho_pi_bitE st lane bit :
+lemma keccak_rho_pi_bit_indexE st lane bit :
+lemma keccak_chi_bitE st lane bit :
+lemma keccak_chi_bit_indexE st lane bit :
+lemma keccak_iota_bitE st rc lane bit :
+lemma keccak_round_bitE st rc lane bit :
+lemma keccak_bytes_of_lanes_size st :
+lemma keccak_bytes_of_lanes_byteE st i :
+lemma keccak_lane_to_byte_bitsE lane byte_index :
+lemma keccak_lane_to_byte_from_bitsE
+lemma keccak_lane_to_byte_70E lane byte_index :
+lemma keccak_f1600_bytes_size st :
+\end{lstlisting}
+
+\subsection*{Hoare, probabilistic Hoare, and equivalence proof commands}
+\begin{lstlisting}[language=EasyCrypt,basicstyle=\ttfamily\tiny]
+\end{lstlisting}

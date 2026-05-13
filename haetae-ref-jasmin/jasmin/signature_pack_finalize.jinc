@@ -1,0 +1,56 @@
+fn _pack_sig_finish(reg mut ptr u8[2948] sigp,
+                    reg mut ptr u64[5] statep,
+                    reg const ptr u8[2048] hbencp,
+                    reg const ptr u8[2048] hencp) -> reg ptr u8[2948],
+                                               reg ptr u64[5]
+{
+  reg u64 hbsize hsize offsets bad;
+
+  hbsize = statep[0];
+  hsize = statep[1];
+  statep = _pack_sig_size_offsets(statep);
+  bad = statep[1];
+  if (bad == 0)
+  {
+    offsets = statep[0];
+    sigp = _pack_sig_suffix(sigp, hbencp, hencp, hbsize, hsize, offsets);
+  }
+
+  return sigp, statep;
+}
+
+fn _unpack_sig_finish(reg mut ptr u64[4] statep,
+                      reg const ptr u8[2948] sigp) -> reg ptr u64[4]
+{
+  reg u64 hbsize hsize padlen bad i idx bb;
+  reg u32 b;
+
+  statep = _unpack_sig_size_offsets(statep, sigp);
+  bad = statep[3];
+  if (bad == 0)
+  {
+    hbsize = statep[0];
+    hsize = statep[1];
+    padlen = statep[2];
+
+    i = 0;
+    while (i < padlen)
+    {
+      idx = 2;
+      idx += hbsize;
+      idx += hsize;
+      idx += i;
+      b = (32u)sigp[idx];
+      bb = (64u)b;
+      bad |= bb;
+      i += 1;
+    }
+
+    if (bad != 0)
+    {
+      statep[3] = 1;
+    }
+  }
+
+  return statep;
+}

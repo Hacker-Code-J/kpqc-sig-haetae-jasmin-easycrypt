@@ -1,0 +1,2265 @@
+%==============================================================================%
+%  haetae-ntt-presentation.tex
+%  Artifact-oriented presentation for the HAETAE NTT verification
+%==============================================================================%
+
+\documentclass[10pt,aspectratio=1610,compress,dvipsnames]{beamer}
+\usepackage{kotex}
+\input{cse-seminar-preamble}
+\input{title-haetae}
+\input{tcolorbox}
+\input{listing}
+\input{algorithm}
+\input{cse-seminar-commands}
+
+\usepackage{stmaryrd}
+\usepackage{pifont}
+\usepackage{mathtools}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{booktabs}
+
+%--- Status icons -------------------------------------------------------------
+\newcommand{\cmark}{\textcolor{green!55!black}{\ding{51}}}
+\newcommand{\xmark}{\textcolor{red!65!black}{\ding{55}}}
+\newcommand{\pmark}{\textcolor{orange!80!black}{\ding{119}}}
+
+%--- Math and text shorthands -------------------------------------------------
+\providecommand{\NTT}{\ensuremath{\mathsf{NTT}}}
+\newcommand{\INTT}{\ensuremath{\mathsf{INTT}}}
+\newcommand{\brev}{\ensuremath{\mathsf{brev}}}
+\newcommand{\SREDC}{\ensuremath{\mathsf{SREDC}}}
+\newcommand{\Rq}{\ensuremath{\mathbb{Z}_q[X]/(X^{256}+1)}}
+\newcommand{\ec}[1]{\texttt{#1}}
+\newcommand{\haetae}{\textsc{Haetae}}
+\newcommand{\easycrypt}{\textsf{EasyCrypt}}
+\newcommand{\jasmin}{\textsf{Jasmin}}
+
+%--- EC code listing ----------------------------------------------------------
+\tcbuselibrary{listings}
+\newtcblisting{ecblock}[1][]{
+  colframe=cseblue!75, colback=cseblue!4, arc=3pt,
+  listing only, left=4pt, right=4pt, top=3pt, bottom=3pt,
+  listing options={
+    basicstyle=\ttfamily\scriptsize,
+    keywordstyle=\color{cseblue}\bfseries,
+    commentstyle=\color{gray!70}\itshape,
+    morekeywords={hoare,phoare,lemma,proc,call,wp,skip,while,islossless,
+                  op,let,forall,exists,fun,type,module,axiom,clone,
+                  proof,apply,rewrite,have,by,move,smt,ring,field,
+                  return,if,then,else,in,require,equiv,pred,var},
+    escapeinside={(*@}{@*)},
+  },
+  title={\footnotesize\sffamily\bfseries #1},
+}
+
+%--- Layer palette ------------------------------------------------------------
+\colorlet{layer0}{red!12!white}
+\colorlet{layer1}{orange!18!white}
+\colorlet{layer2}{yellow!24!white}
+\colorlet{layer3}{green!12!white}
+\colorlet{e2ecol}{cyan!14!white}
+
+%--- Navigation ---------------------------------------------------------------
+\newsavebox{\csenavbox}
+\setbeamertemplate{headline}{%
+  \leavevmode
+  \hbox{%
+    \begin{beamercolorbox}[wd=\paperwidth,ht=2.5ex,dp=3.125ex]{palette quaternary}
+      \savebox{\csenavbox}{\insertnavigation{\paperwidth}}%
+      \ifdim\wd\csenavbox>\paperwidth
+        \resizebox{\paperwidth}{!}{\usebox{\csenavbox}}%
+      \else
+        \usebox{\csenavbox}%
+      \fi
+    \end{beamercolorbox}%
+  }%
+  \featherheaderbackground
+}
+
+\newcommand{\sectiontitleframe}[1]{%
+\begin{frame}[plain]
+\begin{center}\bfseries\centering
+  \includegraphics[scale=1]{Feathergraphics/cse_logo_opa10}
+  \vspace{-5.75cm}\\
+  {\adjustbox{scale=2.6}{\color{cseblue}#1}}
+  {\ }\vspace{4cm}\\
+\end{center}
+\end{frame}
+}
+
+%==============================================================================%
+\begin{document}
+%==============================================================================%
+
+{\1\begin{frame}[plain,noframenumbering]\titlepage\end{frame}}
+
+\begin{frame}{\textbf{Table of Contents}}\tableofcontents\end{frame}
+
+%==============================================================================%
+\section{Artifact Claim}
+%==============================================================================%
+\sectiontitleframe{Artifact Claim}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Claim}{What the Artifact Proves}
+
+\begin{center}
+\large\bfseries
+The artifact gives a fully machine-checked \easycrypt{} proof that the scalar
+\jasmin{} NTT code implements the intended HAETAE transform.
+\end{center}
+
+\vspace{10pt}
+\begin{center}
+\renewcommand{\arraystretch}{1.45}
+\begin{tabular}{p{4.2cm}p{8.2cm}}
+\toprule[1.2pt]
+\textbf{Forward NTT} &
+\ec{poly\_ntt\_jazz} returns an array representing $\mathtt{full\_ntt}(p)$,
+with output bound $2^{24}$. \\
+\midrule
+\textbf{Inverse NTT} &
+\ec{poly\_invntt\_jazz} returns an array representing
+$\mathtt{array256\_mont}(\mathtt{full\_invntt}(p))$, the Montgomery-form result
+expected by HAETAE arithmetic. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{8pt}
+\begin{center}
+\small The claim is functional correctness of the scalar NTT primitives, not a
+full proof of the complete signature scheme.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Claim}{Mathematical Notation Behind the Claim}
+\small
+\defbox[Field, root, and decoding map]{
+Let
+\[
+  q=64513,\qquad
+  \mathbb F_q=\mathbb Z/q\mathbb Z,\qquad
+  \zeta=[426]_q,\qquad
+  R=[2^{32}]_q.
+\]
+We write $\brev_8(i)$ for \ec{br i}, where \ec{br = bsrev 8};
+$p_i$ for \ec{p.[i]}; and $\zeta^e$ for
+\ec{ZqRing.exp zroot e}.
+
+For a Jasmin byte array \ec{rp}, define the decoded polynomial
+\[
+  D(rp)_i =
+  \left[
+    \operatorname{to\_sint}\bigl(\operatorname{get32}(rp,i)\bigr)
+  \right]_q,
+  \qquad 0\le i<256.
+\]
+}
+
+\vspace{4pt}
+\thmbox[Exact meaning of \ec{NTT\_Fq.poly\_repr\_bound rp p b}]{
+\[
+  \mathsf{Repr}_b(rp,p)
+  \;\Longleftrightarrow\;
+  D(rp)=p
+  \;\land\;
+  \forall i\in[0,256).\;
+  -2^b \le \operatorname{to\_sint}(\operatorname{get32}(rp,i)) < 2^b.
+\]
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}[fragile]{\bfseries Artifact Claim}{Forward NTT Theorem}
+\begin{ecblock}[NTTEndToEnd.ec]
+lemma haetae_jasmin_ntt_correct p :
+  hoare [Hpoly_extract.M.poly_ntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res (NTTFullSpec.full_ntt p) 24].
+\end{ecblock}
+
+\vspace{4pt}
+
+\thmbox[Mathematical formula carried by the code]{
+\scriptsize
+\[
+  F(p)_i=
+  \sum_{j=0}^{255} p_j\,\zeta^{(2\brev_8(i)+1)j},
+  \qquad 0\le i<256.
+\]
+\[
+  \forall p\in\mathbb F_q^{256}.\quad
+  \bigl\{\mathsf{Repr}_{16}(rp,p)\bigr\}\;
+  \ec{poly\_ntt\_jazz}(rp)\;
+  \bigl\{\mathsf{Repr}_{24}(res,F(p))\bigr\}.
+\]
+Thus the EasyCrypt postcondition is not merely termination: it says that the
+returned Jasmin memory decodes to the full HAETAE forward transform.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Claim}{Forward Theorem as a Formula}
+\small
+\defbox[Mathematical transform corresponding to \ec{NTTFullSpec.full\_ntt}]{
+\[
+  F(p)_i
+  =
+  \sum_{j=0}^{255}
+    p_j\,\zeta^{(2\brev_8(i)+1)j},
+  \qquad 0\le i<256.
+\]
+}
+
+\vspace{5pt}
+\thmbox[Hoare triple proved by \ec{haetae\_jasmin\_ntt\_correct}]{
+\[
+  \bigl\{\mathsf{Repr}_{16}(rp,p)\bigr\}\;
+  \ec{poly\_ntt\_jazz}(rp)\;
+  \bigl\{\mathsf{Repr}_{24}(res,F(p))\bigr\}.
+\]
+Equivalently, for every input polynomial $p\in\mathbb F_q^{256}$ represented
+by the input memory, the returned Jasmin memory decodes to exactly $F(p)$ and
+its signed words are bounded by $2^{24}$.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}[fragile]{\bfseries Artifact Claim}{Inverse NTT Theorem}
+\begin{ecblock}[NTTEndToEnd.ec]
+lemma haetae_jasmin_invntt_correct p :
+  hoare [Hpoly_extract.M.poly_invntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res
+      (NTT_Fq.array256_mont (NTTFullSpec.full_invntt p)) 16].
+\end{ecblock}
+
+\vspace{4pt}
+
+\thmbox[Mathematical formula carried by the code]{
+\scriptsize
+\[
+  F^{-1}(p)_i =
+  [256]_q^{-1}\sum_{j=0}^{255}
+    p_j\,\zeta^{-((2\brev_8(j)+1)i)},\qquad
+  \mathsf{Mont}(v)_i=R\,v_i.
+\]
+\[
+  \forall p\in\mathbb F_q^{256}.\quad
+  \bigl\{\mathsf{Repr}_{16}(rp,p)\bigr\}\;
+  \ec{poly\_invntt\_jazz}(rp)\;
+  \bigl\{\mathsf{Repr}_{16}(res,\mathsf{Mont}(F^{-1}(p)))\bigr\}.
+\]
+The \ec{array256\_mont} wrapper in the EasyCrypt code is exactly the
+coefficientwise factor $R=[2^{32}]_q$ in this formula.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Claim}{Inverse Theorem as a Formula}
+\small
+\defbox[Mathematical transform corresponding to \ec{NTTFullSpec.full\_invntt}]{
+\[
+  F^{-1}(p)_i
+  =
+  [256]_q^{-1}
+  \sum_{j=0}^{255}
+    p_j\,\zeta^{-((2\brev_8(j)+1)i)},
+  \qquad 0\le i<256.
+\]
+\[
+  \ec{NTT\_Fq.array256\_mont}(v)_i = R\,v_i.
+\]
+}
+
+\vspace{5pt}
+\thmbox[Hoare triple proved by \ec{haetae\_jasmin\_invntt\_correct}]{
+\[
+  \bigl\{\mathsf{Repr}_{16}(rp,p)\bigr\}\;
+  \ec{poly\_invntt\_jazz}(rp)\;
+  \bigl\{\mathsf{Repr}_{16}(res,R\cdot F^{-1}(p))\bigr\}.
+\]
+The factor $R=[2^{32}]_q$ is the Montgomery representation factor appearing
+in the EasyCrypt postcondition
+\ec{array256\_mont (full\_invntt p)}.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Claim}{Why This Was Not Just Reusing Kyber}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\defbox[What could be reused]{
+\normalsize
+\begin{itemize}
+  \setlength\itemsep{6pt}
+  \item The high-assurance stack: \jasmin{} source, \jasmin{} extraction, and \easycrypt{} proof.
+  \item The overall proof shape: refine low-level code to an imperative NTT, then connect the loop to algebra.
+  \item Standard word-arithmetic and relational Hoare-logic techniques.
+\end{itemize}
+}
+
+\column{0.48\textwidth}
+\defbox[What had to be redone]{
+\normalsize
+\begin{itemize}
+  \setlength\itemsep{6pt}
+  \item HAETAE works with $q=64513$ and primitive root $\zeta_0=426$.
+  \item The intended transform is the full 256-point spectral NTT over $X^{256}+1$.
+  \item The Kyber-style ring-level NTT was not the final HAETAE specification, so a new full spectral specification and algebra bridge were needed.
+\end{itemize}
+}
+\end{columns}
+
+\vspace{6pt}
+\begin{center}
+\small The artifact closes that HAETAE-specific bridge inside \ec{NTTFullAlgebra.ec}.
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Artifact Map}
+%==============================================================================%
+\sectiontitleframe{Artifact Map}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Where the Proof Lives}
+\begin{center}
+\scriptsize\renewcommand{\arraystretch}{1.16}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.45cm}p{8.05cm}c}
+\toprule[1.2pt]
+\textbf{File} & \textbf{Role in the artifact} & \textbf{Checked} \\
+\midrule
+\ec{NTTEndToEnd.ec} & Top-level Hoare theorems for forward and inverse Jasmin entry points. & \cmark \\
+\ec{RefJasminNTT.ec} & pRHL refinement from extracted Jasmin code to imperative EasyCrypt procedures. & \cmark \\
+\ec{NTTFullAlgebra.ec} & Loop invariants and algebra proving imperative NTT/INTT equal the full spectral specs. & \cmark \\
+\ec{NTTFullSpec.ec} & Abstract full NTT and inverse NTT definitions. & \cmark \\
+\ec{NTT\_Fq.ec} and \ec{Fq.ec} & Imperative NTT model, coefficient arithmetic, bounds, and array representation predicates. & \cmark \\
+\ec{Montgomery.ec}, \ec{GFq.ec}, \ec{Rq.ec} & Modular arithmetic, Montgomery reduction, field and ring support. & \cmark \\
+\ec{Array256.ec}, \ec{BArray1024.ec}, \ec{WArray1024.ec} & Array libraries used by the proof. & \cmark \\
+\ec{Hpoly\_extract.ec} & Jasmin extraction surface used by the refinement proof. & \cmark \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\vspace{3pt}
+\begin{center}
+\scriptsize
+These files are the checked transitive spine for the final HAETAE NTT
+functional-correctness theorem.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Structural Metrics I}
+\begin{center}
+\scriptsize
+Counts are syntactic over all non-scratch EasyCrypt \ec{.ec} files in the
+artifact tree, including \ec{extract/}:
+\ec{type}, \ec{op}, \ec{module}, \ec{lemma}, and occurrences of
+\ec{hoare}, \ec{phoare}, or \ec{equiv}.  Scratch files under \ec{rubbish/}
+are excluded.
+\end{center}
+
+\vspace{4pt}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.18}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule[1.2pt]
+\textbf{File} & \textbf{Lines} & \textbf{Types} & \textbf{Ops} &
+\textbf{Modules} & \textbf{Lemmas} & \textbf{Hoare/equiv} \\
+\midrule
+\ec{Array256.ec}      &    3 & 0 &  0 & 0 &   0 &  0 \\
+\ec{BArray1024.ec}    &    3 & 0 &  0 & 0 &   0 &  0 \\
+\ec{Fastexp.ec}       &   82 & 0 &  2 & 0 &   2 &  0 \\
+\ec{Fq.ec}            &  535 & 0 &  6 & 0 &  16 &  4 \\
+\ec{GFq.ec}           &   27 & 0 &  6 & 0 &   0 &  0 \\
+\ec{Hpoly\_extract.ec}&  338 & 0 &  0 & 1 &   0 &  0 \\
+\ec{Montgomery.ec}    &  427 & 0 & 21 & 0 &  29 &  0 \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Structural Metrics II}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.16}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule[1.2pt]
+\textbf{File} & \textbf{Lines} & \textbf{Types} & \textbf{Ops} &
+\textbf{Modules} & \textbf{Lemmas} & \textbf{Hoare/equiv} \\
+\midrule
+\ec{NTTEndToEnd.ec}    &  104 & 1 &  2 & 0 &  10 & 10 \\
+\ec{NTTFullAlgebra.ec} & 3085 & 1 & 26 & 0 & 111 &  2 \\
+\ec{NTTFullSpec.ec}    &  160 & 0 &  5 & 0 &  10 &  0 \\
+\ec{NTT\_Fq.ec}        &  988 & 1 & 21 & 1 &  52 &  0 \\
+\ec{RefJasminNTT.ec}   & 2609 & 0 & 15 & 0 &  99 & 18 \\
+\ec{Rq.ec}             &  117 & 2 & 20 & 0 &   0 &  0 \\
+\ec{WArray1024.ec}     &    3 & 0 &  0 & 0 &   0 &  0 \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Structural Metrics III}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.16}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrr}
+\toprule[1.2pt]
+\textbf{File} & \textbf{Lines} & \textbf{Types} & \textbf{Ops} &
+\textbf{Modules} & \textbf{Lemmas} & \textbf{Hoare/equiv} \\
+\midrule
+\ec{extract/Array256.ec}       &    3 & 0 & 0 & 0 &   0 & 0 \\
+\ec{extract/BArray1024.ec}     &    3 & 0 & 0 & 0 &   0 & 0 \\
+\ec{extract/Hpoly\_extract.ec} &  356 & 0 & 0 & 1 &   2 & 2 \\
+\ec{extract/WArray1024.ec}     &    3 & 0 & 0 & 0 &   0 & 0 \\
+\midrule
+\textbf{Total}                 & 8846 & 5 & 124 & 3 & 331 & 36 \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{2pt}
+\begin{center}
+\scriptsize
+The Hoare/equiv column counts deterministic Hoare judgments, probability-one
+\ec{phoare} judgments, and relational \ec{equiv} judgments.
+\end{center}
+
+\vspace{5pt}
+\begin{center}
+\scriptsize
+The large proof weight is concentrated in \ec{NTTFullAlgebra.ec} and
+\ec{RefJasminNTT.ec}: algebraic loop reasoning plus Jasmin refinement and
+word-level bounds.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Metrics as Mathematical Objects}
+\small
+\defbox[How to interpret the structural counts]{
+The metrics are not merely syntactic size indicators.  Each counted class has a
+mathematical role in the proof:
+\[
+\begin{array}{rcl}
+\ec{type}  &\leadsto& \text{a carrier set},\\
+\ec{op}    &\leadsto& \text{a total function or predicate},\\
+\ec{module}&\leadsto& \text{a state-transforming algorithm},\\
+\ec{lemma} &\leadsto& \text{a theorem in the proof graph},\\
+\ec{hoare/phoare/equiv}&\leadsto&
+  \text{a semantic program-correctness judgment}.
+\end{array}
+\]
+}
+
+\vspace{6pt}
+\begin{center}
+\scriptsize
+The following slides interpret all counted objects used by the checked
+functional-correctness development.  The rows are exhaustive by declaration
+family: every counted type, op, module, lemma, and Hoare-style judgment falls
+under exactly one of the displayed mathematical schemas.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Types and Modules as Mathematics}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.14}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.1cm}p{3.3cm}p{5.7cm}}
+\toprule[1.2pt]
+\textbf{EasyCrypt object} & \textbf{Kind} & \textbf{Mathematical meaning} \\
+\midrule
+\ec{Rq.poly} & type & Carrier $\mathbb{F}_q^{256}$; also read as
+$\mathbb{F}_q[X]/(X^{256}+1)$ when multiplication is used. \\
+\ec{NTTFullAlgebra.poly} & type & Local alias for the same carrier
+$\mathbb{F}_q^{256}$ inside the stage-invariant proof. \\
+\ec{NTTEndToEnd.poly} & type & Local alias for the vector quantified in the
+final Jasmin correctness theorems. \\
+\ec{Rq.CR.t}, \ec{NTT\_Fq.CR.t} & clone carrier & Ring carrier specialized to
+\ec{coeff}; supplies $0,1,+,-,\cdot,(\cdot)^{-1}$ over $\mathbb{F}_q$. \\
+\ec{Hpoly\_extract.M} & module & Extracted Jasmin transition system:
+procedures are state transformers over word arrays. \\
+\ec{extract/Hpoly\_extract.M} & module & Generated extraction-side copy of the
+same Jasmin transition system, with wrapper equivalence lemmas for public
+entry points. \\
+\ec{NTT\_Fq.NTT} & module & Imperative mathematical model of forward and
+inverse NTT loops over field arrays. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Counted Types and Modules}
+\tiny
+\begin{columns}[T]
+\column{0.52\textwidth}
+\textbf{The five counted type declarations}
+\vspace{2pt}
+\begin{center}
+\renewcommand{\arraystretch}{1.14}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{p{2.35cm}p{3.85cm}}
+\toprule[1.1pt]
+\textbf{EasyCrypt type} & \textbf{Set or class represented} \\
+\midrule
+\ec{Rq.poly} &
+$\mathcal P=\mathbb F_q^{256}$, also the coefficient class for
+$\mathbb F_q[X]/(X^{256}+1)$. \\
+\ec{NTTFullAlgebra.poly} &
+The same set $\mathcal P$, equipped with stage-invariant predicates
+$\mathsf{Stage}_\ell$. \\
+\ec{NTTEndToEnd.poly} &
+The same set $\mathcal P$, used as the quantified input class in the final
+Hoare contracts. \\
+\ec{Rq.CR.t} &
+$\mathbb F_q$, instantiated as the commutative-ring carrier for polynomial
+sums and products. \\
+\ec{NTT\_Fq.CR.t} &
+$\mathbb F_q$, instantiated as the field carrier for exponentiation and
+twiddle powers. \\
+\bottomrule[1.1pt]
+\end{tabular}
+\end{center}
+
+\column{0.46\textwidth}
+\textbf{The three counted modules}
+\vspace{2pt}
+\begin{center}
+\renewcommand{\arraystretch}{1.14}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{p{2.55cm}p{3.15cm}}
+\toprule[1.1pt]
+\textbf{EasyCrypt module} & \textbf{State-transforming algorithm} \\
+\midrule
+\ec{NTT\_Fq.NTT} &
+Imperative field-array algorithms
+$T_{\rm ntt},T_{\rm invntt}:\mathcal P\to\mathcal P$ implementing the
+butterfly loops. \\
+\ec{Hpoly\_extract.M} &
+Extracted Jasmin machine-state transformer over word arrays; its exported
+procedures update byte-array memory. \\
+\ec{extract/Hpoly\_extract.M} &
+Extraction-side wrapper/core transformer; wrapper equivalences relate public
+entry points to core procedures. \\
+\bottomrule[1.1pt]
+\end{tabular}
+\end{center}
+\end{columns}
+
+\vspace{3pt}
+\begin{center}
+\scriptsize
+Thus the type count is not five unrelated mathematical universes: it is
+three presentations of $\mathbb F_q^{256}$ and two presentations of
+$\mathbb F_q$, while the module count records three program-transition
+systems.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Formula Dictionary for Counted Objects}
+\small
+\defbox[Base notation used for every correspondence row]{
+Let
+\[
+  q=64513,\qquad \mathbb{F}=\mathbb{Z}/q\mathbb{Z},\qquad
+  N=256,\qquad \zeta=\mathtt{incoeff}(426).
+\]
+An EasyCrypt array value of type \ec{coeff Array256.t} is read as a vector
+$p=(p_0,\ldots,p_{255})\in\mathbb{F}^N$.  A Jasmin byte array \ec{rp} is read through
+\[
+  D(rp)_i =
+  \mathtt{incoeff}\bigl(\mathtt{W32.to\_sint}
+      (\mathtt{BArray1024.get32}(rp,i))\bigr).
+\]
+}
+
+\vspace{4pt}
+\begin{center}
+\scriptsize
+Thus the five counted type declarations are carrier declarations, the two
+modules are transition systems on these carriers, and the ops/lemmas/judgments
+below are functions, predicates, theorems, and semantic contracts over
+$\mathbb{F}^N$ and decoded machine states.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Ops as Formula Schemas I}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.15}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{2.8cm}p{8.2cm}}
+\toprule[1.2pt]
+\textbf{Ops covered} & \textbf{Mathematical specification} \\
+\midrule
+\ec{CR.*} clone ops in \ec{Rq.ec}, \ec{NTT\_Fq.ec} &
+The ring/field structure on $\mathbb{F}$:
+$0,1,+,-,\cdot,(\cdot)^{-1}$, exponentiation, and integer embedding. \\
+\ec{GFq.ec}, \ec{Fq.ec} constants and bounds &
+$q=64513$; $\operatorname{sint}(x)=asint(x)$ if $asint(x)\le(q-1)/2$ and
+$asint(x)-q$ otherwise; $\ec{bw32}(w,b)\iff -2^b\le to\_sint(w)<2^b$. \\
+\ec{compress}, \ec{decompress} &
+$\operatorname{compress}_d(x)=
+\lfloor asint(x)2^d/q+1/2\rfloor\bmod 2^d$ and
+$\operatorname{decompress}_d(y)=
+\bigl[\lfloor yq/2^d+1/2\rfloor\bigr]_q$. \\
+\ec{Montgomery.ec} reduction ops &
+$R=2^k$; $\operatorname{smod}(a,b)$ is the representative congruent to $a$
+in $[-b/2,b/2)$; \ec{SREDC}, \ec{REDC}, and \ec{REDCk} specify
+$T\mapsto T R^{-1}\pmod q$ or $T\mapsto T R^{-1}\pmod N$ with proved bounds. \\
+\ec{Rq.ec} ring ops &
+$0_i=0$, $1_i=\delta_{i0}$,
+$(a+b)_i=a_i+b_i$, $(-a)_i=-a_i$, and
+$(ab)_i=\sum_{k=0}^{255} a_k b_{i-k}$ with the sign change imposed by
+$X^{256}=-1$. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Ops as Formula Schemas II}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.13}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{2.8cm}p{8.2cm}}
+\toprule[1.2pt]
+\textbf{Ops covered} & \textbf{Mathematical specification} \\
+\midrule
+\ec{Rq.ntt}, \ec{Rq.invntt}, \ec{basemul} &
+Even/odd split NTT formulas over 128 terms, inverse split formulas with
+$128^{-1}$, and degree-one multiplication modulo $X^2-\zeta^e$. \\
+\ec{NTTFullSpec.ec} spectral ops &
+\[
+F(p)_i=\sum_{j=0}^{255}p_j\zeta^{(2\brev_8(i)+1)j},\qquad
+F^{-1}(p)_i=256^{-1}\sum_{j=0}^{255}p_j\zeta^{-(2\brev_8(j)+1)i}.
+\]
+\ec{full\_ntt} is $F$, \ec{full\_invntt} is $F^{-1}$, and
+\ec{partial\_ntt} is the corresponding restricted sum. \\
+\ec{NTTFullAlgebra.ec} stage predicates &
+\ec{full\_stage\_spec}, \ec{fwd\_stage\_progress},
+\ec{inv\_stage\_spec}, and \ec{inv\_stage\_progress} assert that every
+already-visited butterfly position stores exactly the appropriate partial
+sum, while unvisited positions still store the previous-stage sum. \\
+\ec{RefJasminNTT.ec} bound and address ops &
+The predicates are pointwise:
+$\operatorname{bound}_{bd}(rp)\iff
+\forall i\in[0,256).\; -2^{bd(i)}\le to\_sint(rp_i)<2^{bd(i)}$;
+address ops are the affine maps selecting the two butterfly cells. \\
+\ec{NTTEndToEnd.ec} postcondition ops &
+\ec{jasmin\_ntt\_full\_post} means $D(rp)=F(p)$ with the proved output bound;
+\ec{jasmin\_invntt\_full\_post} means
+$D(rp)=R\cdot F^{-1}(p)$ with the inverse output bound. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Lemma Schemas for All Counted Lemmas}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.13}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{2.8cm}p{8.2cm}}
+\toprule[1.2pt]
+\textbf{Lemma schema} & \textbf{Mathematician's reading} \\
+\midrule
+Evaluation lemmas &
+Names ending in \ec{E}, \ec{get}, or constant names prove concrete equalities
+such as $q=64513$, $\zeta^{256}=-1$, and table entries equal powers of
+$\zeta$. \\
+Range and address lemmas &
+They prove integer side conditions: indices lie in $[0,256)$, bit reversal is
+involutive on this interval, and paired butterfly addresses are distinct. \\
+Reduction and word lemmas &
+They show machine-word operations denote field arithmetic:
+$D(a+b)=D(a)+D(b)$, $D(a-b)=D(a)-D(b)$, and
+$D(\ec{\_\_fqmul}(a,b))=\operatorname{SREDC}(D(a)D(b))$. \\
+Split and stage lemmas &
+They prove algebraic recurrence equations for partial sums and then the loop
+invariant steps
+$I_k(r,p)\land\operatorname{step}(r,r')\Rightarrow I_k(r',p)$, finishing with
+$I_8(r,p)\Rightarrow r=F(p)$ and the inverse analogue. \\
+Refinement and end-to-end lemmas &
+They compose decoded-array representation, bound preservation, loop
+correctness, and final postconditions into
+$\llbracket\mathtt{Jasmin}\rrbracket(p)=F(p)$ and
+$\llbracket\mathtt{Jasmin}^{-1}\rrbracket(p)=R\cdot F^{-1}(p)$. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Ops as Mathematical Functions I}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.0cm}p{3.7cm}p{5.3cm}}
+\toprule[1.2pt]
+\textbf{File / op family} & \textbf{Representative ops} & \textbf{Mathematical meaning} \\
+\midrule
+\ec{Fastexp.ec} & \ec{fastexp\_nbits}, \ec{fastexp} &
+Recursive exponentiation functions computing $x^n$. \\
+\ec{Fq.ec} & \ec{q}, \ec{bw32} &
+Modulus $q=64513$ and signed-word range predicate
+$-2^b\le \mathtt{to\_sint}(w)<2^b$. \\
+\ec{GFq.ec} & \ec{q}, \ec{as\_sint}, \ec{compress}, \ec{decompress} &
+Field modulus, signed representative, and rounding maps between coefficients
+and compressed integers. \\
+\ec{Montgomery.ec} & \ec{R}, \ec{smod}, \ec{SREDC}, \ec{REDC}, \ec{REDCk} &
+Integer functions specifying Montgomery reduction and signed modular reduction. \\
+\ec{Rq.ec} & \ec{zero}, \ec{one}, \ec{\&*}, \ec{\&+}, \ec{\&-} &
+Polynomial ring operations in $\mathbb{F}_q[X]/(X^{256}+1)$. \\
+\ec{Rq.ec} & \ec{zroot}, \ec{br}, \ec{ntt}, \ec{invntt}, \ec{basemul} &
+Root $\zeta_0=426$, bit-reversal, split NTT support, and base multiplication. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Ops as Mathematical Functions II}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.11}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.0cm}p{3.7cm}p{5.3cm}}
+\toprule[1.2pt]
+\textbf{File / op family} & \textbf{Representative ops} & \textbf{Mathematical meaning} \\
+\midrule
+\ec{NTTFullSpec.ec} & \ec{partial\_ntt}, \ec{full\_ntt},
+\ec{full\_invntt} & Abstract sums defining the HAETAE forward and inverse
+spectral transforms. \\
+\ec{NTT\_Fq.ec} & \ec{R}, \ec{scale255}, \ec{array256\_mont},
+\ec{array256\_mont\_inv} & Montgomery scaling maps $x\mapsto xR$ and inverse
+scaling constants. \\
+\ec{NTT\_Fq.ec} & \ec{word\_to\_coeff}, \ec{barray256\_to\_poly},
+\ec{poly\_repr\_bound} & Decoding relation from machine words to
+$\mathbb{F}_q^{256}$ with signed range bounds. \\
+\ec{NTT\_Fq.ec} & \ec{zetas}, \ec{zetas\_inv} & Mathematical twiddle tables:
+field powers of $\zeta_0$ in the loop order used by Jasmin. \\
+\ec{NTTFullAlgebra.ec} & \ec{full\_stage\_spec}, \ec{fwd\_stage\_progress},
+\ec{inv\_stage\_spec} & Predicates expressing that an array stores all partial
+NTT or inverse-NTT sums at a stage. \\
+\ec{RefJasminNTT.ec} & \ec{poly\_repr\_bound\_by}, stage-bound ops,
+\ec{final\_mont\_array} & Indexed word-bound predicates and the final
+Montgomery-scaled array during inverse output. \\
+\ec{NTTEndToEnd.ec} & \ec{jasmin\_ntt\_full\_post},
+\ec{jasmin\_invntt\_full\_post} & Final postcondition predicates for the two
+Jasmin entry points. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Lemma Families as Theorems I}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.13}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.0cm}p{3.7cm}p{5.3cm}}
+\toprule[1.2pt]
+\textbf{Lemma family} & \textbf{Examples} & \textbf{Mathematical assertion} \\
+\midrule
+Exponentiation and constants & \ec{fastexpP}, \ec{qE}, \ec{scale255E} &
+Computed constants and fast exponentiation equal the intended field-theoretic
+values. \\
+Montgomery arithmetic & \ec{SREDCp\_corr}, \ec{REDC\_corr},
+\ec{montgomery\_reduce\_corr\_h} & Machine Montgomery reduction implements the
+integer function congruent to $T R^{-1}\pmod q$. \\
+Word ranges and signed decoding & \ec{bw32\_weaken}, \ec{word\_to\_coeff\_*},
+\ec{add\_corr}, \ec{sub\_corr} & Word operations preserve coefficient meaning
+and maintain signed bounds. \\
+Specification equivalence & \ec{full\_ntt\_spec\_imp},
+\ec{full\_invntt\_spec\_imp} & Indexed partial-sum specifications are
+extensionally equal to the array functions \ec{full\_ntt} and
+\ec{full\_invntt}. \\
+Root and bit-reversal algebra & \ec{exp\_zroot\_*}, \ec{bsrev\_*},
+\ec{zetas\_stage} & Powers of $\zeta_0$ and bit-reversed indices normalize to
+the exponents used in the NTT formulas. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Lemma Families as Theorems II}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.12}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.0cm}p{3.7cm}p{5.3cm}}
+\toprule[1.2pt]
+\textbf{Lemma family} & \textbf{Examples} & \textbf{Mathematical assertion} \\
+\midrule
+Forward partial-sum split & \ec{partial\_ntt\_split\_low},
+\ec{partial\_ntt\_split\_high} & A length-$2^{k+1}$ partial NTT sum splits
+into two length-$2^k$ sums combined by a twiddle. \\
+Forward stage induction & \ec{forward\_nat\_pair\_refines},
+\ec{fwd\_stage\_progress\_*}, \ec{ntt\_full\_ntt} & Every forward butterfly
+preserves the stage invariant; after eight stages the imperative loop equals
+\ec{full\_ntt}. \\
+Inverse partial-sum split & \ec{partial\_invntt\_split\_*},
+\ec{inverse\_pair\_refines\_values} & The inverse butterfly merges two inverse
+partial sums into the next inverse stage. \\
+Inverse stage induction & \ec{inv\_stage\_progress\_*},
+\ec{inv\_post\_exit\_full}, \ec{invntt\_full\_invntt} & The inverse loop plus
+final scaling equals \ec{full\_invntt}. \\
+Jasmin refinement and bounds & \ec{forward\_butterfly\_*},
+\ec{inverse\_butterfly\_*}, \ec{final\_mont\_array\_*} & Extracted Jasmin word
+updates preserve the decoded polynomial and the required per-index bounds. \\
+End-to-end composition & \ec{haetae\_jasmin\_ntt\_correct},
+\ec{haetae\_jasmin\_invntt\_correct} & Refinement, algebra, and representation
+lemmas compose into final Jasmin functional-correctness theorems. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{Hoare/equiv Judgments as Semantics}
+\tiny
+\defbox[Judgment form]{
+\[
+  \{P\}\;c\;\{Q\}
+  \quad\text{means}\quad
+  \forall s.\;P(s)\Rightarrow Q(\llbracket c\rrbracket(s)).
+\]
+For \ec{phoare}, EasyCrypt asserts the same postcondition with probability
+$1$.  Losslessness lemmas discharge termination where needed.  An \ec{equiv}
+judgment is the two-program analogue:
+\[
+  P(s_1,s_2)\Rightarrow Q(\llbracket c_1\rrbracket(s_1),
+                         \llbracket c_2\rrbracket(s_2)).
+\]
+}
+
+\vspace{4pt}
+\begin{center}
+\tiny\renewcommand{\arraystretch}{1.08}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{3.0cm}p{2.0cm}p{6.6cm}}
+\toprule[1.2pt]
+\textbf{File} & \textbf{Count} & \textbf{Mathematical content} \\
+\midrule
+\ec{Fq.ec} & 4 & The two Hoare and two probability-one Hoare judgments say
+\ec{\_\_montgomery\_reduce} computes \ec{SREDC} and \ec{\_\_fqmul} computes
+\ec{SREDC}(ab). \\
+\ec{NTTFullAlgebra.ec} & 2 & Imperative \ec{NTT.ntt} and \ec{NTT.invntt}
+compute \ec{full\_ntt} and \ec{full\_invntt}. \\
+\ec{RefJasminNTT.ec} & 18 & Hoare/phoare multiplication obligations and four
+\ec{equiv} judgments show extracted Jasmin code refines the imperative model
+while preserving decoded values and signed-word bounds. \\
+\ec{extract/Hpoly\_extract.ec} & 2 & Wrapper equivalence judgments relate the
+public Jasmin wrapper procedures to their extracted core procedures. \\
+\ec{NTTEndToEnd.ec} & 10 & The two exported Jasmin entry points satisfy the
+final pre/post contracts for HAETAE NTT and inverse NTT. \\
+\textbf{Total} & \textbf{36} & All semantic proof obligations in the
+non-scratch EasyCrypt \ec{.ec} files counted by the structural scan. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{The Proof Chain}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=0.9cm,
+  basebox/.style={rectangle,draw=cseblue,rounded corners=4pt,
+    minimum width=12.6cm,minimum height=0.86cm,
+    align=center,font=\normalsize\sffamily},
+  arr/.style={-Stealth,thick,cseblue!75,line width=1.8pt},
+  ann/.style={font=\small\itshape,cseblue!80,align=left}]
+
+  \node[basebox,fill=layer0] (L0) at (0,4.8)
+    {\textbf{Jasmin source}\quad scalar \ec{poly\_ntt\_jazz} and \ec{poly\_invntt\_jazz}};
+
+  \node[basebox,fill=layer1] (L1) at (0,3.45)
+    {\textbf{Extracted EasyCrypt module}\quad \ec{Hpoly\_extract.M}};
+
+  \node[basebox,fill=layer2] (L2) at (0,2.1)
+    {\textbf{Imperative EasyCrypt model}\quad \ec{NTT\_Fq.NTT.ntt} and \ec{NTT\_Fq.NTT.invntt}};
+
+  \node[basebox,fill=layer3] (L3) at (0,0.75)
+    {\textbf{Abstract spectral specification}\quad \ec{full\_ntt} and \ec{full\_invntt}};
+
+  \draw[arr] (L0.south)--node[right=8pt,ann]{compiler extraction}(L1.north);
+  \draw[arr] (L1.south)--node[right=8pt,ann]{pRHL refinement\\\ec{RefJasminNTT.ec}}(L2.north);
+  \draw[arr] (L2.south)--node[right=8pt,ann]{loop invariants and algebra\\\ec{NTTFullAlgebra.ec}}(L3.north);
+\end{tikzpicture}
+\end{center}
+
+\vspace{6pt}
+\begin{center}
+\small \ec{NTTEndToEnd.ec} composes these layers into the two final Jasmin correctness theorems.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Artifact Map}{The Full HAETAE NTT Specification}
+\begin{center}
+\textbf{Forward transform}\\[-2pt]
+\normalsize
+\[
+  \mathtt{full\_ntt}(p)[i]
+  =
+  \sum_{j=0}^{255}
+    p[j]\cdot \zeta_0^{(2\brev_8(i)+1)j}
+  \pmod{64513}.
+\]
+\end{center}
+
+\vspace{2pt}
+
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Evaluation points}\\[2pt]
+\small
+The 256 points are:
+\[
+  \omega_i = \zeta_0^{2\brev_8(i)+1}.
+\]
+They are the odd powers of a primitive 512th root of unity, arranged by
+8-bit reversal.
+
+\column{0.48\textwidth}
+\textbf{Inverse transform}\\[2pt]
+\small
+The inverse uses the conjugate powers and the factor $1/256$:
+\[
+\begin{aligned}
+  \mathtt{full\_invntt}(y)[i]
+  &= 256^{-1}\\[-2pt]
+  &\quad\cdot\sum_j y[j]\omega_j^{-i}.
+\end{aligned}
+\]
+The Jasmin inverse returns this result in Montgomery form.
+\end{columns}
+\end{frame}
+
+%==============================================================================%
+\section{Mathematical Specifications}
+%==============================================================================%
+\sectiontitleframe{Mathematical Specifications}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Specification Dictionary}
+\begin{center}
+\scriptsize\renewcommand{\arraystretch}{1.24}
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{p{3.55cm}p{4.95cm}p{3.75cm}}
+\toprule[1.2pt]
+\textbf{EasyCrypt object} & \textbf{Mathematical object} & \textbf{Role} \\
+\midrule
+\ec{GFq.coeff} & Field element in $\mathbb{F}_{64513}$ & Coefficient domain \\
+\ec{Rq.poly}; \ec{NTTFullSpec.poly} & Vector $(p_0,\ldots,p_{255})\in\mathbb{F}_q^{256}$ & Polynomial representation \\
+\ec{Rq} ring product & Multiplication in $\mathbb{F}_q[X]/(X^{256}+1)$ & Ring context \\
+\ec{Rq.zroot} / \ec{NTT\_Fq.zroot} & $\zeta_0=426\in\mathbb{F}_q$ & Primitive 512th root \\
+\ec{Rq.br} & $\brev_8(i)$ & Bit-reversed index \\
+\ec{NTTFullSpec.full\_ntt} & Full 256-point HAETAE NTT & Forward target spec \\
+\ec{NTTFullSpec.full\_invntt} & Full inverse HAETAE NTT & Inverse target spec \\
+\ec{NTT\_Fq.NTT.ntt} & In-place butterfly algorithm over field arrays & Imperative spec \\
+\ec{poly\_ntt\_jazz} / \ec{poly\_invntt\_jazz} & Extracted Jasmin entry points in \ec{Hpoly\_extract.M} & Machine-code source surface \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Coefficient and Polynomial Domain}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Field}
+\small
+\[
+  q = 64513,
+  \qquad
+  \mathbb{F}_q = \mathbb{Z}/q\mathbb{Z}.
+\]
+In EasyCrypt:
+\[
+  \ec{coeff} = \ec{GFq.Zq.zmod}.
+\]
+The proof assumes \ec{prime\_q}, so arithmetic on \ec{coeff} is field
+arithmetic.
+
+\vspace{6pt}
+\[
+  \zeta_0 = \ec{incoeff}(426).
+\]
+
+\column{0.48\textwidth}
+\textbf{Polynomials}
+\small
+The code uses arrays:
+\[
+  p : \ec{coeff Array256.t}.
+\]
+Mathematically, this is:
+\[
+  p=(p_0,\ldots,p_{255})\in\mathbb{F}_q^{256}.
+\]
+When ring multiplication is needed, the vector is interpreted as:
+\[
+  p(X)=\sum_{i=0}^{255}p_iX^i
+  \quad\text{in}\quad
+  \mathbb{F}_q[X]/(X^{256}+1).
+\]
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Forward NTT Target}
+\thmbox[\ec{NTTFullSpec.full\_ntt}]{
+\normalsize
+For every input vector $p\in\mathbb{F}_q^{256}$, the specified output
+$y=\mathtt{full\_ntt}(p)$ is:
+\[
+  y_i
+  =
+  \sum_{j=0}^{255}
+    p_j\,\zeta_0^{(2\brev_8(i)+1)j}
+  \quad\in\mathbb{F}_q,
+  \qquad 0\le i<256.
+\]
+}
+
+\vspace{8pt}
+\begin{center}
+\small
+Equivalently, the evaluation point for output index $i$ is:
+\[
+  \omega_i = \zeta_0^{2\brev_8(i)+1},
+  \qquad
+  y_i = p(\omega_i).
+\]
+These $\omega_i$ are the 256 odd powers of a primitive 512th root, in
+bit-reversed order.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Inverse NTT Target}
+\thmbox[\ec{NTTFullSpec.full\_invntt}]{
+\normalsize
+For a spectral vector $y\in\mathbb{F}_q^{256}$, the specified inverse output
+$p=\mathtt{full\_invntt}(y)$ is:
+\[
+  p_i
+  =
+  256^{-1}
+  \sum_{j=0}^{255}
+    y_j\,\zeta_0^{-((2\brev_8(j)+1)i)}
+  \quad\in\mathbb{F}_q,
+  \qquad 0\le i<256.
+\]
+}
+
+\vspace{6pt}
+\defbox[What the Jasmin inverse returns]{
+\small
+The end-to-end theorem does not return \ec{full\_invntt(y)} directly.  It
+returns its Montgomery representation:
+\[
+  \mathtt{array256\_mont}(\mathtt{full\_invntt}(y))_i
+  =
+  \mathtt{full\_invntt}(y)_i\cdot R,
+  \qquad R=2^{32}\bmod q.
+\]
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Partial and Stage Specifications}
+\defbox[\ec{NTTFullSpec.partial\_ntt}]{
+\small
+\[
+  \mathtt{partial\_ntt}(p,\ell,start,bsj)
+  =
+  \sum_{s=0}^{\ell-1}
+    \zeta_0^{(2start+1)\brev_8(s)}
+    \,p_{\brev_8(bsj\cdot\ell+s)}.
+\]
+}
+
+\vspace{6pt}
+\begin{center}
+\small
+\ec{full\_ntt\_spec r p} states:
+\[
+  \forall start\in[0,256).\quad
+  r_{\brev_8(start)}
+  =
+  \mathtt{partial\_ntt}(p,256,start,0).
+\]
+\ec{full\_ntt\_spec\_imp} proves this indexed statement is exactly the same
+as the array equation:
+\[
+  r=\mathtt{full\_ntt}(p).
+\]
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{Imperative Algorithms and Final Hoare Specs}
+\begin{columns}[T]
+\column{0.49\textwidth}
+\textbf{Imperative model}
+\small
+\[
+\begin{aligned}
+  \ec{NTT.ntt}(p,\ec{zetas})
+  &= \ec{full\_ntt}(p),\\
+  \ec{NTT.invntt}(p,\ec{zetas\_inv})
+  &= \ec{full\_invntt}(p).
+\end{aligned}
+\]
+These are the theorems \ec{ntt\_full\_ntt} and
+\ec{invntt\_full\_invntt}.
+
+\column{0.49\textwidth}
+\textbf{Jasmin entry points}
+\small
+\[
+  \ec{poly\_ntt\_jazz}(rp)
+  \leadsto
+  \mathtt{full\_ntt}(p).
+\]
+\[
+\begin{aligned}
+  \ec{poly\_invntt\_jazz}(rp)
+  &\leadsto
+  \mathtt{array256\_mont}\\[-2pt]
+  &\quad(\mathtt{full\_invntt}(p)).
+\end{aligned}
+\]
+Bounds: $2^{24}$ for NTT output and $2^{16}$ for inverse output.
+Here \ec{rp} represents $p$ by \ec{poly\_repr\_bound}.
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Mathematical Specifications}{What Is Not the Final Target}
+\defbox[\ec{Rq.ntt} is not the final HAETAE NTT target]{
+\small
+\ec{Rq.ec} also contains a Kyber-style even/odd split transform:
+\[
+\begin{aligned}
+(\mathtt{Rq.ntt}(p))_{2i}
+  &=
+  \sum_{j=0}^{127}
+    p_{2j}\,\zeta_0^{(2\brev_8(i)+1)j},\\
+(\mathtt{Rq.ntt}(p))_{2i+1}
+  &=
+  \sum_{j=0}^{127}
+    p_{2j+1}\,\zeta_0^{(2\brev_8(i)+1)j}.
+\end{aligned}
+\]
+}
+
+\vspace{6pt}
+\begin{center}
+\small
+The artifact explicitly records that this is not the full spectral NTT used as
+the final HAETAE Jasmin target.  \ec{NTTFullSpec.ec} contains
+\ec{rq\_ntt\_is\_not\_full\_ntt\_on\_one}, a counterexample on the unit
+polynomial.  The end-to-end theorem targets \ec{full\_ntt}, not \ec{Rq.ntt}.
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Formulation Correspondence}
+%==============================================================================%
+\sectiontitleframe{Formulation Correspondence}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{How To Read This Section}
+\small
+\defbox[Purpose]{
+This section explains, formula by formula, how the EasyCrypt development turns
+the Jasmin implementation into a mathematical statement about the HAETAE NTT.
+The direction is always:
+\[
+  \text{machine array}
+  \longrightarrow
+  \text{field vector}
+  \longrightarrow
+  \text{partial-sum invariant}
+  \longrightarrow
+  \text{full NTT formula}.
+\]
+}
+
+\vspace{8pt}
+\begin{itemize}
+\item The representation formulas say what mathematical object the machine
+memory denotes.
+\item The butterfly formulas say what one loop body proves.
+\item The stage formulas say how all loop bodies compose.
+\item The final Hoare triples state the exact theorem about the exported
+Jasmin entry points.
+\end{itemize}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Complete Declaration Catalog}
+\footnotesize
+\defbox[Exhaustive correspondence handout]{
+The presentation folder now contains
+\ec{haetae-ntt-correspondence-catalog.pdf}.  It enumerates every counted
+EasyCrypt declaration used in the checked functional-correctness chain and
+records: source line, exact EasyCrypt declaration line, and mathematical
+correspondence.
+\[
+\begin{array}{c|ccccc}
+\text{kind} & \ec{type} & \ec{op} & \ec{module} & \ec{lemma} & \ec{judgment} \\
+\hline
+\text{count} & 5 & 124 & 2 & 329 & 34
+\end{array}
+\]
+The structural metrics above expand the syntactic scan to all non-scratch
+\ec{.ec} files, adding \ec{extract/Hpoly\_extract.ec}'s wrapper module and
+two wrapper equivalence lemmas.
+}
+
+\vspace{3pt}
+\begin{center}
+\scriptsize
+\[
+\begin{array}{rcl}
+\ec{type} &\mapsto& \text{carrier set},\\
+\ec{op} &\mapsto& \text{total function or predicate},\\
+\ec{module} &\mapsto& \text{state-transition system},\\
+\ec{lemma} &\mapsto& \text{checked theorem/schema instance},\\
+\ec{hoare/phoare/equiv} &\mapsto& \text{program-semantics judgment}.
+\end{array}
+\]
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Catalog Symbol Table}
+\small
+\defbox[Symbols used uniformly in the full catalog]{
+\[
+q=64513,\quad
+\mathbb F_q=\mathbb Z/q\mathbb Z,\quad
+N=256,\quad
+\zeta=[426]_q,\quad
+\brev_8=\text{8-bit reversal}.
+\]
+For a Jasmin byte array \ec{rp},
+\[
+  D(rp)_i=
+  \left[
+    \operatorname{to\_sint}\bigl(\operatorname{get32}(rp,i)\bigr)
+  \right]_q,
+  \qquad 0\le i<256.
+\]
+}
+
+\vspace{4pt}
+\begin{center}
+\scriptsize
+The catalog uses this notation to interpret every EasyCrypt declaration in
+mathematical form, including all twiddle-table lemmas, all butterfly-stage
+lemmas, all representation/bound lemmas, and every Hoare-style judgment.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Representation Relation}
+\small
+\defbox[Decoding a Jasmin array]{
+For a byte array \ec{rp}, EasyCrypt decodes the coefficient vector by
+\[
+  \llbracket rp\rrbracket_i
+  =
+  \mathtt{incoeff}\bigl(
+    \mathtt{W32.to\_sint}(\mathtt{BArray1024.get32}(rp,i))
+  \bigr),
+  \qquad 0\le i<256.
+\]
+This is exactly \ec{NTT\_Fq.barray256\_to\_poly}.
+}
+
+\vspace{6pt}
+\thmbox[\ec{poly\_repr\_bound}]{
+\[
+\begin{aligned}
+\mathsf{repr}_B(rp,p)
+&\equiv
+\ec{poly\_repr\_bound}(rp,p,B) \\
+&\Longleftrightarrow
+  \bigl(\forall i<256.\; \llbracket rp\rrbracket_i=p_i\bigr)
+  \land
+  \bigl(\forall i<256.\;
+      -2^B \le \mathtt{to\_sint}(\mathtt{get32}(rp,i)) < 2^B
+  \bigr).
+\end{aligned}
+\]
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Representation Relation Explained}
+\small
+\defbox[What the formula is saying]{
+The Jasmin code manipulates 1024 bytes, grouped as 256 signed 32-bit words.
+EasyCrypt first defines a decoding map
+\[
+  rp \mapsto \llbracket rp\rrbracket\in\mathbb{F}_q^{256}.
+\]
+After this decoding, ordinary mathematical statements can talk about the
+coefficient vector $p$ rather than about bytes.
+}
+
+\vspace{6pt}
+\thmbox[Why the bound is part of the specification]{
+\[
+  \mathsf{repr}_B(rp,p)
+  =
+  \text{``$rp$ decodes to $p$''}
+  \;\land\;
+  \text{``each signed word is in }[-2^B,2^B)\text{''.}
+  \]
+The equality part is the algebraic content.  The bound part is the machine
+safety content: it lets the proof justify the signed-word arithmetic used by
+the Jasmin code.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Forward Butterfly Lemma}
+\footnotesize
+Let
+\[
+  P_{\ell,s,b}(p)
+  =
+  \sum_{u=0}^{\ell-1}
+    \zeta_0^{(2s+1)\brev_8(u)}
+    p_{\brev_8(b\ell+u)}.
+\]
+For stage $k$, block $ks$, offset $off$, define
+\[
+\begin{aligned}
+  a &= ks\,2^{8-k}+off,
+  &
+  b &= a+2^{7-k},\\
+  z &= \ec{zetas}[2^k+ks]
+     =\zeta_0^{(2\brev_k(ks)+1)2^{7-k}}.
+\end{aligned}
+\]
+
+\vspace{4pt}
+The code assignment
+\[
+  t=z r_b,\qquad r_b\gets r_a-t,\qquad r_a\gets r_a+t
+\]
+is the mathematical update
+\[
+  r'_a=r_a+zr_b,\qquad r'_b=r_a-zr_b,\qquad
+  r'_x=r_x\;(x\notin\{a,b\}).
+\]
+
+\vspace{4pt}
+The EasyCrypt lemma \ec{forward\_nat\_pair\_refines} proves:
+\[
+\begin{gathered}
+ r_a=P_{2^k,\brev_k(ks),\,2\brev_{7-k}(off)}(p),\quad
+ r_b=P_{2^k,\brev_k(ks),\,2\brev_{7-k}(off)+1}(p)\\
+\Longrightarrow\quad
+ r'_a=P_{2^{k+1},\brev_k(ks),\,\brev_{7-k}(off)}(p),\quad
+ r'_b=P_{2^{k+1},2^k+\brev_k(ks),\,\brev_{7-k}(off)}(p).
+\end{gathered}
+\]
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Forward Butterfly Explained}
+\small
+\defbox[Meaning of $P_{\ell,s,b}$]{
+$P_{\ell,s,b}(p)$ is a partial NTT sum.  It looks only at the block numbered
+$b$, of length $\ell$, and evaluates that block at the exponent pattern
+determined by $s$:
+\[
+  P_{\ell,s,b}(p)
+  =
+  \sum_{u=0}^{\ell-1}
+    \zeta_0^{(2s+1)\brev_8(u)}
+    p_{\brev_8(b\ell+u)}.
+\]
+}
+
+\vspace{6pt}
+\thmbox[Why the butterfly is correct]{
+Before the butterfly, the two touched cells contain two length-$2^k$ partial
+sums.  Multiplying the second one by
+\[
+  z=\zeta_0^{(2\brev_k(ks)+1)2^{7-k}}
+\]
+aligns its exponents with the next stage.  The two assignments
+$r'_a=r_a+zr_b$ and $r'_b=r_a-zr_b$ are therefore exactly the two
+length-$2^{k+1}$ partial sums required by the next stage.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Forward Stage Invariant}
+\small
+\defbox[Stage predicate]{
+\[
+  \mathsf{Stage}_\ell(r,p)
+  \Longleftrightarrow
+  \forall s,b.\;
+  0\le s<\ell \land 0\le b<256/\ell
+  \Rightarrow
+  r_{\brev_8(b\ell+s)}=P_{\ell,s,b}(p).
+\]
+In EasyCrypt this is \ec{full\_stage\_spec r p len}.
+}
+
+\vspace{8pt}
+\thmbox[Mathematical content of the forward proof]{
+\[
+\begin{array}{rcll}
+\mathsf{Stage}_1(p,p) &&& \ec{full\_stage1\_init},\\[2pt]
+\mathsf{Stage}_{2^k}(r,p)
+  &\Longrightarrow&
+\mathsf{Stage}_{2^{k+1}}(r',p)
+& \ec{fwd\_stage\_progress\_finish},\\[2pt]
+\mathsf{Stage}_{256}(r,p)
+  &\Longrightarrow&
+r=\ec{full\_ntt}(p)
+& \ec{full\_stage256\_imp}.
+\end{array}
+\]
+}
+
+\vspace{6pt}
+\begin{center}
+Thus the nested loops of \ec{NTT.ntt} are a checked induction over
+$\ell=1,2,4,\ldots,256$.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Forward Stage Invariant Explained}
+\small
+\defbox[What the invariant buys us]{
+The statement
+\[
+  \mathsf{Stage}_\ell(r,p)
+\]
+does not merely say that a few cells are correct.  It says that every cell of
+the current array is already the correct partial transform for block length
+$\ell$.
+}
+
+\vspace{6pt}
+\thmbox[How the loop proof uses it]{
+The proof starts with $\ell=1$, where each partial sum is just one input
+coefficient.  Each completed forward stage doubles the length:
+\[
+  \mathsf{Stage}_{2^k}(r,p)
+  \Longrightarrow
+  \mathsf{Stage}_{2^{k+1}}(r',p).
+\]
+After eight stages, $\ell=256$ and there is only one block.  The invariant then
+collapses to the full formula for \ec{full\_ntt}.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Inverse Butterfly Lemma}
+\footnotesize
+Let
+\[
+  Q_{\ell,s,b}(y)
+  =
+  \sum_{u=0}^{\ell-1}
+    y_{b\ell+u}\,
+    \zeta_0^{-((2\brev_8(b\ell+u)+1)s)}.
+\]
+For inverse stage $k$, block $ks$, offset $off$, define
+\[
+\begin{aligned}
+  a &= ks\,2^{k+1}+off,
+  &
+  b &= a+2^k,\\
+  z &= \ec{zetas\_inv}[256-2^{8-k}+ks]\\
+    &= \zeta_0^{-((2\brev_{7-k}(ks)+1)2^k)}.
+\end{aligned}
+\]
+
+\vspace{4pt}
+The code assignment
+\[
+  t=r_a,\qquad r_a\gets t+r_b,\qquad r_b\gets z(t-r_b)
+\]
+is the mathematical update
+\[
+  r'_a=r_a+r_b,\qquad r'_b=z(r_a-r_b).
+\]
+
+\vspace{4pt}
+\ec{inverse\_pair\_refines\_values} proves:
+\[
+\begin{gathered}
+ r_a=Q_{2^k,off,2ks}(y),\quad
+ r_b=Q_{2^k,off,2ks+1}(y)\\
+\Longrightarrow\quad
+ r'_a=Q_{2^{k+1},off,ks}(y),\quad
+ r'_b=Q_{2^{k+1},2^k+off,ks}(y).
+\end{gathered}
+\]
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{Inverse Butterfly Explained}
+\small
+\defbox[Meaning of $Q_{\ell,s,b}$]{
+$Q_{\ell,s,b}(y)$ is the inverse counterpart of the forward partial sum.  It
+accumulates spectral coefficients from one block and uses the inverse exponent
+pattern:
+\[
+  Q_{\ell,s,b}(y)
+  =
+  \sum_{u=0}^{\ell-1}
+    y_{b\ell+u}\,
+    \zeta_0^{-((2\brev_8(b\ell+u)+1)s)}.
+\]
+}
+
+\vspace{6pt}
+\thmbox[How the inverse loop differs]{
+The inverse butterfly first forms $r_a+r_b$ and $r_a-r_b$, then multiplies the
+difference by the inverse-stage root
+\[
+  \zeta_0^{-((2\brev_{7-k}(ks)+1)2^k)}.
+\]
+The EasyCrypt proof shows that this merges two length-$2^k$ inverse partial
+sums into two length-$2^{k+1}$ inverse partial sums.  The final loop multiplies
+all coefficients by \ec{zetas\_inv[255]}$=256^{-1}$.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{End-to-End Formula Contracts}
+\small
+Define the two mathematical output vectors
+\[
+\begin{aligned}
+  \widehat{p}_i
+  &=
+  \sum_{j=0}^{255}
+    p_j\,\zeta_0^{(2\brev_8(i)+1)j},\\
+  \check{y}_i
+  &=
+  R\cdot 256^{-1}
+  \sum_{j=0}^{255}
+    y_j\,\zeta_0^{-((2\brev_8(j)+1)i)},
+  \qquad R=2^{32}\bmod 64513.
+\end{aligned}
+\]
+
+\vspace{4pt}
+The final EasyCrypt lemmas are exactly the Hoare triples
+\[
+  \{\mathsf{repr}_{16}(rp,p)\}\;
+  \ec{poly\_ntt\_jazz}(rp)\;
+  \{\mathsf{repr}_{24}(\mathit{res},\widehat{p})\},
+\]
+\[
+  \{\mathsf{repr}_{16}(rp,y)\}\;
+  \ec{poly\_invntt\_jazz}(rp)\;
+  \{\mathsf{repr}_{16}(\mathit{res},\check{y})\}.
+\]
+
+\vspace{4pt}
+\begin{center}
+\footnotesize
+The bridge is the pair of checked refinements
+\[
+\begin{aligned}
+\ec{RefJasminNTT} &: \text{Jasmin entry point} \longrightarrow \ec{NTT\_Fq.NTT},\\
+\ec{NTTFullAlgebra} &: \ec{NTT\_Fq.NTT} \longrightarrow (\widehat{p},\check{y}).
+\end{aligned}
+\]
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Formulation Correspondence}{End-to-End Contracts Explained}
+\footnotesize
+\defbox[Forward contract]{
+The forward theorem says: if the input memory decodes to $p$ with 16-bit signed
+bounds, then the returned memory decodes to the vector
+\[
+  \widehat{p}_i
+  =
+  \sum_{j=0}^{255}
+    p_j\,\zeta_0^{(2\brev_8(i)+1)j},
+\]
+with the larger 24-bit bound needed after additions and multiplications.
+}
+
+\vspace{3pt}
+\thmbox[Inverse contract]{
+The inverse theorem says the returned memory decodes to the inverse NTT result
+in Montgomery form:
+\[
+  \check{y}_i
+  =
+  R\cdot 256^{-1}
+  \sum_{j=0}^{255}
+    y_j\,\zeta_0^{-((2\brev_8(j)+1)i)}.
+\]
+The factor $R$ is intentional: HAETAE arithmetic expects the inverse result in
+Montgomery representation.
+}
+\end{frame}
+
+%==============================================================================%
+\section{How To Check It}
+%==============================================================================%
+\sectiontitleframe{How To Check It}
+
+%-------------------------------------------------------
+\begin{frame}[fragile]{\bfseries How To Check It}{Minimal Reproduction}
+\defbox[Run location]{
+\normalsize
+All commands below are run from:
+\[
+  \ec{haetae-ntt-verify/easycrypt}
+\]
+}
+
+\vspace{6pt}
+
+\begin{ecblock}[Compile the final theorem file]
+easycrypt compile NTTEndToEnd.ec -I .
+\end{ecblock}
+
+\vspace{4pt}
+
+\thmbox[Mathematical judgment checked by the command]{
+\scriptsize
+\[
+\begin{aligned}
+  \mathsf{EC}\vdash
+  \forall p\in\mathbb F_q^{256}.\;&
+  \{\mathsf{Repr}_{16}(rp,p)\}\;
+    \ec{poly\_ntt\_jazz}(rp)\;
+  \{\mathsf{Repr}_{24}(res,F(p))\},\\
+  \mathsf{EC}\vdash
+  \forall p\in\mathbb F_q^{256}.\;&
+  \{\mathsf{Repr}_{16}(rp,p)\}\;
+    \ec{poly\_invntt\_jazz}(rp)\;
+  \{\mathsf{Repr}_{16}(res,\mathsf{Mont}(F^{-1}(p)))\}.
+\end{aligned}
+\]
+Compiling \ec{NTTEndToEnd.ec} forces EasyCrypt to check the imported proof
+chain whose conclusion is precisely these two Hoare triples.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}[fragile]{\bfseries How To Check It}{Full Artifact Check: Support Libraries}
+\begin{ecblock}[Support files]
+easycrypt compile Array256.ec -I .
+easycrypt compile BArray1024.ec -I .
+easycrypt compile WArray1024.ec -I .
+easycrypt compile Montgomery.ec -I .
+easycrypt compile GFq.ec -I .
+easycrypt compile Rq.ec -I .
+easycrypt compile Fastexp.ec -I .
+easycrypt compile Hpoly_extract.ec -I .
+easycrypt compile Fq.ec -I .
+\end{ecblock}
+
+\vspace{4pt}
+\begin{center}
+\scriptsize
+\[
+  \mathsf{EC}\vdash
+  \bigl(\mathbb F_{64513},\;R,\;D,\;\mathsf{Repr}\bigr)
+  \quad\text{with}\quad
+  \mathsf{Repr}_b(rp,p)\Leftrightarrow
+  D(rp)=p\land
+  \forall i<256.\;-2^b\le \operatorname{to\_sint}(\operatorname{get32}(rp,i))<2^b.
+\]
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}[fragile]{\bfseries How To Check It}{Full Artifact Check: Functional-Correctness Stack}
+\begin{ecblock}[Functional-correctness stack]
+easycrypt compile NTTFullSpec.ec -I .
+easycrypt compile NTT_Fq.ec -I .
+easycrypt compile RefJasminNTT.ec -I .
+easycrypt compile NTTFullAlgebra.ec -I .
+easycrypt compile NTTEndToEnd.ec -I .
+\end{ecblock}
+
+\vspace{4pt}
+\begin{center}
+\scriptsize
+\[
+  \mathsf{EC}\vdash
+  \bigl(\ec{NTT.ntt}=F\bigr)
+  \;\land\; \bigl(\ec{NTT.invntt}=F^{-1}\bigr)
+  \;\land\; \bigl(\ec{Hpoly\_extract.M}\leadsto\ec{NTT\_Fq.NTT}\bigr)
+  \;\land\; \mathcal H_{\mathrm{NTT}}\land\mathcal H_{\mathrm{INTT}}.
+\]
+\[
+\begin{aligned}
+\mathcal H_{\mathrm{NTT}} &:=
+\{\mathsf{Repr}_{16}(rp,p)\}\;\ec{poly\_ntt\_jazz}(rp)\;
+\{\mathsf{Repr}_{24}(res,F(p))\},\\
+\mathcal H_{\mathrm{INTT}} &:=
+\{\mathsf{Repr}_{16}(rp,p)\}\;\ec{poly\_invntt\_jazz}(rp)\;
+\{\mathsf{Repr}_{16}(res,\mathsf{Mont}(F^{-1}(p)))\}.
+\end{aligned}
+\]
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries How To Check It}{What Counts as Machine-Checked Here}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\defbox[Checked by EasyCrypt]{
+\normalsize
+\begin{itemize}
+  \setlength\itemsep{6pt}
+  \item The final Hoare statements in \ec{NTTEndToEnd.ec}.
+  \item The pRHL refinement lemmas in \ec{RefJasminNTT.ec}.
+  \item The forward and inverse loop-to-spec theorems in \ec{NTTFullAlgebra.ec}.
+  \item Array, word, modular arithmetic, and Montgomery support lemmas used by those proofs.
+\end{itemize}
+}
+
+\column{0.48\textwidth}
+\defbox[Still part of the trust boundary]{
+\normalsize
+\begin{itemize}
+  \setlength\itemsep{6pt}
+  \item The EasyCrypt prover, its trusted libraries, and trusted SMT results.
+  \item The Jasmin compiler theorem connecting extracted code and generated assembly.
+  \item Foundational assumptions already present in the field, ring, and Montgomery support files.
+\end{itemize}
+}
+\end{columns}
+
+\vspace{6pt}
+\begin{center}
+\small The artifact claim is therefore: fully machine-checked functional
+correctness, relative to the standard EasyCrypt/Jasmin trusted base and the
+explicit foundational assumptions in the support layer.
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Proof Ideas}
+%==============================================================================%
+\sectiontitleframe{Proof Ideas}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Proof Ideas}{The Central Bridge}
+\thmbox[\ec{NTTFullAlgebra.ec}]{
+\large
+The key new proof obligation is:
+\[
+  \mathtt{NTT\_Fq.NTT.ntt}(p,\mathtt{zetas})
+  =
+  \mathtt{full\_ntt}(p).
+\]
+The inverse theorem proves the analogous statement for
+\ec{NTT\_Fq.NTT.invntt} and \ec{full\_invntt}.
+}
+
+\vspace{8pt}
+
+\defbox[Why this matters]{
+\normalsize
+\ec{RefJasminNTT.ec} already connects the extracted Jasmin program to
+\ec{NTT\_Fq.NTT.ntt}.  Without the algebra bridge, the artifact would only say
+that Jasmin matches another program.  With the bridge, it says the Jasmin code
+matches the mathematical HAETAE transform.
+}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Proof Ideas}{Forward NTT Invariant}
+\begin{center}
+\large
+The iterative butterfly loop is proved by a stage invariant.  After stage $s$,
+the array equals the partial transform for the first $s$ layers:
+\[
+  r = \mathtt{fwd\_stage}(s,p).
+\]
+The final stage is $s=8$, which is the full 256-point transform.
+\end{center}
+
+\vspace{4pt}
+
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Loop facts}
+\small
+\begin{itemize}
+  \setlength\itemsep{4pt}
+  \item The loop indices cover exactly the butterfly pairs for each stage.
+  \item The twiddle counter is synchronized with the stage and group.
+  \item Every in-place update preserves the array representation predicate.
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Algebra facts}
+\small
+\begin{itemize}
+  \setlength\itemsep{4pt}
+  \item The table value \ec{zetas[k]} is the right power of $\zeta_0$.
+  \item Bit reversal maps loop order to spectral order.
+  \item The butterfly equations combine two half-sums into the next partial transform.
+\end{itemize}
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Proof Ideas}{Inverse NTT and Montgomery Form}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\defbox[Inverse loop]{
+\normalsize
+The inverse proof follows the reverse butterfly structure.  Its invariant tracks
+how each stage reconstructs the coefficient representation from spectral
+values.  The final scaling by $1/256$ is part of the specification.
+}
+
+\column{0.48\textwidth}
+\defbox[Montgomery convention]{
+\normalsize
+HAETAE arithmetic stores some values in Montgomery form.  The final inverse NTT
+theorem therefore does not claim:
+\[
+  \mathtt{res} = \mathtt{full\_invntt}(p).
+\]
+It claims:
+\[
+\begin{aligned}
+  \mathtt{res}
+  &= \mathtt{array256\_mont}\\[-2pt]
+  &\quad(\mathtt{full\_invntt}(p)).
+\end{aligned}
+\]
+}
+\end{columns}
+
+\vspace{4pt}
+\begin{center}
+\small\textbf{Practical reading:}
+This is not a weakness of the theorem.  It is the representation expected by
+the surrounding HAETAE polynomial arithmetic.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Proof Ideas}{What the Proof Prevents}
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{p{5.2cm}p{7.2cm}}
+\toprule[1.2pt]
+\textbf{Potential implementation error} & \textbf{Where the artifact rules it out} \\
+\midrule
+Wrong twiddle exponent or table index & \ec{zetas} stage lemmas and bit-reversal lemmas in \ec{NTTFullAlgebra.ec}. \\
+Wrong butterfly ordering & Forward and inverse loop invariants over all loop counters. \\
+Word-level overflow hidden by machine arithmetic & Bound predicates and word-to-coefficient lemmas in \ec{Fq.ec} and \ec{RefJasminNTT.ec}. \\
+Montgomery multiplication used with the wrong representation & \ec{Montgomery.ec} and the Jasmin refinement proofs. \\
+Proof only matching another implementation, not the math & Final bridge to \ec{full\_ntt} and \ec{full\_invntt}. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Lemma Reasoning}
+%==============================================================================%
+\sectiontitleframe{Lemma Reasoning}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Proof Dependency Skeleton}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.28}
+\begin{tabular}{p{3.8cm}p{5.2cm}p{3.2cm}}
+\toprule[1.2pt]
+\textbf{Lemma family} & \textbf{Mathematical question} & \textbf{Used by} \\
+\midrule
+\ec{exp\_zroot\_*} &
+How do powers of $\zeta_0$ reduce modulo the 512-period? &
+Exponent normalization \\
+\ec{bsrev\_*} &
+Which spectral index is selected by each loop counter? &
+Twiddle and pair lemmas \\
+\ec{zetas\_stage}, \ec{zetas\_inv\_stage} &
+Which root of unity is loaded from the table? &
+Butterfly steps \\
+\ec{fwd\_stage\_progress\_*} &
+Why does one forward butterfly advance one NTT stage? &
+\ec{ntt\_full\_ntt} \\
+\ec{inv\_stage\_progress\_*} and \ec{inv\_post\_*} &
+Why does the reverse loop compute the inverse spectral formula? &
+\ec{invntt\_full\_invntt} \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{6pt}
+\begin{center}
+\small Each lemma removes one mismatch between program structure and the
+mathematical definition: loop order, table order, in-place array updates,
+field exponents, or Montgomery representation.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Root Period and Evaluation Points}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Period facts}
+\small
+\[
+  \zeta_0^{256} = -1,
+  \qquad
+  \zeta_0^{512} = 1.
+\]
+\ec{exp\_zroot\_512} follows by squaring the checked fact
+$\zeta_0^{256}=-1$.  Then \ec{exp\_zroot\_mod512} lets the proof rewrite:
+\[
+  \zeta_0^{e+512n} = \zeta_0^e.
+\]
+
+\column{0.48\textwidth}
+\textbf{Distinct evaluation points}
+\small
+The full NTT uses:
+\[
+  \omega_i = \zeta_0^{2\brev_8(i)+1}.
+\]
+If $\omega_i=\omega_j$, then:
+\[
+  \zeta_0^{2(\brev_8(i)-\brev_8(j))}=1.
+\]
+Because $\zeta_0$ has period 512, this forces
+$256 \mid \brev_8(i)-\brev_8(j)$.  Both values lie in $[0,256)$, so
+$\brev_8(i)=\brev_8(j)$, hence $i=j$.
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Bit-Reversal Stage Index}
+\thmbox[\ec{bsrev\_stage\_index}]{
+\normalsize
+For $0\le k<8$ and $0\le ks<2^k$:
+\[
+  \brev_8(2^k+ks)
+  =
+  (2\brev_k(ks)+1)\,2^{7-k}.
+\]
+}
+
+\vspace{6pt}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{p{4.1cm}p{8.0cm}}
+\toprule[1.2pt]
+\textbf{Bit pattern before reversal} &
+$2^k+ks$ has bit $k$ set to $1$, lower $k$ bits equal to $ks$, and all higher bits zero. \\
+\midrule
+\textbf{After 8-bit reversal} &
+The set bit moves to position $7-k$, the lower $k$ bits become
+$\brev_k(ks)$ above it, and the lower $7-k$ bits become zero. \\
+\midrule
+\textbf{Integer value} &
+$2^{7-k} + \brev_k(ks)\,2^{8-k}
+= (2\brev_k(ks)+1)2^{7-k}$. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{4pt}
+\begin{center}
+\small This is the bridge from loop counter \ec{2\^{}k + ks} to the spectral
+exponent used by the mathematical NTT.
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Twiddle Table and Montgomery Cancellation}
+\begin{columns}[T]
+\column{0.49\textwidth}
+\textbf{\ec{zetas\_stage}}
+\small
+The table is defined by bit-reversed exponents:
+\[
+  \mathtt{zetas}[t]=\zeta_0^{\brev_8(t)}.
+\]
+Substitute $t=2^k+ks$ and use \ec{bsrev\_stage\_index}:
+\[
+  \mathtt{zetas}[2^k+ks]
+  =
+  \zeta_0^{(2\brev_k(ks)+1)2^{7-k}}.
+\]
+
+\column{0.49\textwidth}
+\textbf{Montgomery multiplication}
+\small
+The Jasmin table stores the Montgomery value
+$\zeta R \bmod q$.  The reducer satisfies:
+\[
+  \SREDC(x) \equiv xR^{-1} \pmod q.
+\]
+Therefore the butterfly multiplication computes:
+\[
+  \SREDC((\zeta R)\,a)
+  \equiv
+  \zeta a \pmod q.
+\]
+The stored $R$ and the reducer's $R^{-1}$ cancel exactly.
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Forward Butterfly Stage Lemma}
+\begin{center}
+\small
+The key local step is represented by \ec{fwd\_stage\_progress\_step} and then
+lifted through loop invariants to \ec{ntt\_full\_ntt}.
+\end{center}
+
+\vspace{4pt}
+\begin{columns}[T]
+\column{0.49\textwidth}
+\textbf{Program update}
+\small
+For one pair $(a,b)$ and twiddle $w$:
+\[
+\begin{aligned}
+  t &= w\cdot b,\\
+  a' &= a+t,\\
+  b' &= a-t.
+\end{aligned}
+\]
+The proof also shows the two array addresses are distinct, so the in-place
+updates affect only that pair.
+
+\column{0.49\textwidth}
+\textbf{Mathematical meaning}
+\small
+At stage $k$, $a$ and $b$ are two partial sums over complementary halves of
+one residue class.  The twiddle from \ec{zetas\_stage} supplies exactly the
+missing factor needed to merge the halves:
+\[
+  \text{partial}_k^{\mathrm{low}}
+  + w\,\text{partial}_k^{\mathrm{high}}
+  =
+  \text{partial}_{k+1}.
+\]
+The lower output uses the same split with a sign change.
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{Inverse Loop and Final Scaling}
+\begin{columns}[T]
+\column{0.49\textwidth}
+\textbf{Reverse-stage reasoning}
+\small
+\ec{partial\_invntt\_split\_low} and
+\ec{partial\_invntt\_split\_high} split the inverse spectral sum into the two
+halves touched by one reverse butterfly.  \ec{zetas\_inv\_stage} supplies the
+inverse twiddle factor, so one program pair reconstructs the next inverse
+partial sum.
+
+\vspace{4pt}
+The stage lemmas are threaded through the outer invariant until the loop exit
+postcondition, ending at \ec{inv\_outer\_exit\_post}.
+
+\column{0.49\textwidth}
+\textbf{Post-processing}
+\small
+The inverse routine has a final scaling pass.  The proof uses
+\ec{zetas\_inv\_255} and \ec{inv\_post\_exit\_full} to show that this pass
+multiplies by the required inverse factor:
+\[
+  256^{-1}.
+\]
+The end-to-end theorem then wraps the mathematical inverse in
+\ec{array256\_mont}, matching HAETAE's representation convention.
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Lemma Reasoning}{How EasyCrypt Checks the Reasoning}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{p{4.0cm}p{8.2cm}}
+\toprule[1.2pt]
+\textbf{Mathematical move} & \textbf{EasyCrypt proof form} \\
+\midrule
+Equality of polynomials & Array extensionality over all indices in $[0,256)$. \\
+Loop-to-stage claim & Hoare loop invariant with exact counter, address, and twiddle facts. \\
+Finite-sum rewrite & Big-operator splitting, reindexing, and range side conditions. \\
+Bit-index rewrite & Dedicated \ec{bsrev\_*} lemmas rather than informal bit diagrams. \\
+Modular arithmetic & Field/ring rewriting plus explicit exponent-period lemmas. \\
+Machine-word step & pRHL refinement plus signed-word bounds in \ec{RefJasminNTT.ec}. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{6pt}
+\begin{center}
+\small The slides show the mathematical reason; the artifact records each
+reason as a typed lemma with all range and representation side conditions.
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Coverage and Limits}
+%==============================================================================%
+\sectiontitleframe{Coverage and Limits}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Coverage and Limits}{What Is Covered}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\defbox[In scope]{
+\small
+\begin{itemize}
+  \setlength\itemsep{4pt}
+  \item Scalar Jasmin forward NTT entry point.
+  \item Scalar Jasmin inverse NTT entry point.
+  \item Correctness against the full HAETAE spectral NTT specifications.
+  \item Coefficient representation and bit-width bounds needed by the code.
+  \item Montgomery reduction behavior needed by the NTT routines.
+\end{itemize}
+}
+
+\column{0.48\textwidth}
+\defbox[Out of scope]{
+\small
+\begin{itemize}
+  \setlength\itemsep{4pt}
+  \item Full HAETAE key generation, signing, and verification.
+  \item Security proof for the signature scheme.
+  \item Constant-time or side-channel analysis.
+  \item AVX2/vectorized implementation correctness.
+  \item Correctness of unrelated HAETAE arithmetic routines.
+\end{itemize}
+}
+\end{columns}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Coverage and Limits}{Review Path for Artifact Evaluators}
+\begin{enumerate}
+  \setlength\itemsep{9pt}
+  \item Start with \ec{NTTEndToEnd.ec}.  Read the two final lemmas and the four composition lemmas above them.
+  \item Open \ec{RefJasminNTT.ec}.  Check that the Jasmin entry points refine the imperative NTT and inverse NTT procedures.
+  \item Open \ec{NTTFullAlgebra.ec}.  Inspect \ec{ntt\_full\_ntt} and \ec{invntt\_full\_invntt}; these are the loop-to-math bridges.
+  \item Open \ec{NTTFullSpec.ec}.  Confirm that \ec{full\_ntt} and \ec{full\_invntt} are the intended full HAETAE spectral transforms.
+  \item Run the compile commands.  EasyCrypt must accept the same proof scripts without admitted proof obligations.
+\end{enumerate}
+\end{frame}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Coverage and Limits}{Current Status}
+\begin{center}
+\small\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{p{4.4cm}p{6.4cm}c}
+\toprule[1.2pt]
+\textbf{Layer} & \textbf{Representative theorem or file} & \textbf{Status} \\
+\midrule
+Jasmin to imperative model & \ec{poly\_ntt\_core\_ref}, \ec{poly\_invntt\_core\_ref} & \cmark \\
+Imperative forward NTT to full spec & \ec{ntt\_full\_ntt} & \cmark \\
+Imperative inverse NTT to full spec & \ec{invntt\_full\_invntt} & \cmark \\
+Forward Jasmin end-to-end theorem & \ec{haetae\_jasmin\_ntt\_correct} & \cmark \\
+Inverse Jasmin end-to-end theorem & \ec{haetae\_jasmin\_invntt\_correct} & \cmark \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+
+\vspace{6pt}
+\begin{center}
+\small
+\textbf{Status change from the older deck:}
+The previous presentation marked the algebra bridge and end-to-end result as
+partial.  The current artifact has those files accepted by EasyCrypt.
+\end{center}
+\end{frame}
+
+%==============================================================================%
+\section{Conclusion}
+%==============================================================================%
+\sectiontitleframe{Conclusion}
+
+%-------------------------------------------------------
+\begin{frame}{\bfseries Conclusion}{Takeaway}
+\begin{center}
+\renewcommand{\arraystretch}{1.55}
+\begin{tabular}{p{2.6cm}p{10.0cm}}
+\toprule[1.2pt]
+\rowcolor{cseblue!10}
+\textbf{Artifact} &
+An EasyCrypt proof stack for the scalar HAETAE Jasmin NTT and inverse NTT. \\
+\midrule
+\rowcolor{green!10}
+\textbf{Result} &
+The final Jasmin entry points are proved functionally correct against the full
+HAETAE spectral transform specifications. \\
+\midrule
+\rowcolor{yellow!14}
+\textbf{Evidence} &
+The theorem stack compiles through EasyCrypt, including \ec{RefJasminNTT.ec},
+\ec{NTTFullAlgebra.ec}, and \ec{NTTEndToEnd.ec}. \\
+\midrule
+\rowcolor{red!7}
+\textbf{Boundary} &
+This is an NTT functional-correctness artifact, not a whole-signature,
+side-channel, or AVX2 verification. \\
+\bottomrule[1.2pt]
+\end{tabular}
+\end{center}
+\end{frame}
+
+%-------------------------------------------------------
+{\1\begin{frame}[plain,noframenumbering]
+\begin{center}
+  {\Large\bfseries\color{cseblue}Thank You}\\[1.2cm]
+  {\large Questions?}\\[1.0cm]
+  \rule{0.45\textwidth}{0.4pt}\\[0.7cm]
+  \textbf{Ji, Yonghyeon}\\[0.3cm]
+  \texttt{hacker3740@kookmin.ac.kr}\\[0.3cm]
+  Department of Cyber Security, Kookmin University\\[0.8cm]
+  \rule{0.45\textwidth}{0.4pt}\\[0.5cm]
+  {\small\color{gray}
+  Artifact: \ec{haetae-ntt-verify/easycrypt}\\[3pt]
+  Final file: \ec{NTTEndToEnd.ec}
+  }
+\end{center}
+\end{frame}}
+
+\end{document}

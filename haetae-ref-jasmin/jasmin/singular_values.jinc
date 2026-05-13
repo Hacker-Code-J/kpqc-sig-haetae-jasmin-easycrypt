@@ -1,0 +1,140 @@
+fn _singular_clear_sum(reg mut ptr u32[HAETAE_N] sump)
+                       -> reg ptr u32[HAETAE_N]
+{
+  reg u64 i;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    sump[i] = 0;
+    i += 1;
+  }
+
+  return sump;
+}
+
+inline fn _singular_finish_typed(reg const ptr u32[HAETAE_N] sump,
+                                 inline int best_count,
+                                 inline int tau,
+                                 inline int rem) -> reg u64
+{
+  stack u32[5] bestm;
+  reg u64 i j r;
+  reg u32 x y min fac notfac res tmp;
+
+  i = 0;
+  while (i < best_count)
+  {
+    x = sump[i];
+    bestm[i] = x;
+    i += 1;
+  }
+
+  i = best_count;
+  while (i < HAETAE_N)
+  {
+    x = sump[i];
+
+    j = 0;
+    while (j < best_count)
+    {
+      y = bestm[j];
+      x, y = __sk_singular_value_minmax(x, y);
+      bestm[j] = y;
+      j += 1;
+    }
+
+    i += 1;
+  }
+
+  min = bestm[0];
+  i = 1;
+  while (i < best_count)
+  {
+    tmp = bestm[i];
+    min, tmp = __sk_singular_value_minmax(min, tmp);
+    i += 1;
+  }
+
+  res = 0;
+  i = 0;
+  while (i < best_count)
+  {
+    tmp = bestm[i];
+    fac = min;
+    fac -= tmp;
+    fac >>s= 31;
+
+    notfac = fac;
+    notfac ^= 0xffffffff;
+    notfac &= rem;
+    fac &= tau;
+    fac ^= notfac;
+
+    tmp += 0x10200;
+    tmp >>s= 10;
+    tmp *= fac;
+    res += tmp;
+    i += 1;
+  }
+
+  r = (64s)res;
+  r += 32;
+  r >>s= 6;
+  return r;
+}
+
+inline fn _singular_full(reg const ptr u32[2048] s1p,
+                         reg const ptr u32[2048] s2p,
+                         inline int mcount,
+                         inline int kcount,
+                         inline int best_count,
+                         inline int tau,
+                         inline int rem) -> reg u64
+{
+  stack u32[512] input;
+  stack u32[HAETAE_N] sum;
+  reg ptr u32[512] inputp;
+  reg ptr u32[HAETAE_N] sump;
+  reg ptr u32[512] rootsp;
+  reg ptr u16[HAETAE_N] brvp;
+  reg const ptr u32[HAETAE_N] xp;
+  reg u64 i base r;
+
+  inputp = input;
+  sump = sum;
+  rootsp = jfft_roots;
+  brvp = jfft_brv8;
+  sump = _singular_clear_sum(sump);
+
+  i = 0;
+  base = 0;
+  while (i < mcount)
+  {
+    xp = s1p[base : HAETAE_N];
+    () = #spill(s1p, s2p, i, base);
+    inputp = _fft_init_and_bitrev(inputp, xp, rootsp, brvp);
+    inputp = _fft_full(inputp, rootsp);
+    sump = _sk_singular_value_accumulate_fft_sqabs(sump, inputp);
+    () = #unspill(s1p, s2p, i, base);
+    base += HAETAE_N;
+    i += 1;
+  }
+
+  i = 0;
+  base = 0;
+  while (i < kcount)
+  {
+    xp = s2p[base : HAETAE_N];
+    () = #spill(s1p, s2p, i, base);
+    inputp = _fft_init_and_bitrev(inputp, xp, rootsp, brvp);
+    inputp = _fft_full(inputp, rootsp);
+    sump = _sk_singular_value_accumulate_fft_sqabs(sump, inputp);
+    () = #unspill(s1p, s2p, i, base);
+    base += HAETAE_N;
+    i += 1;
+  }
+
+  r = _singular_finish_typed(sump, best_count, tau, rem);
+  return r;
+}

@@ -1,0 +1,20 @@
+require "keccak.jinc"
+require "fixpoint.jinc"
+require "sampler.jinc"
+require "polynomial_sampler.jinc"
+require "gaussian_sampler.jinc"
+
+export
+fn sample_gauss_N_full_jazz(reg mut ptr u64[4096] rp,
+                            reg mut ptr u8[512] signsp,
+                            reg mut ptr u64[2] sqsump,
+                            reg ui64 seedp,
+                            reg u64 nonce,
+                            reg u64 len) -> reg ptr u64[4096],
+                                              reg ptr u8[512],
+                                              reg ptr u64[2]
+{
+  rp, signsp, sqsump = _sample_gauss_N_full(rp, signsp, sqsump, seedp, nonce,
+                                            len);
+  return rp, signsp, sqsump;
+}

@@ -1,0 +1,28 @@
+# HAETAE provable-security proof surface.
+# Blank lines and comment lines are ignored by verify-provable-security.sh.
+
+# Main theorem and signature ROM interface.
+HAETAE_Security.ec
+Sig_ROM.ec
+
+# Hop games, reductions, ROM programming, and proof games.
+HAETAE_HopGames.ec
+HAETAE_Reductions.ec
+HAETAE_ROM.ec
+HAETAE_ROM_Programming.ec
+
+# Scheme, transcript, events, assumptions, and proof support.
+HAETAE_Scheme.ec
+HAETAE_Transcript.ec
+HAETAE_Events.ec
+HAETAE_Assumptions.ec
+
+# Distribution, rejection, algebra, and parameter support.
+HAETAE_Distributions.ec
+HAETAE_Rejection.ec
+HAETAE_Algebra.ec
+HAETAE_Params.ec
+
+# Concrete hash support used by the HAETAE model.
+HAETAE_FIPS202.ec
+HAETAE_Keccak1600.ec

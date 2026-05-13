@@ -1,0 +1,83 @@
+%==============================================================================%
+% Abstract
+%==============================================================================%
+
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+\noindent
+The transition to post-quantum cryptography demands not only mathematically
+sound security arguments but also \emph{machine-verified} correctness proofs for
+concrete implementations.  This dissertation presents a comprehensive formal
+verification of the Number-Theoretic Transform (NTT) at the core of the
+\haetae{} lattice-based digital signature scheme---a Korean national standard
+candidate under the KPQC competition.
+
+\medskip
+\noindent
+We establish functional correctness across three vertically composed
+abstraction layers.  At the \emph{implementation layer}, the high-assurance
+\jasmin{} programming language produces x86-64 assembly that admits direct
+extraction into \easycrypt{} modules.  At the \emph{algorithmic layer}, an
+imperative specification in \easycrypt{} faithfully models the in-place
+Cooley--Tukey butterfly structure together with Montgomery modular arithmetic
+over $\Zq$, $q = 64513$, including tight coefficient-bound invariants across
+all eight butterfly stages.  At the \emph{mathematical layer}, a fully abstract
+spectral specification expresses the NTT as a Vandermonde-style evaluation at
+powers of a primitive $512$th root of unity in $\Zq$.
+
+\medskip
+\noindent
+The key technical contributions are:
+\begin{enumerate}
+  \item A machine-checked \textbf{Montgomery reduction correctness} proof,
+        showing that $\op{montgomery\_reduce}(a) \equiv a \cdot R^{-1}
+        \pmod{q}$ for all $a$ in the $16$-bit to $32$-bit working range, with
+        explicit arithmetic bit-width bounds.
+
+  \item A \textbf{butterfly-stage induction} connecting the iterative
+        forward NTT loop in \ec{NTT\_Fq.ec} to the closed-form evaluation
+        formula in \ec{NTTFullSpec.ec}, parameterised over the 8-level
+        Cooley--Tukey recursion for the negacyclic polynomial ring
+        $\Z_q[X]/(X^{256}+1)$.
+
+  \item An \textbf{inverse NTT correctness} proof that tracks the
+        Montgomery scaling factor $R^{-1} \pmod{q}$ introduced by the
+        final output normalisation step, and establishes
+        $\op{invntt\_tomont} \circ \op{ntt} = \op{id}$ on valid coefficient
+        representations.
+
+  \item A \textbf{Jasmin-to-EasyCrypt refinement} proof in
+        \ec{RefJasminNTT.ec} connecting the extracted Jasmin semantics to the
+        imperative specifications, with a 16-bit-to-24-bit coefficient-bound
+        analysis for the forward transform and a tighter 16-bit preservation
+        proof for the inverse transform.
+
+  \item An \textbf{end-to-end statement} in \ec{NTTEndToEnd.ec} asserting
+        that the \jasmin{} exported functions \jasm{poly\_ntt\_jazz} and
+        \jasm{poly\_invntt\_jazz} compute exactly the abstract spectral NTT and
+        its inverse, bringing the entire verification chain under a single
+        top-level theorem.
+\end{enumerate}
+
+\noindent
+The verification identifies a critical structural difference between the
+\haetae{} NTT and the MLKEM NTT: the former performs a \emph{complete}
+$256$-point negacyclic transform with bit-reversal exponent
+$\brev_8(s \bmod \ell)$, whereas the latter applies an incomplete
+$128$-point transform with exponent $\brev_8((s \bmod \ell) \cdot 2)$.
+This difference invalidates a naive reuse of existing MLKEM algebra lemmas
+and motivates new algebraic infrastructure developed in
+\ec{NTTFullAlgebra.ec}.
+
+\medskip
+\noindent
+All proofs are machine-checked in \easycrypt{} version~2024 on an x86-64
+Linux platform.  The complete development totals approximately 3\,500 lines of
+\easycrypt{} and 200 lines of \jasmin{} code.
+
+\vspace{1em}
+\noindent
+\textbf{Keywords:} Number-Theoretic Transform, Formal Verification,
+EasyCrypt, Jasmin, Post-Quantum Cryptography, HAETAE, Montgomery Arithmetic,
+Lattice-Based Signatures, Functional Correctness, Negacyclic Convolution.

@@ -1,0 +1,84 @@
+require "params.jinc"
+require "poly.jinc"
+
+fn _keypair_copy_vec(reg mut ptr u32[2048] rp,
+                     reg const ptr u32[2048] ap,
+                     reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    rp[i] = a;
+    i += 1;
+  }
+
+  return rp;
+}
+
+export
+fn keypair_m23_matrix_jazz(reg mut ptr u32[2048] bp,
+                           reg mut ptr u32[2048] s1hatp,
+                           reg const ptr u32[8192] ap,
+                           reg const ptr u32[2048] s1p,
+                           reg u64 rows,
+                           reg u64 cols) -> reg ptr u32[2048],
+                                           reg ptr u32[2048]
+{
+  reg u64 count;
+
+  count = cols;
+  count *= HAETAE_N;
+  s1hatp = _keypair_copy_vec(s1hatp, s1p, count);
+
+  () = #spill(bp, ap, rows, cols);
+  s1hatp = _polyvec_ntt(s1hatp, cols);
+  () = #unspill(bp, ap, rows, cols);
+
+  bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
+  bp = _polyvec_invntt(bp, rows);
+
+  return bp, s1hatp;
+}
+
+export
+fn keypair_m5_matrix_jazz(reg mut ptr u32[2048] bp,
+                          reg mut ptr u32[2048] s1hatp,
+                          reg const ptr u32[8192] ap,
+                          reg const ptr u32[2048] s1p,
+                          reg u64 rows,
+                          reg u64 cols) -> reg ptr u32[2048],
+                                          reg ptr u32[2048]
+{
+  reg u64 count;
+
+  count = cols;
+  count *= HAETAE_N;
+  s1hatp = _keypair_copy_vec(s1hatp, s1p, count);
+
+  () = #spill(bp, ap, rows, cols);
+  s1hatp = _polyvec_ntt(s1hatp, cols);
+  () = #unspill(bp, ap, rows, cols);
+
+  bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
+
+  return bp, s1hatp;
+}
+
+export
+fn keypair_copy_ntt_jazz(reg mut ptr u32[2048] dstp,
+                         reg const ptr u32[2048] srcp,
+                         reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 coeffs;
+
+  coeffs = count;
+  coeffs *= HAETAE_N;
+  dstp = _keypair_copy_vec(dstp, srcp, coeffs);
+  dstp = _polyvec_ntt(dstp, count);
+
+  return dstp;
+}

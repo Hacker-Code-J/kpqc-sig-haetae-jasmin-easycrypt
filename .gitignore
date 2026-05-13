@@ -1,4 +1,22 @@
 haetae-ref-profiling/profiling_results/
+.omx
+.codex
+.agents
+tstex_modules/
+
+*.snm
+*.toc
+*.vrb
+*.log
+*.aux
+*.synctex.gz
+*.bbl
+*.blg
+*.lof
+*.lol
+*.lot
+*.xml
+*.claude
 
 # Prerequisites
 *.d

@@ -1,0 +1,263 @@
+%==============================================================================%
+% Chapter 5 – Field and Ring Formalisation
+%==============================================================================%
+
+\chapter{Formalisation of Field and Ring Arithmetic}
+\label{ch:field_ring}
+
+\section{The Prime Field $\F_q$}
+
+\subsection{Field Definition in \texttt{Fq.ec}}
+
+The file \texttt{Fq.ec} (536 lines) formalises the prime field
+$\F_q = \Z / 64513\Z$.  Rather than working with \easycrypt{}'s built-in
+\ec{ZModField} functor directly, the development uses a bespoke
+\ec{clone} instantiation to gain tighter control over signed arithmetic.
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Field declaration in \texttt{Fq.ec}},
+  label={lst:fq_decl}]
+require import AllCore IntDiv SmtMap Ring.
+require import List StdBigop.
+
+(* The modulus *)
+op q : int = 64513.
+axiom q_prime : prime q.
+axiom q_pos   : 0 < q.
+
+(* The canonical representative: representative in (-q/2, q/2] *)
+op Fq_repr (a : int) : int = a %% q.
+\end{lstlisting}
+
+\subsection{Signed vs.\ Unsigned Representation}
+
+A key design decision in \texttt{Fq.ec} is working with \emph{signed} integer
+representatives in $(-q/2, q/2]$ rather than the conventional non-negative
+representatives $[0, q)$.  This matches the signed 32-bit word representation
+used in the \jasmin{} implementation, where coefficients are stored as
+\jasm{u32} (unsigned 32-bit) but interpreted as signed integers via
+two's-complement.
+
+The file defines the \emph{signed word conversion} operator:
+\[
+  \op{to\_sint}(w) = \begin{cases}
+    w & \text{if } w < 2^{31} \\
+    w - 2^{32} & \text{otherwise}
+  \end{cases}
+\]
+which maps a 32-bit unsigned word to its signed interpretation, and the
+inverse \op{of\_sint} which lifts a bounded integer to a 32-bit word.
+
+\subsection{Bit-Width Bounds}
+
+A central technical device in \texttt{Fq.ec} is the \emph{bit-width bound
+predicate}:
+\[
+  \op{bw32}(w, s) \;\Leftrightarrow\; \abs{\op{to\_sint}(w)} < 2^s,
+\]
+for a bit-width parameter $s \in \{1, \dots, 31\}$.  This captures the
+invariant that a machine word represents a ``small'' integer.
+
+\begin{lemma}[Bound addition]
+  If $\op{bw32}(a, s_a)$ and $\op{bw32}(b, s_b)$, then
+  $\op{bw32}(a + b, \max(s_a, s_b) + 1)$.
+\label{lem:bw_add}
+\end{lemma}
+
+\begin{lemma}[Bound multiplication]
+  If $\op{bw32}(a, s_a)$ and $\op{bw32}(b, s_b)$, then
+  $\op{bw64}(a \cdot b, s_a + s_b)$
+  where $\op{bw64}$ is the 64-bit analogue.
+\label{lem:bw_mul}
+\end{lemma}
+
+These lemmas directly support the analysis of intermediate products in the
+NTT butterfly: a 16-bit coefficient multiplied by a 15-bit twiddle factor
+gives a 31-bit product, safe in a 32-bit signed word.
+
+\subsection{Signed Arithmetic Lemmas}
+
+The \easycrypt{} standard library does not include arithmetic lemmas for
+signed integer interpretations of machine words.  \texttt{Fq.ec} contributes
+several new lemmas, including:
+
+\begin{lemma}[Signed right shift]
+  For $a \in \Z$ with $\abs{a} < 2^{63}$,
+  \[
+    \op{to\_sint}(a \mathbin{\gg_s} 32) = a \div 2^{32},
+  \]
+  where $\gg_s$ denotes arithmetic right shift and $\div$ is truncating
+  (towards zero) integer division.
+\label{lem:arith_shift}
+\end{lemma}
+
+This lemma is crucial for formalising the Montgomery reduction formula, which
+uses an arithmetic right shift to divide by $R = 2^{32}$.
+
+\section{The \texorpdfstring{$\Z_q$}{Zq} Field via Theory Cloning}
+
+\subsection{\texttt{GFq.ec}: Abstract Field}
+
+The file \texttt{GFq.ec} clones \easycrypt{}'s abstract \ec{ZModField} theory
+with $q = 64513$:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={\texttt{GFq.ec}: Galois field instantiation},
+  label={lst:gfq}]
+require import ZModField IntDiv.
+require Fq.
+
+clone ZModField as Zq with
+  op p <- Fq.q
+  proof prime_p by exact Fq.q_prime.
+
+(* Canonical embedding from int to Zq *)
+abbrev inZq (a : int) : Zq.zmod = Zq.inzmod a.
+
+(* Signed representative *)
+op toInt (x : Zq.zmod) : int = Zq.asint x.
+\end{lstlisting}
+
+This instantiation provides the complete algebraic structure of $\F_q$:
+commutativity, associativity, distributivity, existence of inverses, and the
+characteristic-$q$ axiom $q \cdot 1 = 0$.
+
+\subsection{Primitive Root}
+
+The primitive $512$th root of unity $\zeta_0 = 426$ is defined and verified:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Primitive root declaration in NTTFullAlgebra.ec},
+  label={lst:zroot}]
+op zroot : Zq.zmod = inZq 426.
+
+lemma zroot_512 : zroot ^ 512 = Zq.one.
+lemma zroot_256 : zroot ^ 256 = Zq.(-\!one).
+lemma zroot_primitive : forall k, 0 < k < 512 =>
+    zroot ^ k <> Zq.one.
+\end{lstlisting}
+
+These are proved by direct computation in $\F_{64513}$, using the SMT
+backend to discharge the modular arithmetic obligations.
+
+\section{The Polynomial Ring $R_q$}
+
+\subsection{\texttt{Rq.ec}: Ring Definition}
+
+The file \texttt{Rq.ec} (118 lines) defines the polynomial ring
+$R_q = \Z_q[X]/(X^{256}+1)$ as a 256-element coefficient vector over $\Z_q$:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={Ring definition in \texttt{Rq.ec}},
+  label={lst:rq_def}]
+require import Array256.
+
+(* Polynomial = coefficient vector *)
+type poly = Zq.zmod Array256.t.
+
+(* Ring addition *)
+op (&+) (p q : poly) : poly =
+  Array256.map2 Zq.(+) p q.
+
+(* Ring multiplication (schoolbook, negacyclic) *)
+op (&*) (p q : poly) : poly =
+  let r = Array256.create Zq.zero in
+  let r = foldr (fun i r =>
+    let pi = p.[i] in
+    foldr (fun j r =>
+      let pij = pi * q.[j] in
+      let idx = (i + j) %% 512 in
+      if idx < 256 then r.[idx <- r.[idx] + pij]
+                   else r.[idx - 256 <- r.[idx - 256] - pij]
+    ) r (iota_ 0 256)
+  ) r (iota_ 0 256) in
+  r.
+\end{lstlisting}
+
+\subsection{NTT Axioms in \texttt{Rq.ec}}
+
+Rather than proving from first principles that the NTT is a ring homomorphism,
+\texttt{Rq.ec} introduces this as an \emph{axiom} that is later discharged
+by the algebraic development in \texttt{NTTFullAlgebra.ec}:
+
+\begin{lstlisting}[language=EasyCrypt,
+  caption={NTT homomorphism axioms in \texttt{Rq.ec}},
+  label={lst:rq_ntt_axiom}]
+(* NTT of a product = pointwise product of NTTs *)
+axiom ntt_mul_hom (f g : poly) :
+  NTT (f &* g) = Array256.map2 Zq.( * ) (NTT f) (NTT g).
+
+(* INTT is the left inverse of NTT *)
+axiom intt_ntt (f : poly) : INTT (NTT f) = f.
+\end{lstlisting}
+
+These axioms are discharged as theorems once \texttt{NTTFullAlgebra.ec}
+establishes the connection between the imperative NTT loop and the abstract
+spectral map.
+
+\section{Array Infrastructure}
+
+\subsection{\texttt{Array256.ec}}
+
+The 256-element array type \ec{Array256.t} is a typed abstract type with
+the following operations:
+\begin{itemize}
+  \item \ec{.[i]} and \ec{.[i <- v]}: functional get and set.
+  \item \ec{map}, \ec{map2}: pointwise operations.
+  \item \ec{iteri}: iteration with index.
+  \item \ec{init}: create from a function.
+  \item \ec{create}: create with constant value.
+\end{itemize}
+
+Key properties include extensional equality (\ec{Array256.ext\_eq}):
+two arrays are equal if and only if they agree at every index.
+
+\subsection{Word Array Conversion}
+
+The bridge between machine-word arrays and integer arrays is captured by
+the following predicate:
+
+\begin{definition}[Word-to-coefficient correspondence]
+  Given a 32-bit word array $\mathtt{rp} : \ec{W32.t}^{256}$ and an integer
+  array $\mathtt{a} : \Z^{256}$, we write $\mathtt{rp} \approx \mathtt{a}$
+  (notation \ec{warray\_rel rp a}) if:
+  \[
+    \forall i \in [0, 256).\;
+    \op{W32.to\_sint}(\mathtt{rp}[i]) = \mathtt{a}[i].
+  \]
+\label{def:wrel}
+\end{definition}
+
+This relation is the key linking the extracted \jasmin{} module (which works
+with \ec{W32.t} arrays) to the imperative specification (which works with
+\ec{int} arrays).  It is the core of the refinement proof in
+\texttt{RefJasminNTT.ec}.
+
+\section{Reduction and Auxiliary Operations}
+
+\subsection{Conditional Addition (\texttt{caddq})}
+
+The \ec{caddq} operation adds $q$ to negative coefficients:
+\[
+  \op{caddq}(a) = \begin{cases} a + q & \text{if } a < 0 \\ a & \text{otherwise} \end{cases}
+\]
+It maps signed representatives in $(-q, 0) \cup [0, q)$ to non-negative
+representatives in $[0, q)$, without modular reduction.
+
+\begin{lemma}[caddq correctness]
+  For all $a \in \Z$ with $-q < a < q$:
+  $\op{caddq}(a) \equiv a \pmod{q}$ and $0 \le \op{caddq}(a) < q$.
+\label{lem:caddq}
+\end{lemma}
+
+\subsection{Freeze (\texttt{freeze})}
+
+Full modular reduction to $[0, q)$ is defined as:
+\[
+  \op{freeze}(a) = ((a \bmod q) + q) \bmod q.
+\]
+\begin{lemma}[freeze correctness]
+  For all $a \in \Z$:
+  $\op{freeze}(a) \equiv a \pmod{q}$ and $0 \le \op{freeze}(a) < q$.
+\label{lem:freeze}
+\end{lemma}

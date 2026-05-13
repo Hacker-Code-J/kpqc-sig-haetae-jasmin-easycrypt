@@ -1,0 +1,216 @@
+mkdir -p build/jasmin
+jasminc -o build/jasmin/hpoly.s jasmin/hpoly.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/poly_sample.s jasmin/poly_sample.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/poly_sample.o build/jasmin/poly_sample.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/shake_multi.s jasmin/shake_multi.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/shake_multi.o build/jasmin/shake_multi.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/poly_challenge_full.s jasmin/poly_challenge_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/poly_challenge_full.o build/jasmin/poly_challenge_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/expand.s jasmin/expand.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/unpack_vk_full.s jasmin/unpack_vk_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/unpack_vk_full.o build/jasmin/unpack_vk_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/encoding_full.s jasmin/encoding_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/encoding_full.o build/jasmin/encoding_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/fips202_full.s jasmin/fips202_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/fips202_full.o build/jasmin/fips202_full.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/sampler_full.s jasmin/sampler_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sampler_full.o build/jasmin/sampler_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/fft_full.s jasmin/fft_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/fft_full.o build/jasmin/fft_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/pack_sig_finish.s jasmin/pack_sig_finish.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/pack_sig_finish.o build/jasmin/pack_sig_finish.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/pack_sig_full.s jasmin/pack_sig_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/pack_sig_full.o build/jasmin/pack_sig_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/unpack_sig_full.s jasmin/unpack_sig_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/unpack_sig_full.o build/jasmin/unpack_sig_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/verify_tail.s jasmin/verify_tail.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verify_tail.o build/jasmin/verify_tail.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/verify_matrix.s jasmin/verify_matrix.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verify_matrix.o build/jasmin/verify_matrix.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/verify_full.s jasmin/verify_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verify_full.o build/jasmin/verify_full.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/singular_full.s jasmin/singular_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/singular_full.o build/jasmin/singular_full.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/sign_challenge.s jasmin/sign_challenge.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sign_challenge.o build/jasmin/sign_challenge.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/sign_round.s jasmin/sign_round.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sign_round.o build/jasmin/sign_round.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/sign_cs.s jasmin/sign_cs.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sign_cs.o build/jasmin/sign_cs.s
+mkdir -p build/jasmin
+jasminc -o build/jasmin/keypair_matrix.s jasmin/keypair_matrix.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/keypair_full.s jasmin/keypair_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/keypair_full.o build/jasmin/keypair_full.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/hyperball_full.s jasmin/hyperball_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/hyperball_full.o build/jasmin/hyperball_full.s
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/sign_full.s jasmin/sign_full.jazz
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sign_full.o build/jasmin/sign_full.s
+mkdir -p build/mode2/lib
+cc -shared  -Wl,-soname,libhaetae-mode2-jazz.so -o build/mode2/lib/libhaetae-mode2-jazz.so build/mode2/jasmin/hpoly.o build/mode2/jasmin/poly_sample.o build/mode2/jasmin/shake_multi.o build/mode2/jasmin/poly_challenge_full.o build/mode2/jasmin/expand.o build/mode2/jasmin/unpack_vk_full.o build/mode2/jasmin/encoding_full.o build/mode2/jasmin/fips202_full.o build/mode2/jasmin/sampler_full.o build/mode2/jasmin/fft_full.o build/mode2/jasmin/pack_sig_finish.o build/mode2/jasmin/pack_sig_full.o build/mode2/jasmin/unpack_sig_full.o build/mode2/jasmin/verify_tail.o build/mode2/jasmin/verify_matrix.o build/mode2/jasmin/verify_full.o build/mode2/jasmin/singular_full.o build/mode2/jasmin/sign_challenge.o build/mode2/jasmin/sign_round.o build/mode2/jasmin/sign_cs.o build/mode2/jasmin/keypair_matrix.o build/mode2/jasmin/keypair_full.o build/mode2/jasmin/hyperball_full.o build/mode2/jasmin/sign_full.o 
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/poly_sample.o build/jasmin/poly_sample.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/shake_multi.o build/jasmin/shake_multi.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/poly_challenge_full.o build/jasmin/poly_challenge_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/unpack_vk_full.o build/jasmin/unpack_vk_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/encoding_full.o build/jasmin/encoding_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/fips202_full.o build/jasmin/fips202_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sampler_full.o build/jasmin/sampler_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/fft_full.o build/jasmin/fft_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/pack_sig_finish.o build/jasmin/pack_sig_finish.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/pack_sig_full.o build/jasmin/pack_sig_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/unpack_sig_full.o build/jasmin/unpack_sig_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verify_tail.o build/jasmin/verify_tail.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verify_matrix.o build/jasmin/verify_matrix.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verify_full.o build/jasmin/verify_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/singular_full.o build/jasmin/singular_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sign_challenge.o build/jasmin/sign_challenge.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sign_round.o build/jasmin/sign_round.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sign_cs.o build/jasmin/sign_cs.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/keypair_full.o build/jasmin/keypair_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/hyperball_full.o build/jasmin/hyperball_full.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sign_full.o build/jasmin/sign_full.s
+mkdir -p build/mode3/lib
+cc -shared  -Wl,-soname,libhaetae-mode3-jazz.so -o build/mode3/lib/libhaetae-mode3-jazz.so build/mode3/jasmin/hpoly.o build/mode3/jasmin/poly_sample.o build/mode3/jasmin/shake_multi.o build/mode3/jasmin/poly_challenge_full.o build/mode3/jasmin/expand.o build/mode3/jasmin/unpack_vk_full.o build/mode3/jasmin/encoding_full.o build/mode3/jasmin/fips202_full.o build/mode3/jasmin/sampler_full.o build/mode3/jasmin/fft_full.o build/mode3/jasmin/pack_sig_finish.o build/mode3/jasmin/pack_sig_full.o build/mode3/jasmin/unpack_sig_full.o build/mode3/jasmin/verify_tail.o build/mode3/jasmin/verify_matrix.o build/mode3/jasmin/verify_full.o build/mode3/jasmin/singular_full.o build/mode3/jasmin/sign_challenge.o build/mode3/jasmin/sign_round.o build/mode3/jasmin/sign_cs.o build/mode3/jasmin/keypair_matrix.o build/mode3/jasmin/keypair_full.o build/mode3/jasmin/hyperball_full.o build/mode3/jasmin/sign_full.o 
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/poly_sample.o build/jasmin/poly_sample.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/shake_multi.o build/jasmin/shake_multi.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/poly_challenge_full.o build/jasmin/poly_challenge_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/unpack_vk_full.o build/jasmin/unpack_vk_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/encoding_full.o build/jasmin/encoding_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/fips202_full.o build/jasmin/fips202_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sampler_full.o build/jasmin/sampler_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/fft_full.o build/jasmin/fft_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/pack_sig_finish.o build/jasmin/pack_sig_finish.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/pack_sig_full.o build/jasmin/pack_sig_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/unpack_sig_full.o build/jasmin/unpack_sig_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verify_tail.o build/jasmin/verify_tail.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verify_matrix.o build/jasmin/verify_matrix.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verify_full.o build/jasmin/verify_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/singular_full.o build/jasmin/singular_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sign_challenge.o build/jasmin/sign_challenge.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sign_round.o build/jasmin/sign_round.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sign_cs.o build/jasmin/sign_cs.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/keypair_full.o build/jasmin/keypair_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/hyperball_full.o build/jasmin/hyperball_full.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sign_full.o build/jasmin/sign_full.s
+mkdir -p build/mode5/lib
+cc -shared  -Wl,-soname,libhaetae-mode5-jazz.so -o build/mode5/lib/libhaetae-mode5-jazz.so build/mode5/jasmin/hpoly.o build/mode5/jasmin/poly_sample.o build/mode5/jasmin/shake_multi.o build/mode5/jasmin/poly_challenge_full.o build/mode5/jasmin/expand.o build/mode5/jasmin/unpack_vk_full.o build/mode5/jasmin/encoding_full.o build/mode5/jasmin/fips202_full.o build/mode5/jasmin/sampler_full.o build/mode5/jasmin/fft_full.o build/mode5/jasmin/pack_sig_finish.o build/mode5/jasmin/pack_sig_full.o build/mode5/jasmin/unpack_sig_full.o build/mode5/jasmin/verify_tail.o build/mode5/jasmin/verify_matrix.o build/mode5/jasmin/verify_full.o build/mode5/jasmin/singular_full.o build/mode5/jasmin/sign_challenge.o build/mode5/jasmin/sign_round.o build/mode5/jasmin/sign_cs.o build/mode5/jasmin/keypair_matrix.o build/mode5/jasmin/keypair_full.o build/mode5/jasmin/hyperball_full.o build/mode5/jasmin/sign_full.o 
+mkdir -p build/mode2/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/main.o test/main.c
+mkdir -p build/mode2/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/randombytes.o test/randombytes.c
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode2-main-jazz build/mode2/test/main.o build/mode2/test/randombytes.o -Lbuild/mode2/lib -lhaetae-mode2-jazz -Wl,-rpath,/home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-jasmin/build/mode2/lib 
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/main.o test/main.c
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/randombytes.o test/randombytes.c
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode3-main-jazz build/mode3/test/main.o build/mode3/test/randombytes.o -Lbuild/mode3/lib -lhaetae-mode3-jazz -Wl,-rpath,/home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-jasmin/build/mode3/lib 
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/main.o test/main.c
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/randombytes.o test/randombytes.c
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode5-main-jazz build/mode5/test/main.o build/mode5/test/randombytes.o -Lbuild/mode5/lib -lhaetae-mode5-jazz -Wl,-rpath,/home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-jasmin/build/mode5/lib 

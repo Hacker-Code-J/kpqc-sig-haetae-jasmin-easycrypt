@@ -1,0 +1,24 @@
+\chapter{Transcript Games and Erasure}
+\label{ch:transcripts}
+
+\section{Transcript Simulation}
+
+Transcript games expose the internal structure needed for simulation and
+extraction.  The proof includes modules for transcript-simulated signing,
+internal transcript signing, and ROM-internal transcript signing.  These games
+bridge the gap between a real signing oracle and the NMA-style games used in the
+reduction.
+
+\section{State Preservation}
+
+Representative lemmas prove that signing oracles preserve transcript validity,
+log readiness, min-entropy conditions, and ROM state invariants.  These are not
+cosmetic properties; they are the invariants needed to apply later bad-event and
+special-soundness arguments.
+
+\section{Erasure Exactness}
+
+Erasure lemmas show that internal transcript information can be removed without
+changing the adversary-visible distribution.  In a paper proof this might be a
+sentence.  In EasyCrypt it is a relational statement about two games with
+related states and identical observable outputs.

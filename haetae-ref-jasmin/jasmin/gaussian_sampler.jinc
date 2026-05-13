@@ -1,0 +1,320 @@
+fn __sample_full_squeeze256(reg mut ptr u8[8192] outp,
+                            reg u64 outoff,
+                            reg mut ptr u64[25] sp) -> reg ptr u8[8192],
+                                                     reg ptr u64[25]
+{
+  reg u64 i j lane t idx;
+  reg u8 b;
+
+  idx = outoff;
+  () = #spill(outp, outoff, idx);
+  sp = _keccakf1600(sp);
+  () = #unspill(outp, outoff, idx);
+
+  i = 0;
+  while (i < 136)
+  {
+    lane = i;
+    lane >>= 3;
+    t = sp[lane];
+
+    j = 0;
+    while (j < 8)
+    {
+      b = (8u)t;
+      outp[idx] = b;
+      t >>= 8;
+      idx += 1;
+      j += 1;
+    }
+
+    i += 8;
+  }
+
+  return outp, sp;
+}
+
+fn __sample_gauss_at(reg mut ptr u64[4096] rp,
+                     reg mut ptr u64[2] sqsump,
+                     reg mut ptr u64[1] coefcntp,
+                     reg const ptr u8[8192] bufp,
+                     reg u64 counts,
+                     reg u64 dont_write_last,
+                     reg u64 bufoff,
+                     reg u64 outoff) -> reg ptr u64[4096],
+                                       reg ptr u64[2],
+                                       reg ptr u64[1]
+{
+  stack ptr u64[4096] srp;
+  stack ptr u64[2] ssqsump;
+  stack ptr u64[1] scoefcntp;
+  stack ptr u8[8192] sbufp;
+  stack u64 slen sbytecnt spos scoefcnt sdont sbufoff soutoff;
+  stack u8[17] randbuf;
+  reg ptr u64[4096] rp_tmp;
+  reg ptr u64[2] sqsum_tmp;
+  reg ptr u64[1] coefcntp_tmp;
+  reg const ptr u8[8192] bufp_tmp;
+  reg ptr u8[17] randp;
+  inline int k;
+  reg u64 len bytecnt pos coefcnt last sample accepted accepted64 dont;
+  reg u64 s0 s1 sqr0 sqr1 mask carry base outidx;
+  reg u8 byte;
+
+  srp = rp;
+  ssqsump = sqsump;
+  scoefcntp = coefcntp;
+  sbufp = bufp;
+  sdont = dont_write_last;
+  sbufoff = bufoff;
+  soutoff = outoff;
+
+  len = counts;
+  len &= 0xffffffff;
+  bytecnt = counts;
+  bytecnt >>= 32;
+  slen = len;
+  sbytecnt = bytecnt;
+  spos = 0;
+  scoefcnt = 0;
+
+  randp = randbuf;
+
+  while { coefcnt = scoefcnt; len = slen; } (coefcnt < len)
+  {
+    bytecnt = sbytecnt;
+    if (bytecnt < 17)
+    {
+      slen = coefcnt;
+    }
+    else
+    {
+      pos = spos;
+      base = sbufoff;
+      base += pos;
+      bufp_tmp = sbufp;
+      for k = 0 to 17
+      {
+        byte = bufp_tmp[base + k];
+        randp[k] = byte;
+      }
+
+      () = #spill(len, bytecnt, pos, coefcnt);
+      sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+      () = #unspill(len, bytecnt, pos, coefcnt);
+
+      last = len;
+      last -= 1;
+      dont = sdont;
+      rp_tmp = srp;
+      if (dont != 0)
+      {
+        if (coefcnt == last)
+        {
+          accepted64 = accepted;
+        }
+        else
+        {
+          outidx = soutoff;
+          outidx += coefcnt;
+          rp_tmp[outidx] = sample;
+          srp = rp_tmp;
+          accepted64 = accepted;
+        }
+      }
+      else
+      {
+        outidx = soutoff;
+        outidx += coefcnt;
+        rp_tmp[outidx] = sample;
+        srp = rp_tmp;
+        accepted64 = accepted;
+      }
+
+      coefcnt += accepted64;
+      pos += 17;
+      bytecnt -= 17;
+
+      mask = 0;
+      mask -= accepted64;
+      sqr0 &= mask;
+      sqr1 &= mask;
+      sqsum_tmp = ssqsump;
+      s0 = sqsum_tmp[0];
+      s1 = sqsum_tmp[1];
+      s0 += sqr0;
+      s1 += sqr1;
+      sqsum_tmp[0] = s0;
+      sqsum_tmp[1] = s1;
+      ssqsump = sqsum_tmp;
+      scoefcnt = coefcnt;
+      spos = pos;
+      sbytecnt = bytecnt;
+    }
+  }
+
+  sqsum_tmp = ssqsump;
+  s0 = sqsum_tmp[0];
+  s1 = sqsum_tmp[1];
+  carry = s0;
+  carry >>= 48;
+  s1 += carry;
+  mask = 0xffffffffffff;
+  s0 &= mask;
+  sqsum_tmp[0] = s0;
+  sqsum_tmp[1] = s1;
+  ssqsump = sqsum_tmp;
+
+  coefcnt = scoefcnt;
+  coefcntp_tmp = scoefcntp;
+  coefcntp_tmp[0] = coefcnt;
+  scoefcntp = coefcntp_tmp;
+
+  rp = srp;
+  sqsump = ssqsump;
+  coefcntp = scoefcntp;
+  return rp, sqsump, coefcntp;
+}
+
+fn __sample_gauss_N_copy_signs_at(reg mut ptr u8[512] signsp,
+                                  reg const ptr u8[8192] bufp,
+                                  reg u64 signbytes,
+                                  reg u64 signoff) -> reg ptr u8[512]
+{
+  reg u64 i idx;
+  reg u8 b;
+
+  i = 0;
+  while (i < signbytes)
+  {
+    b = bufp[i];
+    idx = signoff;
+    idx += i;
+    signsp[idx] = b;
+    i += 1;
+  }
+
+  return signsp;
+}
+
+fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
+                           reg mut ptr u8[512] signsp,
+                           reg mut ptr u64[2] sqsump,
+                           reg ui64 seedp,
+                           reg u64 nonce,
+                           reg u64 len,
+                           reg u64 sampleoff,
+                           reg u64 signoff) -> reg ptr u64[4096],
+                                               reg ptr u8[512],
+                                               reg ptr u64[2]
+{
+  stack u64[25] state;
+  stack u8[8192] buf;
+  stack u64[1] coefcnt_buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[8192] bufp;
+  reg ptr u64[1] coefcntp;
+  reg u64 block off signbytes bytecnt counts total got firstflag remaining;
+  reg u64 dont bufoff outoff;
+
+  sp = state;
+  bufp = buf;
+  coefcntp = coefcnt_buf;
+
+  sp = __poly_sample_shake256_init(sp, seedp, nonce);
+
+  block = 0;
+  off = 0;
+  while (block < 32)
+  {
+    () = #spill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
+    bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #unspill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
+    off += 136;
+    block += 1;
+  }
+
+  signbytes = len;
+  signbytes >>= 3;
+  signsp = __sample_gauss_N_copy_signs_at(signsp, bufp, signbytes, signoff);
+
+  bytecnt = 4352;
+  bytecnt -= signbytes;
+  counts = bytecnt;
+  counts <<= 32;
+  counts |= len;
+
+  dont = len;
+  while (dont >= HAETAE_N)
+  {
+    dont -= HAETAE_N;
+  }
+
+  bufoff = signbytes;
+  outoff = sampleoff;
+  () = #spill(signsp, sp, len, bytecnt, signbytes, dont, sampleoff, signoff);
+  rp, sqsump, coefcntp = __sample_gauss_at(rp, sqsump, coefcntp, bufp,
+                                           counts, dont, bufoff, outoff);
+  () = #unspill(signsp, sp, len, bytecnt, signbytes, dont, sampleoff, signoff);
+  got = coefcntp[0];
+  total = got;
+  firstflag = 1;
+
+  while (total < len)
+  {
+    off = bytecnt;
+    while (off >= 17)
+    {
+      off -= 17;
+    }
+
+    bufp = _sample_gauss_N_carry(bufp, bytecnt, signbytes, firstflag, off);
+
+    () = #spill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
+                dont, off, sampleoff, signoff);
+    bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #unspill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
+                  dont, off, sampleoff, signoff);
+
+    bytecnt = 136;
+    bytecnt += off;
+    remaining = len;
+    remaining -= total;
+    counts = bytecnt;
+    counts <<= 32;
+    counts |= remaining;
+    bufoff = 0;
+    outoff = sampleoff;
+    outoff += total;
+    () = #spill(signsp, sp, len, bytecnt, signbytes, firstflag, total, dont,
+                sampleoff, signoff);
+    rp, sqsump, coefcntp = __sample_gauss_at(rp, sqsump, coefcntp, bufp,
+                                             counts, dont, bufoff, outoff);
+    () = #unspill(signsp, sp, len, bytecnt, signbytes, firstflag, total, dont,
+                  sampleoff, signoff);
+    got = coefcntp[0];
+    total += got;
+    firstflag = 0;
+  }
+
+  return rp, signsp, sqsump;
+}
+
+fn _sample_gauss_N_full(reg mut ptr u64[4096] rp,
+                        reg mut ptr u8[512] signsp,
+                        reg mut ptr u64[2] sqsump,
+                        reg ui64 seedp,
+                        reg u64 nonce,
+                        reg u64 len) -> reg ptr u64[4096],
+                                          reg ptr u8[512],
+                                          reg ptr u64[2]
+{
+  reg u64 sampleoff signoff;
+
+  sampleoff = 0;
+  signoff = 0;
+  rp, signsp, sqsump = _sample_gauss_N_full_at(rp, signsp, sqsump, seedp,
+                                               nonce, len, sampleoff, signoff);
+
+  return rp, signsp, sqsump;
+}

@@ -1,0 +1,42 @@
+fn _fft_full(reg mut ptr u32[512] datap,
+             reg const ptr u32[512] rootsp) -> reg ptr u32[512]
+{
+  reg u64 r m md2 n k even odd twid stride;
+
+  r = 1;
+  m = 2;
+  md2 = 1;
+  stride = 256;
+  while (r <= 8)
+  {
+    n = 0;
+    while (n < 256)
+    {
+      k = 0;
+      while (k < md2)
+      {
+        even = n;
+        even += k;
+        odd = even;
+        odd += md2;
+
+        twid = k;
+        twid *= stride;
+
+        () = #spill(rootsp, r, m, md2, n, k, stride);
+        datap = _fft_butterfly(datap, rootsp, even, odd, twid);
+        () = #unspill(rootsp, r, m, md2, n, k, stride);
+        k += 1;
+      }
+
+      n += m;
+    }
+
+    r += 1;
+    m <<= 1;
+    md2 <<= 1;
+    stride >>= 1;
+  }
+
+  return datap;
+}

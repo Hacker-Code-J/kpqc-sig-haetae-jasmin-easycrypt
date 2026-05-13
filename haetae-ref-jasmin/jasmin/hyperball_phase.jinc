@@ -1,0 +1,47 @@
+fn _polyfixveclk_scale_and_check(reg mut ptr u32[2048] y1p,
+                                 reg mut ptr u32[2048] y2p,
+                                 reg mut ptr u64[4] statep,
+                                 reg const ptr u64[4096] samplesp,
+                                 reg const ptr u8[512] signsp,
+                                 reg const ptr u64[2] scalep)
+                                 -> reg ptr u32[2048],
+                                    reg ptr u32[2048],
+                                    reg ptr u64[4]
+{
+  stack ptr u32[2048] sy1p sy2p;
+  stack ptr u64[4] sstatep;
+  reg u64 lcount total kcount counts bound norm accepted;
+
+  sy1p = y1p;
+  sy2p = y2p;
+  sstatep = statep;
+
+  lcount = statep[0];
+  total = statep[1];
+  bound = statep[2];
+
+  counts = total;
+  counts <<= 32;
+  counts |= lcount;
+  y1p = sy1p;
+  y2p = sy2p;
+  y1p, y2p = _polyfixveclk_scale_samples(y1p, y2p, samplesp, signsp, scalep,
+                                         counts);
+  sy1p = y1p;
+  sy2p = y2p;
+
+  kcount = total;
+  kcount -= lcount;
+  norm = _polyfixveclk_sqnorm2_2048(y1p, lcount, y2p, kcount);
+  accepted = 0;
+  if (norm <= bound)
+  {
+    accepted = 1;
+  }
+  statep = sstatep;
+  statep[3] = accepted;
+
+  y1p = sy1p;
+  y2p = sy2p;
+  return y1p, y2p, statep;
+}

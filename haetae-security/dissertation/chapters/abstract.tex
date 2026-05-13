@@ -1,0 +1,50 @@
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+This dissertation studies the machine-checked verification of the formal
+provable-security model of the lattice-based signature scheme \haetae{}.  The
+verification is performed in \easycrypt{} and targets the formal,
+reduction-style random-oracle security argument rather than implementation
+certification artifacts or a standard-model proof for SHAKE.  The central
+machine-checked statement is a scoped \eufcma{} implication for the modeled
+scheme in the random oracle model, with the counted-ROM loss ledger
+instantiated at the checked wrapper constants and under the explicit hop and
+hardness premises of the final EasyCrypt composition lemma.  The current
+dissertation also records a vacuity warning: one final
+composition premise contains \ec{rejection\_sampling\_loss\_term}, which is
+larger than one under the present constants, so the checked implication should
+not be read as a non-vacuous concrete security instantiation until that
+antecedent or loss normalization is repaired.  It is not claimed as a checked
+equivalence theorem between the February 2026 HAETAE specification and the
+EasyCrypt model.  The proof surface is supported by formal
+modules for signature games, lazy random oracles, transcript games, signing
+simulators, paper-simulation samplers, exact hyperball sampling, rejection
+sampling, special soundness, and concrete loss accounting.
+
+A major practical contribution is the creation of a separated proof-management
+surface under \code{provable-security/}.  The manifest
+\code{provable-security/proof-files.txt} lists the EasyCrypt files that define
+the provable-security gate, and \code{provable-security/easycrypt/} contains the
+corresponding source copies.  The verification script compiles this separated
+folder with EasyCrypt and excludes generated known-answer-test material such as
+\code{HAETAE\_FIPS202\_KAT\_Empty\_Generated.ec}, which is useful for
+implementation validation but not necessary for the reduction proof.
+
+The dissertation explains the theorem architecture from the generic signature
+\rom{} interface in \code{Sig\_ROM.ec} through the \haetae{}-specific theorem
+layer in \code{HAETAE\_Security.ec}.  It gives particular attention to the
+proof-engineering obligations that are easy to hide in informal cryptographic
+papers: random-oracle programming freshness, adversarial query logging,
+\code{sampler\_bad\_prequery}, clean-conditioned lifting through signing
+oracles, exact hyperball sampling, rejection-sampling losses, and the algebra of
+final concrete bounds.  It also records a dependency layer separating checked
+EasyCrypt theorems, explicit modeling assumptions, audited specification
+correspondences, vacuity checks, and out-of-scope cryptanalytic or
+implementation claims.  The resulting document is both a dissertation-style
+explanation of the checked formal-model proof surface and a guide to maintaining
+it.  The model/specification correspondence, non-vacuous discharge of the final
+hop premise, concrete hash instantiation, implementation correctness, concrete
+MLWE/Module-SIS security estimates, and reduction runtime overhead are
+identified as explicit boundary obligations rather than hidden theorem claims.
+
+\cleardoublepage

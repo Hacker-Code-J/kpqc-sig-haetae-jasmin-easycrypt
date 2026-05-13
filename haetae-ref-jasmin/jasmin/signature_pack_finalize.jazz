@@ -1,0 +1,22 @@
+require "params.jinc"
+require "pack.jinc"
+require "signature_pack_finalize.jinc"
+
+export
+fn pack_sig_finish_jazz(reg mut ptr u8[2948] sigp,
+                        reg mut ptr u64[5] statep,
+                        reg const ptr u8[2048] hbencp,
+                        reg const ptr u8[2048] hencp) -> reg ptr u8[2948],
+                                                   reg ptr u64[5]
+{
+  sigp, statep = _pack_sig_finish(sigp, statep, hbencp, hencp);
+  return sigp, statep;
+}
+
+export
+fn unpack_sig_finish_jazz(reg mut ptr u64[4] statep,
+                          reg const ptr u8[2948] sigp) -> reg ptr u64[4]
+{
+  statep = _unpack_sig_finish(statep, sigp);
+  return statep;
+}

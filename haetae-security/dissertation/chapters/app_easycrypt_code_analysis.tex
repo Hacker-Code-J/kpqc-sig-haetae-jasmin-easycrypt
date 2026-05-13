@@ -1,0 +1,574 @@
+\chapter{Detailed EasyCrypt Proof-Code Analysis}
+\label{app:easycrypt-code-analysis}
+
+\providecommand{\ecfile}[1]{\nolinkurl{#1}}
+\providecommand{\ecsym}[1]{\nolinkurl{#1}}
+
+This appendix records a file-by-file analysis of the EasyCrypt code that is part
+of the provable-security verification surface.  The source of truth for the
+analysis is the manifest \ecfile{provable-security/proof-files.txt}; files not
+listed there are outside the provable-security gate documented here.  In
+particular, known-answer-test files for concrete FIPS 202 outputs are useful for
+implementation validation but are not needed for the game-based provable-security
+argument.
+
+\section{Manifest-level proof-code inventory}
+\label{app:ec-inventory}
+
+The manifest contains 16 EasyCrypt files and 22046 lines of checked source.  The
+recorded inventory is reproducible with
+\ecfile{dissertation/etc/count-easycrypt-declarations.sh}, which fixes the
+counting policy used for this appendix and reports axioms separately from
+lemmas.  Under the inventory policy used for this dissertation, the scan reports
+1088 lemma declarations, 0 axiom declarations, 105 Hoare/equivalence proof
+commands, 113 module or module-type declarations, 678 operation/predicate
+declarations, and 63 type declarations.  These
+numbers are a command-oriented inventory, not a semantic theorem count.  Broader
+catalogs that include clones, generated headers, or different Hoare/equiv match
+rules may legitimately report different totals, but they should cite their
+counting policy explicitly.
+
+The same scan found no literal occurrence of \ecsym{axiom}, \ecsym{admit.}, or
+\ecsym{sorry.} in the copied provable-security proof surface.  This does not
+remove the cryptographic assumptions from the theorem; it means that those
+assumptions are represented as abstract games, hardness terms, modules, and
+parameters rather than as unchecked EasyCrypt axioms inside the manifest.
+
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\begin{longtable}{p{0.28\textwidth}rrrrrrr}
+\caption{Structural summary of the manifest EasyCrypt files.}
+\label{tab:easycrypt-code-inventory}\\
+\toprule
+File & Lines & Types & Ops & Modules & Lemmas & Axioms & Hoare/equiv \\
+\midrule
+\endfirsthead
+\toprule
+File & Lines & Types & Ops & Modules & Lemmas & Axioms & Hoare/equiv \\
+\midrule
+\endhead
+\ecfile{HAETAE\_Security.ec} & 1272 & 0 & 1 & 0 & 40 & 0 & 0 \\
+\ecfile{Sig\_ROM.ec} & 206 & 11 & 4 & 16 & 3 & 0 & 0 \\
+\ecfile{HAETAE\_HopGames.ec} & 8817 & 1 & 40 & 62 & 247 & 0 & 88 \\
+\ecfile{HAETAE\_Reductions.ec} & 504 & 0 & 26 & 0 & 50 & 0 & 0 \\
+\ecfile{HAETAE\_ROM.ec} & 111 & 4 & 24 & 2 & 3 & 0 & 0 \\
+\ecfile{HAETAE\_ROM\_Programming.ec} & 1754 & 2 & 43 & 11 & 99 & 0 & 17 \\
+\ecfile{HAETAE\_Scheme.ec} & 66 & 7 & 2 & 1 & 0 & 0 & 0 \\
+\ecfile{HAETAE\_Transcript.ec} & 660 & 1 & 51 & 0 & 35 & 0 & 0 \\
+\ecfile{HAETAE\_Events.ec} & 57 & 0 & 4 & 0 & 4 & 0 & 0 \\
+\ecfile{HAETAE\_Assumptions.ec} & 377 & 5 & 13 & 21 & 11 & 0 & 0 \\
+\ecfile{HAETAE\_Distributions.ec} & 1218 & 2 & 64 & 0 & 97 & 0 & 0 \\
+\ecfile{HAETAE\_Rejection.ec} & 2204 & 4 & 97 & 0 & 139 & 0 & 0 \\
+\ecfile{HAETAE\_Algebra.ec} & 3885 & 20 & 246 & 0 & 282 & 0 & 0 \\
+\ecfile{HAETAE\_Params.ec} & 113 & 1 & 17 & 0 & 19 & 0 & 0 \\
+\ecfile{HAETAE\_FIPS202.ec} & 105 & 2 & 12 & 0 & 9 & 0 & 0 \\
+\ecfile{HAETAE\_Keccak1600.ec} & 697 & 3 & 34 & 0 & 50 & 0 & 0 \\
+\midrule
+Total & 22046 & 63 & 678 & 113 & 1088 & 0 & 105 \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+The proof surface has four strata.  The foundation stratum defines parameters,
+algebraic data structures, SHAKE/Keccak support, and distributions.  The scheme
+stratum defines the HAETAE random-oracle scheme interface and the signing,
+verification, transcript, event, and rejection predicates.  The game stratum
+defines EUF-CMA, UF-NMA, ROM, transcript, sampler, and programming games.  The
+reduction stratum composes hop bounds into the final checked implication.
+
+\section{Trust boundary and checked claims}
+\label{app:ec-trust-boundary}
+
+The machine-checked claim is a conditional game-based security implication.  The
+checked proof establishes that the fixed-ledger EasyCrypt-model EUF-CMA
+advantage in the modeled random-oracle setting is bounded by the concrete
+expression assembled in \ecfile{HAETAE\_Reductions.ec}, subject to the explicit
+final hop/reduction premise, the abstract hardness games, and the parameter
+assumptions represented in \ecfile{HAETAE\_Assumptions.ec}.  One current
+final-hop premise is a
+proof-surface premise rather than a non-vacuous concrete-security premise because
+it contains the oversized \ecsym{rejection\_sampling\_loss\_term}.  Thus the
+checker verifies the game transformations, sampler/event accounting, algebraic
+well-formedness obligations, and non-negativity/subunit arithmetic needed to
+compose the final implication.  It does not prove Module-SIS hardness, MLWE
+hardness, the missing non-vacuous final hop, or the physical correctness of an
+implementation outside the modeled operations.
+
+The absence of manifest-local \ecsym{axiom}, \ecsym{admit.}, and
+\ecsym{sorry.} occurrences is important because the final implication is not
+obtained by installing an unchecked theorem statement.  The remaining trusted
+base consists of EasyCrypt's logic and libraries, the correctness of the
+manifest selection, the intended interpretation of abstract hardness games, and
+the fidelity of the HAETAE model to the specification.
+
+\section{File-by-file analysis}
+\label{app:ec-file-analysis}
+
+\subsection[HAETAE\_Security.ec]{\texorpdfstring{\ecfile{HAETAE\_Security.ec}}{HAETAE\_Security.ec}}
+
+\ecfile{HAETAE\_Security.ec} is the top-level composition file.  It imports the
+signature ROM interface, the HAETAE scheme model, algebra, distributions,
+reductions, assumptions, rejection logic, transcript logic, ROM programming,
+and hop games.  Its purpose is compositional: it does not define a new
+low-level model, but connects previously checked lemmas into externally usable
+security statements.
+
+The first obligation is correctness.  The operation
+\ecsym{correctness\_obligation} packages the required rejection-freeness and
+verification facts, while \ecsym{correctness\_obligation\_holds} and
+\ecsym{correctness\_perfect} connect those facts to the correctness game.  This
+establishes that the modeled signing algorithm produces signatures accepted by
+the modeled verifier under the proof assumptions.
+
+The EUF-CMA part is organized as a chain of increasingly explicit theorems.
+Lemmas such as \ecsym{euf\_cma\_security\_no\_signing},
+\ecsym{euf\_cma\_security}, and
+\ecsym{euf\_cma\_security\_with\_hop\_interfaces} expose the public theorem at
+different levels of abstraction.  The middle of the file refines the proof
+through simulated-signing, explicit-boundary, ROM-internal transcript, clear
+site, counted clear site, structural NMA, public simulation, paper simulation,
+real-signing paper simulation, HAETAE-rejection paper simulation, exact
+hyperball, and RO-exact hyperball stages.  The final lemmas, including
+\ecsym{euf\_cma\_security\_from\_paper\_sample\_lifting\_and\_counted\_bimodal},
+\ecsym{euf\_cma\_security\_from\_budgeted\_paper\_sample\_lifting\_and\_counted\_bimodal},
+\ecsym{euf\_cma\_security\_from\_checked\_ro\_sampling\_hop\_and\_counted\_bimodal},
+and
+\ecsym{euf\_cma\_security\_from\_real\_signing\_exact\_hyperball\_hop\_and\_counted\_bimodal},
+are the checked composition points used by the dissertation security
+implication.
+
+The code pattern in this file is deliberately conservative.  Most lemmas are
+bound-lifting or theorem-composition lemmas whose proof obligations are
+arithmetic inequalities and applications of earlier hop lemmas.  This makes the
+top-level implication auditable: each public statement records which lower-level
+boundary it depends on, and the concrete loss expression remains centralized in
+\ecfile{HAETAE\_Reductions.ec}.
+
+\subsection[Sig\_ROM.ec]{\texorpdfstring{\ecfile{Sig\_ROM.ec}}{Sig\_ROM.ec}}
+
+\ecfile{Sig\_ROM.ec} defines the generic signature security interface used by
+the HAETAE proof.  It abstracts public keys, secret keys, messages, contexts,
+signatures, random-oracle queries, and random-oracle outputs.  The operations
+\ecsym{fresh\_msg} and \ecsym{fresh\_sig} define freshness predicates for
+EUF-CMA and strong-EUF-CMA style games, and the file clones EasyCrypt's full
+random-oracle interface through \ecsym{FullRO}.
+
+The module types \ecsym{Oracle}, \ecsym{POracle}, \ecsym{Scheme},
+\ecsym{CORR\_ADV}, \ecsym{SignOracle}, \ecsym{Adversary}, and
+\ecsym{NMA\_Adversary} are the interfaces through which all later HAETAE games
+are parameterized.  The game modules \ecsym{Correctness}, \ecsym{EUF\_CMA},
+\ecsym{UF\_NMA}, and \ecsym{SUF\_CMA} define the standard experiments.  The
+adapter \ecsym{NMA\_As\_CMA} embeds a no-message adversary in a chosen-message
+interface.
+
+The central proof obligation in this file is
+\ecsym{nma\_as\_cma\_exact}.  It is an equivalence proof showing that the NMA
+adapter preserves the result of the experiment under equal globals.  Later
+HAETAE reductions rely on this generic lemma when replacing active chosen-message
+interfaces with passive or simulated transcript interfaces.
+
+\subsection[HAETAE\_HopGames.ec]{\texorpdfstring{\ecfile{HAETAE\_HopGames.ec}}{HAETAE\_HopGames.ec}}
+
+\ecfile{HAETAE\_HopGames.ec} is the largest and most security-critical proof
+file in the manifest.  It contains the detailed game transformations that turn
+real HAETAE signing into transcript-based and ROM-internal simulators, then into
+NMA samplers, paper samplers, rejection samplers, exact-hyperball samplers, and
+budgeted random-oracle lifting games.
+
+The first block defines signing simulators and transcript consistency
+invariants.  Predicates such as \ecsym{transcript\_log\_consistent},
+\ecsym{transcript\_log\_ready}, \ecsym{internal\_transcript\_state\_sound}, and
+\ecsym{sampler\_rom\_covered} are the invariants that let the proof state that
+logged transcripts match signatures, public keys, mode data, min-entropy
+conditions, and random-oracle query coverage.  Lemmas including
+\ecsym{transcript\_log\_consistent\_cons},
+\ecsym{internal\_transcript\_state\_sound\_sign\_internal\_cons}, and
+\ecsym{sampler\_rom\_covered\_fresh\_after\_clean\_seed} are preservation
+lemmas used in Hoare proofs for signing oracles.
+
+The next major block defines game modules for simulated signing:
+\ecsym{EUF\_CMA\_SimulatedSign},
+\ecsym{EUF\_CMA\_TranscriptSimulatedSign},
+\ecsym{EUF\_CMA\_InternalTranscriptSign}, and
+\ecsym{EUF\_CMA\_ROMInternalTranscriptSign}.  These modules isolate the
+semantic changes between real signing and transcript-oriented simulation.  The
+proof obligations here are mainly equivalence and Hoare obligations showing
+that results and bad events are preserved or bounded when the signing oracle is
+replaced.
+
+The paper-simulation block defines simulated transcript and signature samples,
+including public-simulation fields and RO-signing-attempt sampling.  Operations
+such as \ecsym{paper\_sim\_sample\_token},
+\ecsym{public\_sim\_signature}, and the RO signing-attempt samplers encode the
+paper proof's distributional objects in a form that EasyCrypt can reason about.
+This is the point where the proof maps hand-written sampling arguments into
+typed programs and event predicates.
+
+The budgeted ROM-internal block is the most delicate part of the file.  It
+defines budgeted wrappers for adversary hash calls and signing calls, logs
+adversary-side hash queries and sampler self-queries, and introduces
+sampler-clean events such as \ecsym{sampler\_bad\_prequery}.  The checked
+lifting theorems compare
+\ecsym{ROSigningAttemptPaperSimSampler} and
+\ecsym{ROExactHyperballPaperSimSampler} under clean conditions and query
+budgets.  The important proof idea is a fundamental-lemma argument: the attempt
+side and exact side are equivalent unless the sampler's fresh
+\ecsym{sampler\_expand\_query} was already present in the joint adversary/self
+log.
+
+The concentration of 88 Hoare/equivalence commands in this file is expected.
+Those commands correspond to the stateful game transitions that cannot be
+captured by pure algebraic rewriting alone.  This file is therefore the primary
+machine-checked replacement for the informal hybrid-game portion of the
+pen-and-paper proof.
+
+\subsection[HAETAE\_Reductions.ec]{\texorpdfstring{\ecfile{HAETAE\_Reductions.ec}}{HAETAE\_Reductions.ec}}
+
+\ecfile{HAETAE\_Reductions.ec} defines the concrete loss terms that appear in
+the final checked implication.  It introduces abstract hardness terms such as
+\ecsym{mlwe\_hardness\_term}, \ecsym{module\_sis\_hardness\_term}, and
+\ecsym{bimodal\_selftarget\_msis\_hardness\_term}, then defines query budgets,
+challenge-support lower bounds, counted ROM collision/prequery/min-entropy
+terms, rejection-sampling terms, and final EUF bounds.
+
+The code is mostly arithmetic normalization and inequality proof.  Lemmas such
+as \ecsym{haetae\_euf\_boundE},
+\ecsym{haetae\_euf\_bound\_groupedE},
+\ecsym{haetae\_euf\_counted\_rom\_bound\_groupedE},
+\ecsym{counted\_rom\_programming\_loss\_term\_subunit},
+\ecsym{counted\_rom\_support\_dominates\_budget}, and
+\ecsym{counted\_rom\_loss\_from\_query\_budgets\_and\_support} ensure that the
+bound is algebraically well-formed, nonnegative, and expressible in terms of the
+declared budgets and support sizes.
+
+This file is the numerical interface between proof and theorem statement.  The
+proof scripts in the game files produce losses in structured form, while this
+file rewrites them into the concrete HAETAE bound used by
+\ecfile{HAETAE\_Security.ec}.
+
+\subsection[HAETAE\_ROM.ec]{\texorpdfstring{\ecfile{HAETAE\_ROM.ec}}{HAETAE\_ROM.ec}}
+
+\ecfile{HAETAE\_ROM.ec} specializes EasyCrypt's full random oracle to HAETAE.
+It defines the query tags for message hashing, challenge hashing, matrix
+expansion, and sampler expansion.  Its random-oracle output type contains a CRH,
+a challenge, a matrix, and signing randomness, with projection operations such
+as \ecsym{ro\_output\_to\_crh},
+\ecsym{ro\_output\_to\_challenge}, \ecsym{ro\_output\_to\_matrix}, and
+\ecsym{ro\_output\_to\_random\_coins}.
+
+The distribution \ecsym{dro\_output} is query-dependent: matrix expansion uses
+the matrix distribution, sampler expansion uses signing-randomness output, and
+other query forms use the appropriate projections.  The lemmas
+\ecsym{matrix\_query\_distribution\_lossless},
+\ecsym{ro\_output\_distribution\_lossless}, and
+\ecsym{sampler\_expand\_query\_dro\_output\_ro\_signing\_coins} establish the
+losslessness and projection behavior that the sampler-freshness proof needs.
+
+This file is small but foundational.  If query constructors were not separated,
+the later prequery analysis could not state precisely that only adversary
+queries equal to \ecsym{sampler\_expand\_query} collide with the signer's fresh
+sampler seed.
+
+\subsection[HAETAE\_ROM\_Programming.ec]{\texorpdfstring{\ecfile{HAETAE\_ROM\_Programming.ec}}{HAETAE\_ROM\_Programming.ec}}
+
+\ecfile{HAETAE\_ROM\_Programming.ec} defines counted ROM programming.  It
+introduces programming sites, programming-site queries and outputs, transcript
+programming sites, challenge entropy checks, min-entropy failures, and counted
+ROM events.  These definitions allow the proof to count hash queries, signature
+sites, programmed sites, and min-entropy checks in a single event log.
+
+The module \ecsym{CountedLazyROM} is the concrete lazy random oracle used by the
+programming proof.  Preservation lemmas such as
+\ecsym{counted\_lazy\_rom\_init\_clears},
+\ecsym{counted\_lazy\_rom\_get\_preserves\_clear},
+\ecsym{counted\_lazy\_rom\_get\_preserves\_bad\_clear},
+\ecsym{counted\_lazy\_rom\_observe\_transcript\_preserves\_clear}, and
+\ecsym{counted\_lazy\_rom\_program\_preserves\_bad\_clear\_if\_fresh} are the
+state invariants used to justify ROM programming without double-programming or
+programming a prequeried site.
+
+The later lemmas in the file turn event-counting disciplines into probability
+bounds.  They are the bridge between operational ROM code and the arithmetic
+loss terms in \ecfile{HAETAE\_Reductions.ec}.  The file therefore supports both
+the classical Fiat--Shamir with aborts programming step and the separate
+budgeted sampler prequery analysis used in the active-signing lifting surface.
+
+\subsection[HAETAE\_Scheme.ec]{\texorpdfstring{\ecfile{HAETAE\_Scheme.ec}}{HAETAE\_Scheme.ec}}
+
+\ecfile{HAETAE\_Scheme.ec} instantiates the generic signature interface with
+HAETAE types.  It clones \ecfile{Sig\_ROM.ec} with HAETAE public keys, secret
+keys, messages, contexts, signatures, ROM queries, and ROM outputs.  The
+operation \ecsym{haetae\_mode} leaves the parameter mode abstract so that the
+security proof applies uniformly across the supported HAETAE parameter sets.
+
+The module \ecsym{HAETAE} supplies the key-generation, signing, and verification
+procedures used by the generic games.  Its role is interface alignment, not
+cryptographic reasoning.  The proofs about the behavior of signing and
+verification are discharged in the algebra, rejection, transcript, and security
+files that import this scheme module.
+
+\subsection[HAETAE\_Transcript.ec]{\texorpdfstring{\ecfile{HAETAE\_Transcript.ec}}{HAETAE\_Transcript.ec}}
+
+\ecfile{HAETAE\_Transcript.ec} defines the transcript abstraction used by the
+forking, ROM-programming, and rejection-sampling arguments.  Transcript fields
+record the public key, message, context, commitment data, challenge, response,
+hint, signature token, rejection branch, and validity conditions needed to relate
+a signature to the algebraic equations seen by the verifier.
+
+The lemmas in this file prove that transcript predicates expose the exact fields
+needed by later game hops.  Examples include
+\ecsym{transcript\_fields\_match\_signature\_challenge\_query},
+\ecsym{transcript\_valid\_signature\_challenge\_query},
+\ecsym{transcript\_valid\_public\_equation},
+\ecsym{transcript\_valid\_commitment\_reconstruction}, and
+\ecsym{valid\_forking\_pair\_public\_equations}.  The extraction lemmas
+\ecsym{extract\_bimodal\_forking\_some} and
+\ecsym{extract\_bimodal\_forking\_nonempty} connect valid transcript pairs to
+the bimodal self-target MSIS reduction interface.
+
+This file is the semantic link between game-based forgery events and algebraic
+hardness instances.  Without transcript validity lemmas, a final forgery would
+remain an accepted signature only; with these lemmas, the proof can extract the
+structured algebraic relation required by the reduction.
+
+\subsection[HAETAE\_Events.ec]{\texorpdfstring{\ecfile{HAETAE\_Events.ec}}{HAETAE\_Events.ec}}
+
+\ecfile{HAETAE\_Events.ec} defines the small collection of event predicates used
+to state rejection-freeness and acceptance properties.  The operations describe
+key-generation rejection, signing rejection, verification rejection, and accepted
+transcript rejection-free conditions.
+
+The four lemmas in the file establish that the current model's key-generation,
+signing, verification, and accepted transcript paths satisfy the corresponding
+event predicates.  This isolates event vocabulary from the larger proof files:
+game hops can refer to named events rather than re-expanding rejection and
+verification definitions at every boundary.
+
+\subsection[HAETAE\_Assumptions.ec]{\texorpdfstring{\ecfile{HAETAE\_Assumptions.ec}}{HAETAE\_Assumptions.ec}}
+
+\ecfile{HAETAE\_Assumptions.ec} defines the abstract hardness games and
+reduction interfaces used by the final checked implication.  It contains module types for
+solvers and reductions, games for Module-SIS, bimodal self-target MSIS, MLWE,
+and distribution-lifted relations, plus adapter modules that lift one solver
+interface into another.
+
+The lemmas are exactness and well-formedness results for these adapters.  For
+example, \ecsym{bimodal\_solver\_lift\_exact},
+\ecsym{bimodal\_mode\_solver\_lifted\_distribution\_exact}, and
+\ecsym{bimodal\_msis\_as\_module\_sis\_exact} are equivalence proofs showing
+that adapter games preserve success events.  Lemmas such as
+\ecsym{module\_sis\_eval\_wf}, \ecsym{module\_sis\_valid\_target\_wf}, and
+\ecsym{bimodal\_to\_module\_sis\_valid} provide structural well-formedness for
+instances passed to these games.
+
+This file is the explicit cryptographic trust boundary.  The machine checker
+verifies that HAETAE's game reductions reduce to these games and terms; it does
+not prove that the abstract hardness terms are small.  That interpretation is a
+mathematical and cryptographic assumption outside EasyCrypt's deductive core.
+
+\subsection[HAETAE\_Distributions.ec]{\texorpdfstring{\ecfile{HAETAE\_Distributions.ec}}{HAETAE\_Distributions.ec}}
+
+\ecfile{HAETAE\_Distributions.ec} defines all distributions needed for the
+scheme model and sampler proofs.  It includes byte, seed, CRH, signing
+randomness, coefficient, polynomial, vector, matrix, challenge, structural
+signing sample, bounded-unit sample, checked-hyperball sample, and
+exact-hyperball sample distributions.
+
+The early lemmas prove losslessness and domain correctness for byte, seed, CRH,
+and signing randomness distributions.  The signing-randomness token machinery is
+especially important: it gives the proof a finite support with a point bound,
+which is later used to bound the probability that a fresh sampler seed collides
+with a logged adversary query.  Lemmas such as
+\ecsym{signing\_coin\_distribution\_lossless},
+\ecsym{signing\_entropy\_token\_to\_coins\_tokenK}, and
+\ecsym{signing\_randomness\_from\_source\_tokenK} justify that representation.
+
+The hyperball distribution lemmas support the paper-sample to exact-hyperball
+transition.  They prove well-formedness, boundedness, losslessness, and
+probability point bounds for the distributions that replace the rejection-based
+signing attempt distribution.  These lemmas are consumed by
+\ecfile{HAETAE\_Rejection.ec} and \ecfile{HAETAE\_HopGames.ec}.
+
+\subsection[HAETAE\_Rejection.ec]{\texorpdfstring{\ecfile{HAETAE\_Rejection.ec}}{HAETAE\_Rejection.ec}}
+
+\ecfile{HAETAE\_Rejection.ec} formalizes the signing-attempt state, rejection
+conditions, simulation predicates, and distributional bridges for HAETAE's
+rejection sampling.  The file defines fields extracted from signing attempts,
+including sampled vectors, commitment high and low bits, challenge, response,
+auxiliary response, hint, signature token, rejection-branch bit, and programmed
+challenge data.
+
+The first proof block connects signing attempts to valid signatures.  Lemmas
+such as \ecsym{signing\_attempt\_verifies},
+\ecsym{signing\_simulation\_verifies}, and
+\ecsym{signing\_attempt\_simulates} show that states satisfying the modeled
+relations produce signatures accepted by verification.  These facts are used by
+the correctness theorem and by the game hops that replace concrete signing with
+simulated signing.
+
+The sampler block proves that structural, bounded-unit, checked-hyperball, and
+exact-hyperball samples satisfy the predicates needed by the signing-attempt
+state.  Lemmas such as
+\ecsym{structural\_signing\_sample\_pair\_sampler\_ok},
+\ecsym{bounded\_unit\_signing\_sample\_pair\_sampler\_ok},
+\ecsym{checked\_hyperball\_signing\_sample\_pair\_sampler\_ok}, and
+\ecsym{exact\_hyperball\_signing\_sample\_pair\_sampler\_ok} are the checked
+counterparts of the paper proof's sampling claims.
+
+The rejection-bound block connects abort predicates to the global
+\ecsym{rejection\_sampling\_loss\_term}.  This is where the proof accounts for
+the cost of moving from real rejection sampling to the idealized distributions
+used in the later NMA and exact-hyperball games.
+
+\subsection[HAETAE\_Algebra.ec]{\texorpdfstring{\ecfile{HAETAE\_Algebra.ec}}{HAETAE\_Algebra.ec}}
+
+\ecfile{HAETAE\_Algebra.ec} defines the algebraic model for HAETAE.  It gives
+types for bytes, seeds, CRHs, random coins, messages, contexts, coefficients,
+polynomials, challenges, polynomial vectors, matrices, public keys, secret keys,
+encoded public keys, signatures, and signature tokens.  It also defines zero
+values, well-formedness predicates, modular coefficient arithmetic, polynomial
+arithmetic, vector arithmetic, matrix-vector multiplication, packing-like
+operations, high/low-bit operations, challenge operations, and verification
+relations.
+
+The 282 lemmas in this file are mostly preservation, size, well-formedness, and
+equational lemmas.  Examples include \ecsym{poly\_zero\_wf},
+\ecsym{polyveck\_zero\_wf}, \ecsym{poly\_add\_wf},
+\ecsym{poly\_mul\_wf}, \ecsym{poly\_dot\_wf}, and the corresponding vector and
+matrix facts.  These lemmas are not merely implementation details: later
+transcript and rejection proofs depend on them to ensure that every sampled or
+derived value has the correct dimension and belongs to the modeled algebraic
+domain.
+
+The file is intentionally explicit and list-based.  That representation keeps
+the proof close to executable data structures and avoids hiding dimension
+conditions in an abstract ring interface.  The cost is a large number of size and
+well-formedness obligations, which EasyCrypt checks once and makes reusable
+throughout the proof.
+
+\subsection[HAETAE\_Params.ec]{\texorpdfstring{\ecfile{HAETAE\_Params.ec}}{HAETAE\_Params.ec}}
+
+\ecfile{HAETAE\_Params.ec} defines the parameter constants and mode-dependent
+functions for HAETAE.  Constants include seed size, CRH size, polynomial degree,
+modulus, doubled modulus, and the parameter modes \ecsym{Mode2},
+\ecsym{Mode3}, and \ecsym{Mode5}.  Mode functions define vector dimensions,
+challenge weight, rejection bounds, hint parameters, signature sizes, and public
+key sizes.
+
+The lemmas prove positivity and basic arithmetic facts about these parameters.
+Examples include \ecsym{seedbytes\_gt0}, \ecsym{crhbytes\_gt0},
+\ecsym{n\_gt0}, \ecsym{q\_gt0}, \ecsym{mode\_k\_gt0},
+\ecsym{mode\_l\_gt0}, \ecsym{mode\_tau\_le\_n}, and
+\ecsym{mode\_publickeybytes\_gt0}.  These facts discharge side conditions in
+distribution losslessness, vector sizing, and probability-bound proofs.
+
+This file is part of the trusted modeling layer because it states the numeric
+parameters used by all later code.  EasyCrypt checks consequences of these
+definitions, but the correspondence between these constants and the intended
+HAETAE parameter sets is a modeling obligation.
+
+\subsection[HAETAE\_FIPS202.ec]{\texorpdfstring{\ecfile{HAETAE\_FIPS202.ec}}{HAETAE\_FIPS202.ec}}
+
+\ecfile{HAETAE\_FIPS202.ec} models the SHAKE256 portion of FIPS 202 used by the
+HAETAE algebraic model.  It imports the Keccak permutation model, defines the
+state size, SHAKE256 rate, capacity, domain separator, final padding byte,
+absorb operation, squeeze operation, and complete SHAKE256 operation.
+
+The lemmas prove constant equalities and output-size properties, including
+\ecsym{fips202\_state\_bytesE}, \ecsym{shake256\_rate\_bytesE},
+\ecsym{shake256\_capacity\_bytesE},
+\ecsym{shake256\_rate\_capacity\_state\_bytesE},
+\ecsym{shake256\_absorb\_once\_short\_state\_size},
+\ecsym{shake256\_squeeze\_size}, and \ecsym{shake256\_size}.  These facts are
+used by the algebraic model to ensure byte-string sizes match the expected
+HAETAE encodings.
+
+For provable security, the random oracle abstraction is the main security
+object.  This file contributes concrete hash-support definitions used by the
+model and by correspondence with implementation-level code, but the game-based
+ROM theorem does not rely on known-answer tests.
+
+\subsection[HAETAE\_Keccak1600.ec]{\texorpdfstring{\ecfile{HAETAE\_Keccak1600.ec}}{HAETAE\_Keccak1600.ec}}
+
+\ecfile{HAETAE\_Keccak1600.ec} defines a list-based model of the Keccak-f1600
+permutation.  It introduces byte, lane, and state types; normalization and bit
+projection operations; lane Boolean operations; rotations; byte-lane
+conversions; state indexing; round constants; and the theta, rho-pi, chi, and
+iota round functions.
+
+The lemmas prove well-formedness and bit-level equations for these operations.
+Examples include \ecsym{keccak\_lane\_zero\_wf},
+\ecsym{keccak\_lane\_xor\_wf}, \ecsym{keccak\_lane\_and\_wf},
+\ecsym{keccak\_lane\_rotl\_wf}, \ecsym{keccak\_bytes\_to\_lane\_wf},
+\ecsym{keccak\_theta\_bitE}, \ecsym{keccak\_rho\_pi\_bitE}, and
+\ecsym{keccak\_chi\_bitE}.  These lemmas support the FIPS 202 model's size and
+bit-level correctness obligations.
+
+In the provable-security proof, this file is support code rather than the main
+cryptographic reduction.  Its function is to make the hash-related HAETAE model
+internally consistent.  Security is still proved in the ROM abstraction; the
+Keccak model documents and checks the concrete hash representation used by the
+formalized scheme layer.
+
+\section{Cross-file dependency analysis}
+\label{app:ec-cross-file-analysis}
+
+The dependency flow is acyclic at the conceptual level.  Parameters feed
+algebra; algebra and parameters feed distributions; parameters, algebra, and
+distributions feed the ROM and scheme; algebra, distributions, events, and
+transcripts feed rejection; ROM and transcript logic feed ROM programming; ROM
+programming, rejection, transcript logic, and reductions feed hop games; hop
+games and reductions feed the top-level security theorem.
+
+The most important design choice is the separation between pure predicates and
+stateful games.  Pure files such as \ecfile{HAETAE\_Params.ec},
+\ecfile{HAETAE\_Algebra.ec}, \ecfile{HAETAE\_Distributions.ec},
+\ecfile{HAETAE\_Transcript.ec}, and \ecfile{HAETAE\_Reductions.ec} define
+operations and prove algebraic or probabilistic facts about them.  Stateful files
+such as \ecfile{Sig\_ROM.ec}, \ecfile{HAETAE\_ROM\_Programming.ec}, and
+\ecfile{HAETAE\_HopGames.ec} define games and use Hoare or equivalence proofs to
+relate adversarial executions.  This split is useful because it localizes
+program-logic obligations to the files where mutable game state is actually
+present.
+
+The second important design choice is explicit event logging.  Transcript logs,
+ROM query logs, counted ROM event logs, and sampler self-query logs make the
+fundamental-lemma proofs inspectable.  The budgeted sampler prequery event is not
+a black-box union bound over an oversized wrapper; it is tied to the concrete
+event that a fresh \ecsym{sampler\_expand\_query} is already present in the
+logged joint log of adversary hash queries and previous sampler self-queries.
+This event is distinct from the \ecsym{counted\_rom\_prequery\_term} summand in
+the final counted-ROM bound.
+
+The third important design choice is centralization of concrete arithmetic.
+Loss terms are not duplicated across hop proofs.  Hop files prove local
+probability inequalities, and \ecfile{HAETAE\_Reductions.ec} normalizes them into
+the final bound.  This reduces the risk that two theorem statements silently use
+different interpretations of the same loss.
+
+\section{Residual proof obligations outside EasyCrypt}
+\label{app:ec-residual-obligations}
+
+The analysis identifies four residual obligations that are outside the manifest
+even though the manifest itself is machine checked.  First, the abstract hardness
+terms in \ecfile{HAETAE\_Assumptions.ec} must be interpreted as the intended
+MLWE, Module-SIS, and bimodal self-target MSIS assumptions.  Second, the
+parameter constants in \ecfile{HAETAE\_Params.ec} must match the parameter set
+claimed by the surrounding HAETAE specification.  Third, the modeled signing,
+verification, rejection, and transcript operations must be kept aligned with the
+implementation and the paper specification.  Fourth, the manifest
+\ecfile{provable-security/proof-files.txt} must remain the audited proof surface;
+adding or removing EasyCrypt files changes the scope of the claim and requires a
+fresh inventory and compile check.
+
+Within those boundaries, the EasyCrypt code performs the intended
+machine-checked provable-security work: it defines the security games, formalizes
+the HAETAE model, proves the transcript and sampler invariants, carries out the
+ROM and budgeted lifting hops, proves the concrete arithmetic side conditions,
+and composes the checked lemmas into the final conditional EUF-CMA implication.
+The
+main dissertation now treats this appendix as evidence, not as a substitute for
+the mathematical proof narrative; curated proof-object analyses appear in
+Appendix~\ref{app:curated-easycrypt-case-studies}, and the exhaustive generated
+individual correspondence is archived under \ecfile{dissertation/etc/}.

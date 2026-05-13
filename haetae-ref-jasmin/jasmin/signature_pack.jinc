@@ -1,0 +1,120 @@
+fn __pack_sig_suffix_at(reg mut ptr u8[2948] sigp,
+                        reg const ptr u8[2048] hbencp,
+                        reg const ptr u8[2048] hencp,
+                        reg u64 off,
+                        reg u64 hbsize,
+                        reg u64 hsize,
+                        reg u64 offsets) -> reg ptr u8[2948]
+{
+  reg u64 i dst;
+  reg u32 b;
+
+  b = (32u)offsets;
+  sigp[off] = b;
+  b = (32u)offsets;
+  b >>= 8;
+  sigp[off + 1] = b;
+
+  dst = off;
+  dst += 2;
+  i = 0;
+  while (i < hbsize)
+  {
+    b = (32u)hbencp[i];
+    sigp[dst] = b;
+    dst += 1;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < hsize)
+  {
+    b = (32u)hencp[i];
+    sigp[dst] = b;
+    dst += 1;
+    i += 1;
+  }
+
+  return sigp;
+}
+
+inline fn _pack_sig_full(reg mut ptr u8[2948] sigp,
+                         reg mut ptr u64[1] badp,
+                         reg const ptr u32[HAETAE_N] cp,
+                         reg const ptr u32[2048] lowp,
+                         reg const ptr u32[2048] hbzp,
+                         reg const ptr u32[2048] hp,
+                         reg const ptr u32[132] hb_esymsp,
+                         reg const ptr u32[132] h_esymsp,
+                         inline int sigbytes_i,
+                         inline int lcount_i,
+                         inline int hb_count_i,
+                         inline int hb_m_i,
+                         inline int hb_offset_i,
+                         inline int h_count_i,
+                         inline int h_m_i,
+                         inline int h_offset_i,
+                         inline int base_hb_i,
+                         inline int base_h_i,
+                         inline int payload_limit_i) -> reg ptr u8[2948],
+                                                     reg ptr u64[1]
+{
+  stack u8[2048] hbenc;
+  stack u8[2048] henc;
+  stack u64[5] state;
+  reg ptr u8[2048] hbencp;
+  reg ptr u8[2048] hencp;
+  reg ptr u64[5] statep;
+  reg u64 hbsize hsize bad prefix_off offsets;
+  reg u64 sigbytes lcount hb_count hb_m hb_offset;
+  reg u64 h_count h_m h_offset base_hb base_h payload_limit;
+
+  hbencp = hbenc;
+  hencp = henc;
+  statep = state;
+
+  sigbytes = sigbytes_i;
+  lcount = lcount_i;
+  () = #spill(badp, hbencp, hencp, statep, hbzp, hp, hb_esymsp, h_esymsp);
+  sigp = _pack_sig_prefix(sigp, cp, lowp, lcount, sigbytes);
+  () = #unspill(badp, hbencp, hencp, statep, hbzp, hp, hb_esymsp, h_esymsp);
+
+  hb_count = hb_count_i;
+  hb_m = hb_m_i;
+  hb_offset = hb_offset_i;
+  () = #spill(sigp, badp, hencp, statep, hp, h_esymsp);
+  hbencp, hbsize = _encode_hb_z1_full(hbencp, hbzp, hb_esymsp, hb_count,
+                                      hb_m, hb_offset);
+  () = #unspill(sigp, badp, hencp, statep, hp, h_esymsp);
+
+  h_count = h_count_i;
+  h_m = h_m_i;
+  h_offset = h_offset_i;
+  () = #spill(sigp, badp, hbencp, statep, hbsize);
+  hencp, hsize = _encode_h_full(hencp, hp, h_esymsp, h_count, h_m, h_offset);
+  () = #unspill(sigp, badp, hbencp, statep, hbsize);
+
+  base_hb = base_hb_i;
+  base_h = base_h_i;
+  payload_limit = payload_limit_i;
+  statep[0] = hbsize;
+  statep[1] = hsize;
+  statep[2] = base_hb;
+  statep[3] = base_h;
+  statep[4] = payload_limit;
+  statep = _pack_sig_size_offsets(statep);
+  offsets = statep[0];
+  bad = statep[1];
+  if (bad == 0)
+  {
+    lcount = lcount_i;
+    prefix_off = lcount;
+    prefix_off *= HAETAE_N;
+    prefix_off += 32;
+    sigp = __pack_sig_suffix_at(sigp, hbencp, hencp, prefix_off, hbsize, hsize,
+                                offsets);
+  }
+
+  badp[0] = bad;
+  return sigp, badp;
+}

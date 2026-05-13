@@ -1,0 +1,64 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{HAETAE Line-by-Line EasyCrypt Mathematical Guides}
+\author{Generated from provable-security/proof-files.txt}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+This folder contains one LaTeX guide for each EasyCrypt file in the
+provable-security manifest.  Each guide preserves every source line and gives a
+mathematical or proof-script reading of that line.  The guides are explanatory
+documents; the checked artifact remains the EasyCrypt files compiled by
+\file{provable-security/verify-provable-security.sh}.
+
+\begin{longtable}{L{0.24\textwidth} r L{0.28\textwidth} L{0.34\textwidth}}
+\toprule
+\textbf{EasyCrypt file} & \textbf{Lines} & \textbf{Guide} & \textbf{Role} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{EasyCrypt file} & \textbf{Lines} & \textbf{Guide} & \textbf{Role} \\
+\midrule
+\endhead
+\file{HAETAE\_Security.ec} & 1272 & \file{HAETAE\_Security-line-by-line-guide.tex} & Top-level correctness and EUF-CMA theorem composition. \\
+\file{Sig\_ROM.ec} & 206 & \file{Sig\_ROM-line-by-line-guide.tex} & Generic signature games and random-oracle interfaces. \\
+\file{HAETAE\_HopGames.ec} & 8817 & \file{HAETAE\_HopGames-line-by-line-guide.tex} & Detailed HAETAE hybrid games, invariants, and game-hop bounds. \\
+\file{HAETAE\_Reductions.ec} & 504 & \file{HAETAE\_Reductions-line-by-line-guide.tex} & Concrete loss terms and arithmetic normalization. \\
+\file{HAETAE\_ROM.ec} & 111 & \file{HAETAE\_ROM-line-by-line-guide.tex} & Typed random-oracle query and output model. \\
+\file{HAETAE\_ROM\_Programming.ec} & 1754 & \file{HAETAE\_ROM\_Programming-line-by-line-guide.tex} & Counted random-oracle programming events and bounds. \\
+\file{HAETAE\_Scheme.ec} & 66 & \file{HAETAE\_Scheme-line-by-line-guide.tex} & HAETAE instantiation of the generic signature interface. \\
+\file{HAETAE\_Transcript.ec} & 660 & \file{HAETAE\_Transcript-line-by-line-guide.tex} & Transcript records and validity/extraction facts. \\
+\file{HAETAE\_Events.ec} & 57 & \file{HAETAE\_Events-line-by-line-guide.tex} & Named rejection and acceptance events. \\
+\file{HAETAE\_Assumptions.ec} & 377 & \file{HAETAE\_Assumptions-line-by-line-guide.tex} & Abstract hardness games and reduction interfaces. \\
+\file{HAETAE\_Distributions.ec} & 1218 & \file{HAETAE\_Distributions-line-by-line-guide.tex} & Sampling distributions, support facts, and point bounds. \\
+\file{HAETAE\_Rejection.ec} & 2204 & \file{HAETAE\_Rejection-line-by-line-guide.tex} & Rejection predicates and rejection-sampling loss accounting. \\
+\file{HAETAE\_Algebra.ec} & 3885 & \file{HAETAE\_Algebra-line-by-line-guide.tex} & Deterministic algebraic model and algebra lemmas. \\
+\file{HAETAE\_Params.ec} & 113 & \file{HAETAE\_Params-line-by-line-guide.tex} & Parameter modes and constants. \\
+\file{HAETAE\_FIPS202.ec} & 105 & \file{HAETAE\_FIPS202-line-by-line-guide.tex} & Modeled FIPS202/SHAKE support. \\
+\file{HAETAE\_Keccak1600.ec} & 697 & \file{HAETAE\_Keccak1600-line-by-line-guide.tex} & Keccak state and low-level hash support. \\
+\bottomrule
+\end{longtable}
+
+\section*{Regenerating}
+From \file{haetae-security}, run:
+\begin{verbatim}
+python3 guide/generate-line-by-line-guides.py
+\end{verbatim}
+
+\section*{Building PDFs}
+From \file{guide/line-by-line}, run:
+\begin{verbatim}
+make all
+# or build one companion:
+make HAETAE_Security-line-by-line-guide.pdf
+\end{verbatim}
+
+\end{document}

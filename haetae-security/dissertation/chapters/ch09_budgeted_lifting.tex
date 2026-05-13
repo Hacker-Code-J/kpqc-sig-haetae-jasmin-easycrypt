@@ -1,0 +1,73 @@
+\chapter{Budgeted Lifting Through Oracles}
+\label{ch:budgeted}
+
+\section{Adversarial Query Budgets}
+
+ROM proofs depend on query counts.  The development therefore proves that hash
+and signing query budgets are preserved by the relevant wrappers.  The budgeted
+interfaces certify that prequery and programming losses are multiplied by the
+right quantities.
+
+\section{Pen-and-Paper Fundamental-Lemma Lifting}
+
+\begin{lemma}[Budgeted one-call lifting]
+Suppose two signing-oracle implementations \(O_0\) and \(O_1\) are identical
+unless a clean event \(C\) fails during one signing call.  If for every state
+satisfying the budget invariant
+\[
+\Pr[\neg C\text{ during one call}]\le \epsilon,
+\]
+and the adversary makes at most \(q_S\) signing calls, then the distinguishing
+loss between the two full games is at most \(q_S\epsilon\), plus any separately
+accounted hash-query bad events.
+\end{lemma}
+
+\begin{proof}
+Index the signing calls from \(1\) to \(q_S\).  Define a hybrid sequence in
+which the first \(i\) calls use \(O_1\) and the remaining calls use \(O_0\).  By
+the fundamental lemma, adjacent hybrids differ by at most the probability that
+the clean event fails in call \(i+1\).  The budget invariant ensures that each
+such probability is bounded by \(\epsilon\).  Summing over at most \(q_S\) calls
+gives \(q_S\epsilon\).  Hash-query bad events are added by another union-bound
+or fundamental-lemma step.
+\end{proof}
+
+\section{One-Call Signing Loss}
+
+The concrete one-call signing loss relates an attempt-side clean projection to
+an exact-side projection.  Lemmas such as
+\code{concrete\_budgeted\_ro\_signing\_attempt\_o\_sign\_active\_clean\_signature\_structural\_le},
+\code{concrete\_budgeted\_ro\_exact\_hyperball\_o\_sign\_active\_signature\_exact},
+and
+\code{concrete\_budgeted\_o\_sign\_clean\_one\_call\_loss\_from\_self\_logged\_surface}
+encode this local proof.
+
+\section{Detailed EasyCrypt Code Analysis}
+
+The module \code{ROMInternalTranscriptBudgetedPaperSimAsNMA} is the central
+budgeted wrapper.  Its signing oracle \code{O.sign} is where a one-step sampler
+loss must be lifted through adversarial interaction.  The code first proves
+projection lemmas: the attempt side projects from \code{O.sign} to the
+self-logged \code{sample\_with\_seed} event, and the exact side projects from
+\code{sample\_with\_seed} back to exact signing.
+
+The lemma
+\code{concrete\_budgeted\_self\_logged\_signature\_clean\_event\_loss\_surface}
+acts as a reusable surface theorem.  It abstracts over the local event and
+requires both projections.  The final lemma
+\code{concrete\_budgeted\_o\_sign\_clean\_one\_call\_loss\_from\_self\_logged\_surface}
+instantiates that surface for the concrete \haetae{} lazy ROM.  This structure
+is stronger than a coarse local wrapper bound because it proves that the exact
+events used by the signing oracle are the events bounded by the sampler proof.
+
+\section{From One Call to NMA Wrapper Obligations}
+
+The one-call bound supplies the local surface that a non-vacuous NMA-level lift
+should consume.  The checked lemmas whose names contain
+\code{rom\_internal\_budgeted\_nma} expose the bridge from local signing facts to
+adversarial-game facts, including the concrete clean event and the
+\code{sampler\_bad\_prequery} log.  The present top-level path still has coarse
+fallback steps: some NMA bridge lemmas use probability bounds whose usefulness
+depends on the oversized \code{rejection\_sampling\_loss\_term}.  The remaining
+proof obligation is to make the final NMA composition consume the local clean
+one-call surface directly.

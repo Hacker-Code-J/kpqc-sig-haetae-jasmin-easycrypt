@@ -1,0 +1,108 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Scheme.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+HAETAE instantiation of the generic signature interface.
+
+\section*{How To Read This Script}
+Read this file as an adapter.  It aligns HAETAE key generation, signing, and verification with the generic games without doing the security proof locally.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore.} & Imports AllCore.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import Sig\_ROM HAETAE\_Params HAETAE\_Algebra HAETAE\_Distributions.} & Imports Sig\_ROM HAETAE\_Params HAETAE\_Algebra HAETAE\_Distributions.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize require import HAETAE\_ROM.} & Imports HAETAE\_ROM.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+4 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+5 & {\ttfamily\scriptsize theory HAETAE\_Scheme.} & Begins the namespace HAETAE\_Scheme, grouping the declarations as one checked theory. \\
+6 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+7 & {\ttfamily\scriptsize import HAETAE\_Params.} & Opens HAETAE\_Params so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize import HAETAE\_Algebra.} & Opens HAETAE\_Algebra so its names can be used without qualification in the following proof. \\
+9 & {\ttfamily\scriptsize import HAETAE\_Distributions.} & Opens HAETAE\_Distributions so its names can be used without qualification in the following proof. \\
+10 & {\ttfamily\scriptsize import HAETAE\_ROM.} & Opens HAETAE\_ROM so its names can be used without qualification in the following proof. \\
+11 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+12 & {\ttfamily\scriptsize clone import Sig\_ROM as SIG with} & Clones and opens a parameterized EasyCrypt theory, producing a specialized instance used below. \\
+13 & {\ttfamily\scriptsize   type pkey <- pkey,} & Declares carrier set pkey.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+14 & {\ttfamily\scriptsize   type skey <- skey,} & Declares carrier set skey.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+15 & {\ttfamily\scriptsize   type message <- message,} & Declares carrier set message.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+16 & {\ttfamily\scriptsize   type context <- context,} & Declares carrier set context.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+17 & {\ttfamily\scriptsize   type signature <- signature,} & Declares carrier set signature.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+18 & {\ttfamily\scriptsize   type ro\_query <- ro\_query,} & Declares carrier set ro\_query.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+19 & {\ttfamily\scriptsize   type ro\_output <- ro\_output,} & Declares carrier set ro\_output.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+20 & {\ttfamily\scriptsize   op dro\_output <- dro\_output.} & Defines operation dro\_output, a total mathematical function or abbreviation used by later declarations. \\
+21 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+22 & {\ttfamily\scriptsize op haetae\_mode : mode.} & Defines operation haetae\_mode, a total mathematical function or abbreviation used by later declarations. \\
+23 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+24 & {\ttfamily\scriptsize module HAETAE(H : SIG.POracle) = \{} & Defines module HAETAE, a probabilistic program or game used to create events and success probabilities. \\
+25 & {\ttfamily\scriptsize   proc kg() : pkey * skey = \{} & Defines procedure kg.  Its body is a probabilistic program whose result becomes part of a game event. \\
+26 & {\ttfamily\scriptsize     var sd : seed;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+27 & {\ttfamily\scriptsize     var rhoprime : seed;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+28 & {\ttfamily\scriptsize     var kp : pkey * skey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+29 & {\ttfamily\scriptsize     var ro\_y : ro\_output;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+31 & {\ttfamily\scriptsize     sd <\$ dseed;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+32 & {\ttfamily\scriptsize     rhoprime <- haetae\_keygen\_rhoprime sd;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+33 & {\ttfamily\scriptsize     ro\_y <@ H.get(matrix\_expand\_query haetae\_mode rhoprime);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+34 & {\ttfamily\scriptsize     kp <- keygen\_internal haetae\_mode rhoprime;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+35 & {\ttfamily\scriptsize     return kp;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+36 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+37 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+38 & {\ttfamily\scriptsize   proc sign(sk : skey, m : message, ctx : context) : signature = \{} & Defines procedure sign.  Its body is a probabilistic program whose result becomes part of a game event. \\
+39 & {\ttfamily\scriptsize     var coins : random\_coins;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+40 & {\ttfamily\scriptsize     var pk : pkey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+41 & {\ttfamily\scriptsize     var highbits : polyveck;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize     var lowbits : poly;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+43 & {\ttfamily\scriptsize     var mu : crh;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+44 & {\ttfamily\scriptsize     var ro\_y : ro\_output;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+45 & {\ttfamily\scriptsize     var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+46 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+47 & {\ttfamily\scriptsize     coins <\$ drandom\_coins;} & Samples from a distribution.  Mathematically this introduces a random variable with the named law. \\
+48 & {\ttfamily\scriptsize     ro\_y <@ H.get(sampler\_expand\_query coins);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+49 & {\ttfamily\scriptsize     coins <- ro\_signing\_coins ro\_y;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+50 & {\ttfamily\scriptsize     pk <- public\_key\_of\_secret haetae\_mode sk;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+51 & {\ttfamily\scriptsize     ro\_y <@ H.get(message\_hash\_query pk ctx m);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+52 & {\ttfamily\scriptsize     mu <- ro\_message\_hash ro\_y;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+53 & {\ttfamily\scriptsize     highbits <- commitment\_highbits haetae\_mode sk m ctx coins;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+54 & {\ttfamily\scriptsize     lowbits <- commitment\_lowbits haetae\_mode sk m ctx coins;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+55 & {\ttfamily\scriptsize     ro\_y <@ H.get(challenge\_hash\_query haetae\_mode highbits lowbits mu);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+56 & {\ttfamily\scriptsize     sig <- sign\_internal haetae\_mode sk m ctx coins;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+57 & {\ttfamily\scriptsize     return sig;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+58 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+59 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+60 & {\ttfamily\scriptsize   proc verify(pk : pkey, m : message, ctx : context,} & Defines procedure verify.  Its body is a probabilistic program whose result becomes part of a game event. \\
+61 & {\ttfamily\scriptsize               sig : signature) : bool = \{} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+62 & {\ttfamily\scriptsize     return verify\_internal haetae\_mode pk m ctx sig;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+63 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+64 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+65 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+66 & {\ttfamily\scriptsize end HAETAE\_Scheme.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

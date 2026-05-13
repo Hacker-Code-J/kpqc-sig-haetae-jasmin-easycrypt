@@ -1,0 +1,246 @@
+%==============================================================================%
+% Chapter 3 – HAETAE and Its NTT
+%==============================================================================%
+
+\chapter{The \haetae{} Signature Scheme and Its NTT}
+\label{ch:haetae_ntt}
+
+\section{Overview of \haetae{}}
+
+\haetae{}~\cite{HAETAE2022} is a module-lattice based digital signature scheme
+submitted to the Korean Post-Quantum Cryptography (KPQC) standardisation
+process.  It follows the ``Fiat--Shamir with aborts'' paradigm~\cite{Lyubashevsky2012}:
+the signing algorithm samples a masking polynomial, computes a commitment via a
+hash function, and rejects the sample if the output leaks information about the
+secret key.
+
+\subsection{Algebraic Setting}
+
+\haetae{} operates in the polynomial ring
+\begin{equation}
+  R_q = \Z_q[X]/(X^n + 1), \qquad n = 256,\quad q = 64513.
+\label{eq:ring}
+\end{equation}
+Keys and signatures are vectors in $R_q^k$ for parameter-set-dependent
+ranks $k$.  Polynomial multiplication in $R_q$ is the dominant operation in
+key generation, signing, and verification.
+
+\subsection{Role of the NTT}
+
+The NTT converts polynomials from the \emph{coefficient domain} to the
+\emph{evaluation domain}, where multiplication is pointwise.  The workflow is:
+\begin{equation}
+  f \cdot g \;\in\; R_q
+  \;\longleftrightarrow\;
+  \NTT(f) \odot \NTT(g) \;\in\; \F_q^n,
+\label{eq:ntt_mul}
+\end{equation}
+where $\odot$ denotes componentwise multiplication.  A single polynomial
+multiplication thus costs $3 \cdot O(n \log n)$ field operations (two forward
+NTTs, one componentwise multiplication, one inverse NTT) instead of $O(n^2)$.
+
+\section{\haetae{} NTT Parameters}
+\label{sec:haetae_params}
+
+\begin{table}[h]
+\centering
+\caption{\haetae{} NTT parameters}
+\label{tab:params}
+\begin{tabular}{lll}
+\toprule
+Symbol & Value & Description \\
+\midrule
+$q$    & $64513$ & Modulus ($= 2^8 \cdot 252 + 1 = 251 \cdot 256 + 1$) \\
+$n$    & $256$   & Polynomial degree \\
+$\zeta_0$ & $426$ & Primitive $512$th root of unity in $\F_q$ \\
+$R$    & $2^{32}$ & Montgomery base \\
+$\mathsf{QINV}$ & $940508161$ & $-q^{-1} \bmod 2^{32}$ \\
+$\mathsf{MONT}$ & $14321$ & $R \bmod q = 2^{32} \bmod q$ \\
+$\mathsf{MONTSQ}$ & $4214$ & $R^2 \bmod q = 2^{64} \bmod q$ \\
+$R^{-1}$ & $50386$ & $R^{-1} \bmod q$ \\
+$f$ & $-29720$ & Inverse NTT scaling constant (in Montgomery form) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Twiddle Factors}
+
+The forward NTT uses 256 precomputed twiddle factors stored in an array
+\texttt{zetas[256]}.  The $k$-th factor is $\mathsf{MONT} \cdot \zeta_0^{\brev_8(k)}
+\bmod q$ (stored in Montgomery form), for $k = 1, 2, \dots, 256$.  The array
+is indexed starting at $k = 1$ because the $k = 0$ factor (unity) is implicit
+in the loop initialisation.
+
+\begin{table}[h]
+\centering
+\caption{First sixteen twiddle factors \texttt{zetas[1..16]} (in Montgomery form)}
+\label{tab:zetas}
+\begin{tabular}{r|rrrrrrrr}
+\toprule
+$k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\midrule
+\texttt{zetas}$[k]$ & 14321 & 26798 & 6943 & 15978 & 5568 & 5921 & 16245 & 3978 \\
+\midrule
+$k$ & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\
+\midrule
+\texttt{zetas}$[k]$ & 26903 & 7074 & 7428 & 16539 & 5742 & 5953 & 17095 & 4032 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The inverse NTT uses a separate array \texttt{zetas\_inv[256]} whose entries
+are the modular inverses of the corresponding forward twiddle factors, again
+stored in Montgomery form.  The final entry \texttt{zetas\_inv[255]} encodes
+the scaling constant $f = n^{-1} \cdot \mathsf{MONT}^2 \bmod q = -29720$.
+
+\section{Reference C Implementation}
+\label{sec:c_impl}
+
+The reference C implementation in \texttt{ntt.c} provides the algorithmic
+ground truth.  It implements the forward NTT (\Cref{alg:ntt}) and the inverse
+NTT with an extra final scaling step.
+
+\subsection{Forward NTT}
+
+\begin{lstlisting}[language=C,
+  caption={Forward NTT from \texttt{ntt.c}},
+  label={lst:c_ntt}]
+void ntt(int32_t a[256]) {
+  unsigned int len, start, j, k;
+  int32_t t, zeta;
+
+  k = 1;
+  for (len = 128; len > 0; len >>= 1) {
+    for (start = 0; start < 256; start += 2 * len) {
+      zeta = zetas[k++];
+      for (j = start; j < start + len; j++) {
+        t = montgomery_reduce((int64_t)zeta * a[j + len]);
+        a[j + len] = a[j] - t;
+        a[j]       = a[j] + t;
+      }
+    }
+  }
+}
+\end{lstlisting}
+
+The loop nest has three levels:
+\begin{enumerate}
+  \item \textbf{Outer loop}: $\ell \in \{128, 64, 32, 16, 8, 4, 2, 1\}$,
+        the current butterfly half-length.  Each iteration is one NTT stage.
+  \item \textbf{Middle loop}: iterates over the $256 / (2\ell)$ groups within
+        each stage.
+  \item \textbf{Inner loop}: performs $\ell$ butterfly operations within each
+        group, using the same twiddle factor \texttt{zeta = zetas[k]}.
+\end{enumerate}
+
+Key observations:
+\begin{itemize}
+  \item After stage $s$ (with $\ell = 2^{7-s}$), the array is arranged so
+        that coefficient $a[j]$ holds the partial sum over the subset
+        $\{j \bmod 2^\ell, j + 2^\ell, j + 2 \cdot 2^\ell, \dots\}$.
+
+  \item The twiddle counter $k$ advances monotonically from 1 to 255,
+        consuming all 255 non-trivial twiddle factors.
+
+  \item No modular reduction is applied at the output of butterfly pairs;
+        coefficients grow by at most one bit per stage (from 16-bit inputs
+        to at most 24-bit after 8 stages).
+\end{itemize}
+
+\subsection{Inverse NTT}
+
+\begin{lstlisting}[language=C,
+  caption={Inverse NTT from \texttt{ntt.c}},
+  label={lst:c_invntt}]
+void invntt_tomont(int32_t a[256]) {
+  unsigned int start, len, j, k;
+  int32_t t, zeta;
+  const int32_t f = -29720;   /* mont^2 / 256 mod q */
+
+  k = 255;
+  for (len = 1; len < 256; len <<= 1) {
+    for (start = 0; start < 256; start += 2 * len) {
+      zeta = zetas_inv[k--];
+      for (j = start; j < start + len; j++) {
+        t        = a[j];
+        a[j]     = t + a[j + len];
+        a[j+len] = montgomery_reduce((int64_t)zeta * (t - a[j+len]));
+      }
+    }
+  }
+  for (j = 0; j < 256; j++)
+    a[j] = montgomery_reduce((int64_t)f * a[j]);
+}
+\end{lstlisting}
+
+The inverse NTT reverses the butterfly ordering: $\ell$ increases from 1 to
+128, and the twiddle counter $k$ decreases from 255 to 1.  The final loop
+multiplies each coefficient by $f = -29720 \equiv n^{-1} \cdot R^2 \cdot
+(-1) \pmod{q}$, with the Montgomery reduction removing one factor of $R$,
+leaving each coefficient multiplied by $n^{-1} \cdot R \pmod{q}$ (i.e., in
+Montgomery form).
+
+\subsection{Montgomery Reduction}
+
+\begin{lstlisting}[language=C,
+  caption={Montgomery reduction from \texttt{reduce.c}},
+  label={lst:c_mont}]
+int32_t montgomery_reduce(int64_t a) {
+  int32_t t;
+  t = (int32_t)a * (int32_t)QINV;
+  t = (a - (int64_t)t * Q) >> 32;
+  return t;
+}
+\end{lstlisting}
+
+This implements the signed Montgomery reduction.  The cast \texttt{(int32\_t)a}
+extracts the low 32 bits of $a$ (interpreted as a signed 32-bit integer), the
+product \texttt{t * Q} is computed as a signed 64-bit value, and the right
+shift by 32 is an arithmetic right shift on signed integers.
+
+\subsection{Test Harness}
+
+The file \texttt{test\_haetae\_ntt.c} provides a reference test harness that:
+\begin{enumerate}
+  \item Generates random polynomial inputs within the valid range.
+  \item Applies the forward NTT.
+  \item Applies the inverse NTT.
+  \item Verifies that the output matches the input (modulo $q$).
+\end{enumerate}
+
+All test cases pass with the reference C code, providing empirical confidence
+in the correctness of the algorithm before formal verification.
+
+\section{Structural Comparison with MLKEM NTT}
+\label{sec:haetae_vs_mlkem}
+
+\begin{table}[h]
+\centering
+\caption{Comparison of \haetae{} and MLKEM NTT structures}
+\label{tab:haetae_mlkem}
+\begin{tabular}{lll}
+\toprule
+Property & \haetae{} & MLKEM \\
+\midrule
+Modulus $q$ & $64513$ & $3329$ \\
+Degree $n$ & $256$ & $256$ \\
+NTT type & Full 256-point negacyclic & Incomplete 128-point \\
+Bit-reversal exponent & $\brev_8(k)$ & $\brev_7(k)$ \\
+Primitive root & $\zeta_0 = 426$ ($512$th) & $\zeta_0 = 17$ ($256$th) \\
+Output permutation & Bit-reversed & Bit-reversed \\
+Final inv.\ NTT step & Scale by $n^{-1} R \bmod q$ & Scale by $n^{-1} R \bmod q$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The key structural difference is that the \haetae{} NTT uses twiddle factors
+$\zeta^{\brev_8(k)}$ where $k$ ranges from 1 to 255, producing a full 256-point
+spectral evaluation.  MLKEM uses twiddle factors $\zeta^{\brev_7(2k+1)}$,
+producing only a 128-point evaluation (the polynomial is split into even/odd
+parts).  This means the \haetae{} NTT result vector contains evaluation at
+all 256 primitive $512$th roots of unity, while the MLKEM result vector
+contains evaluations at 128 primitive $256$th roots.
+
+This structural difference invalidates any attempt to directly reuse MLKEM NTT
+algebra lemmas for the \haetae{} verification.  New algebraic infrastructure
+is required, developed in \ec{NTTFullAlgebra.ec} (\Cref{ch:algebra}).

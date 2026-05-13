@@ -1,0 +1,478 @@
+\chapter{Model--Specification Correspondence}
+\label{ch:model-spec-correspondence}
+
+A machine-checked security proof is only as persuasive as the correspondence
+between its formal model and the scheme that the proof purports to study.  The
+HAETAE proof surface therefore has two distinct obligations.  The first is the
+internal EasyCrypt obligation: the games, hops, and reductions must check.  The
+second is the external modeling obligation: the objects in those games must
+faithfully represent the HAETAE specification.  This chapter records that second
+obligation explicitly.
+
+The specification reference used here is \ec{HAETAE\_v260204.pdf}
+\cite{haetae-v260204}.  The local copy has 46 pages and was generated on
+February 4, 2026.  The relevant parts for provable security are Definition 1 for
+the signature-scheme interface, Section 4.2 for the HAETAE algorithms, Figure 8
+for the deterministic full algorithms, and Table 1 for the three parameter
+sets.  The EasyCrypt files used for the
+formal model are principally \ec{Sig\_ROM.ec}, \ec{HAETAE\_Scheme.ec},
+\ec{HAETAE\_Params.ec}, \ec{HAETAE\_ROM.ec}, \ec{HAETAE\_Distributions.ec},
+\ec{HAETAE\_Algebra.ec}, and \ec{HAETAE\_Rejection.ec}.
+
+\section{Signature-scheme interface}
+\label{sec:model-spec-signature-interface}
+
+Definition 1 of the specification presents a signature scheme as a triple of
+algorithms
+\[
+  \Pi=(\mathsf{KeyGen},\mathsf{Sign},\mathsf{Verify})
+\]
+with public keys, secret keys, messages, signatures, and a verification
+predicate.  The corresponding EasyCrypt interface is intentionally generic.  It
+first defines abstract types and then requires any concrete scheme to implement
+key generation, signing, and verification procedures.
+
+\begin{longtable}{p{0.25\textwidth}p{0.30\textwidth}p{0.35\textwidth}}
+\caption{Signature-interface correspondence.}
+\label{tab:signature-interface-correspondence}\\
+\toprule
+\textbf{Specification object} & \textbf{EasyCrypt object} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Specification object} & \textbf{EasyCrypt object} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+Public key space & \ec{type pkey} in \ec{Sig\_ROM.ec} & A carrier set
+\(\mathcal{PK}\). \\
+\midrule
+Secret key space & \ec{type skey} & A carrier set \(\mathcal{SK}\). \\
+\midrule
+Message and context & \ec{type message}, \ec{type context} & The security game works over
+pairs \((m,ctx)\in\mathcal{M}\times\mathcal{C}\). \\
+\midrule
+Signature space & \ec{type signature} & A carrier set \(\Sigma\). \\
+\midrule
+Key generation & \ec{proc kg() : pkey * skey} & A probabilistic kernel
+\(\mathsf{KeyGen}:1\to\mathcal{D}(\mathcal{PK}\times\mathcal{SK})\). \\
+\midrule
+Signing & \ec{proc sign(sk,m,ctx) : signature} & A random-oracle relative
+kernel \(\mathsf{Sign}^{H}(sk,m,ctx)\). \\
+\midrule
+Verification & \ec{proc verify(pk,m,ctx,sig) : bool} & A predicate
+\(\mathsf{Verify}^{H}(pk,m,ctx,\sigma)\in\{0,1\}\). \\
+\midrule
+Chosen-message and strong freshness & \ec{fresh\_msg}, \ec{fresh\_sig} &
+\ec{fresh\_msg} is the EUF-CMA condition that the final message/context pair was
+not previously signed.  \ec{fresh\_sig} is the stronger condition that the exact
+message/context/signature triple was not returned before. \\
+\bottomrule
+\end{longtable}
+
+The generic interface is not itself a HAETAE model.  It is the mathematical
+ambient category in which the HAETAE model is later instantiated.  In categorical
+language, \ec{HAETAE\_Scheme.ec} supplies one object of the class of all
+random-oracle signature schemes described by \ec{Sig\_ROM.ec}.
+
+\section{Algorithm correspondence}
+\label{sec:model-spec-algorithm-correspondence}
+
+Figure 8 of the specification gives deterministic HAETAE algorithms.  The
+EasyCrypt wrapper in \ec{HAETAE\_Scheme.ec} exposes the same three algorithms,
+but separates the random-oracle queries from the internal algebraic operations.
+This separation is essential for the game proof: the ROM table, query logs, and
+programming events must be visible to EasyCrypt.
+
+\begin{longtable}{p{0.23\textwidth}p{0.34\textwidth}p{0.33\textwidth}}
+\caption{Algorithm-level model/spec correspondence.}
+\label{tab:algorithm-correspondence}\\
+\toprule
+\textbf{Specification step} & \textbf{EasyCrypt representation} & \textbf{Proof-relevant interpretation} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Specification step} & \textbf{EasyCrypt representation} & \textbf{Proof-relevant interpretation} \\
+\midrule
+\endhead
+Sample key-generation seed and derive \(seed_A,seed_{sk},K\). &
+\ec{sd <\$ dseed}; \ec{haetae\_keygen\_rhoprime sd}; \ec{keygen\_internal}. &
+The model records the entropy source and delegates deterministic key material
+construction to the internal HAETAE operations. \\
+\midrule
+Expand the public matrix from \(seed_A\). &
+\ec{H.get(matrix\_expand\_query haetae\_mode rhoprime)} and
+\ec{keygen\_internal}. &
+The wrapper records a typed matrix-expansion ROM query, while
+\ec{keygen\_internal} constructs the modeled matrix through deterministic
+internal algebra.  The ROM output is not consumed by \ec{keygen\_internal}; it is
+part of the proof instrumentation for the hash-interface audit. \\
+\midrule
+Compute \(b=A_{gen}s_{gen}+e_{gen}+a_{gen}\), split low/high bits, and form
+\((pk,sk)\). &
+\ec{keygen\_internal haetae\_mode rhoprime}. &
+The algebraic construction is part of the scheme model, not part of the ROM
+wrapper.  Its soundness depends on the algebra and parameter files. \\
+\midrule
+Compute \(\mu=H_{gen}(seed_A,b_1,M)\). &
+\ec{H.get(message\_hash\_query pk ctx m)} followed by \ec{ro\_message\_hash}. &
+The signing wrapper performs and logs a typed message-hash ROM query.  In the
+current internal algebra, \ec{sign\_internal} recomputes the message hash through
+the deterministic operation \ec{message\_hash}; the wrapper's ROM output is
+therefore observational instrumentation unless the model is changed to pass it
+into \ec{sign\_internal}. \\
+\midrule
+Derive signing randomness through \(seed_{ybb}=H_{gen}(K,\mu)\) and
+\(expandYbb\). &
+\ec{coins <\$ drandom\_coins}; \ec{H.get(sampler\_expand\_query coins)};
+\ec{ro\_signing\_coins}. &
+The formal proof models the signing sampler as a ROM-mediated randomness
+source.  The model/spec audit must justify that this is the intended abstraction
+of the deterministic specification path. \\
+\midrule
+Hash the commitment data to obtain challenge seed \(\rho\), then sample the
+binary challenge. &
+\ec{commitment\_highbits}, \ec{commitment\_lowbits},
+\ec{H.get(challenge\_hash\_query haetae\_mode highbits lowbits mu)}, and
+\ec{sign\_internal}. &
+The challenge point is a separately typed ROM site for freshness and
+programming analysis.  The explicit wrapper call uses the wrapper value
+\ec{mu <- ro\_message\_hash ro\_y}.  The signature returned by
+\ec{sign\_internal}, and the honest programming site used by the programming
+lemmas, instead use the deterministic \ec{message\_hash} recomputed inside the
+internal algebra.  Thus this wrapper call records a typed challenge-hash query
+near the proof site; it should not be identified with the transcript-derived
+programming site unless a separate bridge equates the two message-hash values. \\
+\midrule
+Apply rejection tests and return encoded signature components. &
+\ec{sign\_internal}, \ec{HAETAE\_Rejection.ec}, and distribution lemmas. &
+The proof reasons about support, rejection predicates, and exact-hyperball
+sampling through explicit events and loss lemmas. \\
+\midrule
+Decode, recompute challenge data, and check norm/challenge conditions. &
+\ec{verify\_internal haetae\_mode pk m ctx sig}. &
+Verification is modeled as the deterministic predicate used by the correctness
+and EUF-CMA games. \\
+\bottomrule
+\end{longtable}
+
+The most important modeling distinction is the treatment of signing randomness.
+The specification describes a deterministic derivation from \(K\) and \(\mu\),
+whereas the EasyCrypt signing wrapper first samples \ec{random\_coins} and then
+routes the sampler-expansion point through the random oracle.  This is not a
+minor notation change.  It is the reason that the proof contains
+\ec{sampler\_expand\_query}, \ec{sampler\_bad\_prequery},
+\ec{sampler\_rom\_covered}, and the concrete lazy-ROM freshness lemmas.  The
+formal theorem is therefore a theorem about the modeled ROM interface; a
+complete certification story must additionally maintain a model/spec argument
+that the deterministic HAETAE sampling path realizes the same distributional
+role.
+
+\section{Exact scope statement}
+\label{sec:model-spec-exact-scope}
+
+The model/specification correspondence in this chapter should be read as an
+audited mathematical bridge, not as an additional EasyCrypt theorem silently
+imported into the proof.  Let
+\[
+  \mathsf{Spec}_{260204}
+\]
+denote the algorithms in the February 2026 specification, and let
+\[
+  \mathsf{ECModel}
+\]
+denote the EasyCrypt scheme obtained from \ec{HAETAE\_Scheme.ec} and its
+supporting files.  The machine-checked EasyCrypt surface proves the following
+conditional formal-model implication, where \(\mathcal{H}_{\mathsf{EC}}\)
+abbreviates the final hop/reduction premise and the MLWE and Module-SIS
+hardness premises appearing in the cited EasyCrypt composition lemma:
+\[
+  \mathcal{H}_{\mathsf{EC}}
+  \Longrightarrow
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  \le
+  \ec{haetae\_euf\_counted\_rom\_bound}.
+\]
+The dissertation does not claim a separately checked theorem of the form
+\[
+  \mathsf{Spec}_{260204}\equiv\mathsf{ECModel}.
+\]
+Instead, it records the correspondence evidence needed for a reviewer to judge
+whether the formal model is the intended model of the specification.
+
+This distinction matters most for signing randomness.  In the specification,
+the signing path derives \(\mathsf{seed}_{ybb}\) from secret key material and the
+message digest, then expands it.  In the EasyCrypt proof, the sampler expansion
+site is exposed as a typed random-oracle query fed by sampled
+\ec{random\_coins}.  The security theorem is exact for the EasyCrypt model; the
+specification-level conclusion additionally depends on the distributional
+justification that the exposed sampler interface faithfully represents the
+specified signing-randomness role.
+
+\begin{assumption}[Signing-randomness modeling bridge]
+\label{assm:signing-randomness-modeling-bridge}
+The specification-level reading of the EasyCrypt theorem assumes the following
+modeling hypotheses.
+\begin{enumerate}[label=\arabic*.]
+\item The specification's call
+\[
+  \mathsf{seed}_{ybb}=H_{gen}(K,\mu),
+  \qquad
+  (y,b,b')=\mathsf{expandYbb}(\mathsf{seed}_{ybb},counter)
+\]
+is represented in the EasyCrypt model by a domain-separated sampler-expansion
+random-oracle site
+\[
+  q_s=\ec{sampler\_expand\_query}(\rho_s)
+\]
+and interpretation map \(\ec{ro\_signing\_coins}\).
+\item The sampler, message-hash, challenge-hash, and matrix-expansion query
+constructors are injectively tagged, so that programming or observing one domain
+does not program or observe another.
+\item Before the signing call under consideration, \(q_s\) has not appeared in
+the adversary hash log or in the sampler self-log from earlier signing calls
+except on the local wrapper event \(\ec{sampler\_bad\_prequery}\).  The
+counted-ROM prequery and min-entropy terms are separate final-bound ledger
+entries, not this local event.
+\item At a fresh sampler site, the concrete lazy-ROM law
+\[
+  \ec{ro\_signing\_coins}(H(q_s)) \equiv D_{\mathsf{coins}}
+\]
+is the law expressed by
+\ec{concrete\_lazy\_rom\_sampler\_expand\_query\_fresh\_eq}.
+\end{enumerate}
+Under these hypotheses, the distribution of the specification signing sampler,
+viewed through the random-oracle abstraction, is identified with the EasyCrypt
+sampler distribution on the clean event.  Without conditioning on the clean
+event, two distinct proof-accounting facts are involved: the local
+\ec{sampler\_bad\_prequery} wrapper event is bounded by the combined
+adversary-hash and sampler-self-log budget, while the final counted-ROM theorem
+contains the separate \ec{counted\_rom\_prequery\_term} and
+\ec{counted\_rom\_min\_entropy\_term} summands.
+\end{assumption}
+
+\paragraph{Pen-and-paper justification.}
+By domain separation, the sampler site is disjoint from the message, challenge,
+and matrix sites.  On the clean event, the sampler site is fresh in the lazy-ROM
+table.  The lazy-ROM semantics therefore samples a new oracle output from the
+declared output distribution, and the interpretation
+\ec{ro\_signing\_coins} maps that output to the same coin distribution used by
+the EasyCrypt signing sampler.  The local sampler equivalence can fail before
+the fresh call only if the adversary has already queried the sampler site or an
+earlier signing sampler has already logged the same sampler site.  These
+failures are represented by \(\ec{sampler\_bad\_prequery}\) and have their own
+combined-log budget in the active-signing wrapper.  The counted-ROM prequery and
+min-entropy terms are separate final-bound summands for the ROM programming
+ledger: the former is a programmed-site prequery term, and the latter records
+the \(\ec{bad\_min\_entropy}\) predicate on observed transcripts.  Thus the
+bridge is exact under \(\neg\ec{sampler\_bad\_prequery}\), with the remaining
+accounting split between the local sampler-prequery bound and the counted-ROM
+terms.
+
+This assumption is intentionally not presented as an EasyCrypt theorem.  It is
+the strongest pen-and-paper bridge currently supplied by the dissertation.
+Mechanizing it would require a formal relation between the deterministic
+\(H_{gen}(K,\mu)\)-based specification sampler and the typed
+\ec{sampler\_expand\_query} interface used by the current proof.
+
+\section{Internal-algorithm fidelity audit ledger}
+\label{sec:internal-algorithm-fidelity-ledger}
+
+The previous assumption isolates the signing-randomness abstraction.  The same
+discipline is needed for the remaining internal algorithms: a theorem about
+\(\mathsf{ECModel}\) is only a theorem about \(\mathsf{Spec}_{260204}\) after
+the following correspondences have either been mechanized or accepted as
+audited modeling assumptions.
+
+The status column uses the dependency classes from
+\Cref{tab:dependency-classes}.  In particular, ``checked for
+\(\mathsf{ECModel}\)'' means that the EasyCrypt model has the stated internal
+property; it does not mean that the corresponding line of the PDF specification
+has been formally related to the EasyCrypt definition.  ``Audited'' means
+reviewed correspondence evidence.  ``Assumed'' means a named bridge that remains
+outside the checked proof.
+
+\begin{longtable}{p{0.21\textwidth}p{0.23\textwidth}p{0.32\textwidth}p{0.14\textwidth}}
+\caption{Internal-algorithm correspondence obligations for reading
+\(\mathsf{ECModel}\) as the HAETAE specification.}
+\label{tab:internal-algorithm-fidelity-ledger}\\
+\toprule
+\textbf{Specification object} & \textbf{EasyCrypt object} &
+\textbf{Current evidence} & \textbf{Status} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Specification object} & \textbf{EasyCrypt object} &
+\textbf{Current evidence} & \textbf{Status} \\
+\midrule
+\endhead
+Figure 8 KeyGen, lines 1--11 &
+\ec{keygen\_internal}, \ec{HAETAE\_Scheme.kg} &
+The parameter, matrix-expansion, secret-sampling, and public-key equations are
+represented by the algebraic model and the parameter table in
+\Cref{sec:model-spec-parameter-correspondence}. &
+Audited; not a checked PDF-to-model equivalence. \\
+\midrule
+Figure 8 Sign, lines 1--17 &
+\ec{sign\_internal}, \ec{HAETAE\_Scheme.sign} &
+The proof tracks rejection, sampler expansion, message hashing, challenge
+hashing, and signature validity through the hop-game lemmas and the clean
+sampler instrumentation. &
+Checked for \(\mathsf{ECModel}\); specification bridge assumed. \\
+\midrule
+Figure 8 Verify, lines 1--10 &
+\ec{verify\_internal}, \ec{HAETAE\_Scheme.verify} &
+The verification predicate is the formal accept/reject event used by the
+EUF-CMA game, but byte-level parsing and malformed encodings are outside the
+central probability theorem. &
+Audited; implementation parsing separate. \\
+\midrule
+Table 1 parameters &
+\ec{Mode2}, \ec{Mode3}, \ec{Mode5}, \ec{mode\_*} &
+The dissertation records the main numerical correspondences, including
+\(n=256\), \(q=64513\), \((k,\ell)\), \(\tau\), and squared norm bounds. &
+Documented correspondence. \\
+\midrule
+\(H_{gen}(K,\mu)\) and \(\mathsf{expandYbb}\) &
+\ec{sampler\_expand\_query}, \ec{ro\_signing\_coins} &
+The EasyCrypt proof has concrete lazy-ROM freshness and self-query logging for
+the modeled sampler site.  The deterministic specification-to-ROM distribution
+argument is exactly \Cref{assm:signing-randomness-modeling-bridge}. &
+Explicit assumption. \\
+\bottomrule
+\end{longtable}
+
+\section{Parameter correspondence}
+\label{sec:model-spec-parameter-correspondence}
+
+Table 1 of the specification gives the parameter sets for security levels 2, 3,
+and 5.  The EasyCrypt file \ec{HAETAE\_Params.ec} encodes the same modes through
+\ec{Mode2}, \ec{Mode3}, and \ec{Mode5}.  The following table records the main
+correspondences used by the proof.
+
+\begin{longtable}{p{0.22\textwidth}p{0.28\textwidth}p{0.40\textwidth}}
+\caption{Parameter correspondence between the specification and EasyCrypt.}
+\label{tab:parameter-correspondence}\\
+\toprule
+\textbf{Specification parameter} & \textbf{EasyCrypt operation} & \textbf{Values / interpretation} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Specification parameter} & \textbf{EasyCrypt operation} & \textbf{Values / interpretation} \\
+\midrule
+\endhead
+Security level & \ec{mode} with constructors \ec{Mode2}, \ec{Mode3}, \ec{Mode5} &
+The three formal modes correspond to the three specification parameter sets. \\
+\midrule
+Ring dimension \(n\) & \ec{n} & \(256\). \\
+\midrule
+Modulus \(q\) & \ec{q} & \(64513\); \ec{dq} is \(2q\). \\
+\midrule
+Module dimensions \((k,\ell)\) & \ec{mode\_k}, \ec{mode\_l} &
+\((2,4)\), \((3,6)\), and \((4,7)\). \\
+\midrule
+Challenge weight \(\tau\) & \ec{mode\_tau} &
+\(58\), \(80\), and \(128\). \\
+\midrule
+Norm/radius bounds \(B,B',B''\) & \ec{mode\_b0sq}, \ec{mode\_b1sq},
+\ec{mode\_b2sq} & The EasyCrypt model stores squared integer bounds.  The
+correspondence is therefore between the specification radii and the squared
+thresholds used by norm predicates. \\
+\midrule
+Hint parameters & \ec{mode\_alpha\_hint}, \ec{mode\_m} &
+Mode-dependent constants used by encoding, hint, and verification predicates. \\
+\midrule
+Public-key and signature sizes & \ec{mode\_publickeybytes},
+\ec{mode\_crypto\_bytes} & Size constants used for specification alignment and
+encoding-side modeling. \\
+\bottomrule
+\end{longtable}
+
+The squared-bound convention is a common source of confusion.  The main
+EasyCrypt validity predicates compare squared norms against squared integer
+thresholds with non-strict bounds.  The proof should not silently identify
+ordinary norm notation with the exact predicate used in the model; the intended
+reading for these validity checks is
+\[
+  \|z\|^2 \le B^2
+  \quad\text{implemented as}\quad
+  \mathsf{normsq}(z) \le \ec{mode\_b*sq}(\mathsf{mode}).
+\]
+Some rejection subchecks use strict inequalities against separate scaled
+rejection bounds; those are distinct abort predicates, not the main
+\ec{mode\_b*sq} validity checks.
+
+\section{Hash and random-oracle correspondence}
+\label{sec:model-spec-hash-correspondence}
+
+The specification uses hash/XOF building blocks \(H_{gen}\), \(H\),
+\(expandA\), \(expandS\), and \(expandYbb\).  The EasyCrypt proof distinguishes
+three layers:
+\[
+  \text{typed query constructors}
+  \longrightarrow
+  \text{lazy ROM state}
+  \longrightarrow
+  \text{interpretation functions on ROM outputs}.
+\]
+For example, \ec{message\_hash\_query}, \ec{challenge\_hash\_query},
+\ec{sampler\_expand\_query}, and \ec{matrix\_expand\_query} prevent accidental
+identification of distinct hash domains.  \ec{HAETAE\_RO.FRO.get} supplies the
+lazy random-oracle semantics.  Operations such as \ec{ro\_message\_hash} and
+\ec{ro\_signing\_coins} interpret the raw oracle output as a typed object when a
+wrapper consumes that output.  In the current scheme wrapper, the sampler output
+is consumed as signing coins, while the matrix, message-hash, and challenge ROM
+calls are proof-visible instrumentation around deterministic internal
+operations.
+
+This is modeled hash-interface support, not a standard-model SHAKE theorem.
+\ec{HAETAE\_FIPS202.ec} and \ec{HAETAE\_Keccak1600.ec} are useful for specifying
+or validating concrete hash components, but the provable-security theorem proved
+in the dissertation is a random-oracle-model theorem for the formal HAETAE
+scheme.
+
+\section{Residual model/spec obligations}
+\label{sec:model-spec-residual-obligations}
+
+The following obligations remain outside the central EasyCrypt security theorem
+and should be tracked whenever the model or the specification changes.
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+\caption{Model/spec obligations outside the central game proof.}
+\label{tab:model-spec-obligations}\\
+\toprule
+\textbf{Obligation} & \textbf{Reason} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Obligation} & \textbf{Reason} \\
+\midrule
+\endhead
+Internal algorithm fidelity & \ec{keygen\_internal}, \ec{sign\_internal}, and
+\ec{verify\_internal} must be audited against Figure 8 and the algebraic
+specification.  The ROM wrapper exposes oracle structure but does not by itself
+prove that every internal operation is the same as the specification formula. \\
+\midrule
+Deterministic sampling path & The specification derives signing randomness from
+secret material and the message digest.  The proof model uses typed randomness
+and ROM-mediated sampler expansion.  The correspondence is the explicit
+modeling assumption in
+\Cref{assm:signing-randomness-modeling-bridge}, not a checked theorem. \\
+\midrule
+Concrete hash instantiation & The checked implication is in the ROM.  Replacing
+the ROM by SHAKE is a computational-assumption or indifferentiability-style step
+not proved by the game theorem itself. \\
+\midrule
+Encoding and parsing & The proof-level signature type abstracts over concrete
+byte encodings.  Implementation-level validity of decoding, rejection, and
+malformed-input behavior is a separate verification target. \\
+\midrule
+Runtime overhead & The checked implication accounts for probabilities and query
+budgets.  Concrete running time and circuit-size overhead of reductions are
+recorded as an external ledger unless a future cost-aware formalization is added. \\
+\bottomrule
+\end{longtable}
+
+This chapter does not weaken the machine-checked implication.  It states
+precisely what the checked surface proves: a conditional ROM security result for
+the formal HAETAE model, together with an explicit audit trail showing how that
+model corresponds to the February 2026 specification.

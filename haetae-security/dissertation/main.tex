@@ -1,0 +1,185 @@
+%==============================================================================%
+% PhD Dissertation: Machine-Checked Verification of the Provable Security
+%                   of the HAETAE Signature Scheme
+% Dissertation-style technical monograph for the local HAETAE EasyCrypt
+% provable-security verification record.
+% Year: 2026
+%==============================================================================%
+
+\documentclass[12pt, a4paper, twoside, openright]{book}
+
+%--- Encoding & Fonts ---------------------------------------------------------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+%--- Mathematics --------------------------------------------------------------
+\usepackage{amsmath, amssymb, amsthm, mathtools}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{stmaryrd}
+
+%--- Layout & Typography ------------------------------------------------------
+\usepackage[top=3cm, bottom=3cm, left=3.5cm, right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{emptypage}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+\usepackage{csquotes}
+
+%--- Colors -------------------------------------------------------------------
+\usepackage[dvipsnames, table]{xcolor}
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{keyword}{RGB}{0,0,180}
+\definecolor{comment}{RGB}{60,120,60}
+\definecolor{string}{RGB}{160,0,0}
+
+%--- References & Hyperlinks --------------------------------------------------
+\usepackage[backend=bibtex, style=alphabetic, sorting=anyt, maxnames=4]{biblatex}
+\addbibresource{bibliography/refs.bib}
+\usepackage[colorlinks=true,
+            hypertexnames=false,
+            linkcolor=NavyBlue,
+            citecolor=OliveGreen,
+            urlcolor=BrickRed]{hyperref}
+\usepackage{cleveref}
+
+%--- Listings & Code ----------------------------------------------------------
+\usepackage{listings}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%--- Graphics & Tables --------------------------------------------------------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, fit, calc, matrix, backgrounds}
+
+%--- Theorem Environments -----------------------------------------------------
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{invariant}[theorem]{Invariant}
+\crefname{assumption}{Assumption}{Assumptions}
+\Crefname{assumption}{Assumption}{Assumptions}
+
+%--- Code Style ---------------------------------------------------------------
+\lstdefinelanguage{EasyCrypt}{
+  keywords={require, import, theory, end, op, type, abbrev, lemma, proof,
+            done, qed, by, forall, exists, fun, if, then, else, match, with,
+            let, in, return, proc, while, do, module, abstract, clone, as,
+            include, export, local, global, print, axiom, hint, rewrite,
+            apply, exact, split, left, right, intro, move, have, case,
+            elim, congr, ring, field, smt, auto, trivial, assumption,
+            phoare, hoare, equiv, conseq, call, wp, skip, rnd, lossless},
+  morecomment=[s]{(*}{*)},
+  morestring=[b]",
+  sensitive=true,
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\color{comment}\itshape,
+  stringstyle=\color{string},
+  numberstyle=\tiny\color{gray},
+  numbers=left,
+  numbersep=8pt,
+  frame=single,
+  framesep=4pt,
+  breaklines=true,
+  breakatwhitespace=false,
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=15pt,
+  xrightmargin=5pt,
+}
+
+%--- Custom Commands ----------------------------------------------------------
+\newcommand{\haetae}{\textsc{HAETAE}}
+\newcommand{\easycrypt}{\textsf{EasyCrypt}}
+\newcommand{\whythree}{\textsf{Why3}}
+\newcommand{\rom}{\ensuremath{\mathsf{ROM}}}
+\newcommand{\eufcma}{\ensuremath{\mathsf{EUF}\mbox{-}\mathsf{CMA}}}
+\newcommand{\ufnma}{\ensuremath{\mathsf{UF}\mbox{-}\mathsf{NMA}}}
+\newcommand{\msis}{\ensuremath{\mathsf{Module}\mbox{-}\mathsf{SIS}}}
+\newcommand{\adv}{\ensuremath{\mathsf{Adv}}}
+\newcommand{\Adv}{\adv}
+\newcommand{\prob}{\ensuremath{\mathsf{Pr}}}
+\newcommand{\bad}{\ensuremath{\mathsf{bad}}}
+\newcommand{\game}{\ensuremath{\mathsf{Game}}}
+\newcommand{\ec}[1]{\texttt{#1}}
+\newcommand{\file}[1]{\texttt{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+
+%--- Header / Footer ----------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\small\itshape\leftmark}
+\fancyhead[RO]{\small\itshape\rightmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\setlength{\headheight}{26pt}
+
+%==============================================================================%
+\begin{document}
+%==============================================================================%
+\setlength{\parskip}{0.5\baselineskip}
+\setlength{\parindent}{0pt}
+\setlength{\emergencystretch}{4em}
+
+\frontmatter
+\include{chapters/titlepage}
+\include{chapters/abstract}
+\include{chapters/acknowledgements}
+
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+
+\mainmatter
+\include{chapters/ch01_introduction}
+\include{chapters/ch02_background}
+\include{chapters/ch03_proof_scope}
+\include{chapters/ch04_model_spec_correspondence}
+\include{chapters/ch04_easycrypt_framework}
+\include{chapters/ch05_security_games}
+\include{chapters/ch06_rom_programming}
+\include{chapters/ch07_sampler_freshness}
+\include{chapters/ch08_transcript_hops}
+\include{chapters/ch09_budgeted_lifting}
+\include{chapters/ch10_reductions_bounds}
+\include{chapters/ch11_pen_paper_reconstruction}
+\include{chapters/ch12_mathematical_cryptological_synthesis}
+\include{chapters/ch13_reproducibility}
+\include{chapters/ch14_conclusion}
+
+\appendix
+\include{chapters/app_manifest}
+\include{chapters/app_easycrypt_code_analysis}
+\include{chapters/app_mathematical_correspondence}
+\include{chapters/app_formal_easycrypt_semantics}
+\include{chapters/app_easycrypt_declaration_index}
+\include{chapters/app_curated_easycrypt_case_studies}
+
+\backmatter
+\nocite{*}
+\printbibliography[heading=bibintoc, title={Bibliography}]
+
+\end{document}

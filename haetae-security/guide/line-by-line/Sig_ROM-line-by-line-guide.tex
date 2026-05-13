@@ -1,0 +1,248 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for Sig\_ROM.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Generic signature games and random-oracle interfaces.
+
+\section*{How To Read This Script}
+Read this file as the reusable game framework.  Its scripts define abstract experiments and prove the exact NMA-to-CMA adapter fact used by the HAETAE-specific proof.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore List PROM.} & Imports AllCore List PROM.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+3 & {\ttfamily\scriptsize abstract theory Sig\_ROM.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+4 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+5 & {\ttfamily\scriptsize type pkey.} & Declares carrier set pkey.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+6 & {\ttfamily\scriptsize type skey.} & Declares carrier set skey.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+7 & {\ttfamily\scriptsize type message.} & Declares carrier set message.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+8 & {\ttfamily\scriptsize type context.} & Declares carrier set context.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+9 & {\ttfamily\scriptsize type signature.} & Declares carrier set signature.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+10 & {\ttfamily\scriptsize type ro\_query.} & Declares carrier set ro\_query.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+11 & {\ttfamily\scriptsize type ro\_output.} & Declares carrier set ro\_output.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+12 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+13 & {\ttfamily\scriptsize op [lossless] dro\_output : ro\_query -> ro\_output distr.} & Defines dro\_output as a distribution-valued object; later probability proofs rely on its losslessness, support, or point bounds. \\
+14 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+15 & {\ttfamily\scriptsize type query = message * context.} & Declares carrier set query.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+16 & {\ttfamily\scriptsize type signed\_query = query * signature.} & Declares carrier set signed\_query.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+17 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+18 & {\ttfamily\scriptsize op fresh\_msg (qs : query list) (m : message) (ctx : context) : bool =} & Defines predicate fresh\_msg, an event or well-formedness condition used in later implications and game proofs. \\
+19 & {\ttfamily\scriptsize   ! ((m, ctx) \textbackslash{}in qs).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+20 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+21 & {\ttfamily\scriptsize op fresh\_sig (qs : signed\_query list) (m : message) (ctx : context)} & Defines operation fresh\_sig, a total mathematical function or abbreviation used by later declarations. \\
+22 & {\ttfamily\scriptsize              (sig : signature) : bool =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+23 & {\ttfamily\scriptsize   ! (((m, ctx), sig) \textbackslash{}in qs).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+24 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+25 & {\ttfamily\scriptsize lemma fresh\_msg\_nil m ctx : fresh\_msg [] m ctx.} & States checked lemma fresh\_msg\_nil.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+26 & {\ttfamily\scriptsize proof. by rewrite /fresh\_msg. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+27 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+28 & {\ttfamily\scriptsize lemma fresh\_sig\_nil m ctx sig : fresh\_sig [] m ctx sig.} & States checked lemma fresh\_sig\_nil.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+29 & {\ttfamily\scriptsize proof. by rewrite /fresh\_sig. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+31 & {\ttfamily\scriptsize clone import FullRO as RO with} & Clones and opens a parameterized EasyCrypt theory, producing a specialized instance used below. \\
+32 & {\ttfamily\scriptsize   type in\_t <- ro\_query,} & Declares carrier set in\_t.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+33 & {\ttfamily\scriptsize   type out\_t <- ro\_output,} & Declares carrier set out\_t.  EasyCrypt will type-check all later functions and games over this mathematical domain. \\
+34 & {\ttfamily\scriptsize   op dout <- dro\_output.} & Defines operation dout, a total mathematical function or abbreviation used by later declarations. \\
+35 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+36 & {\ttfamily\scriptsize module type Oracle = \{} & Defines module interface Oracle.  It specifies the procedures that later games or adversaries may call. \\
+37 & {\ttfamily\scriptsize   include FRO [init, get]} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+38 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+39 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+40 & {\ttfamily\scriptsize module type POracle = \{} & Defines module interface POracle.  It specifies the procedures that later games or adversaries may call. \\
+41 & {\ttfamily\scriptsize   include FRO [get]} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+43 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+44 & {\ttfamily\scriptsize module type Scheme(O : POracle) = \{} & Defines module interface Scheme.  It specifies the procedures that later games or adversaries may call. \\
+45 & {\ttfamily\scriptsize   proc kg() : pkey * skey} & Defines procedure kg.  Its body is a probabilistic program whose result becomes part of a game event. \\
+46 & {\ttfamily\scriptsize   proc sign(sk : skey, m : message, ctx : context) : signature} & Defines procedure sign.  Its body is a probabilistic program whose result becomes part of a game event. \\
+47 & {\ttfamily\scriptsize   proc verify(pk : pkey, m : message, ctx : context,} & Defines procedure verify.  Its body is a probabilistic program whose result becomes part of a game event. \\
+48 & {\ttfamily\scriptsize               sig : signature) : bool} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+49 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+50 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+51 & {\ttfamily\scriptsize module type CORR\_ADV(O : POracle) = \{} & Defines module interface CORR\_ADV.  It specifies the procedures that later games or adversaries may call. \\
+52 & {\ttfamily\scriptsize   proc find(pk : pkey, sk : skey) : message * context} & Defines procedure find.  Its body is a probabilistic program whose result becomes part of a game event. \\
+53 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+54 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+55 & {\ttfamily\scriptsize module Correctness(H : Oracle, S : Scheme, A : CORR\_ADV) = \{} & Defines module Correctness, a probabilistic program or game used to create events and success probabilities. \\
+56 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+57 & {\ttfamily\scriptsize     var pk : pkey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+58 & {\ttfamily\scriptsize     var sk : skey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+59 & {\ttfamily\scriptsize     var m : message;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+60 & {\ttfamily\scriptsize     var ctx : context;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize     var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+62 & {\ttfamily\scriptsize     var ok : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+63 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+64 & {\ttfamily\scriptsize     H.init();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+65 & {\ttfamily\scriptsize     (pk, sk) <@ S(H).kg();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+66 & {\ttfamily\scriptsize     (m, ctx) <@ A(H).find(pk, sk);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+67 & {\ttfamily\scriptsize     sig <@ S(H).sign(sk, m, ctx);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+68 & {\ttfamily\scriptsize     ok <@ S(H).verify(pk, m, ctx, sig);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize     return !ok;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+70 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+71 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+72 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+73 & {\ttfamily\scriptsize module type SignOracle = \{} & Defines module interface SignOracle.  It specifies the procedures that later games or adversaries may call. \\
+74 & {\ttfamily\scriptsize   proc sign(m : message, ctx : context) : signature} & Defines procedure sign.  Its body is a probabilistic program whose result becomes part of a game event. \\
+75 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+76 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+77 & {\ttfamily\scriptsize module type Adversary(H : POracle, O : SignOracle) = \{} & Defines module interface Adversary.  It specifies the procedures that later games or adversaries may call. \\
+78 & {\ttfamily\scriptsize   proc forge(pk : pkey) : message * context * signature \{H.get, O.sign\}} & Defines procedure forge.  Its body is a probabilistic program whose result becomes part of a game event. \\
+79 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+80 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+81 & {\ttfamily\scriptsize module type NMA\_Adversary(H : POracle) = \{} & Defines module interface NMA\_Adversary.  It specifies the procedures that later games or adversaries may call. \\
+82 & {\ttfamily\scriptsize   proc forge(pk : pkey) : message * context * signature \{H.get\}} & Defines procedure forge.  Its body is a probabilistic program whose result becomes part of a game event. \\
+83 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+84 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+85 & {\ttfamily\scriptsize module NMA\_As\_CMA(A : NMA\_Adversary) (H : POracle, O : SignOracle) = \{} & Defines module NMA\_As\_CMA, a probabilistic program or game used to create events and success probabilities. \\
+86 & {\ttfamily\scriptsize   proc forge(pk : pkey) : message * context * signature = \{} & Defines procedure forge.  Its body is a probabilistic program whose result becomes part of a game event. \\
+87 & {\ttfamily\scriptsize     var r : message * context * signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+88 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+89 & {\ttfamily\scriptsize     r <@ A(H).forge(pk);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+90 & {\ttfamily\scriptsize     return r;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+92 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+93 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+94 & {\ttfamily\scriptsize module EUF\_CMA(H : Oracle, S : Scheme, A : Adversary) = \{} & Defines module EUF\_CMA, a probabilistic program or game used to create events and success probabilities. \\
+95 & {\ttfamily\scriptsize   var sk : skey} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+96 & {\ttfamily\scriptsize   var queries : query list} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+97 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+98 & {\ttfamily\scriptsize   module O = \{} & Defines module O, a probabilistic program or game used to create events and success probabilities. \\
+99 & {\ttfamily\scriptsize     proc sign(m : message, ctx : context) : signature = \{} & Defines procedure sign.  Its body is a probabilistic program whose result becomes part of a game event. \\
+100 & {\ttfamily\scriptsize       var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+101 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+102 & {\ttfamily\scriptsize       sig <@ S(H).sign(sk, m, ctx);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+103 & {\ttfamily\scriptsize       queries <- (m, ctx) :: queries;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+104 & {\ttfamily\scriptsize       return sig;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+105 & {\ttfamily\scriptsize     \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+106 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+107 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+108 & {\ttfamily\scriptsize   module A = A(H, O)} & Defines module A, a probabilistic program or game used to create events and success probabilities. \\
+109 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+110 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+111 & {\ttfamily\scriptsize     var pk : pkey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+112 & {\ttfamily\scriptsize     var m : message;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+113 & {\ttfamily\scriptsize     var ctx : context;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+114 & {\ttfamily\scriptsize     var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+115 & {\ttfamily\scriptsize     var ok : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+116 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+117 & {\ttfamily\scriptsize     H.init();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+118 & {\ttfamily\scriptsize     queries <- [];} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+119 & {\ttfamily\scriptsize     (pk, sk) <@ S(H).kg();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+120 & {\ttfamily\scriptsize     (m, ctx, sig) <@ A.forge(pk);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+121 & {\ttfamily\scriptsize     ok <@ S(H).verify(pk, m, ctx, sig);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+122 & {\ttfamily\scriptsize     return ok /\textbackslash{} fresh\_msg queries m ctx;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+123 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+124 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+125 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+126 & {\ttfamily\scriptsize module UF\_NMA(H : Oracle, S : Scheme, A : NMA\_Adversary) = \{} & Defines module UF\_NMA, a probabilistic program or game used to create events and success probabilities. \\
+127 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+128 & {\ttfamily\scriptsize     var pk : pkey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+129 & {\ttfamily\scriptsize     var sk : skey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+130 & {\ttfamily\scriptsize     var m : message;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+131 & {\ttfamily\scriptsize     var ctx : context;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+132 & {\ttfamily\scriptsize     var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+133 & {\ttfamily\scriptsize     var ok : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+134 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+135 & {\ttfamily\scriptsize     H.init();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+136 & {\ttfamily\scriptsize     (pk, sk) <@ S(H).kg();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+137 & {\ttfamily\scriptsize     (m, ctx, sig) <@ A(H).forge(pk);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+138 & {\ttfamily\scriptsize     ok <@ S(H).verify(pk, m, ctx, sig);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+139 & {\ttfamily\scriptsize     return ok;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+140 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+141 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+142 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+143 & {\ttfamily\scriptsize section NMA\_Embedding.} & Starts section NMA\_Embedding, a scoped region for related declarations and hypotheses. \\
+144 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+145 & {\ttfamily\scriptsize declare module H <: Oracle \{-EUF\_CMA\}.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+146 & {\ttfamily\scriptsize declare module S <: Scheme \{-H, -EUF\_CMA\}.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+147 & {\ttfamily\scriptsize declare module A <: NMA\_Adversary \{-H, -S, -EUF\_CMA\}.} & Declares an abstract module parameter.  Mathematically this quantifies over an oracle, adversary, or reduction satisfying the stated interface. \\
+148 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+149 & {\ttfamily\scriptsize lemma nma\_as\_cma\_exact \&m :} & States checked lemma nma\_as\_cma\_exact.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+150 & {\ttfamily\scriptsize   Pr[EUF\_CMA(H, S, NMA\_As\_CMA(A)).main() @ \&m : res] =} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+151 & {\ttfamily\scriptsize   Pr[UF\_NMA(H, S, A).main() @ \&m : res].} & Refers to a probability of an event in an EasyCrypt game; this is the central object of the security bound. \\
+152 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+153 & {\ttfamily\scriptsize byequiv (: =\{glob H, glob S, glob A\} ==> =\{res\}) => //.} & Introduces implication structure: later proof steps may assume the antecedent to prove the conclusion. \\
+154 & {\ttfamily\scriptsize proc.} & Enters procedure-body proof mode for a module procedure. \\
+155 & {\ttfamily\scriptsize inline EUF\_CMA(H, S, NMA\_As\_CMA(A)).A.forge} & Unfolds a procedure body so the proof can reason about its concrete commands. \\
+156 & {\ttfamily\scriptsize        NMA\_As\_CMA(A, H, EUF\_CMA(H, S, NMA\_As\_CMA(A)).O).forge.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+157 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+158 & {\ttfamily\scriptsize call (: =\{glob H, glob S, glob A, arg\} ==> =\{glob H, glob S, glob A, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+159 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+160 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+161 & {\ttfamily\scriptsize call (: =\{glob H, glob S, glob A, arg\} ==> =\{glob H, glob S, glob A, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+162 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+163 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+164 & {\ttfamily\scriptsize call (: =\{glob H, glob S\} ==> =\{glob H, glob S, res\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+165 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+166 & {\ttfamily\scriptsize wp.} & Applies weakest-precondition reasoning to a program fragment. \\
+167 & {\ttfamily\scriptsize call (: =\{glob H\} ==> =\{glob H\}).} & Uses a procedure specification or adversary call rule inside a program logic proof. \\
+168 & {\ttfamily\scriptsize + by sim.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+169 & {\ttfamily\scriptsize by auto => />.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+170 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+171 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+172 & {\ttfamily\scriptsize end section NMA\_Embedding.} & Closes the current section, discharging local module and variable scope. \\
+173 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+174 & {\ttfamily\scriptsize module SUF\_CMA(H : Oracle, S : Scheme, A : Adversary) = \{} & Defines module SUF\_CMA, a probabilistic program or game used to create events and success probabilities. \\
+175 & {\ttfamily\scriptsize   var sk : skey} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+176 & {\ttfamily\scriptsize   var queries : signed\_query list} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+177 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+178 & {\ttfamily\scriptsize   module O = \{} & Defines module O, a probabilistic program or game used to create events and success probabilities. \\
+179 & {\ttfamily\scriptsize     proc sign(m : message, ctx : context) : signature = \{} & Defines procedure sign.  Its body is a probabilistic program whose result becomes part of a game event. \\
+180 & {\ttfamily\scriptsize       var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+181 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+182 & {\ttfamily\scriptsize       sig <@ S(H).sign(sk, m, ctx);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+183 & {\ttfamily\scriptsize       queries <- ((m, ctx), sig) :: queries;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+184 & {\ttfamily\scriptsize       return sig;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+185 & {\ttfamily\scriptsize     \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+186 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+187 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+188 & {\ttfamily\scriptsize   module A = A(H, O)} & Defines module A, a probabilistic program or game used to create events and success probabilities. \\
+189 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+190 & {\ttfamily\scriptsize   proc main() : bool = \{} & Defines procedure main.  Its body is a probabilistic program whose result becomes part of a game event. \\
+191 & {\ttfamily\scriptsize     var pk : pkey;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+192 & {\ttfamily\scriptsize     var m : message;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+193 & {\ttfamily\scriptsize     var ctx : context;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+194 & {\ttfamily\scriptsize     var sig : signature;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+195 & {\ttfamily\scriptsize     var ok : bool;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+196 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+197 & {\ttfamily\scriptsize     H.init();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+198 & {\ttfamily\scriptsize     queries <- [];} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+199 & {\ttfamily\scriptsize     (pk, sk) <@ S(H).kg();} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+200 & {\ttfamily\scriptsize     (m, ctx, sig) <@ A.forge(pk);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+201 & {\ttfamily\scriptsize     ok <@ S(H).verify(pk, m, ctx, sig);} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+202 & {\ttfamily\scriptsize     return ok /\textbackslash{} fresh\_sig queries m ctx sig;} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+203 & {\ttfamily\scriptsize   \}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+204 & {\ttfamily\scriptsize \}.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+205 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+206 & {\ttfamily\scriptsize end Sig\_ROM.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

@@ -1,0 +1,296 @@
+require "params.jinc"
+
+fn _poly_highbits_z1(reg mut ptr u32[HAETAE_N] rp,
+                     reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 hb;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    hb = ap[i];
+    hb += HAETAE_Z1_HALF_ALPHA;
+    hb >>s= HAETAE_Z1_LOG_ALPHA;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_lowbits_z1(reg mut ptr u32[HAETAE_N] rp,
+                    reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 lb center sub;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    lb = ap[i];
+    lb &= HAETAE_Z1_ALPHA - 1;
+    center = HAETAE_Z1_HALF_ALPHA;
+    center -= lb;
+    center -= 1;
+    center >>s= 31;
+    sub = center;
+    sub &= HAETAE_Z1_ALPHA;
+    lb -= sub;
+    rp[i] = lb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_highbits_z1(reg mut ptr u32[2048] rp,
+                        reg const ptr u32[2048] ap,
+                        reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 hb;
+
+  i = 0;
+  while (i < count)
+  {
+    hb = ap[i];
+    hb += HAETAE_Z1_HALF_ALPHA;
+    hb >>s= HAETAE_Z1_LOG_ALPHA;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_lowbits_z1(reg mut ptr u32[2048] rp,
+                       reg const ptr u32[2048] ap,
+                       reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 lb center sub;
+
+  i = 0;
+  while (i < count)
+  {
+    lb = ap[i];
+    lb &= HAETAE_Z1_ALPHA - 1;
+    center = HAETAE_Z1_HALF_ALPHA;
+    center -= lb;
+    center -= 1;
+    center >>s= 31;
+    sub = center;
+    sub &= HAETAE_Z1_ALPHA;
+    lb -= sub;
+    rp[i] = lb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_decompose_z1(reg mut ptr u32[2048] lowp,
+                         reg mut ptr u32[2048] highp,
+                         reg const ptr u32[2048] ap,
+                         reg u64 count) -> reg ptr u32[2048],
+                                          reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a hb lb center sub;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+
+    hb = a;
+    hb += HAETAE_Z1_HALF_ALPHA;
+    hb >>s= HAETAE_Z1_LOG_ALPHA;
+    highp[i] = hb;
+
+    lb = a;
+    lb &= HAETAE_Z1_ALPHA - 1;
+    center = HAETAE_Z1_HALF_ALPHA;
+    center -= lb;
+    center -= 1;
+    center >>s= 31;
+    sub = center;
+    sub &= HAETAE_Z1_ALPHA;
+    lb -= sub;
+    lowp[i] = lb;
+
+    i += 1;
+  }
+
+  return lowp, highp;
+}
+
+fn _poly_highbits_hint_m23(reg mut ptr u32[HAETAE_N] rp,
+                           reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 hb edge sub;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    hb = ap[i];
+    hb += HAETAE_HINT_HALF_ALPHA_M23;
+    hb >>s= HAETAE_HINT_LOG_ALPHA_M23;
+    edge = HAETAE_HINT_BOUND_M23;
+    edge -= hb;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= HAETAE_HINT_BOUND_M23;
+    hb -= sub;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_highbits_hint_m5(reg mut ptr u32[HAETAE_N] rp,
+                          reg const ptr u32[HAETAE_N] ap) -> reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 hb edge sub;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    hb = ap[i];
+    hb += HAETAE_HINT_HALF_ALPHA_M5;
+    hb >>s= HAETAE_HINT_LOG_ALPHA_M5;
+    edge = HAETAE_HINT_BOUND_M5;
+    edge -= hb;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= HAETAE_HINT_BOUND_M5;
+    hb -= sub;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_highbits_hint_m23(reg mut ptr u32[2048] rp,
+                              reg const ptr u32[2048] ap,
+                              reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 hb edge sub;
+
+  i = 0;
+  while (i < count)
+  {
+    hb = ap[i];
+    hb += HAETAE_HINT_HALF_ALPHA_M23;
+    hb >>s= HAETAE_HINT_LOG_ALPHA_M23;
+    edge = HAETAE_HINT_BOUND_M23;
+    edge -= hb;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= HAETAE_HINT_BOUND_M23;
+    hb -= sub;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _polyvec_highbits_hint_m5(reg mut ptr u32[2048] rp,
+                             reg const ptr u32[2048] ap,
+                             reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 hb edge sub;
+
+  i = 0;
+  while (i < count)
+  {
+    hb = ap[i];
+    hb += HAETAE_HINT_HALF_ALPHA_M5;
+    hb >>s= HAETAE_HINT_LOG_ALPHA_M5;
+    edge = HAETAE_HINT_BOUND_M5;
+    edge -= hb;
+    edge -= 1;
+    edge >>s= 31;
+    sub = edge;
+    sub &= HAETAE_HINT_BOUND_M5;
+    hb -= sub;
+    rp[i] = hb;
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _poly_decompose_vk(reg mut ptr u32[HAETAE_N] lowp,
+                      reg mut ptr u32[HAETAE_N] highp) -> reg ptr u32[HAETAE_N],
+                                                                reg ptr u32[HAETAE_N]
+{
+  reg ui64 i;
+  reg u32 a a0 tmp a1;
+
+  i = 0;
+  while (i < HAETAE_N)
+  {
+    a = highp[i];
+    a0 = a;
+    a0 &= 1;
+    tmp = a;
+    tmp >>s= 1;
+    tmp &= a0;
+    tmp <<= 1;
+    a0 -= tmp;
+    lowp[i] = a0;
+
+    a1 = a;
+    a1 -= a0;
+    a1 >>s= 1;
+    highp[i] = a1;
+
+    i += 1;
+  }
+
+  return lowp, highp;
+}
+
+fn _polyvec_decompose_vk(reg mut ptr u32[2048] lowp,
+                         reg mut ptr u32[2048] highp,
+                         reg u64 count) -> reg ptr u32[2048],
+                                           reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a a0 tmp a1;
+
+  i = 0;
+  while (i < count)
+  {
+    a = highp[i];
+    a0 = a;
+    a0 &= 1;
+    tmp = a;
+    tmp >>s= 1;
+    tmp &= a0;
+    tmp <<= 1;
+    a0 -= tmp;
+    lowp[i] = a0;
+
+    a1 = a;
+    a1 -= a0;
+    a1 >>s= 1;
+    highp[i] = a1;
+
+    i += 1;
+  }
+
+  return lowp, highp;
+}

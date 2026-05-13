@@ -1,0 +1,547 @@
+\chapter{Mathematical Correspondence of the EasyCrypt Proof Objects}
+\label{app:mathematical-correspondence}
+
+\providecommand{\ecfile}[1]{\nolinkurl{#1}}
+\providecommand{\ecsym}[1]{\nolinkurl{#1}}
+
+Entries in this appendix use schematic metavariables when describing general
+EasyCrypt syntax.  In particular, occurrences of ellipses such as
+\ecsym{tau1 -> ... -> taun} denote families of language constructs, not omitted
+parts of a specific HAETAE theorem.  Exact theorem and module names are written
+without ellipses.
+
+This appendix gives the mathematical reading of every kind of EasyCrypt object
+used in the HAETAE provable-security development.  The goal is not to restate
+the proof script tactically, but to say what the checked declarations mean as
+mathematics.  Let \(\llbracket - \rrbracket\) denote the intended mathematical
+interpretation of an EasyCrypt declaration in the manifest proof surface.
+
+\section{Global interpretation principle}
+\label{app:global-interpretation-principle}
+
+The EasyCrypt development is a typed formalization of a game-based proof.
+Mathematically, each manifest file contributes objects in a category of
+discrete probabilistic programs, predicates over their states, and
+inequalities between event probabilities.  The top-level checked implication is
+therefore a fixed-ledger formal-model statement of the following form:
+\[
+  \mathcal{H}_{\mathsf{hop}}
+  \wedge
+  \mathcal{H}_{\mathsf{hard}}
+  \Longrightarrow
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  \leq
+  B_{\mathsf{loss}}(2,2,\lambda)
+  + L_{\mathsf{ModuleSIS}}
+  + L_{\mathsf{MLWE}}
+  + L_{\mathsf{bimodal}\to\mathsf{MSIS}},
+\]
+where the right-hand side is the concrete expression defined in the reduction
+file after applying the declared hardness bounds.  The reductions \(B_i\) are
+either explicit adapters in individual hop lemmas or abstract reduction modules
+supplied through the final lemma's antecedents.  In particular, the final
+composition lemma does not derive the MLWE or Module-SIS solvers from \(A\); it
+uses the explicit hop/reduction and hardness premises present in the EasyCrypt
+statement.  Each EasyCrypt type, operation, module, lemma, and Hoare/equivalence
+judgment contributes one well-typed component to this implication.  A
+specification-level or arbitrary-query HAETAE theorem would require additional
+correspondence and parameterization work.
+
+\section{Types as carrier sets}
+\label{app:types-as-carrier-sets}
+
+An EasyCrypt declaration of the form
+\begin{center}
+\ecsym{type t}
+\end{center}
+is interpreted as a carrier set \(\llbracket t \rrbracket\).  If the type is
+abstract, the proof treats it as an arbitrary set satisfying only the
+properties derivable from the surrounding declarations.  If the type is an
+explicit finite datatype, such as the HAETAE mode type, it is interpreted as the
+listed finite set.  Product, list, and distribution types are interpreted in the
+usual set-theoretic way:
+\[
+  \llbracket \tau_1 * \tau_2 \rrbracket
+  =
+  \llbracket \tau_1 \rrbracket \times \llbracket \tau_2 \rrbracket,
+  \qquad
+  \llbracket \mathsf{List}(\tau) \rrbracket
+  =
+  \llbracket \tau \rrbracket^{*},
+\]
+and \(\llbracket \mathsf{Distr}(\tau) \rrbracket\) is the set of discrete
+probability or subprobability laws over \(\llbracket \tau \rrbracket\), with
+\ecsym{is\_lossless} asserting total mass \(1\).
+
+Thus all manifest types have one of the following mathematical roles.
+
+\begin{longtable}{p{0.25\textwidth}p{0.65\textwidth}}
+\caption{Mathematical reading of all manifest type declarations.}
+\label{tab:type-correspondence}\\
+\toprule
+EasyCrypt type class & Mathematical correspondence \\
+\midrule
+\endfirsthead
+\toprule
+EasyCrypt type class & Mathematical correspondence \\
+\midrule
+\endhead
+Signature-game types &
+Carrier sets for public keys, secret keys, messages, contexts, signatures,
+random-oracle queries, random-oracle outputs, and signed-query records.  These
+sets define the sample space of the generic correctness, EUF-CMA, SUF-CMA, and
+UF-NMA experiments. \\
+HAETAE algebra types &
+Concrete carrier sets for byte strings, seeds, CRHs, random coins, coefficients,
+polynomials, challenges, polynomial vectors, matrices, public keys, secret keys,
+and signatures.  These sets are modeled as integers, lists, products, and
+mode-indexed list families. \\
+Parameter-mode types &
+Finite sets of parameter choices.  The declaration of HAETAE modes is
+mathematically the finite set \(\{\mathsf{Mode2},\mathsf{Mode3},\mathsf{Mode5}\}\). \\
+Distribution-support types &
+Carrier sets for random coins, signing entropy tokens, sample pairs,
+hyperball samples, and rejection-sampling states.  These are the domains on
+which the sampler laws are defined. \\
+Transcript and event types &
+Carrier sets for transcript records, counted ROM events, programming sites, and
+bad-event indicators.  These are state spaces for hybrid-game invariants. \\
+Hardness-game types &
+Carrier sets for Module-SIS instances, MLWE instances, bimodal self-target
+instances, solutions, and solver outputs.  These are the mathematical domains of
+the assumed hard problems. \\
+Hash-support types &
+Carrier sets for Keccak bytes, lanes, states, and FIPS 202 states.  These model
+bit-level and byte-level hash state spaces. \\
+\bottomrule
+\end{longtable}
+
+The mathematical significance is that no lemma may mix these sets unless the
+EasyCrypt type checker admits the expression.  The type checker therefore
+enforces, for example, that a sampler seed, a ROM query, a challenge, and a
+signature transcript cannot be confused in a reduction.
+
+\section{Operations as functions, predicates, distributions, and bounds}
+\label{app:ops-as-functions}
+
+An EasyCrypt operation declaration of the form
+\begin{center}
+\ecsym{op f : tau1 -> ... -> taun -> tau}
+\end{center}
+is interpreted as a total mathematical function
+\[
+  \llbracket f \rrbracket :
+  \llbracket \tau_1 \rrbracket \times \cdots \times
+  \llbracket \tau_n \rrbracket
+  \to \llbracket \tau \rrbracket .
+\]
+When \(\tau=\mathsf{Bool}\), the operation is a predicate or event.  When
+\(\tau=\mathsf{Distr}(\sigma)\), it is a probability law or sampling
+distribution.  When \(\tau=\mathbb{R}\), it is a concrete loss, advantage, or
+bound term.  When \(\tau\) is a product or record-like tuple, it is a projection
+or constructor.
+
+Every operation in the proof surface falls into one of the following
+mathematical classes.
+
+\begin{longtable}{p{0.24\textwidth}p{0.66\textwidth}}
+\caption{Mathematical reading of all manifest operation declarations.}
+\label{tab:op-correspondence}\\
+\toprule
+Operation class & Mathematical correspondence \\
+\midrule
+\endfirsthead
+\toprule
+Operation class & Mathematical correspondence \\
+\midrule
+\endhead
+Constructors and projections &
+Functions building or extracting components of keys, signatures, transcripts,
+programming sites, random-oracle outputs, sample pairs, and rejection states.
+Mathematically these are product constructors and coordinate projections. \\
+Well-formedness predicates &
+Predicates \(P(x)\) expressing membership in a syntactic or algebraic domain:
+correct list length, coefficient range, sparse challenge form, valid vector
+dimension, valid transcript field relation, or valid hardness instance. \\
+Algebraic operations &
+Total functions implementing modular arithmetic, polynomial addition,
+negation, subtraction, multiplication, vector arithmetic, matrix-vector
+multiplication, high/low-bit extraction, commitment reconstruction, and public
+verification equations. \\
+Hash-query constructors &
+Injective or tagged constructors for message-hash, challenge-hash,
+matrix-expansion, and sampler-expansion queries.  Mathematically they partition
+the ROM domain into the query forms used by the security proof. \\
+Distributions &
+Probability laws for bytes, seeds, CRHs, signing randomness, coefficients,
+polynomials, vectors, matrices, challenges, structural samples,
+bounded-unit samples, checked-hyperball samples, exact-hyperball samples, and
+ROM outputs. \\
+Events and bad predicates &
+Boolean predicates defining rejection, verification success, forgery success,
+prequery, collision, reprogramming failure, min-entropy failure, counted ROM
+badness, sampler badness, and transcript readiness.  These are events in the
+probability spaces of the games. \\
+Budgets and loss terms &
+Real-valued functions and constants representing query budgets, support-size
+lower bounds, ROM collision terms, prequery terms, min-entropy terms,
+programming losses, rejection-sampling losses, and final EUF-CMA bounds. \\
+Hardness relations &
+Predicates and functions defining Module-SIS, MLWE, and bimodal self-target
+relations, together with adapter maps from one relation or game to another. \\
+Hash-state functions &
+Bit and byte functions for Keccak lanes, state indexing, round transformations,
+FIPS 202 absorb/squeeze, and SHAKE256 sizing.  These are deterministic functions
+over finite bit/byte sequences. \\
+\bottomrule
+\end{longtable}
+
+This is the mathematical reason the proof can be read as a sequence of
+ordinary definitions.  For example, \ecsym{sampler\_expand\_query} is not a
+tactic artifact; it is a function from signing randomness to the ROM domain.
+The event \ecsym{sampler\_bad\_prequery} is the corresponding predicate that
+this query already lies in the joint log containing adversary hash queries and
+earlier sampler-expansion self-queries.  The tight bound is then a
+finite-support probability statement about a freshly sampled argument to that
+function colliding with the combined log.
+
+\section{Modules as games, algorithms, oracles, and reductions}
+\label{app:modules-as-games}
+
+An EasyCrypt module is interpreted as a probabilistic imperative algorithm with
+local state.  A module type is an interface specifying the procedures available
+to such an algorithm.  A functorial module, such as a game parameterized by an
+adversary and an oracle, is interpreted as a mathematical construction sending
+algorithms to algorithms:
+\[
+  (A,H,O) \longmapsto G^{A,H,O}.
+\]
+The procedures of the resulting module define random variables and events by
+executing probabilistic code.
+
+\begin{longtable}{p{0.24\textwidth}p{0.66\textwidth}}
+\caption{Mathematical reading of all manifest module declarations.}
+\label{tab:module-correspondence}\\
+\toprule
+Module class & Mathematical correspondence \\
+\midrule
+\endfirsthead
+\toprule
+Module class & Mathematical correspondence \\
+\midrule
+\endhead
+Oracle interfaces &
+Abstract access to random-oracle procedures and programmable-oracle procedures.
+Mathematically these are black-box functions or stateful lazy-sampling oracles. \\
+Scheme interfaces &
+Abstract key-generation, signing, and verification algorithms.  These define the
+cryptographic primitive whose correctness and security games are studied. \\
+Adversary interfaces &
+Classes of algorithms with specified oracle access.  EUF-CMA adversaries may
+call both hash and signing oracles; UF-NMA adversaries receive only the public
+interface needed by the no-message game. \\
+Security games &
+Probabilistic experiments for correctness, EUF-CMA, SUF-CMA, UF-NMA,
+ROM-internal transcript games, simulated-signing games, and exact-hyperball
+games.  Their outputs are Bernoulli random variables representing success
+events. \\
+Adapters &
+Program transformations from one adversary or solver interface to another, such
+as NMA-as-CMA adapters and bimodal-to-Module-SIS adapters.  Mathematically these
+are reductions between experiments. \\
+Lazy ROM modules &
+Stateful samplers implementing the random oracle by memoization.  Their state is
+a finite map from queries to sampled outputs plus logs and bad-event flags. \\
+Programming modules &
+Algorithms that reprogram or observe ROM sites.  Mathematically these implement
+the standard ROM programming operation subject to freshness and min-entropy
+preconditions. \\
+Signing simulators and samplers &
+Algorithms that generate signatures or transcript samples under real,
+structural, paper, rejection, RO-attempt, or exact-hyperball distributions.
+Mathematically these are Markov kernels between message/context inputs and
+signature/transcript outputs. \\
+Hardness games and reductions &
+Experiments defining the abstract success probability of MLWE, Module-SIS, and
+bimodal self-target MSIS solvers, plus reductions translating HAETAE forgeries
+into solver successes. \\
+\bottomrule
+\end{longtable}
+
+This module interpretation is essential because the proof is not merely a
+collection of static equations.  EUF-CMA security is a statement about an
+interactive experiment.  Modules are the formal objects whose executions define
+that experiment.
+
+\section{Lemmas as propositions, invariants, equivalences, and inequalities}
+\label{app:lemmas-as-theorems}
+
+An EasyCrypt lemma declaration of the form
+\begin{center}
+\ecsym{lemma L : Phi.}
+\end{center}
+is interpreted as a theorem asserting the formula
+\(\llbracket \Phi \rrbracket\).  The proof script following the lemma is a
+machine-checked derivation in EasyCrypt's logic and program logic.  For the
+HAETAE security proof, every lemma belongs to one of the following mathematical
+families.
+
+\begin{longtable}{p{0.24\textwidth}p{0.66\textwidth}}
+\caption{Mathematical reading of all manifest lemma declarations.}
+\label{tab:lemma-correspondence}\\
+\toprule
+Lemma family & Mathematical correspondence \\
+\midrule
+\endfirsthead
+\toprule
+Lemma family & Mathematical correspondence \\
+\midrule
+\endhead
+Parameter lemmas &
+Arithmetic facts about constants and mode-dependent parameters, such as
+positivity, size lower bounds, and challenge-weight feasibility. \\
+Algebraic lemmas &
+Equational and well-formedness theorems for coefficients, polynomials, vectors,
+matrices, challenges, signatures, and verification equations. \\
+Distribution lemmas &
+Losslessness, support, point-probability, boundedness, and sampler-correctness
+facts for the distributions used in signing and simulation. \\
+Transcript lemmas &
+Theorems saying that transcript predicates imply the public equations,
+challenge-query identities, field consistency, and extraction conditions needed
+by the hardness reductions. \\
+Event lemmas &
+Implications relating rejection-free events, acceptance events, verification
+success, and forgery events. \\
+ROM lemmas &
+Losslessness and projection facts for query-dependent ROM output distributions,
+plus preservation and counting facts for lazy ROM state. \\
+ROM-programming lemmas &
+Freshness, non-prequery, min-entropy, counted-event, and reprogramming-failure
+bounds.  Mathematically these are fundamental-lemma and union-bound steps over
+finite query logs. \\
+Invariant lemmas &
+State preservation theorems for transcript logs, internal transcript state,
+sampler ROM coverage, signing budgets, active public keys, and adversary query
+logs. \\
+Game-hop lemmas &
+Inequalities or equalities between success probabilities of adjacent games.
+These are the checked hybrid steps of the security proof. \\
+Reduction lemmas &
+Theorems transforming a successful forgery or bimodal event into success in an
+abstract hardness game, with the corresponding advantage inequality. \\
+Concrete-bound lemmas &
+Real-arithmetic theorems normalizing, grouping, proving non-negativity of, or
+bounding the final concrete loss expression. \\
+Top-level security lemmas &
+Compositions of all previous families into correctness and conditional EUF-CMA
+advantage theorems for the HAETAE model. \\
+\bottomrule
+\end{longtable}
+
+In mathematician's language, the 1088 checked lemmas form a dependency graph of
+propositions.  The leaves are parameter, algebraic, distributional, and
+well-formedness facts.  The middle nodes are invariant and hybrid-game
+propositions.  The root is the conditional EUF-CMA security implication.
+Machine checking means that every edge in this graph is justified by
+EasyCrypt's proof kernel, not by an informal appeal to a paper proof.
+
+\section{Hoare and equivalence judgments as program-logic theorems}
+\label{app:hoare-equiv-as-program-logic}
+
+The Hoare and equivalence commands are the formal counterpart of reasoning about
+program executions.  If \(c\) is a probabilistic procedure, an EasyCrypt Hoare
+judgment \ecsym{hoare [c : P ==> Q]}
+is interpreted as partial-correctness reasoning: every terminating execution
+starting in a state satisfying \(P\) ends in a state satisfying \(Q\).  A
+probabilistic Hoare judgment \ecsym{phoare [c : P ==> Q] = p}
+is interpreted as a statement about the probability that \(Q\) holds after
+executing \(c\) from a \(P\)-state.  An equivalence judgment
+\ecsym{equiv [c1 ~ c2 : Rpre ==> Rpost]}
+is interpreted as a coupling or relational program theorem: two executions can
+be related so that the post-relation holds whenever the pre-relation holds.
+The command \ecsym{byequiv} is the proof-script form of such a relational
+argument.
+
+The 105 Hoare/equivalence proof commands in the manifest have the following
+mathematical roles.
+
+\begin{longtable}{p{0.26\textwidth}p{0.64\textwidth}}
+\caption{Mathematical reading of all manifest Hoare/equivalence proof commands.}
+\label{tab:hoare-correspondence}\\
+\toprule
+Program-logic family & Mathematical correspondence \\
+\midrule
+\endfirsthead
+\toprule
+Program-logic family & Mathematical correspondence \\
+\midrule
+\endhead
+Correctness Hoare proofs &
+Show that modeled key generation, signing, and verification preserve the
+correctness predicate and end in accepting states. \\
+Adapter equivalences &
+Show that wrapping one adversary or solver interface into another does not
+change the relevant success event.  Mathematically these are exact reductions
+with zero loss. \\
+Simulated-signing equivalences &
+Show that replacing real signing by transcript or internal-transcript signing
+preserves the adversary's observable behavior up to the stated bad event. \\
+ROM-internal equivalences &
+Show that moving hash behavior into a lazy internal ROM preserves query/output
+relations and adversary result distributions under synchronized states. \\
+Sampler equivalences &
+Show that structural, paper, rejection, RO-attempt, and exact-hyperball samplers
+produce related outputs under the coupling conditions proved by sampler lemmas. \\
+Fundamental-lemma proofs &
+Show that two games are identical on the complement of a bad event, so their
+success probabilities differ by at most the probability of that bad event. \\
+Budgeted oracle-call proofs &
+Show that the budgeted wrappers preserve capped counters and logs, and that the
+calls recorded before the cap are exactly the calls counted in the loss term.
+Over-budget calls are handled by the modeled wrapper behavior rather than by a
+syntactic restriction on arbitrary adversary code. \\
+\bottomrule
+\end{longtable}
+
+These judgments are the place where informal ``the games are identical until
+bad'' reasoning becomes mathematical.  The proof must name the program states,
+state relation, bad event, and postcondition.  EasyCrypt then checks that every
+procedure call, random sample, assignment, branch, and oracle invocation
+preserves the required relation or incurs the stated loss.
+
+\section{File-wise mathematical correspondence}
+\label{app:file-wise-correspondence}
+
+The previous sections describe the universal interpretation of the EasyCrypt
+object classes.  The following table records how those classes specialize in
+each manifest file.
+
+\begin{longtable}{p{0.20\textwidth}p{0.70\textwidth}}
+\caption{Per-file mathematical correspondence of proof-object classes.}
+\label{tab:file-wise-correspondence}\\
+\toprule
+File & Mathematical role of its types, operations, modules, lemmas, and
+program-logic judgments \\
+\midrule
+\endfirsthead
+\toprule
+File & Mathematical role of its types, operations, modules, lemmas, and
+program-logic judgments \\
+\midrule
+\endhead
+\ecfile{Sig\_ROM.ec} &
+Types are abstract carrier sets for a generic ROM signature scheme.  Operations
+are freshness predicates and ROM-output distributions.  Modules are correctness,
+EUF-CMA, SUF-CMA, UF-NMA games and adversary/oracle interfaces.  Lemmas prove
+freshness base cases and the exact NMA-as-CMA correspondence.  Equivalence
+judgments are exact game-isomorphism statements. \\
+\ecfile{HAETAE\_Params.ec} &
+The mode type is a finite parameter set.  Operations are numeric parameter
+functions.  Lemmas are arithmetic facts ensuring positivity, dimensions, and
+feasibility side conditions.  There are no stateful games here. \\
+\ecfile{HAETAE\_Algebra.ec} &
+Types are algebraic carrier sets for HAETAE objects.  Operations are modular,
+polynomial, vector, matrix, packing, challenge, and verification functions.
+Lemmas are algebraic equations and well-formedness preservation theorems. \\
+\ecfile{HAETAE\_Keccak1600.ec} &
+Types are bit/byte/lane/state carrier sets.  Operations are Keccak state
+transformations and projections.  Lemmas are bit-level equations,
+well-formedness facts, and size facts for the permutation model. \\
+\ecfile{HAETAE\_FIPS202.ec} &
+Types are FIPS 202 byte and state spaces.  Operations are SHAKE256
+absorb/squeeze functions and constants.  Lemmas are state-size and output-size
+theorems supporting the modeled hash layer. \\
+\ecfile{HAETAE\_Distributions.ec} &
+Types are sampler domains and sample-pair spaces.  Operations are probability
+laws, support predicates, point-bound expressions, and sample constructors.
+Lemmas are losslessness, support, boundedness, and sampler-correctness
+theorems. \\
+\ecfile{HAETAE\_ROM.ec} &
+Types are HAETAE ROM query and output spaces.  Operations are tagged query
+constructors, output projections, output injections, and query-dependent output
+laws.  Modules instantiate the full ROM.  Lemmas prove losslessness and sampler
+projection laws. \\
+\ecfile{HAETAE\_Scheme.ec} &
+The module is the HAETAE instance of the generic signature interface.  The mode
+operation fixes the parameter family.  Mathematically this file identifies the
+generic game carrier sets with the HAETAE carrier sets. \\
+\ecfile{HAETAE\_Events.ec} &
+Operations are named events for rejection-freeness and verification acceptance.
+Lemmas show that the current modeled events imply the event predicates consumed
+by correctness and game-hop theorems. \\
+\ecfile{HAETAE\_Transcript.ec} &
+The transcript type is the carrier set of signing transcripts.  Operations are
+field projections, consistency predicates, validity predicates, forking
+relations, and extraction maps.  Lemmas prove that valid transcripts encode the
+algebraic equations required by the hardness reductions. \\
+\ecfile{HAETAE\_Rejection.ec} &
+Types are signing-attempt states and sample spaces.  Operations are rejection
+predicates, state projections, signature constructors, acceptance predicates,
+and sampler predicates.  Lemmas prove verification, simulation,
+sampler-correctness, and rejection-loss facts. \\
+\ecfile{HAETAE\_Assumptions.ec} &
+Types are hardness-instance and solution spaces.  Operations are relation
+predicates and distribution adapters.  Modules are hardness games, solver
+interfaces, and reductions.  Lemmas and equivalence judgments prove exactness of
+adapters and well-formedness of lifted instances. \\
+\ecfile{HAETAE\_Reductions.ec} &
+Operations are real-valued hardness terms, query budgets, support bounds, ROM
+losses, rejection losses, and final advantage bounds.  Lemmas are arithmetic
+normalization, non-negativity, subunit, grouping, and support-dominance
+theorems. \\
+\ecfile{HAETAE\_ROM\_Programming.ec} &
+Types are programming sites and counted ROM events.  Operations are event
+counters, freshness predicates, min-entropy predicates, and counted bad events.
+Modules are lazy ROM and programming games.  Lemmas are preservation,
+freshness, count, min-entropy, and ROM-programming loss theorems. \\
+\ecfile{HAETAE\_HopGames.ec} &
+Types and operations define transcript invariants, sampler coverage, public
+simulation fields, paper-simulation samples, bad events, and budget disciplines.
+Modules are the full sequence of real, simulated, transcript, ROM-internal,
+NMA, paper-sampler, RO-attempt, exact-hyperball, and budgeted-wrapper games.
+Lemmas and Hoare/equivalence judgments prove the hybrid steps, invariants,
+fundamental-lemma bounds, sampler-freshness bounds, and budgeted lifting
+theorems. \\
+\ecfile{HAETAE\_Security.ec} &
+Operations define the top-level correctness obligation.  Lemmas compose all
+lower-level facts into correctness and conditional EUF-CMA theorems.  Its Hoare
+proof is the final correctness program-logic obligation.  Mathematically this
+file is the root of the proof DAG: it turns local game-hop and arithmetic
+theorems, under the explicit hop and hardness premises of the final composition
+lemma, into the published security inequality. \\
+\bottomrule
+\end{longtable}
+
+\section{Mathematical reading of the final proof DAG}
+\label{app:final-proof-dag-reading}
+
+The entire EasyCrypt development can be summarized as the following mathematical
+dependency chain.
+
+\[
+\begin{array}{c}
+\text{parameters and algebraic carrier sets} \\
+\Downarrow \\
+\text{well-formed distributions and samplers} \\
+\Downarrow \\
+\text{scheme, transcript, rejection, and ROM events} \\
+\Downarrow \\
+\text{stateful games and lazy-ROM/programming modules} \\
+\Downarrow \\
+\text{Hoare/equivalence proofs for adjacent hybrids} \\
+\Downarrow \\
+\text{bad-event probability bounds and hardness reductions} \\
+\Downarrow \\
+\text{concrete arithmetic normalization} \\
+\Downarrow \\
+\text{HAETAE correctness and EUF-CMA security theorem.}
+\end{array}
+\]
+
+In this reading, Types supply the spaces, Ops supply the maps and events,
+Modules supply the experiments, Lemmas supply the propositions, and
+Hoare/equiv judgments supply the program-logic bridges between experiments.
+The machine checker verifies that these objects compose without type errors,
+unproved proof holes, or missing side conditions, thereby converting the
+pen-and-paper game proof into a formal theorem about the modeled HAETAE scheme.

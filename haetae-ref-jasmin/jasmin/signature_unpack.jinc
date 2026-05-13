@@ -1,0 +1,177 @@
+inline fn __copy_sig_slice(reg mut ptr u8[2048] outp,
+                           reg const ptr u8[2948] sigp,
+                           reg u64 off,
+                           reg u64 size) -> reg ptr u8[2048]
+{
+  reg u64 i src;
+  reg u32 b;
+
+  i = 0;
+  while (i < size)
+  {
+    src = off;
+    src += i;
+    b = (32u)sigp[src];
+    outp[i] = b;
+    i += 1;
+  }
+
+  return outp;
+}
+
+fn __unpack_sig_finish_at(reg mut ptr u64[4] statep,
+                          reg const ptr u8[2948] sigp,
+                          reg u64 off) -> reg ptr u64[4]
+{
+  reg u64 base_hb base_h payload_limit hbsize hsize padlen total bad i idx bb;
+  reg u32 b;
+
+  base_hb = statep[0];
+  base_h = statep[1];
+  payload_limit = statep[2];
+
+  b = (32u)sigp[off];
+  hbsize = (64u)b;
+  hbsize += base_hb;
+  b = (32u)sigp[off + 1];
+  hsize = (64u)b;
+  hsize += base_h;
+
+  bad = 0;
+  padlen = 0;
+  total = hbsize;
+  total += hsize;
+  if (total > payload_limit)
+  {
+    bad = 1;
+  }
+  else
+  {
+    padlen = payload_limit;
+    padlen -= total;
+  }
+
+  if (bad == 0)
+  {
+    i = 0;
+    while (i < padlen)
+    {
+      idx = off;
+      idx += 2;
+      idx += hbsize;
+      idx += hsize;
+      idx += i;
+      b = (32u)sigp[idx];
+      bb = (64u)b;
+      bad |= bb;
+      i += 1;
+    }
+
+    if (bad != 0)
+    {
+      bad = 1;
+    }
+  }
+
+  statep[0] = hbsize;
+  statep[1] = hsize;
+  statep[2] = padlen;
+  statep[3] = bad;
+  return statep;
+}
+
+inline fn _unpack_sig_full(reg mut ptr u32[HAETAE_N] cp,
+                           reg mut ptr u32[2048] lowp,
+                           reg mut ptr u32[2048] hbzp,
+                           reg mut ptr u32[2048] hp,
+                           reg mut ptr u64[1] badp,
+                           reg const ptr u8[2948] sigp,
+                           reg const ptr u32[512] h_symbolwp,
+                           reg const ptr u32[132] h_dsymswp,
+                           reg const ptr u32[512] hb_symbolwp,
+                           reg const ptr u32[132] hb_dsymswp,
+                           inline int lcount_i,
+                           inline int hb_count_i,
+                           inline int hb_m_i,
+                           inline int hb_offset_i,
+                           inline int h_count_i,
+                           inline int h_m_i,
+                           inline int h_offset_i,
+                           inline int base_hb_i,
+                           inline int base_h_i,
+                           inline int payload_limit_i) -> reg ptr u32[HAETAE_N],
+                                                       reg ptr u32[2048],
+                                                       reg ptr u32[2048],
+                                                       reg ptr u32[2048],
+                                                       reg ptr u64[1]
+{
+  stack u8[2048] hbenc;
+  stack u8[2048] henc;
+  stack u64[4] state;
+  reg ptr u8[2048] hbencp;
+  reg ptr u8[2048] hencp;
+  reg ptr u64[4] statep;
+  reg u64 lcount suffix_off hbsize hsize bad enc_off;
+  reg u64 hb_count hb_m hb_offset h_count h_m h_offset;
+  reg u64 base_hb base_h payload_limit;
+
+  hbencp = hbenc;
+  hencp = henc;
+  statep = state;
+
+  lcount = lcount_i;
+  () = #spill(hbzp, hp, badp, hbencp, hencp, statep, sigp);
+  cp, lowp = _unpack_sig_prefix(cp, lowp, sigp, lcount);
+  () = #unspill(hbzp, hp, badp, hbencp, hencp, statep, sigp);
+
+  suffix_off = lcount;
+  suffix_off *= HAETAE_N;
+  suffix_off += 32;
+
+  base_hb = base_hb_i;
+  base_h = base_h_i;
+  payload_limit = payload_limit_i;
+  statep[0] = base_hb;
+  statep[1] = base_h;
+  statep[2] = payload_limit;
+  statep[3] = 0;
+  () = #spill(hbzp, hp, badp, hbencp, hencp, suffix_off);
+  statep = __unpack_sig_finish_at(statep, sigp, suffix_off);
+  () = #unspill(hbzp, hp, badp, hbencp, hencp, suffix_off);
+
+  hbsize = statep[0];
+  hsize = statep[1];
+  bad = statep[3];
+
+  if (bad == 0)
+  {
+    enc_off = suffix_off;
+    enc_off += 2;
+    hbencp = __copy_sig_slice(hbencp, sigp, enc_off, hbsize);
+
+    enc_off += hbsize;
+    hencp = __copy_sig_slice(hencp, sigp, enc_off, hsize);
+
+    hb_count = hb_count_i;
+    hb_m = hb_m_i;
+    hb_offset = hb_offset_i;
+    () = #spill(hp, hencp, hsize, h_symbolwp, h_dsymswp);
+    hbzp, badp = _decode_hb_z1_full(hbzp, badp, hbencp, hbsize, hb_symbolwp,
+                                    hb_dsymswp, hb_count, hb_m, hb_offset);
+    () = #unspill(hp, hencp, hsize, h_symbolwp, h_dsymswp);
+    bad = badp[0];
+
+    if (bad == 0)
+    {
+      h_count = h_count_i;
+      h_m = h_m_i;
+      h_offset = h_offset_i;
+      hp, badp = _decode_h_full(hp, badp, hencp, hsize, h_symbolwp,
+                                h_dsymswp, h_count, h_m, h_offset);
+      bad = badp[0];
+    }
+  }
+
+  badp[0] = bad;
+  return cp, lowp, hbzp, hp, badp;
+}

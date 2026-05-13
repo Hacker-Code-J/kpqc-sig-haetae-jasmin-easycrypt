@@ -1,0 +1,403 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.75em}
+
+\newtheorem{remark}{Remark}
+\newtheorem{observation}{Observation}
+
+\title{Memorandum on the EasyCrypt Formalization of the HAETAE NTT}
+\author{Codex Proof Report}
+\date{22 April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note records the present state of the EasyCrypt proof development for the
+HAETAE number-theoretic transform, with particular attention to the
+refinement path from the extracted Jasmin program to the abstract polynomial
+specification. The report is written in the style of a mathematical proof
+memorandum: completed lemmas are stated by role, partially reconstructed
+arguments are isolated precisely, and the remaining obligations are organized
+according to the logic of the final correctness theorem. The principal
+technical achievements to date are the proof of losslessness for the
+imperative NTT specifications, the reconstruction of the root-of-unity
+identity $zroot^{256} = -1$ in $\mathbf{F}_q$, and the establishment of a
+substantial portion of the representation layer relating machine words and
+mathematical coefficients. The main unresolved point at present is a
+library-level normalization issue in the concrete twiddle-table bridge,
+specifically around the rewriting of \texttt{BArray1024.get32\_of\_list32}
+inside the full theory \texttt{NTT\_Fq.ec}.
+\end{abstract}
+
+\section{Objective and Verification Architecture}
+
+The final theorem sought in the project is an end-to-end refinement statement:
+the Jasmin routines implementing the forward and inverse NTT must coincide,
+under a suitable representation relation, with the mathematical
+transformations defined over the quotient ring formalized in
+\texttt{Rq.ec}. In conceptual terms, the proof must traverse four layers:
+\[
+\text{Jasmin source}
+\;\Longrightarrow\;
+\text{EasyCrypt extraction}
+\;\Longrightarrow\;
+\text{imperative EasyCrypt NTT model}
+\;\Longrightarrow\;
+\text{abstract ring-theoretic NTT specification}.
+\]
+
+The relevant artifacts are as follows.
+\begin{itemize}
+\item \texttt{extract/Hpoly\_extract.ec}: extracted Jasmin code, including the concrete tables \texttt{jzetas} and \texttt{jzetas\_inv}.
+\item \texttt{NTT\_Fq.ec}: imperative NTT specifications together with the algebraic and representation lemmas required to relate program state to mathematical state.
+\item \texttt{Fq.ec} and \texttt{Montgomery.ec}: arithmetic correctness of modular and Montgomery operations.
+\item \texttt{Rq.ec}: abstract forward and inverse NTT operators.
+\end{itemize}
+
+\section{Foundational Proofs Already Established}
+
+\subsection{Losslessness of the Imperative Specifications}
+
+The imperative module \texttt{NTT} in \texttt{NTT\_Fq.ec} contains two
+procedures:
+\begin{itemize}
+\item \texttt{NTT.ntt}, modeling the forward transform with eight butterfly layers;
+\item \texttt{NTT.invntt}, modeling the inverse transform with eight inverse layers followed by the final scaling by $\operatorname{inv}(256)$.
+\end{itemize}
+
+Both procedures are now accompanied by complete losslessness proofs:
+\begin{align*}
+&\texttt{lemma ntt\_spec\_ll : islossless NTT.ntt},\\
+&\texttt{lemma invntt\_spec\_ll : islossless NTT.invntt}.
+\end{align*}
+
+These proofs proceed by explicit integer variants for the three nested loops.
+For the forward transform one uses:
+\begin{itemize}
+\item outer variant: \texttt{len};
+\item middle variant: $256 - \texttt{start}$;
+\item inner variant: $\texttt{start} + \texttt{len} - \texttt{j}$.
+\end{itemize}
+For the inverse transform the final scaling loop contributes the additional
+variant $256 - \texttt{j}$, while the outer loop uses $256 - \texttt{len}$.
+
+The supporting lemmas
+\[
+\texttt{ntt\_middle\_right},\qquad
+\texttt{inv\_middle\_right},\qquad
+\texttt{inv\_outer\_progress},\qquad
+\texttt{ntt\_init\_progress}
+\]
+encode the required arithmetic monotonicity of these variants. Their role is
+entirely proof-theoretic: they guarantee that the imperative models are
+legitimate targets for subsequent pRHL and Hoare refinements.
+
+\subsection{Root-of-Unity Arithmetic}
+
+The HAETAE parameters are fixed by
+\[
+q = 64513,\qquad N = 256,\qquad zroot = 426 \in \mathbf{F}_q.
+\]
+The crucial algebraic fact needed for the inverse transform is now proved:
+\[
+\texttt{lemma exp\_zroot\_256 : Zq.exp zroot 256 = incoeff (-1)}.
+\]
+
+The argument is economical. One first identifies
+\[
+zroot^{128} = 28837
+\]
+by reading the value at index \(1\) in the explicit forward zeta table, and
+then derives
+\[
+zroot^{256} = (zroot^{128})^2 = -1 \pmod q.
+\]
+This confirms that \(zroot\) behaves as a primitive \(512\)-th root of unity,
+which is precisely the structural fact needed to justify the inverse
+normalization.
+
+\section{Representation Layer Between Machine Words and Coefficients}
+
+The extracted Jasmin code operates on byte arrays of packed \(32\)-bit words,
+whereas the mathematical specification is expressed over arrays of field
+coefficients. The present development already contains the nucleus of the
+representation relation:
+\begin{align*}
+&\texttt{word\_to\_coeff}(w) = \texttt{incoeff}(\texttt{W32.to\_sint}\; w),\\
+&\texttt{barray256\_to\_poly}(rp) =
+  \texttt{Array256.init}(\lambda i.\,\texttt{word\_to\_coeff}(\texttt{BArray1024.get32}\; rp\; i)),\\
+&\texttt{poly\_repr}(rp,p) \equiv \texttt{barray256\_to\_poly}(rp) = p.
+\end{align*}
+
+This layer is supported by several useful conversion lemmas:
+\begin{itemize}
+\item \texttt{barray256\_to\_polyE};
+\item \texttt{poly\_repr\_get};
+\item \texttt{word\_to\_coeff\_of\_int};
+\item \texttt{word\_to\_coeff\_small};
+\item \texttt{word\_to\_coeff\_repr};
+\item the concrete instances \texttt{word\_to\_coeff\_neg16505} and \texttt{word\_to\_coeff\_26964}.
+\end{itemize}
+
+Mathematically, these lemmas do the indispensable bookkeeping which allows one
+to pass from signed machine integers to residue classes in \(\mathbf{F}_q\).
+Cryptographically, this is the bridge by which a concrete read from memory may
+eventually be interpreted as a field element participating in a butterfly.
+
+\section{Explicit Twiddle Tables and Their Formal Role}
+
+\subsection{Inverse Twiddle Table}
+
+The inverse zeta table is defined abstractly by
+\[
+\texttt{zetas\_inv}[k] = zroot^{-(\operatorname{bsrev}_8(k)+1)}
+\quad (0 \le k \le 254),
+\]
+with the final entry replaced by
+\[
+\texttt{scale255} = \operatorname{inv}(256) = -252 \pmod q.
+\]
+
+The following items are now fully formalized in \texttt{NTT\_Fq.ec}:
+\begin{itemize}
+\item \texttt{unit\_zroot};
+\item \texttt{inv\_zroot};
+\item \texttt{zetas\_invE}, giving the full explicit list of inverse twiddle factors;
+\item \texttt{scale255E};
+\item \texttt{zetas\_inv\_vals}, expressing the Montgomery-scaled inverse table explicitly;
+\item \texttt{zetas\_inv\_255\_montE};
+\item \texttt{jzetas\_inv\_255\_wordE};
+\item \texttt{jzetas\_inv\_255\_scaleE}.
+\end{itemize}
+
+The last two lemmas are especially significant. The extracted table
+\texttt{jzetas\_inv} stores at index \(255\) not merely the abstract factor
+\(\operatorname{inv}(256)\), but the machine-level constant
+\(-29720\), representing the Montgomery-encoded quantity required by the
+Jasmin multiplication routine. The lemma
+\[
+\texttt{jzetas\_inv\_255\_scaleE}
+\]
+establishes the exact compatibility relation
+\[
+\texttt{word\_to\_coeff}(\texttt{jzetas\_inv}[255]) \cdot R^{-1}
+=
+\texttt{scale255} \cdot R,
+\]
+which is precisely the identity needed in the final scaling loop of the
+inverse transform.
+
+\subsection{Forward Twiddle Table}
+
+The forward table is treated similarly. The abstract definition
+\[
+\texttt{zetas}[k] = zroot^{\operatorname{bsrev}_8(k)}
+\]
+is matched by the explicit formulas
+\begin{itemize}
+\item \texttt{zetasE};
+\item \texttt{zetas\_vals}.
+\end{itemize}
+
+Moreover, the development already contains the index-\(1\) bridge lemmas
+\begin{itemize}
+\item \texttt{jzetas\_1\_poly};
+\item \texttt{jzetas\_1\_word\_montE};
+\item \texttt{jzetas\_1\_get32E};
+\item \texttt{jzetas\_1\_get32dE};
+\item \texttt{zetas\_1\_montE};
+\item \texttt{jzetas\_1E};
+\item \texttt{jzetas\_1\_wordE}.
+\end{itemize}
+
+These serve as small but concrete witnesses that the forward table relation is
+mathematically the expected one. They also indicate the intended pattern for
+the full array-level proof.
+
+\section{Partial Reconstruction of the Twiddle-Bridge Proofs}
+
+The principal work currently in progress concerns the array-level bridge
+lemmas relating the extracted tables \texttt{jzetas} and
+\texttt{jzetas\_inv} to the mathematical arrays
+\texttt{array256\_mont zetas} and \texttt{array256\_mont\_inv zetas\_inv}.
+
+The present proof scripts introduce the stronger intermediate identities
+\begin{align*}
+&\texttt{jzetas\_inv\_polyE}:
+  \texttt{barray256\_to\_poly Hpoly\_extract.jzetas\_inv}
+  =
+  (\texttt{array256\_mont\_inv zetas\_inv})[255 \leftarrow \texttt{incoeff}(-29720)],\\
+&\texttt{jzetas\_polyE}:
+  \texttt{barray256\_to\_poly Hpoly\_extract.jzetas}
+  =
+  (\texttt{array256\_mont zetas})[0 \leftarrow \texttt{incoeff}(0)].
+\end{align*}
+
+From these one deduces the pointwise statements
+\begin{align*}
+&\texttt{jzetas\_inv\_poly\_vals}\; i
+  \quad (0 \le i < 255),\\
+&\texttt{jzetas\_poly\_vals}\; i
+  \quad (1 \le i < 256),
+\end{align*}
+and thence the direct get-lemmas \texttt{jzetas\_inv\_get} and
+\texttt{jzetas\_get}.
+
+\begin{observation}
+The special indices differ for conceptual reasons.
+For the inverse table, index \(255\) stores the Montgomery-encoded final
+normalization constant, not the plain array value
+\((\texttt{array256\_mont\_inv zetas\_inv})[255]\).
+For the forward table, index \(0\) is padding and is never read by the
+algorithm, because the counter is incremented before the first lookup.
+\end{observation}
+
+\subsection{Current Obstruction}
+
+The mathematical structure of the proof is clear and essentially complete.
+The obstruction is local and syntactic. When one compiles
+\texttt{NTT\_Fq.ec}, EasyCrypt currently fails in the proof of
+\texttt{jzetas\_inv\_polyE} at the line
+\[
+\texttt{rewrite BArray1024.get32\_of\_list32 1:/\#}.
+\]
+The prover reports:
+\begin{quote}
+\texttt{nothing to rewrite}.
+\end{quote}
+
+Thus the unresolved issue is not arithmetic but normalization of the concrete
+\texttt{BArray1024} accessor inside the full ambient theory. In isolated probe
+files the same rewrite shape is admissible, whereas inside the complete theory
+it fails to match the current goal term. This suggests a mismatch in the
+surface form of the accessor after unfolding \texttt{Hpoly\_extract.jzetas}
+and \texttt{Hpoly\_extract.jzetas\_inv}, rather than any defect in the
+underlying mathematical argument.
+
+\section{Status of the Reconstruction}
+
+The present state of the formal development may be summarized as follows.
+
+\begin{center}
+\begin{longtable}{p{0.27\linewidth} p{0.21\linewidth} p{0.43\linewidth}}
+\toprule
+Component & Status & Mathematical significance \\
+\midrule
+\endfirsthead
+\toprule
+Component & Status & Mathematical significance \\
+\midrule
+\endhead
+\texttt{ntt\_spec\_ll} & proved & termination and losslessness of the forward imperative model \\
+\texttt{invntt\_spec\_ll} & proved & termination and losslessness of the inverse imperative model \\
+\texttt{exp\_zroot\_256} & proved & primitive-root structure and inverse scaling justification \\
+\texttt{word\_to\_coeff} layer & proved & conversion from signed words to field coefficients \\
+\texttt{poly\_repr} layer & proved & base representation predicate for future simulation arguments \\
+\texttt{zetas\_invE}, \texttt{zetas\_inv\_vals} & proved & explicit inverse twiddle constants and Montgomery form \\
+\texttt{zetasE}, \texttt{zetas\_vals} & proved & explicit forward twiddle constants and Montgomery form \\
+\texttt{jzetas\_inv\_255\_scaleE} & proved & compatibility of the inverse final scaling constant \\
+\texttt{jzetas\_inv\_polyE} and descendants & formalized but not compiling & inverse array bridge blocked by accessor normalization \\
+\texttt{jzetas\_polyE} and descendants & formalized but not compiling & forward array bridge blocked by the same normalization issue \\
+\texttt{fqmul\_corr} & not yet formalized & arithmetic correctness of one Montgomery multiplication \\
+Butterfly correctness lemmas & not yet formalized & local simulation step for both transforms \\
+Loop invariants for extracted Jasmin code & not yet formalized & pRHL refinement from extraction to imperative model \\
+Imperative-to-abstract refinement & not yet formalized & identification of imperative NTT with \texttt{Rq.ntt} and \texttt{Rq.invntt} \\
+\bottomrule
+\end{longtable}
+\end{center}
+
+\section{Remaining Proof Obligations}
+
+Once the concrete table bridge is resolved, the remaining development is
+structurally straightforward, though not short.
+
+\subsection{Arithmetic Step}
+
+One must prove correctness of the extracted routine
+\texttt{M.\_\_fqmul} using Montgomery reduction, relying on the
+existing theory \texttt{Fq.ec} and the lemma \texttt{SREDCp\_corr} from
+\texttt{Montgomery.ec}. This yields the field-level interpretation of one
+machine multiplication.
+
+\subsection{Local Butterfly Lemmas}
+
+With the twiddle tables and multiplication routine in place, the next step is
+to establish:
+\begin{itemize}
+\item a forward butterfly correctness lemma;
+\item an inverse butterfly correctness lemma, including the final scaling
+phase.
+\end{itemize}
+
+These are the atomic transitions from which the loop invariants for the
+extracted procedures will be assembled.
+
+\subsection{Loop Refinement}
+
+The extracted routines \texttt{M.\_poly\_ntt} and \texttt{M.\_poly\_invntt}
+must then be related to the imperative procedures \texttt{NTT.ntt} and
+\texttt{NTT.invntt} by synchronized invariants on the indices
+\texttt{len}, \texttt{start}, \texttt{j}, and \texttt{zetasctr}. The natural
+logic here is probabilistic relational Hoare logic, though the programs are
+deterministic.
+
+\subsection{Abstract Identification}
+
+Finally, one must prove that the imperative models coincide with the abstract
+ring-level operators
+\[
+\texttt{Rq.ntt}, \qquad \texttt{Rq.invntt}.
+\]
+This is where the Cooley--Tukey decomposition and the bit-reversal structure
+must be identified with the explicit formula from \texttt{Rq.ec}.
+
+\section{Recommended Next Step}
+
+The proof search should now focus narrowly on the accessor normalization
+problem in the twiddle-bridge lemmas. Concretely:
+\begin{enumerate}
+\item inspect the exact normal form of
+  \texttt{BArray1024.get32 Hpoly\_extract.jzetas\_inv i}
+  after unfolding \texttt{Hpoly\_extract.jzetas\_inv} inside the ambient theory;
+\item identify the precise theorem name or rewriting direction accepted by the
+  cloned \texttt{ByteArray} theory in this context;
+\item only after that, resume the array extensional proofs of
+  \texttt{jzetas\_inv\_polyE} and \texttt{jzetas\_polyE}.
+\end{enumerate}
+
+\begin{remark}
+At the present moment the main body of mathematical work is not blocked by a
+deep algebraic deficiency. The obstruction is a proof-engineering issue in the
+representation layer. This is good news: once the concrete memory accessor is
+brought under control, the path to the local butterfly lemmas is already
+visible.
+\end{remark}
+
+\section*{Conclusion}
+
+The proof effort has already secured the algebraic spine of the HAETAE NTT
+formalization. The imperative specifications are lossless; the chosen root is
+shown to have the required order; the explicit zeta tables, both forward and
+inverse, are mathematically identified; and the representation relation from
+word arrays to coefficient arrays is in place in its essential form. What
+remains is the completion of the concrete twiddle-table bridge and, beyond it,
+the expected sequence of simulation lemmas from Montgomery multiplication to
+butterflies, from butterflies to loops, and from loops to the abstract NTT
+operators. The present state is therefore best described not as incomplete in
+principle, but as suspended at a technically local juncture.
+
+\end{document}

@@ -1,0 +1,124 @@
+inline fn __fft_mulrnd16(reg u32 x y) -> reg u32
+{
+  reg u64 xx yy r;
+  reg u32 out;
+
+  xx = (64s)x;
+  yy = (64s)y;
+  r = xx * yy;
+  r += 32768;
+  r >>s= 16;
+  out = (32u)r;
+  return out;
+}
+
+fn _fft_init_and_bitrev(reg mut ptr u32[512] rp,
+                        reg const ptr u32[256] xp,
+                        reg const ptr u32[512] rootsp,
+                        reg const ptr u16[256] brvp) -> reg ptr u32[512]
+{
+  reg u64 i idx ridx;
+  reg u16 inv;
+  reg u32 c root val;
+
+  i = 0;
+  while (i < 256)
+  {
+    inv = brvp[i];
+    ridx = (64u)inv;
+    ridx <<= 1;
+
+    c = xp[i];
+    idx = i;
+    idx <<= 1;
+
+    root = rootsp[idx];
+    val = c;
+    val *= root;
+    rp[ridx] = val;
+
+    idx += 1;
+    ridx += 1;
+    root = rootsp[idx];
+    val = c;
+    val *= root;
+    rp[ridx] = val;
+
+    i += 1;
+  }
+
+  return rp;
+}
+
+fn _fft_butterfly(reg mut ptr u32[512] datap,
+                  reg const ptr u32[512] rootsp,
+                  reg u64 even,
+                  reg u64 odd,
+                  reg u64 twid) -> reg ptr u32[512]
+{
+  reg u64 eidx oidx tidx idx;
+  reg u32 ureal uimag oreal oimag rreal rimag;
+  reg u32 ar ai br bi treal timag out;
+
+  eidx = even;
+  eidx <<= 1;
+  oidx = odd;
+  oidx <<= 1;
+  tidx = twid;
+  tidx <<= 1;
+
+  ureal = datap[eidx];
+  idx = eidx;
+  idx += 1;
+  uimag = datap[idx];
+
+  oreal = datap[oidx];
+  idx = oidx;
+  idx += 1;
+  oimag = datap[idx];
+
+  rreal = rootsp[tidx];
+  idx = tidx;
+  idx += 1;
+  rimag = rootsp[idx];
+
+  ar = __fft_mulrnd16(rreal, oreal);
+  ai = __fft_mulrnd16(rimag, oimag);
+  treal = ar;
+  treal -= ai;
+
+  br = __fft_mulrnd16(rreal, oimag);
+  bi = __fft_mulrnd16(rimag, oreal);
+  timag = br;
+  timag += bi;
+
+  out = ureal;
+  out += treal;
+  datap[eidx] = out;
+  idx = eidx;
+  idx += 1;
+  out = uimag;
+  out += timag;
+  datap[idx] = out;
+
+  out = ureal;
+  out -= treal;
+  datap[oidx] = out;
+  idx = oidx;
+  idx += 1;
+  out = uimag;
+  out -= timag;
+  datap[idx] = out;
+
+  return datap;
+}
+
+fn _complex_fp_sqabs(reg u32 real imag) -> reg u32
+{
+  reg u32 r t;
+
+  r = __fft_mulrnd16(real, real);
+  t = __fft_mulrnd16(imag, imag);
+  r += t;
+  return r;
+}

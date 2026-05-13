@@ -1,0 +1,1203 @@
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+\setlist[itemize]{leftmargin=1.5em}
+\setlist[enumerate]{leftmargin=1.75em}
+\emergencystretch=3em
+
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\Fq}{\mathbf{F}_q}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Rq}{\mathbb{Z}/q\mathbb{Z}}
+\newcommand{\Range}[2]{\{#1,\ldots,#2\}}
+\newcommand{\B}{\mathsf{B}}
+\newcommand{\W}{\mathsf{W32}}
+\newcommand{\bw}{\mathsf{bw32}}
+\newcommand{\repr}{\mathsf{repr}}
+\newcommand{\poly}{\mathsf{poly}}
+\newcommand{\mont}{\mathsf{mont}}
+\newcommand{\Proof}{\par\noindent\emph{Proof.} }
+\newcommand{\Lemma}[1]{\paragraph{\code{#1}.}}
+
+\title{Mathematical Notes for the Lemmas in \texorpdfstring{\code{RefJasminNTT.ec}}{RefJasminNTT.ec}}
+\author{Codex Proof Notes}
+\date{28 April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+These notes give a mathematician-style account of every lemma and equivalence
+proved in \code{RefJasminNTT.ec}.  The EasyCrypt file is a refinement layer:
+it proves that the extracted Jasmin forward and inverse NTT cores refine the
+imperative reference procedures in \code{NTT_Fq.NTT}.  The central mathematical
+themes are representation of signed machine words as field elements, Montgomery
+table cancellation, pointwise word-size bounds, and loop-level pRHL invariants.
+The presentation below follows the order of the EasyCrypt file and explains
+what each lemma proves and why the proof is valid.
+\end{abstract}
+
+\tableofcontents
+
+\section{Notation and Proof Obligations}
+
+All coefficients live in the finite field \(\Fq=\Rq\), where the HAETAE
+modulus is \(q=64513\).  A 32-bit machine word \(w\) is interpreted as the
+field element
+\[
+  \operatorname{word}(w)=\operatorname{incoeff}(\W.\operatorname{to\_sint}(w)).
+\]
+For a byte array \(rp:\code{BArray1024.t}\), the corresponding coefficient
+array is obtained pointwise by reading the \(i\)-th 32-bit lane:
+\[
+  \operatorname{poly}(rp)[i]
+  =
+  \operatorname{word}(\code{BArray1024.get32}\;rp\;i).
+\]
+The relation \(\code{NTT_Fq.poly_repr}(rp,p)\) states
+\(\operatorname{poly}(rp)=p\).  The bounded relation
+\(\code{NTT_Fq.poly_repr_bound}(rp,p,s)\) additionally states that every lane
+of \(rp\) satisfies the signed \(s\)-bit word bound \(\bw(-,s)\).
+
+The proof file also uses a pointwise bound function \(bd:\Z\to\Z\):
+\[
+  \code{barray256_bound_by}(rp,bd)
+  \quad\Longleftrightarrow\quad
+  \forall i\in\Range{0}{255}.\,
+    \bw(\code{BArray1024.get32}\;rp\;i,bd(i)).
+\]
+This permits a loop invariant to say that already processed coefficients have
+one more bit of headroom than untouched coefficients.
+
+\section{Integer Shift Lemmas}
+
+\Lemma{int_shr1_div2}
+For every non-negative integer \(x\), the EasyCrypt integer operation
+\(x\mathbin{\code{`|>>}}1\) equals Euclidean division \(x\%/2\).
+\Proof
+The operator \(\code{`|>>}\) is the integer right-shift notation expanded by
+EasyCrypt into the corresponding arithmetic division by a power of two.  With
+shift amount \(1\), that power is \(2\).  Since \(x\ge 0\), Euclidean division
+and the intended non-negative shift semantics coincide.
+
+\Lemma{int_shl1_mul2}
+For every integer \(x\), the EasyCrypt integer operation
+\(x\mathbin{\code{`<<}}1\) equals \(2x\).
+\Proof
+Expanding the definition of \(\code{`<<}\), left shift by one is multiplication
+by \(2^1\).  Hence the result is \(x\cdot 2\).
+
+\section{Machine-Word Addition and Subtraction}
+
+\Lemma{word_to_coeff_add}
+Assume two words \(a,b\) satisfy bounds \(\bw(a,a_s)\) and \(\bw(b,b_s)\), with
+\(0\le a_s,b_s<31\).  Then
+\[
+  \operatorname{word}(a+b)
+  =
+  \operatorname{word}(a)+\operatorname{word}(b).
+\]
+\Proof
+The hypotheses imply that the signed representatives of \(a\) and \(b\) lie in
+intervals contained in \((-2^{30},2^{30})\).  Therefore their sum lies inside
+the range where \(\W.\operatorname{to\_sint}\) of the word addition is the
+integer sum of signed representatives.  EasyCrypt's lemma
+\code{W32.to_sintD_small} gives this equality at the integer level.  Applying
+\(\operatorname{incoeff}\) and using additivity of \(\operatorname{incoeff}\)
+gives the field equality.
+
+\Lemma{word_to_coeff_sub}
+Under the same hypotheses as the preceding lemma,
+\[
+  \operatorname{word}(a-b)
+  =
+  \operatorname{word}(a)-\operatorname{word}(b).
+\]
+\Proof
+The signed bounds again put both operands in a range where word subtraction
+does not wrap with respect to signed interpretation.  The lemma
+\code{W32.to_sintB_small} identifies the signed representative of \(a-b\) with
+the integer difference.  The conclusion follows from the compatibility of
+\(\operatorname{incoeff}\) with subtraction.
+
+\Lemma{forward_butterfly_bounds}
+If \(s\) and \(t\) satisfy bounds \(a_s\) and \(t_s\), with both exponents in
+\([0,30]\), then both butterfly outputs \(s+t\) and \(s-t\) satisfy bound
+\(\max(a_s,t_s)+1\).
+\Proof
+The signed magnitude of each operand is bounded by the appropriate power of
+two.  The sum and difference are therefore bounded by twice the larger bound,
+which is exactly one additional bit.  The EasyCrypt proof invokes the word
+arithmetic lemmas \code{Fq.add_corr} and \code{Fq.sub_corr}.
+
+\Lemma{inverse_butterfly_bounds}
+If \(t_0\) and \(coeff\) satisfy bounds \(a_s\) and \(b_s\), then both
+\(t_0+coeff\) and \(t_0-coeff\) satisfy bound \(\max(a_s,b_s)+1\).
+\Proof
+This is the same signed-interval argument as for
+\code{forward_butterfly_bounds}, specialized to the inverse butterfly
+temporaries.  Addition and subtraction each cost at most one bit.
+
+\section{Montgomery Constant and Table Cancellation}
+
+\Lemma{unit_R_ref}
+The Montgomery constant \(R=\code{NTT_Fq.R}\) is a unit of \(\Fq\).
+\Proof
+The constant \(R\) is the residue of the Montgomery radix modulo \(q\).  The
+proof expands \(R\), reduces the claim to a non-zero residue modulo \(q\), and
+uses the unit criterion for the field \(\Fq\).
+
+\Lemma{inv_R_ref}
+The inverse of \(R\) in \(\Fq\) is \(\operatorname{incoeff}(50386)\).
+\Proof
+Since \(R\) is a unit by \code{unit_R_ref}, it suffices to multiply both sides
+by \(R\).  Expanding \(R\) and reducing modulo \(q\), EasyCrypt checks
+\[
+  R\cdot 50386 \equiv 1 \pmod q.
+\]
+The field equality follows from the injective residue equality used by
+\(\operatorname{incoeff}\).
+
+\Lemma{array256_mont_get}
+For \(i\in\Range{0}{255}\),
+\[
+  \code{NTT_Fq.array256_mont}(p)[i]=p[i]\cdot R.
+\]
+\Proof
+The operator \code{array256_mont} is an \code{Array256.map}/\code{init}
+definition that multiplies every coefficient by \(R\).  Expanding the
+definition and evaluating the initializer at an in-range index proves the
+claim.
+
+\Lemma{mont_cancel}
+For \(i\in\Range{0}{255}\),
+\[
+  \code{NTT_Fq.array256_mont}(p)[i]\cdot R^{-1}=p[i].
+\]
+\Proof
+By \code{array256_mont_get}, the left-hand side is
+\(p[i]\cdot R\cdot R^{-1}\).  The lemma \code{inv_R_ref} identifies \(R^{-1}\),
+and the unit law \(R R^{-1}=1\) reduces the expression to \(p[i]\).
+
+\Lemma{jzetas_get_cancel}
+For \(1\le i<256\),
+\[
+  \operatorname{word}(\code{jzetas}[i])\cdot R^{-1}
+  =
+  \code{NTT_Fq.zetas}[i].
+\]
+\Proof
+The table lemma \code{NTT_Fq.jzetas_get} states that the extracted table entry
+at index \(i\) is the Montgomery encoding of the abstract forward twiddle:
+\(\operatorname{word}(\code{jzetas}[i])=(\code{array256_mont zetas})[i]\).
+Applying \code{mont_cancel} cancels the factor \(R\).
+
+\Lemma{array256_mont_inv_get}
+For \(i\in\Range{0}{255}\),
+\[
+  \code{NTT_Fq.array256_mont_inv}(p)[i]=p[i]\cdot R.
+\]
+\Proof
+This is the inverse-table analogue of \code{array256_mont_get}.  It follows by
+expanding \code{array256_mont_inv} as the pointwise multiplication map.
+
+\Lemma{mont_inv_cancel}
+For \(i\in\Range{0}{255}\),
+\[
+  \code{NTT_Fq.array256_mont_inv}(p)[i]\cdot R^{-1}=p[i].
+\]
+\Proof
+Combine \code{array256_mont_inv_get} with the identity \(R R^{-1}=1\), using
+\code{inv_R_ref}.
+
+\Lemma{jzetas_inv_get_cancel}
+For \(i\in\Range{0}{254}\),
+\[
+  \operatorname{word}(\code{jzetas_inv}[i])\cdot R^{-1}
+  =
+  \code{NTT_Fq.zetas_inv}[i].
+\]
+\Proof
+The imported lemma \code{NTT_Fq.jzetas_inv_get} identifies the concrete
+inverse table entry with the Montgomery encoding of \(\code{zetas_inv}[i]\).
+The cancellation lemma \code{mont_inv_cancel} removes \(R\).  The range stops
+at \(254\) because index \(255\) is the special final scaling constant.
+
+\Lemma{jzetas_inv_255_scale_cancel}
+At the final inverse-table index,
+\[
+  \operatorname{word}(\code{jzetas_inv}[255])\cdot R^{-1}
+  =
+  \code{NTT_Fq.scale255}\cdot R.
+\]
+\Proof
+This is exactly the table fact \code{NTT_Fq.jzetas_inv_255_scaleE}.  It states
+that the extracted word at index \(255\) is chosen so that, after one
+Montgomery multiplication, the effect is multiplication by
+\(\code{scale255}\) and retention of one Montgomery factor.
+
+\section{Montgomery Multiplication Lemmas}
+
+\Lemma{fqmul_bw32_16}
+If the integer product \(aa\cdot bb\) lies in the signed Montgomery reducer
+range
+\[
+ -\frac{R}{2}q\le aa\,bb<\frac{R}{2}q,
+\]
+then a call to \code{Hpoly_extract.M.__fqmul} with operands whose signed values
+are \(aa\) and \(bb\) returns a 16-bit bounded word.
+\Proof
+The extracted multiplication routine is related to the signed Montgomery
+reducer by \code{Fq.fqmul_corr_h}.  The reducer correctness lemma
+\code{Fq.SignedReductions.SREDCp_corr} says the result lies in
+\((-q,q)\).  Since \(q<2^{16}\), the returned signed word satisfies
+\(\bw(-,16)\).
+
+\Lemma{fqmul_word_to_coeff_mul}
+Under the same product-range hypothesis, \code{__fqmul} returns a word whose
+field interpretation is
+\[
+  \operatorname{incoeff}(aa)\operatorname{incoeff}(bb)R^{-1}.
+\]
+\Proof
+Again use \code{Fq.fqmul_corr_h} to replace the procedure result by the signed
+Montgomery reduction of \(aa\,bb\).  The congruence part of
+\code{SREDCp_corr} states that this reduction is congruent to
+\(aa\,bb\,R^{-1}\) modulo \(q\).  Translating through
+\(\operatorname{incoeff}\) and \code{inv_R_ref} gives the field equality.
+
+\Lemma{fqmul_word_to_coeff_mul_h}
+This is the Hoare-form version of \code{fqmul_word_to_coeff_mul}, with the
+product-range hypothesis placed in the procedure precondition.
+\Proof
+The proof is the same congruence argument as above.  The only difference is
+logical: the product bound is destructed from the Hoare precondition rather
+than supplied as a lemma parameter.
+
+\Lemma{fqmul_word_to_coeff_mul_bound_h}
+This combines the semantic conclusion of \code{fqmul_word_to_coeff_mul_h} with
+the 16-bit output bound of \code{fqmul_bw32_16}.
+\Proof
+Use Hoare consequence twice.  The first consequence supplies the field-value
+postcondition from \code{fqmul_word_to_coeff_mul_h}; the second invokes
+\code{Fq.fqmul_corr_h} and \code{SREDCp_corr} to obtain the 16-bit bound.
+
+\Lemma{fqmul_word_to_coeff_mul_bound_ph}
+The probabilistic Hoare version of the previous lemma holds with probability
+one.
+\Proof
+The routine \code{__fqmul} is lossless by \code{Fq.fqmul_ll}.  Combining
+losslessness with the ordinary Hoare triple
+\code{fqmul_word_to_coeff_mul_bound_h} yields the probability-one
+\code{phoare} statement.
+
+\section{Pointwise Bound Infrastructure}
+
+The file defines
+\[
+\code{barray256_bound_by}(rp,bd)
+\]
+and
+\[
+\code{poly_repr_bound_by}(rp,p,bd).
+\]
+The first is a pointwise signed-word bound for all 256 lanes; the second adds
+the field representation relation.  The following lemmas are the elementary
+logic of these definitions.
+
+\Lemma{barray256_bound_by_get}
+If \(\code{barray256_bound_by}(rp,bd)\) holds and \(i\in\Range{0}{255}\), then
+the \(i\)-th lane satisfies \(\bw(\code{get32}\;rp\;i,bd(i))\).
+\Proof
+This is immediate from universal elimination in the definition of
+\code{barray256_bound_by}.
+
+\Lemma{barray256_bound_by_weaken}
+If \(bd_1(i)\le bd_2(i)\) for every in-range \(i\), then a buffer bounded by
+\(bd_1\) is also bounded by \(bd_2\).
+\Proof
+At each index, use \code{NTT_Fq.bw32_weaken}, which says that a signed word
+bounded by a smaller exponent is bounded by a larger exponent.
+
+\Lemma{barray256_bound_by_set32}
+If \(rp\) is bounded by \(bd\), \(i\) is in range, and the new word \(w\)
+satisfies \(\bw(w,bd(i))\), then \(\code{set32}\;rp\;i\;w\) is still bounded by
+\(bd\).
+\Proof
+For an arbitrary lane \(j\), use the byte-array get-after-set lemma:
+the read is \(w\) when \(j=i\), and is the old lane otherwise.  The case
+\(j=i\) uses the hypothesis on \(w\); the other case uses the old bound.
+
+\Lemma{barray256_bound_by_set32_change}
+Suppose \(rp\) is bounded by \(bd\).  If a store at \(i\) writes a word bounded
+by \(bd'(i)\), and every untouched lane has \(bd(k)\le bd'(k)\), then the
+updated buffer is bounded by \(bd'\).
+\Proof
+The same get-after-set case split is used.  At the updated index, the new word
+has the desired bound by hypothesis.  At all other indices, the old bound is
+weakened from \(bd(k)\) to \(bd'(k)\).
+
+\Lemma{poly_repr_bound_by_repr}
+The relation \(\code{poly_repr_bound_by}(rp,p,bd)\) implies
+\(\code{NTT_Fq.poly_repr}(rp,p)\).
+\Proof
+This is the first conjunct of the definition.
+
+\Lemma{poly_repr_bound_by_bound}
+The relation \(\code{poly_repr_bound_by}(rp,p,bd)\) implies
+\(\code{barray256_bound_by}(rp,bd)\).
+\Proof
+This is the second conjunct of the definition.
+
+\Lemma{fqmul_product_bound_16_24}
+If \(a\) is 16-bit bounded and \(b\) is 24-bit bounded, then
+\[
+ -\frac{R}{2}q
+ \le
+ \W.\operatorname{to\_sint}(a)\W.\operatorname{to\_sint}(b)
+ <
+ \frac{R}{2}q.
+\]
+\Proof
+The signed bounds give
+\(|\W.\operatorname{to\_sint}(a)|<2^{16}\) and
+\(|\W.\operatorname{to\_sint}(b)|<2^{24}\).  With the concrete HAETAE values
+of \(R\) and \(q\), the product interval is strictly contained in the
+Montgomery reducer input interval.  EasyCrypt discharges the remaining
+integer arithmetic by normalization and SMT.
+
+\Lemma{jzetas_bound16}
+Every forward twiddle table entry \(\code{jzetas}[i]\), for \(1\le i<256\), is
+16-bit bounded.
+\Proof
+Expand the concrete list \(\code{Hpoly_extract.jzetas}\) and use
+\code{BArray1024.get32_of_list32}.  Each of the 255 in-range constants is
+checked by reducing the signed word conversion and verifying its magnitude is
+below \(2^{16}\).
+
+\Lemma{jzetas_inv_bound16}
+Every inverse twiddle table entry \(\code{jzetas_inv}[i]\), for
+\(0\le i<256\), is 16-bit bounded.
+\Proof
+The proof is the same finite table enumeration as \code{jzetas_bound16}, now
+over all 256 entries of the inverse table, including the final scaling entry.
+
+\Lemma{barray256_bound_by_const}
+A uniform bound \(\code{NTT_Fq.barray256_bound}(rp,s)\) implies the pointwise
+bound by the constant function \(i\mapsto s\).
+\Proof
+Both definitions quantify over the same 256 indices.  Expanding
+\code{const_bound} makes the conclusions identical.
+
+\Lemma{barray256_bound_by_const_bound}
+Conversely, a pointwise bound by the constant function \(i\mapsto s\) implies
+\(\code{NTT_Fq.barray256_bound}(rp,s)\).
+\Proof
+Expand \code{const_bound}; the pointwise and uniform definitions coincide.
+
+\section{Forward Stage Arithmetic}
+
+The forward stage definitions encode the descending layer sequence:
+\[
+128,64,32,16,8,4,2,1,0.
+\]
+The associated bound table is
+\[
+\begin{array}{c|ccccccccc}
+\ell&128&64&32&16&8&4&2&1&0\\
+\midrule
+\code{fwd_stage_bound}(\ell)&16&17&18&19&20&21&22&23&24
+\end{array}
+\]
+and the twiddle base table is
+\[
+\begin{array}{c|ccccccccc}
+\ell&128&64&32&16&8&4&2&1&0\\
+\midrule
+\code{fwd_zbase}(\ell)&0&1&3&7&15&31&63&127&255.
+\end{array}
+\]
+
+\Lemma{fwd_stage_bound_range}
+For every legal forward length, \(\code{fwd_stage_bound}(\ell)\) lies between
+0 and 24.
+\Proof
+The predicate \code{fwd_len_ok} is a finite disjunction over the nine legal
+values.  Checking the definition of \code{fwd_stage_bound} on each case gives
+one of \(16,\ldots,24\).
+
+\Lemma{fwd_stage_bound_pos}
+For every legal forward length, \(\code{fwd_stage_bound}(\ell)\ge 0\).
+\Proof
+This is the lower half of \code{fwd_stage_bound_range}.
+
+\Lemma{fwd_stage_bound_lt31}
+For every legal forward length, \(\code{fwd_stage_bound}(\ell)<31\).
+\Proof
+The upper half of \code{fwd_stage_bound_range} gives at most \(24\), hence
+strictly less than \(31\).
+
+\Lemma{fwd_stage_bound_ge16}
+For every legal forward length, \(\code{fwd_stage_bound}(\ell)\ge 16\).
+\Proof
+Case analysis on the finite definition gives values \(16,\ldots,24\).
+
+\Lemma{fwd_stage_next}
+If \(\ell\) is a positive legal forward length, then
+\[
+  \code{fwd_stage_bound}(\ell/2)
+  =
+  \code{fwd_stage_bound}(\ell)+1.
+\]
+\Proof
+The positive legal lengths are \(128,\ldots,1\).  Halving moves one step to
+the right in the bound table, increasing the bound by one.
+
+\Lemma{fwd_len_next_ok}
+If \(\ell\) is a positive legal forward length, then \(\ell/2\) is again a
+legal forward length.
+\Proof
+The allowed positive lengths are powers of two from \(128\) to \(1\).  Dividing
+by two gives the next entry in the list, with \(1/2=0\) in integer division,
+which is included as the loop-exit length.
+
+\Lemma{fwd_zbase_next}
+For a positive legal length,
+\[
+  \code{fwd_zbase}(\ell/2)
+  =
+  \code{fwd_zbase}(\ell)+256/(2\ell).
+\]
+\Proof
+Each forward layer consumes \(256/(2\ell)\) twiddle entries.  The explicit
+\code{fwd_zbase} table records the cumulative number of entries consumed
+before the layer.  Case analysis over \(\ell=128,\ldots,1\) verifies the
+identity.
+
+\Lemma{fwd_zbase_range}
+For every legal forward length, \(\code{fwd_zbase}(\ell)\) lies between 0 and
+255.
+\Proof
+Immediate from the explicit table \(0,1,3,7,15,31,63,127,255\).
+
+\Lemma{fwd_read_range}
+Assume a positive legal length, a block start \(0\le start<256\), and
+\[
+start=2\ell\,(zc-\code{fwd_zbase}(\ell)).
+\]
+Then the forward table read index \(zc+1\) satisfies \(1\le zc+1<256\).
+\Proof
+The equation expresses \(zc-\code{fwd_zbase}(\ell)\) as the number of completed
+blocks in the layer.  Since \(start\) is a valid block start strictly below
+256, this number lies in the range of blocks of the current layer.  Combining
+this with the explicit \code{fwd_zbase} table gives \(zc+1\in\Range{1}{255}\).
+
+\Lemma{fwd_block_end_bound}
+Under the hypotheses of \code{fwd_read_range},
+\[
+  start+2\ell\le 256.
+\]
+\Proof
+The same block-count equation says that \(start\) is the beginning of a full
+block of size \(2\ell\) in a 256-entry array.  Legal layer sizes divide 256,
+so the end of the block is still within the array.
+
+\Lemma{fwd_stage_zbase_exit}
+If a positive forward layer exits the middle loop, so that
+\[
+  256=2\ell\,(zc-\code{fwd_zbase}(\ell)),
+\]
+then \(zc=\code{fwd_zbase}(\ell/2)\).
+\Proof
+At layer exit, the number of consumed blocks is \(256/(2\ell)\).  Adding this
+quantity to the old zeta base gives the next zeta base by
+\code{fwd_zbase_next}.
+
+\Lemma{fwd_middle_to_inner}
+The middle-loop bound at block start equals the inner-loop bound with
+\(j=start\):
+\[
+\code{fwd_middle_bound}(s,start,i)
+=
+\code{fwd_inner_bound}(s,\ell,start,start,i).
+\]
+\Proof
+At the beginning of a block, no coefficient of that block has been processed
+yet.  Expanding both definitions shows that the only entries assigned the
+larger bound are exactly those with \(0\le i<start\).
+
+\Lemma{fwd_inner_current}
+For \(j\) inside the current block, the current butterfly inputs \(j\) and
+\(j+\ell\) have bound \(s\), and after advancing to \(j+1\) both positions
+have bound \(s+1\).
+\Proof
+Unfold \code{fwd_inner_bound}.  Before processing the pair, neither \(j\) nor
+\(j+\ell\) lies in the completed subranges.  After incrementing \(j\), both
+positions lie in completed subranges.
+
+\Lemma{fwd_inner_weaken_unchanged}
+For any index \(k\) distinct from \(j\) and \(j+\ell\), the inner bound at
+\(j\) is no larger than the inner bound at \(j+1\).
+\Proof
+Advancing the inner loop only adds the two current positions to the processed
+sets.  All other positions either keep the same status or move from smaller to
+larger bound.  The result follows by unfolding the range predicates.
+
+\Lemma{fwd_inner_exit_to_middle}
+At \(j=start+\ell\), the inner-loop bound equals the middle-loop bound for the
+next block start \(start+2\ell\).
+\Proof
+At inner-loop exit, both halves of the block have been processed.  The union of
+the old completed prefix, the first half of the block, and the second half of
+the block is precisely the prefix \(0\le i<start+2\ell\).
+
+\Lemma{fwd_middle_exit_const}
+If \(start\ge 256\), then every in-range index has
+\[
+\code{fwd_middle_bound}(s,start,i)=s+1.
+\]
+\Proof
+Every \(i\in\Range{0}{255}\) satisfies \(i<start\), so the first branch of
+\code{fwd_middle_bound} applies.
+
+\Lemma{fwd_middle_start_const}
+At \(start=0\),
+\[
+\code{fwd_middle_bound}(s,0,i)=s.
+\]
+\Proof
+No index satisfies \(0\le i<0\), so the default branch of the definition
+applies.
+
+\section{Forward Butterfly and Twiddle Lemmas}
+
+\Lemma{forward_twiddle_product}
+Given a representation relation \(rp\sim p\), a valid forward twiddle index
+\(zc\), and operands \(ai=\code{jzetas}[zc]\) and
+\(bi=rp[j+\ell]\), a call to \code{__fqmul} returns a word representing
+\[
+  \code{zetas}[zc]\cdot p[j+\ell].
+\]
+\Proof
+The representation relation gives
+\[
+p[j+\ell]=\operatorname{word}(bi).
+\]
+The multiplication correctness lemma gives
+\[
+\operatorname{word}(res)
+=\operatorname{word}(ai)\operatorname{word}(bi)R^{-1}.
+\]
+By \code{jzetas_get_cancel},
+\(\operatorname{word}(ai)R^{-1}=\code{zetas}[zc]\).  Associativity and
+commutativity in \(\Fq\) yield the result.
+
+\Lemma{forward_twiddle_product_bound_h}
+This strengthens \code{forward_twiddle_product} with the postcondition
+\(\bw(res,16)\).
+\Proof
+The semantic part is \code{forward_twiddle_product}.  The bound part is
+\code{fqmul_bw32_16}, using the same product-range hypothesis.
+
+\Lemma{forward_twiddle_product_bound_ph}
+This is the probability-one \code{phoare} form of
+\code{forward_twiddle_product_bound_h}.
+\Proof
+Combine losslessness of \code{__fqmul} with the ordinary Hoare triple.
+
+\Lemma{forward_twiddle_product_bound_call_h}
+This is a call-friendly Hoare triple for \code{__fqmul}: all equalities tying
+local variables to the table entry and coefficient word are included in the
+precondition, and the postcondition gives both the abstract twiddle product and
+the 16-bit result bound.
+\Proof
+Apply \code{fqmul_word_to_coeff_mul_bound_h}.  Then rewrite the local-variable
+equalities, use \code{poly_repr_get} for \(p[j+\ell]\), and use
+\code{jzetas_get_cancel} to remove the Montgomery factor.
+
+\Lemma{forward_twiddle_product_bound_call_ph}
+The probability-one version of \code{forward_twiddle_product_bound_call_h}.
+\Proof
+Use \code{Fq.fqmul_ll} and the Hoare triple
+\code{forward_twiddle_product_bound_call_h}.
+
+\Lemma{forward_twiddle_value}
+If a word \(t\) is known to satisfy
+\[
+\operatorname{word}(t)=\operatorname{word}(ai)\operatorname{word}(bi)R^{-1},
+\]
+with \(ai=\code{jzetas}[zc]\) and \(bi=rp[j+\ell]\), then
+\[
+\operatorname{word}(t)=\code{zetas}[zc]p[j+\ell].
+\]
+\Proof
+This is the pure post-call version of \code{forward_twiddle_product}.  The
+representation relation identifies \(bi\) with \(p[j+\ell]\), and
+\code{jzetas_get_cancel} identifies the table entry after multiplying by
+\(R^{-1}\).
+
+\Lemma{forward_butterfly_store}
+If \(rp\sim p\), \(s=rp[j]\), and the word operations \(s-t\) and \(s+t\) are
+within their signed ranges, then the two stores
+\[
+rp[j+\ell]\leftarrow s-t,\qquad rp[j]\leftarrow s+t
+\]
+represent the polynomial update
+\[
+p[j+\ell]\leftarrow p[j]-\operatorname{word}(t),\qquad
+p[j]\leftarrow p[j]+\operatorname{word}(t).
+\]
+\Proof
+The representation relation gives \(p[j]=\operatorname{word}(s)\).  The lemmas
+\code{word_to_coeff_sub} and \code{word_to_coeff_add} convert the stored words
+to the corresponding field subtraction and addition.  Two applications of
+\code{NTT_Fq.poly_repr_set32} complete the representation proof.
+
+\Lemma{forward_butterfly_store_bound}
+Under a uniform \(s\)-bit input bound and a 16-bit bound on \(t\), the two
+stores above produce a representation bounded by \(\max(s,16)+1\).
+\Proof
+The representation part is \code{forward_butterfly_store}.  The bound part
+uses \code{forward_butterfly_bounds} for the two updated words, weakens all
+untouched lanes to the larger bound, and applies the uniform
+\code{barray256_bound_set32} lemmas.
+
+\Lemma{forward_butterfly_store_bound_by}
+This is the pointwise-bound version of \code{forward_butterfly_store_bound}.
+It assumes that the current pair \(j,j+\ell\) has bound \(a_s\), and that the
+target bound \(bd'\) raises exactly those two positions to \(a_s+1\).
+\Proof
+Use \code{forward_butterfly_store} for the representation.  Use
+\code{forward_butterfly_bounds} for the two newly written words.  The first
+store is handled by \code{barray256_bound_by_set32_change}; the second by
+\code{barray256_bound_by_set32}.  The hypothesis on untouched lanes supplies
+all weakenings.
+
+\Lemma{forward_spec_updateE}
+The two syntactic forms of the forward specification update are extensionally
+equal:
+\[
+(p[j+\ell\leftarrow p[j]-t])[j\leftarrow(p[j+\ell\leftarrow p[j]-t])[j]+t]
+=
+(p[j+\ell\leftarrow p[j]-t])[j\leftarrow p[j]+t].
+\]
+\Proof
+Since \(\ell>0\), the indices \(j\) and \(j+\ell\) are distinct.  Extensional
+array equality reduces the claim to an arbitrary index \(i\); the get-after-set
+rules split on whether \(i\) is \(j\), \(j+\ell\), or neither.
+
+\Lemma{forward_butterfly_step_bound_by}
+One full forward butterfly step preserves representation and updates the
+pointwise inner-loop bound from
+\(\code{fwd_inner_bound}(s,\ell,start,j)\) to
+\(\code{fwd_inner_bound}(s,\ell,start,j+1)\).
+\Proof
+\code{fwd_inner_current} shows that the two current inputs have bound \(s\).
+The 16-bit multiplication result is the \(t\) input to the store.  Apply
+\code{forward_butterfly_store_bound_by}; the untouched-lane weakening is
+exactly \code{fwd_inner_weaken_unchanged}.  Finally
+\code{forward_spec_updateE} aligns the array update with the right-hand
+imperative specification.
+
+\Lemma{forward_twiddle_product_bound_from_inner}
+Inside the forward inner-loop invariant, the product
+\[
+\code{jzetas}[zc]\cdot rp[j+\ell]
+\]
+meets the signed Montgomery reducer input range.
+\Proof
+\code{jzetas_bound16} gives the 16-bit twiddle bound.  By
+\code{fwd_inner_current}, the current second butterfly input has bound
+\code{fwd_stage_bound} at length \(\ell\); this bound is at most 24 by
+\code{fwd_stage_bound_range}.  Weakening gives a 24-bit coefficient bound.
+Now apply \code{fqmul_product_bound_16_24}.
+
+\Lemma{forward_butterfly_repr}
+If \(t\) already represents the abstract product
+\(\code{zetas}[zc]p[j+\ell]\), then the two Jasmin stores represent the forward
+specification butterfly update.
+\Proof
+Apply \code{forward_butterfly_store} and rewrite
+\(\operatorname{word}(t)\) to the abstract product.
+
+\Lemma{forward_butterfly_step}
+If \(t\) satisfies the Montgomery product equation using the concrete forward
+twiddle and input word, then the two stores represent the abstract forward
+butterfly update.
+\Proof
+First use \code{forward_twiddle_value} to convert the Montgomery product
+equation into the abstract product equation.  Then apply
+\code{forward_butterfly_repr}.
+
+\section{Inverse Stage Arithmetic}
+
+The inverse stage definitions encode the ascending layer sequence:
+\[
+1,2,4,8,16,32,64,128,256.
+\]
+The predicate \code{inv_len_ok} is the finite disjunction recognizing exactly
+these legal loop lengths.
+The bound table is again \(16,\ldots,24\), while the inverse zeta base table is
+\[
+\begin{array}{c|ccccccccc}
+\ell&1&2&4&8&16&32&64&128&256\\
+\midrule
+\code{inv_zbase}(\ell)&0&128&192&224&240&248&252&254&255.
+\end{array}
+\]
+
+\Lemma{inv_stage_bound_range}
+For every legal inverse length, \(\code{inv_stage_bound}(\ell)\) lies between
+0 and 24.
+\Proof
+Case analysis over the legal inverse lengths gives one of the values
+\(16,\ldots,24\).
+
+\Lemma{inv_stage_bound_pos}
+For every legal inverse length, \(\code{inv_stage_bound}(\ell)\ge 0\).
+\Proof
+This is immediate from \code{inv_stage_bound_range}.
+
+\Lemma{inv_stage_bound_lt31}
+For every legal inverse length, \(\code{inv_stage_bound}(\ell)<31\).
+\Proof
+\code{inv_stage_bound_range} gives an upper bound of 24.
+
+\Lemma{inv_stage_bound_ge16}
+For every legal inverse length, \(\code{inv_stage_bound}(\ell)\ge 16\).
+\Proof
+Each case in the explicit definition is one of \(16,\ldots,24\).
+
+\Lemma{inv_stage_next}
+If \(\ell<256\) is a legal inverse length, then
+\[
+\code{inv_stage_bound}(2\ell)
+=
+\code{inv_stage_bound}(\ell)+1.
+\]
+\Proof
+Doubling moves one step to the right in the inverse bound table.
+
+\Lemma{inv_len_next_ok}
+If \(\ell<256\) is a legal inverse length, then \(2\ell\) is legal.
+\Proof
+The legal values are powers of two from 1 through 256.  Doubling a value below
+256 gives the next value in the list.
+
+\Lemma{inv_zbase_range}
+For every legal inverse length, \(\code{inv_zbase}(\ell)\) lies between 0 and
+255.
+\Proof
+Immediate from the explicit inverse base table.
+
+\Lemma{inv_read_range}
+Assume a legal inverse length \(\ell<256\), \(0\le start<256\), and
+\[
+start=2\ell\,(zc-\code{inv_zbase}(\ell)).
+\]
+Then \(zc\in\Range{0}{254}\).
+\Proof
+The equation identifies \(zc-\code{inv_zbase}(\ell)\) with the completed block
+count in the current inverse layer.  Since \(start\) is a valid block start and
+\(\ell<256\), the layer consumes only indices below 255; checking the finite
+base table gives \(zc\in\Range{0}{254}\).
+
+\Lemma{inv_block_end_bound}
+Under the same hypotheses,
+\[
+start+2\ell\le 256.
+\]
+\Proof
+The start position is a valid block beginning in a layer whose block size is
+\(2\ell\), and legal inverse lengths divide 256.
+
+\Lemma{inv_stage_zbase_exit}
+If an inverse layer exits with
+\[
+256=2\ell\,(zc-\code{inv_zbase}(\ell)),
+\]
+then \(zc=\code{inv_zbase}(2\ell)\).
+\Proof
+At layer exit, the number of consumed twiddle entries is the number of blocks
+in the layer.  Adding that count to the old base gives the next base by the
+explicit inverse table.
+
+\Lemma{inv_middle_to_inner}
+At block start, the inverse middle bound equals the inverse inner bound with
+\(j=start\).
+\Proof
+No coefficient of the new block has been processed yet; unfolding the two
+definitions leaves exactly the same processed prefix \(0\le i<start\).
+
+\Lemma{inv_inner_current}
+For \(j\) inside an inverse block, the current inputs \(j\) and \(j+\ell\) have
+the old stage bound \(s\), and after advancing to \(j+1\) both have bound
+\(s+1\).
+\Proof
+The inverse inner bound has the same shape as the forward one.  The current
+pair is outside the completed subranges before the step and inside them after
+the step.
+
+\Lemma{inv_inner_weaken_unchanged}
+For indices other than the current pair, the inverse inner bound can only stay
+the same or increase when \(j\) advances to \(j+1\).
+\Proof
+Unfold the definition.  Advancing the loop extends the completed ranges by
+exactly the two current positions.
+
+\Lemma{inv_inner_exit_to_middle}
+At inverse inner-loop exit, the inverse inner bound is the middle bound for
+the next block start.
+\Proof
+At \(j=start+\ell\), the entire block \(start,\ldots,start+2\ell-1\) has been
+processed.  This is exactly the prefix extension represented by
+\(\code{inv_middle_bound}(s,start+2\ell,-)\).
+
+\Lemma{inv_middle_exit_const}
+If \(start\ge 256\), every in-range index has inverse middle bound \(s+1\).
+\Proof
+All indices \(0,\ldots,255\) lie below \(start\), so they are in the completed
+prefix.
+
+\Lemma{inv_middle_start_const}
+At \(start=0\), the inverse middle bound is the constant bound \(s\).
+\Proof
+The completed prefix is empty.
+
+\Lemma{inverse_spec_updateE}
+The generated inverse update expression is extensionally equal to the compact
+mathematical update
+\[
+(p[j\leftarrow p[j]+p[j+\ell]])[j+\ell\leftarrow z(p[j]-p[j+\ell])].
+\]
+\Proof
+Since \(\ell>0\), the indices \(j\) and \(j+\ell\) are distinct.  Extensional
+array equality and get-after-set case analysis reduce both sides to the same
+value at every index.
+
+\section{Inverse Butterfly and Twiddle Lemmas}
+
+\Lemma{inverse_twiddle_product_bound_call_h}
+For a valid inverse twiddle index \(zc\), if \(ai=\code{jzetas_inv}[zc]\) and
+\(bi\) represents the field difference \(diff\), and the signed product bound
+holds, then \code{__fqmul} returns a 16-bit word representing
+\[
+\code{zetas_inv}[zc]\cdot diff.
+\]
+\Proof
+\code{fqmul_word_to_coeff_mul_bound_h} gives
+\[
+\operatorname{word}(res)=\operatorname{word}(ai)\operatorname{word}(bi)R^{-1}
+\]
+and a 16-bit result bound.  Substitute \(\operatorname{word}(bi)=diff\), and
+use \code{jzetas_inv_get_cancel} to replace
+\(\operatorname{word}(ai)R^{-1}\) by \(\code{zetas_inv}[zc]\).
+
+\Lemma{inverse_twiddle_product_bound_call_ph}
+The probability-one version of \code{inverse_twiddle_product_bound_call_h}.
+\Proof
+Combine the ordinary Hoare triple with \code{Fq.fqmul_ll}.
+
+\Lemma{inverse_twiddle_value}
+If a word \(t\) satisfies the Montgomery product equation with an inverse
+twiddle and the field difference \(p[j]-p[j+\ell]\), then
+\[
+\operatorname{word}(t)=\code{zetas_inv}[zc]\,(p[j]-p[j+\ell]).
+\]
+\Proof
+Substitute \(ai=\code{jzetas_inv}[zc]\) and use
+\code{jzetas_inv_get_cancel}.  The remaining equality is associativity in
+\(\Fq\).
+
+\Lemma{inverse_butterfly_store}
+If \(rp\sim p\), \(t_0=rp[j]\), \(coeff=rp[j+\ell]\), and \(t\) represents the
+desired target value, then the stores
+\[
+rp[j]\leftarrow t_0+coeff,\qquad rp[j+\ell]\leftarrow t
+\]
+represent the inverse butterfly update
+\[
+p[j]\leftarrow p[j]+p[j+\ell],\qquad p[j+\ell]\leftarrow target.
+\]
+\Proof
+The representation relation identifies \(t_0\) and \(coeff\) with
+\(p[j]\) and \(p[j+\ell]\).  The lemma \code{word_to_coeff_add} converts
+\(t_0+coeff\) into the field sum.  Two applications of
+\code{NTT_Fq.poly_repr_set32} prove the representation after the two stores.
+
+\Lemma{inverse_butterfly_store_bound}
+Under a uniform \(s\)-bit bound and a 16-bit bound on \(t\), the inverse
+butterfly stores produce a representation bounded by \(\max(s,16)+1\).
+\Proof
+The representation part is \code{inverse_butterfly_store}.  The bound for
+\(t_0+coeff\) follows from \code{Fq.add_corr}; the bound for \(t\) is weakened
+from 16 bits.  Untouched entries are weakened from \(s\) to the larger bound,
+and the two store-bound lemmas finish the proof.
+
+\Lemma{inverse_butterfly_store_bound_by}
+This is the pointwise-bound version of the previous lemma.  The two current
+inputs have bound \(a_s\); the target bound raises both updated positions to
+\(a_s+1\).
+\Proof
+Use \code{inverse_butterfly_store} for representation and
+\code{inverse_butterfly_bounds} for the new sum bound.  The freshly multiplied
+word is 16-bit and therefore weakens to \(a_s+1\).  The two pointwise
+get-after-set lemmas handle the stores.
+
+\Lemma{inverse_butterfly_step_bound_by}
+One full inverse butterfly step preserves representation and advances the
+inverse inner-loop bound from \(j\) to \(j+1\).
+\Proof
+\code{inv_inner_current} supplies the bounds on the two inputs.
+\code{inverse_butterfly_store_bound_by} performs the store proof.  The
+untouched-lane hypothesis is supplied by \code{inv_inner_weaken_unchanged}.
+
+\Lemma{inverse_twiddle_product_bound_from_inner}
+Inside the inverse inner-loop invariant, the word difference
+\[
+rp[j]-rp[j+\ell]
+\]
+has bound \(\code{inv_stage_bound}(\ell)+1\).
+\Proof
+\code{inv_inner_current} gives the same stage bound for the two current input
+words.  Applying \code{Fq.sub_corr} to those two bounded words gives one
+additional bit for the difference.
+
+\Lemma{inverse_twiddle_product_call_bound_from_inner}
+Inside the inverse inner-loop invariant, the product of the inverse twiddle
+and the word difference lies in the signed Montgomery reducer input range.
+\Proof
+The inverse twiddle is 16-bit by \code{jzetas_inv_bound16}.  The difference is
+bounded by \code{inv_stage_bound} at length \(\ell\), plus one bit, by the previous lemma; for
+\(\ell<256\) this is at most 24.  Weakening gives a 24-bit bound, and
+\code{fqmul_product_bound_16_24} supplies the reducer range.
+
+\Lemma{inverse_butterfly_step_full}
+If \(t\) satisfies the Montgomery product equation for the inverse twiddle and
+the field difference, then the two stores represent the abstract inverse
+butterfly update.
+\Proof
+Use \code{inverse_twiddle_value} to convert the Montgomery product equation
+into the abstract product with \(\code{zetas_inv}[zc]\).  Then apply
+\code{inverse_butterfly_store}.
+
+\Lemma{inverse_butterfly_repr}
+This is another representation-only form of the inverse butterfly step, using
+the same hypotheses as \code{inverse_butterfly_step_full}.
+\Proof
+The proof is identical in structure: derive the abstract value of \(t\) by
+\code{inverse_twiddle_value}, then call \code{inverse_butterfly_store}.
+
+\section{Final Inverse Scaling Lemmas}
+
+The final inverse loop is tracked by the ghost array
+\[
+\code{final_mont_array}(p,j)[i]
+=
+\begin{cases}
+p[i]R,&0\le i<j,\\
+p[i],&\text{otherwise}.
+\end{cases}
+\]
+The matching bound function is
+\[
+\code{final_bound}(j,i)
+=
+\begin{cases}
+16,&0\le i<j,\\
+24,&\text{otherwise}.
+\end{cases}
+\]
+
+\Lemma{final_mont_array_start}
+\[
+\code{final_mont_array}(p,0)=p.
+\]
+\Proof
+The prefix \(0\le i<0\) is empty, so the initializer returns \(p[i]\) at every
+index.
+
+\Lemma{final_mont_array_exit}
+\[
+\code{final_mont_array}(p,256)=\code{NTT_Fq.array256_mont}(p).
+\]
+\Proof
+Every array index lies in the prefix \(0\le i<256\).  Hence the initializer
+returns \(p[i]R\) at each index, which is exactly \code{array256_mont} by
+\code{array256_mont_get}.
+
+\Lemma{final_mont_array_get_raw}
+If \(0\le j<256\), then the \(j\)-th entry of
+\(\code{final_mont_array}(p,j)\) is still \(p[j]\).
+\Proof
+The condition for Montgomery scaling is \(0\le i<j\).  At \(i=j\), this
+condition is false, so the raw entry \(p[j]\) is returned.
+
+\Lemma{final_mont_array_setE}
+For \(0\le j<256\), storing \(p[j]\cdot\code{scale255}\cdot R\) at index \(j\)
+of \(\code{final_mont_array}(p,j)\) yields
+\[
+\code{final_mont_array}(p[j\leftarrow p[j]\cdot\code{scale255}],j+1).
+\]
+\Proof
+Use extensional equality.  At \(i=j\), both sides are the newly scaled value.
+For \(i<j\), both sides are already Montgomery-scaled.  For \(i>j\), both
+sides are still raw entries.  The get-after-set rules separate these cases.
+
+\Lemma{final_bound_start}
+\[
+\code{final_bound}(0,i)=24.
+\]
+\Proof
+No index lies in the processed prefix \(0\le i<0\).
+
+\Lemma{final_bound_next_unchanged}
+If \(k\ne j\), then the bound at \(k\) under \(\code{final_bound}(j,-)\) is no
+larger than the bound under \(\code{final_bound}(j+1,-)\).
+\Proof
+Advancing \(j\) changes only the status of index \(j\), moving it from the
+24-bit unprocessed region to the 16-bit processed region.  Every other index
+keeps the same status, or is already in the processed prefix.
+
+\Lemma{inverse_final_product_bound_call_h}
+For the special table entry \(ai=\code{jzetas_inv}[255]\), if \(bi\) represents
+\(coeff\) and the signed product bound holds, then \code{__fqmul} returns a
+16-bit word representing
+\[
+coeff\cdot \code{scale255}\cdot R.
+\]
+\Proof
+\code{fqmul_word_to_coeff_mul_bound_h} gives the Montgomery product
+\(\operatorname{word}(ai)\operatorname{word}(bi)R^{-1}\) and the 16-bit bound.
+The hypothesis identifies \(\operatorname{word}(bi)=coeff\), and
+\code{jzetas_inv_255_scale_cancel} rewrites
+\(\operatorname{word}(ai)R^{-1}\) as \(\code{scale255}R\).
+
+\Lemma{inverse_final_product_bound_call_ph}
+The probability-one version of \code{inverse_final_product_bound_call_h}.
+\Proof
+Use losslessness of \code{__fqmul} and the ordinary Hoare triple.
+
+\Lemma{inverse_final_product_bound_from_inv}
+Under the final-loop bound invariant, the product of
+\(\code{jzetas_inv}[255]\) and the current unprocessed coefficient word lies in
+the signed Montgomery reducer input range.
+\Proof
+\code{jzetas_inv_bound16} gives the 16-bit bound for the scale table entry.
+The current unprocessed coefficient has 24-bit bound by \code{final_bound}.
+Apply \code{fqmul_product_bound_16_24}.
+
+\section{Wrapper and Core pRHL Equivalences}
+
+\Lemma{poly_ntt_jazz_ref}
+The public extracted wrapper \code{poly_ntt_jazz} is equivalent to the core
+procedure \code{_poly_ntt} under equality of the input buffer and equality of
+the result.
+\Proof
+The wrapper contains only the core call.  Inlining all procedures reduces both
+sides to the same program, and pRHL simulation proves equality of results.
+
+\Lemma{poly_invntt_jazz_ref}
+The public extracted wrapper \code{poly_invntt_jazz} is equivalent to the core
+procedure \code{_poly_invntt}.
+\Proof
+As in the forward case, inlining exposes a direct call to the core routine, and
+the two sides simulate identically.
+
+\Lemma{poly_ntt_core_ref}
+The extracted forward core refines the imperative EasyCrypt forward NTT:
+\[
+\begin{array}{l}
+\code{Hpoly_extract.M._poly_ntt}
+\sim
+\code{NTT_Fq.NTT.ntt},\\[0.3em]
+\code{poly_repr_bound}(rp_1,r_2,16)\land
+\code{zetas}_2=\code{NTT_Fq.zetas}\\
+\qquad\Longrightarrow
+\code{poly_repr_bound}(res_1,res_2,24).
+\end{array}
+\]
+\Proof
+The proof is a direct three-loop pRHL simulation.  The outer invariant aligns
+the layer length, twiddle counter, table pointers, representation relation,
+and a uniform pointwise bound
+\(\code{fwd_stage_bound}(\ell)\).  The middle invariant refines the bound to
+\code{fwd_middle_bound}, distinguishing completed blocks from untouched
+blocks.  The inner invariant refines it further to \code{fwd_inner_bound},
+distinguishing completed butterflies inside the current block.
+
+At each inner iteration, \code{forward_twiddle_product_bound_call_ph} verifies
+the call to \code{__fqmul}; its product-range precondition is supplied by
+\code{forward_twiddle_product_bound_from_inner}.  The subsequent stores are
+verified by \code{forward_butterfly_step_bound_by}.  Inner-loop exit uses
+\code{fwd_inner_exit_to_middle}; middle-loop exit uses
+\code{fwd_middle_exit_const}; outer-loop advancement uses
+\code{fwd_stage_next}, \code{fwd_len_next_ok}, and \code{fwd_zbase_next}.  At
+outer-loop exit, \(\ell=0\), so the bound is 24, giving the stated
+postcondition.
+
+\Lemma{poly_invntt_core_ref}
+The extracted inverse core refines the imperative EasyCrypt inverse NTT:
+\[
+\begin{array}{l}
+\code{Hpoly_extract.M._poly_invntt}
+\sim
+\code{NTT_Fq.NTT.invntt},\\[0.3em]
+\code{poly_repr_bound}(rp_1,r_2,16)\land
+\code{zetas_inv}_2=\code{NTT_Fq.zetas_inv}\\
+\qquad\Longrightarrow
+\code{poly_repr_bound}(res_1,\code{NTT_Fq.array256_mont}(res_2),16).
+\end{array}
+\]
+\Proof
+The inverse proof has two phases.  First, weakest-precondition reasoning
+encounters the syntactically final scaling loop.  Its invariant represents the
+left buffer as \code{final_mont_array} of the right buffer and uses
+\code{final_bound} to say that the processed prefix is 16-bit while the
+unprocessed suffix is 24-bit.  Each iteration is justified by
+\code{inverse_final_product_bound_call_ph} and
+\code{inverse_final_product_bound_from_inv}.  The lemmas
+\code{final_mont_array_setE}, \code{final_bound_next_unchanged}, and
+\code{final_mont_array_exit} carry the loop from an empty Montgomery prefix to
+\code{array256_mont}.
+
+Second, the proof establishes the eight inverse butterfly layers with the same
+three-loop structure as the forward proof, using \code{inv_stage_bound},
+\code{inv_middle_bound}, and \code{inv_inner_bound}.  The multiplication call
+inside a butterfly is handled by \code{inverse_twiddle_product_bound_call_ph};
+the product-range side condition comes from
+\code{inverse_twiddle_product_call_bound_from_inner}.  The stores are handled
+by \code{inverse_butterfly_step_bound_by}, and \code{inverse_spec_updateE}
+aligns the right-hand array update with the generated program expression.
+Layer advancement uses \code{inv_stage_next}, \code{inv_len_next_ok}, and
+\code{inv_stage_zbase_exit}.  After the butterfly layers, the output is
+represented with a 24-bit bound; this initializes the final scaling invariant.
+The final loop then reduces every entry back to 16 bits and produces the
+Montgomery-scaled representation required by the theorem.
+
+\section{Conclusion}
+
+Every lemma in \code{RefJasminNTT.ec} serves one of four mathematical roles:
+\begin{enumerate}
+\item interpreting machine words as field elements without overflow;
+\item cancelling Montgomery factors in concrete twiddle tables;
+\item maintaining pointwise word-size bounds through butterfly loops;
+\item assembling those local facts into direct pRHL simulations of the
+      extracted forward and inverse NTT cores.
+\end{enumerate}
+The final result is a checked refinement layer from Jasmin extraction to the
+imperative EasyCrypt NTT model, with the inverse postcondition strengthened to
+the mathematically correct Montgomery-scaled representation.
+
+\end{document}

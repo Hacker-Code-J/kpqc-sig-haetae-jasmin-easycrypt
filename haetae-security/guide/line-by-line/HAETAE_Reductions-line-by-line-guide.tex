@@ -1,0 +1,546 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[landscape,margin=0.45in]{geometry}
+\usepackage{array,booktabs,longtable,hyperref,xcolor}
+\setlength{\emergencystretch}{3em}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcommand{\file}[1]{\nolinkurl{#1}}
+\hypersetup{colorlinks=true,linkcolor=blue!55!black,urlcolor=blue!55!black}
+\title{Line-by-Line Mathematical Guide for HAETAE\_Reductions.ec}
+\author{Generated HAETAE EasyCrypt proof guide}
+\date{2026-05-11}
+\begin{document}
+\maketitle
+
+\section*{File Role}
+Concrete loss terms and arithmetic normalization.
+
+\section*{How To Read This Script}
+Read this file as the real-arithmetic ledger.  It collects the bound expressions and proves they can be grouped in the form consumed by the top-level security theorem.
+
+\section*{Line-by-Line Mathematical Reading}
+Each row preserves one EasyCrypt source line and gives the intended mathematical
+or proof-script reading.  Blank rows are kept because they mark proof structure
+in long EasyCrypt developments.
+
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{r L{0.53\textwidth} L{0.37\textwidth}}
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Line} & \textbf{EasyCrypt source} & \textbf{Mathematical reading} \\
+\midrule
+\endhead
+1 & {\ttfamily\scriptsize require import AllCore Real RealExp StdOrder.} & Imports AllCore Real RealExp StdOrder.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+2 & {\ttfamily\scriptsize require import HAETAE\_Events.} & Imports HAETAE\_Events.  Mathematically, this exposes earlier carrier sets, operations, games, and lemmas that the current file may cite. \\
+3 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+4 & {\ttfamily\scriptsize theory HAETAE\_Reductions.} & Begins the namespace HAETAE\_Reductions, grouping the declarations as one checked theory. \\
+5 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+6 & {\ttfamily\scriptsize import HAETAE\_Events.} & Opens HAETAE\_Events so its names can be used without qualification in the following proof. \\
+7 & {\ttfamily\scriptsize import RealOrder.} & Opens RealOrder so its names can be used without qualification in the following proof. \\
+8 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+9 & {\ttfamily\scriptsize op mlwe\_hardness\_term : real.} & Defines real-valued term mlwe\_hardness\_term, usually a loss, probability bound, or advantage expression. \\
+10 & {\ttfamily\scriptsize op module\_sis\_hardness\_term : real.} & Defines real-valued term module\_sis\_hardness\_term, usually a loss, probability bound, or advantage expression. \\
+11 & {\ttfamily\scriptsize op bimodal\_to\_msis\_reduction\_loss\_term : real = 0\%r.} & Defines real-valued term bimodal\_to\_msis\_reduction\_loss\_term, usually a loss, probability bound, or advantage expression. \\
+12 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+13 & {\ttfamily\scriptsize op bimodal\_selftarget\_msis\_hardness\_term =} & Defines operation bimodal\_selftarget\_msis\_hardness\_term, a total mathematical function or abbreviation used by later declarations. \\
+14 & {\ttfamily\scriptsize   module\_sis\_hardness\_term + bimodal\_to\_msis\_reduction\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+15 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+16 & {\ttfamily\scriptsize op signature\_query\_count : real = 2\%r.} & Defines real-valued term signature\_query\_count, usually a loss, probability bound, or advantage expression. \\
+17 & {\ttfamily\scriptsize op hash\_query\_count : real = 2\%r.} & Defines real-valued term hash\_query\_count, usually a loss, probability bound, or advantage expression. \\
+18 & {\ttfamily\scriptsize op signature\_query\_budget\_count : int = 2.} & Defines integer-valued parameter signature\_query\_budget\_count, used for dimensions, budgets, support sizes, or bounds. \\
+19 & {\ttfamily\scriptsize op hash\_query\_budget\_count : int = 2.} & Defines integer-valued parameter hash\_query\_budget\_count, used for dimensions, budgets, support sizes, or bounds. \\
+20 & {\ttfamily\scriptsize op abort\_probability : real = 0\%r.} & Defines real-valued term abort\_probability, usually a loss, probability bound, or advantage expression. \\
+21 & {\ttfamily\scriptsize op min\_entropy\_loss\_factor : real = 2\%r.} & Defines real-valued term min\_entropy\_loss\_factor, usually a loss, probability bound, or advantage expression. \\
+22 & {\ttfamily\scriptsize op challenge\_support\_bits\_lower\_bound : int = 58.} & Defines integer-valued parameter challenge\_support\_bits\_lower\_bound, used for dimensions, budgets, support sizes, or bounds. \\
+23 & {\ttfamily\scriptsize op challenge\_support\_cardinality\_lower\_bound : real =} & Defines real-valued term challenge\_support\_cardinality\_lower\_bound, usually a loss, probability bound, or advantage expression. \\
+24 & {\ttfamily\scriptsize   288230376151711744\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+25 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+26 & {\ttfamily\scriptsize op rom\_hash\_query\_budget : real = hash\_query\_count.} & Defines real-valued term rom\_hash\_query\_budget, usually a loss, probability bound, or advantage expression. \\
+27 & {\ttfamily\scriptsize op rom\_signature\_query\_budget : real = signature\_query\_count.} & Defines real-valued term rom\_signature\_query\_budget, usually a loss, probability bound, or advantage expression. \\
+28 & {\ttfamily\scriptsize op rom\_total\_query\_budget =} & Defines operation rom\_total\_query\_budget, a total mathematical function or abbreviation used by later declarations. \\
+29 & {\ttfamily\scriptsize   rom\_hash\_query\_budget + rom\_signature\_query\_budget + 1\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+30 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+31 & {\ttfamily\scriptsize op counted\_rom\_collision\_term =} & Defines operation counted\_rom\_collision\_term, a total mathematical function or abbreviation used by later declarations. \\
+32 & {\ttfamily\scriptsize   (rom\_total\_query\_budget * rom\_total\_query\_budget) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+33 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+34 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+35 & {\ttfamily\scriptsize op counted\_rom\_prequery\_term =} & Defines operation counted\_rom\_prequery\_term, a total mathematical function or abbreviation used by later declarations. \\
+36 & {\ttfamily\scriptsize   (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+37 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+38 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+39 & {\ttfamily\scriptsize op counted\_rom\_min\_entropy\_term =} & Defines operation counted\_rom\_min\_entropy\_term, a total mathematical function or abbreviation used by later declarations. \\
+40 & {\ttfamily\scriptsize   (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+41 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+42 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+43 & {\ttfamily\scriptsize op counted\_rom\_prequery\_reprogramming\_term =} & Defines operation counted\_rom\_prequery\_reprogramming\_term, a total mathematical function or abbreviation used by later declarations. \\
+44 & {\ttfamily\scriptsize   counted\_rom\_collision\_term + counted\_rom\_prequery\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+45 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+46 & {\ttfamily\scriptsize op counted\_rom\_programming\_loss\_term =} & Defines operation counted\_rom\_programming\_loss\_term, a total mathematical function or abbreviation used by later declarations. \\
+47 & {\ttfamily\scriptsize   counted\_rom\_collision\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+48 & {\ttfamily\scriptsize   counted\_rom\_prequery\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+49 & {\ttfamily\scriptsize   counted\_rom\_min\_entropy\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+50 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+51 & {\ttfamily\scriptsize op signing\_query\_scale =} & Defines operation signing\_query\_scale, a total mathematical function or abbreviation used by later declarations. \\
+52 & {\ttfamily\scriptsize   signature\_query\_count / (1\%r - abort\_probability).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+53 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+54 & {\ttfamily\scriptsize op fs\_with\_aborts\_reprogramming\_term =} & Defines operation fs\_with\_aborts\_reprogramming\_term, a total mathematical function or abbreviation used by later declarations. \\
+55 & {\ttfamily\scriptsize   sqrt signing\_query\_scale *} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+56 & {\ttfamily\scriptsize     (hash\_query\_count + 1\%r + sqrt signing\_query\_scale).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+57 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+58 & {\ttfamily\scriptsize op fs\_with\_aborts\_min\_entropy\_term =} & Defines operation fs\_with\_aborts\_min\_entropy\_term, a total mathematical function or abbreviation used by later declarations. \\
+59 & {\ttfamily\scriptsize   min\_entropy\_loss\_factor *} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+60 & {\ttfamily\scriptsize     (signing\_query\_scale * (hash\_query\_count + 1\%r)).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+61 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+62 & {\ttfamily\scriptsize op rejection\_sampling\_loss\_term =} & Defines operation rejection\_sampling\_loss\_term, a total mathematical function or abbreviation used by later declarations. \\
+63 & {\ttfamily\scriptsize   fs\_with\_aborts\_reprogramming\_term + fs\_with\_aborts\_min\_entropy\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+64 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+65 & {\ttfamily\scriptsize op haetae\_euf\_bound =} & Defines operation haetae\_euf\_bound, a total mathematical function or abbreviation used by later declarations. \\
+66 & {\ttfamily\scriptsize   mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+67 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+68 & {\ttfamily\scriptsize   rejection\_sampling\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+69 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+70 & {\ttfamily\scriptsize op haetae\_euf\_counted\_rom\_bound =} & Defines operation haetae\_euf\_counted\_rom\_bound, a total mathematical function or abbreviation used by later declarations. \\
+71 & {\ttfamily\scriptsize   mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+72 & {\ttfamily\scriptsize   bimodal\_selftarget\_msis\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+73 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+74 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+75 & {\ttfamily\scriptsize lemma haetae\_euf\_boundE :} & States checked lemma haetae\_euf\_boundE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+76 & {\ttfamily\scriptsize   haetae\_euf\_bound =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+77 & {\ttfamily\scriptsize     mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+78 & {\ttfamily\scriptsize     module\_sis\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+79 & {\ttfamily\scriptsize     bimodal\_to\_msis\_reduction\_loss\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+80 & {\ttfamily\scriptsize     fs\_with\_aborts\_reprogramming\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+81 & {\ttfamily\scriptsize     fs\_with\_aborts\_min\_entropy\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+82 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+83 & {\ttfamily\scriptsize by rewrite /haetae\_euf\_bound /bimodal\_selftarget\_msis\_hardness\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+84 & {\ttfamily\scriptsize            /rejection\_sampling\_loss\_term; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+85 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+86 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+87 & {\ttfamily\scriptsize lemma haetae\_euf\_bound\_groupedE :} & States checked lemma haetae\_euf\_bound\_groupedE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+88 & {\ttfamily\scriptsize   haetae\_euf\_bound =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+89 & {\ttfamily\scriptsize     (mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+90 & {\ttfamily\scriptsize       (module\_sis\_hardness\_term + bimodal\_to\_msis\_reduction\_loss\_term)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+91 & {\ttfamily\scriptsize     (fs\_with\_aborts\_reprogramming\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+92 & {\ttfamily\scriptsize       fs\_with\_aborts\_min\_entropy\_term).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+93 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+94 & {\ttfamily\scriptsize by rewrite /haetae\_euf\_bound /bimodal\_selftarget\_msis\_hardness\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+95 & {\ttfamily\scriptsize            /rejection\_sampling\_loss\_term; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+96 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+97 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+98 & {\ttfamily\scriptsize lemma haetae\_euf\_bound\_rejection\_groupedE :} & States checked lemma haetae\_euf\_bound\_rejection\_groupedE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+99 & {\ttfamily\scriptsize   haetae\_euf\_bound =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+100 & {\ttfamily\scriptsize     (mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+101 & {\ttfamily\scriptsize       (module\_sis\_hardness\_term + bimodal\_to\_msis\_reduction\_loss\_term)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+102 & {\ttfamily\scriptsize     rejection\_sampling\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+103 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+104 & {\ttfamily\scriptsize by rewrite /haetae\_euf\_bound /bimodal\_selftarget\_msis\_hardness\_term; ring.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+105 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+106 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+107 & {\ttfamily\scriptsize lemma haetae\_euf\_counted\_rom\_bound\_groupedE :} & States checked lemma haetae\_euf\_counted\_rom\_bound\_groupedE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+108 & {\ttfamily\scriptsize   haetae\_euf\_counted\_rom\_bound =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+109 & {\ttfamily\scriptsize     (mlwe\_hardness\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+110 & {\ttfamily\scriptsize       (module\_sis\_hardness\_term + bimodal\_to\_msis\_reduction\_loss\_term)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+111 & {\ttfamily\scriptsize     counted\_rom\_programming\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+112 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+113 & {\ttfamily\scriptsize by rewrite /haetae\_euf\_counted\_rom\_bound} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+114 & {\ttfamily\scriptsize            /bimodal\_selftarget\_msis\_hardness\_term; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+115 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+116 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+117 & {\ttfamily\scriptsize lemma signing\_query\_scaleE :} & States checked lemma signing\_query\_scaleE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+118 & {\ttfamily\scriptsize   signing\_query\_scale = signature\_query\_count.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+119 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+120 & {\ttfamily\scriptsize by rewrite /signing\_query\_scale /signature\_query\_count /abort\_probability; ring.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+121 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+122 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+123 & {\ttfamily\scriptsize lemma signing\_query\_scale\_nonnegative :} & States checked lemma signing\_query\_scale\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+124 & {\ttfamily\scriptsize   0\%r <= signing\_query\_scale.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+125 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+126 & {\ttfamily\scriptsize by rewrite signing\_query\_scaleE /signature\_query\_count.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+127 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+128 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+129 & {\ttfamily\scriptsize lemma fs\_with\_aborts\_reprogramming\_term\_nonnegative :} & States checked lemma fs\_with\_aborts\_reprogramming\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+130 & {\ttfamily\scriptsize   0\%r <= fs\_with\_aborts\_reprogramming\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+131 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+132 & {\ttfamily\scriptsize rewrite /fs\_with\_aborts\_reprogramming\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+133 & {\ttfamily\scriptsize apply mulr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+134 & {\ttfamily\scriptsize + by apply ge0\_sqrt.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+135 & {\ttfamily\scriptsize rewrite addr\_ge0.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+136 & {\ttfamily\scriptsize + by rewrite addr\_ge0 /hash\_query\_count.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+137 & {\ttfamily\scriptsize + by apply ge0\_sqrt.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+138 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+139 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+140 & {\ttfamily\scriptsize lemma fs\_with\_aborts\_min\_entropy\_term\_nonnegative :} & States checked lemma fs\_with\_aborts\_min\_entropy\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+141 & {\ttfamily\scriptsize   0\%r <= fs\_with\_aborts\_min\_entropy\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+142 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+143 & {\ttfamily\scriptsize rewrite /fs\_with\_aborts\_min\_entropy\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+144 & {\ttfamily\scriptsize apply mulr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+145 & {\ttfamily\scriptsize + by rewrite /min\_entropy\_loss\_factor.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+146 & {\ttfamily\scriptsize apply mulr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+147 & {\ttfamily\scriptsize + by apply signing\_query\_scale\_nonnegative.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+148 & {\ttfamily\scriptsize by rewrite addr\_ge0 /hash\_query\_count.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+149 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+150 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+151 & {\ttfamily\scriptsize lemma rom\_hash\_query\_budget\_nonnegative :} & States checked lemma rom\_hash\_query\_budget\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+152 & {\ttfamily\scriptsize   0\%r <= rom\_hash\_query\_budget.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+153 & {\ttfamily\scriptsize proof. by rewrite /rom\_hash\_query\_budget /hash\_query\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+154 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+155 & {\ttfamily\scriptsize lemma rom\_signature\_query\_budget\_nonnegative :} & States checked lemma rom\_signature\_query\_budget\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+156 & {\ttfamily\scriptsize   0\%r <= rom\_signature\_query\_budget.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+157 & {\ttfamily\scriptsize proof. by rewrite /rom\_signature\_query\_budget /signature\_query\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+158 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+159 & {\ttfamily\scriptsize lemma hash\_query\_budget\_countE :} & States checked lemma hash\_query\_budget\_countE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+160 & {\ttfamily\scriptsize   hash\_query\_count = (hash\_query\_budget\_count)\%r.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+161 & {\ttfamily\scriptsize proof. by rewrite /hash\_query\_count /hash\_query\_budget\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+162 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+163 & {\ttfamily\scriptsize lemma signature\_query\_budget\_countE :} & States checked lemma signature\_query\_budget\_countE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+164 & {\ttfamily\scriptsize   signature\_query\_count = (signature\_query\_budget\_count)\%r.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+165 & {\ttfamily\scriptsize proof. by rewrite /signature\_query\_count /signature\_query\_budget\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+166 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+167 & {\ttfamily\scriptsize lemma hash\_query\_budget\_count\_nonnegative :} & States checked lemma hash\_query\_budget\_count\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+168 & {\ttfamily\scriptsize   0 <= hash\_query\_budget\_count.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+169 & {\ttfamily\scriptsize proof. by rewrite /hash\_query\_budget\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+170 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+171 & {\ttfamily\scriptsize lemma signature\_query\_budget\_count\_nonnegative :} & States checked lemma signature\_query\_budget\_count\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+172 & {\ttfamily\scriptsize   0 <= signature\_query\_budget\_count.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+173 & {\ttfamily\scriptsize proof. by rewrite /signature\_query\_budget\_count. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+174 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+175 & {\ttfamily\scriptsize lemma min\_entropy\_loss\_factor\_nonnegative :} & States checked lemma min\_entropy\_loss\_factor\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+176 & {\ttfamily\scriptsize   0\%r <= min\_entropy\_loss\_factor.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+177 & {\ttfamily\scriptsize proof. by rewrite /min\_entropy\_loss\_factor. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+178 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+179 & {\ttfamily\scriptsize lemma challenge\_support\_cardinality\_lower\_bound\_positive :} & States checked lemma challenge\_support\_cardinality\_lower\_bound\_positive.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+180 & {\ttfamily\scriptsize   0\%r < challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+181 & {\ttfamily\scriptsize proof. by rewrite /challenge\_support\_cardinality\_lower\_bound. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+182 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+183 & {\ttfamily\scriptsize lemma challenge\_support\_cardinality\_lower\_bound\_nonnegative :} & States checked lemma challenge\_support\_cardinality\_lower\_bound\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+184 & {\ttfamily\scriptsize   0\%r <= challenge\_support\_cardinality\_lower\_bound.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+185 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+186 & {\ttfamily\scriptsize by apply ltrW; apply challenge\_support\_cardinality\_lower\_bound\_positive.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+187 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+188 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+189 & {\ttfamily\scriptsize lemma rom\_total\_query\_budget\_nonnegative :} & States checked lemma rom\_total\_query\_budget\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+190 & {\ttfamily\scriptsize   0\%r <= rom\_total\_query\_budget.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+191 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+192 & {\ttfamily\scriptsize rewrite /rom\_total\_query\_budget.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+193 & {\ttfamily\scriptsize apply addr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+194 & {\ttfamily\scriptsize + by apply addr\_ge0;} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+195 & {\ttfamily\scriptsize      [apply rom\_hash\_query\_budget\_nonnegative} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+196 & {\ttfamily\scriptsize      | apply rom\_signature\_query\_budget\_nonnegative].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+197 & {\ttfamily\scriptsize + by [].} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+198 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+199 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+200 & {\ttfamily\scriptsize lemma counted\_rom\_collision\_term\_nonnegative :} & States checked lemma counted\_rom\_collision\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+201 & {\ttfamily\scriptsize   0\%r <= counted\_rom\_collision\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+202 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+203 & {\ttfamily\scriptsize rewrite /counted\_rom\_collision\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+204 & {\ttfamily\scriptsize apply divr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+205 & {\ttfamily\scriptsize + by apply mulr\_ge0; apply rom\_total\_query\_budget\_nonnegative.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+206 & {\ttfamily\scriptsize by apply challenge\_support\_cardinality\_lower\_bound\_nonnegative.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+207 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+208 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+209 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_term\_nonnegative :} & States checked lemma counted\_rom\_prequery\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+210 & {\ttfamily\scriptsize   0\%r <= counted\_rom\_prequery\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+211 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+212 & {\ttfamily\scriptsize rewrite /counted\_rom\_prequery\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+213 & {\ttfamily\scriptsize apply divr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+214 & {\ttfamily\scriptsize + apply mulr\_ge0.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+215 & {\ttfamily\scriptsize   + by apply rom\_signature\_query\_budget\_nonnegative.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+216 & {\ttfamily\scriptsize   by apply addr\_ge0; [apply rom\_hash\_query\_budget\_nonnegative |].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+217 & {\ttfamily\scriptsize by apply challenge\_support\_cardinality\_lower\_bound\_nonnegative.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+218 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+219 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+220 & {\ttfamily\scriptsize lemma counted\_rom\_min\_entropy\_term\_nonnegative :} & States checked lemma counted\_rom\_min\_entropy\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+221 & {\ttfamily\scriptsize   0\%r <= counted\_rom\_min\_entropy\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+222 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+223 & {\ttfamily\scriptsize rewrite /counted\_rom\_min\_entropy\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+224 & {\ttfamily\scriptsize apply divr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+225 & {\ttfamily\scriptsize + apply mulr\_ge0.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+226 & {\ttfamily\scriptsize   + by apply rom\_signature\_query\_budget\_nonnegative.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+227 & {\ttfamily\scriptsize   by apply addr\_ge0; [apply rom\_hash\_query\_budget\_nonnegative |].} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+228 & {\ttfamily\scriptsize by apply challenge\_support\_cardinality\_lower\_bound\_nonnegative.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+229 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+230 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+231 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_term\_nonnegative :} & States checked lemma counted\_rom\_prequery\_reprogramming\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+232 & {\ttfamily\scriptsize   0\%r <= counted\_rom\_prequery\_reprogramming\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+233 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+234 & {\ttfamily\scriptsize rewrite /counted\_rom\_prequery\_reprogramming\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+235 & {\ttfamily\scriptsize by apply addr\_ge0;} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+236 & {\ttfamily\scriptsize    [apply counted\_rom\_collision\_term\_nonnegative} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+237 & {\ttfamily\scriptsize    | apply counted\_rom\_prequery\_term\_nonnegative].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+238 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+239 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+240 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_nonnegative :} & States checked lemma counted\_rom\_programming\_loss\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+241 & {\ttfamily\scriptsize   0\%r <= counted\_rom\_programming\_loss\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+242 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+243 & {\ttfamily\scriptsize rewrite /counted\_rom\_programming\_loss\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+244 & {\ttfamily\scriptsize apply addr\_ge0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+245 & {\ttfamily\scriptsize + by apply addr\_ge0;} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+246 & {\ttfamily\scriptsize      [apply counted\_rom\_collision\_term\_nonnegative} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+247 & {\ttfamily\scriptsize      | apply counted\_rom\_prequery\_term\_nonnegative].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+248 & {\ttfamily\scriptsize + by apply counted\_rom\_min\_entropy\_term\_nonnegative.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+249 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+250 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+251 & {\ttfamily\scriptsize lemma counted\_rom\_collision\_termE :} & States checked lemma counted\_rom\_collision\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+252 & {\ttfamily\scriptsize   counted\_rom\_collision\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+253 & {\ttfamily\scriptsize     25\%r / challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+254 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+255 & {\ttfamily\scriptsize by rewrite /counted\_rom\_collision\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+256 & {\ttfamily\scriptsize            /rom\_total\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+257 & {\ttfamily\scriptsize            /rom\_hash\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+258 & {\ttfamily\scriptsize            /rom\_signature\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+259 & {\ttfamily\scriptsize            /hash\_query\_count} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+260 & {\ttfamily\scriptsize            /signature\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+261 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+262 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+263 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_termE :} & States checked lemma counted\_rom\_prequery\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+264 & {\ttfamily\scriptsize   counted\_rom\_prequery\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+265 & {\ttfamily\scriptsize     6\%r / challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+266 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+267 & {\ttfamily\scriptsize by rewrite /counted\_rom\_prequery\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+268 & {\ttfamily\scriptsize            /rom\_signature\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+269 & {\ttfamily\scriptsize            /rom\_hash\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+270 & {\ttfamily\scriptsize            /hash\_query\_count} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+271 & {\ttfamily\scriptsize            /signature\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+272 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+273 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+274 & {\ttfamily\scriptsize lemma counted\_rom\_min\_entropy\_termE :} & States checked lemma counted\_rom\_min\_entropy\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+275 & {\ttfamily\scriptsize   counted\_rom\_min\_entropy\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+276 & {\ttfamily\scriptsize     6\%r / challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+277 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+278 & {\ttfamily\scriptsize by rewrite /counted\_rom\_min\_entropy\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+279 & {\ttfamily\scriptsize            /rom\_signature\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+280 & {\ttfamily\scriptsize            /rom\_hash\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+281 & {\ttfamily\scriptsize            /hash\_query\_count} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+282 & {\ttfamily\scriptsize            /signature\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+283 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+284 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+285 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_termE :} & States checked lemma counted\_rom\_prequery\_reprogramming\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+286 & {\ttfamily\scriptsize   counted\_rom\_prequery\_reprogramming\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+287 & {\ttfamily\scriptsize     31\%r / challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+288 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+289 & {\ttfamily\scriptsize by rewrite /counted\_rom\_prequery\_reprogramming\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+290 & {\ttfamily\scriptsize            counted\_rom\_collision\_termE} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+291 & {\ttfamily\scriptsize            counted\_rom\_prequery\_termE; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+292 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+293 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+294 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_termE :} & States checked lemma counted\_rom\_programming\_loss\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+295 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+296 & {\ttfamily\scriptsize     37\%r / challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+297 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+298 & {\ttfamily\scriptsize by rewrite /counted\_rom\_programming\_loss\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+299 & {\ttfamily\scriptsize            counted\_rom\_collision\_termE} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+300 & {\ttfamily\scriptsize            counted\_rom\_prequery\_termE} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+301 & {\ttfamily\scriptsize            counted\_rom\_min\_entropy\_termE; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+302 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+303 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+304 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_subunit :} & States checked lemma counted\_rom\_programming\_loss\_term\_subunit.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+305 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term < 1\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+306 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+307 & {\ttfamily\scriptsize rewrite counted\_rom\_programming\_loss\_termE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+308 & {\ttfamily\scriptsize rewrite ltr\_pdivr\_mulr.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+309 & {\ttfamily\scriptsize + by apply challenge\_support\_cardinality\_lower\_bound\_positive.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+310 & {\ttfamily\scriptsize by rewrite /challenge\_support\_cardinality\_lower\_bound.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+311 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+312 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+313 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_positive :} & States checked lemma counted\_rom\_programming\_loss\_term\_positive.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+314 & {\ttfamily\scriptsize   0\%r < counted\_rom\_programming\_loss\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+315 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+316 & {\ttfamily\scriptsize rewrite counted\_rom\_programming\_loss\_termE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+317 & {\ttfamily\scriptsize apply divr\_gt0.} & Applies an existing theorem, lemma, or proof rule to reduce the current goal to its premises. \\
+318 & {\ttfamily\scriptsize + by [].} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+319 & {\ttfamily\scriptsize by apply challenge\_support\_cardinality\_lower\_bound\_positive.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+320 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+321 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+322 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_le1 :} & States checked lemma counted\_rom\_programming\_loss\_term\_le1.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+323 & {\ttfamily\scriptsize   1\%r >= counted\_rom\_programming\_loss\_term.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+324 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+325 & {\ttfamily\scriptsize by apply ltrW; apply counted\_rom\_programming\_loss\_term\_subunit.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+326 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+327 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+328 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_budget\_numeratorE :} & States checked lemma counted\_rom\_prequery\_reprogramming\_budget\_numeratorE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+329 & {\ttfamily\scriptsize   (rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+330 & {\ttfamily\scriptsize   (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+331 & {\ttfamily\scriptsize   31\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+332 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+333 & {\ttfamily\scriptsize by rewrite /rom\_total\_query\_budget} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+334 & {\ttfamily\scriptsize            /rom\_hash\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+335 & {\ttfamily\scriptsize            /rom\_signature\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+336 & {\ttfamily\scriptsize            /hash\_query\_count} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+337 & {\ttfamily\scriptsize            /signature\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+338 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+339 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+340 & {\ttfamily\scriptsize lemma counted\_rom\_budget\_numeratorE :} & States checked lemma counted\_rom\_budget\_numeratorE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+341 & {\ttfamily\scriptsize   (rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+342 & {\ttfamily\scriptsize   (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+343 & {\ttfamily\scriptsize   (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+344 & {\ttfamily\scriptsize   37\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+345 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+346 & {\ttfamily\scriptsize by rewrite /rom\_total\_query\_budget} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+347 & {\ttfamily\scriptsize            /rom\_hash\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+348 & {\ttfamily\scriptsize            /rom\_signature\_query\_budget} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+349 & {\ttfamily\scriptsize            /hash\_query\_count} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+350 & {\ttfamily\scriptsize            /signature\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+351 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+352 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+353 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_cardinalityE :} & States checked lemma counted\_rom\_programming\_loss\_term\_cardinalityE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+354 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+355 & {\ttfamily\scriptsize     ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+356 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+357 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+358 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+359 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+360 & {\ttfamily\scriptsize by rewrite counted\_rom\_programming\_loss\_termE} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+361 & {\ttfamily\scriptsize            counted\_rom\_budget\_numeratorE.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+362 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+363 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+364 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_term\_cardinalityE :} & States checked lemma counted\_rom\_prequery\_reprogramming\_term\_cardinalityE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+365 & {\ttfamily\scriptsize   counted\_rom\_prequery\_reprogramming\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+366 & {\ttfamily\scriptsize     ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+367 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+368 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+369 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+370 & {\ttfamily\scriptsize by rewrite counted\_rom\_prequery\_reprogramming\_termE} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+371 & {\ttfamily\scriptsize            counted\_rom\_prequery\_reprogramming\_budget\_numeratorE.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+372 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+373 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+374 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_concreteE :} & States checked lemma counted\_rom\_programming\_loss\_term\_concreteE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+375 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+376 & {\ttfamily\scriptsize     37\%r / 288230376151711744\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+377 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+378 & {\ttfamily\scriptsize by rewrite counted\_rom\_programming\_loss\_termE} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+379 & {\ttfamily\scriptsize            /challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+380 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+381 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+382 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_term\_concreteE :} & States checked lemma counted\_rom\_prequery\_reprogramming\_term\_concreteE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+383 & {\ttfamily\scriptsize   counted\_rom\_prequery\_reprogramming\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+384 & {\ttfamily\scriptsize     31\%r / 288230376151711744\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+385 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+386 & {\ttfamily\scriptsize by rewrite counted\_rom\_prequery\_reprogramming\_termE} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+387 & {\ttfamily\scriptsize            /challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+388 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+389 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+390 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_term\_checked\_subunit :} & States checked lemma counted\_rom\_programming\_loss\_term\_checked\_subunit.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+391 & {\ttfamily\scriptsize   0\%r < counted\_rom\_programming\_loss\_term /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+392 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term < 1\%r /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+393 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+394 & {\ttfamily\scriptsize     37\%r / 288230376151711744\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+395 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+396 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+397 & {\ttfamily\scriptsize + by apply counted\_rom\_programming\_loss\_term\_positive.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+398 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+399 & {\ttfamily\scriptsize + by apply counted\_rom\_programming\_loss\_term\_subunit.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+400 & {\ttfamily\scriptsize by apply counted\_rom\_programming\_loss\_term\_concreteE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+401 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+402 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+403 & {\ttfamily\scriptsize lemma counted\_rom\_support\_lower\_bound\_summary :} & States checked lemma counted\_rom\_support\_lower\_bound\_summary.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+404 & {\ttfamily\scriptsize   challenge\_support\_bits\_lower\_bound = 58 /\textbackslash{}} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+405 & {\ttfamily\scriptsize   challenge\_support\_cardinality\_lower\_bound =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+406 & {\ttfamily\scriptsize     288230376151711744\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+407 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+408 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+409 & {\ttfamily\scriptsize + by rewrite /challenge\_support\_bits\_lower\_bound.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+410 & {\ttfamily\scriptsize by rewrite /challenge\_support\_cardinality\_lower\_bound.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+411 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+412 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+413 & {\ttfamily\scriptsize lemma counted\_rom\_support\_dominates\_budget :} & States checked lemma counted\_rom\_support\_dominates\_budget.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+414 & {\ttfamily\scriptsize   37\%r < challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+415 & {\ttfamily\scriptsize proof. by rewrite /challenge\_support\_cardinality\_lower\_bound. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+416 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+417 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_support\_dominates\_budget :} & States checked lemma counted\_rom\_prequery\_reprogramming\_support\_dominates\_budget.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+418 & {\ttfamily\scriptsize   31\%r < challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+419 & {\ttfamily\scriptsize proof. by rewrite /challenge\_support\_cardinality\_lower\_bound. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+420 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+421 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_term\_subunit :} & States checked lemma counted\_rom\_prequery\_reprogramming\_term\_subunit.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+422 & {\ttfamily\scriptsize   counted\_rom\_prequery\_reprogramming\_term < 1\%r.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+423 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+424 & {\ttfamily\scriptsize rewrite counted\_rom\_prequery\_reprogramming\_termE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+425 & {\ttfamily\scriptsize rewrite ltr\_pdivr\_mulr.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+426 & {\ttfamily\scriptsize + by apply challenge\_support\_cardinality\_lower\_bound\_positive.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+427 & {\ttfamily\scriptsize by apply counted\_rom\_prequery\_reprogramming\_support\_dominates\_budget.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+428 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+429 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+430 & {\ttfamily\scriptsize lemma counted\_rom\_prequery\_reprogramming\_from\_query\_budgets\_and\_support :} & States checked lemma counted\_rom\_prequery\_reprogramming\_from\_query\_budgets\_and\_support.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+431 & {\ttfamily\scriptsize   counted\_rom\_prequery\_reprogramming\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+432 & {\ttfamily\scriptsize     ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+433 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+434 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+435 & {\ttfamily\scriptsize   ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+436 & {\ttfamily\scriptsize    (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) <} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+437 & {\ttfamily\scriptsize   challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+438 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+439 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+440 & {\ttfamily\scriptsize + by apply counted\_rom\_prequery\_reprogramming\_term\_cardinalityE.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+441 & {\ttfamily\scriptsize rewrite counted\_rom\_prequery\_reprogramming\_budget\_numeratorE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+442 & {\ttfamily\scriptsize by apply counted\_rom\_prequery\_reprogramming\_support\_dominates\_budget.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+443 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+444 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+445 & {\ttfamily\scriptsize lemma counted\_rom\_programming\_loss\_splitE :} & States checked lemma counted\_rom\_programming\_loss\_splitE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+446 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+447 & {\ttfamily\scriptsize     counted\_rom\_prequery\_reprogramming\_term +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+448 & {\ttfamily\scriptsize     counted\_rom\_min\_entropy\_term.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+449 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+450 & {\ttfamily\scriptsize by rewrite /counted\_rom\_programming\_loss\_term} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+451 & {\ttfamily\scriptsize            /counted\_rom\_prequery\_reprogramming\_term; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+452 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+453 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+454 & {\ttfamily\scriptsize lemma counted\_rom\_loss\_from\_query\_budgets\_and\_support :} & States checked lemma counted\_rom\_loss\_from\_query\_budgets\_and\_support.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+455 & {\ttfamily\scriptsize   counted\_rom\_programming\_loss\_term =} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+456 & {\ttfamily\scriptsize     ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+457 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+458 & {\ttfamily\scriptsize      (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) /} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+459 & {\ttfamily\scriptsize     challenge\_support\_cardinality\_lower\_bound /\textbackslash{}} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+460 & {\ttfamily\scriptsize   ((rom\_total\_query\_budget * rom\_total\_query\_budget) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+461 & {\ttfamily\scriptsize    (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r)) +} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+462 & {\ttfamily\scriptsize    (rom\_signature\_query\_budget * (rom\_hash\_query\_budget + 1\%r))) <} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+463 & {\ttfamily\scriptsize   challenge\_support\_cardinality\_lower\_bound.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+464 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+465 & {\ttfamily\scriptsize split.} & Splits a conjunction or structured goal into independent proof obligations. \\
+466 & {\ttfamily\scriptsize + by apply counted\_rom\_programming\_loss\_term\_cardinalityE.} & Solves a proof branch produced by a previous split, transitivity, or case analysis. \\
+467 & {\ttfamily\scriptsize rewrite counted\_rom\_budget\_numeratorE.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+468 & {\ttfamily\scriptsize by apply counted\_rom\_support\_dominates\_budget.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+469 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+470 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+471 & {\ttfamily\scriptsize lemma rejection\_sampling\_loss\_term\_nonnegative :} & States checked lemma rejection\_sampling\_loss\_term\_nonnegative.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+472 & {\ttfamily\scriptsize   0\%r <= rejection\_sampling\_loss\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+473 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+474 & {\ttfamily\scriptsize rewrite /rejection\_sampling\_loss\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+475 & {\ttfamily\scriptsize by apply addr\_ge0; [apply fs\_with\_aborts\_reprogramming\_term\_nonnegative} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+476 & {\ttfamily\scriptsize                   | apply fs\_with\_aborts\_min\_entropy\_term\_nonnegative].} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+477 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+478 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+479 & {\ttfamily\scriptsize lemma fs\_with\_aborts\_min\_entropy\_termE :} & States checked lemma fs\_with\_aborts\_min\_entropy\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+480 & {\ttfamily\scriptsize   fs\_with\_aborts\_min\_entropy\_term = 12\%r.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+481 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+482 & {\ttfamily\scriptsize by rewrite /fs\_with\_aborts\_min\_entropy\_term /min\_entropy\_loss\_factor} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+483 & {\ttfamily\scriptsize            signing\_query\_scaleE /signature\_query\_count /hash\_query\_count; ring.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+484 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+485 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+486 & {\ttfamily\scriptsize lemma fs\_with\_aborts\_min\_entropy\_term\_ge1 :} & States checked lemma fs\_with\_aborts\_min\_entropy\_term\_ge1.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+487 & {\ttfamily\scriptsize   1\%r <= fs\_with\_aborts\_min\_entropy\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+488 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+489 & {\ttfamily\scriptsize by rewrite fs\_with\_aborts\_min\_entropy\_termE.} & Discharges the current goal in one step using the cited simplification, lemma, or automation. \\
+490 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+491 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+492 & {\ttfamily\scriptsize lemma rejection\_sampling\_loss\_term\_ge1 :} & States checked lemma rejection\_sampling\_loss\_term\_ge1.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+493 & {\ttfamily\scriptsize   1\%r <= rejection\_sampling\_loss\_term.} & Part of an inequality, usually comparing probabilities or bounding a concrete loss term. \\
+494 & {\ttfamily\scriptsize proof.} & Begins the proof script for the preceding proposition. \\
+495 & {\ttfamily\scriptsize rewrite /rejection\_sampling\_loss\_term.} & Rewrites the goal using definitions or previously proved equalities, exposing the intended mathematical normal form. \\
+496 & {\ttfamily\scriptsize smt(fs\_with\_aborts\_min\_entropy\_term\_ge1} & Calls SMT automation for first-order arithmetic, list, or algebraic side conditions. \\
+497 & {\ttfamily\scriptsize     fs\_with\_aborts\_reprogramming\_term\_nonnegative).} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+498 & {\ttfamily\scriptsize qed.} & Ends the proof; EasyCrypt has accepted all remaining obligations. \\
+499 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+500 & {\ttfamily\scriptsize lemma bimodal\_to\_msis\_reduction\_loss\_termE :} & States checked lemma bimodal\_to\_msis\_reduction\_loss\_termE.  The following proof script must derive this proposition from prior definitions and lemmas. \\
+501 & {\ttfamily\scriptsize   bimodal\_to\_msis\_reduction\_loss\_term = 0\%r.} & Part of an equality or definition, identifying two mathematical expressions or assigning a program value. \\
+502 & {\ttfamily\scriptsize proof. by rewrite /bimodal\_to\_msis\_reduction\_loss\_term. qed.} & Continuation line in the current declaration or proof.  Read it with surrounding lines as part of the same mathematical object. \\
+503 & {\ttfamily\scriptsize \emph{blank}} & Blank separator.  It marks a boundary between declarations, proof blocks, or tactic phases. \\
+504 & {\ttfamily\scriptsize end HAETAE\_Reductions.} & Closes the current theory or module block. \\
+\bottomrule
+\end{longtable}
+
+\end{document}

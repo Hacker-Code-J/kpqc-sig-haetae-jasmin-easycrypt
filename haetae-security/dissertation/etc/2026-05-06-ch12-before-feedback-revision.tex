@@ -1,0 +1,374 @@
+\chapter{Mathematical and Cryptological Synthesis}
+\label{ch:mathematical-cryptological-synthesis}
+
+This chapter gives the central mathematical and cryptological reading of the
+machine-checked \haetae{} security proof.  It also repairs an important weakness
+of a purely catalog-style dissertation: the final theorem must not be hidden
+behind a long list of EasyCrypt names.  A cryptologist needs to see the security
+experiment, the adversary model, the explicit loss ledger, the residual trusted
+base, and the precise sense in which the EasyCrypt proof is non-vacuous.
+
+The checked development proves a conditional theorem.  It verifies the game
+hops, oracle-programming arguments, sampler-distribution arguments, budgeted
+active-signing lifting, and final reduction composition.  It does not prove the
+underlying lattice assumptions and it does not by itself prove that every
+implementation realizes the formal model.  The dissertation should therefore be
+read as a rigorous mechanization of the provable-security reduction for the
+formal \haetae{} model.
+
+\section{The formal security object}
+\label{sec:synthesis-formal-object-rewritten}
+
+Let \(A\) be an adversary with access to a hash oracle \(H\) and a signing
+oracle \(O\).  The random-oracle EUF-CMA experiment samples
+\[
+  (pk,sk) \leftarrow \mathsf{KeyGen}(),
+\]
+answers signing queries by \(\mathsf{Sign}^{H}(sk,\cdot)\), answers hash queries
+by lazy sampling, and receives a final output
+\[
+  (m^\star,ctx^\star,\sigma^\star)\leftarrow A^{H,O}(pk).
+\]
+The success event is
+\[
+  \mathsf{Forge}
+  =
+  \left[
+    \mathsf{Verify}^{H}(pk,m^\star,ctx^\star,\sigma^\star)=1
+    \wedge
+    (m^\star,ctx^\star)\notin Q_S
+  \right],
+\]
+where \(Q_S\) is the signing-query log.  The advantage is
+\[
+  \Adv_{\haetae,\rom}^{\eufcma}(A)=\Pr[\mathsf{Forge}].
+\]
+
+In EasyCrypt this probability is represented by a moduleized experiment in
+\ec{Sig\_ROM.ec}, the scheme interface in \ec{HAETAE\_Scheme.ec}, and the hop
+layers in \ec{HAETAE\_GameHops.ec} and \ec{HAETAE\_HopGames.ec}.  The theorem
+proved by the checker has the mathematical shape
+\[
+  \Adv_{\haetae,\rom}^{\eufcma}(A)
+  \le
+  \ec{haetae\_euf\_counted\_rom\_bound}.
+\]
+The identifier on the right is not a black-box placeholder; it is the concrete
+EasyCrypt expression assembled and normalized in \ec{HAETAE\_Reductions.ec}.
+
+\section{Expanded advantage ledger}
+\label{sec:synthesis-expanded-ledger}
+
+For a dissertation intended for cryptographers, the bound should be displayed as
+a ledger.  The following theorem gives the paper-level version of the checked
+statement.
+
+\begin{theorem}[Ledger form of the checked \haetae{} security theorem]
+\label{thm:ledger-form-haetae-security}
+For every adversary \(A\) satisfying the declared hash-query and signing-query
+budgets, there is a reduction adversary \(B_A\) such that
+\[
+\begin{aligned}
+  \Adv_{\haetae,\rom}^{\eufcma}(A)
+  \le{}&
+  L_{\mathsf{MLWE}}
+  + L_{\mathsf{ModSIS}}
+  + L_{\mathsf{bimodal\mbox{-}MSIS}}
+  + L_{\mathsf{ROM\mbox{-}coll}}
+  + L_{\mathsf{ROM\mbox{-}pre}} \\
+  &+ L_{\mathsf{ROM\mbox{-}me}}
+  + L_{\mathsf{sample}}
+  + L_{\mathsf{rej}}
+  + L_{\mathsf{extract}}
+  + L_{\mathsf{budget}} .
+\end{aligned}
+\]
+The EasyCrypt theorem states this same inequality with the right-hand side
+encoded as \ec{haetae\_euf\_counted\_rom\_bound}; the equivalence between the
+ledger notation and the checked expression is witnessed by
+\ec{haetae\_euf\_boundE}, \ec{haetae\_euf\_bound\_groupedE}, and
+\ec{haetae\_euf\_counted\_rom\_bound\_groupedE}.
+\end{theorem}
+
+\begin{longtable}{p{0.20\textwidth}p{0.36\textwidth}p{0.34\textwidth}}
+\caption{Cryptological loss ledger for the checked security theorem.}
+\label{tab:cryptological-loss-ledger}\\
+\toprule
+\textbf{Paper term} & \textbf{Meaning} & \textbf{EasyCrypt evidence} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Paper term} & \textbf{Meaning} & \textbf{EasyCrypt evidence} \\
+\midrule
+\endhead
+\(L_{\mathsf{MLWE}}\) & Assumed advantage term for the MLWE-style hardness game
+used by the reduction layer. & \ec{mlwe\_hardness\_term} in
+\ec{HAETAE\_Reductions.ec} and the assumption interfaces in
+\ec{HAETAE\_Assumptions.ec}. \\
+\midrule
+\(L_{\mathsf{ModSIS}}\) & Assumed Module-SIS advantage term. &
+\ec{module\_sis\_hardness\_term} and the Module-SIS game interfaces. \\
+\midrule
+\(L_{\mathsf{bimodal\mbox{-}MSIS}}\) & Bimodal self-target MSIS term produced by
+forgery extraction and special-soundness reasoning. &
+\ec{bimodal\_selftarget\_msis\_hardness\_term},
+\ec{BimodalSelfTargetMSIS\_Game}, and reduction modules in
+\ec{HAETAE\_HopGames.ec}. \\
+\midrule
+\(L_{\mathsf{ROM\mbox{-}coll}}\) & Loss from collisions among programmed or
+observed random-oracle sites. & \ec{counted\_rom\_collision\_term} and grouped
+ROM-programming lemmas. \\
+\midrule
+\(L_{\mathsf{ROM\mbox{-}pre}}\) & Loss that a fresh sampler-programming query was
+already asked by the adversary. & \ec{counted\_rom\_prequery\_term},
+\ec{sampler\_bad\_prequery}, and logged adversary hash-query lemmas. \\
+\midrule
+\(L_{\mathsf{ROM\mbox{-}me}}\) & Min-entropy or support-size loss needed to turn
+fresh coins into a concrete prequery probability. &
+\ec{counted\_rom\_min\_entropy\_term} and spread/support lemmas. \\
+\midrule
+\(L_{\mathsf{sample}}\) & Statistical distance between attempt, paper, and exact
+sampling distributions. & Structural-to-exact and exact-hyperball sampler
+lemmas in \ec{HAETAE\_Distributions.ec}, \ec{HAETAE\_Rejection.ec}, and
+\ec{HAETAE\_HopGames.ec}. \\
+\midrule
+\(L_{\mathsf{rej}}\) & Loss paid for rejection-sampling conditioning and support
+membership. & Rejection predicates and loss lemmas in \ec{HAETAE\_Rejection.ec}. \\
+\midrule
+\(L_{\mathsf{extract}}\) & Loss in converting a final forgery or forked transcript
+into a hardness-game solution. & Transcript-validity, special-soundness, and
+bimodal extraction lemmas in \ec{HAETAE\_Transcript.ec} and
+\ec{HAETAE\_HopGames.ec}. \\
+\midrule
+\(L_{\mathsf{budget}}\) & Multiplicative loss from lifting one-call bounds through
+adaptive hash and signing oracle interaction. & Budgeted wrapper lemmas over
+\ec{ROMInternalTranscriptBudgetedPaperSimAsNMA.O.sign}. \\
+\bottomrule
+\end{longtable}
+
+This ledger is intentionally more informative than the raw EasyCrypt expression.
+The formal expression is the object checked by EasyCrypt; the ledger is the
+cryptological interpretation of its summands.
+
+\section{Denotational reading of the proof scripts}
+\label{sec:synthesis-denotational-rewritten}
+
+Each EasyCrypt procedure denotes a subprobability kernel.  If \(S\) is the state
+space and \(R\) is the return space of a procedure \(c\), then
+\[
+  \llbracket c\rrbracket:S\to\mathcal{D}(S\times R).
+\]
+Losslessness lemmas assert total mass one.  Hoare judgments assert almost-sure
+postcondition preservation:
+\[
+  \{P\}\;c\;\{Q\}
+  \quad\Longleftrightarrow\quad
+  \forall s.\;P(s)\Rightarrow
+  \Pr_{(s',r)\leftarrow\llbracket c\rrbracket(s)}[Q(s',r)]=1.
+\]
+Equivalence judgments are relational kernel statements.  A judgment
+\[
+  \mathbf{equiv}[c_1\sim c_2:P\Rightarrow Q]
+\]
+asserts that, for related initial states, the two output distributions admit a
+coupling under which \(Q\) holds almost surely.  This is the mathematical reason
+a game-hop proof in EasyCrypt can be read as a conventional cryptographic hybrid
+argument.
+
+\begin{proposition}[Forms of checked game transitions]
+\label{prop:checked-game-transition-forms}
+Every security-relevant transition in the proof has one of the following forms:
+\[
+  \Pr[G_i:E_i]=\Pr[G_{i+1}:E_{i+1}],
+\]
+\[
+  \Pr[G_i:E_i]\le \Pr[G_{i+1}:E_{i+1}]+\Pr[G_i:\mathsf{Bad}_i],
+\]
+\[
+  \Pr[G_i:E_i]\le B_i(A).
+\]
+The first is a perfect coupling, the second is a fundamental-lemma transition,
+and the third is a direct probability or reduction bound.
+\end{proposition}
+
+\section{Adversary budgets and reduction cost}
+\label{sec:synthesis-reduction-cost}
+
+The adversary model is budgeted.  Let
+\[
+  q_H=|Q_H|,
+  \qquad
+  q_S=|Q_S|,
+\]
+where \(Q_H\) is the hash-query log and \(Q_S\) is the signing-query log.  The
+proof must preserve these inequalities under every oracle call.  A one-call loss
+\(\epsilon_{\mathsf{sign}}\) therefore lifts to at most
+\(q_S\epsilon_{\mathsf{sign}}\), and a one-hash-call loss
+\(\epsilon_{\mathsf{hash}}\) lifts to at most
+\(q_H\epsilon_{\mathsf{hash}}\).
+
+A complete cryptographic statement should also record reduction cost.  The
+current EasyCrypt proof is strongest on probability accounting and oracle-call
+accounting; it is less explicit about wall-clock or circuit-size overhead.  The
+paper-level reduction-cost statement should be maintained as the following
+ledger:
+\[
+  \operatorname{Time}(B_A)
+  \le
+  \operatorname{Time}(A)
+  + T_{\mathsf{sim}}(q_H,q_S)
+  + T_{\mathsf{extract}}(q_H,q_S),
+\]
+where \(T_{\mathsf{sim}}\) is the cost of simulated signing, lazy-ROM table
+maintenance, and sampler instrumentation, and \(T_{\mathsf{extract}}\) is the
+cost of the extraction/forking layer.  If future EasyCrypt files formalize time
+costs, this ledger should be replaced by checked cost bounds; until then it is a
+cryptographic interpretation obligation, not a machine-checked theorem.
+
+\section{Non-vacuity of the clean-conditioned proof}
+\label{sec:synthesis-non-vacuity-rewritten}
+
+A machine-checked proof can be formally accepted but cryptologically vacuous if
+the hypotheses of the main game-hop theorem are never reachable.  The active
+signing part of the \haetae{} proof avoids this only if the clean condition is
+initialized, preserved, and strong enough to trigger the next transition.
+
+Let
+\[
+  C_i =
+  \neg\mathsf{sampler\_bad\_prequery}
+  \wedge
+  \mathsf{sampler\_rom\_covered}
+  \wedge
+  pk_{\mathsf{current}}=pk
+  \wedge
+  \mathsf{ROMConsistent}_i.
+\]
+The non-vacuity obligation is the triple
+\[
+  \mathsf{Init}\Rightarrow C_0,
+\]
+\[
+  C_i\wedge\neg\mathsf{Bad}_i\Rightarrow C_{i+1},
+\]
+\[
+  C_i\Rightarrow
+  \text{the clean-conditioned lifting theorem is applicable at step }i.
+\]
+The EasyCrypt evidence consists of the sampler-ROM coverage lemmas, the concrete
+lazy-ROM freshness laws, and the active \ec{O.sign} lifting lemmas, especially
+\ec{concrete\_budgeted\_self\_logged\_signature\_clean\_event\_loss\_surface}
+and
+\ec{concrete\_budgeted\_o\_sign\_clean\_one\_call\_loss\_from\_self\_logged\_surface}.
+
+\begin{lemma}[Paper-level non-vacuity criterion]
+\label{lem:paper-level-non-vacuity}
+The clean-conditioned lifting is cryptologically meaningful only if the
+initialization, preservation, and applicability obligations above are all
+available for the concrete \haetae{} lazy ROM and the concrete active signing
+oracle.
+\end{lemma}
+
+\begin{proof}
+If initialization fails, the clean-conditioned theorem is never entered.  If
+preservation fails, adaptive signing may leave the clean region before the game
+hop is applied.  If applicability fails, the later sampler and ROM-programming
+lemmas cannot be instantiated.  Hence all three obligations are necessary.  The
+formal development addresses them through concrete logged-oracle and self-logged
+signing instrumentation rather than by postulating a clean state abstractly.
+\end{proof}
+
+\section{Trusted base and residual obligations}
+\label{sec:synthesis-trusted-base}
+
+The following table is the paper's trust-boundary audit.  It states what is
+checked, what is assumed, and what should be inspected when claiming security for
+an implementation rather than for the formal model.
+
+\begin{longtable}{p{0.23\textwidth}p{0.31\textwidth}p{0.36\textwidth}}
+\caption{Trusted base and residual obligations.}
+\label{tab:trusted-base-ledger}\\
+\toprule
+\textbf{Boundary item} & \textbf{Status} & \textbf{Required evidence} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Boundary item} & \textbf{Status} & \textbf{Required evidence} \\
+\midrule
+\endhead
+EasyCrypt logic and libraries & Trusted deductive base. & Versioned EasyCrypt
+installation, standard library assumptions, and reproducible compile log. \\
+\midrule
+Hardness assumptions & Assumed, not proved. & Clear mapping from
+\ec{HAETAE\_Assumptions.ec} games and terms to MLWE, Module-SIS, and bimodal
+self-target MSIS assumptions. \\
+\midrule
+Parameter constants & Checked internally once declared. & Audit that
+\ec{HAETAE\_Params.ec} matches the intended \haetae{} parameter set and security
+level. \\
+\midrule
+Formal scheme model & Checked as a model. & Model/spec correspondence showing
+that signing, verification, transcript formation, rejection sampling, and hash
+queries match the HAETAE specification. \\
+\midrule
+Implementation fidelity & Outside this proof. & Separate refinement or
+functional-correctness proof connecting concrete code to the EasyCrypt model. \\
+\midrule
+Manifest completeness & Procedural trust boundary. & Audited
+\ec{provable-security/proof-files.txt}, compile script, and policy for adding or
+removing proof files. \\
+\midrule
+Random-oracle abstraction & Idealized assumption. & The theorem is in the ROM;
+concrete SHAKE/FIPS202 instantiation requires an additional cryptographic
+argument. \\
+\bottomrule
+\end{longtable}
+
+This table should remain in the main paper.  It prevents the phrase
+``machine-checked security proof'' from being read as a claim that all external
+assumptions and implementation links have also been proved.
+
+\section{What FIPS202 and Keccak support do not prove}
+\label{sec:synthesis-fips-boundary}
+
+The files \ec{HAETAE\_FIPS202.ec} and \ec{HAETAE\_Keccak1600.ec} support the
+modeled hash interface and concrete hash-domain objects used by the formalization.
+They do not turn the random-oracle theorem into a standard-model proof for
+SHAKE.  Likewise, the excluded generated KAT file is useful implementation
+validation evidence, but it is not a game-hop theorem, a ROM-programming lemma,
+or a hardness reduction.
+
+Thus the correct statement is:
+\[
+  \text{the proof is a machine-checked ROM proof for the formal model,}
+\]
+not:
+\[
+  \text{the proof establishes standard-model security of the concrete hash
+  implementation.}
+\]
+This distinction should be explicit wherever the dissertation discusses FIPS202
+support.
+
+\section{Why the generated catalog is supplemental}
+\label{sec:synthesis-generated-catalog}
+
+The exhaustive declaration catalog is valuable for traceability, but it is not a
+substitute for mathematical exposition.  A generated line saying that a lemma
+means ``the proposition stated by the lemma'' is formally true but not persuasive
+to a cryptologist.  The main dissertation therefore keeps curated case studies
+in the appendices and moves the exhaustive generated correspondence to
+\ec{dissertation/etc/}.  The archived material remains available for audit, but
+the paper's argument is now carried by theorem statements, ledgers, and selected
+proof-object analyses.
+
+\section{Summary}
+\label{sec:synthesis-summary-rewritten}
+
+The strengthened dissertation claim is now precise.  The EasyCrypt development
+proves that a budget-respecting adversary against the formal random-oracle
+\haetae{} signature model has success probability at most the explicit counted
+bound \ec{haetae\_euf\_counted\_rom\_bound}.  The cryptological content of that
+bound is the ledger of hardness, ROM, sampler, rejection, extraction, and
+budgeted active-signing losses.  The remaining obligations are not hidden; they
+are listed as trusted-base and model-fidelity requirements.

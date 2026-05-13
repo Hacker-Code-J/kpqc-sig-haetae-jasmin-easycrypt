@@ -1,0 +1,95 @@
+\chapter{EasyCrypt Framework}
+\label{ch:framework}
+
+\section{Modules and Adversaries}
+
+The proof uses EasyCrypt modules to represent schemes, oracles, adversaries,
+and reductions.  A module type describes the operations available to a game or
+adversary.  A concrete module instantiates those operations.  This is essential
+for cryptographic reductions because an adversary is not a function in
+isolation; it is code linked against a particular oracle interface.
+
+Mathematically, an EasyCrypt module should be read as an indexed family of
+probabilistic transition kernels.  A procedure
+\[
+  \mathtt{proc}\ f(x):\tau
+\]
+denotes a subdistribution over return values and final memories.  A module type
+specifies which kernels an environment may call.  This is the formal analogue of
+the oracle-access notation in cryptographic papers:
+\[
+  A^{H,\mathsf{Sign}}(pk).
+\]
+The superscript is not decoration; it is an interface contract.  The EasyCrypt
+module system makes that contract explicit and prevents a proof from silently
+using state or procedures that the adversary should not possess.
+
+Functor-style modules are the proof mechanism behind reductions.  A reduction is
+code that links an adversary against one game to oracles for another game.  In
+mathematical notation this is usually written as \(B^O(A)\).  In EasyCrypt it is
+a module parameterized by both adversary and oracle modules.  The type checker
+therefore enforces which information crosses the reduction boundary.
+
+\section{Probabilistic Judgments}
+
+The proof uses several EasyCrypt judgment forms.  Hoare judgments prove state
+properties of programs.  Probabilistic Hoare judgments prove probability bounds.
+Equivalence judgments prove that two games produce related outputs under
+related states.  Losslessness lemmas establish that procedures terminate with
+probability one.
+
+The corresponding mathematical readings are:
+\[
+\begin{array}{ll}
+\{P\}\;c\;\{Q\}
+&
+\text{for every initial memory satisfying }P,\text{ every terminating final memory satisfies }Q,\\[0.4em]
+\Pr_c[Q\mid P]\le \alpha
+&
+\Pr[c\text{ terminates in a }Q\text{-state}\mid P]\le \alpha,\\[0.4em]
+c_1 \sim c_2 : P \Longrightarrow Q
+&
+\text{there is a coupling of }c_1,c_2\text{ taking }P\text{-related states to }Q\text{-related states}.
+\end{array}
+\]
+The exact EasyCrypt surface syntax differs from this display, but the semantic
+content is this combination of state transformers, probability measures, and
+relations.
+
+Game-hopping proofs usually require all three forms.  A relational equivalence
+shows that two games are identical until a bad event; a probabilistic Hoare
+judgment bounds the bad event; ordinary Hoare judgments maintain invariants such
+as query-log consistency and budget monotonicity.  This decomposition is the
+machine-checked version of the fundamental lemma of game playing.
+
+\section{Fundamental Lemma of Game Playing}
+
+The fundamental lemma can be stated in total-variation language.  Let \(G_0\)
+and \(G_1\) be two games with Boolean outputs, and let \(\mathsf{Bad}\) be an
+event.  If the games are coupled so that their views and outputs agree whenever
+\(\mathsf{Bad}\) does not occur, then
+\[
+  \left|\Pr[G_0\Rightarrow 1]-\Pr[G_1\Rightarrow 1]\right|
+  \le \Pr[\mathsf{Bad}].
+\]
+Many HAETAE proof obligations are instances of this lemma.  The difficult part
+is not the inequality itself; it is proving that the relevant games are truly
+identical on the complement of the bad event.  For ROM programming, this means
+the programmed point was fresh.  For sampler lifting, this means the sampler
+query was not present in the adversary hash log or in the sampler self-log.  For
+budgeted wrappers, this means oracle counters and logs remain synchronized.
+
+\section{Proof Style}
+
+The development uses named lemmas heavily.  This makes the proof auditable:
+rather than compressing all reasoning into a single top-level statement, it exposes
+intermediate facts such as oracle preservation, bad-event bounds, query-budget
+invariants, and reduction-term arithmetic.
+
+A useful way to read the proof scripts is as a typed refinement of a
+pen-and-paper proof outline.  Paper proofs often use phrases such as ``by
+freshness,'' ``by rejection sampling,'' or ``by a standard hybrid argument.''
+In the EasyCrypt development each such phrase must correspond to a theorem with
+explicit hypotheses.  The main review question is therefore not only whether the
+top-level checked implication compiles, but whether every lemma name and
+hypothesis corresponds to the intended mathematical invariant.

@@ -1,0 +1,508 @@
+\chapter{Pen-and-Paper Security Proof Reconstructed from EasyCrypt}
+\label{ch:pen-paper-reconstruction}
+
+This chapter reconstructs the pen-and-paper proof of \haetae{} provable security
+using the EasyCrypt development as a checked source of lemmas.  The aim is not
+to analyze the proof script line by line.  The aim is to write the mathematical
+hybrid argument that a cryptographer would expect on paper, while citing the
+EasyCrypt theorem names that certify each step.
+
+\section{Proof convention}
+\label{sec:paper-proof-convention}
+
+Let \(A\) be a probabilistic polynomial-time adversary in the modeled
+random-oracle interface.  The adversary interacts with a hash oracle \(H\) and a
+signing oracle \(O\), then outputs a candidate forgery
+\((m^\star,ctx^\star,\sigma^\star)\).  The event
+\(\mathsf{Forge}\) is the event that verification accepts and the message-context
+pair was not previously signed.
+
+For the informal target cryptographic game, we write
+\[
+  \Adv_{\haetae,\rom}^{\eufcma}(A)
+  =
+  \Pr[\mathsf{Forge}\text{ in the real EUF-CMA game}].
+\]
+The checked theorem reconstructed below uses the EasyCrypt-model advantage; the
+fixed query constants belong to the proof ledger and bound terms rather than to a
+syntactic restriction on the source \eufcma{} game.
+All probabilities in this chapter are over the coins of key generation, signing,
+the random oracle, and the adversary.  When this reconstruction mirrors
+paper-style notation, \(q_H\) and \(q_S\) denote the fixed wrapper counts used by
+the proof ledger; in the EasyCrypt development these are represented by
+\ec{hash\_query\_budget\_count} and \ec{signature\_query\_budget\_count}.
+
+The concrete counted-ROM loss expression is the one defined in
+\ec{HAETAE\_Reductions.ec}.  For the theorem emphasized in this dissertation we
+write it schematically as
+\[
+  B_{\haetae}
+  =
+  B_{\mathsf{hard}} + B_{\mathsf{ROM}},
+\]
+where \(B_{\mathsf{hard}}\) expands to the MLWE, Module-SIS, and
+bimodal-to-MSIS terms, and \(B_{\mathsf{ROM}}\) expands to the counted collision,
+prequery, and min-entropy terms.  The paper-style
+\ec{haetae\_euf\_bound} contains a separate rejection/Fiat--Shamir-with-aborts
+ledger, but it is not the final counted-ROM theorem.  The counted-ROM grouping is
+certified by
+\ec{haetae\_euf\_counted\_rom\_bound\_groupedE}.
+
+\begin{theorem}[Reconstructed formal-model counted-ROM implication]
+\label{thm:reconstructed-haetae-euf}
+For every adversary \(A\) satisfying the declared EasyCrypt module interfaces,
+with the proof and bound ledger instantiated through the fixed wrapper constants
+\(q_H=q_S=2\), if the explicit hop/reduction premise and the MLWE and
+Module-SIS hardness premises required by
+\ec{euf\_cma\_security\_from\_checked\_ro\_sampling\_hop\_and\_counted\_bimodal}
+hold for the declared reduction modules appearing in those antecedents, then the
+formal EasyCrypt model satisfies
+\[
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  \le
+  \ec{haetae\_euf\_counted\_rom\_bound}.
+\]
+Equivalently, after expanding the counted-ROM bound,
+\[
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  \le
+  L_{\mathsf{MLWE}}
+  +
+  L_{\mathsf{ModSIS}}
+  +
+  L_{\mathsf{bimodal}\to\mathsf{MSIS}}
+  +
+  L_{\mathsf{ROM}},
+\]
+where the hardness terms and ROM loss terms are the concrete real expressions in
+\ec{HAETAE\_Reductions.ec}.  This is not a specification-level theorem for
+\(\mathsf{Spec}_{260204}\), and it is not an arbitrary-query theorem.
+\end{theorem}
+
+\begin{proof}
+The proof is a sequence of games.  Each displayed transition is an ordinary
+paper-proof step; the cited EasyCrypt lemmas are the machine-checked
+certificates that the step is valid.  The final composition is not a bare
+closed theorem over all adversaries: it is a fixed-ledger formal-model
+implication whose antecedents are the final NMA/hardness hop and the declared
+MLWE and Module-SIS bounds.
+\end{proof}
+
+\section{Correctness and the starting game}
+\label{sec:paper-proof-starting-game}
+
+The starting game \(G_0\) is the standard, unbudgeted EUF-CMA game for the
+random-oracle signature interface:
+\[
+  G_0 = \ec{Sig\_ROM.EUF\_CMA}(\haetae,H,A).
+\]
+Thus, inside the EasyCrypt source game used by the checked composition,
+\[
+  \Pr[G_0(A)\Rightarrow 1]
+  =
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A).
+\]
+The fixed constants \(q_H=q_S=2\) enter through the later budgeted wrappers and
+the right-hand-side bound, not through this source-game notation.
+The correctness side of the theorem is independent of the unforgeability
+hybrid.  It states that honestly generated signatures verify:
+\[
+  \Pr[
+    \mathsf{Verify}(pk,m,ctx,\mathsf{Sign}(sk,m,ctx))=1
+  ]=1.
+\]
+The EasyCrypt proof anchors are
+\ec{correctness\_obligation\_holds} and
+\ec{correctness\_perfect}.  They discharge the paper proof's statement that the
+modeled signing and verification procedures are consistent.
+
+\section{Removing the direct signing view}
+\label{sec:paper-proof-simulated-signing}
+
+The first unforgeability step replaces real signing calls by a signing simulator
+that exposes the same distributional interface to the adversary.  Let \(G_1\)
+be the simulated-signing game:
+\[
+  G_1 = \ec{EUF\_CMA\_SimulatedSign}.
+\]
+The paper claim is that the adversary's success probability is unchanged, or
+bounded by the explicit signing-hop loss when one moves through the more refined
+interfaces:
+\[
+  \Pr[G_0(A)\Rightarrow 1]
+  \le
+  \Pr[G_1(A)\Rightarrow 1] + L_{\mathsf{sign}}.
+\]
+The corresponding checked statements are
+\ec{euf\_cma\_security\_from\_simulated\_hop},
+\ec{euf\_cma\_security\_from\_explicit\_boundaries}, and
+\ec{euf\_cma\_security\_with\_hop\_interfaces}.
+
+At the paper level, this step is justified by the fact that a signature is fully
+determined by the transcript fields sampled by the signing algorithm.  The
+transcript predicates record the required public equation, challenge query,
+response, hint, and rejection-branch consistency.  These facts are certified by
+\ec{transcript\_valid\_public\_equation},
+\ec{transcript\_valid\_signature\_challenge\_query},
+\ec{transcript\_fields\_match\_signature\_challenge\_query}, and
+\ec{transcript\_valid\_commitment\_reconstruction}.
+
+\section{Internal transcript and random-oracle view}
+\label{sec:paper-proof-rom-internal}
+
+The next step internalizes the transcript log and the random-oracle state.  Let
+\(G_2\) be the transcript-simulated signing game, \(G_3\) the internal
+transcript game, and \(G_4\) the ROM-internal transcript game:
+\[
+  G_2 = \ec{EUF\_CMA\_TranscriptSimulatedSign},
+  \qquad
+  G_3 = \ec{EUF\_CMA\_InternalTranscriptSign},
+  \qquad
+  G_4 = \ec{EUF\_CMA\_ROMInternalTranscriptSign}.
+\]
+The paper-proof statement is
+\[
+  \Pr[G_1(A)\Rightarrow 1]
+  \le
+  \Pr[G_4(A)\Rightarrow 1] + L_{\mathsf{tr}}.
+\]
+The reason is that transcript logging and lazy-ROM internalization do not change
+the adversary's observable interface, except at explicitly counted bad events.
+
+The EasyCrypt invariants used here are:
+\[
+\begin{array}{ll}
+\ec{transcript\_log\_consistent} &
+  \text{logged signatures match transcript fields},\\
+\ec{transcript\_log\_ready} &
+  \text{transcripts are ready for programming},\\
+\ec{internal\_transcript\_state\_sound} &
+  \text{internal state agrees with key and transcript data},\\
+\ec{sampler\_rom\_covered} &
+  \text{sampler ROM calls are represented in the ROM state}.
+\end{array}
+\]
+Their preservation under signing is checked by
+\ec{transcript\_log\_consistent\_sign\_internal\_cons},
+\ec{internal\_transcript\_state\_sound\_sign\_internal\_cons}, and the
+sampler-coverage lemmas
+\ec{sampler\_rom\_covered\_fresh\_after\_clean\_seed},
+\ec{sampler\_rom\_covered\_self\_log\_preserves}, and
+\ec{sampler\_rom\_covered\_old\_log\_clean\_boundary}.
+
+In paper terms, this is the point where the proof stops treating the random
+oracle as an external black box and begins treating it as a lazy table whose
+queries, programmed sites, and bad events can be counted.
+
+\section{ROM programming and counted bad events}
+\label{sec:paper-proof-rom-programming}
+
+The Fiat--Shamir-with-aborts proof programs challenge sites in the random
+oracle.  A programming site is a pair
+\[
+  s=(q,y)\in \mathsf{Q}_{\mathsf{RO}}\times\mathsf{Y}_{\mathsf{RO}},
+\]
+where \(q\) is the query to be programmed and \(y\) is the desired output.  The
+programming is sound when the site is fresh:
+\[
+  q\notin Q_A,
+\]
+where \(Q_A\) is the adversary's previous random-oracle query log.
+
+The paper proof decomposes the failure probability into counted events:
+\[
+  L_{\mathsf{ROM}}
+  =
+  L_{\mathsf{coll}}
+  +
+  L_{\mathsf{pre}}
+  +
+  L_{\mathsf{me}}.
+\]
+This corresponds to the EasyCrypt terms
+\ec{counted\_rom\_collision\_term},
+\ec{counted\_rom\_prequery\_term}, and
+\ec{counted\_rom\_min\_entropy\_term}.  Their grouping is certified by
+\ec{counted\_rom\_programming\_loss\_termE} and
+\ec{counted\_rom\_programming\_loss\_splitE}.
+
+The preservation laws for the lazy ROM are the checked form of the paper
+argument that lazy sampling remains consistent after query, observation, and
+programming:
+\[
+\begin{array}{ll}
+\ec{counted\_lazy\_rom\_init\_clears} &
+  \text{initial state has no bad event},\\
+\ec{counted\_lazy\_rom\_get\_preserves\_clear} &
+  \text{ordinary queries preserve cleanness},\\
+\ec{counted\_lazy\_rom\_program\_preserves\_bad\_clear\_if\_fresh} &
+  \text{fresh programming does not create badness},\\
+\ec{counted\_lazy\_rom\_bad\_false\_when\_clear} &
+  \text{the clear invariant excludes the bad event}.
+\end{array}
+\]
+
+\section{From chosen-message to no-message structure}
+\label{sec:paper-proof-nma}
+
+After transcript and ROM internalization, the signing oracle is represented by
+logged samples.  The proof then factors the active signing interaction into a
+no-message attack against a simulated transcript distribution.  At the paper
+level this says that the signing oracle has been replaced by a sampler whose
+outputs are independent of the final forgery except through the public
+transcript and ROM state.
+
+Let \(G_5\) be the ROM-internal NMA game obtained from the chosen-message game:
+\[
+  G_5 = \ec{ROMInternalTranscriptAsNMA}.
+\]
+The generic exact adapter is certified by \ec{nma\_as\_cma\_exact}, and the
+\haetae{}-specific chain is certified by
+\ec{euf\_cma\_security\_from\_structural\_nma\_and\_counted\_bimodal},
+\ec{euf\_cma\_security\_from\_public\_sim\_nma\_and\_counted\_bimodal}, and
+\ec{euf\_cma\_security\_from\_paper\_sim\_nma\_and\_counted\_bimodal}.
+
+Thus the paper inequality is
+\[
+  \Pr[G_4(A)\Rightarrow 1]
+  \le
+  \Pr[G_5(A')\Rightarrow 1] + L_{\mathsf{NMA}},
+\]
+where \(A'\) is the induced no-message adversary.
+
+\section{Rejection sampling and the paper sampler}
+\label{sec:paper-proof-rejection-sampling}
+
+The paper proof next replaces the real rejection-sampling view by the paper
+sampler view.  This step is justified by the fact that the signing attempt state
+contains all fields needed to reconstruct an accepted signature:
+\[
+  (y_1,y_2,w,c,z,h,\rho)
+  \longmapsto
+  \sigma.
+\]
+The paper claim is that the sampler distributions are related up to the
+rejection-sampling loss:
+\[
+  \Pr[G_5(A')\Rightarrow 1]
+  \le
+  \Pr[G_6(A')\Rightarrow 1] + L_{\mathsf{rej}}.
+\]
+The checked anchors are
+\ec{signing\_attempt\_verifies},
+\ec{signing\_simulation\_verifies},
+\ec{signing\_attempt\_simulates},
+\ec{structural\_signing\_sample\_pair\_sampler\_ok},
+\ec{bounded\_unit\_signing\_sample\_pair\_sampler\_ok},
+\ec{checked\_hyperball\_signing\_sample\_pair\_sampler\_ok}, and
+\ec{exact\_hyperball\_signing\_sample\_pair\_sampler\_ok}.
+
+In the top-level chain this is reflected by
+\ec{euf\_cma\_security\_from\_real\_signing\_paper\_sim\_nma\_and\_counted\_bimodal},
+\ec{euf\_cma\_security\_from\_haetae\_rejection\_paper\_sim\_nma\_and\_counted\_bimodal},
+and
+\ec{exact\_hyperball\_haetae\_rejection\_nma\_bound\_from\_paper\_sim}.
+
+\section{Exact hyperball sampling}
+\label{sec:paper-proof-exact-hyperball}
+
+The exact hyperball game replaces the checked paper sampling distribution by the
+ideal exact distribution on the hyperball.  The mathematical step is
+\[
+  \Pr[G_6(A')\Rightarrow 1]
+  \le
+  \Pr[G_7(A')\Rightarrow 1] + L_{\mathsf{hyp}}.
+\]
+The distributional facts are encoded in
+\ec{HAETAE\_Distributions.ec}; the proof uses losslessness, support, and point
+bound lemmas for the relevant signing sample distributions.
+
+The security chain exposes this step through
+\ec{haetae\_rejection\_nma\_bound\_from\_exact\_hyperball\_sampling\_hop},
+\ec{haetae\_rejection\_exact\_hyperball\_sampling\_hop\_from\_real\_signing\_exact\_hyperball\_hop},
+and
+\ec{haetae\_rejection\_ro\_exact\_hyperball\_sampling\_hop\_from\_real\_signing\_ro\_exact\_hyperball\_hop}.
+
+\section{Tight RO-signing-attempt to RO-exact-hyperball lifting}
+\label{sec:paper-proof-budgeted-lifting}
+
+The most delicate part of the proof is the transition from the RO signing
+attempt sampler to the RO exact hyperball sampler.  Let \(R\) be fresh signing
+randomness sampled from \(\mu_{\mathsf{coins}}\), and define the sampler query
+\[
+  q_R = \ec{sampler\_expand\_query}(R).
+\]
+Let \(Q_A\) be the adversary's logged hash-query set.  The clean event is
+\[
+  \mathsf{Clean}
+  =
+  \{q_R\notin Q_A\}
+  \wedge
+  \{q_R\notin Q_{\mathsf{sampler}}\}
+  \wedge
+  \mathsf{sampler\_rom\_covered}
+  \wedge
+  \mathsf{budget\ discipline}.
+\]
+Here \(Q_{\mathsf{sampler}}\) is the self-log of sampler-expansion queries from
+earlier signing calls.  The checked event \ec{sampler\_bad\_prequery} is set if
+the fresh sampler query is already in either log.
+On \(\mathsf{Clean}\), one signing call in the two games is coupled so that its
+visible output is identical.  Therefore the local fundamental-lemma contribution
+of that call is bounded by
+\[
+  \Pr[q_R\in Q_A\cup Q_{\mathsf{sampler}}].
+\]
+Since \(R\) is fresh, \(Q_A\) contains at most \(q_H\) logged adversary hash
+queries, and \(Q_{\mathsf{sampler}}\) contains at most \(q_S\) sampler self-log
+queries over the whole budgeted execution, the one-call loss is
+\[
+  \Pr[q_R\in Q_A\cup Q_{\mathsf{sampler}}]
+  \le
+  (q_H+q_S)\cdot
+  \max_r \Pr[R=r].
+\]
+The displayed inequality is a local signing-call bound.  The full \(G_7\) to
+\(G_8\) hop must also union over the at most \(q_S\) signing calls, so the
+full-game sampler-prequery contribution is
+\[
+  \left|
+  \Pr[G_7(A')\Rightarrow 1]
+  -
+  \Pr[G_8(A')\Rightarrow 1]
+  \right|
+  \le
+  q_S(q_H+q_S)\cdot
+  \max_r \Pr[R=r].
+\]
+In the EasyCrypt development the point bound on \(R\) is supplied by the
+signing-randomness distribution lemmas and the budgeted support lower bound,
+yielding the checked full-game term
+\[
+  \ec{rom\_signature\_query\_budget}
+  \cdot
+  \frac{\ec{rom\_hash\_query\_budget}+
+        \ec{rom\_signature\_query\_budget}}
+       {\ec{challenge\_support\_cardinality\_lower\_bound}}.
+\]
+The NMA lifting lemmas separately carry
+\(\ec{rom\_signature\_query\_budget}\cdot
+\ec{rejection\_sampling\_loss\_term}\); this is distinct from the
+sampler-prequery loss above.
+
+The checked anchors are
+\ec{rom\_internal\_budgeted\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_clean\_conditioned\_lifting},
+\ec{rom\_internal\_budgeted\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_loss\_from\_paper\_sample\_lifting},
+\ec{concrete\_budgeted\_self\_logged\_signature\_clean\_event\_loss\_surface},
+\ec{concrete\_budgeted\_o\_sign\_clean\_one\_call\_loss\_from\_self\_logged\_surface},
+and the active projection lemmas for the attempt side and exact side.
+
+The top-level security file uses this lifting through
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_from\_budgeted\_lifting},
+\ec{haetae\_rejection\_ro\_exact\_hyperball\_sampling\_hop\_from\_budgeted\_lifting},
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_from\_paper\_sample\_lifting}, and
+\ec{euf\_cma\_security\_from\_budgeted\_paper\_sample\_lifting\_and\_counted\_bimodal}.
+
+\section{Forgery extraction and hardness reduction}
+\label{sec:paper-proof-hardness}
+
+In the final exact-hyperball NMA game, extraction is a forking-pair
+special-soundness step, not a conclusion from one valid transcript alone.  When
+the preceding game and reduction interfaces provide two compatible accepting
+transcripts with the required shared public data and distinct challenges, the
+local extraction obligation has the following form:
+\[
+  \mathsf{ValidForkingPair}(\mathsf{tr}_1,\mathsf{tr}_2)
+  \Longrightarrow
+  \mathsf{Solve}_{\mathsf{Bimodal/MSIS}}.
+\]
+The transcript-to-relation facts are checked by
+\ec{extract\_bimodal\_forking\_some},
+\ec{extract\_bimodal\_forking\_nonempty},
+\ec{valid\_forking\_pair\_public\_equations}, and
+\ec{bimodal\_to\_module\_sis\_valid}.
+
+The reduction adapters are exact in the sense that they preserve the success
+event of the induced solver:
+\[
+  \Pr[\mathsf{BimodalSolver}(A)\Rightarrow 1]
+  \le
+  \Pr[\mathsf{ModuleSIS}(B_A)\Rightarrow 1].
+\]
+The checked anchors are
+\ec{bimodal\_solver\_lift\_exact},
+\ec{bimodal\_mode\_solver\_lifted\_distribution\_exact}, and
+\ec{bimodal\_msis\_as\_module\_sis\_exact}.  The top-level composition uses
+\ec{bimodal\_to\_module\_sis\_reduction\_bound} and the counted-bimodal security
+lemmas in \ec{HAETAE\_Security.ec}.
+
+\section{Composing the inequalities}
+\label{sec:paper-proof-composition}
+
+Combining the checked counted-ROM path under the final hop/reduction premise and
+the MLWE and Module-SIS hardness premises gives
+\[
+\begin{aligned}
+  \Adv_{\mathsf{ECModel},\rom}^{\eufcma}(A)
+  &=
+  \Pr[G_0(A)\Rightarrow 1] \\
+  &\le
+  \Pr[G_8(A')\Rightarrow 1] + L_{\mathsf{ROM}} \\
+  &\le
+  L_{\mathsf{MLWE}}
+  + L_{\mathsf{ModSIS}}
+  + L_{\mathsf{bimodal}\to\mathsf{MSIS}}
+  + L_{\mathsf{ROM}}
+\end{aligned}
+\]
+Here \(L_{\mathsf{ROM}}\) is the counted collision, prequery, and min-entropy
+loss.  Rejection, exact-sampling, and active-signing lifting obligations are real
+proof obligations in the hop chain, but in the counted theorem they are pushed
+into explicit hypotheses and bridge lemmas rather than appearing as additional
+final summands.  This is not the same as proving that the hypotheses are
+non-vacuously satisfiable.  In the current EasyCrypt constants,
+\ec{rejection\_sampling\_loss\_term} is already larger than one, so a final
+antecedent containing
+\(\Pr[\cdot]+\ec{rejection\_sampling\_loss\_term}\le \Pr[\cdot]+\Pr[\cdot]\)
+must be treated as a vacuity warning until the rejection ledger is normalized or
+the antecedent is replaced by a stronger checked hop.  The separate expression
+\ec{haetae\_euf\_bound} records the older paper-style
+rejection/Fiat--Shamir-with-aborts ledger; it should not be added to
+\ec{haetae\_euf\_counted\_rom\_bound}.
+The real-arithmetic side conditions required to make this a probability-scale
+bound are checked in \ec{HAETAE\_Reductions.ec}:
+\[
+\begin{array}{ll}
+\ec{counted\_rom\_programming\_loss\_term\_nonnegative} &
+  L_{\mathsf{ROM}}\ge 0,\\
+\ec{counted\_rom\_programming\_loss\_term\_subunit} &
+  L_{\mathsf{ROM}}\le 1,\\
+\ec{challenge\_support\_cardinality\_lower\_bound\_positive} &
+  |\mathcal{C}|>0,\\
+\ec{counted\_rom\_support\_dominates\_budget} &
+  \text{the support lower bound dominates the counted query budget},\\
+\ec{counted\_rom\_loss\_from\_query\_budgets\_and\_support} &
+  \text{the counted ROM loss follows from the query and support bounds}.
+\end{array}
+\]
+
+Finally, \ec{euf\_cma\_security\_from\_checked\_ro\_sampling\_hop\_and\_counted\_bimodal}
+and \ec{euf\_cma\_security\_from\_real\_signing\_exact\_hyperball\_hop\_and\_counted\_bimodal}
+compose the checked sampling hop with the counted bimodal reduction.  This is
+the fixed-ledger formal-model implication reconstructed at the beginning of the
+chapter, subject to the explicit antecedents and vacuity warning above.
+
+\section{What this reconstruction does and does not claim}
+\label{sec:paper-proof-scope}
+
+This chapter is a pen-and-paper reconstruction of the proof.  It does not add a
+new EasyCrypt theorem.  The machine-checked content remains the EasyCrypt files
+listed in the provable-security manifest.  The contribution of this chapter is
+expository: it recovers the mathematical hybrid proof from the checked lemma
+graph and records which EasyCrypt lemma certifies each paper step.
+
+The proof remains conditional on the intended interpretation of the abstract
+hardness games and on the fidelity of the HAETAE model to the specification.
+Within those boundaries, the game hops, sampler transformations, ROM
+programming steps, bad-event bounds, and final arithmetic composition are
+machine checked by the cited EasyCrypt development.
