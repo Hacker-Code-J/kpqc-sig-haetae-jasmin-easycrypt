@@ -71,16 +71,21 @@ operations using the Cooley--Tukey decimation-in-time (DIT) algorithm.  For
 the negacyclic case with $n = 256 = 2^8$, the algorithm proceeds in 8 stages.
 
 At stage $s$ (with $s = 0, 1, \dots, 7$, from outermost to innermost), the
-half-length is $\ell = 2^{7-s}$ and the \emph{twiddle factor} for group $k$ is
-$\zeta_k^{(s)} = \zeta^{\brev_8(k) \cdot \ell}$ where $k$ ranges over the
-$2^s$ groups.  The butterfly operation on a pair $(a, b)$ with twiddle factor
-$w$ is:
+half-length is $\ell = 2^{7-s}$.  If $g$ is the group number within that
+stage, then the implementation's table counter is $k = 2^s + g$ and the
+twiddle factor is
+\[
+  w = \zeta^{\brev_8(k)}.
+\]
+Index 0 of the concrete forward table is padding, so the loop consumes
+indices $1,\dots,255$.  The butterfly operation on a pair $(a, b)$ with
+twiddle factor $w$ is:
 \begin{equation}
   (a', b') = (a + w \cdot b,\ a - w \cdot b).
 \label{eq:butterfly}
 \end{equation}
 
-\begin{algorithm}[h]
+\begin{algorithm}[htbp]
 \caption{Forward NTT (Cooley--Tukey DIT, negacyclic, $n = 256$)}
 \label{alg:ntt}
 \begin{algorithmic}[1]
@@ -123,21 +128,23 @@ multiplication that avoids expensive division.  Given $a \in \Z$ with
 $0 \le a < q \cdot R$ and integers $q, R$ with $\gcd(q, R) = 1$, the
 Montgomery product is $a \cdot R^{-1} \bmod q$.
 
-\begin{algorithm}[h]
-\caption{Montgomery Reduction REDC$(a, q, R, q')$}
+\begin{algorithm}[htbp]
+\caption{Montgomery Reduction with the \haetae{} Sign Convention}
 \label{alg:mont_reduce}
 \begin{algorithmic}[1]
-\Require $a, R = 2^{32}$, $q' = -q^{-1} \bmod R$
+\Require $a, R = 2^{32}$, $q^+ = q^{-1} \bmod R$
 \Ensure $a \cdot R^{-1} \bmod q$
-\State $m \gets (a \bmod R) \cdot q' \bmod R$
-\State $t \gets (a + m \cdot q) \div R$
-\If{$t \ge q$} \Return $t - q$ \Else\ \Return $t$ \EndIf
+\State $m \gets (a \bmod R) \cdot q^+ \bmod R$
+\State $t \gets (a - m \cdot q) \div R$
+\If{$t < 0$} \Return $t + q$ \Else\ \Return $t$ \EndIf
 \end{algorithmic}
 \end{algorithm}
 
 In the \haetae{} implementation, $R = 2^{32}$, $q = 64513$,
-$q' = \mathsf{QINV} = 940508161$ ($\equiv -q^{-1} \bmod 2^{32}$), and
-$\mathsf{MONT} = R \bmod q = 14321$.
+$\mathsf{QINV} = 940508161$ ($\equiv q^{-1} \bmod 2^{32}$), and
+$\mathsf{MONT} = R \bmod q = 14321$.  Thus the implementation uses the
+positive-inverse convention in \Cref{alg:mont_reduce}: it computes
+$m = (a \bmod R)\mathsf{QINV} \bmod R$ and then forms $a - m q$.
 
 \subsection{Montgomery Multiplication}
 
@@ -153,11 +160,13 @@ values are 32-bit signed integers and the final conditional subtraction is
 replaced by an arithmetic right shift.  Specifically, for $a \in \Z$ with
 $\abs{a} < q \cdot 2^{15}$:
 \begin{equation}
-  \text{int32}(a_{\text{lo}} \cdot q') \cdot q \;\text{(as signed 64-bit)} +\; a
+  a \;-\; \text{int32}(a_{\text{lo}} \cdot \mathsf{QINV}) \cdot q
+  \quad\text{(as signed 64-bit)}
   \;\text{ shifted right by 32}
 \label{eq:signed_mont}
 \end{equation}
-yields a value congruent to $a \cdot R^{-1} \pmod{q}$ and bounded by $q/2$.
+yields a value congruent to $a \cdot R^{-1} \pmod{q}$ and, in the checked
+signed REDC theorem, a representative in $[-q,q)$.
 
 \section{The EasyCrypt Proof Assistant}
 
@@ -222,6 +231,12 @@ cryptographic code.  Its distinguishing features are:
         undefined behaviour (array out of bounds, use before initialisation,
         integer overflow in unsigned arithmetic).
 
+  \item \textbf{Constant-time verification.}  The companion
+        \texttt{jasmin-ct} checker verifies that secret values do not control
+        branches or memory addresses.  Its speculative mode also tracks
+        transient pointer inputs, using explicit \jasm{\#[ct = "..."]} and
+        \jasm{\#[sct = "..."]} contracts on exported procedures.
+
   \item \textbf{EasyCrypt extraction.}  Each \jasm{export fn} is compiled
         to both assembly and an \easycrypt{} module.  The extracted module has
         a semantic identical to the assembly, by the Jasmin compiler
@@ -238,16 +253,17 @@ export fn poly_ntt_jazz(reg mut ptr u32[256] rp)
 \end{lstlisting}
 
 The export annotation triggers both assembly generation and \easycrypt{}
-extraction.  The extracted \easycrypt{} type for \jasm{ptr u32[256]} is the
-\easycrypt{} type \ec{W32.t Array256.t}, i.e., an array of 256 machine words.
+extraction.  The extracted \easycrypt{} type for \jasm{ptr u32[256]} is a
+\ec{BArray1024.t} byte-array value, with coefficients accessed by
+\ec{BArray1024.get32} and \ec{BArray1024.set32}.
 
 \section{Related Work}
 
 \paragraph{MLKEM/Kyber NTT.}
 The closest predecessor is the Jasmin/EasyCrypt verification of the NTT in
 ML-KEM~\cite{Barbosa2023}.  That work verifies the incomplete $128$-point
-Cooley--Tukey NTT over the same ring structure but with the \emph{different}
-exponent formula $\brev_8((s \bmod \ell) \cdot 2)$.  Our work adapts
+Cooley--Tukey NTT over a related ring structure but with an incomplete
+transform and a different twiddle-indexing discipline.  Our work adapts
 techniques from that development but requires new algebra lemmas for the
 full $256$-point transform.
 

@@ -97,13 +97,14 @@ enabling rich algebraic developments (ring theory, field theory, group theory)
 within the same tool.
 
 Our proof strategy follows the \emph{refinement} paradigm:
-\begin{align*}
-  \text{Jasmin} &\xrightarrow{\text{extraction}}
-  \text{EC module (RefJasminNTT)} \xrightarrow{\text{pRHL equivalence}}
-  \text{EC imperative spec (NTT\_Fq)} \\
-  &\xrightarrow{\text{loop invariant}}
-  \text{EC abstract spec (NTTFullSpec/Algebra)}
-\end{align*}
+\[
+\begin{aligned}
+  \text{Jasmin}
+    &\xrightarrow{\text{extraction}} \text{EC module} \\
+    &\xrightarrow{\text{pRHL equivalence}} \text{EC imperative spec} \\
+    &\xrightarrow{\text{loop invariant}} \text{EC abstract spec}.
+\end{aligned}
+\]
 Each arrow represents a machine-checked proof step; the composition yields
 the end-to-end theorem stated in \ec{NTTEndToEnd.ec}.
 
@@ -111,10 +112,10 @@ the end-to-end theorem stated in \ec{NTTEndToEnd.ec}.
 
 \begin{description}
   \item[\textbf{C1 -- Montgomery correctness.}]
-    A machine-checked proof that \ec{montgomery\_reduce} computes
+    A machine-checked proof of the Montgomery reducer: it computes
     $a \cdot R^{-1} \bmod q$ for all inputs in the relevant working range,
-    with $R = 2^{32}$, $q = 64513$, explicitly verified bit-width bounds,
-    and signed-integer arithmetic lemmas absent from the \easycrypt{} standard
+    with $R = 2^{32}$, $q = 64513$, verified bit-width bounds, and
+    signed-integer arithmetic lemmas absent from the \easycrypt{} standard
     library (\Cref{ch:montgomery}).
 
   \item[\textbf{C2 -- Imperative NTT specification.}]
@@ -125,9 +126,9 @@ the end-to-end theorem stated in \ec{NTTEndToEnd.ec}.
     (\Cref{ch:ntt_spec}).
 
   \item[\textbf{C3 -- Abstract spectral specification.}]
-    An algebraic library \ec{NTTFullAlgebra.ec} establishing properties of the
-    primitive root $\zeta_0 = 426$ in $\Zq$, bit-reversal permutation lemmas,
-    and a butterfly-stage induction connecting the iterative algorithm to the
+    An algebraic library establishing properties of the primitive root
+    $\zeta_0 = 426$ in $\Zq$, bit-reversal permutation lemmas, and a
+    butterfly-stage induction connecting the iterative algorithm to the
     closed-form evaluation formula (\Cref{ch:algebra}).
 
   \item[\textbf{C4 -- Jasmin refinement.}]
@@ -136,9 +137,8 @@ the end-to-end theorem stated in \ec{NTTEndToEnd.ec}.
     up to array representation (\Cref{ch:refinement}).
 
   \item[\textbf{C5 -- End-to-end correctness.}]
-    Top-level theorems \ec{haetae\_jasmin\_ntt\_correct} and
-    \ec{haetae\_jasmin\_invntt\_correct} in \ec{NTTEndToEnd.ec}, together
-    with the round-trip theorem $\INTT \circ \NTT = \op{id}$
+    Top-level forward and inverse correctness theorems relate the exported
+    \jasmin{} procedures to their abstract specifications
     (\Cref{ch:end_to_end}).
 \end{description}
 
@@ -176,7 +176,7 @@ The remainder of this dissertation is organised as follows.
         detail.
 
   \item[\Cref{ch:refinement}] presents the Jasmin-to-EasyCrypt refinement
-        proof in \ec{RefJasminNTT.ec}.
+        proof.
 
   \item[\Cref{ch:end_to_end}] assembles all pieces into the end-to-end
         correctness theorems.

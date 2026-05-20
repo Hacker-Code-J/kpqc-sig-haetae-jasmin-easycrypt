@@ -2,59 +2,662 @@ require "params.jinc"
 require "reduce.jinc"
 require "zetas.jinc"
 
+fn _poly_ntt_stage_128(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 1)
+  {
+    zeta = zetasp[1 + block];
+    start = block;
+    start <<= 8;
+    j = 0;
+    while (j < 128)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 128;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_64(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 2)
+  {
+    zeta = zetasp[2 + block];
+    start = block;
+    start <<= 7;
+    j = 0;
+    while (j < 64)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 64;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_32(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 4)
+  {
+    zeta = zetasp[4 + block];
+    start = block;
+    start <<= 6;
+    j = 0;
+    while (j < 32)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 32;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_16(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 8)
+  {
+    zeta = zetasp[8 + block];
+    start = block;
+    start <<= 5;
+    j = 0;
+    while (j < 16)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 16;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_8(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 16)
+  {
+    zeta = zetasp[16 + block];
+    start = block;
+    start <<= 4;
+    j = 0;
+    while (j < 8)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 8;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_4(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 32)
+  {
+    zeta = zetasp[32 + block];
+    start = block;
+    start <<= 3;
+    j = 0;
+    while (j < 4)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 4;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_2(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 64)
+  {
+    zeta = zetasp[64 + block];
+    start = block;
+    start <<= 2;
+    j = 0;
+    while (j < 2)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 2;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt_stage_1(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 128)
+  {
+    zeta = zetasp[128 + block];
+    start = block;
+    start <<= 1;
+    j = 0;
+    while (j < 1)
+    {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 1;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
 /* Forward NTT (in-place, bit-reversed output).
  * Mirrors C ntt(): 8 butterfly layers, no reduction between steps.
  * Coefficients are int32_t stored as u32. */
 fn _poly_ntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
 {
-  reg ui64 len;
-  reg ui64 start;
-  reg ui64 j;
-  reg ui64 cmp;
-  reg ui64 offset;
+  rp = _poly_ntt_stage_128(rp);
+  rp = _poly_ntt_stage_64(rp);
+  rp = _poly_ntt_stage_32(rp);
+  rp = _poly_ntt_stage_16(rp);
+  rp = _poly_ntt_stage_8(rp);
+  rp = _poly_ntt_stage_4(rp);
+  rp = _poly_ntt_stage_2(rp);
+  rp = _poly_ntt_stage_1(rp);
+  return rp;
+}
 
-  reg u32 zeta;
-  reg u32 t;
-  reg u32 s;
-  reg u32 coeff;
-
+fn _poly_invntt_stage_1(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
   reg ptr u32[256] zetasp;
-  reg ui64 zetasctr;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
 
-  zetasp   = jzetas;
-  zetasctr = 0;
-  len      = 128;
-
-  while (len > 0)
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 128)
   {
-    start = 0;
-    while (start < HAETAE_N)
+    zeta = zetasp[0 + block];
+    start = block;
+    start <<= 1;
+    j = 0;
+    while (j < 1)
     {
-      zetasctr += 1;
-      zeta = zetasp[zetasctr];
-
-      j   = start;
-      cmp = start; cmp += len;
-      while (j < cmp)
-      {
-        s      = rp[j];
-        offset = j; offset += len;
-        coeff  = rp[offset];
-
-        t      = __fqmul(zeta, coeff);   /* t = montgomery_reduce(zeta * coeff) */
-        coeff  = s;
-        coeff -= t;                      /* coeff = a[j] - t */
-        rp[offset] = coeff;
-        s     += t;                      /* s = a[j] + t */
-        rp[j]  = s;
-
-        j += 1;
-      }
-      start = j; start += len;
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 1;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
     }
-    len >>= 1;
+    block += 1;
   }
+  return rp;
+}
 
+fn _poly_invntt_stage_2(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 64)
+  {
+    zeta = zetasp[128 + block];
+    start = block;
+    start <<= 2;
+    j = 0;
+    while (j < 2)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 2;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_4(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 32)
+  {
+    zeta = zetasp[192 + block];
+    start = block;
+    start <<= 3;
+    j = 0;
+    while (j < 4)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 4;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_8(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 16)
+  {
+    zeta = zetasp[224 + block];
+    start = block;
+    start <<= 4;
+    j = 0;
+    while (j < 8)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 8;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_16(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 8)
+  {
+    zeta = zetasp[240 + block];
+    start = block;
+    start <<= 5;
+    j = 0;
+    while (j < 16)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 16;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_32(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 4)
+  {
+    zeta = zetasp[248 + block];
+    start = block;
+    start <<= 6;
+    j = 0;
+    while (j < 32)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 32;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_64(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 2)
+  {
+    zeta = zetasp[252 + block];
+    start = block;
+    start <<= 7;
+    j = 0;
+    while (j < 64)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 64;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_stage_128(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 block;
+  reg ui64 j;
+  reg ui64 start;
+  reg ui64 idx;
+  reg ui64 offset;
+  reg u32 zeta t s coeff;
+
+  zetasp = jzetas_inv;
+  block = 0;
+  while (block < 1)
+  {
+    zeta = zetasp[254 + block];
+    start = block;
+    start <<= 8;
+    j = 0;
+    while (j < 128)
+    {
+      idx = j;
+      idx += start;
+      t = rp[idx];
+      offset = idx;
+      offset += 128;
+      coeff = rp[offset];
+      s = t;
+      s += coeff;
+      rp[idx] = s;
+      t -= coeff;
+      t = __fqmul(zeta, t);
+      rp[offset] = t;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_invntt_scale(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
+{
+  reg ptr u32[256] zetasp;
+  reg ui64 j;
+  reg u32 zeta coeff t;
+
+  zetasp = jzetas_inv;
+  zeta = zetasp[255];
+  j = 0;
+  while (j < HAETAE_N)
+  {
+    coeff = rp[j];
+    t = __fqmul(zeta, coeff);
+    rp[j] = t;
+    j += 1;
+  }
   return rp;
 }
 
@@ -62,64 +665,15 @@ fn _poly_ntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
  * Mirrors C invntt_tomont(): 8 inverse butterfly layers + final scaling by f. */
 fn _poly_invntt(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
 {
-  reg ui64 len;
-  reg ui64 start;
-  reg ui64 j;
-  reg ui64 cmp;
-  reg ui64 offset;
-
-  reg u32 zeta;
-  reg u32 t;
-  reg u32 s;
-  reg u32 coeff;
-
-  reg ptr u32[256] zetasp;
-  reg ui64 zetasctr;
-
-  zetasp   = jzetas_inv;
-  zetasctr = 0;
-
-  len = 1;
-  while (len < HAETAE_N)
-  {
-    start = 0;
-    while (start < HAETAE_N)
-    {
-      zeta = zetasp[zetasctr];
-      zetasctr += 1;
-
-      j   = start;
-      cmp = start; cmp += len;
-      while (j < cmp)
-      {
-        t      = rp[j];
-        offset = j; offset += len;
-        coeff  = rp[offset];
-
-        s          = t;           /* copy a[j] */
-        s         += coeff;       /* s = a[j] + a[j+len] */
-        rp[j]      = s;
-        t         -= coeff;       /* t = a[j] - a[j+len] */
-        t          = __fqmul(zeta, t); /* montgomery_reduce(zeta * (a[j]-a[j+len])) */
-        rp[offset] = t;
-
-        j += 1;
-      }
-      start = j; start += len;
-    }
-    len <<= 1;
-  }
-
-  /* Final scaling by f = -29720 (jzetas_inv[255] = mont^2/256) */
-  zeta = zetasp[255];
-  j = 0;
-  while (j < HAETAE_N)
-  {
-    coeff  = rp[j];
-    t      = __fqmul(zeta, coeff);
-    rp[j]  = t;
-    j     += 1;
-  }
+  rp = _poly_invntt_stage_1(rp);
+  rp = _poly_invntt_stage_2(rp);
+  rp = _poly_invntt_stage_4(rp);
+  rp = _poly_invntt_stage_8(rp);
+  rp = _poly_invntt_stage_16(rp);
+  rp = _poly_invntt_stage_32(rp);
+  rp = _poly_invntt_stage_64(rp);
+  rp = _poly_invntt_stage_128(rp);
+  rp = _poly_invntt_scale(rp);
 
   return rp;
 }

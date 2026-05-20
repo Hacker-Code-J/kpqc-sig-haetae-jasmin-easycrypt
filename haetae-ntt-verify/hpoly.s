@@ -11,6 +11,8 @@ poly_basemul_jazz:
 	andq	$-8, %rsp
 	movq	%rbx, (%rsp)
 	movq	%rax, 8(%rsp)
+	lfence
+	movq	$0, %rax
 	call	L_poly_basemul$1
 Lpoly_basemul_jazz$1:
 	movq	(%rsp), %rbx
@@ -24,6 +26,8 @@ poly_invntt_jazz:
 	movq	%rbx, (%rsp)
 	movq	%rbp, 8(%rsp)
 	movq	%rax, 16(%rsp)
+	lfence
+	movq	$0, %rax
 	call	L_poly_invntt$1
 Lpoly_invntt_jazz$1:
 	movq	(%rsp), %rbx
@@ -38,6 +42,8 @@ poly_ntt_jazz:
 	movq	%rbx, (%rsp)
 	movq	%rbp, 8(%rsp)
 	movq	%rax, 16(%rsp)
+	lfence
+	movq	$0, %rax
 	call	L_poly_ntt$1
 Lpoly_ntt_jazz$1:
 	movq	(%rsp), %rbx
@@ -66,57 +72,33 @@ L_poly_basemul$2:
 	jb  	L_poly_basemul$3
 	ret
 L_poly_invntt$1:
-	leaq	glob_data + 0(%rip), %rax
-	movq	$0, %rcx
-	movq	$1, %rdx
-	jmp 	L_poly_invntt$4
-L_poly_invntt$5:
-	movq	$0, %r9
-	jmp 	L_poly_invntt$6
-L_poly_invntt$7:
-	movl	(%rax,%rcx,4), %esi
-	incq	%rcx
-	movq	%r9, %r8
-	addq	%rdx, %r9
-	jmp 	L_poly_invntt$8
+	call	L_poly_invntt_stage_1$1
+L_poly_invntt$10:
+	call	L_poly_invntt_stage_2$1
 L_poly_invntt$9:
-	movl	(%rdi,%r8,4), %r11d
-	movq	%r8, %r10
-	addq	%rdx, %r10
-	movl	(%rdi,%r10,4), %ebx
-	movl	%r11d, %ebp
-	addl	%ebx, %ebp
-	movl	%ebp, (%rdi,%r8,4)
-	subl	%ebx, %r11d
-	movslq	%esi, %rbx
-	movslq	%r11d, %r11
-	imulq	%r11, %rbx
-	movl	%ebx, %r11d
-	imull	$940508161, %r11d, %r11d
-	movslq	%r11d, %r11
-	imulq	$64513, %r11, %r11
-	subq	%r11, %rbx
-	sarq	$32, %rbx
-	movl	%ebx, (%rdi,%r10,4)
-	incq	%r8
+	call	L_poly_invntt_stage_4$1
 L_poly_invntt$8:
-	cmpq	%r9, %r8
-	jb  	L_poly_invntt$9
-	movq	%r8, %r9
-	addq	%rdx, %r9
+	call	L_poly_invntt_stage_8$1
+L_poly_invntt$7:
+	call	L_poly_invntt_stage_16$1
 L_poly_invntt$6:
-	cmpq	$256, %r9
-	jb  	L_poly_invntt$7
-	shlq	$1, %rdx
+	call	L_poly_invntt_stage_32$1
+L_poly_invntt$5:
+	call	L_poly_invntt_stage_64$1
 L_poly_invntt$4:
-	cmpq	$256, %rdx
-	jb  	L_poly_invntt$5
-	movl	1020(%rax), %esi
-	movq	$0, %r8
-	jmp 	L_poly_invntt$2
+	call	L_poly_invntt_stage_128$1
 L_poly_invntt$3:
+	call	L_poly_invntt_scale$1
+L_poly_invntt$2:
+	ret
+L_poly_invntt_scale$1:
+	leaq	glob_data + 0(%rip), %rax
+	movl	1020(%rax), %edx
+	movq	$0, %r8
+	jmp 	L_poly_invntt_scale$2
+L_poly_invntt_scale$3:
 	movl	(%rdi,%r8,4), %ecx
-	movslq	%esi, %rbx
+	movslq	%edx, %rbx
 	movslq	%ecx, %rcx
 	imulq	%rcx, %rbx
 	movl	%ebx, %ecx
@@ -127,30 +109,366 @@ L_poly_invntt$3:
 	sarq	$32, %rbx
 	movl	%ebx, (%rdi,%r8,4)
 	incq	%r8
-L_poly_invntt$2:
+L_poly_invntt_scale$2:
 	cmpq	$256, %r8
-	jb  	L_poly_invntt$3
+	jb  	L_poly_invntt_scale$3
+	ret
+L_poly_invntt_stage_128$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_128$2
+L_poly_invntt_stage_128$3:
+	movl	1016(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$8, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_128$4
+L_poly_invntt_stage_128$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$128, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_128$4:
+	cmpq	$128, %r8
+	jb  	L_poly_invntt_stage_128$5
+	incq	%rcx
+L_poly_invntt_stage_128$2:
+	cmpq	$1, %rcx
+	jb  	L_poly_invntt_stage_128$3
+	ret
+L_poly_invntt_stage_64$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_64$2
+L_poly_invntt_stage_64$3:
+	movl	1008(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$7, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_64$4
+L_poly_invntt_stage_64$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$64, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_64$4:
+	cmpq	$64, %r8
+	jb  	L_poly_invntt_stage_64$5
+	incq	%rcx
+L_poly_invntt_stage_64$2:
+	cmpq	$2, %rcx
+	jb  	L_poly_invntt_stage_64$3
+	ret
+L_poly_invntt_stage_32$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_32$2
+L_poly_invntt_stage_32$3:
+	movl	992(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$6, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_32$4
+L_poly_invntt_stage_32$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$32, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_32$4:
+	cmpq	$32, %r8
+	jb  	L_poly_invntt_stage_32$5
+	incq	%rcx
+L_poly_invntt_stage_32$2:
+	cmpq	$4, %rcx
+	jb  	L_poly_invntt_stage_32$3
+	ret
+L_poly_invntt_stage_16$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_16$2
+L_poly_invntt_stage_16$3:
+	movl	960(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$5, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_16$4
+L_poly_invntt_stage_16$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$16, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_16$4:
+	cmpq	$16, %r8
+	jb  	L_poly_invntt_stage_16$5
+	incq	%rcx
+L_poly_invntt_stage_16$2:
+	cmpq	$8, %rcx
+	jb  	L_poly_invntt_stage_16$3
+	ret
+L_poly_invntt_stage_8$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_8$2
+L_poly_invntt_stage_8$3:
+	movl	896(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$4, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_8$4
+L_poly_invntt_stage_8$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$8, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_8$4:
+	cmpq	$8, %r8
+	jb  	L_poly_invntt_stage_8$5
+	incq	%rcx
+L_poly_invntt_stage_8$2:
+	cmpq	$16, %rcx
+	jb  	L_poly_invntt_stage_8$3
+	ret
+L_poly_invntt_stage_4$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_4$2
+L_poly_invntt_stage_4$3:
+	movl	768(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$3, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_4$4
+L_poly_invntt_stage_4$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$4, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_4$4:
+	cmpq	$4, %r8
+	jb  	L_poly_invntt_stage_4$5
+	incq	%rcx
+L_poly_invntt_stage_4$2:
+	cmpq	$32, %rcx
+	jb  	L_poly_invntt_stage_4$3
+	ret
+L_poly_invntt_stage_2$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_2$2
+L_poly_invntt_stage_2$3:
+	movl	512(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$2, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_2$4
+L_poly_invntt_stage_2$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	addq	$2, %r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_2$4:
+	cmpq	$2, %r8
+	jb  	L_poly_invntt_stage_2$5
+	incq	%rcx
+L_poly_invntt_stage_2$2:
+	cmpq	$64, %rcx
+	jb  	L_poly_invntt_stage_2$3
+	ret
+L_poly_invntt_stage_1$1:
+	leaq	glob_data + 0(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_invntt_stage_1$2
+L_poly_invntt_stage_1$3:
+	movl	(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$1, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_invntt_stage_1$4
+L_poly_invntt_stage_1$5:
+	movq	%r8, %r10
+	addq	%rsi, %r10
+	movl	(%rdi,%r10,4), %ebx
+	movq	%r10, %r9
+	incq	%r9
+	movl	(%rdi,%r9,4), %r11d
+	movl	%ebx, %ebp
+	addl	%r11d, %ebp
+	movl	%ebp, (%rdi,%r10,4)
+	subl	%r11d, %ebx
+	movslq	%edx, %r10
+	movslq	%ebx, %r11
+	imulq	%r11, %r10
+	movl	%r10d, %r11d
+	imull	$940508161, %r11d, %r11d
+	movslq	%r11d, %r11
+	imulq	$64513, %r11, %r11
+	subq	%r11, %r10
+	sarq	$32, %r10
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_invntt_stage_1$4:
+	cmpq	$1, %r8
+	jb  	L_poly_invntt_stage_1$5
+	incq	%rcx
+L_poly_invntt_stage_1$2:
+	cmpq	$128, %rcx
+	jb  	L_poly_invntt_stage_1$3
 	ret
 L_poly_ntt$1:
+	call	L_poly_ntt_stage_128$1
+L_poly_ntt$9:
+	call	L_poly_ntt_stage_64$1
+L_poly_ntt$8:
+	call	L_poly_ntt_stage_32$1
+L_poly_ntt$7:
+	call	L_poly_ntt_stage_16$1
+L_poly_ntt$6:
+	call	L_poly_ntt_stage_8$1
+L_poly_ntt$5:
+	call	L_poly_ntt_stage_4$1
+L_poly_ntt$4:
+	call	L_poly_ntt_stage_2$1
+L_poly_ntt$3:
+	call	L_poly_ntt_stage_1$1
+L_poly_ntt$2:
+	ret
+L_poly_ntt_stage_1$1:
 	leaq	glob_data + 1024(%rip), %rax
 	movq	$0, %rcx
-	movq	$128, %rdx
-	jmp 	L_poly_ntt$2
-L_poly_ntt$3:
-	movq	$0, %r9
-	jmp 	L_poly_ntt$4
-L_poly_ntt$5:
-	incq	%rcx
-	movl	(%rax,%rcx,4), %esi
-	movq	%r9, %r8
-	addq	%rdx, %r9
-	jmp 	L_poly_ntt$6
-L_poly_ntt$7:
-	movl	(%rdi,%r8,4), %r10d
-	movq	%r8, %r11
-	addq	%rdx, %r11
+	jmp 	L_poly_ntt_stage_1$2
+L_poly_ntt_stage_1$3:
+	movl	512(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$1, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_1$4
+L_poly_ntt_stage_1$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	incq	%r11
 	movl	(%rdi,%r11,4), %ebp
-	movslq	%esi, %rbx
+	movslq	%edx, %rbx
 	movslq	%ebp, %rbp
 	imulq	%rbp, %rbx
 	movl	%ebx, %ebp
@@ -163,20 +481,295 @@ L_poly_ntt$7:
 	subl	%ebx, %ebp
 	movl	%ebp, (%rdi,%r11,4)
 	addl	%ebx, %r10d
-	movl	%r10d, (%rdi,%r8,4)
+	movl	%r10d, (%rdi,%r9,4)
 	incq	%r8
-L_poly_ntt$6:
-	cmpq	%r9, %r8
-	jb  	L_poly_ntt$7
+L_poly_ntt_stage_1$4:
+	cmpq	$1, %r8
+	jb  	L_poly_ntt_stage_1$5
+	incq	%rcx
+L_poly_ntt_stage_1$2:
+	cmpq	$128, %rcx
+	jb  	L_poly_ntt_stage_1$3
+	ret
+L_poly_ntt_stage_2$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_2$2
+L_poly_ntt_stage_2$3:
+	movl	256(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$2, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_2$4
+L_poly_ntt_stage_2$5:
 	movq	%r8, %r9
-	addq	%rdx, %r9
-L_poly_ntt$4:
-	cmpq	$256, %r9
-	jb  	L_poly_ntt$5
-	shrq	$1, %rdx
-L_poly_ntt$2:
-	cmpq	$0, %rdx
-	jnbe	L_poly_ntt$3
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$2, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_2$4:
+	cmpq	$2, %r8
+	jb  	L_poly_ntt_stage_2$5
+	incq	%rcx
+L_poly_ntt_stage_2$2:
+	cmpq	$64, %rcx
+	jb  	L_poly_ntt_stage_2$3
+	ret
+L_poly_ntt_stage_4$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_4$2
+L_poly_ntt_stage_4$3:
+	movl	128(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$3, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_4$4
+L_poly_ntt_stage_4$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$4, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_4$4:
+	cmpq	$4, %r8
+	jb  	L_poly_ntt_stage_4$5
+	incq	%rcx
+L_poly_ntt_stage_4$2:
+	cmpq	$32, %rcx
+	jb  	L_poly_ntt_stage_4$3
+	ret
+L_poly_ntt_stage_8$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_8$2
+L_poly_ntt_stage_8$3:
+	movl	64(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$4, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_8$4
+L_poly_ntt_stage_8$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$8, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_8$4:
+	cmpq	$8, %r8
+	jb  	L_poly_ntt_stage_8$5
+	incq	%rcx
+L_poly_ntt_stage_8$2:
+	cmpq	$16, %rcx
+	jb  	L_poly_ntt_stage_8$3
+	ret
+L_poly_ntt_stage_16$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_16$2
+L_poly_ntt_stage_16$3:
+	movl	32(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$5, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_16$4
+L_poly_ntt_stage_16$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$16, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_16$4:
+	cmpq	$16, %r8
+	jb  	L_poly_ntt_stage_16$5
+	incq	%rcx
+L_poly_ntt_stage_16$2:
+	cmpq	$8, %rcx
+	jb  	L_poly_ntt_stage_16$3
+	ret
+L_poly_ntt_stage_32$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_32$2
+L_poly_ntt_stage_32$3:
+	movl	16(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$6, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_32$4
+L_poly_ntt_stage_32$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$32, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_32$4:
+	cmpq	$32, %r8
+	jb  	L_poly_ntt_stage_32$5
+	incq	%rcx
+L_poly_ntt_stage_32$2:
+	cmpq	$4, %rcx
+	jb  	L_poly_ntt_stage_32$3
+	ret
+L_poly_ntt_stage_64$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_64$2
+L_poly_ntt_stage_64$3:
+	movl	8(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$7, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_64$4
+L_poly_ntt_stage_64$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$64, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_64$4:
+	cmpq	$64, %r8
+	jb  	L_poly_ntt_stage_64$5
+	incq	%rcx
+L_poly_ntt_stage_64$2:
+	cmpq	$2, %rcx
+	jb  	L_poly_ntt_stage_64$3
+	ret
+L_poly_ntt_stage_128$1:
+	leaq	glob_data + 1024(%rip), %rax
+	movq	$0, %rcx
+	jmp 	L_poly_ntt_stage_128$2
+L_poly_ntt_stage_128$3:
+	movl	4(%rax,%rcx,4), %edx
+	movq	%rcx, %rsi
+	shlq	$8, %rsi
+	movq	$0, %r8
+	jmp 	L_poly_ntt_stage_128$4
+L_poly_ntt_stage_128$5:
+	movq	%r8, %r9
+	addq	%rsi, %r9
+	movl	(%rdi,%r9,4), %r10d
+	movq	%r9, %r11
+	addq	$128, %r11
+	movl	(%rdi,%r11,4), %ebp
+	movslq	%edx, %rbx
+	movslq	%ebp, %rbp
+	imulq	%rbp, %rbx
+	movl	%ebx, %ebp
+	imull	$940508161, %ebp, %ebp
+	movslq	%ebp, %rbp
+	imulq	$64513, %rbp, %rbp
+	subq	%rbp, %rbx
+	sarq	$32, %rbx
+	movl	%r10d, %ebp
+	subl	%ebx, %ebp
+	movl	%ebp, (%rdi,%r11,4)
+	addl	%ebx, %r10d
+	movl	%r10d, (%rdi,%r9,4)
+	incq	%r8
+L_poly_ntt_stage_128$4:
+	cmpq	$128, %r8
+	jb  	L_poly_ntt_stage_128$5
+	incq	%rcx
+L_poly_ntt_stage_128$2:
+	cmpq	$1, %rcx
+	jb  	L_poly_ntt_stage_128$3
 	ret
 	.data
 	.p2align	5

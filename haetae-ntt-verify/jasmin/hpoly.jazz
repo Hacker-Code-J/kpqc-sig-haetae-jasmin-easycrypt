@@ -1,24 +1,38 @@
 require "params.jinc"
 require "poly.jinc"
 
+#[ct = "rp -> rp"]
+#[sct = "{ ptr: transient, val: secret } -> { ptr: public, val: secret }"]
 export
 fn poly_ntt_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
 {
+  _ = #init_msf();
   rp = _poly_ntt(rp);
   return rp;
 }
 
+#[ct = "rp -> rp"]
+#[sct = "{ ptr: transient, val: secret } -> { ptr: public, val: secret }"]
 export
 fn poly_invntt_jazz(reg mut ptr u32[HAETAE_N] rp) -> reg ptr u32[HAETAE_N]
 {
+  _ = #init_msf();
   rp = _poly_invntt(rp);
   return rp;
 }
 
+#[ct = "rp × ap × bp -> {ap, bp, rp}"]
+#[sct = "
+{ ptr: transient, val: secret } ×
+{ ptr: transient, val: secret } ×
+{ ptr: transient, val: secret } ->
+{ ptr: public, val: secret }
+"]
 export
 fn poly_basemul_jazz(reg mut ptr u32[HAETAE_N] rp,
                      reg const ptr u32[HAETAE_N] ap bp) -> reg ptr u32[HAETAE_N]
 {
+  _ = #init_msf();
   rp = _poly_basemul(rp, ap, bp);
   return rp;
 }

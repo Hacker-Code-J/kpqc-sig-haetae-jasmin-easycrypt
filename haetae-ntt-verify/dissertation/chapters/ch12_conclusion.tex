@@ -25,9 +25,11 @@ future cryptographic verifications.
 We developed a fully proved imperative NTT specification in \texttt{NTT\_Fq.ec},
 covering both the forward and inverse NTT with all loop invariants,
 termination witnesses, and coefficient-bound invariants.  The specification is
-structurally identical to the C reference implementation and the \jasmin{} source,
-making the correspondence proofs straightforward once the arithmetic
-infrastructure is in place.
+structurally identical to the C reference implementation and to the original
+direct-loop \jasmin{} source.  The current full-safe \jasmin{} source exposes
+the same public schedule as fixed stage helpers, so the correspondence is read
+as the composition of those stage instances through the checked
+\texttt{Hpoly\_loop.ec} and \texttt{CTLoopEquiv.ec} bridge.
 
 \paragraph{C3 -- Abstract spectral specification.}
 We developed the algebraic infrastructure in \texttt{NTTFullAlgebra.ec},
@@ -39,7 +41,9 @@ $128$-point transform, and provides the formal foundation for the
 stage-induction proof.
 
 \paragraph{C4 -- Jasmin refinement.}
-We proved the two central refinement lemmas in \texttt{RefJasminNTT.ec}:
+We proved the two central refinement lemmas first in the direct-loop
+\texttt{RefJasminNTT.ec} boundary and then reused them for the full-safe
+artifact through \texttt{RefJasminNTT\allowbreak Loop.ec}:
 \begin{itemize}
   \item \ec{poly\_ntt\_core\_ref}: the \jasmin{} forward NTT is observationally
         equivalent to the imperative specification, with coefficient bounds
@@ -50,22 +54,41 @@ We proved the two central refinement lemmas in \texttt{RefJasminNTT.ec}:
 \end{itemize}
 
 \paragraph{C5 -- End-to-end correctness.}
-We assembled all layers in \texttt{NTTEndToEnd.ec}, stating the main theorems
-\ec{haetae\_jasmin\_ntt\_correct} and \ec{haetae\_jasmin\_invntt\_correct}.
-These theorems directly relate the \jasmin{} exported functions to the abstract
-spectral NTT map.
+We assembled all layers in \texttt{NTTEndToEnd.ec}.  Its main forward and
+inverse theorems directly relate the \jasmin{} exported functions to the
+abstract spectral NTT map for the helperized full-safe extraction.
 
-\section{Limitations and Remaining Obligations}
+\paragraph{C6 -- Compiler-level safety and constant-time checking.}
+The current scalar \jasmin{} implementation also passes the implementation
+security checks exposed by the Jasmin toolchain: \texttt{jasminc -checksafety},
+\texttt{jasmin-ct}, and \texttt{jasmin-ct --speculative}.  This required
+preserving the old algorithmic structure but making the public stage schedule
+syntactic in the source and adding explicit \jasm{\#[ct = "..."]} and
+\jasm{\#[sct = "..."]} contracts to the exported wrappers.  The same
+extraction is connected to the functional-correctness proof by the
+\texttt{easycrypt-ct} bridge.
 
-\subsection{Stage Induction Gap}
+\section{Limitations and Remaining Scope}
 
-The one remaining proof obligation is the complete machine-checked proof of the
-butterfly-stage induction connecting \ec{NTT\_Fq.NTT.ntt} to
-\ec{NTTFullSpec.full\_ntt}.  While the mathematical argument is clear
-(\Cref{lem:butterfly_stage}), its formalisation in \easycrypt{} requires
-significant index-arithmetic manipulation.  The MLKEM verification did not
-provide a reusable template, necessitating new infrastructure.  Completing
-this proof is the primary remaining task.
+\subsection{Scalar NTT Scope}
+
+The scalar forward and inverse NTT verification compiles through
+\texttt{NTTEndToEnd.ec} in \texttt{easycrypt-ct}.  The helperized
+full-safe extraction, the proof-loop bridge, the stage-induction bridge from
+\ec{NTT\_Fq.NTT.ntt} to \ec{NTTFullSpec.full\_ntt}, and the inverse
+counterpart are part of the checked artifact.  The remaining limitations are
+therefore outside the scalar NTT chain proved here.
+
+\subsection{Stage-Specialised Extraction Boundary}
+
+The full-safe constant-time Jasmin source is a stage-specialised
+implementation of the same scalar NTT schedule.  The dissertation keeps the
+old direct-loop listings to distinguish the proof-oriented presentation from
+the current compiler-checked source.  The checked proof bundle now performs
+that adaptation explicitly: \texttt{Hpoly\_loop.ec} provides the direct-loop
+model, \texttt{RefJasminNTT\allowbreak Loop.ec} proves refinement for that model, and
+\texttt{CTLoopEquiv.ec} transfers the result to the helperized
+\texttt{Hpoly\_extract} procedures.
 
 \subsection{No AVX2 Vectorisation}
 
@@ -93,13 +116,11 @@ protocol level.
 
 \section{Future Work}
 
-\paragraph{Completing the stage induction.}
-The most pressing future work is completing the butterfly-stage induction in
-\texttt{NTTFullAlgebra.ec}.  The key insight needed is a formal lemma relating
-the loop counter $k$ to the spectral index $\brev_8(2^s + g)$ at each stage.
-We conjecture that a more direct formulation---expressing the partial NTT
-directly in terms of the loop variables rather than through the bit-reversal
-permutation---would simplify the proof considerably.
+\paragraph{Generalising the stage induction.}
+The current butterfly-stage induction is specialised to the HAETAE parameters
+\(n=256\), \(q=64513\), and \(\zeta_0=426\).  A useful next step is to
+factor this proof into a reusable, parameterised NTT algebra library rather
+than a scheme-specific development.
 
 \paragraph{Vectorised implementation verification.}
 Extending the proof to cover an AVX2 implementation would provide a

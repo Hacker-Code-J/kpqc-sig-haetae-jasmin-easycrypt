@@ -30,7 +30,7 @@ Let $R = 2^{32}$, $q = 64513$.  Since $\gcd(q, R) = 1$, the inverse $R^{-1}
 \bmod q$ and $q^{-1} \bmod R$ both exist.
 
 \begin{align}
-  \mathsf{QINV} &= -q^{-1} \bmod R = 940508161 \label{eq:qinv} \\
+  \mathsf{QINV} &= q^{-1} \bmod R = 940508161 \label{eq:qinv} \\
   \mathsf{MONT} &= R \bmod q = 14321 \label{eq:mont} \\
   \mathsf{MONTSQ} &= R^2 \bmod q = 4214 \label{eq:montsq} \\
   R^{-1} &\bmod q = 50386 \label{eq:rinv}
@@ -39,7 +39,7 @@ Let $R = 2^{32}$, $q = 64513$.  Since $\gcd(q, R) = 1$, the inverse $R^{-1}
 \begin{lemma}[Parameter verification]
   The following hold in $\Z$:
   \begin{enumerate}
-    \item $q \cdot \mathsf{QINV} \equiv -1 \pmod{2^{32}}$
+    \item $q \cdot \mathsf{QINV} \equiv 1 \pmod{2^{32}}$
     \item $\mathsf{MONT} \equiv R \pmod{q}$
     \item $\mathsf{MONTSQ} \equiv R^2 \pmod{q}$
     \item $R^{-1} \cdot R \equiv 1 \pmod{q}$
@@ -89,9 +89,9 @@ inputs).  Define:
 \begin{proof}
   We have $m \equiv a \cdot \mathsf{QINV} \pmod{2^{32}}$.
   Then $m \cdot q \equiv a \cdot \mathsf{QINV} \cdot q \pmod{2^{32}}$.
-  Since $\mathsf{QINV} = -q^{-1} \bmod R$, we get
-  $\mathsf{QINV} \cdot q \equiv -1 \pmod{2^{32}}$, so
-  $m \cdot q \equiv -a \pmod{2^{32}}$, hence $u = a - mq \equiv 0 \pmod{2^{32}}$.
+  Since $\mathsf{QINV} = q^{-1} \bmod R$, we get
+  $\mathsf{QINV} \cdot q \equiv 1 \pmod{2^{32}}$, so
+  $m \cdot q \equiv a \pmod{2^{32}}$, hence $u = a - mq \equiv 0 \pmod{2^{32}}$.
 \end{proof}
 
 Defining $t = u / 2^{32}$ (exact integer division by \Cref{lem:mont_div}),
@@ -101,7 +101,7 @@ we have:
   Let $a \in \Z$ with $\abs{a} < q \cdot 2^{15}$.  Then:
   \begin{enumerate}
     \item $t \equiv a \cdot R^{-1} \pmod{q}$, where $t = u / R$ and $u = a - m \cdot q$.
-    \item $\abs{t} < q / 2$.
+    \item $-q \le t < q$.
   \end{enumerate}
 \label{thm:mont_correct}
 \end{theorem}
@@ -110,13 +110,13 @@ we have:
   For Part (1): Since $u = a - mq$, we have $t = u / R = (a - mq)/R$, so
   $t \cdot R = a - mq \equiv a \pmod{q}$, thus $t \equiv a \cdot R^{-1} \pmod{q}$.
 
-  For Part (2): We bound $|u|$.
-  We have $|a| < q \cdot 2^{15}$ and $0 \le m < 2^{32}$, so
-  $|u| = |a - mq| \le |a| + mq < q \cdot 2^{15} + 2^{32} \cdot q = q(2^{15} + 2^{32})$.
-  Dividing by $R = 2^{32}$: $|t| < q(2^{15} + 2^{32}) / 2^{32} = q(1 + 2^{-17}) < 2q$.
-  A tighter analysis using the signed representation of $m$ (where the C cast
-  $(int32\_t)a$ gives a signed value in $(-2^{31}, 2^{31}]$) improves this
-  to $|t| < q$, but the weaker bound suffices for our purposes.
+  For Part (2), the checked proof does not use the unsigned representative
+  $m \in [0,R)$ directly.  It models the C cast to \texttt{int32\_t} by a
+  signed residue in $[-R/2,R/2)$ and proves the range for the signed REDC
+  operator under the admissible precondition
+  $-R q/2 \le a < R q/2$.  This gives the machine-checked bound
+  $-q \le t < q$.  The simpler unsigned estimate only proves a weaker
+  interval and is not sufficient for the stated result.
 \end{proof}
 
 \subsection{EasyCrypt Formalisation}
@@ -125,21 +125,26 @@ The EasyCrypt formalisation of Montgomery reduction appears in
 \texttt{Fq.ec} and \texttt{Montgomery.ec}.
 
 \begin{lstlisting}[language=EasyCrypt,
-  caption={Montgomery reduction specification in \texttt{Fq.ec}},
+  caption={Signed REDC correctness in \texttt{Montgomery.ec}},
   label={lst:mont_ec}]
-op montgomery_reduce (a : int) : int =
-  let t = (to_sint32 a * qinv) %% W32.modulus in
-  (a - t * q) %/ W32.modulus.
+op SREDC (a: int) : int =
+  let u = smod (a * qinv * R) (R^2) in
+  let t = smod (a - u %/ R * q) (R^2) in
+      smod (t %/ R %% (R^2)) R.
 
-lemma montgomery_reduce_corr (a : int) :
-    `|a| < q * 2^15 =>
-    montgomery_reduce a %% q = a %% q /\ `|montgomery_reduce a| < q.
+lemma SREDCp_corr (a : int):
+  0 < q < R %/2 =>
+  -R %/ 2 * q <= a < R %/2 * q =>
+  -q <= SREDC a < q /\
+  SREDC a %% q = (a * Rinv) %% q.
 \end{lstlisting}
 
-The key lemma \ec{montgomery\_reduce\_corr} is proved in two parts.  The
+The key lemma \ec{SREDCp\_corr} is proved in two parts.  The
 congruence part ($t \equiv a R^{-1} \pmod q$) follows from
-\Cref{lem:mont_div}.  The bound part uses the concrete values of $q$ and
-$R = 2^{32}$ to establish $|t| < q$ via SMT.
+\Cref{lem:mont_div}.  The bound part uses the signed representative of the
+low word and the concrete values of $q$ and $R = 2^{32}$ to establish
+$-q \le t < q$ via SMT.  The Jasmin procedure is connected to this operator
+by the Hoare lemma \ec{montgomery\_reduce\_corr\_h} in \texttt{Fq.ec}.
 
 \section{Montgomery Multiplication (\texttt{fqmul})}
 
@@ -153,7 +158,8 @@ op fqmul (a b : int) : int = montgomery_reduce (a * b).
 \end{lstlisting}
 
 \begin{theorem}[fqmul correctness]
-  For all $a, b \in \Z$ with $|a|, |b| < q \cdot 2^{15}$:
+  For all $a, b \in \Z$ whose product lies in the signed REDC admissible
+  range $-Rq/2 \le ab < Rq/2$:
   \begin{enumerate}
     \item $\op{fqmul}(a, b) \equiv a \cdot b \cdot R^{-1} \pmod{q}$.
     \item $|\op{fqmul}(a, b)| < q$.
@@ -162,11 +168,10 @@ op fqmul (a b : int) : int = montgomery_reduce (a * b).
 \end{theorem}
 
 \begin{proof}
-  Directly from \Cref{thm:mont_correct} with $a \leftarrow a \cdot b$.
-  The product $a \cdot b$ satisfies $|ab| \le (q \cdot 2^{15})^2 < q \cdot
-  2^{15} \cdot q \cdot 2^{15}$; by choosing the working range for individual
-  arguments to be $|a|, |b| < 2^{15}$, we ensure $|ab| < 2^{30} < q \cdot 2^{15}$
-  (since $q > 2^{15}$).
+  Directly from \Cref{thm:mont_correct} with the REDC input
+  $a \leftarrow a \cdot b$.  The refinement proof discharges the concrete
+  side conditions for the NTT cases, for example when a 16-bit twiddle factor
+  is multiplied by a coefficient bounded by the current stage invariant.
 \end{proof}
 
 \section{Twiddle Factor Multiplication in the NTT Butterfly}
@@ -187,7 +192,8 @@ the twiddle table in pre-multiplied form.
 
 \begin{lemma}[Twiddle factor correctness]
   Let $\zeta_k = \op{zetas}[k]$ (stored as $\zeta_0^{\brev_8(k)} \cdot R \bmod q$),
-  and let $a \in \Z$ with $|a| < 2^{15}$.  Then:
+  and let \(a\) satisfy the signed coefficient bound required at the current
+  stage.  Then:
   \[
     \op{montgomery\_reduce}(\zeta_k \cdot a)
     \equiv \zeta_0^{\brev_8(k)} \cdot a \pmod{q}
@@ -199,60 +205,66 @@ the twiddle table in pre-multiplied form.
 \section{Bound Tracking Through NTT Stages}
 
 \begin{theorem}[Coefficient bounds through forward NTT]
-  Let $a \in \Z^{256}$ be the input array with $|a[i]| < 2^{15}$ for all $i$.
-  After the forward NTT (8 butterfly stages), the output satisfies
-  $|a'[i]| < 2^{23}$ for all $i$.
+  Let the concrete input array satisfy the checked 16-bit signed word bound
+  \(\ec{poly\_repr\_bound}\;\texttt{rp}\;p\;16\).  After the forward NTT,
+  the output satisfies the checked 24-bit signed word bound
+  \(\ec{poly\_repr\_bound}\;\texttt{res}\;(\ec{full\_ntt}\;p)\;24\).
 \label{thm:ntt_bounds}
 \end{theorem}
 
 \begin{proof}
-  By induction on the stage number $s \in \{0, \dots, 7\}$.
-
-  \emph{Base case} ($s = 0$, before any stage): $|a[i]| < 2^{15}$.
-
-  \emph{Inductive step}: After stage $s$, each coefficient satisfies
-  $|a^{(s)}[i]| < 2^{15+s}$ by the following sub-claim.
-
-  In stage $s$, each butterfly computes:
-  \begin{align*}
-    a'[j] &= a[j] + \op{mont\_reduce}(\zeta \cdot a[j+\ell]) \\
-    a'[j+\ell] &= a[j] - \op{mont\_reduce}(\zeta \cdot a[j+\ell])
-  \end{align*}
-  By \Cref{thm:mont_correct}, $|\op{mont\_reduce}(\zeta \cdot a[j+\ell])| < q < 2^{16}$.
-  Combined with $|a[j]| < 2^{15+s}$ by inductive hypothesis:
+  The checked proof in \texttt{RefJasminNTT.ec} uses stage-indexed
+  bit-width bounds rather than the false recurrence
+  \(|a^{(s)}[i]| < 2^{15+s}\).  For the forward loop, the function
+  \ec{fwd\_stage\_bound} maps
   \[
-    |a'[j]|, |a'[j+\ell]| \le 2^{15+s} + 2^{16} < 2^{15+(s+1)},
+    128,64,32,16,8,4,2,1,0
+    \quad\mapsto\quad
+    16,17,18,19,20,21,22,23,24.
   \]
-  provided $2^{15+s} + 2^{16} < 2^{15+s+1}$, i.e., $2^{16} < 2^{15+s}$,
-  i.e., $s \ge 1$.  For $s = 0$, the bound is $|a'| < 2^{15} + q < 2^{16.0}$,
-  still within $2^{16}$.
-
-  After $s = 8$ stages: $|a[i]| < 2^{15+8} = 2^{23}$.
+  Inner-loop and middle-loop invariants use \ec{fwd\_inner\_bound} and
+  \ec{fwd\_middle\_bound} to mark exactly which cells have advanced to the
+  next bit-width.  The final EasyCrypt theorem is
+  \ec{poly\_ntt\_core\_ref}, whose postcondition is the 24-bit
+  \ec{poly\_repr\_bound}.
 \end{proof}
 
 \begin{corollary}[Bound for inverse NTT]
-  Let the input to the inverse NTT have coefficients bounded by $2^{23}$
-  (the output of the forward NTT).  After the inverse NTT, the output
-  satisfies $|a'[i]| < 2^{15}$ for all $i$.
+  The checked inverse refinement theorem assumes a 16-bit signed input bound
+  and proves a 16-bit signed output bound for the Montgomery-form inverse
+  result:
+  \[
+  \begin{aligned}
+    &\ec{poly\_repr\_bound}\;\texttt{rp}\;p\;16 \\
+    &\quad\Longrightarrow
+      \ec{poly\_repr\_bound}\;\texttt{res}\;
+      (\ec{array256\_mont}(\ec{full\_invntt}\;p))\;16.
+  \end{aligned}
+  \]
 \label{cor:invntt_bounds}
 \end{corollary}
 
 These bounds are the key invariants verified in \texttt{RefJasminNTT.ec}
 and summarised in \Cref{tab:bounds}.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Coefficient bounds at each layer of the verification}
 \label{tab:bounds}
-\begin{tabular}{lll}
+\small
+\begin{tabular}{
+  >{\raggedright\arraybackslash}p{0.29\textwidth}
+  >{\raggedright\arraybackslash}p{0.20\textwidth}
+  >{\raggedright\arraybackslash}p{0.41\textwidth}}
 \toprule
 Stage & Variable & Bound \\
 \midrule
-Input to forward NTT & $a[i]$ & $|a[i]| < 2^{15}$ \\
-After forward NTT & $\hat{a}[i]$ & $|\hat{a}[i]| < 2^{23}$ \\
-Input to inverse NTT & $\hat{a}[i]$ & $|\hat{a}[i]| < 2^{23}$ \\
-After inverse NTT & $a'[i]$ & $|a'[i]| < 2^{15}$ \\
-Montgomery reduced & $a'[i] \cdot R \bmod q$ & $|a'[i] \cdot R \bmod q| < q/2$ \\
+Input to forward NTT & $a[i]$ & signed 16-bit bound \\
+After forward NTT & $\hat{a}[i]$ & signed 24-bit bound \\
+Input to inverse NTT & $\hat{a}[i]$ & signed 16-bit bound required by theorem \\
+After inverse NTT & $a'[i]\cdot R$ & signed 16-bit bound \\
+Montgomery reduced & $a'[i] \cdot R \bmod q$ & signed representative in $[-q,q)$ \\
 \bottomrule
 \end{tabular}
+\normalsize
 \end{table}

@@ -5,38 +5,50 @@
 \chapter{Formalisation of Field and Ring Arithmetic}
 \label{ch:field_ring}
 
-\section{The Prime Field $\F_q$}
+\section[The Prime Field Fq]{The Prime Field $\F_q$}
 
 \subsection{Field Definition in \texttt{Fq.ec}}
 
-The file \texttt{Fq.ec} (536 lines) formalises the prime field
-$\F_q = \Z / 64513\Z$.  Rather than working with \easycrypt{}'s built-in
-\ec{ZModField} functor directly, the development uses a bespoke
-\ec{clone} instantiation to gain tighter control over signed arithmetic.
+The file \texttt{Fq.ec} (535 lines) provides the signed-reduction and
+Montgomery-arithmetic infrastructure for the modulus \(q=64513\).  The field
+structure itself is imported through the neighbouring \texttt{GFq.ec} file;
+\texttt{Fq.ec} clones the \ec{SignedReductions} theory with the concrete
+HAETAE constants so that word-level signed arithmetic can be related to
+field coefficients.
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={Field declaration in \texttt{Fq.ec}},
   label={lst:fq_decl}]
-require import AllCore IntDiv SmtMap Ring.
-require import List StdBigop.
+require import AllCore List IntDiv CoreMap.
+from Jasmin require import JWord JModel.
+require import Montgomery.
+require import Hpoly_extract.
 
-(* The modulus *)
 op q : int = 64513.
-axiom q_prime : prime q.
-axiom q_pos   : 0 < q.
+lemma qE : q = 64513 by rewrite /q.
 
-(* The canonical representative: representative in (-q/2, q/2] *)
-op Fq_repr (a : int) : int = a %% q.
+clone import SignedReductions with
+    op k    <- 32,
+    op q    <- q,
+    op qinv <- 940508161,
+    op Rinv <- 50386
+    proof q_bnd    by (rewrite /R qE => />)
+    proof q_odd1   by (rewrite qE => />)
+    proof q_odd2   by (rewrite qE => />)
+    proof qqinv    by (rewrite /R qE => />)
+    proof Rinv_gt0 by (auto => />)
+    proof RRinv    by (rewrite /R qE => />)
+    proof qinv_bnd by (rewrite /R => />).
 \end{lstlisting}
 
 \subsection{Signed vs.\ Unsigned Representation}
 
-A key design decision in \texttt{Fq.ec} is working with \emph{signed} integer
-representatives in $(-q/2, q/2]$ rather than the conventional non-negative
-representatives $[0, q)$.  This matches the signed 32-bit word representation
-used in the \jasmin{} implementation, where coefficients are stored as
-\jasm{u32} (unsigned 32-bit) but interpreted as signed integers via
-two's-complement.
+A key design decision in the refinement proof is to separate field equality
+from machine-word signed bounds.  Modular residues such as \(a \bmod q\) are
+not treated as centered representatives.  Instead, concrete \jasm{u32}
+coefficients are mapped to field elements by \ec{word\_to\_coeff}, while
+side conditions such as \ec{Fq.bw32 w sz} record the signed interpretation
+\(-2^{sz} \le \ec{W32.to\_sint}\,w < 2^{sz}\).
 
 The file defines the \emph{signed word conversion} operator:
 \[
@@ -86,8 +98,9 @@ several new lemmas, including:
   \[
     \op{to\_sint}(a \mathbin{\gg_s} 32) = a \div 2^{32},
   \]
-  where $\gg_s$ denotes arithmetic right shift and $\div$ is truncating
-  (towards zero) integer division.
+  where $\gg_s$ denotes arithmetic right shift and $\div$ is EasyCrypt's
+  integer division operation, matching the floor-style semantics of an
+  arithmetic shift on negative two's-complement values.
 \label{lem:arith_shift}
 \end{lemma}
 
@@ -104,18 +117,23 @@ with $q = 64513$:
 \begin{lstlisting}[language=EasyCrypt,
   caption={\texttt{GFq.ec}: Galois field instantiation},
   label={lst:gfq}]
-require import ZModField IntDiv.
-require Fq.
+require import AllCore.
+require import IntDiv.
+require import ZModP Ring.
 
-clone ZModField as Zq with
-  op p <- Fq.q
-  proof prime_p by exact Fq.q_prime.
+op q : int = 64513 axiomatized by qE.
+axiom prime_q : prime q.
 
-(* Canonical embedding from int to Zq *)
-abbrev inZq (a : int) : Zq.zmod = Zq.inzmod a.
+clone import ZModField as Zq with
+  op p <- q
+  rename "zmod" as "coeff"
+  rename "ZModp" as "Zq"
+  proof prime_p by apply prime_q
+  proof *.
 
 (* Signed representative *)
-op toInt (x : Zq.zmod) : int = Zq.asint x.
+op as_sint(x : coeff) =
+  if (q-1) %/ 2 < asint x then asint x - q else asint x.
 \end{lstlisting}
 
 This instantiation provides the complete algebraic structure of $\F_q$:
@@ -140,7 +158,7 @@ lemma zroot_primitive : forall k, 0 < k < 512 =>
 These are proved by direct computation in $\F_{64513}$, using the SMT
 backend to discharge the modular arithmetic obligations.
 
-\section{The Polynomial Ring $R_q$}
+\section[The Polynomial Ring Rq]{The Polynomial Ring $R_q$}
 
 \subsection{\texttt{Rq.ec}: Ring Definition}
 
@@ -174,26 +192,27 @@ op (&*) (p q : poly) : poly =
   r.
 \end{lstlisting}
 
-\subsection{NTT Axioms in \texttt{Rq.ec}}
+\subsection{Legacy NTT Operators in \texttt{Rq.ec}}
 
-Rather than proving from first principles that the NTT is a ring homomorphism,
-\texttt{Rq.ec} introduces this as an \emph{axiom} that is later discharged
-by the algebraic development in \texttt{NTTFullAlgebra.ec}:
+\texttt{Rq.ec} also contains legacy axiomatized operators \ec{ntt} and
+\ec{invntt}.  They are kept as part of the surrounding ring interface, but
+they are not the full HAETAE NTT proved in this dissertation.  The checked
+full-transform development uses the explicit spectral maps in
+\texttt{NTTFullSpec.ec} and proves the Jasmin NTT against those maps through
+\texttt{NTTFullAlgebra.ec}.
 
 \begin{lstlisting}[language=EasyCrypt,
-  caption={NTT homomorphism axioms in \texttt{Rq.ec}},
+  caption={Legacy NTT equations in \texttt{Rq.ec}},
   label={lst:rq_ntt_axiom}]
-(* NTT of a product = pointwise product of NTTs *)
-axiom ntt_mul_hom (f g : poly) :
-  NTT (f &* g) = Array256.map2 Zq.( * ) (NTT f) (NTT g).
-
-(* INTT is the left inverse of NTT *)
-axiom intt_ntt (f : poly) : INTT (NTT f) = f.
+op ntt (p: poly) = ... axiomatized by nttE.
+op invntt (p: poly) = ... axiomatized by invnttE.
 \end{lstlisting}
 
-These axioms are discharged as theorems once \texttt{NTTFullAlgebra.ec}
-establishes the connection between the imperative NTT loop and the abstract
-spectral map.
+The distinction matters: \texttt{NTTFullSpec.ec} proves that this legacy
+\ec{Rq.ntt} is not the same as the full HAETAE transform on a simple test
+polynomial.  The end-to-end theorem in \texttt{NTTEndToEnd.ec} therefore uses
+\ec{NTTFullSpec.full\_ntt} and \ec{NTTFullSpec.full\_invntt}, not the legacy
+\ec{Rq.ntt} operators.
 
 \section{Array Infrastructure}
 
@@ -214,23 +233,25 @@ two arrays are equal if and only if they agree at every index.
 
 \subsection{Word Array Conversion}
 
-The bridge between machine-word arrays and integer arrays is captured by
-the following predicate:
+The bridge between machine-word arrays and field-coefficient arrays is
+captured by the following predicates:
 
 \begin{definition}[Word-to-coefficient correspondence]
-  Given a 32-bit word array $\mathtt{rp} : \ec{W32.t}^{256}$ and an integer
-  array $\mathtt{a} : \Z^{256}$, we write $\mathtt{rp} \approx \mathtt{a}$
-  (notation \ec{warray\_rel rp a}) if:
+  Given a Jasmin memory array $\mathtt{rp} : \ec{BArray1024.t}$ and a field
+  array $\mathtt{p} : \F_q^{256}$, \ec{poly\_repr rp p} states:
   \[
     \forall i \in [0, 256).\;
-    \op{W32.to\_sint}(\mathtt{rp}[i]) = \mathtt{a}[i].
+    \op{word\_to\_coeff}(\op{BArray1024.get32}(\mathtt{rp},i)) =
+      \mathtt{p}[i].
   \]
-\label{def:wrel}
+  The strengthened predicate \ec{poly\_repr\_bound rp p sz} adds a signed
+  bit-width bound \ec{Fq.bw32} for every loaded word.
+\label{def:poly-repr}
 \end{definition}
 
 This relation is the key linking the extracted \jasmin{} module (which works
-with \ec{W32.t} arrays) to the imperative specification (which works with
-\ec{int} arrays).  It is the core of the refinement proof in
+with \ec{BArray1024.t} memory) to the imperative specification (which works
+with \(\F_q\) coefficient arrays).  It is the core of the refinement proof in
 \texttt{RefJasminNTT.ec}.
 
 \section{Reduction and Auxiliary Operations}

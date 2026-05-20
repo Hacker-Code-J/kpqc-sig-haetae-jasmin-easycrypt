@@ -1,4 +1,4 @@
-require import AllCore Distr List Real FSet FMap StdOrder FelTactic Mu_mem.
+require import AllCore Distr List Real RealSeries FSet FMap StdOrder FelTactic Mu_mem.
 require import Sig_ROM HAETAE_Scheme HAETAE_Params HAETAE_Algebra.
 require import HAETAE_Distributions.
 require import HAETAE_Assumptions.
@@ -1763,6 +1763,137 @@ module ROMInternalTranscriptBudgetedPaperSimAsNMA(
   }
 }.
 
+module ROMInternalTranscriptBudgetedTwoCallHybridAsNMA(
+  A : SIG.Adversary,
+  First : PaperSimSigningSampler,
+  Second : PaperSimSigningSampler
+) (H : SIG.POracle) = {
+  var pk_current : pkey
+  var queries : SIG.query list
+  var transcripts : transcript list
+  var records : signing_transcript_record list
+  var adversary_hash_count : int
+  var signing_count : int
+  var adversary_hash_queries : ro_query list
+  var sampler_expand_queries : ro_query list
+  var sampler_bad_prequery : bool
+
+  module AH = {
+    proc get(q : ro_query) : ro_output = {
+      var y : ro_output;
+
+      if (adversary_hash_count < hash_query_budget_count) {
+        if (adversary_hash_count = 0) {
+          adversary_hash_count <- 1;
+        } else {
+          adversary_hash_count <- hash_query_budget_count;
+        }
+        y <@ H.get(q);
+        adversary_hash_queries <- q :: adversary_hash_queries;
+      } else {
+        adversary_hash_count <- hash_query_budget_count;
+        y <- ro_output_zero;
+      }
+      return y;
+    }
+  }
+
+  module O = {
+    proc sign(m : message, ctx : context) : signature = {
+      var seed_coins : random_coins;
+      var smp : paper_sim_signature_sample;
+      var highbits : polyveck;
+      var lowbits : poly;
+      var mu : crh;
+      var ro_y : ro_output;
+      var sig : signature;
+      var tr : transcript;
+      var old_signing_count : int;
+      var old_adversary_hash_queries : ro_query list;
+      var old_sampler_expand_queries : ro_query list;
+      var old_sampler_bad_prequery : bool;
+
+      if (signing_count < signature_query_budget_count) {
+        old_signing_count <- signing_count;
+        if (signing_count = 0) {
+          signing_count <- 1;
+        } else {
+          signing_count <- signature_query_budget_count;
+        }
+        old_adversary_hash_queries <- adversary_hash_queries;
+        old_sampler_expand_queries <- sampler_expand_queries;
+        old_sampler_bad_prequery <- sampler_bad_prequery;
+        seed_coins <$ drandom_coins;
+        sampler_bad_prequery <-
+          old_sampler_bad_prequery \/
+          sampler_expand_query seed_coins \in old_adversary_hash_queries \/
+          sampler_expand_query seed_coins \in old_sampler_expand_queries;
+        sampler_expand_queries <-
+          sampler_expand_query seed_coins :: old_sampler_expand_queries;
+        if (old_signing_count = 0) {
+          smp <@ First.sample_with_seed(seed_coins, m, ctx);
+        } else {
+          smp <@ Second.sample_with_seed(seed_coins, m, ctx);
+        }
+        ro_y <@ H.get(message_hash_query pk_current ctx m);
+        mu <- ro_message_hash ro_y;
+        highbits <- paper_sim_commitment_highbits haetae_mode
+          pk_current m ctx smp;
+        lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+        ro_y <@ H.get(challenge_hash_query haetae_mode highbits lowbits mu);
+        sig <- paper_sim_signature haetae_mode pk_current m ctx smp;
+        tr <- transcript_of_signature haetae_mode pk_current m ctx sig;
+        queries <- (m, ctx) :: queries;
+        transcripts <- tr :: transcripts;
+        records <- (m, ctx, sig, tr) :: records;
+      } else {
+        signing_count <- signature_query_budget_count;
+        smp <- paper_sim_abort_fallback_sample haetae_mode;
+        sig <- paper_sim_signature haetae_mode pk_current m ctx smp;
+      }
+      return sig;
+    }
+  }
+
+  module A = A(AH, O)
+
+  proc forge(pk : pkey) : message * context * signature = {
+    var r : message * context * signature;
+
+    pk_current <- pk;
+    queries <- [];
+    transcripts <- [];
+    records <- [];
+    adversary_hash_count <- 0;
+    signing_count <- 0;
+    adversary_hash_queries <- [];
+    sampler_expand_queries <- [];
+    sampler_bad_prequery <- false;
+    First.init(pk);
+    Second.init(pk);
+    r <@ A.forge(pk);
+    return r;
+  }
+}.
+
+module ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+  (A : SIG.Adversary) (H : SIG.POracle) =
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA
+    (A, ROSigningAttemptPaperSimSampler(H),
+     ROSigningAttemptPaperSimSampler(H), H).
+
+module ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+  (A : SIG.Adversary) (H : SIG.POracle) =
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA
+    (A, ROExactHyperballPaperSimSampler(H),
+     ROSigningAttemptPaperSimSampler(H), H).
+
+module ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+  (A : SIG.Adversary) (H : SIG.POracle) =
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA
+    (A, ROExactHyperballPaperSimSampler(H),
+     ROExactHyperballPaperSimSampler(H), H).
+
 section ROMInternalTranscriptBudgetedPaperSimNMAQueryBudget.
 
 declare module H <: SIG.Oracle {-ROMInternalTranscriptBudgetedPaperSimAsNMA}.
@@ -1789,7 +1920,42 @@ if.
   by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
                       /signature_query_budget_count; smt.
 by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
-                    /signature_query_budget_count; smt.
+                      /signature_query_budget_count; smt.
+qed.
+
+lemma budgeted_paper_sim_sign_oracle_first_active_sets_one :
+  hoare[ROMInternalTranscriptBudgetedPaperSimAsNMA(A, Samp, H).O.sign :
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 0 ==>
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 1].
+proof.
+proc.
+rcondt 1; first by auto => />; rewrite /signature_query_budget_count.
+rcondt 1; first by auto.
+wp.
+call (_: true).
+wp.
+call (_: true).
+wp.
+call (_: true).
+by auto.
+qed.
+
+lemma budgeted_paper_sim_sign_oracle_second_active_saturates :
+  hoare[ROMInternalTranscriptBudgetedPaperSimAsNMA(A, Samp, H).O.sign :
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 1 ==>
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count =
+      signature_query_budget_count].
+proof.
+proc.
+rcondt 1; first by auto => />; rewrite /signature_query_budget_count.
+rcondf 1; first by auto.
+wp.
+call (_: true).
+wp.
+call (_: true).
+wp.
+call (_: true).
+by auto => />; rewrite /signature_query_budget_count.
 qed.
 
 lemma adversary_budgeted_paper_sim_signing_count_preserved :
@@ -2324,7 +2490,8 @@ call (concrete_lazy_rom_sampler_expand_query_fresh_arg_phoare
      p (paper_sim_sample_from_rejection_attempt
           (signing_attempt_state_of_coins haetae_mode
              sk m ctx coins)))).
-by auto => />; smt.
+by auto => />;
+  smt(ge0_mu mu_le_weight is_losslessP signing_attempt_state_distribution_lossless).
 qed.
 
 lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_arg_clean_le
@@ -2505,6 +2672,20 @@ wp.
 call (concrete_lazy_rom_get_preserves_sampler_rom_covered_arg
         hash_qs sampler_qs).
 by auto => />; smt.
+qed.
+
+lemma concrete_ro_exact_hyperball_sample_with_seed_preserves_sk sk :
+  hoare[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed :
+    ROExactHyperballPaperSimSampler.sk_current = sk ==>
+    ROExactHyperballPaperSimSampler.sk_current = sk].
+proof.
+proc.
+wp.
+rnd.
+wp.
+call (_: ROExactHyperballPaperSimSampler.sk_current = sk).
+wp; rnd; auto; smt(ro_output_distribution_lossless).
+by auto.
 qed.
 
 lemma concrete_ro_signing_attempt_sample_with_seed_preserves_sampler_rom_covered_budgeted_logs :
@@ -5176,7 +5357,7 @@ fel 12
 	    wp.
 	    rnd.
 	    by auto => />; rewrite /signature_query_budget_count; smt.
-	  by auto => />; rewrite /signature_query_budget_count; smt.
+  by auto => />; rewrite /signature_query_budget_count; smt.
 qed.
 
 lemma budgeted_sampled_direct_prequery_reprogram_bad_bound &m :
@@ -6675,6 +6856,44 @@ by apply (sampler_rom_covered_fresh_after_clean_seed
   seed_coins HAETAE_RO.FRO.m{m} hash_qs sampler_qs bad).
 qed.
 
+lemma concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_state_loss
+    seed_coins m ctx
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool)
+    hash_qs sampler_qs bad &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered HAETAE_RO.FRO.m{m} hash_qs sampler_qs =>
+  ! (bad \/
+     sampler_expand_query seed_coins \in hash_qs \/
+     sampler_expand_query seed_coins \in sampler_qs) =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean sk_eq left_frame right_frame.
+have sample_loss_p :=
+  concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_loss
+    seed_coins m ctx p hash_qs sampler_qs bad &m
+    sample_loss covered clean sk_eq.
+by smt().
+qed.
+
 lemma concrete_budgeted_o_sign_sample_with_seed_clean_loss_surface
     seed_coins m ctx (p : paper_sim_signature_sample -> bool) &m :
   structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
@@ -6699,6 +6918,50 @@ move=> sample_loss covered clean sk_eq.
 by apply
   (concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_loss
      seed_coins m ctx p
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m}
+     &m).
+qed.
+
+lemma concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface
+    seed_coins m ctx
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean sk_eq left_frame right_frame.
+by apply
+  (concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_state_loss
+     seed_coins m ctx Q p
      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}
      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m}
@@ -7320,6 +7583,7 @@ section ConcreteROMInternalTranscriptROSigningAttemptExactHyperballPaperSimNMA.
 declare module A <: SIG.Adversary {-HAETAE_RO.FRO,
                                    -ROMInternalTranscriptPaperSimAsNMA,
                                    -ROMInternalTranscriptBudgetedPaperSimAsNMA,
+                                   -ROMInternalTranscriptBudgetedTwoCallHybridAsNMA,
                                    -ROSigningAttemptPaperSimSampler,
                                    -ROExactHyperballPaperSimSampler}.
 
@@ -7367,6 +7631,42 @@ lemma concrete_lazy_rom_get_true :
   phoare[HAETAE_RO.FRO.get : true ==> true] = 1%r.
 proof.
 by conseq concrete_lazy_rom_get_lossless.
+qed.
+
+lemma concrete_lazy_rom_get_true_le :
+  phoare[HAETAE_RO.FRO.get : true ==> true] <= 1%r.
+proof.
+proc.
+wp.
+rnd.
+by auto => />; smt(ro_output_distribution_lossless).
+qed.
+
+lemma concrete_signing_attempt_state_mu_lossless_bound
+    md sk m ctx (p : signing_attempt_state -> bool) :
+  0%r <= mu (dsigning_attempt_state md sk m ctx) p <= 1%r.
+proof.
+split.
++ by apply ge0_mu.
+have hle := mu_le_weight (dsigning_attempt_state md sk m ctx) p.
+have hwt : weight (dsigning_attempt_state md sk m ctx) = 1%r.
++ by apply is_losslessP; apply signing_attempt_state_distribution_lossless.
+by smt.
+qed.
+
+lemma concrete_exact_hyperball_signing_attempt_state_mu_lossless_bound
+    md sk m ctx (p : signing_attempt_state -> bool) :
+  0%r <= mu (dexact_hyperball_signing_attempt_state md sk m ctx) p <= 1%r.
+proof.
+split.
++ by apply ge0_mu.
+have hle :=
+  mu_le_weight (dexact_hyperball_signing_attempt_state md sk m ctx) p.
+have hwt :
+  weight (dexact_hyperball_signing_attempt_state md sk m ctx) = 1%r.
++ by apply is_losslessP;
+     apply dexact_hyperball_signing_attempt_state_lossless.
+by smt.
 qed.
 
 lemma concrete_lazy_rom_get_preserves_budgeted_clean_signature_event
@@ -7528,12 +7828,13 @@ if.
   wp.
   call concrete_lazy_rom_get_true.
   by auto => />.
-+ inline HAETAE_RO.FRO.get.
++ hoare.
+  inline HAETAE_RO.FRO.get.
   wp.
   rnd.
   wp.
   rnd.
-  by auto => />; smt(ro_output_distribution_lossless).
+  by auto => />; smt.
 + by smt(mu_bounded).
 by auto => />; smt.
 qed.
@@ -7724,10 +8025,4334 @@ have exact_project :
         HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
        p res].
 + by apply
-    (concrete_budgeted_ro_exact_hyperball_sample_with_seed_to_o_sign_active_projection
-       seed_coins pk ROExactHyperballPaperSimSampler.sk_current{m}
-       m ctx p &m).
+	    (concrete_budgeted_ro_exact_hyperball_sample_with_seed_to_o_sign_active_projection
+	       seed_coins pk ROExactHyperballPaperSimSampler.sk_current{m}
+	       m ctx p &m).
+	by smt().
+qed.
+
+lemma concrete_budgeted_o_sign_clean_stateful_loss_from_sample_frames
+    seed_coins m ctx
+    (R : signature -> glob HAETAE_RO.FRO -> bool)
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO) /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)] =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO) /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean sk_eq attempt_frame left_frame
+        right_frame exact_frame.
+have sample_bridge :=
+  concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface
+    seed_coins m ctx Q p &m
+    sample_loss covered clean sk_eq left_frame right_frame.
 by smt().
+qed.
+
+lemma concrete_lazy_rom_get_preserves_sampler_rom_covered_two_call_logs :
+  hoare[HAETAE_RO.FRO.get :
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries /\
+    (forall seed_coins,
+       arg = sampler_expand_query seed_coins =>
+       arg \in
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries \/
+       arg \in
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries) ==>
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries].
+proof.
+proc.
+wp.
+rnd.
+auto => />.
+rewrite /sampler_rom_covered.
+smt(mem_set).
+qed.
+
+lemma concrete_ro_signing_attempt_sample_with_seed_preserves_sampler_rom_covered_two_call_logs :
+  hoare[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed :
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries /\
+    sampler_expand_query arg.`1 \in
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries ==>
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries].
+proof.
+proc.
+wp.
+call concrete_lazy_rom_get_preserves_sampler_rom_covered_two_call_logs.
+by auto => />; smt.
+qed.
+
+lemma concrete_lazy_rom_sampler_expand_query_fresh_arg_two_call_clean_phoare
+    (p : random_coins -> bool) :
+  phoare[HAETAE_RO.FRO.get :
+      (exists seed_coins,
+         arg = sampler_expand_query seed_coins /\
+         sampler_expand_query seed_coins \notin HAETAE_RO.FRO.m) /\
+      ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery
+      ==> p (ro_signing_coins res) /\
+          ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery] <=
+    (mu drandom_coins p).
+proof.
+proc.
+wp.
+rnd.
+auto => /> &hr seed_coins arg_eq fresh.
+rewrite sampler_expand_query_dro_output_ro_signing_coins.
+by rewrite lerr.
+qed.
+
+lemma concrete_ro_signing_attempt_sample_with_seed_fresh_structural_arg_two_call_clean_le
+    sk m ctx (p : paper_sim_signature_sample -> bool) :
+  phoare[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed :
+      arg.`2 = m /\
+      arg.`3 = ctx /\
+      ROSigningAttemptPaperSimSampler.sk_current = sk /\
+      ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+      sampler_expand_query arg.`1 \notin HAETAE_RO.FRO.m
+      ==> p res /\
+          ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery] <=
+    (mu (dsigning_attempt_state haetae_mode
+          sk m ctx)
+       (fun st => p (paper_sim_sample_from_rejection_attempt st))).
+proof.
+rewrite /dsigning_attempt_state dmapE /=.
+proc.
+wp.
+call (concrete_lazy_rom_sampler_expand_query_fresh_arg_two_call_clean_phoare
+  (fun coins =>
+     p (paper_sim_sample_from_rejection_attempt
+          (signing_attempt_state_of_coins haetae_mode
+             sk m ctx coins)))).
+by auto => />; smt.
+qed.
+
+lemma concrete_lazy_rom_sampler_expand_query_guarded_two_call_clean_phoare
+    (p : random_coins -> bool) :
+  phoare[HAETAE_RO.FRO.get :
+      (! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery =>
+       exists seed_coins,
+         arg = sampler_expand_query seed_coins /\
+         sampler_expand_query seed_coins \notin HAETAE_RO.FRO.m)
+      ==> p (ro_signing_coins res) /\
+          ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery] <=
+    (mu drandom_coins p).
+proof.
+proc.
+wp.
+rnd.
+auto => /> &hr guarded.
+case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{hr}).
++ move=> bad.
+  rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
+  + by move=> y; case (x{hr} \in HAETAE_RO.FRO.m{hr}).
+  by rewrite mu0; smt.
++ move=> clean.
+  elim (guarded clean) => seed_coins [arg_eq fresh].
+  rewrite arg_eq fresh /=.
+  rewrite sampler_expand_query_dro_output_ro_signing_coins.
+  by rewrite lerr.
+qed.
+
+lemma concrete_ro_signing_attempt_sample_with_seed_guarded_two_call_clean_structural_arg_le
+    sk m ctx (p : paper_sim_signature_sample -> bool) :
+  phoare[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed :
+      arg.`2 = m /\
+      arg.`3 = ctx /\
+      ROSigningAttemptPaperSimSampler.sk_current = sk /\
+      (! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery =>
+       sampler_expand_query arg.`1 \notin HAETAE_RO.FRO.m)
+      ==> p res /\
+          ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery] <=
+    (mu (dsigning_attempt_state haetae_mode
+          sk m ctx)
+       (fun st => p (paper_sim_sample_from_rejection_attempt st))).
+proof.
+rewrite /dsigning_attempt_state dmapE /=.
+proc.
+wp.
+call (concrete_lazy_rom_sampler_expand_query_guarded_two_call_clean_phoare
+  (fun coins =>
+     p (paper_sim_sample_from_rejection_attempt
+          (signing_attempt_state_of_coins haetae_mode
+             sk m ctx coins)))).
+by auto => />; smt.
+qed.
+
+lemma concrete_two_call_g0_first_active_o_sign_active_clean_signature_structural_le
+    pk sk msg ctxt (p : signature -> bool) :
+  phoare[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+          (A, HAETAE_RO.FRO).O.sign :
+    arg = (msg, ctxt) /\
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count = 0 /\
+	    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+    ROSigningAttemptPaperSimSampler.sk_current = sk /\
+    sampler_rom_covered
+      HAETAE_RO.FRO.m
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+      ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries /\
+    ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery ==>
+    p res /\
+    ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+    1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  (mu (dsigning_attempt_state haetae_mode sk msg ctxt)
+     (fun st =>
+        p (paper_sim_signature haetae_mode pk msg ctxt
+             (paper_sim_sample_from_rejection_attempt st)))).
+proof.
+proc.
+rcondt 1; first by auto => />; rewrite /signature_query_budget_count.
+rcondt 2; first by auto.
+rcondt 9; first by auto.
+seq 9 :
+  (m = msg /\
+   ctx = ctxt /\
+	   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+   ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+   1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count /\
+   p (paper_sim_signature haetae_mode pk msg ctxt smp))
+  (mu (dsigning_attempt_state haetae_mode sk msg ctxt)
+     (fun st =>
+        p (paper_sim_signature haetae_mode pk msg ctxt
+             (paper_sim_sample_from_rejection_attempt st))))
+  (1%r) _ (0%r)
+  (m = msg /\
+   ctx = ctxt /\
+	   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+   ROSigningAttemptPaperSimSampler.sk_current = sk /\
+   sampler_rom_covered
+     HAETAE_RO.FRO.m
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries);
+  1: (wp;
+      call concrete_ro_signing_attempt_sample_with_seed_preserves_sampler_rom_covered_two_call_logs;
+      wp; rnd;
+      by auto => />; rewrite /signature_query_budget_count;
+        smt(signing_coin_distribution_lossless
+            sampler_rom_covered_self_log_preserves)).
++ wp.
+  call (concrete_ro_signing_attempt_sample_with_seed_guarded_two_call_clean_structural_arg_le
+    sk msg ctxt
+    (fun smp =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp))).
+  wp; rnd.
+  by auto => />; rewrite /signature_query_budget_count;
+    smt(sampler_rom_covered_fresh_after_clean_seed
+        signing_coin_distribution_lossless).
++ inline HAETAE_RO.FRO.get.
+  wp.
+  rnd.
+  wp.
+  rnd.
+  by auto => />; smt(ro_output_distribution_lossless).
++ hoare.
+  inline HAETAE_RO.FRO.get.
+  wp.
+  rnd.
+  wp.
+  rnd.
+  by auto => />; smt.
++ have hbound :
+    0%r <=
+    mu (dsigning_attempt_state haetae_mode sk msg ctxt)
+       (fun st =>
+          p (paper_sim_signature haetae_mode pk msg ctxt
+               (paper_sim_sample_from_rejection_attempt st))) <= 1%r.
+  + by apply concrete_signing_attempt_state_mu_lossless_bound.
+  by smt.
+qed.
+
+lemma concrete_two_call_g1_first_active_o_sign_active_signature_exact
+    pk sk msg ctxt (p : signature -> bool) :
+  phoare[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+          (A, HAETAE_RO.FRO).O.sign :
+    arg = (msg, ctxt) /\
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count = 0 /\
+	    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+    ROExactHyperballPaperSimSampler.sk_current = sk ==>
+    p res /\
+    1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] =
+  (mu (dexact_hyperball_signing_attempt_state haetae_mode sk msg ctxt)
+    (fun st =>
+       p (paper_sim_signature haetae_mode pk msg ctxt
+            (paper_sim_sample_from_rejection_attempt st)))).
+proof.
+proc.
+rcondt 1; first by auto => />; rewrite /signature_query_budget_count.
+rcondt 2; first by auto.
+rcondt 9; first by auto.
+seq 9 :
+  (m = msg /\
+   ctx = ctxt /\
+	   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+   1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count /\
+   p (paper_sim_signature haetae_mode pk msg ctxt smp))
+  (mu (dexact_hyperball_signing_attempt_state haetae_mode sk msg ctxt)
+     (fun st =>
+        p (paper_sim_signature haetae_mode pk msg ctxt
+             (paper_sim_sample_from_rejection_attempt st))))
+  (1%r) _ (0%r)
+  (m = msg /\
+   ctx = ctxt /\
+	   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current = pk /\
+   ROExactHyperballPaperSimSampler.sk_current = sk);
+  1: (wp;
+      call (concrete_ro_exact_hyperball_sample_with_seed_preserves_sk sk);
+      wp; rnd;
+      by auto => />; rewrite /signature_query_budget_count;
+        smt(signing_coin_distribution_lossless)).
++ wp.
+  call (concrete_ro_exact_hyperball_sample_with_seed_exact_no_seed
+        sk msg ctxt
+        (fun smp =>
+           p (paper_sim_signature haetae_mode pk msg ctxt smp))).
+  by auto => />; smt(signing_coin_distribution_lossless).
++ wp.
+  call concrete_lazy_rom_get_true.
+  wp.
+  call concrete_lazy_rom_get_true.
+  by auto => />.
++ hoare.
+  inline HAETAE_RO.FRO.get.
+  wp.
+  rnd.
+  wp.
+  rnd.
+  by auto => />; smt.
++ have hbound :
+    0%r <=
+    mu (dexact_hyperball_signing_attempt_state haetae_mode sk msg ctxt)
+       (fun st =>
+          p (paper_sim_signature haetae_mode pk msg ctxt
+               (paper_sim_sample_from_rejection_attempt st))) <= 1%r.
+  + by apply concrete_exact_hyperball_signing_attempt_state_mu_lossless_bound.
+  by smt.
+qed.
+
+lemma concrete_two_call_g0_first_active_o_sign_to_self_logged_sample_active_projection
+    seed_coins pk sk msg ctxt (p : signature -> bool) &m :
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} = sk =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+       (A, HAETAE_RO.FRO).O.sign(msg, ctxt) @ &m :
+       p res /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, msg, ctxt) @ &m :
+       p (paper_sim_signature haetae_mode pk msg ctxt res) /\
+       ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m})].
+proof.
+move=> covered clean first_active pk_eq sk_eq.
+have osign_le :
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+       (A, HAETAE_RO.FRO).O.sign(msg, ctxt) @ &m :
+       p res /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  mu (dsigning_attempt_state haetae_mode sk msg ctxt)
+     (fun st =>
+        p (paper_sim_signature haetae_mode pk msg ctxt
+             (paper_sim_sample_from_rejection_attempt st))).
++ byphoare
+    (concrete_two_call_g0_first_active_o_sign_active_clean_signature_structural_le
+       pk sk msg ctxt p) => //.
+  by auto => />; smt.
+have sample_eq :
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, msg, ctxt) @ &m :
+       p (paper_sim_signature haetae_mode pk msg ctxt res) /\
+       ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m})] =
+  mu (dsigning_attempt_state haetae_mode sk msg ctxt)
+     (fun st =>
+        p (paper_sim_signature haetae_mode pk msg ctxt
+             (paper_sim_sample_from_rejection_attempt st))).
++ rewrite (mu_eq _ _
+    (fun st =>
+       p (paper_sim_signature haetae_mode pk msg ctxt
+            (paper_sim_sample_from_rejection_attempt st)) /\
+       ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+          sampler_expand_query seed_coins \in
+            ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}))).
+  + by move=> st; smt.
+  byphoare
+    (concrete_ro_signing_attempt_sample_with_seed_fresh_structural_eq
+       seed_coins sk msg ctxt
+       (fun smp =>
+          p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+          ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+             sampler_expand_query seed_coins \in
+               ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+             sampler_expand_query seed_coins \in
+               ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}))) => //.
+  by auto => />; smt(sampler_rom_covered_fresh_after_clean_seed).
+by smt().
+qed.
+
+lemma concrete_two_call_g1_exact_sample_with_seed_to_first_active_o_sign_projection
+    seed_coins pk sk msg ctxt (p : signature -> bool) &m :
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{m} = pk =>
+  ROExactHyperballPaperSimSampler.sk_current{m} = sk =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, msg, ctxt) @ &m :
+       p (paper_sim_signature haetae_mode pk msg ctxt res)] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+       (A, HAETAE_RO.FRO).O.sign(msg, ctxt) @ &m :
+       p res /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count].
+proof.
+move=> first_active pk_eq sk_eq.
+have sample_eq :
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, msg, ctxt) @ &m :
+       p (paper_sim_signature haetae_mode pk msg ctxt res)] =
+  mu (dexact_hyperball_signing_attempt_state haetae_mode sk msg ctxt)
+    (fun st =>
+       p (paper_sim_signature haetae_mode pk msg ctxt
+            (paper_sim_sample_from_rejection_attempt st))).
++ rewrite
+    (concrete_ro_exact_hyperball_sample_with_seed_exact_pr
+       seed_coins msg ctxt
+       (fun smp =>
+          p (paper_sim_signature haetae_mode pk msg ctxt smp)) &m).
+  by rewrite sk_eq.
+have osign_eq :
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+       (A, HAETAE_RO.FRO).O.sign(msg, ctxt) @ &m :
+       p res /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] =
+  mu (dexact_hyperball_signing_attempt_state haetae_mode sk msg ctxt)
+    (fun st =>
+       p (paper_sim_signature haetae_mode pk msg ctxt
+            (paper_sim_sample_from_rejection_attempt st))).
+  + byphoare
+    (concrete_two_call_g1_first_active_o_sign_active_signature_exact
+       pk sk msg ctxt p) => //.
+  by auto => />; smt.
+qed.
+
+lemma concrete_two_call_g0_g1_first_active_o_sign_clean_stateful_loss_from_sample_frames
+    seed_coins m ctx
+    (R :
+      signature -> glob HAETAE_RO.FRO -> pkey -> SIG.query list ->
+      transcript list -> signing_transcript_record list -> int -> int ->
+      ro_query list -> ro_query list -> bool -> bool)
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean _first_active sk_eq attempt_frame
+        left_frame right_frame exact_frame.
+have sample_bridge :=
+  concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_state_loss
+    seed_coins m ctx Q p
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m}
+    &m sample_loss covered clean sk_eq left_frame right_frame.
+by smt().
+qed.
+
+lemma concrete_two_call_g0_g1_first_active_o_sign_clean_signature_loss
+    seed_coins pk m ctx (p : signature -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean first_active pk_eq sk_eq.
+apply
+  (concrete_two_call_g0_g1_first_active_o_sign_clean_stateful_loss_from_sample_frames
+     seed_coins m ctx
+     (fun sig _ _ _ _ _ _ _ _ _ _ => p sig)
+     (fun smp _ =>
+        p (paper_sim_signature haetae_mode pk m ctx smp) /\
+        ! (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{m} \/
+           sampler_expand_query seed_coins \in
+             ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{m} \/
+           sampler_expand_query seed_coins \in
+             ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{m}))
+     (fun smp => p (paper_sim_signature haetae_mode pk m ctx smp))
+     &m) => //.
++ by apply
+    (concrete_two_call_g0_first_active_o_sign_to_self_logged_sample_active_projection
+       seed_coins pk ROSigningAttemptPaperSimSampler.sk_current{m} m ctx p
+       &m).
++ by rewrite Pr[mu_sub]; smt.
++ by rewrite Pr[mu_sub]; smt.
++ apply (ler_trans
+     (Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+          (seed_coins, m, ctx) @ &m :
+          p (paper_sim_signature haetae_mode pk m ctx res)])).
+  + by rewrite Pr[mu_sub]; smt.
+  by apply
+    (concrete_two_call_g1_exact_sample_with_seed_to_first_active_o_sign_projection
+       seed_coins pk ROExactHyperballPaperSimSampler.sk_current{m} m ctx p
+       &m).
+qed.
+
+lemma concrete_mu_dlet_ge_point ['a 'b]
+    (d : 'a distr) (K : 'a -> 'b distr) (E : 'b -> bool) x :
+  mu1 d x * mu (K x) E <= mu (dlet d K) E.
+proof.
+rewrite dletE (@sumD1 _ x) /=.
++ apply summable_mu1_wght => y; smt(mu_bounded).
+apply ler_addl.
+apply ge0_sum => y /=.
+by smt(ge0_mu1 ge0_mu).
+qed.
+
+lemma structural_to_exact_hyperball_coin_sample_pair_suffix_loss_from_point_loss
+    ['a] md sk m ctx
+    (K : signing_attempt_coin_sample_pair -> 'a distr) (E : 'a -> bool) :
+  structural_to_exact_hyperball_sample_pair_point_loss_obligation =>
+  mu (dlet (dstructural_signing_attempt_coin_sample_pair md sk m ctx) K) E <=
+  mu (dlet (dexact_hyperball_signing_attempt_coin_sample_pair md sk m ctx) K) E +
+    rejection_sampling_loss_term.
+proof.
+move=> point_loss.
+rewrite /dstructural_signing_attempt_coin_sample_pair
+        /dexact_hyperball_signing_attempt_coin_sample_pair.
+have -> :
+  dlet
+    (dlet drandom_coins
+       (fun coins =>
+          dmap (dstructural_signing_sample_pair md sk m ctx coins)
+            (fun sample => (coins, sample))))
+    K =
+  dlet drandom_coins
+    (fun coins =>
+       dlet
+         (dmap (dstructural_signing_sample_pair md sk m ctx coins)
+            (fun sample => (coins, sample)))
+         K).
++ by rewrite dlet_dlet.
+have -> :
+  dlet
+    (dlet drandom_coins
+       (fun coins =>
+          dmap (dexact_hyperball_signing_sample_pair md)
+            (fun sample => (coins, sample))))
+    K =
+  dlet drandom_coins
+    (fun coins =>
+       dlet
+         (dmap (dexact_hyperball_signing_sample_pair md)
+            (fun sample => (coins, sample)))
+         K).
++ by rewrite dlet_dlet.
+apply mu_dlet_le_add_all.
++ apply rejection_sampling_loss_term_nonnegative.
+move=> coins.
+pose s0 := signing_sample_pair_of_coins md sk m ctx coins.
+have hpoint := point_loss md sk m ctx coins.
+have hge :=
+  concrete_mu_dlet_ge_point
+    (dexact_hyperball_signing_sample_pair md)
+    (fun sample => K (coins, sample)) E s0.
+have hstep :
+  mu (K (coins, s0)) E <=
+  mu1 (dexact_hyperball_signing_sample_pair md) s0 *
+    mu (K (coins, s0)) E + rejection_sampling_loss_term.
++ have hb : 0%r <= mu (K (coins, s0)) E <= 1%r by smt(mu_bounded).
+  have ha :
+    0%r <= mu1 (dexact_hyperball_signing_sample_pair md) s0 <= 1%r
+    by smt(mu_bounded).
+  by smt.
+by smt.
+qed.
+
+lemma structural_to_exact_hyperball_seeded_coin_sample_pair_suffix_loss_from_point_loss
+    ['a] md sk m ctx
+    (K : random_coins -> signing_attempt_coin_sample_pair -> 'a distr)
+    (E : 'a -> bool) :
+  structural_to_exact_hyperball_sample_pair_point_loss_obligation =>
+  mu (dlet drandom_coins
+        (fun seed_coins =>
+           dlet (dstructural_signing_attempt_coin_sample_pair md sk m ctx)
+             (K seed_coins))) E <=
+  mu (dlet drandom_coins
+        (fun seed_coins =>
+           dlet (dexact_hyperball_signing_attempt_coin_sample_pair md sk m ctx)
+             (K seed_coins))) E +
+    rejection_sampling_loss_term.
+proof.
+move=> point_loss.
+apply mu_dlet_le_add_all.
++ apply rejection_sampling_loss_term_nonnegative.
+move=> seed_coins.
+by apply
+  (structural_to_exact_hyperball_coin_sample_pair_suffix_loss_from_point_loss
+     md sk m ctx (K seed_coins) E point_loss).
+qed.
+
+op concrete_fro_get_step
+   (rom : glob HAETAE_RO.FRO) (q : ro_query) :
+   (ro_output * glob HAETAE_RO.FRO) distr =
+  if q \in rom then
+    let y = (oget rom.[q]).`1 in
+    dunit (y, rom.[q <- (y, PROM.Known)])
+  else
+    dmap (dro_output q)
+      (fun y => (y, rom.[q <- (y, PROM.Known)])).
+
+op concrete_two_call_first_active_o_sign_suffix_kernel
+   (R :
+      signature -> glob HAETAE_RO.FRO -> pkey -> SIG.query list ->
+      transcript list -> signing_transcript_record list -> int -> int ->
+      ro_query list -> ro_query list -> bool -> bool)
+   (rom0 : glob HAETAE_RO.FRO) (pk : pkey)
+   (queries : SIG.query list) (transcripts : transcript list)
+   (records : signing_transcript_record list)
+   (adversary_hash_count signing_count : int)
+   (adversary_hash_queries sampler_expand_queries : ro_query list)
+   (sampler_bad_prequery : bool)
+   (m : message) (ctx : context) (sk : skey)
+   (seed_coins : random_coins)
+   (cs : signing_attempt_coin_sample_pair) : bool distr =
+  let sampler_q = sampler_expand_query seed_coins in
+  let sampler_bad =
+    sampler_bad_prequery \/
+    sampler_q \in adversary_hash_queries \/
+    sampler_q \in sampler_expand_queries in
+  let sampler_queries' = sampler_q :: sampler_expand_queries in
+  let rom_sampler =
+    rom0.[sampler_q <- (ro_output_of_random_coins cs.`1, PROM.Known)] in
+  let st =
+    signing_attempt_state_of_coin_sample_pair haetae_mode sk m ctx cs in
+  let smp = paper_sim_sample_from_rejection_attempt st in
+  dlet (concrete_fro_get_step rom_sampler (message_hash_query pk ctx m))
+    (fun (msg_step : ro_output * glob HAETAE_RO.FRO) =>
+       let ro_y = msg_step.`1 in
+       let rom_msg = msg_step.`2 in
+       let mu = ro_message_hash ro_y in
+       let highbits =
+         paper_sim_commitment_highbits haetae_mode pk m ctx smp in
+       let lowbits = paper_sim_commitment_lowbits haetae_mode smp in
+       dmap
+         (concrete_fro_get_step rom_msg
+            (challenge_hash_query haetae_mode highbits lowbits mu))
+         (fun (challenge_step : ro_output * glob HAETAE_RO.FRO) =>
+            let rom_challenge = challenge_step.`2 in
+            let sig = paper_sim_signature haetae_mode pk m ctx smp in
+            let tr = transcript_of_signature haetae_mode pk m ctx sig in
+            R sig rom_challenge pk
+              ((m, ctx) :: queries)
+              (tr :: transcripts)
+              ((m, ctx, sig, tr) :: records)
+              adversary_hash_count 1
+              adversary_hash_queries sampler_queries' sampler_bad /\
+            ! sampler_bad)).
+
+lemma concrete_two_call_g0_g1_first_active_o_sign_clean_full_state_loss_from_coin_sample_suffix_frames
+    pk m ctx
+    (R :
+      signature -> glob HAETAE_RO.FRO -> pkey -> SIG.query list ->
+      transcript list -> signing_transcript_record list -> int -> int ->
+      ro_query list -> ro_query list -> bool -> bool)
+    (K : signing_attempt_coin_sample_pair -> signature distr)
+    (P : signature -> bool) &m :
+  structural_to_exact_hyperball_sample_pair_point_loss_obligation =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  mu (dlet
+        (dstructural_signing_attempt_coin_sample_pair haetae_mode
+           ROSigningAttemptPaperSimSampler.sk_current{m} m ctx)
+        K) P =>
+  mu (dlet
+        (dexact_hyperball_signing_attempt_coin_sample_pair haetae_mode
+           ROExactHyperballPaperSimSampler.sk_current{m} m ctx)
+        K) P <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] +
+    rejection_sampling_loss_term.
+proof.
+move=> point_loss _first_active _pk_eq sk_eq left_frame right_frame.
+have hsuffix :=
+  structural_to_exact_hyperball_coin_sample_pair_suffix_loss_from_point_loss
+    haetae_mode ROSigningAttemptPaperSimSampler.sk_current{m} m ctx K P
+    point_loss.
+by smt.
+qed.
+
+lemma concrete_two_call_g0_g1_first_active_o_sign_clean_full_state_loss_from_seeded_coin_sample_suffix_frames
+    pk m ctx
+    (R :
+      signature -> glob HAETAE_RO.FRO -> pkey -> SIG.query list ->
+      transcript list -> signing_transcript_record list -> int -> int ->
+      ro_query list -> ro_query list -> bool -> bool)
+    (K : random_coins -> signing_attempt_coin_sample_pair -> bool distr)
+    (P : bool -> bool) &m :
+  structural_to_exact_hyperball_sample_pair_point_loss_obligation =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} = 0 =>
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  mu (dlet drandom_coins
+        (fun seed_coins =>
+           dlet
+             (dstructural_signing_attempt_coin_sample_pair haetae_mode
+                ROSigningAttemptPaperSimSampler.sk_current{m} m ctx)
+             (K seed_coins))) P =>
+  mu (dlet drandom_coins
+        (fun seed_coins =>
+           dlet
+             (dexact_hyperball_signing_attempt_coin_sample_pair haetae_mode
+                ROExactHyperballPaperSimSampler.sk_current{m} m ctx)
+             (K seed_coins))) P <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] =>
+  Pr[ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] <=
+  Pr[ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+	       (A, HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+	       R res (glob HAETAE_RO.FRO)
+	         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery /\
+       1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count] +
+    rejection_sampling_loss_term.
+proof.
+move=> point_loss _first_active _pk_eq sk_eq left_frame right_frame.
+have hsuffix :=
+  structural_to_exact_hyperball_seeded_coin_sample_pair_suffix_loss_from_point_loss
+    haetae_mode ROSigningAttemptPaperSimSampler.sk_current{m} m ctx K P
+    point_loss.
+by smt.
+qed.
+
+lemma mu_ro_output_false_le0 (d : ro_output distr) (P : ro_output -> bool) :
+  (forall y, P y = false) =>
+  Pervasive.mu d P <= 0%r.
+proof.
+move=> P_false.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y; rewrite P_false.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_pointwise_not_le0
+    (d : ro_output distr) (P : ro_output -> bool) :
+  (forall y, ! P y) =>
+  Pervasive.mu d P <= 0%r.
+proof.
+move=> P_false.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_pointwise_not_le_nonneg
+    (d : ro_output distr) (P : ro_output -> bool) (z : real) :
+  (forall y, ! P y) =>
+  0%r <= z =>
+  Pervasive.mu d P <= z.
+proof.
+move=> P_false z_ge0.
+by smt(mu_ro_output_pointwise_not_le0 ler_trans).
+qed.
+
+lemma mu_ro_output_implies_rejected_state_le0
+    (d : ro_output distr) (P : ro_output -> bool)
+    (b sampler_bad : bool) (signing_count : int) :
+  (forall y, P y => b /\ !sampler_bad /\ 1 <= signing_count) =>
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  mu d P <= 0%r.
+proof.
+move=> P_implies rejected.
+apply (mu_ro_output_pointwise_not_le0 d P).
+by move=> y; smt.
+qed.
+
+lemma mu_ro_output_implies_rejected_state_le_nonneg
+    (d : ro_output distr) (P : ro_output -> bool)
+    (b sampler_bad : bool) (signing_count : int) (z : real) :
+  (forall y, P y => b /\ !sampler_bad /\ 1 <= signing_count) =>
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  0%r <= z =>
+  mu d P <= z.
+proof.
+move=> P_implies rejected z_ge0.
+by smt(mu_ro_output_implies_rejected_state_le0 ler_trans).
+qed.
+
+lemma mu_ro_output_false_self_support
+    (d : ro_output distr) (P : ro_output -> bool) :
+  (forall y, ! P y) =>
+  (mu d P <= 0%r) &&
+  (forall v, v \in d => P v => P v).
+proof.
+move=> P_false.
+by smt(mu_ro_output_pointwise_not_le0).
+qed.
+
+lemma mu_ro_output_with_support_le1
+    (x : ro_query) (P Q : ro_output -> bool) :
+  (forall v, v \in dro_output x => P v => Q v) =>
+  (mu (dro_output x) P <= 1%r) &&
+  (forall v, v \in dro_output x => P v => Q v).
+proof.
+move=> HQ.
+split.
++ have hle := mu_le_weight (dro_output x) P.
+  have hwt : weight (dro_output x) = 1%r.
+  + by apply is_losslessP; apply ro_output_distribution_lossless.
+  by smt.
+by smt.
+qed.
+
+lemma mu_ro_output_with_support_notnot_le1
+    (x : ro_query) (P Q : ro_output -> bool) :
+  (forall v, v \in dro_output x => P v => Q v) =>
+  ! (! ((mu (dro_output x) P <= 1%r) &&
+        (forall v, v \in dro_output x => P v => Q v))).
+proof.
+move=> HQ.
+have H := mu_ro_output_with_support_le1 x P Q HQ.
+by smt.
+qed.
+
+lemma mu_ro_output_with_support_neg_false
+    (x : ro_query) (P Q : ro_output -> bool) :
+  (forall v, v \in dro_output x => P v => Q v) =>
+  (! ((mu (dro_output x) P <= 1%r) &&
+      (forall v, v \in dro_output x => P v => Q v))) =
+  false.
+proof.
+move=> HQ.
+have H := mu_ro_output_with_support_le1 x P Q HQ.
+by smt.
+qed.
+
+lemma not_bool_and_false (a b : bool) :
+  a => b => (! (a && b)) = false.
+proof. by smt. qed.
+
+lemma not_prop_and_false (a b : bool) :
+  a => b => (! (a /\ b)) = false.
+proof. by smt. qed.
+
+lemma if_bool_four_branches_false
+    (c1 c2 c3 b1 b2 b3 b4 : bool) :
+  !b1 =>
+  !b2 =>
+  !b3 =>
+  !b4 =>
+  (if c1 then (if c2 then b1 else b2)
+   else (if c3 then b3 else b4)) = false.
+proof.
+by smt.
+qed.
+
+lemma if_bool_two_branches_false
+    (c b1 b2 : bool) :
+  !b1 =>
+  !b2 =>
+  (if c then b1 else b2) = false.
+proof.
+by smt.
+qed.
+
+lemma mu_ro_output_with_support_notnot_eq0
+    (x : ro_query) (P Q : ro_output -> bool) :
+  (forall v, v \in dro_output x => P v => Q v) =>
+  mu (dro_output x)
+    (fun (_ : ro_output) =>
+       ! ((mu (dro_output x) P <= 1%r) &&
+          (forall v, v \in dro_output x => P v => Q v))) = 0%r.
+proof.
+move=> HQ.
+have H := mu_ro_output_with_support_le1 x P Q HQ.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_self_support_not_not_le1
+    (x : ro_query) (P : ro_output -> bool) :
+  ! (! ((mu (dro_output x) P <= 1%r) &&
+        (forall v, v \in dro_output x => P v => P v))).
+proof.
+have H := mu_ro_output_with_support_le1 x P P _.
++ by smt.
+by smt.
+qed.
+
+lemma mu_ro_output_beta_self_support_not_not_le1
+    (x : ro_query) (P : ro_output -> bool) :
+  ! (! ((mu (dro_output x) P <= 1%r) &&
+        (forall v, v \in dro_output x => P v => (fun x2 => P x2) v))).
+proof.
+have H := mu_ro_output_with_support_le1 x P (fun x2 => P x2) _.
++ by smt.
+by smt.
+qed.
+
+lemma mu_ro_output_beta_self_support_neg_false
+    (x : ro_query) (P : ro_output -> bool) :
+  (! ((mu (dro_output x) P <= 1%r) &&
+      (forall v, v \in dro_output x => P v => (fun x2 => P x2) v))) =
+  false.
+proof.
+have H := mu_ro_output_beta_self_support_not_not_le1 x P.
+by smt.
+qed.
+
+lemma bool_and3_rejected_rot_eq_false (a b c : bool) :
+  ! (b /\ c /\ a) => (a /\ b /\ c) = false.
+proof. by smt. qed.
+
+lemma bool_bool_count_rejected_rot_eq_false (a b : bool) (n : int) :
+  ! (b /\ 1 <= n /\ a) => (a /\ b /\ 1 <= n) = false.
+proof. by smt. qed.
+
+lemma bool_nested_if_same_false (b1 b2 b3 a : bool) :
+  ! a =>
+  (if b1 then (if b2 then a else a) else (if b3 then a else a)) = false.
+proof. by smt. qed.
+
+lemma bool_nested_if_four_false (b1 b2 b3 a11 a12 a21 a22 : bool) :
+  ! a11 =>
+  ! a12 =>
+  ! a21 =>
+  ! a22 =>
+  (if b1 then (if b2 then a11 else a12) else (if b3 then a21 else a22)) =
+  false.
+proof. by smt. qed.
+
+lemma mu_pointwise_not_le0 ['a] (d : 'a distr) (P : 'a -> bool) :
+  (forall y, ! P y) =>
+  Pervasive.mu d P <= 0%r.
+proof.
+move=> P_false.
+rewrite (mu_eq _ _ (fun (_ : 'a) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_const_false_le0 (d : ro_output distr) (b : bool) :
+  ! b =>
+  mu d (fun (_ : ro_output) => b) <= 0%r.
+proof.
+move=> b_false.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_const_false_and3_le0
+    (d : ro_output distr) (b1 b2 b3 : bool) :
+  ! (b1 /\ b2 /\ b3) =>
+  mu d (fun (_ : ro_output) => b1 /\ b2 /\ b3) <= 0%r.
+proof.
+move=> b_false.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_const_false_and3_cycled_le0
+    (d : ro_output distr) (b1 b2 b3 : bool) :
+  ! (b2 /\ b3 /\ b1) =>
+  mu d (fun (_ : ro_output) => b1 /\ b2 /\ b3) <= 0%r.
+proof.
+move=> b_false.
+apply (mu_ro_output_const_false_and3_le0 d b1 b2 b3).
+by smt(andbA andbC).
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_le0
+    pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output (message_hash_query pk ctxt msg))
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> rejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_covered_le0
+    (covered : bool) pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  covered =>
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output (message_hash_query pk ctxt msg))
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> _ rejected.
+by apply (mu_ro_output_paper_sim_signature_clean_rejected_le0
+            pk msg ctxt p smp sampler_bad signing_count).
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_sampler_rom_covered_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (adversary_hash_queries sampler_expand_queries : ro_query list)
+    pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  sampler_rom_covered rom adversary_hash_queries sampler_expand_queries =>
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output (message_hash_query pk ctxt msg))
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> _ rejected.
+by apply (mu_ro_output_paper_sim_signature_clean_rejected_le0
+            pk msg ctxt p smp sampler_bad signing_count).
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_equalized_le0
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     ! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output (message_hash_query pk_current ctx m))
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> -> -> -> rejected.
+by apply (mu_ro_output_paper_sim_signature_clean_rejected_le0
+            pk msg ctxt p smp sampler_bad signing_count); smt().
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_any_equalized_le0
+    (d : ro_output distr)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     ! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu d
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> -> -> -> rejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma paper_sim_signature_clean_count_rejected_rot_eq_false
+    pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+   ! sampler_bad /\ 1 <= signing_count) = false.
+proof. by smt(andbA andbC). qed.
+
+lemma paper_sim_signature_transcript_clean_count_rejected_rot_eq_false
+    pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+   let tr0 = transcript_of_signature haetae_mode pk msg ctxt sig0 in
+   p sig0 /\ ! sampler_bad /\ 1 <= signing_count) = false.
+proof. by smt(andbA andbC). qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_any_le0
+    (d : ro_output distr) pk msg ctxt (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  ! (! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu d
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> rejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_paper_sim_signature_clean_rejected_with_state_equalities
+    (pk_ref pk_cur : pkey) (msg_ref msg_cur : message)
+    (ctxt_ref ctxt_cur : context) (p : signature -> bool)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad : bool) (signing_count : int) :
+  msg_cur = msg_ref =>
+  ctxt_cur = ctxt_ref =>
+  pk_cur = pk_ref =>
+  ! (msg_cur = msg_ref /\ ctxt_cur = ctxt_ref /\ pk_cur = pk_ref /\
+     ! sampler_bad /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk_ref msg_ref ctxt_ref smp)) =>
+  mu (dro_output (message_hash_query pk_cur ctxt_cur msg_cur))
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk_cur msg_cur ctxt_cur smp) /\
+       ! sampler_bad /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> msg_eq ctxt_eq pk_eq rejected.
+rewrite msg_eq ctxt_eq pk_eq.
+apply (mu_ro_output_paper_sim_signature_clean_rejected_le0
+         pk_ref msg_ref ctxt_ref p smp sampler_bad signing_count).
+by smt(andbA andbC).
+qed.
+
+lemma mu_ro_output_bad_middle_true_le0
+    (d : ro_output distr) (b1 b3 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ !true /\ b3) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_count_false_right_le0
+    (d : ro_output distr) (b1 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ !false /\ false) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_middle_false_le0
+    (d : ro_output distr) (b1 b3 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ false /\ b3) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_right_false_le0
+    (d : ro_output distr) (b1 b2 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ b2 /\ false) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_middle_false_rassoc_le0
+    (d : ro_output distr) (b1 b3 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ (false /\ b3)) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_right_false_rassoc_le0
+    (d : ro_output distr) (b1 b2 : bool) :
+  mu d (fun (_ : ro_output) => b1 /\ (b2 /\ false)) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_middle_false_fun_rassoc_le0
+    (d : ro_output distr) (P Q : ro_output -> bool) :
+  mu d (fun y => P y /\ (false /\ Q y)) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_right_false_fun_rassoc_le0
+    (d : ro_output distr) (P Q : ro_output -> bool) :
+  mu d (fun y => P y /\ (Q y /\ false)) <= 0%r.
+proof.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_le0
+    (d : ro_output distr) (b : bool) :
+  ! (!false /\ true /\ b) =>
+  mu d (fun (_ : ro_output) => b /\ !false /\ true) <= 0%r.
+proof.
+move=> rejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  1 <= signing_count =>
+  mu d (fun (_ : ro_output) => b /\ !false /\ true) <= 0%r.
+proof.
+move=> rejected clean count_ge1.
+apply (mu_ro_output_clean_count_rejected_le0 d b).
+by smt(andbA andbC).
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_rassoc_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  1 <= signing_count =>
+  mu d (fun (_ : ro_output) => b /\ (!false /\ true)) <= 0%r.
+proof.
+move=> rejected clean count_ge1.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_commuted_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  1 <= signing_count =>
+  mu d (fun (_ : ro_output) => !false /\ true /\ b) <= 0%r.
+proof.
+move=> rejected clean count_ge1.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_commuted_rassoc_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  1 <= signing_count =>
+  mu d (fun (_ : ro_output) => !false /\ (true /\ b)) <= 0%r.
+proof.
+move=> rejected clean count_ge1.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_count_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  mu d (fun (_ : ro_output) => b /\ !false /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> rejected clean.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_count_rassoc_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  mu d (fun (_ : ro_output) => b /\ (!false /\ 1 <= signing_count)) <= 0%r.
+proof.
+move=> rejected clean.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_count_commuted_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  mu d (fun (_ : ro_output) => !false /\ 1 <= signing_count /\ b) <= 0%r.
+proof.
+move=> rejected clean.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_clean_count_rejected_from_state_count_commuted_rassoc_le0
+    (d : ro_output distr) (b sampler_bad : bool) (signing_count : int) :
+  ! (!sampler_bad /\ 1 <= signing_count /\ b) =>
+  ! sampler_bad =>
+  mu d (fun (_ : ro_output) => !false /\ (1 <= signing_count /\ b)) <= 0%r.
+proof.
+move=> rejected clean.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(andbA andbC).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_le0
+    (d : ro_output distr) (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu d (fun (_ : ro_output) =>
+      p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+      !sampler_bad_prequery /\
+      1 <= signing_count) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0.
+qed.
+
+lemma rejected_clean_signature_event_false
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+     !sampler_bad_prequery /\
+     1 <= signing_count).
+proof.
+by smt.
+qed.
+
+lemma rejected_clean_signature_event_leaf_false
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery clean leaf : bool) (signing_count : int) :
+  (leaf =>
+     p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+     clean /\
+     1 <= signing_count) =>
+  (clean => !sampler_bad_prequery) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  !leaf.
+proof.
+by smt.
+qed.
+
+lemma rejected_clean_signature_event_leaf_direct_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery leaf : bool) (signing_count : int) :
+  (leaf =>
+     p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+     !sampler_bad_prequery /\
+     1 <= signing_count) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  !leaf.
+proof.
+by smt.
+qed.
+
+lemma rejected_clean_signature_event_predicate_false
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  !sampler_bad_prequery =>
+  1 <= signing_count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! p (paper_sim_signature haetae_mode pk_current m ctx smp).
+proof.
+by smt.
+qed.
+
+lemma rejected_guarded_leaf_false (guard b leaf : bool) :
+  (leaf => guard) =>
+  (leaf => b) =>
+  ! (guard /\ b) =>
+  ! leaf.
+proof.
+by smt.
+qed.
+
+lemma rejected_known_clean_count_leaf_false
+    (g1 g2 g3 clean count b leaf : bool) :
+  g1 =>
+  g2 =>
+  g3 =>
+  clean =>
+  count =>
+  (leaf => b) =>
+  ! (g1 /\ g2 /\ g3 /\ clean /\ count /\ b) =>
+  ! leaf.
+proof.
+by smt.
+qed.
+
+lemma rejected_clean_signature_event_three_if_false
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b0 b1 b2 : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (if b0 then
+     if b1 then
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count
+   else
+     if b2 then
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count) = false.
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b0; case: b1; case: b2 => /=;
+     smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_three_if_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b0 b1 b2 : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (if b0 then
+       if b1 then
+         p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+         !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+         !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       if b2 then
+         p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+         !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+         !sampler_bad_prequery /\ 1 <= signing_count).
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b0; case: b1; case: b2 => /=;
+     smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_three_if_transcript_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b0 b1 b2 : bool)
+    (ignored0 ignored1 ignored2 ignored3 : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (if b0 then
+       if b1 then
+         let r0 = ignored0 in
+         let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+         let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+         p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         let r0 = ignored1 in
+         let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+         let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+         p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       if b2 then
+         let r0 = ignored2 in
+         let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+         let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+         p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         let r0 = ignored3 in
+         let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+         let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+         p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count).
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b0; case: b1; case: b2 => /=;
+     smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_one_if_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (if b then
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count).
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b => /=; smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_one_if_transcript_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b : bool) (ignored : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (if b then
+       let r0 = ignored in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count).
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b => /=; smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_one_if_two_ignored_not
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (b : bool) (ignored_then ignored_else : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  ! (if b then
+       let r0 = ignored_then in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       let r0 = ignored_else in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 = transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count).
+proof.
+by move=> Hm Hctx Hpk Hrej;
+   case: b => /=; smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_two_fro_get_suffix_false
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) (x2 : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (if x1 \in rom then
+     let r1 = (oget rom.[x1]).`1 in
+     let m0 = rom.[x1 <- (r1, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash r1) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+   else
+     let m0 = rom.[x1 <- (x2, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash x2) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+     else
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) = false.
+proof.
+move=> Hm Hctx Hpk Hrejected.
+case: (x1 \in rom) => Hx1 /=.
++ case:
+    (challenge_hash_query haetae_mode
+       (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+       (paper_sim_commitment_lowbits haetae_mode smp)
+       (ro_message_hash (oget rom.[x1]).`1) \in
+     rom.[x1 <- ((oget rom.[x1]).`1, PROM.Known)]) => Hx0 /=;
+  smt(rejected_clean_signature_event_false).
+case:
+  (challenge_hash_query haetae_mode
+     (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+     (paper_sim_commitment_lowbits haetae_mode smp)
+     (ro_message_hash x2) \in
+   rom.[x1 <- (x2, PROM.Known)]) => Hx0 /=;
+smt(rejected_clean_signature_event_false).
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(rejected_clean_signature_event_two_fro_get_suffix_false).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_simplified_suffix_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk : pkey) (msg : message) (ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  ! (!sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> Hrejected.
+apply (mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_le0
+         rom p pk pk msg msg ctxt ctxt smp sampler_bad_prequery
+         signing_count x1); smt().
+qed.
+
+lemma rejected_clean_event_bool_drop_count_suffix_false_base
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (!bad /\ 1 <= count /\ b) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_signature_event_two_fro_get_guarded_drop_count_suffix_false
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) (x2 : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  1 <= signing_count =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (if x1 \in rom then
+     let r1 = (oget rom.[x1]).`1 in
+     let m0 = rom.[x1 <- (r1, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash r1) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery
+   else
+     let m0 = rom.[x1 <- (x2, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash x2) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk_current m ctx sig0 in
+       p sig0 /\ !sampler_bad_prequery) = false.
+proof.
+move=> Hm Hctx Hpk Hcount Hrejected.
+case: (x1 \in rom) => Hx1 /=.
++ case:
+    (challenge_hash_query haetae_mode
+       (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+       (paper_sim_commitment_lowbits haetae_mode smp)
+       (ro_message_hash (oget rom.[x1]).`1) \in
+     rom.[x1 <- ((oget rom.[x1]).`1, PROM.Known)]) => Hx0 /=;
+  smt(rejected_clean_signature_event_predicate_false).
+case:
+  (challenge_hash_query haetae_mode
+     (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+     (paper_sim_commitment_lowbits haetae_mode smp)
+     (ro_message_hash x2) \in
+   rom.[x1 <- (x2, PROM.Known)]) => Hx0 /=;
+smt(rejected_clean_signature_event_predicate_false).
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_guarded_drop_count_suffix_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  1 <= signing_count =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ !sampler_bad_prequery) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hcount Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(rejected_clean_signature_event_two_fro_get_guarded_drop_count_suffix_false).
+by rewrite mu0.
+qed.
+
+lemma rejected_clean_signature_event_two_fro_get_target_guarded_drop_count_suffix_false
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) (x2 : ro_output) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  1 <= signing_count =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (if x1 \in rom then
+     let r1 = (oget rom.[x1]).`1 in
+     let m0 = rom.[x1 <- (r1, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash r1) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+   else
+     let m0 = rom.[x1 <- (x2, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash x2) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery) = false.
+proof.
+move=> Hm Hctx Hpk Hcount Hrejected.
+case: (x1 \in rom) => Hx1 /=.
++ case:
+    (challenge_hash_query haetae_mode
+       (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+       (paper_sim_commitment_lowbits haetae_mode smp)
+       (ro_message_hash (oget rom.[x1]).`1) \in
+     rom.[x1 <- ((oget rom.[x1]).`1, PROM.Known)]) => Hx0 /=;
+  smt(rejected_clean_event_bool_drop_count_suffix_false_base).
+case:
+  (challenge_hash_query haetae_mode
+     (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+     (paper_sim_commitment_lowbits haetae_mode smp)
+     (ro_message_hash x2) \in
+   rom.[x1 <- (x2, PROM.Known)]) => Hx0 /=;
+smt(rejected_clean_event_bool_drop_count_suffix_false_base).
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_target_guarded_drop_count_suffix_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  1 <= signing_count =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hcount Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt(rejected_clean_signature_event_two_fro_get_target_guarded_drop_count_suffix_false).
+by rewrite mu0.
+qed.
+
+lemma rejected_clean_signature_event_two_fro_get_drop_count_suffix_false
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk : pkey) (msg : message) (ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) (x2 : ro_output) :
+  1 <= signing_count =>
+  ! (!sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (if x1 \in rom then
+     let r1 = (oget rom.[x1]).`1 in
+     let m0 = rom.[x1 <- (r1, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash r1) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+   else
+     let m0 = rom.[x1 <- (x2, PROM.Known)] in
+     let x0_0 =
+       challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash x2) in
+     if x0_0 \in m0 then
+       let r0 = (oget m0.[x0_0]).`1 in
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery
+     else
+       let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+       let tr0 =
+         transcript_of_signature haetae_mode pk msg ctxt sig0 in
+       p sig0 /\ !sampler_bad_prequery) = false.
+proof.
+move=> Hcount Hrejected.
+case: (x1 \in rom) => Hx1 /=.
++ case:
+    (challenge_hash_query haetae_mode
+       (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+       (paper_sim_commitment_lowbits haetae_mode smp)
+       (ro_message_hash (oget rom.[x1]).`1) \in
+     rom.[x1 <- ((oget rom.[x1]).`1, PROM.Known)]) => Hx0 /=;
+  smt(rejected_clean_event_bool_drop_count_suffix_false_base).
+case:
+  (challenge_hash_query haetae_mode
+     (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+     (paper_sim_commitment_lowbits haetae_mode smp)
+     (ro_message_hash x2) \in
+   rom.[x1 <- (x2, PROM.Known)]) => Hx0 /=;
+smt(rejected_clean_event_bool_drop_count_suffix_false_base).
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_simplified_drop_count_suffix_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk : pkey) (msg : message) (ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  1 <= signing_count =>
+  ! (!sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk msg ctxt smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery
+         else
+           let sig0 = paper_sim_signature haetae_mode pk msg ctxt smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk msg ctxt sig0 in
+           p sig0 /\ !sampler_bad_prequery) <= 0%r.
+proof.
+  move=> Hcount Hrejected.
+  rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
+  + move=> y /=.
+    by smt(rejected_clean_signature_event_two_fro_get_drop_count_suffix_false).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_clean_le0
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery clean : bool) (signing_count : int)
+    (x1 : ro_query) :
+  (clean => !sampler_bad_prequery) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (x2 : ro_output) =>
+       if x1 \in rom then
+         let r1 = (oget rom.[x1]).`1 in
+         let m0 = rom.[x1 <- (r1, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash r1) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ clean /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ clean /\ 1 <= signing_count
+       else
+         let m0 = rom.[x1 <- (x2, PROM.Known)] in
+         let x0_0 =
+           challenge_hash_query haetae_mode
+             (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+             (paper_sim_commitment_lowbits haetae_mode smp)
+             (ro_message_hash x2) in
+         if x0_0 \in m0 then
+           let r0 = (oget m0.[x0_0]).`1 in
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ clean /\ 1 <= signing_count
+         else
+           let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+           let tr0 =
+             transcript_of_signature haetae_mode pk_current m ctx sig0 in
+           p sig0 /\ clean /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> Hclean Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ move=> y /=.
+  case: (x1 \in rom) => Hx1 /=.
+  + case:
+      (challenge_hash_query haetae_mode
+         (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+         (paper_sim_commitment_lowbits haetae_mode smp)
+         (ro_message_hash (oget rom.[x1]).`1) \in
+       rom.[x1 <- ((oget rom.[x1]).`1, PROM.Known)]) => Hx0 /=;
+    smt(rejected_clean_signature_event_false).
+  case:
+    (challenge_hash_query haetae_mode
+       (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+       (paper_sim_commitment_lowbits haetae_mode smp)
+       (ro_message_hash y) \in
+     rom.[x1 <- (y, PROM.Known)]) => Hx0 /=;
+  smt(rejected_clean_signature_event_false).
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_with_support
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (Q : ro_output -> bool)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (forall v,
+     v \in dro_output x1 =>
+     (if x1 \in rom then
+        let r1 = (oget rom.[x1]).`1 in
+        let m0 = rom.[x1 <- (r1, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash r1) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+      else
+        let m0 = rom.[x1 <- (v, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash v) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) =>
+     Q v) =>
+  (mu (dro_output x1)
+     (fun (x2 : ro_output) =>
+        if x1 \in rom then
+          let r1 = (oget rom.[x1]).`1 in
+          let m0 = rom.[x1 <- (r1, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash r1) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let m0 = rom.[x1 <- (x2, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash x2) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r) &&
+  (forall v,
+     v \in dro_output x1 =>
+     (if x1 \in rom then
+        let r1 = (oget rom.[x1]).`1 in
+        let m0 = rom.[x1 <- (r1, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash r1) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+      else
+        let m0 = rom.[x1 <- (v, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash v) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) =>
+     Q v).
+proof.
+move=> Hm Hctx Hpk Hrejected HQ.
+split.
++ rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
+  + by move=> y /=; smt(rejected_clean_signature_event_two_fro_get_suffix_false).
+  by rewrite mu0.
+by smt.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_self_with_support
+    (rom : (ro_query, ro_output * PROM.flag) fmap)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (mu (dro_output x1)
+     (fun (x2 : ro_output) =>
+        if x1 \in rom then
+          let r1 = (oget rom.[x1]).`1 in
+          let m0 = rom.[x1 <- (r1, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash r1) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let m0 = rom.[x1 <- (x2, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash x2) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r) &&
+  (forall v,
+     v \in dro_output x1 =>
+     (if x1 \in rom then
+        let r1 = (oget rom.[x1]).`1 in
+        let m0 = rom.[x1 <- (r1, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash r1) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+      else
+        let m0 = rom.[x1 <- (v, PROM.Known)] in
+        let x0_0 =
+          challenge_hash_query haetae_mode
+            (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+            (paper_sim_commitment_lowbits haetae_mode smp)
+            (ro_message_hash v) in
+        if x0_0 \in m0 then
+          let r0 = (oget m0.[x0_0]).`1 in
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+          let tr0 =
+            transcript_of_signature haetae_mode pk_current m ctx sig0 in
+          p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) =>
+     (fun (x2 : ro_output) =>
+        if x1 \in rom then
+          let r1 = (oget rom.[x1]).`1 in
+          let m0 = rom.[x1 <- (r1, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash r1) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+        else
+          let m0 = rom.[x1 <- (x2, PROM.Known)] in
+          let x0_0 =
+            challenge_hash_query haetae_mode
+              (paper_sim_commitment_highbits haetae_mode pk_current m ctx smp)
+              (paper_sim_commitment_lowbits haetae_mode smp)
+              (ro_message_hash x2) in
+          if x0_0 \in m0 then
+            let r0 = (oget m0.[x0_0]).`1 in
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count
+          else
+            let sig0 = paper_sim_signature haetae_mode pk_current m ctx smp in
+            let tr0 =
+              transcript_of_signature haetae_mode pk_current m ctx sig0 in
+            p sig0 /\ !sampler_bad_prequery /\ 1 <= signing_count) v).
+proof.
+move=> Hm Hctx Hpk Hrejected.
+split.
++ apply (mu_ro_output_rejected_clean_signature_event_two_fro_get_suffix_le0
+           rom p pk_current pk m msg ctx ctxt smp sampler_bad_prequery
+           signing_count x1); smt().
+by smt().
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_with_support
+    (d : ro_output distr) (P Q : ro_output -> bool)
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  (forall y, P y =>
+     p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+     !sampler_bad_prequery /\
+     1 <= signing_count) =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (forall v, v \in d => P v => Q v) =>
+  (mu d P <= 0%r) &&
+  (forall v, v \in d => P v => Q v).
+proof.
+move=> Hm Hctx Hpk HP Hrejected HQ.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt.
+by rewrite mu0; smt.
+qed.
+
+lemma mu_ro_output_false_from_rejected_event_pointwise_le0
+    (d : ro_output distr) (P : ro_output -> bool) (E : bool) :
+  ! E =>
+  (forall y, P y => E) =>
+  mu d P <= 0%r.
+proof.
+move=> Hrejected Hpoint.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ move=> y /=.
+  case: (P y) => Hy /=.
+  + by smt().
+  by trivial.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_constant_false_le0
+    (d : ro_output distr) (b : bool) :
+  ! b =>
+  mu d (fun (_ : ro_output) => b) <= 0%r.
+proof.
+move=> Hb.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt().
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_pointwise_false_le0
+    (d : ro_output distr) (P : ro_output -> bool) :
+  (forall y, P y = false) =>
+  mu d P <= 0%r.
+proof.
+move=> HP.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; rewrite HP.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_event_bool_reordered_suffix_le0
+    (d : ro_output distr) (bad : bool) (count : int) (b : bool) :
+  ! (!bad /\ 1 <= count /\ b) =>
+  mu d (fun (_ : ro_output) => b /\ !bad /\ 1 <= count) <= 0%r.
+proof.
+move=> Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ move=> y /=.
+  case: b => Hb /=.
+  + case: (!bad) => Hbad /=.
+    + case: (1 <= count) => Hcount /=.
+      + by smt().
+      by trivial.
+    by trivial.
+  by trivial.
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_false_from_rejected_event_pointwise_with_support
+    (d : ro_output distr) (P Q : ro_output -> bool) (E : bool) :
+  ! E =>
+  (forall y, P y => E) =>
+  (forall y, y \in d => P y => Q y) =>
+  (mu d P <= 0%r) &&
+  (forall y, y \in d => P y => Q y).
+proof.
+move=> Hrejected Hpoint Hsupport.
+split.
++ apply (mu_ro_output_false_from_rejected_event_pointwise_le0 d P E).
+  + exact Hrejected.
+  exact Hpoint.
+by smt().
+qed.
+
+lemma rejected_clean_signature_event_post_sampler_suffix_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (p : signature -> bool) (sig : signature) :
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\ !bad /\ 1 <= count /\ p sig) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  (p sig /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_post_sampler_bool_suffix_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (b : bool) :
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\ !bad /\ 1 <= count /\ b) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  (b /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_post_sampler_bool_suffix_false_clean_first
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (b : bool) :
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\ !bad /\ 1 <= count /\ b) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  (!bad /\ 1 <= count /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_with_added_count_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  ! (b /\ !bad) =>
+  (b /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_with_added_count_suffix_false_clean_first
+  (bad : bool) (count : int) (b : bool) :
+  ! (b /\ !bad) =>
+  (!bad /\ 1 <= count /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_with_added_count_suffix_false_clean_pair
+  (bad : bool) (count : int) (b : bool) :
+  ! (!bad /\ b) =>
+  (!bad /\ 1 <= count /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_reordered_count_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  ! (!bad /\ 1 <= count /\ b) =>
+  (b /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_signature_event_reordered_pointwise_eq_false
+    (p : signature -> bool)
+    (pk : pkey) (msg : message) (ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  ! (!sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+   !sampler_bad_prequery /\ 1 <= signing_count) = false.
+proof.
+smt().
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_reordered_suffix_le0
+    (p : signature -> bool)
+    (pk : pkey) (msg : message) (ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  ! (!sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk msg ctxt smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt().
+by rewrite mu0.
+qed.
+
+lemma rejected_clean_event_bool_no_count_suffix_false
+  (bad : bool) (b : bool) :
+  ! (b /\ !bad) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_no_count_suffix_false_clean_first
+  (bad : bool) (b : bool) :
+  ! (!bad /\ b) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_plain_bool_suffix_false
+  (b clean : bool) :
+  ! b =>
+  (b /\ clean) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_plain_bool_suffix_false_clean_first
+  (b clean : bool) :
+  ! b =>
+  (clean /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_plain_bool_self_false (b : bool) :
+  ! b =>
+  b = false.
+proof.
+smt().
+qed.
+
+lemma rejected_event_implies_false (event rejected_event : bool) :
+  (event => rejected_event) =>
+  ! rejected_event =>
+  event = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_drop_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ b) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_drop_count_from_state_false_clean_first
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ b) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_no_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (b : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\ !bad /\ b) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_bool_no_count_from_state_false_clean_first
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (b : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\ !bad /\ b) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_simplified_bool_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  ! (!bad /\ 1 <= count /\ b) =>
+  (b /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_simplified_bool_suffix_false_clean_first
+  (bad : bool) (count : int) (b : bool) :
+  ! (!bad /\ 1 <= count /\ b) =>
+  (!bad /\ 1 <= count /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_simplified_bool_drop_count_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (!bad /\ 1 <= count /\ b) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_simplified_bool_drop_count_suffix_false_clean_first
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (!bad /\ 1 <= count /\ b) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_rot_drop_count_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (b /\ !bad /\ 1 <= count) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_rot_drop_count_suffix_false_clean_first
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (b /\ !bad /\ 1 <= count) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_clean_pair_drop_count_suffix_false
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (!bad /\ b /\ 1 <= count) =>
+  (b /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_clean_pair_drop_count_suffix_false_clean_first
+  (bad : bool) (count : int) (b : bool) :
+  1 <= count =>
+  ! (!bad /\ b /\ 1 <= count) =>
+  (!bad /\ b) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_drop_count_suffix_false
+  (bad : bool) (count : int) (c b1 b2 : bool) :
+  1 <= count =>
+  ! (!bad /\ 1 <= count /\ (if c then b1 else b2)) =>
+  (if c then b1 /\ !bad else b2 /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_drop_count_suffix_false_clean_first
+  (bad : bool) (count : int) (c b1 b2 : bool) :
+  1 <= count =>
+  ! (!bad /\ 1 <= count /\ (if c then b1 else b2)) =>
+  (if c then !bad /\ b1 else !bad /\ b2) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_drop_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (c b1 b2 : bool) :
+  1 <= count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ (if c then b1 else b2)) =>
+  (if c then b1 /\ !bad else b2 /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_drop_count_from_state_false_clean_first
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (c b1 b2 : bool) :
+  1 <= count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ (if c then b1 else b2)) =>
+  (if c then !bad /\ b1 else !bad /\ b2) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_no_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (c b1 b2 : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ (if c then b1 else b2)) =>
+  (if c then b1 /\ !bad else b2 /\ !bad) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_no_count_from_state_false_clean_first
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (c b1 b2 : bool) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ (if c then b1 else b2)) =>
+  (if c then !bad /\ b1 else !bad /\ b2) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_stronger_clean_drop_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (count : int) (c b1 b2 clean1 clean2 : bool) :
+  1 <= count =>
+  (clean1 => !bad) =>
+  (clean2 => !bad) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ (if c then b1 else b2)) =>
+  (if c then b1 /\ clean1 else b2 /\ clean2) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_event_if_stronger_clean_no_count_from_state_false
+  (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+  (bad : bool) (c b1 b2 clean1 clean2 : bool) :
+  (clean1 => !bad) =>
+  (clean2 => !bad) =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ (if c then b1 else b2)) =>
+  (if c then b1 /\ clean1 else b2 /\ clean2) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_signature_event_simplified_suffix_false
+  (bad : bool) (count : int) (p : signature -> bool) (sig : signature) :
+  ! (!bad /\ 1 <= count /\ p sig) =>
+  (p sig /\ !bad /\ 1 <= count) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_signature_event_simplified_suffix_false_clean_first
+  (bad : bool) (count : int) (p : signature -> bool) (sig : signature) :
+  ! (!bad /\ 1 <= count /\ p sig) =>
+  (!bad /\ 1 <= count /\ p sig) = false.
+proof.
+smt().
+qed.
+
+lemma rejected_clean_signature_event_drop_count_from_state_false
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  1 <= signing_count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+   !sampler_bad_prequery) = false.
+proof.
+move=> Hcount Hm Hctx Hpk Hrejected.
+apply (rejected_clean_event_bool_drop_count_suffix_false_base
+         sampler_bad_prequery signing_count
+         (p (paper_sim_signature haetae_mode pk_current m ctx smp))).
++ exact Hcount.
+smt(rejected_clean_signature_event_false).
+qed.
+
+lemma rejected_clean_signature_event_drop_count_from_state_false_clean_first
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int) :
+  1 <= signing_count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  (!sampler_bad_prequery /\
+   p (paper_sim_signature haetae_mode pk_current m ctx smp)) = false.
+proof.
+move=> Hcount Hm Hctx Hpk Hrejected.
+apply (rejected_clean_event_simplified_bool_drop_count_suffix_false_clean_first
+         sampler_bad_prequery signing_count
+         (p (paper_sim_signature haetae_mode pk_current m ctx smp))).
++ exact Hcount.
+smt(rejected_clean_signature_event_false).
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_one_fro_get_suffix_le0
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery /\ 1 <= signing_count) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt().
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_one_fro_get_drop_count_suffix_le0
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  1 <= signing_count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (_ : ro_output) =>
+       p (paper_sim_signature haetae_mode pk_current m ctx smp) /\
+       !sampler_bad_prequery) <= 0%r.
+proof.
+move=> Hcount Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=;
+     apply (rejected_clean_signature_event_drop_count_from_state_false
+              p pk_current pk m msg ctx ctxt smp sampler_bad_prequery
+              signing_count); smt().
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_signature_event_one_fro_get_drop_count_suffix_clean_first_le0
+    (p : signature -> bool)
+    (pk_current pk : pkey) (m msg : message) (ctx ctxt : context)
+    (smp : paper_sim_signature_sample)
+    (sampler_bad_prequery : bool) (signing_count : int)
+    (x1 : ro_query) :
+  1 <= signing_count =>
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !sampler_bad_prequery /\ 1 <= signing_count /\
+     p (paper_sim_signature haetae_mode pk msg ctxt smp)) =>
+  mu (dro_output x1)
+    (fun (_ : ro_output) =>
+       !sampler_bad_prequery /\
+       p (paper_sim_signature haetae_mode pk_current m ctx smp)) <= 0%r.
+proof.
+move=> Hcount Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=;
+     apply (rejected_clean_signature_event_drop_count_from_state_false_clean_first
+              p pk_current pk m msg ctx ctxt smp sampler_bad_prequery
+              signing_count); smt().
+by rewrite mu0.
+qed.
+
+lemma mu_ro_output_rejected_clean_event_bool_suffix_le0
+    (m msg : message) (ctx ctxt : context) (pk_current pk : pkey)
+    (bad : bool) (count : int) (b : bool) (x1 : ro_query) :
+  m = msg =>
+  ctx = ctxt =>
+  pk_current = pk =>
+  ! (m = msg /\ ctx = ctxt /\ pk_current = pk /\
+     !bad /\ 1 <= count /\ b) =>
+  mu (dro_output x1)
+    (fun (_ : ro_output) => b /\ !bad /\ 1 <= count) <= 0%r.
+proof.
+move=> Hm Hctx Hpk Hrejected.
+rewrite (mu_eq _ _ (fun (_ : ro_output) => false)).
++ by move=> y /=; smt().
+by rewrite mu0.
+qed.
+
+equiv concrete_budgeted_o_sign_saturated_fallback_equiv :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2}.
+proof.
+proc.
+rcondf{1} 1; first by auto => />; smt.
+rcondf{2} 1; first by auto => />; smt.
+by auto.
+qed.
+
+equiv concrete_budgeted_o_sign_saturated_fallback_full_state_equiv :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc.
+rcondf{1} 1; first by auto => />; smt.
+rcondf{2} 1; first by auto => />; smt.
+by auto.
+qed.
+
+equiv concrete_budgeted_ah_get_full_state_equiv :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc.
+case (ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} <
+        hash_query_budget_count).
++ rcondt{1} 1; first by auto; smt.
+  rcondt{2} 1; first by auto; smt.
+  case (ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} = 0).
+  + rcondt{1} 1; first by auto; smt.
+    rcondt{2} 1; first by auto; smt.
+    wp.
+    call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+    + by sim.
+    by auto => />.
+  rcondf{1} 1; first by auto; smt.
+  rcondf{2} 1; first by auto; smt.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+  + by sim.
+  by auto => />.
+rcondf{1} 1; first by auto; smt.
+rcondf{2} 1; first by auto; smt.
+by auto => />.
+qed.
+
+equiv concrete_budgeted_adversary_forge_saturated_fallback_equiv :
+  A(ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).O).forge ~
+  A(ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).O).forge :
+  ={glob HAETAE_RO.FRO, glob A, arg} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}
+  ==>
+  ={glob HAETAE_RO.FRO, glob A, res} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc
+  (={glob HAETAE_RO.FRO} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+   signature_query_budget_count <=
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}) => //.
++ move=> />.
++ proc*.
+  call concrete_budgeted_ah_get_full_state_equiv.
+  by auto => />.
++ proc*.
+  call concrete_budgeted_o_sign_saturated_fallback_full_state_equiv.
+  by auto => />.
+qed.
+
+lemma concrete_budgeted_adversary_forge_saturated_clean_fallback_lifts
+    pk (R : message * context * signature -> glob HAETAE_RO.FRO -> bool) &m :
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} =>
+  Pr[A(ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+          HAETAE_RO.FRO).AH,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+          HAETAE_RO.FRO).O).forge(pk) @ &m :
+       R res (glob HAETAE_RO.FRO) /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[A(ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+          HAETAE_RO.FRO).AH,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+          HAETAE_RO.FRO).O).forge(pk) @ &m :
+       R res (glob HAETAE_RO.FRO)].
+proof.
+move=> saturated.
+byequiv
+  (: ={glob HAETAE_RO.FRO, glob A, arg} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.records{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+     signature_query_budget_count <=
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}
+     ==>
+     (R res{1} (glob HAETAE_RO.FRO){1} /\
+      ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1}) =>
+     R res{2} (glob HAETAE_RO.FRO){2}) => //.
++ by proc*; call concrete_budgeted_adversary_forge_saturated_fallback_equiv.
+qed.
+
+lemma concrete_budgeted_o_sign_saturated_clean_fallback_lifts
+    m ctx (R : signature -> glob HAETAE_RO.FRO -> bool) &m :
+  signature_query_budget_count <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO) /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)].
+proof.
+move=> saturated.
+byequiv
+  (: ={glob HAETAE_RO.FRO, arg} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+     signature_query_budget_count <=
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2}
+     ==>
+     (R res{1} (glob HAETAE_RO.FRO){1} /\
+      ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1}) =>
+     R res{2} (glob HAETAE_RO.FRO){2}) => //.
++ by proc*; call concrete_budgeted_o_sign_saturated_fallback_equiv.
+qed.
+
+equiv concrete_two_call_g0_g1_post_first_ah_get_equiv :
+  ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+    (A, HAETAE_RO.FRO).AH.get ~
+  ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+    (A, HAETAE_RO.FRO).AH.get :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}.
+proof.
+proc.
+case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} <
+        hash_query_budget_count).
++ rcondt{1} 1; first by auto; smt.
+  rcondt{2} 1; first by auto; smt.
+  case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} = 0).
+  + rcondt{1} 1; first by auto; smt.
+    rcondt{2} 1; first by auto; smt.
+    wp.
+    call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+    + by sim.
+    by auto => />.
+  rcondf{1} 1; first by auto; smt.
+  rcondf{2} 1; first by auto; smt.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+  + by sim.
+  by auto => />.
+rcondf{1} 1; first by auto; smt.
+rcondf{2} 1; first by auto; smt.
+by auto => />.
+qed.
+
+equiv concrete_two_call_g0_g1_post_first_o_sign_equiv :
+  ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+    (A, HAETAE_RO.FRO).O.sign ~
+  ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+    (A, HAETAE_RO.FRO).O.sign :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}.
+proof.
+proc.
+case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} <
+        signature_query_budget_count).
++ rcondt{1} 1; first by auto; smt.
+  rcondt{2} 1; first by auto; smt.
+  rcondf{1} 2; first by auto; smt.
+  rcondf{2} 2; first by auto; smt.
+  rcondf{1} 9; first by auto; smt.
+  rcondf{2} 9; first by auto; smt.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+  + by sim.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+  + by sim.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} /\
+          ROSigningAttemptPaperSimSampler.pk_current{1} =
+            ROSigningAttemptPaperSimSampler.pk_current{2} /\
+          ROSigningAttemptPaperSimSampler.sk_current{1} =
+            ROSigningAttemptPaperSimSampler.sk_current{2}
+          ==>
+          ={glob HAETAE_RO.FRO, res} /\
+          ROSigningAttemptPaperSimSampler.pk_current{1} =
+            ROSigningAttemptPaperSimSampler.pk_current{2} /\
+          ROSigningAttemptPaperSimSampler.sk_current{1} =
+            ROSigningAttemptPaperSimSampler.sk_current{2}).
+  + by proc; sim.
+  wp.
+  rnd.
+  by auto => />.
+rcondf{1} 1; first by auto; smt.
+rcondf{2} 1; first by auto; smt.
+by auto => />.
+qed.
+
+equiv concrete_two_call_g0_g1_post_first_adversary_forge_equiv :
+  A(ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+      (A, HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+      (A, HAETAE_RO.FRO).O).forge ~
+  A(ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+      (A, HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+      (A, HAETAE_RO.FRO).O).forge :
+  ={glob HAETAE_RO.FRO, glob A, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, glob A, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+  ROSigningAttemptPaperSimSampler.pk_current{1} =
+    ROSigningAttemptPaperSimSampler.pk_current{2} /\
+  ROSigningAttemptPaperSimSampler.sk_current{1} =
+    ROSigningAttemptPaperSimSampler.sk_current{2}.
+proof.
+proc
+  (={glob HAETAE_RO.FRO} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+   1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+   ROSigningAttemptPaperSimSampler.pk_current{1} =
+     ROSigningAttemptPaperSimSampler.pk_current{2} /\
+   ROSigningAttemptPaperSimSampler.sk_current{1} =
+     ROSigningAttemptPaperSimSampler.sk_current{2}) => //.
++ move=> />.
++ proc*.
+  call concrete_two_call_g0_g1_post_first_ah_get_equiv.
+  by auto => />.
++ proc*.
+  call concrete_two_call_g0_g1_post_first_o_sign_equiv.
+  by auto => />.
+qed.
+
+lemma concrete_two_call_g0_g1_post_first_clean_adversary_lifts
+    pk (R : message * context * signature -> glob HAETAE_RO.FRO -> bool) &m :
+  1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{m} =>
+  Pr[A(ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+         (A, HAETAE_RO.FRO).AH,
+       ROMInternalTranscriptBudgetedTwoCallG0AsNMA
+         (A, HAETAE_RO.FRO).O).forge(pk) @ &m :
+       R res (glob HAETAE_RO.FRO) /\
+       ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery] <=
+  Pr[A(ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+         (A, HAETAE_RO.FRO).AH,
+       ROMInternalTranscriptBudgetedTwoCallG1AsNMA
+         (A, HAETAE_RO.FRO).O).forge(pk) @ &m :
+       R res (glob HAETAE_RO.FRO)].
+proof.
+move=> post_first.
+byequiv
+  (: ={glob HAETAE_RO.FRO, glob A, arg} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{2} /\
+     1 <= ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{2} /\
+     ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+       ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{2} /\
+     ROSigningAttemptPaperSimSampler.pk_current{1} =
+       ROSigningAttemptPaperSimSampler.pk_current{2} /\
+     ROSigningAttemptPaperSimSampler.sk_current{1} =
+       ROSigningAttemptPaperSimSampler.sk_current{2}
+     ==>
+     (R res{1} (glob HAETAE_RO.FRO){1} /\
+      ! ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1}) =>
+     R res{2} (glob HAETAE_RO.FRO){2}) => //.
++ by proc*; call concrete_two_call_g0_g1_post_first_adversary_forge_equiv.
+qed.
+
+equiv concrete_two_call_g2_exact_budgeted_ah_get_equiv :
+  ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+    (A, HAETAE_RO.FRO).AH.get ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}.
+proof.
+proc.
+case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} <
+        hash_query_budget_count).
++ rcondt{1} 1; first by auto; smt.
+  rcondt{2} 1; first by auto; smt.
+  case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} = 0).
+  + rcondt{1} 1; first by auto; smt.
+    rcondt{2} 1; first by auto; smt.
+    wp.
+    call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+    + by sim.
+    by auto => />.
+  rcondf{1} 1; first by auto; smt.
+  rcondf{2} 1; first by auto; smt.
+  wp.
+  call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
+  + by sim.
+  by auto => />.
+rcondf{1} 1; first by auto; smt.
+rcondf{2} 1; first by auto; smt.
+by auto => />.
+qed.
+
+equiv concrete_two_call_g2_exact_budgeted_o_sign_equiv :
+  ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+    (A, HAETAE_RO.FRO).O.sign ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign :
+  ={glob HAETAE_RO.FRO, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}.
+proof.
+proc.
+case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} <
+        signature_query_budget_count).
++ rcondt{1} 1; first by auto; smt.
+  rcondt{2} 1; first by auto; smt.
+  case (ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} = 0).
+  + rcondt{1} 2; first by auto; smt.
+    rcondt{2} 1; first by auto; smt.
+    rcondt{1} 9; first by auto; smt.
+    sim.
+  rcondf{1} 2; first by auto; smt.
+  rcondf{2} 1; first by auto; smt.
+  rcondf{1} 9; first by auto; smt.
+  sim.
+rcondf{1} 1; first by auto; smt.
+rcondf{2} 1; first by auto; smt.
+sim.
+qed.
+
+equiv concrete_two_call_g2_exact_budgeted_adversary_forge_equiv :
+  A(ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+      (A, HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+      (A, HAETAE_RO.FRO).O).forge ~
+  A(ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).AH,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+       HAETAE_RO.FRO).O).forge :
+  ={glob HAETAE_RO.FRO, glob A, arg} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}
+  ==>
+  ={glob HAETAE_RO.FRO, glob A, res} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+  ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+  ROExactHyperballPaperSimSampler.pk_current{1} =
+    ROExactHyperballPaperSimSampler.pk_current{2} /\
+  ROExactHyperballPaperSimSampler.sk_current{1} =
+    ROExactHyperballPaperSimSampler.sk_current{2}.
+proof.
+proc
+  (={glob HAETAE_RO.FRO} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.pk_current{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.transcripts{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.records{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.records{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_count{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.signing_count{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.adversary_hash_queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_expand_queries{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{2} /\
+   ROMInternalTranscriptBudgetedTwoCallHybridAsNMA.sampler_bad_prequery{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{2} /\
+   ROExactHyperballPaperSimSampler.pk_current{1} =
+     ROExactHyperballPaperSimSampler.pk_current{2} /\
+   ROExactHyperballPaperSimSampler.sk_current{1} =
+     ROExactHyperballPaperSimSampler.sk_current{2}) => //.
++ move=> />.
++ proc*.
+  call concrete_two_call_g2_exact_budgeted_ah_get_equiv.
+  by auto => />.
++ proc*.
+  call concrete_two_call_g2_exact_budgeted_o_sign_equiv.
+  by auto => />.
+qed.
+
+equiv concrete_two_call_g2_exact_budgeted_forge_equiv :
+  ROMInternalTranscriptBudgetedTwoCallG2AsNMA
+    (A, HAETAE_RO.FRO).forge ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).forge :
+  ={glob HAETAE_RO.FRO, glob A, arg} ==>
+  ={glob HAETAE_RO.FRO, glob A, res}.
+proof.
+proc.
+call concrete_two_call_g2_exact_budgeted_adversary_forge_equiv.
+inline ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init.
+by auto => />.
+qed.
+
+equiv concrete_two_call_g2_exact_budgeted_nma_equiv :
+  SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+    ROMInternalTranscriptBudgetedTwoCallG2AsNMA(A)).main ~
+  SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main :
+  ={glob HAETAE_RO.FRO, glob A} ==> ={res}.
+proof.
+proc.
+inline HAETAE(HAETAE_RO.FRO).verify
+       HAETAE(HAETAE_RO.FRO).kg.
+wp.
+call concrete_two_call_g2_exact_budgeted_forge_equiv.
+wp.
+call (: ={glob HAETAE_RO.FRO, arg} ==> ={glob HAETAE_RO.FRO, res}).
++ by sim.
+wp.
+rnd.
+wp.
+call (: ={glob HAETAE_RO.FRO} ==> ={glob HAETAE_RO.FRO}).
++ by sim.
+by auto => />; rewrite /keygen_internal.
 qed.
 
 lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting &m :

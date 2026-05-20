@@ -41,11 +41,11 @@ The key technical contributions are:
         Cooley--Tukey recursion for the negacyclic polynomial ring
         $\Z_q[X]/(X^{256}+1)$.
 
-  \item An \textbf{inverse NTT correctness} proof that tracks the
-        Montgomery scaling factor $R^{-1} \pmod{q}$ introduced by the
-        final output normalisation step, and establishes
-        $\op{invntt\_tomont} \circ \op{ntt} = \op{id}$ on valid coefficient
-        representations.
+  \item An \textbf{inverse NTT correctness} proof that tracks the final
+        normalisation by \(256^{-1}\) and the concrete Montgomery output
+        convention, where the exported inverse transform returns coefficients
+        represented with one factor of \(R\), as expected for
+        \texttt{invntt\_tomont}.
 
   \item A \textbf{Jasmin-to-EasyCrypt refinement} proof in
         \ec{RefJasminNTT.ec} connecting the extracted Jasmin semantics to the
@@ -56,25 +56,26 @@ The key technical contributions are:
   \item An \textbf{end-to-end statement} in \ec{NTTEndToEnd.ec} asserting
         that the \jasmin{} exported functions \jasm{poly\_ntt\_jazz} and
         \jasm{poly\_invntt\_jazz} compute exactly the abstract spectral NTT and
-        its inverse, bringing the entire verification chain under a single
-        top-level theorem.
+        its inverse, through two top-level Hoare statements for the forward
+        and inverse exported functions.
 \end{enumerate}
 
 \noindent
 The verification identifies a critical structural difference between the
 \haetae{} NTT and the MLKEM NTT: the former performs a \emph{complete}
-$256$-point negacyclic transform with bit-reversal exponent
-$\brev_8(s \bmod \ell)$, whereas the latter applies an incomplete
-$128$-point transform with exponent $\brev_8((s \bmod \ell) \cdot 2)$.
+$256$-point negacyclic transform with 8-bit bit-reversed twiddle indices,
+whereas the latter applies an incomplete $128$-point transform with a
+different exponent structure.
 This difference invalidates a naive reuse of existing MLKEM algebra lemmas
 and motivates new algebraic infrastructure developed in
 \ec{NTTFullAlgebra.ec}.
 
 \medskip
 \noindent
-All proofs are machine-checked in \easycrypt{} version~2024 on an x86-64
-Linux platform.  The complete development totals approximately 3\,500 lines of
-\easycrypt{} and 200 lines of \jasmin{} code.
+The scalar NTT verification compiles in \easycrypt{} version~2024 on an
+x86-64 Linux platform through the top-level \texttt{NTTEndToEnd.ec} file.
+The checked development totals approximately 8\,000 lines of \easycrypt{}
+and 245 lines of \jasmin{} support code.
 
 \vspace{1em}
 \noindent

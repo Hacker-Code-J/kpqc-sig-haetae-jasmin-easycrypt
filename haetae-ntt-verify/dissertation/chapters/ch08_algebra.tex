@@ -5,14 +5,14 @@
 \chapter{Algebraic NTT Infrastructure}
 \label{ch:algebra}
 
-\section{Overview of \texttt{NTTFullSpec.ec} and \texttt{NTTFullAlgebra.ec}}
+\section{Overview of the Algebraic Files}
 
 The abstract spectral NTT specification lives in two files:
 \begin{itemize}
   \item \texttt{NTTFullSpec.ec} (160 lines) defines the abstract evaluation
         maps \ec{full\_ntt} and \ec{full\_invntt} and states the main
         correctness lemmas.
-  \item \texttt{NTTFullAlgebra.ec} (1000+ lines) develops the algebraic
+  \item \texttt{NTTFullAlgebra.ec} (3085 lines) develops the algebraic
         machinery needed to prove those lemmas: primitive root properties,
         bit-reversal identities, and butterfly-stage decompositions.
 \end{itemize}
@@ -64,10 +64,10 @@ which are exactly the primitive roots.
 
 \begin{proof}
   For $i \ne j$: the sum is a geometric series with ratio
-  $r = \zeta_0^{2(i-j)}$.  Since $\zeta_0$ has order 512, $r$ is a
-  $256$th root of unity.  The exponent $2(i-j) \not\equiv 0 \pmod{256}$
-  (because $|i-j| < 256$, so $2|i-j| < 512$, and $2(i-j) \ne 0$).
-  Thus $r^{256} = \zeta_0^{512(i-j)} = 1$ and $r \ne 1$, so
+  $r = \zeta_0^{2(i-j)}$.  Since $\zeta_0$ has order 512, $r^{256}=1$.
+  Moreover $r \ne 1$, because $r=1$ would imply
+  $512 \mid 2(i-j)$, equivalently $256 \mid (i-j)$, impossible for
+  distinct $i,j \in \{0,\dots,255\}$.  Thus
   $\sum_{k=0}^{255} r^k = (r^{256} - 1)/(r-1) = 0$.
 
   For $i = j$: each term is $\zeta_0^0 = 1$, and there are 256 terms.
@@ -106,16 +106,26 @@ op bsrev8 (k : int) : int =
 \label{lem:brev_invol}
 \end{lemma}
 
-\begin{lemma}[Bit-reversal and halving]
-  For $k \in [1, 256)$ and $\ell = 2^s$ (a power of 2 with $s \le 7$):
+\begin{lemma}[Bit-reversal stage-index identities]
+  The checked proof uses several stage-specific identities, including:
   \[
-    \brev_8(k \bmod \ell) = \brev_8(k) / (256 / \ell) \cdot (256 / \ell) + \brev_8(k) \bmod (256 / \ell).
+    \brev_8(2^k + i) = 2^{7-k} + \brev_8(i)
+    \quad (0 \le k < 8,\; 0 \le i < 2^k),
   \]
-\label{lem:brev_halve}
+  and
+  \[
+    \brev_8(2^k + ks) =
+      (2 \cdot \brev_k(ks) + 1) \cdot 2^{7-k}
+    \quad (0 \le ks < 2^k).
+  \]
+\label{lem:brev_stage}
 \end{lemma}
 
-This lemma, though technical, is essential for connecting the loop index $k$
-to the spectral index $\brev_8(k)$.
+These identities, together with the address lemmas
+\ec{bsrev\_stage\_pair\_low}, \ec{bsrev\_stage\_pair\_high}, and
+\ec{bsrev\_zbase\_index}, are what connect loop counters and array addresses
+to the spectral exponents.  The proof does not rely on a generic
+``halving'' formula for \(\brev_8(k \bmod \ell)\).
 
 \subsection{Bit-Reversal and Twiddle Factor Indexing}
 
@@ -137,55 +147,51 @@ to the spectral index $\brev_8(k)$.
 
 \subsection{Partial NTT}
 
-\begin{definition}[Stage-$s$ partial NTT]
-  For $0 \le s \le 8$, the stage-$s$ partial NTT of a vector
-  $f \in \F_q^{256}$ is defined by:
+\begin{definition}[Segment-indexed partial NTT]
+  The checked specification does not use a congruence-class definition
+  \(\NTT_s(f)[i]\).  Instead, \texttt{NTTFullSpec.ec} defines a
+  segment-indexed partial sum:
   \[
-    \NTT_s(f)[i] = \sum_{j \equiv i \pmod{2^s}} f[j] \cdot
-    \zeta_0^{\brev_8(\floor{i/2^s}) \cdot j},\quad i = 0, \dots, 255.
+    \op{partial\_ntt}(p,\ell,\mathit{start},\mathit{bsj}) =
+      \sum_{s=0}^{\ell-1}
+        \zeta_0^{(2\mathit{start}+1)\brev_8(s)}
+        \cdot p[\brev_8(\mathit{bsj}\cdot \ell+s)].
   \]
 \label{def:partial_ntt}
 \end{definition}
 
-The full NTT corresponds to $\NTT_8$ (all 8 stages completed).  The identity
-$\NTT_0(f) = f$ holds trivially (the empty product is 1).
+The full NTT specification states that for every
+\(\mathit{start}\in[0,256)\),
+\[
+  r[\brev_8(\mathit{start})] =
+    \op{partial\_ntt}(p,256,\mathit{start},0).
+\]
+This formulation has the correct base cases and matches the way the loop
+proof grows the transformed segment length.
 
 \subsection{Butterfly Stage Lemma}
 
 \begin{lemma}[Single-stage butterfly correctness]
-  For all $s \in \{0, \dots, 7\}$ and $f \in \F_q^{256}$:
+  For each forward stage, applying all butterflies at the current half-length
+  transforms the collection of old segment-indexed partial sums into the
+  collection for the next segment length:
   \[
-    \NTT_{s+1}(f) = \op{butterfly\_stage}(s, \NTT_s(f)),
+    \op{partial\_ntt}(\cdot,2^k,\cdot,\cdot)
+    \quad\Longrightarrow\quad
+    \op{partial\_ntt}(\cdot,2^{k+1},\cdot,\cdot).
   \]
-  where $\op{butterfly\_stage}(s, a)$ applies one complete pass of butterflies
-  with half-length $\ell = 2^{7-s}$.
 \label{lem:butterfly_stage}
 \end{lemma}
 
 \begin{proof}
-  Fix an index $i$ and let $g = \floor{i / 2^{s+1}}$ (the group number),
-  $r = i \bmod 2^{s+1}$ (the position within the group),
-  $r_0 = r \bmod 2^s$ (the low-half position).
-
-  The butterfly for group $g$ uses twiddle factor $w = \zeta_0^{\brev_8(2^s + g)}$.
-
-  Case $r < 2^s$ (upper butterfly input):
-  \begin{align*}
-    \op{butterfly\_stage}(s, a)[i]
-    &= a[i] + w \cdot a[i + 2^s] \\
-    &= \sum_{j \equiv r_0 \pmod{2^s}} f[j] \zeta_0^{\brev_8(g) j}
-     + \zeta_0^{\brev_8(2^s+g)} \sum_{j \equiv r_0 \pmod{2^s}} f[j+2^s] \zeta_0^{\brev_8(g) j}.
-  \end{align*}
-  (By the inductive hypothesis $\NTT_s(f)[i] = \sum_{j \equiv i \pmod{2^s}} f[j]
-  \zeta_0^{\brev_8(\floor{i/2^s})j}$.)
-
-  Combining the sums over $j$ and $j + 2^s$, and using the identity
-  $\brev_8(2^s + g) = \brev_8(g)/2 + 2^{7-s} \cdot (g \bmod 2^s)$
-  (from \Cref{lem:brev_halve}), one can verify that the result equals
-  $\NTT_{s+1}(f)[i]$ by direct algebraic manipulation.
-
-  The case $r \ge 2^s$ is symmetric.  The full algebraic proof in
-  \easycrypt{} uses the \ec{ring} tactic after reducing to finite sums.
+  The proof splits each target partial sum into its low and high halves using
+  \ec{partial\_ntt\_split\_low} and \ec{partial\_ntt\_split\_high}.  The
+  bit-reversal address lemmas show that the two source array cells used by
+  the imperative butterfly are exactly the two old partial sums.  The
+  twiddle identity \ec{zetas\_stage} supplies the factor
+  \(\zeta_0^{\brev_8(2^k+g)}\).  The remaining equalities are field-ring
+  rearrangements, discharged in the checked proof by the \ec{ring} tactic
+  and finite-sum rewrite lemmas.
 \end{proof}
 
 \subsection{Full NTT Correctness}
@@ -194,7 +200,7 @@ $\NTT_0(f) = f$ holds trivially (the empty product is 1).
   The imperative procedure \ec{NTT.ntt} computes the full NTT:
   \[
     \forall a \in \Z_q^{256}.\;
-    \ec{NTT.ntt}(a) = \NTT_8(a) = \op{full\_ntt}(a).
+    \ec{NTT.ntt}(a) = \op{full\_ntt}(a).
   \]
 \label{thm:ntt_correct}
 \end{theorem}
@@ -202,12 +208,14 @@ $\NTT_0(f) = f$ holds trivially (the empty product is 1).
 \begin{proof}
   By induction on the outer loop iteration, using \Cref{lem:butterfly_stage}
   as the inductive step.  The loop invariant asserts that after $s$ outer
-  loop iterations, the array equals $\NTT_s$ of the input.
+  loop iterations, the array satisfies the appropriate segment-indexed
+  \ec{partial\_ntt\_spec} predicate for the input.
 
-  The base case ($s = 0$): the array is unchanged, matching $\NTT_0 = \op{id}$.
-  The inductive step: applying the butterfly stage transforms $\NTT_s$ to
-  $\NTT_{s+1}$ by \Cref{lem:butterfly_stage}.
-  The final case ($s = 8$): $\NTT_8 = \op{full\_ntt}$ by \Cref{def:full_ntt}.
+  The base case is the length-1 segment specification, where each sum has one
+  term.  The inductive step applies \Cref{lem:butterfly_stage} to double the
+  segment length represented by the invariant.
+  The final case is the length-256 segment specification, which is converted
+  to \ec{full\_ntt} by \ec{full\_ntt\_spec\_imp} and \Cref{def:full_ntt}.
 \end{proof}
 
 \section{Inverse NTT Algebra}
@@ -221,10 +229,10 @@ $\NTT_0(f) = f$ holds trivially (the empty product is 1).
 \label{def:full_intt2}
 \end{definition}
 
-\begin{theorem}[Inverse NTT correctness]
+\begin{proposition}[Pen-and-paper inverse identity]
   $\op{full\_invntt}(\op{full\_ntt}(p)) = p$ for all $p \in \Z_q^{256}$.
 \label{thm:intt_correct}
-\end{theorem}
+\end{proposition}
 
 \begin{proof}
   Substituting the definition of $\op{full\_ntt}$:
@@ -244,6 +252,12 @@ $\NTT_0(f) = f$ holds trivially (the empty product is 1).
 
   Thus $\INTT(\NTT(p))[i] = 256^{-1} \cdot p[i] \cdot 256 = p[i]$.
 \end{proof}
+
+This proposition records the mathematical inverse identity used to interpret
+the transform.  The checked EasyCrypt files in this artifact prove the
+forward and inverse loop refinements against \ec{full\_ntt} and
+\ec{full\_invntt} separately; they do not currently include a standalone
+machine-checked lemma named \ec{full\_invntt\_full\_ntt}.
 
 \section{The Critical Difference from MLKEM}
 

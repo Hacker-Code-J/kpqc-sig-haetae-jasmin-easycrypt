@@ -12,7 +12,7 @@ The verification of the \haetae{} NTT is structured as a
 an implementation or specification at one abstraction level to a
 specification at the next.  \Cref{fig:arch} illustrates the overall structure.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
   box/.style = {rectangle, draw, rounded corners, minimum width=8cm,
@@ -65,8 +65,7 @@ assembly but with structured control flow.  The key files are:
         \jasm{inline fn \_poly\_invntt}.
 
   \item \texttt{reduce.jinc}: The Montgomery reduction primitive
-        \jasm{inline fn \_\_montgomery\_reduce} and the derived
-        \jasm{inline fn \_\_fqmul}.
+        \jasm{\_\_montgomery\_reduce} and the derived \jasm{\_\_fqmul}.
 
   \item \texttt{zetas.jinc}: The 256-element twiddle-factor table as a
         global constant.
@@ -95,8 +94,8 @@ structure.  A fragment is shown in \Cref{lst:extract}.
   caption={Fragment of extracted procedure in Hpoly\_extract.ec},
   label={lst:extract}]
 module M = {
-  proc poly_ntt_jazz (rp : W32.t Array256.t) :
-      W32.t Array256.t = {
+  proc poly_ntt_jazz (rp : BArray1024.t) :
+      BArray1024.t = {
     var zeta : W32.t;
     var t    : W32.t;
     var len  : int;
@@ -115,14 +114,15 @@ All subsequent proof obligations are stated with respect to this module.
 
 The file \texttt{NTT\_Fq.ec} contains hand-written \easycrypt{} procedures
 that closely mirror the reference C implementation.  Unlike the extracted
-module, these procedures work with abstract integer arrays (type
-\ec{Array256.t} with \ec{int} elements) rather than machine-word arrays.
+module, these procedures work with abstract coefficient arrays over \(\F_q\)
+(type \ec{coeff Array256.t}) rather than machine-word arrays.
 
-The translation from machine words to integers is captured by the
-\emph{word-to-coefficient} relation: an array $\mathtt{rp} : \ec{W32.t Array256.t}$
-corresponds to a coefficient array $\mathtt{a} : \ec{int Array256.t}$ if
-$\mathtt{rp}[i] = W32.\mathrm{of\_int}(\mathtt{a}[i])$ for all $i$, i.e., if
-the 32-bit word encoding of each coefficient is faithful.
+The translation from machine words to field coefficients is captured by the
+\emph{word-to-coefficient} relation \ec{poly\_repr}: a concrete
+\ec{BArray1024.t} word array corresponds to a coefficient array when each
+loaded 32-bit word maps to the same \(\F_q\) element.  The strengthened
+\ec{poly\_repr\_bound} predicate also records the signed bit-width bound
+required for word arithmetic.
 
 The imperative specification exposes the full loop structure, making it
 amenable to Hoare-style invariant reasoning.
@@ -154,26 +154,29 @@ NTT is defined as a linear evaluation map over $\F_q^{256}$.
 \section{End-to-End Composition}
 
 The file \texttt{NTTEndToEnd.ec} imports all three layers and states the
-main correctness theorems as pRHL judgements relating the extracted \jasmin{}
-procedures to the abstract NTT map:
+main correctness theorems as Hoare judgements for the exported \jasmin{}
+procedures:
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={End-to-end theorem statement in NTTEndToEnd.ec},
   label={lst:e2e}]
-lemma haetae_jasmin_ntt_correct
-  (rp : W32.t Array256.t) (a : int Array256.t) :
-  (forall i, 0 <= i < 256 =>
-     W32.to_sint rp.[i] = a.[i] /\ -2^15 < a.[i] < 2^15) =>
-  hoare[M.poly_ntt_jazz :
-    arg = rp ==>
-    let rp' = res in
-    forall i, 0 <= i < 256 =>
-      W32.to_sint rp'.[i] = NTTFullSpec.full_ntt a i].
+lemma haetae_jasmin_ntt_correct p :
+  hoare [Hpoly_extract.M.poly_ntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res (NTTFullSpec.full_ntt p) 24].
+
+lemma haetae_jasmin_invntt_correct p :
+  hoare [Hpoly_extract.M.poly_invntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res
+      (NTT_Fq.array256_mont (NTTFullSpec.full_invntt p)) 16].
 \end{lstlisting}
 
-This theorem statement captures the full vertical refinement: starting from
-a \jasmin{} export whose input array encodes a polynomial with 16-bit
-coefficients, the output encodes exactly the abstract spectral NTT.
+These theorem statements capture the vertical refinement: starting from a
+\jasmin{} export whose input array satisfies \ec{poly\_repr\_bound}, the
+forward output represents the abstract spectral NTT with a 24-bit bound, and
+the inverse output represents the abstract inverse NTT in Montgomery form
+with a 16-bit bound.
 
 \section{Proof Methodology}
 
@@ -205,13 +208,17 @@ conjunction of:
 The refinement from the extracted module to the imperative specification
 uses pRHL judgements of the form
 \[
-  \Pr[\ec{Extracted.ntt(rp)} \to \ec{rp'}] =
-  \Pr[\ec{NTT\_Fq.ntt(a)} \to \ec{a'}]
-  \quad \text{given } \ec{rp} \sim \ec{a},
+\begin{aligned}
+  &\Pr[\ec{Hpoly\_extract.M.\_poly\_ntt(rp)} \to \ec{rp'}] \\
+  &\quad =
+    \Pr[\ec{NTT\_Fq.NTT.ntt(a, zetas)} \to \ec{a'}],
+    \quad \text{given } \ec{poly\_repr\_bound(rp,a,16)}.
+\end{aligned}
 \]
-where $\ec{rp} \sim \ec{a}$ means that the word array \ec{rp} and the integer
-array \ec{a} encode the same coefficients.  Since both procedures are
-deterministic, this reduces to a functional equivalence assertion.
+where \ec{poly\_repr\_bound} relates the concrete word array \ec{rp} to the
+abstract field array \ec{a} and records the signed bit-width bound.  Since
+both procedures are deterministic, this reduces to a functional equivalence
+assertion.
 
 \subsection{Field-Theory Automation}
 
@@ -223,12 +230,13 @@ arithmetic goals.
 
 \section{File Dependency Graph}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-  node distance=1.5cm and 2.5cm,
+  scale=0.95, transform shape,
+  node distance=1.35cm and 2.25cm,
   box/.style={rectangle, draw, rounded corners, font=\ttfamily\scriptsize,
-              minimum width=3.5cm, minimum height=0.8cm, align=center},
+              minimum width=3.25cm, minimum height=0.8cm, align=center},
   arr/.style={-Stealth}
 ]
 \node[box] (fq)      {Fq.ec};
@@ -279,7 +287,11 @@ the same proof meaning: some files provide representation infrastructure, some
 state executable procedures, and the last files compose already-checked
 judgements into the final theorem.
 
-\begin{longtable}{p{0.22\textwidth}p{0.27\textwidth}p{0.40\textwidth}}
+\small
+\begin{longtable}{
+  >{\raggedright\arraybackslash}p{0.28\textwidth}
+  >{\raggedright\arraybackslash}p{0.22\textwidth}
+  >{\raggedright\arraybackslash}p{0.39\textwidth}}
 \caption{Relationships between the EasyCrypt source files}
 \label{tab:ec_file_relationships}\\
 \toprule
@@ -376,6 +388,7 @@ Imports \texttt{RefJasminNTT.ec}, \texttt{NTTFullAlgebra.ec},
 lemmas into the final forward and inverse Jasmin NTT correctness statements. \\
 
 \end{longtable}
+\normalsize
 
 In short, the proof has two independent bridges that meet in
 \texttt{NTTEndToEnd.ec}.  The concrete bridge is

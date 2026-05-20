@@ -5,6 +5,7 @@ require import HAETAE_Assumptions.
 require import HAETAE_Transcript.
 require import HAETAE_Reductions.
 require import HAETAE_Rejection HAETAE_ROM HAETAE_ROM_Programming.
+require Hybrid.
 
 theory HAETAE_HopGames.
 
@@ -6705,6 +6706,126 @@ by apply
      &m).
 qed.
 
+(* Restricted sampler/lazy-ROM lifting.
+   These lemmas are machine-checked only for stateful sampler postconditions Q
+   that can be sandwiched around a pure returned-sample predicate p for the
+   actual left and right sampler executions.  The framing premises are the
+   formal place where suffix-measurability and ROM-table/counter preservation
+   must be proved; the lemmas below do not claim an arbitrary coupling for
+   predicates that inspect the sampler-expand ROM entry in a way that exploits
+   the attempt-side correlation. *)
+lemma concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_fresh_restricted_state_loss
+    seed_coins m ctx
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_expand_query seed_coins \notin HAETAE_RO.FRO.m{m} =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss fresh sk_eq left_frame right_frame.
+have sample_loss_p :=
+  concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_fresh_loss
+    seed_coins m ctx p &m sample_loss fresh sk_eq.
+by smt().
+qed.
+
+lemma concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_restricted_state_loss
+    seed_coins m ctx
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool)
+    hash_qs sampler_qs bad &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered HAETAE_RO.FRO.m{m} hash_qs sampler_qs =>
+  ! (bad \/
+     sampler_expand_query seed_coins \in hash_qs \/
+     sampler_expand_query seed_coins \in sampler_qs) =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean sk_eq left_frame right_frame.
+have sample_loss_p :=
+  concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_loss
+    seed_coins m ctx p hash_qs sampler_qs bad &m
+    sample_loss covered clean sk_eq.
+by smt().
+qed.
+
+lemma concrete_budgeted_o_sign_sample_with_seed_clean_restricted_state_loss_surface
+    seed_coins m ctx
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m : p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean sk_eq left_frame right_frame.
+have sample_loss_p :=
+  concrete_budgeted_o_sign_sample_with_seed_clean_loss_surface
+    seed_coins m ctx p &m sample_loss covered clean sk_eq.
+by smt().
+qed.
+
 lemma concrete_budgeted_o_sign_old_log_sample_with_seed_clean_loss_surface
     seed_coins m ctx (p : paper_sim_signature_sample -> bool)
     old_hash_qs old_sampler_qs old_bad &m :
@@ -7284,10 +7405,29 @@ have hbudgeted :
 by smt.
 qed.
 
-(* Coarse fallback. The intended non-vacuous replacement is the
-   push-forward of structural_to_exact_hyperball_attempt_loss_obligation
-   through paper_sim_sample_from_rejection_attempt, lifted across the NMA
-   wrapper once the lazy-ROM sampler law is exposed. *)
+(* Coarse fallback.  The theorem below is machine-checked, but it is not a
+   non-vacuous sampler-comparison proof: it closes from probability boundedness
+   and rejection_sampling_loss_term_ge1.  A replacement should prove the same
+   NMA-level inequality from structural_to_exact_hyperball_paper_sample_loss_obligation
+   by lifting the one-call push-forward through the signing oracle and adversary.
+
+   Missing non-vacuous proof obligations:
+   - unbudgeted NMA lifting:
+       Pr[UF_NMA(... ROSigningAttemptPaperSimSampler ...).main : res]
+       <= Pr[UF_NMA(... ROExactHyperballPaperSimSampler ...).main : res]
+          + rejection_sampling_loss_term
+     without using rejection_sampling_loss_term_ge1;
+   - or a budgeted clean-event route:
+       Pr[UF_NMA(... Budgeted ... ROSigningAttempt ...).main :
+            res /\ !sampler_bad_prequery]
+       <= Pr[UF_NMA(... Budgeted ... ROExactHyperball ...).main : res]
+          + rom_signature_query_budget * rejection_sampling_loss_term,
+     plus exact/monotone budgeted-to-unbudgeted adapters.
+
+   Existing one-call facts such as
+   concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_fresh_loss
+   and the lazy-ROM sampler law supply the per-call input, not this NMA-level
+   adaptive lifting theorem. *)
 lemma rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound &m :
   Pr[SIG.UF_NMA(H, HAETAE,
        ROMInternalTranscriptPaperSimAsNMA
@@ -7322,6 +7462,3694 @@ declare module A <: SIG.Adversary {-HAETAE_RO.FRO,
                                    -ROMInternalTranscriptBudgetedPaperSimAsNMA,
                                    -ROSigningAttemptPaperSimSampler,
                                    -ROExactHyperballPaperSimSampler}.
+
+local clone Hybrid as BudgetedSignHybrid with
+  type input <- SIG.query,
+  type output <- signature,
+  type inleaks <- ro_query,
+  type outleaks <- ro_output,
+  type outputA <- bool,
+  op q <- signature_query_budget_count
+proof q_ge0 by rewrite /signature_query_budget_count
+proof *.
+
+local module BudgetedSignHybridOrclb : BudgetedSignHybrid.Orclb = {
+  proc leaks(q : ro_query) : ro_output = {
+    var y : ro_output;
+
+    y <@ ROMInternalTranscriptBudgetedPaperSimAsNMA
+           (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+            HAETAE_RO.FRO).AH.get(q);
+    return y;
+  }
+
+  proc orclL(qry : SIG.query) : signature = {
+    var m : message;
+    var ctx : context;
+    var seed_coins : random_coins;
+    var smp : paper_sim_signature_sample;
+    var highbits : polyveck;
+    var lowbits : poly;
+    var mu : crh;
+    var ro_y : ro_output;
+    var sig : signature;
+    var tr : transcript;
+    var old_adversary_hash_queries : ro_query list;
+    var old_sampler_expand_queries : ro_query list;
+    var old_sampler_bad_prequery : bool;
+
+    m <- qry.`1;
+    ctx <- qry.`2;
+    old_adversary_hash_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries;
+    old_sampler_expand_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries;
+    old_sampler_bad_prequery <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery;
+    seed_coins <$ drandom_coins;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <-
+      old_sampler_bad_prequery \/
+      sampler_expand_query seed_coins \in old_adversary_hash_queries \/
+      sampler_expand_query seed_coins \in old_sampler_expand_queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <-
+      sampler_expand_query seed_coins :: old_sampler_expand_queries;
+    smp <@ ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+      (seed_coins, m, ctx);
+    ro_y <@ HAETAE_RO.FRO.get
+      (message_hash_query
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current ctx m);
+    mu <- ro_message_hash ro_y;
+    highbits <- paper_sim_commitment_highbits haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+    ro_y <@ HAETAE_RO.FRO.get
+      (challenge_hash_query haetae_mode highbits lowbits mu);
+    sig <- paper_sim_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    tr <- transcript_of_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx sig;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <-
+      (m, ctx) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <-
+      tr :: ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <-
+      (m, ctx, sig, tr) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.records;
+    return sig;
+  }
+
+  proc orclR(qry : SIG.query) : signature = {
+    var m : message;
+    var ctx : context;
+    var seed_coins : random_coins;
+    var smp : paper_sim_signature_sample;
+    var highbits : polyveck;
+    var lowbits : poly;
+    var mu : crh;
+    var ro_y : ro_output;
+    var sig : signature;
+    var tr : transcript;
+    var old_adversary_hash_queries : ro_query list;
+    var old_sampler_expand_queries : ro_query list;
+    var old_sampler_bad_prequery : bool;
+
+    m <- qry.`1;
+    ctx <- qry.`2;
+    old_adversary_hash_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries;
+    old_sampler_expand_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries;
+    old_sampler_bad_prequery <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery;
+    seed_coins <$ drandom_coins;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <-
+      old_sampler_bad_prequery \/
+      sampler_expand_query seed_coins \in old_adversary_hash_queries \/
+      sampler_expand_query seed_coins \in old_sampler_expand_queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <-
+      sampler_expand_query seed_coins :: old_sampler_expand_queries;
+    smp <@ ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+      (seed_coins, m, ctx);
+    ro_y <@ HAETAE_RO.FRO.get
+      (message_hash_query
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current ctx m);
+    mu <- ro_message_hash ro_y;
+    highbits <- paper_sim_commitment_highbits haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+    ro_y <@ HAETAE_RO.FRO.get
+      (challenge_hash_query haetae_mode highbits lowbits mu);
+    sig <- paper_sim_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    tr <- transcript_of_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx sig;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <-
+      (m, ctx) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <-
+      tr :: ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <-
+      (m, ctx, sig, tr) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.records;
+    return sig;
+  }
+}.
+
+local module BudgetedSignHybridGame
+  (Ob : BudgetedSignHybrid.Orclb)
+  (LR : BudgetedSignHybrid.Orcl) = {
+  module AH = {
+    proc get(q : ro_query) : ro_output = {
+      var y : ro_output;
+
+      y <@ Ob.leaks(q);
+      return y;
+    }
+  }
+
+  module O = {
+    proc sign(m : message, ctx : context) : signature = {
+      var sig : signature;
+      var smp : paper_sim_signature_sample;
+
+      if (ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <
+            signature_query_budget_count) {
+        if (ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 0) {
+          ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <- 1;
+        } else {
+          ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <-
+            signature_query_budget_count;
+        }
+        sig <@ LR.orcl((m, ctx));
+      } else {
+        ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <-
+          signature_query_budget_count;
+        smp <- paper_sim_abort_fallback_sample haetae_mode;
+        sig <- paper_sim_signature haetae_mode
+          ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+      }
+      return sig;
+    }
+  }
+
+  module Adv = A(AH, O)
+
+  proc main() : bool = {
+    var pk : pkey;
+    var sk : skey;
+    var m : message;
+    var ctx : context;
+    var sig : signature;
+    var ok : bool;
+
+    HAETAE_RO.FRO.init();
+    (pk, sk) <@ HAETAE(HAETAE_RO.FRO).kg();
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current <- pk;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <- [];
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <- [];
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <- [];
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count <- 0;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <- 0;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries <- [];
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <- [];
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <- false;
+    ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init(pk);
+    ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init(pk);
+    (m, ctx, sig) <@ Adv.forge(pk);
+    ok <@ HAETAE(HAETAE_RO.FRO).verify(pk, m, ctx, sig);
+    return ok;
+  }
+}.
+
+local lemma budgeted_sign_hybrid_counted_sign_preserves_count_bound
+    (O <: BudgetedSignHybrid.Orcl
+          {-BudgetedSignHybrid.Count, -BudgetedSignHybridGame}) :
+  hoare[BudgetedSignHybridGame(
+          BudgetedSignHybridOrclb, BudgetedSignHybrid.OrclCount(O)).O.sign :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+if.
++ inline BudgetedSignHybrid.OrclCount(O).orcl BudgetedSignHybrid.Count.incr.
+  wp.
+  call (_: true).
+  by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                      /signature_query_budget_count; smt.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count; smt.
+qed.
+
+local lemma budgeted_sign_hybrid_fro_get_preserves_count_bound :
+  hoare[HAETAE_RO.FRO.get :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+wp.
+rnd.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count;
+  smt(ro_output_distribution_lossless).
+qed.
+
+local lemma budgeted_sign_hybrid_rom_budgeted_hash_get_preserves_count_bound :
+  hoare[ROMInternalTranscriptBudgetedPaperSimAsNMA
+          (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+           HAETAE_RO.FRO).AH.get :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+if.
++ wp.
+  call budgeted_sign_hybrid_fro_get_preserves_count_bound.
+  by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                      /signature_query_budget_count;
+    smt.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count; smt.
+qed.
+
+local lemma budgeted_sign_hybrid_orclb_leaks_preserves_count_bound :
+  hoare[BudgetedSignHybridOrclb.leaks :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+call budgeted_sign_hybrid_rom_budgeted_hash_get_preserves_count_bound.
+by auto.
+qed.
+
+local lemma budgeted_sign_hybrid_hash_get_preserves_count_bound
+    (O <: BudgetedSignHybrid.Orcl
+          {-BudgetedSignHybrid.Count, -BudgetedSignHybridGame}) :
+  hoare[BudgetedSignHybridGame(
+          BudgetedSignHybridOrclb, BudgetedSignHybrid.OrclCount(O)).AH.get :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+call budgeted_sign_hybrid_orclb_leaks_preserves_count_bound.
+by auto.
+qed.
+
+local lemma budgeted_sign_hybrid_adversary_preserves_count_bound
+    (O <: BudgetedSignHybrid.Orcl
+          {-BudgetedSignHybrid.Count, -BudgetedSignHybridGame}) :
+  hoare[BudgetedSignHybridGame(
+          BudgetedSignHybridOrclb, BudgetedSignHybrid.OrclCount(O)).Adv.forge :
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc
+  (0 <= BudgetedSignHybrid.Count.c /\
+   BudgetedSignHybrid.Count.c <=
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+   budgeted_paper_sim_signing_count_discipline
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count) => //.
++ move=> />.
++ proc*.
+  call (budgeted_sign_hybrid_hash_get_preserves_count_bound O).
+  by auto.
+proc*.
+call (budgeted_sign_hybrid_counted_sign_preserves_count_bound O).
+by auto.
+qed.
+
+local lemma budgeted_sign_hybrid_game_main_preserves_count_bound
+    (O <: BudgetedSignHybrid.Orcl
+          {-BudgetedSignHybrid.Count, -BudgetedSignHybridGame}) :
+  hoare[BudgetedSignHybridGame(
+          BudgetedSignHybridOrclb, BudgetedSignHybrid.OrclCount(O)).main :
+    BudgetedSignHybrid.Count.c = 0 ==>
+    0 <= BudgetedSignHybrid.Count.c /\
+    BudgetedSignHybrid.Count.c <=
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count].
+proof.
+proc.
+wp.
+inline HAETAE(HAETAE_RO.FRO).verify.
+wp.
+call (budgeted_sign_hybrid_adversary_preserves_count_bound O).
+inline ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init.
+inline ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init.
+wp.
+inline HAETAE(HAETAE_RO.FRO).kg.
+wp.
+inline HAETAE_RO.FRO.get.
+wp.
+rnd.
+wp.
+rnd.
+inline HAETAE_RO.FRO.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count;
+  smt(seed_distribution_lossless ro_output_distribution_lossless).
+qed.
+
+local lemma budgeted_sign_hybrid_A_call
+    (O <: BudgetedSignHybrid.Orcl
+          {-BudgetedSignHybrid.Count, -BudgetedSignHybridGame}) :
+  hoare[
+    BudgetedSignHybrid.Orcln
+      (BudgetedSignHybridGame(BudgetedSignHybridOrclb), O).main :
+    true ==> BudgetedSignHybrid.Count.c <= signature_query_budget_count].
+proof.
+proc.
+wp.
+call (budgeted_sign_hybrid_game_main_preserves_count_bound O).
+inline BudgetedSignHybrid.Count.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count; smt.
+qed.
+
+(* Concrete Hybrid_restr implementation spike.
+   BudgetedSignHybridOrclb and BudgetedSignHybridGame type-check the first
+   intended encoding, and budgeted_sign_hybrid_A_call proves its query-count
+   side condition.  Direct use of BudgetedSignHybrid.Hybrid_restr is nevertheless
+   blocked by a module/global restriction: BudgetedSignHybridGame and
+   BudgetedSignHybridOrclb intentionally share HAETAE_RO.FRO.m, sampler state,
+   and the ROMInternalTranscriptBudgetedPaperSimAsNMA globals.
+
+   The disjoint wrapper below tests the narrow refactor suggested by that
+   failure.  Setup and AH.get are exposed through Orclb.leaks, orclL/orclR own
+   the shared ROM/sampler/transcript state, and the AdvOrclb game owns only its
+   local hybrid budget gate. *)
+
+type budgeted_sign_hybrid_leak_query =
+  [ BudgetedSignHybridSetup
+  | BudgetedSignHybridHash of ro_query ].
+
+type budgeted_sign_hybrid_leak_output =
+  [ BudgetedSignHybridSetupOut of (pkey * skey)
+  | BudgetedSignHybridHashOut of ro_output ].
+
+op budgeted_sign_hybrid_default_keypair : pkey * skey =
+  keygen_internal haetae_mode [].
+
+op budgeted_sign_hybrid_query_ro
+   (q : budgeted_sign_hybrid_leak_query) : ro_query =
+  with q = BudgetedSignHybridHash ro_q => ro_q
+  with q = BudgetedSignHybridSetup => matrix_expand_query haetae_mode [].
+
+op budgeted_sign_hybrid_output_ro
+   (y : budgeted_sign_hybrid_leak_output) : ro_output =
+  with y = BudgetedSignHybridHashOut ro_y => ro_y
+  with y = BudgetedSignHybridSetupOut _ => ro_output_zero.
+
+op budgeted_sign_hybrid_output_keypair
+   (y : budgeted_sign_hybrid_leak_output) : pkey * skey =
+  with y = BudgetedSignHybridSetupOut kp => kp
+  with y = BudgetedSignHybridHashOut _ => budgeted_sign_hybrid_default_keypair.
+
+local clone Hybrid as BudgetedSignHybridDisjoint with
+  type input <- SIG.query,
+  type output <- signature,
+  type inleaks <- budgeted_sign_hybrid_leak_query,
+  type outleaks <- budgeted_sign_hybrid_leak_output,
+  type outputA <- bool,
+  op q <- signature_query_budget_count
+proof q_ge0 by rewrite /signature_query_budget_count
+proof *.
+
+local module BudgetedSignHybridDisjointOrclb
+  : BudgetedSignHybridDisjoint.Orclb = {
+  proc leaks(q : budgeted_sign_hybrid_leak_query)
+      : budgeted_sign_hybrid_leak_output = {
+    var y : budgeted_sign_hybrid_leak_output;
+    var ro_q : ro_query;
+    var ro_y : ro_output;
+    var pk : pkey;
+    var sk : skey;
+
+    if (q = BudgetedSignHybridSetup) {
+      HAETAE_RO.FRO.init();
+      (pk, sk) <@ HAETAE(HAETAE_RO.FRO).kg();
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries <- [];
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <- [];
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <- false;
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count <- 0;
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <- 0;
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current <- pk;
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <- [];
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <- [];
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.records <- [];
+      ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init(pk);
+      ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init(pk);
+      y <- BudgetedSignHybridSetupOut (pk, sk);
+    } else {
+      ro_q <- budgeted_sign_hybrid_query_ro q;
+      ro_y <@
+        ROMInternalTranscriptBudgetedPaperSimAsNMA
+          (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+              HAETAE_RO.FRO).AH.get(ro_q);
+      y <- BudgetedSignHybridHashOut ro_y;
+    }
+
+    return y;
+  }
+
+  proc orclL(qry : SIG.query) : signature = {
+    var m : message;
+    var ctx : context;
+    var seed_coins : random_coins;
+    var smp : paper_sim_signature_sample;
+    var highbits : polyveck;
+    var lowbits : poly;
+    var mu : crh;
+    var ro_y : ro_output;
+    var sig : signature;
+    var tr : transcript;
+    var old_adversary_hash_queries : ro_query list;
+    var old_sampler_expand_queries : ro_query list;
+    var old_sampler_bad_prequery : bool;
+
+    m <- qry.`1;
+    ctx <- qry.`2;
+    if (ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 0) {
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <- 1;
+    } else {
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <-
+        signature_query_budget_count;
+    }
+    old_adversary_hash_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries;
+    old_sampler_expand_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries;
+    old_sampler_bad_prequery <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery;
+    seed_coins <$ drandom_coins;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <-
+      old_sampler_bad_prequery \/
+      sampler_expand_query seed_coins \in old_adversary_hash_queries \/
+      sampler_expand_query seed_coins \in old_sampler_expand_queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <-
+      sampler_expand_query seed_coins :: old_sampler_expand_queries;
+    smp <@ ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+      (seed_coins, m, ctx);
+    ro_y <@ HAETAE_RO.FRO.get
+      (message_hash_query
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current ctx m);
+    mu <- ro_message_hash ro_y;
+    highbits <- paper_sim_commitment_highbits haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+    ro_y <@ HAETAE_RO.FRO.get
+      (challenge_hash_query haetae_mode highbits lowbits mu);
+    sig <- paper_sim_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    tr <- transcript_of_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx sig;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <-
+      (m, ctx) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <-
+      tr :: ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <-
+      (m, ctx, sig, tr) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.records;
+    return sig;
+  }
+
+  proc orclR(qry : SIG.query) : signature = {
+    var m : message;
+    var ctx : context;
+    var seed_coins : random_coins;
+    var smp : paper_sim_signature_sample;
+    var highbits : polyveck;
+    var lowbits : poly;
+    var mu : crh;
+    var ro_y : ro_output;
+    var sig : signature;
+    var tr : transcript;
+    var old_adversary_hash_queries : ro_query list;
+    var old_sampler_expand_queries : ro_query list;
+    var old_sampler_bad_prequery : bool;
+
+    m <- qry.`1;
+    ctx <- qry.`2;
+    if (ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = 0) {
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <- 1;
+    } else {
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count <-
+        signature_query_budget_count;
+    }
+    old_adversary_hash_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries;
+    old_sampler_expand_queries <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries;
+    old_sampler_bad_prequery <-
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery;
+    seed_coins <$ drandom_coins;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery <-
+      old_sampler_bad_prequery \/
+      sampler_expand_query seed_coins \in old_adversary_hash_queries \/
+      sampler_expand_query seed_coins \in old_sampler_expand_queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries <-
+      sampler_expand_query seed_coins :: old_sampler_expand_queries;
+    smp <@ ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+      (seed_coins, m, ctx);
+    ro_y <@ HAETAE_RO.FRO.get
+      (message_hash_query
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current ctx m);
+    mu <- ro_message_hash ro_y;
+    highbits <- paper_sim_commitment_highbits haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+    ro_y <@ HAETAE_RO.FRO.get
+      (challenge_hash_query haetae_mode highbits lowbits mu);
+    sig <- paper_sim_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    tr <- transcript_of_signature haetae_mode
+      ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx sig;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <-
+      (m, ctx) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <-
+      tr :: ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <-
+      (m, ctx, sig, tr) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.records;
+    return sig;
+  }
+}.
+
+type budgeted_sign_hybrid_disjoint_surface_result =
+  bool * pkey * (message * context * signature).
+
+op budgeted_sign_hybrid_disjoint_surface_ok
+   (r : budgeted_sign_hybrid_disjoint_surface_result) : bool =
+  r.`1.
+
+op budgeted_sign_hybrid_disjoint_surface_pk
+   (r : budgeted_sign_hybrid_disjoint_surface_result) : pkey =
+  r.`2.
+
+op budgeted_sign_hybrid_disjoint_surface_forgery
+   (r : budgeted_sign_hybrid_disjoint_surface_result) :
+  message * context * signature =
+  r.`3.
+
+local module BudgetedSignHybridDisjointGame
+  (Ob : BudgetedSignHybridDisjoint.Orclb,
+   LR : BudgetedSignHybridDisjoint.Orcl) = {
+  var pk_current : pkey
+  var signing_count : int
+
+  module AH = {
+    proc get(q : ro_query) : ro_output = {
+      var y : budgeted_sign_hybrid_leak_output;
+      var ro_y : ro_output;
+
+      y <@ Ob.leaks(BudgetedSignHybridHash q);
+      ro_y <- budgeted_sign_hybrid_output_ro y;
+      return ro_y;
+    }
+  }
+
+  module O = {
+    proc sign(m : message, ctx : context) : signature = {
+      var sig : signature;
+      var smp : paper_sim_signature_sample;
+
+      if (signing_count < signature_query_budget_count) {
+        if (signing_count = 0) {
+          signing_count <- 1;
+        } else {
+          signing_count <- signature_query_budget_count;
+        }
+        sig <@ LR.orcl((m, ctx));
+      } else {
+        signing_count <- signature_query_budget_count;
+        smp <- paper_sim_abort_fallback_sample haetae_mode;
+        sig <- paper_sim_signature haetae_mode pk_current m ctx smp;
+      }
+      return sig;
+    }
+  }
+
+  module Adv = A(AH, O)
+
+  proc main() : bool = {
+    var setup_y : budgeted_sign_hybrid_leak_output;
+    var kp : pkey * skey;
+    var pk : pkey;
+    var sk : skey;
+    var m : message;
+    var ctx : context;
+    var sig : signature;
+    var ok : bool;
+
+    setup_y <@ Ob.leaks(BudgetedSignHybridSetup);
+    kp <- budgeted_sign_hybrid_output_keypair setup_y;
+    pk <- kp.`1;
+    sk <- kp.`2;
+    pk_current <- pk;
+    signing_count <- 0;
+    (m, ctx, sig) <@ Adv.forge(pk);
+    ok <- verify_internal haetae_mode pk m ctx sig;
+    return ok;
+  }
+
+  proc main_surface()
+      : budgeted_sign_hybrid_disjoint_surface_result = {
+    var setup_y : budgeted_sign_hybrid_leak_output;
+    var kp : pkey * skey;
+    var pk : pkey;
+    var sk : skey;
+    var m : message;
+    var ctx : context;
+    var sig : signature;
+    var ok : bool;
+    var r : budgeted_sign_hybrid_disjoint_surface_result;
+
+    setup_y <@ Ob.leaks(BudgetedSignHybridSetup);
+    kp <- budgeted_sign_hybrid_output_keypair setup_y;
+    pk <- kp.`1;
+    sk <- kp.`2;
+    pk_current <- pk;
+    signing_count <- 0;
+    (m, ctx, sig) <@ Adv.forge(pk);
+    ok <- verify_internal haetae_mode pk m ctx sig;
+    r <- (ok, pk, (m, ctx, sig));
+    return r;
+  }
+}.
+
+local lemma budgeted_sign_hybrid_disjoint_counted_sign_preserves_count_bound
+    (O <: BudgetedSignHybridDisjoint.Orcl
+          {-BudgetedSignHybridDisjoint.Count,
+           -BudgetedSignHybridDisjointGame}) :
+  hoare[
+    BudgetedSignHybridDisjointGame
+      (BudgetedSignHybridDisjointOrclb,
+       BudgetedSignHybridDisjoint.OrclCount(O)).O.sign :
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count
+    ==>
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count].
+proof.
+proc.
+if.
++ if.
+  + inline BudgetedSignHybridDisjoint.OrclCount(O).orcl
+           BudgetedSignHybridDisjoint.Count.incr.
+    wp.
+    call (_ : true).
+    by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                          /signature_query_budget_count; smt.
+  inline BudgetedSignHybridDisjoint.OrclCount(O).orcl
+         BudgetedSignHybridDisjoint.Count.incr.
+  wp.
+  call (_ : true).
+  by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                        /signature_query_budget_count; smt.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                  /signature_query_budget_count; smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_hash_get_preserves_count_bound
+    (O <: BudgetedSignHybridDisjoint.Orcl
+          {-BudgetedSignHybridDisjoint.Count,
+           -BudgetedSignHybridDisjointGame}) :
+  hoare[
+    BudgetedSignHybridDisjointGame
+      (BudgetedSignHybridDisjointOrclb,
+       BudgetedSignHybridDisjoint.OrclCount(O)).AH.get :
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count
+    ==>
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count].
+proof.
+proc.
+inline BudgetedSignHybridDisjointOrclb.leaks
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+          HAETAE_RO.FRO).AH.get.
+rcondf 2; first by auto.
+wp.
+sp 3.
+if.
++ wp.
+  call (_ : true).
+  + by auto.
+  by auto.
+by auto.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_adversary_preserves_count_bound
+    (O <: BudgetedSignHybridDisjoint.Orcl
+          {-BudgetedSignHybridDisjoint.Count,
+           -BudgetedSignHybridDisjointGame}) :
+  hoare[
+    BudgetedSignHybridDisjointGame
+      (BudgetedSignHybridDisjointOrclb,
+       BudgetedSignHybridDisjoint.OrclCount(O)).Adv.forge :
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count
+    ==>
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count].
+proof.
+proc (0 <= BudgetedSignHybridDisjoint.Count.c /\
+      BudgetedSignHybridDisjoint.Count.c <=
+        BudgetedSignHybridDisjointGame.signing_count /\
+      budgeted_paper_sim_signing_count_discipline
+        BudgetedSignHybridDisjointGame.signing_count) => //.
++ move=> />.
++ proc*.
+  call (budgeted_sign_hybrid_disjoint_hash_get_preserves_count_bound O).
+  by auto.
+proc*.
+call (budgeted_sign_hybrid_disjoint_counted_sign_preserves_count_bound O).
+by auto.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_game_main_preserves_count_bound
+    (O <: BudgetedSignHybridDisjoint.Orcl
+          {-BudgetedSignHybridDisjoint.Count,
+           -BudgetedSignHybridDisjointGame}) :
+  hoare[
+    BudgetedSignHybridDisjointGame
+      (BudgetedSignHybridDisjointOrclb,
+       BudgetedSignHybridDisjoint.OrclCount(O)).main :
+    BudgetedSignHybridDisjoint.Count.c = 0 ==>
+    0 <= BudgetedSignHybridDisjoint.Count.c /\
+    BudgetedSignHybridDisjoint.Count.c <=
+      BudgetedSignHybridDisjointGame.signing_count /\
+    budgeted_paper_sim_signing_count_discipline
+      BudgetedSignHybridDisjointGame.signing_count].
+proof.
+proc.
+wp.
+call (budgeted_sign_hybrid_disjoint_adversary_preserves_count_bound O).
+inline BudgetedSignHybridDisjointOrclb.leaks.
+rcondt 2; first by auto.
+inline ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init.
+inline ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init.
+wp.
+inline HAETAE(HAETAE_RO.FRO).kg.
+wp.
+inline HAETAE_RO.FRO.get.
+wp.
+rnd.
+wp.
+rnd.
+inline HAETAE_RO.FRO.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                  /signature_query_budget_count;
+  smt(seed_distribution_lossless ro_output_distribution_lossless).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_A_call
+    (O <: BudgetedSignHybridDisjoint.Orcl
+          {-BudgetedSignHybridDisjoint.Count,
+           -BudgetedSignHybridDisjointGame}) :
+  hoare[
+    BudgetedSignHybridDisjoint.Orcln
+      (BudgetedSignHybridDisjointGame(BudgetedSignHybridDisjointOrclb), O).main :
+    true ==> BudgetedSignHybridDisjoint.Count.c <= signature_query_budget_count].
+proof.
+proc.
+wp.
+call (budgeted_sign_hybrid_disjoint_game_main_preserves_count_bound O).
+inline BudgetedSignHybridDisjoint.Count.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /signature_query_budget_count; smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_res_difference &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] -
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] =
+  signature_query_budget_count%r *
+    (Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+          .main() @ &m : res] -
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+          .main() @ &m : res]).
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll.
+have h :=
+  BudgetedSignHybridDisjoint.Hybrid_restr
+    BudgetedSignHybridDisjointOrclb
+    BudgetedSignHybridDisjointGame
+    budgeted_sign_hybrid_disjoint_A_call
+    leaks_ll orclL_ll orclR_ll game_ll &m
+    (fun (_ : glob BudgetedSignHybridDisjointGame)
+         (_ : glob BudgetedSignHybridDisjointOrclb)
+         (_ : int) (r : bool) => r).
+by rewrite /= in h.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_res_le_from_one_switch &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m : res] <=
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] <=
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] +
+    signature_query_budget_count%r * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll one_switch.
+have restr :=
+  budgeted_sign_hybrid_disjoint_restr_res_difference
+    &m leaks_ll orclL_ll orclR_ll game_ll.
+have q_ge0 :
+  0%r <= signature_query_budget_count%r
+  by rewrite /signature_query_budget_count; smt.
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_clean_le_from_res_one_switch &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m : res] <=
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m : res] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] +
+    signature_query_budget_count%r * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll one_switch.
+have acc :=
+  budgeted_sign_hybrid_disjoint_restr_res_le_from_one_switch
+    &m leaks_ll orclL_ll orclR_ll game_ll one_switch.
+have left_clean_le :
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res]
+  by smt(mu_sub).
+by smt.
+qed.
+
+local pred budgeted_sign_hybrid_disjoint_orclb_clean
+    (g : glob BudgetedSignHybridDisjointOrclb) =
+  ! g.`8.
+
+local pred budgeted_sign_hybrid_disjoint_verify_clean_event
+    (pk : pkey) (r : message * context * signature)
+    (g : glob BudgetedSignHybridDisjointOrclb) =
+  verify_internal haetae_mode pk r.`1 r.`2 r.`3 /\
+  budgeted_sign_hybrid_disjoint_orclb_clean g.
+
+local lemma budgeted_sign_hybrid_disjoint_verify_clean_eventE
+    pk m ctx sig g :
+  budgeted_sign_hybrid_disjoint_verify_clean_event
+    pk (m, ctx, sig) g =
+  (verify_internal haetae_mode pk m ctx sig /\
+   budgeted_sign_hybrid_disjoint_orclb_clean g).
+proof.
+by rewrite /budgeted_sign_hybrid_disjoint_verify_clean_event.
+qed.
+
+local pred budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+    (r : budgeted_sign_hybrid_disjoint_surface_result)
+    (g : glob BudgetedSignHybridDisjointOrclb) =
+  budgeted_sign_hybrid_disjoint_verify_clean_event
+    (budgeted_sign_hybrid_disjoint_surface_pk r)
+    (budgeted_sign_hybrid_disjoint_surface_forgery r) g.
+
+local module BudgetedSignHybridDisjointSurfaceHybGame
+  (Ob : BudgetedSignHybridDisjoint.Orclb,
+   LR : BudgetedSignHybridDisjoint.Orcl) = {
+  proc main() : budgeted_sign_hybrid_disjoint_surface_result = {
+    var r : budgeted_sign_hybrid_disjoint_surface_result;
+
+    BudgetedSignHybridDisjoint.HybOrcl.l0 <$
+      [0..max 0 (signature_query_budget_count - 1)];
+    BudgetedSignHybridDisjoint.HybOrcl.l <- 0;
+    r <@
+      BudgetedSignHybridDisjointGame
+        (Ob, BudgetedSignHybridDisjoint.HybOrcl(Ob, LR)).main_surface();
+    return r;
+  }
+}.
+
+local equiv budgeted_sign_hybrid_disjoint_game_main_surfaceL_equiv :
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb)))
+    .main ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb)))
+    .main_surface :
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl} ==>
+  res{1} =
+    budgeted_sign_hybrid_disjoint_surface_ok res{2} /\
+  budgeted_sign_hybrid_disjoint_surface_pk res{2} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  budgeted_sign_hybrid_disjoint_surface_ok res{2} =
+    verify_internal haetae_mode
+      (budgeted_sign_hybrid_disjoint_surface_pk res{2})
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`1
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`2
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`3 /\
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl}.
+proof.
+proc.
+wp.
+call (: ={glob A, glob BudgetedSignHybridDisjointOrclb,
+          glob BudgetedSignHybridDisjoint.HybOrcl, arg,
+          BudgetedSignHybridDisjointGame.pk_current,
+          BudgetedSignHybridDisjointGame.signing_count} ==>
+          ={glob A, glob BudgetedSignHybridDisjointOrclb,
+            glob BudgetedSignHybridDisjoint.HybOrcl, res,
+            BudgetedSignHybridDisjointGame.pk_current,
+            BudgetedSignHybridDisjointGame.signing_count}).
++ by sim.
+wp.
+call (: ={glob BudgetedSignHybridDisjointOrclb, arg} ==>
+          ={glob BudgetedSignHybridDisjointOrclb, res}).
++ by sim.
+by auto => />; rewrite /budgeted_sign_hybrid_disjoint_surface_ok
+                    /budgeted_sign_hybrid_disjoint_surface_pk
+                    /budgeted_sign_hybrid_disjoint_surface_forgery.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_game_main_surfaceR_equiv :
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb)))
+    .main ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb)))
+    .main_surface :
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl} ==>
+  res{1} =
+    budgeted_sign_hybrid_disjoint_surface_ok res{2} /\
+  budgeted_sign_hybrid_disjoint_surface_pk res{2} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  budgeted_sign_hybrid_disjoint_surface_ok res{2} =
+    verify_internal haetae_mode
+      (budgeted_sign_hybrid_disjoint_surface_pk res{2})
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`1
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`2
+      (budgeted_sign_hybrid_disjoint_surface_forgery res{2}).`3 /\
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl}.
+proof.
+proc.
+wp.
+call (: ={glob A, glob BudgetedSignHybridDisjointOrclb,
+          glob BudgetedSignHybridDisjoint.HybOrcl, arg,
+          BudgetedSignHybridDisjointGame.pk_current,
+          BudgetedSignHybridDisjointGame.signing_count} ==>
+          ={glob A, glob BudgetedSignHybridDisjointOrclb,
+            glob BudgetedSignHybridDisjoint.HybOrcl, res,
+            BudgetedSignHybridDisjointGame.pk_current,
+            BudgetedSignHybridDisjointGame.signing_count}).
++ by sim.
+wp.
+call (: ={glob BudgetedSignHybridDisjointOrclb, arg} ==>
+          ={glob BudgetedSignHybridDisjointOrclb, res}).
++ by sim.
+by auto => />; rewrite /budgeted_sign_hybrid_disjoint_surface_ok
+                    /budgeted_sign_hybrid_disjoint_surface_pk
+                    /budgeted_sign_hybrid_disjoint_surface_forgery.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_hybgame_surfaceL_equiv :
+  BudgetedSignHybridDisjoint.HybGame
+    (BudgetedSignHybridDisjointGame,
+     BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+    .main ~
+  BudgetedSignHybridDisjointSurfaceHybGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+    .main :
+  ={glob A, glob BudgetedSignHybridDisjointOrclb} ==>
+  res{1} =
+    budgeted_sign_hybrid_disjoint_surface_ok res{2} /\
+  budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+    res{2} (glob BudgetedSignHybridDisjointOrclb){2} =
+    (res{1} /\
+     budgeted_sign_hybrid_disjoint_orclb_clean
+       (glob BudgetedSignHybridDisjointOrclb){1}) /\
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl}.
+proof.
+proc.
+wp.
+call budgeted_sign_hybrid_disjoint_game_main_surfaceL_equiv.
+wp.
+rnd.
+by auto => />; rewrite
+  /budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+  /budgeted_sign_hybrid_disjoint_verify_clean_event
+  /budgeted_sign_hybrid_disjoint_orclb_clean
+  /budgeted_sign_hybrid_disjoint_surface_ok
+  /budgeted_sign_hybrid_disjoint_surface_pk
+  /budgeted_sign_hybrid_disjoint_surface_forgery; smt.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_hybgame_surfaceR_equiv :
+  BudgetedSignHybridDisjoint.HybGame
+    (BudgetedSignHybridDisjointGame,
+     BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+    .main ~
+  BudgetedSignHybridDisjointSurfaceHybGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+    .main :
+  ={glob A, glob BudgetedSignHybridDisjointOrclb} ==>
+  res{1} =
+    budgeted_sign_hybrid_disjoint_surface_ok res{2} /\
+  budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+    res{2} (glob BudgetedSignHybridDisjointOrclb){2} =
+    (res{1} /\
+     budgeted_sign_hybrid_disjoint_orclb_clean
+       (glob BudgetedSignHybridDisjointOrclb){1}) /\
+  ={glob A, glob BudgetedSignHybridDisjointOrclb,
+    glob BudgetedSignHybridDisjoint.HybOrcl}.
+proof.
+proc.
+wp.
+call budgeted_sign_hybrid_disjoint_game_main_surfaceR_equiv.
+wp.
+rnd.
+by auto => />; rewrite
+  /budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+  /budgeted_sign_hybrid_disjoint_verify_clean_event
+  /budgeted_sign_hybrid_disjoint_orclb_clean
+  /budgeted_sign_hybrid_disjoint_surface_ok
+  /budgeted_sign_hybrid_disjoint_surface_pk
+  /budgeted_sign_hybrid_disjoint_surface_forgery; smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_hybgame_surfaceL_event_eq &m :
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+byequiv budgeted_sign_hybrid_disjoint_hybgame_surfaceL_equiv => //.
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_hybgame_surfaceR_event_eq &m :
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+byequiv budgeted_sign_hybrid_disjoint_hybgame_surfaceR_equiv => //.
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_clean_one_switch_from_surface
+    &m :
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+move=> surface_one_switch.
+have left_eq :=
+  budgeted_sign_hybrid_disjoint_hybgame_surfaceL_event_eq &m.
+have right_eq :=
+  budgeted_sign_hybrid_disjoint_hybgame_surfaceR_event_eq &m.
+by smt.
+qed.
+
+(* Surface-game one-switch antecedent spike result.
+   The proof-only surface layer above removes the return-type obstruction for
+   stating the verifier-clean one-switch event: main_surface exposes the final
+   public key and forgery triple, the L/R event-equivalence lemmas connect that
+   surface event exactly to the original boolean HybGame clean event, and the
+   bridge lemma above reduces the original clean/clean one-switch obligation to
+   the corresponding surface-game inequality.
+
+   The exact unchecked antecedent is:
+
+     Pr[BudgetedSignHybridDisjointSurfaceHybGame(...,L(...)).main() :
+          budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+            res (glob BudgetedSignHybridDisjointOrclb)]
+     <=
+     Pr[BudgetedSignHybridDisjointSurfaceHybGame(...,R(...)).main() :
+          budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+            res (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term.
+
+   A direct byequiv proof of this antecedent is blocked at the abstract call
+   to A(AH,O).forge.  The ordinary EasyCrypt adversary call rule available here
+   expects exact relational oracle specifications for AH.get and O.sign.  The
+   needed O.sign rule is one-sided and lossy: it is exact except at the active
+   HybOrcl branch l = l0, where the left run calls orclL, the right run calls
+   orclR, and the comparison costs rejection_sampling_loss_term.
+
+   The continuation after that active call is not a pure predicate of the
+   returned signature.  It resumes the current A(AH,O).forge invocation, permits
+   future AH.get/O.sign calls with the hybrid counter advanced past l0, runs
+   verify_internal on the exposed final forgery triple, and checks the final
+   Orclb clean predicate.  Its state therefore includes glob A, glob
+   HAETAE_RO.FRO, glob BudgetedSignHybridDisjointGame, glob
+   BudgetedSignHybridDisjointOrclb, transcript queries/transcripts/records,
+   adversary_hash_queries, sampler_expand_queries, sampler_bad_prequery,
+   signing counters, and Hybrid l/l0 state.
+
+   The obstacle is not the surface result type.  A Hybrid clone with
+   outputA = budgeted_sign_hybrid_disjoint_surface_result can express the
+   surface-output Ln/Rn/HybGame arithmetic, but Hybrid_restr still takes the
+   L/R one-switch inequality as a premise.  It does not manufacture the
+   one-sided oracle-call rule needed below.
+
+   The narrow missing proof principle is a lossy adversary-call induction for
+   this surface game.  Under the invariant that the two runs agree on the
+   public key, adversary state, ROM table relation, transcript/log state,
+   counters, sampler secret state, sampler_rom_covered, and a false
+   attempt-side sampler_bad_prequery before the active call, it must lift the
+   active-call loss supplied by
+   concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface through
+   the remaining adversary continuation.  The existing signature-only one-call
+   loss cannot instantiate this continuation because it has type
+   p : signature -> bool and cannot mention the post-call globals or future
+   oracle behavior.
+
+   The future framework lemma should be specialized to this module interface,
+   not added as an axiom here.  In schematic form it is:
+
+     forall K pk &m,
+       surface_switch_invariant pk (glob A) (glob HAETAE_RO.FRO)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb)
+         (glob BudgetedSignHybridDisjoint.HybOrcl) =>
+       Pr[A(AH, HybOrcl(...,L(...))).forge(pk) @ &m :
+            K res (glob A) (glob HAETAE_RO.FRO)
+              (glob BudgetedSignHybridDisjointGame)
+              (glob BudgetedSignHybridDisjointOrclb)
+              (glob BudgetedSignHybridDisjoint.HybOrcl) /\
+            budgeted_sign_hybrid_disjoint_orclb_clean
+              (glob BudgetedSignHybridDisjointOrclb)]
+       <=
+       Pr[A(AH, HybOrcl(...,R(...))).forge(pk) @ &m :
+            K res (glob A) (glob HAETAE_RO.FRO)
+              (glob BudgetedSignHybridDisjointGame)
+              (glob BudgetedSignHybridDisjointOrclb)
+              (glob BudgetedSignHybridDisjoint.HybOrcl) /\
+            budgeted_sign_hybrid_disjoint_orclb_clean
+              (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term.
+
+   For the actual surface antecedent, K is the continuation that resumes the
+   rest of A(AH,O).forge, then applies verify_internal to the exposed forgery
+   triple and checks final budgeted_sign_hybrid_disjoint_orclb_clean.  Current
+   EasyCrypt call/byequiv patterns in this file handle the same opaque
+   A.forge boundary only for exact oracle equivalences; fel handles bad-event
+   bounds, not this one-sided probability-loss accumulation with a stateful
+   continuation. *)
+
+(* Proof-architecture spike, 2026-05-14.
+   The remaining blocker is architectural rather than syntactic.  The current
+   SIG.Adversary module type exposes only
+
+     proc forge(pk : pkey) : message * context * signature {H.get, O.sign}
+
+   so EasyCrypt proofs can call the adversary with exact oracle specifications,
+   but they cannot pause forge at the active O.sign call, apply a one-sided loss,
+   and resume an arbitrary continuation.
+
+   Route 1: reduction-style one-switch challenge wrapper.
+   Partially expressible.  BudgetedSignHybridDisjoint already implements the
+   active-query selection pattern: AH.get is the leak interface, O.sign is routed
+   through HybOrcl, and the checked surface game exposes the final verifier
+   event.  A separate challenge-oracle wrapper could make the active signing
+   query syntactically visible, reusing BudgetedSignHybridDisjointSurfaceHybGame,
+   budgeted_sign_hybrid_disjoint_clean_one_switch_from_surface, and
+   concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface.
+   It still would not apply the loss outside A.forge with the current adversary
+   type, because the post-challenge continuation is the private remainder of the
+   opaque forge procedure.  To make this route complete, the project would need a
+   new proof-only two-stage adversary interface, for example a module exposing
+   "run until active signing query" and "resume after active signature"; proving
+   that interface equivalent to arbitrary SIG.Adversary would be a new semantic
+   theorem, not a local refactor.
+
+   Route 2: defunctionalized trace game.
+   Not straightforward for the current theorem.  A trace semantics with explicit
+   AHGet, OSign, and ForgeReturn events would allow induction over a bounded
+   interaction trace and could accumulate rejection_sampling_loss_term once per
+   active signing event.  It would reuse the transcript predicates, sampler
+   coverage invariants, concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface,
+   and the checked Hybrid_restr arithmetic as validation targets.  However,
+   EasyCrypt cannot derive such a trace for an arbitrary opaque module
+   A <: SIG.Adversary from the current module type alone.  This route would
+   require a new TraceAdversary module type plus an interpreter/equivalence
+   theorem relating every supported adversary implementation to the trace model.
+   Until that equivalence is machine-checked, it is an external proof obligation.
+
+   Route 3: strengthened adversary theorem boundary.
+   This is the only route compatible with the current opaque adversary interface
+   without adding axioms.  The file can keep the existing machine-checked facts
+   as they are and make the missing lossy-forge call rule an explicit conditional
+   EasyCrypt premise for a future theorem.  The premise should be named narrowly,
+   e.g. budgeted_sign_hybrid_disjoint_lossy_forge_switch_rule, and state exactly
+   the surface one-switch inequality, or equivalently the one-call active-switch
+   rule lifted through A(AH,O).forge under the invariant listed above.  It is not
+   a cryptographic assumption by itself; it is a conditional proof-framework
+   premise that must later be discharged either by Route 1 with a resumable
+   adversary interface or by Route 2 with a trace semantics.
+
+   Selected future architecture:
+   do not add another local wrapper around the existing opaque forge call.  The
+   next sound machine-checked advance is to introduce a named conditional theorem
+   boundary for the lossy-forge switch rule, then separately prove that boundary
+   from either a resumable two-stage adversary model or a defunctionalized trace
+	   model.  The current machine-checked facts are the surface game, exact event
+	   equivalences, Hybrid_restr accumulation, active-HybOrcl wrapper, and
+	   restricted signature-continuation bridges.  The unproved item remains the
+	   conditional lossy adversary-call rule; no external cryptographic assumption
+	   has been added here, and no admit/axiom should be introduced for it. *)
+
+type budgeted_sign_hybrid_resumable_step =
+  [ BudgetedSignHybridResumeActive of SIG.query
+  | BudgetedSignHybridResumeReturn of (message * context * signature) ].
+
+module type BudgetedSignHybridResumableAdversary
+    (H : SIG.POracle, O : SIG.SignOracle) = {
+  proc run_to_active(pk : pkey, active_index : int)
+    : budgeted_sign_hybrid_resumable_step {H.get, O.sign}
+  proc resume_after_active(sig : signature)
+    : message * context * signature {H.get, O.sign}
+}.
+
+type budgeted_sign_hybrid_trace_event =
+  [ BudgetedSignHybridTraceHash of ro_query
+  | BudgetedSignHybridTraceSign of SIG.query
+  | BudgetedSignHybridTraceReturn of (message * context * signature) ].
+
+type budgeted_sign_hybrid_trace_response =
+  [ BudgetedSignHybridTraceStart
+  | BudgetedSignHybridTraceHashOut of ro_output
+  | BudgetedSignHybridTraceSignOut of signature ].
+
+module type BudgetedSignHybridTraceAdversary = {
+  proc init(pk : pkey) : unit
+  proc next(resp : budgeted_sign_hybrid_trace_response)
+    : budgeted_sign_hybrid_trace_event
+}.
+
+op budgeted_sign_hybrid_resumable_step_is_active
+   (s : budgeted_sign_hybrid_resumable_step) : bool =
+  with s = BudgetedSignHybridResumeActive _ => true
+  with s = BudgetedSignHybridResumeReturn _ => false.
+
+op budgeted_sign_hybrid_resumable_step_query
+   (s : budgeted_sign_hybrid_resumable_step) : SIG.query =
+  with s = BudgetedSignHybridResumeActive q => q
+  with s = BudgetedSignHybridResumeReturn _ => ([], []).
+
+op budgeted_sign_hybrid_resumable_default_forgery
+  : message * context * signature =
+  let pk = budgeted_sign_hybrid_default_keypair.`1 in
+  ([], [],
+   paper_sim_signature haetae_mode pk [] []
+     (paper_sim_abort_fallback_sample haetae_mode)).
+
+op budgeted_sign_hybrid_resumable_step_forgery
+   (s : budgeted_sign_hybrid_resumable_step)
+   : message * context * signature =
+  with s = BudgetedSignHybridResumeReturn f => f
+  with s = BudgetedSignHybridResumeActive _ =>
+    budgeted_sign_hybrid_resumable_default_forgery.
+
+local module BudgetedSignHybridResumableActiveL : SIG.SignOracle = {
+  proc sign(m : message, ctx : context) : signature = {
+    var sig : signature;
+
+    sig <@ BudgetedSignHybridDisjointOrclb.orclL((m, ctx));
+    return sig;
+  }
+}.
+
+local module BudgetedSignHybridResumableActiveR : SIG.SignOracle = {
+  proc sign(m : message, ctx : context) : signature = {
+    var sig : signature;
+
+    sig <@ BudgetedSignHybridDisjointOrclb.orclR((m, ctx));
+    return sig;
+  }
+}.
+
+local module BudgetedSignHybridResumableSurfaceGame
+  (RAdv : BudgetedSignHybridResumableAdversary,
+   Active : SIG.SignOracle) = {
+  var pk_current : pkey
+  var signing_count : int
+
+  module AH = {
+    proc get(q : ro_query) : ro_output = {
+      var y : budgeted_sign_hybrid_leak_output;
+      var ro_y : ro_output;
+
+      y <@ BudgetedSignHybridDisjointOrclb.leaks(BudgetedSignHybridHash q);
+      ro_y <- budgeted_sign_hybrid_output_ro y;
+      return ro_y;
+    }
+  }
+
+  module O = {
+    proc sign(m : message, ctx : context) : signature = {
+      var sig : signature;
+      var smp : paper_sim_signature_sample;
+
+      if (signing_count < signature_query_budget_count) {
+        if (signing_count = 0) {
+          signing_count <- 1;
+        } else {
+          signing_count <- signature_query_budget_count;
+        }
+        sig <@
+          BudgetedSignHybridDisjoint.HybOrcl
+            (BudgetedSignHybridDisjointOrclb,
+             BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+            .orcl((m, ctx));
+      } else {
+        signing_count <- signature_query_budget_count;
+        smp <- paper_sim_abort_fallback_sample haetae_mode;
+        sig <- paper_sim_signature haetae_mode pk_current m ctx smp;
+      }
+      return sig;
+    }
+  }
+
+  module Adv = RAdv(AH, O)
+
+  proc main() : budgeted_sign_hybrid_disjoint_surface_result = {
+    var setup_y : budgeted_sign_hybrid_leak_output;
+    var kp : pkey * skey;
+    var pk : pkey;
+    var sk : skey;
+    var step : budgeted_sign_hybrid_resumable_step;
+    var qry : SIG.query;
+    var active_sig : signature;
+    var smp : paper_sim_signature_sample;
+    var forgery : message * context * signature;
+    var ok : bool;
+    var r : budgeted_sign_hybrid_disjoint_surface_result;
+
+    BudgetedSignHybridDisjoint.HybOrcl.l0 <$
+      [0..max 0 (signature_query_budget_count - 1)];
+    BudgetedSignHybridDisjoint.HybOrcl.l <- 0;
+    setup_y <@ BudgetedSignHybridDisjointOrclb.leaks(BudgetedSignHybridSetup);
+    kp <- budgeted_sign_hybrid_output_keypair setup_y;
+    pk <- kp.`1;
+    sk <- kp.`2;
+    pk_current <- pk;
+    signing_count <- 0;
+    step <@ Adv.run_to_active(pk, BudgetedSignHybridDisjoint.HybOrcl.l0);
+    if (budgeted_sign_hybrid_resumable_step_is_active step) {
+      qry <- budgeted_sign_hybrid_resumable_step_query step;
+      if (signing_count < signature_query_budget_count) {
+        if (signing_count = 0) {
+          signing_count <- 1;
+        } else {
+          signing_count <- signature_query_budget_count;
+        }
+        active_sig <@ Active.sign(qry.`1, qry.`2);
+        BudgetedSignHybridDisjoint.HybOrcl.l <-
+          BudgetedSignHybridDisjoint.HybOrcl.l + 1;
+      } else {
+        signing_count <- signature_query_budget_count;
+        smp <- paper_sim_abort_fallback_sample haetae_mode;
+        active_sig <- paper_sim_signature haetae_mode
+          pk_current qry.`1 qry.`2 smp;
+      }
+      forgery <@ Adv.resume_after_active(active_sig);
+    } else {
+      forgery <- budgeted_sign_hybrid_resumable_step_forgery step;
+    }
+    ok <- verify_internal haetae_mode pk forgery.`1 forgery.`2 forgery.`3;
+    r <- (ok, pk, forgery);
+    return r;
+  }
+}.
+
+local lemma
+  budgeted_sign_hybrid_disjoint_lossy_forge_switch_from_resumable_surface
+    (RAdv <: BudgetedSignHybridResumableAdversary) &m :
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveL).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] =>
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveL).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveR).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveR).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+by smt.
+qed.
+
+(* Conditional active-call boundary for the resumable route, not an axiom.
+   The split run_to_active/resume_after_active removes the opaque A.forge call
+   from the selected signing query, but it does not by itself make the existing
+   signature-only loss lemma strong enough.  After Active.sign returns,
+   resume_after_active may inspect the returned signature, the private RAdv
+   state left by run_to_active, lazy-ROM state, transcript/signing logs,
+   sampler_expand_queries, sampler_bad_prequery, Hybrid l/l0 state, and future
+   AH.get/O.sign behavior.  A pure p : signature -> bool cannot encode that
+   suffix.
+
+   The exact non-vacuous theorem still needed is a stateful active-call
+   continuation rule.  In the active branch, after equal setup, equal
+   run_to_active states, an active signing counter, sampler_rom_covered,
+   !sampler_bad_prequery, and matching attempt/exact sampler secrets, prove
+
+     Pr[ActiveL.sign(q) : K res post_state /\ clean]
+       <= Pr[ActiveR.sign(q) : K res post_state /\ clean]
+          + rejection_sampling_loss_term
+
+   for the concrete suffix continuation K that runs
+   RAdv(AH,O).resume_after_active(res), then verify_internal, and then tests
+   budgeted_sign_hybrid_disjoint_surface_verify_clean_event.  Existing exact
+   byequiv rules can cover run_to_active only while the two active signatures
+   are not yet sampled; after that point a one-sided stateful continuation
+   theorem is required.  Closing the lemma below with probability boundedness
+   and rejection_sampling_loss_term_ge1 would be machine-checked but vacuous,
+   so the premise is kept explicit. *)
+local lemma budgeted_sign_hybrid_resumable_active_call_loss_rule
+    (RAdv <: BudgetedSignHybridResumableAdversary) &m :
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveL).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveR).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveL).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridResumableSurfaceGame
+       (RAdv, BudgetedSignHybridResumableActiveR).main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof. by move=> h. qed.
+
+(* Proof-interface design spike, 2026-05-14.
+   The smallest future interface is the resumable two-stage adversary above.
+   It exposes exactly the point hidden by SIG.Adversary: run_to_active executes
+   the prefix of forge up to the selected signing query, returning either that
+   active query or a completed forgery if no active query is reached; then
+   resume_after_active continues from the same private adversary state after
+   receiving the active signature.  The theorem that would imply
+   budgeted_sign_hybrid_disjoint_lossy_forge_switch_rule is:
+
+   - an embedding/equivalence theorem showing that, for the adversaries covered
+     by the model, the ordinary opaque A(H,O).forge game is equivalent to
+     run_to_active followed by either immediate return or resume_after_active;
+   - a stateful active-call theorem applying the existing one-call sampler loss
+     to the exposed active query under sampler_rom_covered, !sampler_bad_prequery,
+     matching signing counters, matching sampler secrets, and equal lazy-ROM and
+     transcript/log state; and
+   - exact byequiv proofs for the prefix and resume phases, reusing the existing
+     AH.get/O.sign exact adapters, the surface-game event equivalences, and the
+     Hybrid_restr accumulation lemmas.
+
+   What remains impossible for arbitrary SIG.Adversary is the embedding theorem:
+   the current module type does not expose any pause/resume state, so EasyCrypt
+   has no object from which to prove that every opaque forge implementation can
+   be represented by run_to_active/resume_after_active.
+
+   The trace interface above is the larger alternative.  Its next(resp) method
+   represents a defunctionalized interaction machine whose interpreter would
+   perform AH.get and O.sign calls and feed back TraceHashOut/TraceSignOut
+   responses.  A trace route would make induction over bounded interactions
+   explicit and could charge rejection_sampling_loss_term at the selected
+   TraceSign event.  It would reuse the same one-call sampler loss, transcript
+   predicates, surface-game event equivalences, and Hybrid_restr arithmetic, but
+   it additionally needs a trace interpreter and a semantic equivalence theorem
+   from each supported adversary to that interpreter.  That is strictly heavier
+   than the resumable interface for this proof obligation and still cannot be
+   derived for arbitrary SIG.Adversary without strengthening the adversary
+   interface. *)
+
+(* Conditional EasyCrypt premise boundary, not an axiom:
+   the premise to this lemma is exactly the lossy-forge switch rule that remains
+   to be proved by a future two-stage adversary or trace framework.  The lemma
+   only gives that premise a stable reusable name.
+
+   Adapter-proof spike result: after the concrete attempt-to-hybrid and
+   hybrid-to-exact adapters, this is still the only substantive open premise.
+   A direct non-vacuous proof of the displayed surface inequality still reaches
+   the opaque call
+
+     BudgetedSignHybridDisjointGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.HybOrcl(...)).Adv.forge(pk)
+
+   and needs a one-sided oracle-call rule for that abstract adversary call.
+   Existing byequiv/call rules can use exact relational specifications for
+   AH.get and O.sign, and the checked Hybrid_restr lemmas can accumulate a
+   supplied one-switch loss, but neither rule derives the one-switch premise
+   through opaque A(AH,O).forge.  The active-HybOrcl and restricted-signature
+   lemmas below only transform a one-call continuation inequality; they do not
+   provide the adversary-call induction that manufactures it.
+
+   The exact future proof-interface theorem needed to eliminate this premise is
+   a stateful lossy forge-call induction, with shape:
+
+     for every continuation
+       K : message * context * signature ->
+           glob A -> glob HAETAE_RO.FRO ->
+           glob BudgetedSignHybridDisjointGame ->
+           glob BudgetedSignHybridDisjointOrclb -> bool,
+     under the active-switch invariant
+       HybOrcl.l = HybOrcl.l0,
+       equal public transcript/log state, equal lazy-ROM state as required by
+       coupled future AH.get calls, matching signing counters, sampler coverage,
+       !sampler_bad_prequery, and matching attempt/exact sampler secrets,
+     prove
+
+       Pr[BudgetedSignHybridDisjointGame
+            (BudgetedSignHybridDisjointOrclb,
+             BudgetedSignHybridDisjoint.HybOrcl
+               (BudgetedSignHybridDisjointOrclb,
+                BudgetedSignHybridDisjoint.L
+                  (BudgetedSignHybridDisjointOrclb))).Adv.forge(pk) :
+            K res (glob A) (glob HAETAE_RO.FRO)
+              (glob BudgetedSignHybridDisjointGame)
+              (glob BudgetedSignHybridDisjointOrclb)]
+       <=
+       Pr[BudgetedSignHybridDisjointGame
+            (BudgetedSignHybridDisjointOrclb,
+             BudgetedSignHybridDisjoint.HybOrcl
+               (BudgetedSignHybridDisjointOrclb,
+                BudgetedSignHybridDisjoint.R
+                  (BudgetedSignHybridDisjointOrclb))).Adv.forge(pk) :
+            K res (glob A) (glob HAETAE_RO.FRO)
+              (glob BudgetedSignHybridDisjointGame)
+              (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term.
+
+   Instantiating K with the exposed surface suffix
+     fun (m,ctx,sig) _ _ _ go =>
+       budgeted_sign_hybrid_disjoint_verify_clean_event pk (m,ctx,sig) go
+   would prove the displayed surface one-switch rule.  Closing this lemma by
+   mu_bounded together with rejection_sampling_loss_term_ge1 would be
+   machine-checked but vacuous, so it is intentionally not used here. *)
+local lemma budgeted_sign_hybrid_disjoint_lossy_forge_switch_rule &m :
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof. by move=> h. qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_clean_one_switch_from_lossy_forge_switch_rule &m :
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+move=> lossy_forge_switch.
+apply (budgeted_sign_hybrid_disjoint_clean_one_switch_from_surface &m).
+by apply (budgeted_sign_hybrid_disjoint_lossy_forge_switch_rule &m).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_orclb_clean_difference &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] -
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  signature_query_budget_count%r *
+    (Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+          .main() @ &m :
+          res /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)] -
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+          .main() @ &m :
+          res /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]).
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll.
+have h :=
+  BudgetedSignHybridDisjoint.Hybrid_restr
+    BudgetedSignHybridDisjointOrclb
+    BudgetedSignHybridDisjointGame
+    budgeted_sign_hybrid_disjoint_A_call
+    leaks_ll orclL_ll orclR_ll game_ll &m
+    (fun (_ : glob BudgetedSignHybridDisjointGame)
+         (gob : glob BudgetedSignHybridDisjointOrclb)
+         (_ : int) (r : bool) =>
+       r /\
+       budgeted_sign_hybrid_disjoint_orclb_clean gob).
+by rewrite /= in h.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_orclb_clean_le_from_orclb_clean_one_switch &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.HybGame
+       (BudgetedSignHybridDisjointGame,
+        BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] +
+    signature_query_budget_count%r * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll one_switch.
+have restr :=
+  budgeted_sign_hybrid_disjoint_restr_orclb_clean_difference
+    &m leaks_ll orclL_ll orclR_ll game_ll.
+have q_ge0 :
+  0%r <= signature_query_budget_count%r
+  by rewrite /signature_query_budget_count; smt.
+have right_clean_le :
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res]
+  by smt(mu_sub).
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_restr_orclb_clean_le_from_lossy_forge_switch_rule &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] +
+    signature_query_budget_count%r * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch.
+apply
+  (budgeted_sign_hybrid_disjoint_restr_orclb_clean_le_from_orclb_clean_one_switch
+     &m leaks_ll orclL_ll orclR_ll game_ll).
+by apply
+  (budgeted_sign_hybrid_disjoint_orclb_clean_one_switch_from_lossy_forge_switch_rule
+     &m).
+qed.
+
+local lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting_from_lossy_forge_switch_rule &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =>
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res] =>
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res] +
+    rom_signature_query_budget * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch
+        attempt_to_hybrid hybrid_to_exact.
+have hybrid_bound :=
+  budgeted_sign_hybrid_disjoint_restr_orclb_clean_le_from_lossy_forge_switch_rule
+    &m leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch.
+have budget_eq :
+  signature_query_budget_count%r * rejection_sampling_loss_term =
+  rom_signature_query_budget * rejection_sampling_loss_term.
++ rewrite /rom_signature_query_budget /signature_query_count
+          /signature_query_budget_count; ring.
+by smt.
+qed.
+
+(* Concrete adapter proof spike.
+   The first mechanical attempt was the direct implication proof
+
+     byequiv (: ={glob HAETAE_RO.FRO, glob A} ==>
+       (res{1} /\ !sampler_bad_prequery{1}) =>
+       (res{2} /\ budgeted_sign_hybrid_disjoint_orclb_clean
+                    (glob BudgetedSignHybridDisjointOrclb){2})) => //.
+     proc; inline *; sim.
+
+   EasyCrypt rejected the final command with "cannot infer the set of
+   equalities".  That is the narrow obstruction for the adapter layer: the
+   proof-only Ln/Rn games are not syntactically the concrete UF_NMA games after
+   expansion.  They route setup through Orclb.leaks, route signing through
+   BudgetedSignHybridDisjointGame.O.sign and OrclCount(L/R).orcl, and maintain
+   extra proof-only globals BudgetedSignHybridDisjointGame.signing_count and
+   BudgetedSignHybridDisjoint.Count.c.
+
+   The concrete wrappers and proof-only wrappers are still intended to be exact
+   adapters, but they require explicit sub-equivalences rather than a one-line
+   simulation:
+   - concrete AH.get versus BudgetedSignHybridDisjointGame.AH.get, preserving
+     HAETAE_RO.FRO.m, adversary_hash_count, and adversary_hash_queries;
+   - concrete active/fallback O.sign versus
+     BudgetedSignHybridDisjointGame.O.sign with OrclCount(L).orcl, synchronizing
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count with
+     BudgetedSignHybridDisjointGame.signing_count while ignoring only the
+     proof-only Count.c;
+   - the analogous exact-side O.sign adapter with OrclCount(R).orcl;
+   - the final event projection equating
+     !ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery with
+     budgeted_sign_hybrid_disjoint_orclb_clean
+       (glob BudgetedSignHybridDisjointOrclb).
+
+   The setup wrapper was also missing the concrete reset of
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count; that mismatch
+   is fixed above in BudgetedSignHybridDisjointOrclb.leaks.
+
+   Focused adapter-subproof attempt, 2026-05-14:
+   the narrow AH.get equivalence was tried before the signing adapters:
+
+     ROMInternalTranscriptBudgetedPaperSimAsNMA(...).AH.get
+       ~ BudgetedSignHybridDisjointGame(BudgetedSignHybridDisjointOrclb, LR).AH.get
+
+   with pre/post framing arg, glob HAETAE_RO.FRO, and the entire
+   glob ROMInternalTranscriptBudgetedPaperSimAsNMA.  Three proof shapes failed
+   after expanding BudgetedSignHybridDisjointGame.AH.get,
+   BudgetedSignHybridDisjointOrclb.leaks, the concrete AH.get, and eventually
+   HAETAE_RO.FRO.get:
+   - rcondf {2} 1 was rejected because the targeted instruction was not the
+     leak setup conditional after inlining;
+   - wp; call (: ={glob HAETAE_RO.FRO, arg} ==> ...) was rejected because the
+     last instruction was no longer a procedure call;
+   - full inlining followed by by sim left goals open even with the whole
+     concrete transcript-wrapper global framed.
+
+   Thus the first missing adapter lemma is more specific than "AH.get
+   equivalence": it is a hash-leak projection lemma for
+   BudgetedSignHybridDisjointOrclb.leaks(BudgetedSignHybridHash q) that exposes
+   the non-setup branch and the BudgetedSignHybridHashOut/output_ro cancellation
+   before relating it to the concrete AH.get.  The signing adapters should not
+   be wired until that projection lemma is checked, because their O.sign calls
+   rely on the same leak wrapper for the post-sampler message/challenge hash
+   queries.  No adapter theorem is claimed here until those sub-equivalences are
+   machine-checked. *)
+
+local module ConcreteBudgetedAHGetCall = {
+  proc get(q : ro_query) : ro_output = {
+    var y : ro_output;
+
+    y <@ ROMInternalTranscriptBudgetedPaperSimAsNMA
+           (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+            HAETAE_RO.FRO).AH.get(q);
+    return y;
+  }
+}.
+
+local equiv concrete_budgeted_ah_get_call_exact :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get ~
+  ConcreteBudgetedAHGetCall.get :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}.
+proof.
+proc.
+inline ConcreteBudgetedAHGetCall.get.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+by sim.
+qed.
+
+local equiv concrete_budgeted_ah_get_call_to_disjoint_hash_leak :
+  ConcreteBudgetedAHGetCall.get ~
+  BudgetedSignHybridDisjointOrclb.leaks :
+  arg{2} = BudgetedSignHybridHash arg{1} /\
+  ={glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA} ==>
+  res{1} = budgeted_sign_hybrid_output_ro res{2} /\
+  ={glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}.
+proof.
+proc.
+inline ConcreteBudgetedAHGetCall.get
+       BudgetedSignHybridDisjointOrclb.leaks.
+rcondf {2} 1.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+wp.
+sp 1 2.
+conseq (: _ ==> ={y0, glob HAETAE_RO.FRO,
+                  glob ROMInternalTranscriptBudgetedPaperSimAsNMA}).
++ by sim.
+qed.
+
+local equiv concrete_budgeted_ah_get_call_to_disjoint_game_ah_get
+    (LR <: BudgetedSignHybridDisjoint.Orcl
+            {-BudgetedSignHybridDisjointGame}) :
+  ConcreteBudgetedAHGetCall.get ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb, LR).AH.get :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}.
+proof.
+proc.
+inline ConcreteBudgetedAHGetCall.get.
+inline BudgetedSignHybridDisjointGame
+  (BudgetedSignHybridDisjointOrclb, LR).AH.get.
+inline {2} 1.
+sp 0 1.
+rcondf {2} 1.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+wp.
+sp 1 2.
+conseq (: _ ==> y0{1} = y1{2} /\
+                  ={glob HAETAE_RO.FRO,
+                    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}).
++ move=> />.
+by sim.
+qed.
+
+local equiv concrete_budgeted_ah_get_to_disjoint_game_ah_get
+    (LR <: BudgetedSignHybridDisjoint.Orcl
+            {-BudgetedSignHybridDisjointGame}) :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb, LR).AH.get :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}.
+proof.
+proc.
+inline BudgetedSignHybridDisjointGame
+  (BudgetedSignHybridDisjointOrclb, LR).AH.get.
+inline {2} 1.
+sp 0 1.
+rcondf {2} 1.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+wp.
+sp 0 2.
+conseq (: _ ==> y{1} = y1{2} /\
+                  ={glob HAETAE_RO.FRO,
+                    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}).
++ move=> />.
+by sim.
+qed.
+
+local equiv concrete_budgeted_ah_get_to_disjoint_counted_L_game_ah_get :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))).AH.get :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc.
+inline BudgetedSignHybridDisjointGame
+  (BudgetedSignHybridDisjointOrclb,
+   BudgetedSignHybridDisjoint.OrclCount
+     (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))).AH.get.
+inline {2} 1.
+sp 0 1.
+rcondf {2} 1.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+wp.
+sp 0 2.
+if => //.
++ if => //.
+  + wp.
+    call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+              ={res, glob HAETAE_RO.FRO}).
+    + by proc; sim.
+    by auto => />.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+            ={res, glob HAETAE_RO.FRO}).
+  + by proc; sim.
+  by auto => />.
+by auto => />.
+qed.
+
+local equiv concrete_budgeted_ro_signing_attempt_o_sign_to_disjoint_counted_L_o_sign :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))).O.sign :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.OrclCount
+         (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb)).orcl
+       BudgetedSignHybridDisjoint.Count.incr
+       BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb).orcl
+       BudgetedSignHybridDisjointOrclb.orclL.
+if.
++ by auto.
++ wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  rnd.
+  by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                        /signature_query_budget_count; smt.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                  /signature_query_budget_count; smt.
+qed.
+
+local equiv concrete_budgeted_ro_signing_attempt_adversary_to_disjoint_counted_L_adversary :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).A.forge ~
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))).Adv.forge :
+  ={arg, glob A, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} ==>
+  ={res, glob A, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+    BudgetedSignHybridDisjointGame.pk_current{2} /\
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+    BudgetedSignHybridDisjointGame.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+  BudgetedSignHybridDisjoint.Count.c{2} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}.
+proof.
+proc
+  (={glob HAETAE_RO.FRO,
+     glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+     glob ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO)} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{1} =
+     BudgetedSignHybridDisjointGame.pk_current{2} /\
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} =
+     BudgetedSignHybridDisjointGame.signing_count{2} /\
+   0 <= BudgetedSignHybridDisjoint.Count.c{2} /\
+   BudgetedSignHybridDisjoint.Count.c{2} <=
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1} /\
+   budgeted_paper_sim_signing_count_discipline
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{1}) => //.
++ proc*.
+  call concrete_budgeted_ah_get_to_disjoint_counted_L_game_ah_get.
+  by auto => />; smt.
+proc*.
+call concrete_budgeted_ro_signing_attempt_o_sign_to_disjoint_counted_L_o_sign.
+by auto => />.
+qed.
+
+local equiv concrete_budgeted_ro_signing_attempt_nma_to_disjoint_Ln_clean_equiv :
+  SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main ~
+  BudgetedSignHybridDisjoint.Ln
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjointGame).main :
+  ={glob A, glob HAETAE_RO.FRO} ==>
+  res{1} = res{2} /\
+  (! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{1} =
+   budgeted_sign_hybrid_disjoint_orclb_clean
+     (glob BudgetedSignHybridDisjointOrclb){2}).
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.Count.init
+       BudgetedSignHybridDisjointGame
+         (BudgetedSignHybridDisjointOrclb,
+          BudgetedSignHybridDisjoint.OrclCount
+            (BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))).main
+       BudgetedSignHybridDisjointOrclb.leaks.
+rcondt {2} 3.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).forge
+  HAETAE(HAETAE_RO.FRO).verify.
+wp.
+call concrete_budgeted_ro_signing_attempt_adversary_to_disjoint_counted_L_adversary.
+inline ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init
+       ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init.
+wp.
+inline HAETAE(HAETAE_RO.FRO).kg.
+wp.
+inline HAETAE_RO.FRO.get.
+wp.
+rnd.
+wp.
+rnd.
+inline HAETAE_RO.FRO.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /budgeted_sign_hybrid_output_keypair
+                    /budgeted_sign_hybrid_disjoint_orclb_clean
+                    /signature_query_budget_count;
+  smt(seed_distribution_lossless ro_output_distribution_lossless).
+qed.
+
+local lemma concrete_budgeted_ro_signing_attempt_to_disjoint_Ln_clean_adapter &m :
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[BudgetedSignHybridDisjoint.Ln
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m :
+       res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+byequiv concrete_budgeted_ro_signing_attempt_nma_to_disjoint_Ln_clean_equiv => //.
+by move=> &1 &2 />; smt.
+qed.
+
+local lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting_from_lossy_forge_switch_rule_and_attempt_adapter &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res] =>
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res] +
+    rom_signature_query_budget * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch
+        hybrid_to_exact.
+apply
+  (concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting_from_lossy_forge_switch_rule
+     &m leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch).
++ apply concrete_budgeted_ro_signing_attempt_to_disjoint_Ln_clean_adapter.
+by apply hybrid_to_exact.
+qed.
+
+local equiv disjoint_counted_R_game_ah_get_to_concrete_budgeted_ro_exact_hyperball_ah_get :
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))).AH.get ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).AH.get :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2}.
+proof.
+proc.
+inline BudgetedSignHybridDisjointGame
+  (BudgetedSignHybridDisjointOrclb,
+   BudgetedSignHybridDisjoint.OrclCount
+     (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))).AH.get.
+inline {1} 1.
+sp 1 0.
+rcondf {1} 1.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).AH.get.
+wp.
+sp 2 0.
+if => //.
++ if => //.
+  + wp.
+    call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+              ={res, glob HAETAE_RO.FRO}).
+    + by proc; sim.
+    by auto => />.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+            ={res, glob HAETAE_RO.FRO}).
+  + by proc; sim.
+  by auto => />.
+by auto => />.
+qed.
+
+local equiv disjoint_counted_R_o_sign_to_concrete_budgeted_ro_exact_hyperball_o_sign :
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))).O.sign ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).O.sign :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2}.
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.OrclCount
+         (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb)).orcl
+       BudgetedSignHybridDisjoint.Count.incr
+       BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb).orcl
+       BudgetedSignHybridDisjointOrclb.orclR.
+if.
++ by auto.
++ wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  call (_ : ={arg, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} ==>
+            ={res, glob HAETAE_RO.FRO,
+              glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)}).
+  + by proc; sim.
+  wp.
+  rnd.
+  by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                        /signature_query_budget_count; smt.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                  /signature_query_budget_count; smt.
+qed.
+
+local equiv disjoint_counted_R_adversary_to_concrete_budgeted_ro_exact_hyperball_adversary :
+  BudgetedSignHybridDisjointGame
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjoint.OrclCount
+       (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))).Adv.forge ~
+  ROMInternalTranscriptBudgetedPaperSimAsNMA
+    (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+     HAETAE_RO.FRO).A.forge :
+  ={arg, glob A, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} ==>
+  ={res, glob A, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+    glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+  BudgetedSignHybridDisjointGame.pk_current{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+  BudgetedSignHybridDisjointGame.signing_count{1} =
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+  BudgetedSignHybridDisjoint.Count.c{1} <=
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+  budgeted_paper_sim_signing_count_discipline
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2}.
+proof.
+proc
+  (={glob HAETAE_RO.FRO,
+     glob ROMInternalTranscriptBudgetedPaperSimAsNMA,
+     glob ROExactHyperballPaperSimSampler(HAETAE_RO.FRO)} /\
+   BudgetedSignHybridDisjointGame.pk_current{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{2} /\
+   BudgetedSignHybridDisjointGame.signing_count{1} =
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+   0 <= BudgetedSignHybridDisjoint.Count.c{1} /\
+   BudgetedSignHybridDisjoint.Count.c{1} <=
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2} /\
+   budgeted_paper_sim_signing_count_discipline
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{2}) => //.
++ proc*.
+  call disjoint_counted_R_game_ah_get_to_concrete_budgeted_ro_exact_hyperball_ah_get.
+  by auto => />; smt.
+proc*.
+call disjoint_counted_R_o_sign_to_concrete_budgeted_ro_exact_hyperball_o_sign.
+by auto => />.
+qed.
+
+local equiv disjoint_Rn_to_concrete_budgeted_ro_exact_hyperball_nma_equiv :
+  BudgetedSignHybridDisjoint.Rn
+    (BudgetedSignHybridDisjointOrclb,
+     BudgetedSignHybridDisjointGame).main ~
+  SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+    ROMInternalTranscriptBudgetedPaperSimAsNMA
+      (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main :
+  ={glob A, glob HAETAE_RO.FRO} ==>
+  res{1} = res{2}.
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.Count.init
+       BudgetedSignHybridDisjointGame
+         (BudgetedSignHybridDisjointOrclb,
+          BudgetedSignHybridDisjoint.OrclCount
+            (BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))).main
+       BudgetedSignHybridDisjointOrclb.leaks.
+rcondt {1} 3.
++ by auto.
+inline ROMInternalTranscriptBudgetedPaperSimAsNMA
+  (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+   HAETAE_RO.FRO).forge
+  HAETAE(HAETAE_RO.FRO).verify.
+wp.
+call disjoint_counted_R_adversary_to_concrete_budgeted_ro_exact_hyperball_adversary.
+inline ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).init
+       ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).init.
+wp.
+inline HAETAE(HAETAE_RO.FRO).kg.
+wp.
+inline HAETAE_RO.FRO.get.
+wp.
+rnd.
+wp.
+rnd.
+inline HAETAE_RO.FRO.init.
+by auto => />; rewrite /budgeted_paper_sim_signing_count_discipline
+                    /budgeted_sign_hybrid_output_keypair
+                    /signature_query_budget_count;
+  smt(seed_distribution_lossless ro_output_distribution_lossless).
+qed.
+
+local lemma disjoint_Rn_to_concrete_budgeted_ro_exact_hyperball_adapter &m :
+  Pr[BudgetedSignHybridDisjoint.Rn
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjointGame).main() @ &m : res] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res].
+proof.
+byequiv disjoint_Rn_to_concrete_budgeted_ro_exact_hyperball_nma_equiv => //.
+qed.
+
+local lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting_from_lossy_forge_switch_rule_and_adapters &m :
+  islossless BudgetedSignHybridDisjointOrclb.leaks =>
+  islossless BudgetedSignHybridDisjointOrclb.orclL =>
+  islossless BudgetedSignHybridDisjointOrclb.orclR =>
+  (forall (Ob <: BudgetedSignHybridDisjoint.Orclb
+                  {-BudgetedSignHybridDisjointGame})
+          (LR <: BudgetedSignHybridDisjoint.Orcl
+                  {-BudgetedSignHybridDisjointGame}),
+     islossless LR.orcl =>
+     islossless Ob.leaks =>
+     islossless Ob.orclL =>
+     islossless Ob.orclR =>
+     islossless BudgetedSignHybridDisjointGame(Ob, LR).main) =>
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointSurfaceHybGame
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .main() @ &m :
+       budgeted_sign_hybrid_disjoint_surface_verify_clean_event
+         res (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,
+       ROMInternalTranscriptBudgetedPaperSimAsNMA
+         (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO))).main() @ &m :
+       res] +
+    rom_signature_query_budget * rejection_sampling_loss_term.
+proof.
+move=> leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch.
+apply
+  (concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting_from_lossy_forge_switch_rule_and_attempt_adapter
+     &m leaks_ll orclL_ll orclR_ll game_ll lossy_forge_switch).
+by apply disjoint_Rn_to_concrete_budgeted_ro_exact_hyperball_adapter.
+qed.
+
+local lemma real_le_congr_from_equal_sides
+    (left_hyb left_orclb right_hyb right_orclb loss : real) :
+  left_hyb = left_orclb =>
+  right_hyb = right_orclb =>
+  left_orclb <= right_orclb + loss =>
+  left_hyb <= right_hyb + loss.
+proof.
+by smt.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_orclb_orclL_self :
+  BudgetedSignHybridDisjointOrclb.orclL ~
+  BudgetedSignHybridDisjointOrclb.orclL :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+by proc; sim.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_orclb_orclR_self :
+  BudgetedSignHybridDisjointOrclb.orclR ~
+  BudgetedSignHybridDisjointOrclb.orclR :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+by proc; sim.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_L_orcl_orclL :
+  BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb).orcl ~
+  BudgetedSignHybridDisjointOrclb.orclL :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb).orcl.
+by sim.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_R_orcl_orclR :
+  BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb).orcl ~
+  BudgetedSignHybridDisjointOrclb.orclR :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+proc.
+inline BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb).orcl.
+by sim.
+qed.
+
+local module BudgetedSignHybridDisjointOrclbCallL = {
+  proc orcl(qry : SIG.query) : signature = {
+    var sig : signature;
+
+    sig <@ BudgetedSignHybridDisjointOrclb.orclL(qry);
+    return sig;
+  }
+}.
+
+local module BudgetedSignHybridDisjointOrclbCallR = {
+  proc orcl(qry : SIG.query) : signature = {
+    var sig : signature;
+
+    sig <@ BudgetedSignHybridDisjointOrclb.orclR(qry);
+    return sig;
+  }
+}.
+
+local equiv budgeted_sign_hybrid_disjoint_orclb_callL_orclL :
+  BudgetedSignHybridDisjointOrclbCallL.orcl ~
+  BudgetedSignHybridDisjointOrclb.orclL :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+proc.
+inline *.
+by sim.
+qed.
+
+local equiv budgeted_sign_hybrid_disjoint_orclb_callR_orclR :
+  BudgetedSignHybridDisjointOrclbCallR.orcl ~
+  BudgetedSignHybridDisjointOrclb.orclR :
+  ={arg, glob BudgetedSignHybridDisjointOrclb} ==>
+  ={res, glob BudgetedSignHybridDisjointOrclb}.
+proof.
+proc.
+inline *.
+by sim.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_active_hyborcl_clean_le_from_orclb_continuation
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (qry : SIG.query) &m :
+  BudgetedSignHybridDisjoint.HybOrcl.l0{m} =
+    BudgetedSignHybridDisjoint.HybOrcl.l{m} =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+move=> active orcl_step.
+have left_hyb_wrap_eq :
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclbCallL.orcl(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
++ byequiv => //.
+  proc.
+  rcondf {1} 1; first by auto; smt.
+  rcondt {1} 1; first by auto; smt.
+  inline BudgetedSignHybridDisjointOrclbCallL.orcl.
+  wp.
+  call budgeted_sign_hybrid_disjoint_L_orcl_orclL.
+  by auto => />; smt.
+have left_wrap_eq :
+  Pr[BudgetedSignHybridDisjointOrclbCallL.orcl(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
++ byequiv => //.
+  proc*.
+  call budgeted_sign_hybrid_disjoint_orclb_callL_orclL.
+  by auto.
+have left_eq :
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)]
+  by smt.
+have right_hyb_wrap_eq :
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclbCallR.orcl(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
++ byequiv => //.
+  proc.
+  rcondf {1} 1; first by auto; smt.
+  rcondt {1} 1; first by auto; smt.
+  inline BudgetedSignHybridDisjointOrclbCallR.orcl.
+  wp.
+  call budgeted_sign_hybrid_disjoint_R_orcl_orclR.
+  by auto => />; smt.
+have right_wrap_eq :
+  Pr[BudgetedSignHybridDisjointOrclbCallR.orcl(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
++ byequiv => //.
+  proc*.
+  call budgeted_sign_hybrid_disjoint_orclb_callR_orclR.
+  by auto.
+have right_eq :
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)]
+  by smt.
+have h :=
+  real_le_congr_from_equal_sides
+    (Pr[BudgetedSignHybridDisjoint.HybOrcl
+         (BudgetedSignHybridDisjointOrclb,
+          BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+         .orcl(qry) @ &m :
+         P res BudgetedSignHybridDisjoint.HybOrcl.l
+           (glob BudgetedSignHybridDisjointGame)
+           (glob BudgetedSignHybridDisjointOrclb) /\
+         budgeted_sign_hybrid_disjoint_orclb_clean
+           (glob BudgetedSignHybridDisjointOrclb)])
+    (Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+         P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+           (glob BudgetedSignHybridDisjointGame)
+           (glob BudgetedSignHybridDisjointOrclb) /\
+         budgeted_sign_hybrid_disjoint_orclb_clean
+           (glob BudgetedSignHybridDisjointOrclb)])
+    (Pr[BudgetedSignHybridDisjoint.HybOrcl
+         (BudgetedSignHybridDisjointOrclb,
+          BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+         .orcl(qry) @ &m :
+         P res BudgetedSignHybridDisjoint.HybOrcl.l
+           (glob BudgetedSignHybridDisjointGame)
+           (glob BudgetedSignHybridDisjointOrclb) /\
+         budgeted_sign_hybrid_disjoint_orclb_clean
+           (glob BudgetedSignHybridDisjointOrclb)])
+    (Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+         P res (BudgetedSignHybridDisjoint.HybOrcl.l + 1)
+           (glob BudgetedSignHybridDisjointGame)
+           (glob BudgetedSignHybridDisjointOrclb) /\
+         budgeted_sign_hybrid_disjoint_orclb_clean
+           (glob BudgetedSignHybridDisjointOrclb)])
+    rejection_sampling_loss_term.
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_continuation_from_signature_framing
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (p : signature -> bool) (qry : SIG.query) (next_l : int) &m :
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       p res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       p res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       p res] +
+    rejection_sampling_loss_term =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       p res] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+by smt.
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_left_state_to_signature_frame
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (p : signature -> bool) (qry : SIG.query) (next_l : int) &m :
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     P sig next_l gg go => p sig) =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       p res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+by move=> frame; smt(mu_sub).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_right_signature_to_state_frame
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (p : signature -> bool) (qry : SIG.query) (next_l : int) &m :
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     p sig =>
+       P sig next_l gg go /\
+       budgeted_sign_hybrid_disjoint_orclb_clean go) =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       p res] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+by move=> frame; smt(mu_sub).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_left_state_to_exists_signature_frame
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (qry : SIG.query) (next_l : int) &m :
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       (exists (gg : glob BudgetedSignHybridDisjointGame),
+          exists (go : glob BudgetedSignHybridDisjointOrclb),
+            P res next_l gg go /\
+            budgeted_sign_hybrid_disjoint_orclb_clean go) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)].
+proof.
+by smt(mu_sub).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_orclb_restricted_state_continuation_from_signature_loss
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (p : signature -> bool) (qry : SIG.query) (next_l : int) &m :
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     P sig next_l gg go => p sig) =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       p res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       p res] +
+    rejection_sampling_loss_term =>
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     p sig =>
+       P sig next_l gg go /\
+       budgeted_sign_hybrid_disjoint_orclb_clean go) =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       P res next_l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+move=> left_frame sig_loss right_frame.
+apply
+  (budgeted_sign_hybrid_disjoint_orclb_continuation_from_signature_framing
+     P p qry next_l &m).
++ by apply
+     (budgeted_sign_hybrid_disjoint_orclb_left_state_to_signature_frame
+        P p qry next_l &m).
++ exact sig_loss.
+by apply
+   (budgeted_sign_hybrid_disjoint_orclb_right_signature_to_state_frame
+      P p qry next_l &m).
+qed.
+
+local lemma budgeted_sign_hybrid_disjoint_active_hyborcl_clean_le_from_signature_restricted
+    (P : signature -> int -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool)
+    (p : signature -> bool) (qry : SIG.query) &m :
+  BudgetedSignHybridDisjoint.HybOrcl.l0{m} =
+    BudgetedSignHybridDisjoint.HybOrcl.l{m} =>
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     P sig (BudgetedSignHybridDisjoint.HybOrcl.l{m} + 1) gg go =>
+       p sig) =>
+  Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) @ &m :
+       p res /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) @ &m :
+       p res] +
+    rejection_sampling_loss_term =>
+  (forall (sig : signature)
+          (gg : glob BudgetedSignHybridDisjointGame)
+          (go : glob BudgetedSignHybridDisjointOrclb),
+     p sig =>
+       P sig (BudgetedSignHybridDisjoint.HybOrcl.l{m} + 1) gg go /\
+       budgeted_sign_hybrid_disjoint_orclb_clean go) =>
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] <=
+  Pr[BudgetedSignHybridDisjoint.HybOrcl
+       (BudgetedSignHybridDisjointOrclb,
+        BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+       .orcl(qry) @ &m :
+       P res BudgetedSignHybridDisjoint.HybOrcl.l
+         (glob BudgetedSignHybridDisjointGame)
+         (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)] +
+    rejection_sampling_loss_term.
+proof.
+move=> active left_frame sig_loss right_frame.
+apply
+  (budgeted_sign_hybrid_disjoint_active_hyborcl_clean_le_from_orclb_continuation
+     P qry &m active).
+have h :=
+  budgeted_sign_hybrid_disjoint_orclb_restricted_state_continuation_from_signature_loss
+    P p qry (BudgetedSignHybridDisjoint.HybOrcl.l{m} + 1) &m
+    left_frame sig_loss right_frame.
+by smt.
+qed.
+
+(* The checked active-HybOrcl bridge above only converts a one-call
+   Orclb-level continuation inequality into the corresponding active hybrid
+   oracle inequality.  It does not prove the genuine sampler loss: that still
+   requires an Orclb-level continuation theorem for orclL/orclR from the
+   sampler push-forward laws and clean-state invariants.
+
+   Focused Orclb-level continuation-loss spike:
+   the exact missing premise for using the active-HybOrcl bridge is a theorem
+   of the following shape.  For every continuation
+
+     P : signature -> glob BudgetedSignHybridDisjointGame ->
+         glob BudgetedSignHybridDisjointOrclb -> bool
+
+   and every query qry, assuming structural_to_exact_hyperball_paper_sample_loss_obligation,
+   sampler_rom_covered for the current ROM table/adversary hash log/sampler
+   expand log, !sampler_bad_prequery, an active signing counter, and
+   ROSigningAttemptPaperSimSampler.sk_current =
+   ROExactHyperballPaperSimSampler.sk_current, prove
+
+     Pr[BudgetedSignHybridDisjointOrclb.orclL(qry) :
+          P res (glob BudgetedSignHybridDisjointGame)
+                (glob BudgetedSignHybridDisjointOrclb) /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+     <=
+     Pr[BudgetedSignHybridDisjointOrclb.orclR(qry) :
+          P res (glob BudgetedSignHybridDisjointGame)
+                (glob BudgetedSignHybridDisjointOrclb) /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term.
+
+   A direct derivation from
+     concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface
+   is blocked by the postcondition type.  That checked lemma supports only
+   p : signature -> bool and therefore cannot mention the post-call ROM table,
+   transcript records, sampler_expand_queries, sampler_bad_prequery, Hybrid
+   counters, or glob BudgetedSignHybridDisjointGame/Orclb.  Instantiating p
+   with a term involving glob BudgetedSignHybridDisjointOrclb would freeze the
+   globals at the surrounding memory, not at the post-state of orclL/orclR.
+
+   The narrow failed proof shape is:
+
+     bypr=> &m premises.
+     byphoare (_ : pre ==> P res (glob Game) (glob Orclb) /\ clean) => //.
+     proc; inline BudgetedSignHybridDisjointOrclb.orclL
+                  BudgetedSignHybridDisjointOrclb.orclR; ...
+     call concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface.
+
+   The call is not applicable: the proof state after opening orclL/orclR has a
+   sampler call followed by two lazy-ROM gets and transcript/log assignments,
+   while the available one-call lemma is a one-sided probability inequality for
+   ROMInternalTranscriptBudgetedPaperSimAsNMA(...).O.sign with a signature-only
+   postcondition.  EasyCrypt's ordinary call/byequiv rules do not consume that
+   one-sided inequality as a stateful continuation rule.
+
+   The next helper needed is therefore either:
+   - a strengthened one-call theorem whose postcondition is a continuation over
+     the returned signature and the post-state globals listed above; or
+   - a decomposition theorem showing that the post-sample lazy-ROM gets and log
+     updates can be framed into a pure signature predicate before invoking the
+     existing signature-only one-call loss.
+
+   The checked framing bridge
+     budgeted_sign_hybrid_disjoint_orclb_continuation_from_signature_framing
+   records the second route precisely.  It reduces the desired stateful Orclb
+   inequality to three premises: a left-state-to-signature upper frame, the
+   existing signature-level loss, and a right-signature-to-state lower frame.
+   The unresolved proof work is exactly those two state-framing inequalities:
+   they must account for the lazy-ROM table updates, transcript-record updates,
+   sampler_expand_queries, sampler_bad_prequery, and the Hybrid l/l0 state.
+
+   Focused suffix-framing spike:
+   the easy logical framing facts are now checked by
+     budgeted_sign_hybrid_disjoint_orclb_left_state_to_signature_frame,
+     budgeted_sign_hybrid_disjoint_orclb_right_signature_to_state_frame, and
+     budgeted_sign_hybrid_disjoint_orclb_left_state_to_exists_signature_frame.
+   The combined restricted rule
+     budgeted_sign_hybrid_disjoint_orclb_restricted_state_continuation_from_signature_loss
+   is also checked: it is the strongest currently available route from a
+   signature-only loss to a stateful Orclb continuation.  Its right-frame
+   premise requires the pure signature predicate p to imply the desired
+   continuation and clean flag for every post-state, so it is usable only for
+   state-insensitive continuations or continuations whose state component is
+   already forced independently.
+
+   The next checked bridge
+     budgeted_sign_hybrid_disjoint_active_hyborcl_clean_le_from_signature_restricted
+   lifts that restricted Orclb rule through the active HybOrcl branch l = l0.
+   Thus the restricted route is usable at exactly the active switch point, but
+   only if the actual post-switch continuation can be expressed through such a
+   pure signature predicate p.
+
+   The actual clean/clean HybGame continuation does not fit that restricted
+   shape.  After the active signing call, the continuation is the rest of
+   A(AH,O).forge followed by verify_internal, with final event
+   res /\ budgeted_sign_hybrid_disjoint_orclb_clean (glob
+   BudgetedSignHybridDisjointOrclb).  That event depends on the adversary
+   private state, future AH.get/O.sign calls, glob HAETAE_RO.FRO, the game
+   pk/signing counter, transcript and record logs, adversary_hash_queries,
+   sampler_expand_queries, sampler_bad_prequery, and the Hybrid l/l0 state.
+   None of those components is determined by the active call's returned
+   signature alone.
+
+   This does not solve the substantive suffix problem for the actual HybGame
+   continuation or arbitrary P, because
+   the only unconditional pure-signature left frame is the existential
+   predicate
+
+     exists post-game post-orclb,
+       P sig next_l post-game post-orclb /\ clean post-orclb.
+
+   The matching right lower frame for that predicate is too strong: an
+   exact-side execution with the same returned signature need not have the
+   witness post-state selected by the existential predicate.  The post-state of
+   orclR contains the lazy-ROM table after the message-hash and challenge-hash
+   gets, the sample-dependent challenge query, transcript/record logs, the
+   self-logged sampler query, sampler_bad_prequery, and Hybrid l/l0 state.
+   A predicate P may distinguish two such post-states even when the returned
+   signature is the same.  Therefore no p : signature -> bool can generally
+   provide both the left upper frame and the right lower frame for arbitrary P.
+
+   The exact failed strengthening is:
+
+     byphoare (_ :
+       pre ==>
+       p res <=>
+       P res next_l (glob BudgetedSignHybridDisjointGame)
+                    (glob BudgetedSignHybridDisjointOrclb) /\
+       budgeted_sign_hybrid_disjoint_orclb_clean
+         (glob BudgetedSignHybridDisjointOrclb)) => //.
+     proc; inline BudgetedSignHybridDisjointOrclb.orclR; ...
+
+   The proof cannot close after the two HAETAE_RO.FRO.get calls: their random
+   table updates are observable in glob BudgetedSignHybridDisjointOrclb but are
+   not encoded in res.  A successful route needs either a state-insensitive
+   continuation P, or a stronger stateful sampler/lazy-ROM coupling theorem
+   whose postcondition ranges over the returned signature and post-state. *)
+
+(* Exact remaining one-switch obligation for the disjoint Hybrid_restr route.
+   The checked lemmas above show the arithmetic accumulation available from
+   Hybrid_restr once a single active signing-call comparison is supplied.
+   There are two checked routes.  The coarse route accepts the res/res
+   one-switch inequality:
+
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+          .main() : res]
+     <=
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+          .main() : res]
+       + rejection_sampling_loss_term.
+
+   The sharper route expresses the clean flag as the pure predicate
+   budgeted_sign_hybrid_disjoint_orclb_clean on
+   glob BudgetedSignHybridDisjointOrclb.  Projection 8 of that global tuple is
+   ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery in the
+   disjoint Orclb package.  Directly mentioning the mutable module variable
+   inside the predicate supplied to Hybrid_restr is not accepted: the library
+   theorem requires a pure predicate over glob Game, glob Orclb, the selected
+   index, and the result.  With that projection, the exact remaining
+   clean/clean one-switch premise is
+
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.L(BudgetedSignHybridDisjointOrclb))
+          .main() :
+          res /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+     <=
+     Pr[BudgetedSignHybridDisjoint.HybGame
+          (BudgetedSignHybridDisjointGame,
+           BudgetedSignHybridDisjointOrclb,
+           BudgetedSignHybridDisjoint.R(BudgetedSignHybridDisjointOrclb))
+          .main() :
+          res /\
+          budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term.
+
+   The checked clean bridge then weakens the final right-clean event to right
+   res by event monotonicity after the Hybrid_restr accumulation.  This avoids
+   needing a stronger res/res one-switch bound, but it still requires proving
+   the active-call clean/clean comparison above.
+
+   In these two games, HybOrcl uses orclR before the selected index l0, uses
+   orclL/orclR only at l = l0, and uses orclL after l0.  The proof therefore
+   has exactly one sampler-distribution difference to charge.  The obstruction
+   is the active-call continuation: at l = l0 the postcondition is not merely
+   p sig for p : signature -> bool.  It is the remaining execution of
+   A(AH,O).forge plus verify_internal, and it depends on glob A, glob
+   HAETAE_RO.FRO, the transcript/signing logs, both signing counters, the
+   adversary hash log, sampler_expand_queries, and sampler_bad_prequery.
+
+   The checked one-call lemma
+     concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface
+   can supply the local rejection-sampling loss only after a stronger
+   stateful oracle rule has related that continuation to a signature predicate.
+   The required invariant around the active LR.orcl call is:
+   - both hybrid runs have identical public key, adversary-visible hash log,
+     transcript log, signing-record log, adversary hash counter, and local
+     Hybrid/HopGames signing counters;
+   - the shared Orclb-side signing_count is active and below
+     signature_query_budget_count;
+   - sampler_rom_covered holds on the attempt side for the current ROM table,
+     adversary_hash_queries, and sampler_expand_queries;
+   - sampler_bad_prequery is false before the attempt-side call, and the
+     sampled seed is fresh for both adversary_hash_queries and
+     sampler_expand_queries;
+   - ROSigningAttemptPaperSimSampler.sk_current =
+     ROExactHyperballPaperSimSampler.sk_current.
+
+   Without this stateful one-switch rule, the theorem above is the strongest
+   machine-checked consequence currently available from Hybrid_restr: it proves
+   the arithmetic accumulation, conditional on the missing one-switch bound,
+   but it does not prove the clean-event NMA lifting itself.
+
+   Focused clean/clean one-switch spike:
+   a direct byequiv/phoare proof of the displayed HybGame inequality reaches
+   the call to BudgetedSignHybridDisjointGame(...).Adv.forge.  At that point
+   the proof needs an oracle specification for
+   BudgetedSignHybridDisjoint.HybOrcl(...).orcl that is exact except when
+   HybOrcl.l = HybOrcl.l0.  In that active branch the left run calls
+   BudgetedSignHybridDisjointOrclb.orclL and the right run calls
+   BudgetedSignHybridDisjointOrclb.orclR; after the call, the continuation is
+   the rest of the adversary plus verify_internal, with the final predicate
+   res /\ budgeted_sign_hybrid_disjoint_orclb_clean (glob
+   BudgetedSignHybridDisjointOrclb).
+
+   The missing continuation principle is therefore:
+   for every continuation K over the returned signature, the adversary state,
+   glob HAETAE_RO.FRO, glob BudgetedSignHybridDisjointGame, and glob
+   BudgetedSignHybridDisjointOrclb, prove a one-sided call rule
+
+     Pr[HybOrcl(...,L(...)).orcl(q) :
+          K res post_state /\ budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+     <=
+     Pr[HybOrcl(...,R(...)).orcl(q) :
+          K res post_state /\ budgeted_sign_hybrid_disjoint_orclb_clean
+            (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term
+
+   under the invariant
+     HybOrcl.l = HybOrcl.l0,
+     BudgetedSignHybridDisjointGame.signing_count <
+       signature_query_budget_count,
+     ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current =
+       BudgetedSignHybridDisjointGame.pk_current,
+     ROSigningAttemptPaperSimSampler.sk_current =
+       ROExactHyperballPaperSimSampler.sk_current,
+     sampler_rom_covered HAETAE_RO.FRO.m adversary_hash_queries
+       sampler_expand_queries,
+     !sampler_bad_prequery, and identical public logs/counters on both sides.
+
+   concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface is
+   still too weak for that call rule because its p : signature -> bool cannot
+   mention the post-call ROM table, transcript records, Hybrid counters, glob A,
+   or future oracle behavior.  It is a local distribution comparison for one
+   signing result, not a continuation-passing lossy oracle rule.
+
+   Actual stateful HybGame continuation spike:
+   the verifier-clean suffix has now been named by the checked predicate
+     budgeted_sign_hybrid_disjoint_verify_clean_event.
+   After Adv.forge returns (m,ctx,sig), the final event is exactly
+     budgeted_sign_hybrid_disjoint_verify_clean_event pk (m,ctx,sig)
+       (glob BudgetedSignHybridDisjointOrclb).
+   This extraction isolates the easy deterministic suffix; it does not expose
+   the harder continuation inside the abstract adversary.
+
+   The one-switch continuation generated at the active HybOrcl call is:
+   - resume the current invocation of A(AH,O).forge with the returned signature;
+   - allow future AH.get calls through Ob.leaks and future O.sign calls through
+     the same hybrid oracle, with l advanced past l0;
+   - run verify_internal on the final forgery; and
+   - test budgeted_sign_hybrid_disjoint_orclb_clean on the final Orclb global.
+
+   A direct proof attempt would need to call Adv.forge with an oracle rule for
+   HybOrcl.orcl that is approximate at l = l0 and exact elsewhere.  EasyCrypt's
+   adversary call rule here accepts exact relational oracle specifications, not
+   a one-sided lossy specification whose postcondition ranges over the returned
+   signature, glob A, glob HAETAE_RO.FRO, glob
+   BudgetedSignHybridDisjointGame, glob BudgetedSignHybridDisjointOrclb, and
+   the later verifier-clean suffix.
+
+   The narrow next lemma needed is a stateful active-switch rule of the shape:
+
+     Pr[BudgetedSignHybridDisjoint.HybGame(...,L(...)).main() :
+          budgeted_sign_hybrid_disjoint_verify_clean_event
+            BudgetedSignHybridDisjointGame.pk_current res_forgery
+            (glob BudgetedSignHybridDisjointOrclb)]
+     <=
+     Pr[BudgetedSignHybridDisjoint.HybGame(...,R(...)).main() :
+          budgeted_sign_hybrid_disjoint_verify_clean_event
+            BudgetedSignHybridDisjointGame.pk_current res_forgery
+            (glob BudgetedSignHybridDisjointOrclb)]
+       + rejection_sampling_loss_term,
+
+   where res_forgery abbreviates the final (m,ctx,sig) returned by the resumed
+   adversary.  This cannot currently be stated directly against HybGame.main
+   because main returns only the verifier boolean, not the forgery triple.  A
+   proof-ready formulation must either introduce a ghost/surface game returning
+   the forgery triple and final globals, or prove an adversary-call induction
+   principle whose continuation parameter represents the resumed forge plus
+   verify_internal suffix.
+
+   Required state relation for that lemma:
+   - equal glob A before the active call, followed by a continuation relation
+     after the returned signatures are delivered to the adversary;
+   - equal lazy-ROM tables except for coupled get extensions generated by the
+     active call and future calls;
+   - equal pk_current, transcript queries, transcript list, records,
+     adversary_hash_queries, sampler_expand_queries, signing counters, and
+     Hybrid l/l0 state except for the intended l increment;
+   - sampler_rom_covered and !sampler_bad_prequery on the attempt side; and
+   - identical sampler secret state between the attempt and exact samplers.
+
+   The current restricted-continuation lemmas cannot supply this because the
+   post-switch continuation is not a function of the active returned signature
+   alone. *)
 
 lemma concrete_lazy_rom_get_preserves_signature_event
     pk m ctx smp (p : signature -> bool) :
@@ -7368,6 +11196,135 @@ lemma concrete_lazy_rom_get_true :
 proof.
 by conseq concrete_lazy_rom_get_lossless.
 qed.
+
+local module ConcreteBudgetedSigningSuffix = {
+  proc run(m : message, ctx : context,
+           smp : paper_sim_signature_sample) : signature = {
+    var ro_y, mu, highbits, lowbits, sig, tr;
+
+    ro_y <@ HAETAE_RO.FRO.get
+      (message_hash_query
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current ctx m);
+    mu <- ro_message_hash ro_y;
+    highbits <-
+      paper_sim_commitment_highbits haetae_mode
+        ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    lowbits <- paper_sim_commitment_lowbits haetae_mode smp;
+    ro_y <@ HAETAE_RO.FRO.get
+      (challenge_hash_query haetae_mode highbits lowbits mu);
+    sig <-
+      paper_sim_signature haetae_mode
+        ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx smp;
+    tr <-
+      transcript_of_signature haetae_mode
+        ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current m ctx sig;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries <-
+      (m, ctx) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.queries;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts <-
+      tr :: ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts;
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records <-
+      (m, ctx, sig, tr) :: ROMInternalTranscriptBudgetedPaperSimAsNMA.records;
+    return sig;
+  }
+}.
+
+local lemma concrete_budgeted_signing_suffix_non_rom_state_eq
+    msg ctxt smp pk qs trs recs ahc sc ahqs sqs bad :
+  phoare[ConcreteBudgetedSigningSuffix.run :
+    arg = (msg, ctxt, smp) /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current = pk /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries = qs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts = trs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records = recs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count = ahc /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = sc /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries = ahqs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries = sqs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery = bad ==>
+    res = paper_sim_signature haetae_mode pk msg ctxt smp /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current = pk /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.queries = (msg, ctxt) :: qs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts =
+      transcript_of_signature haetae_mode pk msg ctxt
+        (paper_sim_signature haetae_mode pk msg ctxt smp) :: trs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.records =
+      (msg, ctxt,
+       paper_sim_signature haetae_mode pk msg ctxt smp,
+       transcript_of_signature haetae_mode pk msg ctxt
+         (paper_sim_signature haetae_mode pk msg ctxt smp)) :: recs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count = ahc /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count = sc /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries = ahqs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries = sqs /\
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery = bad] = 1%r.
+proof.
+proc.
+wp.
+call concrete_lazy_rom_get_true.
+wp.
+call concrete_lazy_rom_get_true.
+by auto => />.
+qed.
+
+local equiv concrete_budgeted_signing_suffix_self_equiv :
+  ConcreteBudgetedSigningSuffix.run ~ ConcreteBudgetedSigningSuffix.run :
+  ={arg, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA} ==>
+  ={res, glob HAETAE_RO.FRO,
+    glob ROMInternalTranscriptBudgetedPaperSimAsNMA}.
+proof.
+proc.
+wp.
+call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+          ={res, glob HAETAE_RO.FRO}).
++ by proc; sim.
+wp.
+call (_ : ={arg, glob HAETAE_RO.FRO} ==>
+          ={res, glob HAETAE_RO.FRO}).
++ by proc; sim.
+by auto => />.
+qed.
+
+(* Deterministic signing-suffix state relation.
+   The proof-only ConcreteBudgetedSigningSuffix factors the common tail after a
+   paper_sim_signature_sample has already been returned by sample_with_seed.
+   The checked lemma
+     concrete_budgeted_signing_suffix_non_rom_state_eq
+   proves that, excluding HAETAE_RO.FRO.m, the tail deterministically returns
+   paper_sim_signature haetae_mode pk m ctx smp, appends exactly the expected
+   query/transcript/record entries, and preserves pk_current,
+   adversary_hash_count, signing_count, adversary_hash_queries,
+   sampler_expand_queries, and sampler_bad_prequery.
+
+   The checked equivalence
+     concrete_budgeted_signing_suffix_self_equiv
+   proves the stronger relational fact needed for wrapper refactorings: if the
+   pre-suffix lazy-ROM state, budgeted transcript state, and returned sample are
+   equal on both sides, then the post-suffix lazy-ROM state, returned signature,
+   and transcript state are equal.
+
+   This does not yet give the resumable active-call loss.  Attempt and exact
+   executions enter the suffix after different sampler laws, and an arbitrary
+   continuation may inspect HAETAE_RO.FRO.m after the message-hash and
+   challenge-hash gets.  The missing theorem must relate those two post-suffix
+   ROM tables, not just the non-ROM transcript bookkeeping.  A precise future
+   theorem shape is:
+
+     Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+          (seed_coins,m,ctx) ;
+        ConcreteBudgetedSigningSuffix.run(m,ctx,smp) :
+          R sig (glob HAETAE_RO.FRO) post_budgeted_state]
+     <=
+     Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+          (seed_coins,m,ctx) ;
+        ConcreteBudgetedSigningSuffix.run(m,ctx,smp) :
+          R sig (glob HAETAE_RO.FRO) post_budgeted_state]
+       + rejection_sampling_loss_term
+
+   for suffix-measurable continuations R equipped with an explicit ROM-table
+   relation for the sampler-expand, message-hash, and challenge-hash entries.
+   Without that relation, an arbitrary R can still distinguish the exact-side
+   independently sampled ROM state from the attempt-side correlated one. *)
 
 lemma concrete_lazy_rom_get_preserves_budgeted_clean_signature_event
     pk m ctx smp (p : signature -> bool) :
@@ -7528,12 +11485,13 @@ if.
   wp.
   call concrete_lazy_rom_get_true.
   by auto => />.
-+ inline HAETAE_RO.FRO.get.
++ hoare.
+  inline HAETAE_RO.FRO.get.
   wp.
   rnd.
   wp.
   rnd.
-  by auto => />; smt(ro_output_distribution_lossless).
+  by auto => />; smt.
 + by smt(mu_bounded).
 by auto => />; smt.
 qed.
@@ -7730,6 +11688,571 @@ have exact_project :
 by smt().
 qed.
 
+lemma concrete_budgeted_o_sign_clean_one_call_restricted_state_loss_from_sampler_framing
+    seed_coins m ctx pk
+    (R : signature -> glob HAETAE_RO.FRO -> pkey ->
+         SIG.query list -> transcript list -> signing_transcript_record list ->
+         int -> int -> ro_query list -> ro_query list -> bool -> bool)
+    (Q : paper_sim_signature_sample -> glob HAETAE_RO.FRO -> bool)
+    (p : paper_sim_signature_sample -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} <
+    signature_query_budget_count =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       p res] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       p res] <=
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       Q res (glob HAETAE_RO.FRO)] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean active pk_eq sk_eq
+        attempt_suffix_frame sample_left_frame sample_right_frame
+        exact_suffix_frame.
+have sampler_state_loss :=
+  concrete_budgeted_o_sign_sample_with_seed_clean_restricted_state_loss_surface
+    seed_coins m ctx Q p &m sample_loss covered clean sk_eq
+    sample_left_frame sample_right_frame.
+by smt().
+qed.
+
+lemma concrete_budgeted_o_sign_attempt_signature_suffix_frame
+    seed_coins m ctx pk
+    (R : signature -> glob HAETAE_RO.FRO -> pkey ->
+         SIG.query list -> transcript list -> signing_transcript_record list ->
+         int -> int -> ro_query list -> ro_query list -> bool -> bool)
+    (p : signature -> bool) &m :
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} <
+    signature_query_budget_count =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{m} = pk =>
+  (forall (sig : signature) (fro : glob HAETAE_RO.FRO) (pk0 : pkey)
+          (qs : SIG.query list) (trs : transcript list)
+          (recs : signing_transcript_record list) (ahc sc : int)
+          (ahqs sqs : ro_query list) (bad : bool),
+     R sig fro pk0 qs trs recs ahc sc ahqs sqs bad => p sig) =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       p (paper_sim_signature haetae_mode pk m ctx res)].
+proof.
+move=> covered clean active pk_eq frame.
+have left_sub :
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery].
++ by smt(mu_sub).
+have project :=
+  concrete_budgeted_ro_signing_attempt_o_sign_to_self_logged_sample_active_projection
+    seed_coins pk ROSigningAttemptPaperSimSampler.sk_current{m}
+    m ctx p &m covered clean active pk_eq _.
++ by smt().
+have clean_true :
+  (fun smp =>
+     p (paper_sim_signature haetae_mode pk m ctx smp) /\
+     ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+        sampler_expand_query seed_coins \in
+          ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+        sampler_expand_query seed_coins \in
+          ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}))
+  =
+  (fun smp =>
+     p (paper_sim_signature haetae_mode pk m ctx smp)).
++ by apply fun_ext; move=> smp; smt().
+by smt().
+qed.
+
+lemma concrete_budgeted_o_sign_exact_signature_suffix_frame
+    seed_coins m ctx pk
+    (R : signature -> glob HAETAE_RO.FRO -> pkey ->
+         SIG.query list -> transcript list -> signing_transcript_record list ->
+         int -> int -> ro_query list -> ro_query list -> bool -> bool)
+    (p : signature -> bool) &m :
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} <
+    signature_query_budget_count =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{m} = pk =>
+  (forall (sig : signature) (fro : glob HAETAE_RO.FRO) (pk0 : pkey)
+          (qs : SIG.query list) (trs : transcript list)
+          (recs : signing_transcript_record list) (ahc sc : int)
+          (ahqs sqs : ro_query list) (bad : bool),
+     p sig => R sig fro pk0 qs trs recs ahc sc ahqs sqs bad) =>
+  Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+       (seed_coins, m, ctx) @ &m :
+       p (paper_sim_signature haetae_mode pk m ctx res)] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery].
+proof.
+move=> active pk_eq frame.
+have project :=
+  concrete_budgeted_ro_exact_hyperball_sample_with_seed_to_o_sign_active_projection
+    seed_coins pk ROExactHyperballPaperSimSampler.sk_current{m}
+    m ctx p &m active pk_eq _.
++ by smt().
+have right_sub :
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery].
++ by smt(mu_sub).
+by smt().
+qed.
+
+lemma concrete_budgeted_o_sign_clean_one_call_restricted_state_loss_from_signature_suffix_frames
+    seed_coins m ctx pk
+    (R : signature -> glob HAETAE_RO.FRO -> pkey ->
+         SIG.query list -> transcript list -> signing_transcript_record list ->
+         int -> int -> ro_query list -> ro_query list -> bool -> bool)
+    (p : signature -> bool) &m :
+  structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
+  sampler_rom_covered
+    HAETAE_RO.FRO.m{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m}
+    ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m} =>
+  ! (ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries{m} \/
+     sampler_expand_query seed_coins \in
+       ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries{m}) =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count{m} <
+    signature_query_budget_count =>
+  ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current{m} = pk =>
+  ROSigningAttemptPaperSimSampler.sk_current{m} =
+    ROExactHyperballPaperSimSampler.sk_current{m} =>
+  (forall (sig : signature) (fro : glob HAETAE_RO.FRO) (pk0 : pkey)
+          (qs : SIG.query list) (trs : transcript list)
+          (recs : signing_transcript_record list) (ahc sc : int)
+          (ahqs sqs : ro_query list) (bad : bool),
+     R sig fro pk0 qs trs recs ahc sc ahqs sqs bad => p sig) =>
+  (forall (sig : signature) (fro : glob HAETAE_RO.FRO) (pk0 : pkey)
+          (qs : SIG.query list) (trs : transcript list)
+          (recs : signing_transcript_record list) (ahc sc : int)
+          (ahqs sqs : ro_query list) (bad : bool),
+     p sig => R sig fro pk0 qs trs recs ahc sc ahqs sqs bad) =>
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] +
+    rejection_sampling_loss_term.
+proof.
+move=> sample_loss covered clean active pk_eq sk_eq left_frame right_frame.
+have left_sub :
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res /\
+       ! ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery].
++ by smt(mu_sub).
+have attempt_project :=
+  concrete_budgeted_ro_signing_attempt_o_sign_to_self_logged_sample_active_projection
+    seed_coins pk ROSigningAttemptPaperSimSampler.sk_current{m}
+    m ctx p &m covered clean active pk_eq _.
++ by smt().
+have sig_loss :=
+  concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface
+    seed_coins m ctx pk p &m sample_loss covered clean active pk_eq sk_eq
+    attempt_project.
+have right_sub :
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       p res] <=
+  Pr[ROMInternalTranscriptBudgetedPaperSimAsNMA
+       (A, ROExactHyperballPaperSimSampler(HAETAE_RO.FRO),
+        HAETAE_RO.FRO).O.sign(m, ctx) @ &m :
+       R res (glob HAETAE_RO.FRO)
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.pk_current
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.transcripts
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.records
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.signing_count
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.adversary_hash_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_expand_queries
+         ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery].
++ by smt(mu_sub).
+by smt().
+qed.
+
+(* Checked O.sign stateful bridge status.
+   concrete_budgeted_o_sign_clean_one_call_restricted_state_loss_from_sampler_framing
+   is the current non-vacuous O.sign-level consequence of the restricted
+   sampler/lazy-ROM lifting lemmas.  It is machine-checked by implication, and
+   its four framing premises are the exact remaining proof obligations:
+   - attempt O.sign stateful event <= attempt sample_with_seed stateful sample
+     event, after exposing the active branch, self-logged seed, sampler log
+     update, message-hash get, challenge-hash get, signature construction, and
+     transcript/record updates;
+   - attempt sample stateful event <= pure returned-sample predicate p;
+   - pure returned-sample predicate p <= exact sample stateful event; and
+   - exact sample stateful event <= exact O.sign stateful event after the same
+     deterministic signing suffix.
+
+   The last two suffix obligations are the hard ones.  They require a ROM-table
+   relation for the two post-sample HAETAE_RO.FRO.get calls and a statement
+   that the resulting transcript/log state is either determined by the returned
+   sample and preserved globals or is intentionally hidden from R.  Without that
+   relation, an arbitrary R can distinguish post-call lazy-ROM tables,
+   challenge queries, records, sampler_expand_queries, or sampler_bad_prequery
+   values that are not encoded by the pure sample predicate p.
+
+   The checked suffix-frame lemmas above prove the only local frame available
+   from the current projection facts: if the stateful postcondition R is
+   equivalent, for all relevant post-states, to a pure returned-signature
+   predicate p, then the signature-only one-call loss yields the restricted
+   stateful O.sign theorem
+     concrete_budgeted_o_sign_clean_one_call_restricted_state_loss_from_signature_suffix_frames.
+   That is useful for state-insensitive continuations, but it still does not
+   cover the resumable active-call continuation, whose truth can depend on the
+   concrete post-call ROM table, transcript records, sampler log, and future
+   oracle behavior.  The more general sampler/lazy-ROM bridge remains the
+   conditional interface for future suffix-measurable Q predicates once their
+   four framing premises are proved. *)
+
+(* Stateful one-call strengthening spike.
+   A direct strengthening of
+     concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface
+   from p : signature -> bool to an arbitrary post-state predicate is not a
+   local generalization of the checked proof above.  The proof above uses the
+   marginal sampler obligation
+
+     forall p : paper_sim_signature_sample -> bool,
+       mu dsigning_attempt_state p <=
+       mu dexact_hyperball_signing_attempt_state p
+         + rejection_sampling_loss_term.
+
+   A stateful postcondition over the returned signature, glob HAETAE_RO.FRO,
+   transcript/signing logs, sampler_expand_queries, sampler_bad_prequery, and
+   signing counters needs a joint sampler/lazy-ROM statement instead.  The
+   attempt sampler correlates the returned sample with the sampler-expand ROM
+   entry, while the exact-hyperball sampler still performs the ROM get but
+   samples the attempt state independently.  An arbitrary post-state predicate
+   can observe that joint state through the lazy-ROM table or through later
+   adversary calls, so it cannot be encoded by freezing a pure p on the
+   returned signature.
+
+   The next non-vacuous theorem needed before the resumable active-call loss
+   can be proved is therefore a restricted stateful sampler/lazy-ROM lifting
+   lemma, not the vacuous O.sign bound:
+
+     Pr[ROSigningAttemptPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+          (seed_coins,m,ctx) :
+          Q res (glob HAETAE_RO.FRO)]
+     <=
+     Pr[ROExactHyperballPaperSimSampler(HAETAE_RO.FRO).sample_with_seed
+          (seed_coins,m,ctx) :
+          Q res (glob HAETAE_RO.FRO)]
+       + rejection_sampling_loss_term
+
+   for the specific suffix-measurable predicates Q generated by the signing
+   suffix and resumable resume_after_active continuation, under freshness,
+   sampler_rom_covered, matching sampler secrets, and a relation saying that Q
+   does not exploit any correlation between the sampler-expand ROM output and
+   the exact-side independently sampled state beyond the information present in
+   the returned signature.  The checked O.sign bridge above shows how to lift
+   such a sampler statement through the deterministic signing suffix once the
+   suffix-framing premises are proved.  Without those frames, the theorem is
+   still conditional; using mu_bounded plus rejection_sampling_loss_term_ge1
+   here would again be a vacuous proof and is intentionally not done. *)
+
+(* Focused proof-obligation note for the budgeted clean-event route.
+   The desired non-vacuous proof of
+   concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting
+   requires an adaptive loss-lifting rule over A.forge.  The checked one-call
+   ingredients above are not enough by themselves: they must be applied to the
+   continuation success predicate induced by the adversary after each active
+   signing-oracle call.
+
+   Exact missing induction principle:
+   for every adversary-continuation postcondition C over the final forge result
+   and the public final state visible to the later verifier
+     C r (glob A) (glob HAETAE_RO.FRO)
+       pk_current queries transcripts records
+       adversary_hash_count signing_count
+       adversary_hash_queries sampler_expand_queries,
+   and for related attempt/exact memories satisfying the invariant below with
+     k = signature_query_budget_count - signing_count{attempt},
+   prove
+     Pr[A(AH_attempt,O_attempt).forge(pk) @ attempt :
+          C res ... /\ !sampler_bad_prequery]
+     <=
+     Pr[A(AH_exact,O_exact).forge(pk) @ exact :
+          C res ...]
+     + (k)%r * rejection_sampling_loss_term.
+   The NMA clean-event theorem is the instance where C is the rest of
+   UF_NMA.main after A.forge returns, including HAETAE.verify.
+
+   This is not expressible by the current one-call lemma alone.  The current
+   lemma quantifies over p : signature -> bool.  The continuation needed here
+   is stateful: after O.sign returns, it depends on the adversary private
+   state, the lazy-ROM table, the public transcript/signing logs, the query
+   counters, and future oracle calls.  A usable active-call premise therefore
+   has to be a stateful oracle rule:
+     Pr[O_attempt.sign(m,ctx) @ attempt :
+          R res post_state_attempt /\ !sampler_bad_prequery]
+     <=
+     Pr[O_exact.sign(m,ctx) @ exact :
+          R res post_state_exact]
+     + rejection_sampling_loss_term,
+   where R includes the post-call relation required by the recursive
+   continuation.  The existing signature-only one-call lemma should be one
+   component of that stateful rule, not the induction rule itself.
+
+   Invariant needed before and after every active O.sign in the attempt and
+   exact-hyperball games:
+   - the two executions expose the same public key, adversary-visible hash
+     log, transcript log, signing-record log, adversary hash counter, and
+     signing counter;
+   - ROSigningAttemptPaperSimSampler.sk_current =
+     ROExactHyperballPaperSimSampler.sk_current;
+   - sampler_rom_covered HAETAE_RO.FRO.m adversary_hash_queries
+     sampler_expand_queries holds on the attempt side;
+   - the attempt side is on the clean branch
+     !ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler_bad_prequery, and
+     the seed about to be used is absent from both adversary_hash_queries and
+     sampler_expand_queries;
+   - signing_count <= signature_query_budget_count, with the per-call loss
+     charged only when signing_count < signature_query_budget_count.
+
+   Per-call step that the lifting theorem must invoke:
+   concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface, with
+   p instantiated to the adversary-continuation success predicate after the
+   current O.sign.  Its premises should be discharged by the invariant, the
+   fresh self-logged seed condition, and
+   concrete_budgeted_ro_signing_attempt_o_sign_to_self_logged_sample_active_projection.
+   The exact sampler side is connected by
+   concrete_budgeted_ro_exact_hyperball_sample_with_seed_to_o_sign_active_projection.
+
+   Accumulation target:
+   the active branch is entered at most signature_query_budget_count times, so a
+   custom lossy-oracle/fel rule should sum the constant per-call charge
+   rejection_sampling_loss_term to
+   rom_signature_query_budget * rejection_sampling_loss_term.
+
+   Why the current EasyCrypt patterns are insufficient:
+   existing equiv/byequiv calls can traverse A.forge only when AH.get and
+   O.sign satisfy exact relational postconditions; existing fel uses in this
+   file bound one bad flag in one execution and have no right-side probability
+   term; existing phoare lemmas prove local one-procedure inequalities but do
+   not provide an adversary-call rule for one-sided lossy oracles.  Therefore
+   none of the current patterns can directly consume the one-call lossy
+   comparison and sum the loss through A.forge.
+
+   Focused proof-engineering spike, 2026-05-13:
+   EasyCrypt's library Hybrid_restr theorem is the closest reusable shape.  A
+   plausible instantiation would package AH.get as the Hybrid Orclb.leaks
+   procedure, package attempt/exact O.sign as Orclb.orclL/orclR, and take
+   AdvOrclb.main to be A(AH,O).forge with q = signature_query_budget_count.
+   That route still leaves the same local one-switch obligation: after the
+   hybrid chooses the active signing call, the proof must compare the attempt
+   and exact sign oracles under the continuation consisting of the remaining
+   adversary execution plus the final UF_NMA verifier.  The available
+   concrete_budgeted_o_sign_clean_one_call_loss_from_self_logged_surface cannot
+   discharge that obligation because its postcondition is only p res for
+   p : signature -> bool.
+
+   SDist.sdist_oracleN is not a replacement: it proves a symmetric statistical
+   distance bound for simple sampling oracles from an sdist premise.  The
+   present premise is one-sided,
+     mu attempt P <= mu exact P + rejection_sampling_loss_term,
+   and the oracle state includes the lazy ROM map, transcript/signing logs,
+   counters, sampler coverage, and the clean flag.
+
+   Narrow failed direct proof shape:
+     byequiv (: ={glob HAETAE_RO.FRO, glob A, arg} /\ Inv ==>
+               C res{1} ... /\ !sampler_bad_prequery{1} => C res{2} ...).
+     proc; inline ...; call (_: Inv ==> ?).
+   The proof stops at the A.forge call because the EasyCrypt call rule at that
+   point accepts exact relational oracle specifications or fundamental-lemma
+   bad-event specifications, but not an oracle premise of the form
+     Pr[O_attempt.sign(m,ctx) @ &1 :
+          R res post_state_attempt /\ !sampler_bad_prequery]
+     <=
+     Pr[O_exact.sign(m,ctx) @ &2 :
+          R res post_state_exact]
+       + rejection_sampling_loss_term
+   together with an instruction to add this charge to the enclosing adversary
+   judgement for each active O.sign call.  Thus the missing construct is an
+   approximate/lossy call rule, or an explicit hybrid wrapper plus a stateful
+   one-switch lemma, whose continuation predicate R ranges over res, glob A,
+   glob HAETAE_RO.FRO, pk_current, queries, transcripts, records,
+   adversary_hash_count, signing_count, adversary_hash_queries,
+   sampler_expand_queries, and sampler_bad_prequery. *)
 lemma concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting &m :
   structural_to_exact_hyperball_paper_sample_loss_obligation haetae_mode =>
   Pr[SIG.UF_NMA(HAETAE_RO.FRO, HAETAE,

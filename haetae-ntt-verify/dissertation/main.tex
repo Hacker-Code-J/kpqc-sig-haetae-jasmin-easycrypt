@@ -13,6 +13,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
 \usepackage{microtype}
+\setlength{\emergencystretch}{3em}
+\hbadness=10000
+\vbadness=10000
 
 %--- Mathematics --------------------------------------------------------------
 \usepackage{amsmath, amssymb, amsthm, mathtools}
@@ -36,16 +39,21 @@
 \definecolor{number}{RGB}{100,60,0}
 
 %--- References & Hyperlinks --------------------------------------------------
-\usepackage[backend=bibtex, style=alphabetic, sorting=anyt, maxnames=4]{biblatex}
+\usepackage[backend=bibtex8, style=alphabetic, sorting=anyt, maxnames=4]{biblatex}
 \addbibresource{bibliography/refs.bib}
 \usepackage[colorlinks=true,
             linkcolor=NavyBlue,
             citecolor=OliveGreen,
-            urlcolor=BrickRed]{hyperref}
+            urlcolor=BrickRed,
+            hypertexnames=false,
+            pdfencoding=auto,
+            psdextra]{hyperref}
 \usepackage{cleveref}
 
 %--- Listings & Code ----------------------------------------------------------
 \usepackage{listings}
+\crefname{lstlisting}{listing}{listings}
+\Crefname{lstlisting}{Listing}{Listings}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 
@@ -94,7 +102,7 @@
 \lstdefinelanguage{Jasmin}{
   keywords={fn, export, inline, reg, stack, ptr, u8, u16, u32, u64, u128,
             u256, bool, int, return, if, else, while, for, to, downto,
-            param, global, mut},
+            param, global, mut, require, const, ui64},
   morecomment=[l]{//},
   morecomment=[s]{/*}{*/},
   sensitive=true,
@@ -113,6 +121,7 @@
   framesep=4pt,
   breaklines=true,
   breakatwhitespace=false,
+  literate={×}{{$\times$}}1,
   tabsize=2,
   captionpos=b,
   xleftmargin=15pt,
@@ -131,7 +140,7 @@
 \newcommand{\mont}{\ensuremath{\mathsf{mont}}}
 \newcommand{\MONT}{\ensuremath{\mathsf{MONT}}}
 \newcommand{\qinv}{\ensuremath{\mathsf{QINV}}}
-\newcommand{\haetae}{\textsc{Haetae}}
+\newcommand{\haetae}{\texorpdfstring{\textup{HAETAE}}{HAETAE}}
 \newcommand{\jasmin}{\textsf{Jasmin}}
 \newcommand{\easycrypt}{\textsf{EasyCrypt}}
 \newcommand{\ec}[1]{\texttt{#1}}
@@ -144,12 +153,20 @@
 \newcommand{\modulo}{\ensuremath{\mathbin{\%}}}
 \newcommand{\pRHL}{\texorpdfstring{\ensuremath{\mathsf{pRHL}}}{pRHL}}
 \newcommand{\HL}{\texorpdfstring{\ensuremath{\mathsf{HL}}}{HL}}
+\pdfstringdefDisableCommands{%
+  \def\haetae{HAETAE}%
+  \def\jasmin{Jasmin}%
+  \def\easycrypt{EasyCrypt}%
+  \def\ec#1{#1}%
+  \def\jasm#1{#1}%
+}
 
 %--- Header / Footer ----------------------------------------------------------
+\setlength{\headheight}{14pt}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE]{\small\itshape\leftmark}
-\fancyhead[RO]{\small\itshape\rightmark}
+\fancyhead[LE]{\small\nouppercase{\leftmark}}
+\fancyhead[RO]{\small\nouppercase{\rightmark}}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 

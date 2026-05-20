@@ -67,7 +67,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, scale=0.88, transform shape]
 
   %--- Layer boxes -------------------------------------------------------------
   \node[layer box=10.5cm, fill=col@jasmin]
@@ -82,7 +82,7 @@
     (L1) at (0, 5.4)
     {\textbf{Layer 1 — Extracted EasyCrypt Module}\\[2pt]
      \texttt{Hpoly\_extract.ec}\enspace
-     (\texttt{W32.t Array256.t} operands, machine semantics)};
+     (\texttt{BArray1024.t} operands, machine semantics)};
 
   \node[layer box=10.5cm, fill=col@imperative]
     (L2) at (0, 3.3)
@@ -90,7 +90,7 @@
      \texttt{NTT\_Fq.ec}\enspace|\enspace
      \texttt{Fq.ec}\enspace|\enspace
      \texttt{Montgomery.ec}
-     (\texttt{int Array256.t}, loop invariants)};
+     (\texttt{coeff Array256.t}, loop invariants)};
 
   \node[layer box=10.5cm, fill=col@algebraic]
     (L3) at (0, 1.2)
@@ -136,15 +136,13 @@
   \node[annot, text=col@darkline, anchor=east] at (-5.7, 5.4)
     {\texttt{W32}/\texttt{W64}\\machine words};
   \node[annot, text=col@darkline, anchor=east] at (-5.7, 3.3)
-    {\texttt{int} arithmetic\\$|a_i| < 2^{23}$};
+    {\texttt{int} arithmetic\\16-bit $\to$ 24-bit bounds};
   \node[annot, text=col@darkline, anchor=east] at (-5.7, 1.2)
     {$\hat{f}[i]=\!\!\sum_{j}\!f[j]\,\zeta^{(2\,\mathrm{br}(i)+1)j}$};
 
 \end{tikzpicture}
-\caption{Complete four-layer formal verification architecture for the
-         \haetae{} NTT\@.  Solid arrows are machine-checked proof steps.
-         Dashed arrows show the end-to-end composition in
-         \texttt{NTTEndToEnd.ec}.}
+\caption{Four-layer verification architecture for the \haetae{} NTT.  Solid
+         arrows are checked proof steps; dashed arrows show final composition.}
 \label{fig:full_arch}
 \end{figure}
 
@@ -279,14 +277,14 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1.75cm, y=0.85cm]
+\begin{tikzpicture}[x=1.75cm, y=0.85cm, scale=0.94, transform shape]
   % Background
   \fill[col@butterfly!28, rounded corners=4pt] (-0.45,-3.6) rectangle (8.45,1.75);
   \draw[col@darkline, dashed] (-0.45,0.40) -- (8.45,0.40);
   \draw[col@darkline, dashed] (-0.45,0.88) -- (8.45,0.88);
 
   % Stage column headers (hardcoded via \stagehead)
-  \stagehead{0}{Input}{$<\!2^{15}$}
+  \stagehead{0}{Input}{16-bit}
   \stagehead{1}{$\ell=128$}{$<\!2^{16}$}
   \stagehead{2}{$\ell=64$} {$<\!2^{17}$}
   \stagehead{3}{$\ell=32$} {$<\!2^{18}$}
@@ -294,7 +292,9 @@
   \stagehead{5}{$\ell=8$}  {$<\!2^{20}$}
   \stagehead{6}{$\ell=4$}  {$<\!2^{21}$}
   \stagehead{7}{$\ell=2$}  {$<\!2^{22}$}
-  \stagehead{8}{$\ell=1$}  {$<\!2^{23}$}
+  \stagehead{8}{$\ell=1$}  {23-bit}
+  \node[font=\scriptsize\bfseries, text=col@highlight, align=center]
+    at (8.00, 1.38) {post\\24-bit};
 
   % Twiddle counts
   \foreach \s/\cnt in {0/{---},1/{1},2/{2},3/{4},4/{8},5/{16},6/{32},7/{64},8/{128}} {
@@ -372,8 +372,9 @@
 \end{tikzpicture}
 \caption{Data-flow view of the eight-stage forward NTT\@.  Each column
          is one outer-loop iteration ($\ell$ value).  Green cells are groups
-         fully processed; white cells are untouched.  The coefficient bound
-         grows by one bit per stage: input $<2^{15}$, output $<2^{23}$.
+         fully processed; white cells are untouched.  The checked coefficient
+         invariant starts with a 16-bit input bound and exits with a 24-bit
+         postcondition.
          The twiddle counter column ($k{+}$) shows how many twiddle factors
          have been consumed cumulatively.}
 \label{fig:ntt_stages}
@@ -465,7 +466,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=1cm, y=1cm, scale=0.85, transform shape]
 
   %--- Ring diagram on the left ------------------------------------------------
   \node[draw=col@darkline, fill=col@imperative!60, rounded corners=6pt,
@@ -553,7 +554,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1.15cm, y=0.78cm]
+\begin{tikzpicture}[x=1.15cm, y=0.78cm, scale=0.72, transform shape]
 
   %--- Title ------------------------------------------------------------------
   \node[font=\small\bfseries\sffamily, col@darkline] at (7.5, 2.1)
@@ -578,10 +579,10 @@
      8/16,9/144,10/80,11/208,12/48,13/176,14/112,15/240}
   { \node[font=\footnotesize\ttfamily, col@highlight] at (\k,0.42) {\v}; }
 
-  % Row: zeta^brev mod q (Montgomery form = zeta^brev * R mod q) — hardcoded
+  % Row: concrete jzetas[k] values (signed Montgomery form; index 0 is padding)
   \foreach \k/\v in
-    {0/1,1/14321,2/26798,3/6943,4/15978,5/5568,6/5921,7/16245,
-     8/3978,9/26903,10/7074,11/7428,12/16539,13/5742,14/5953,15/17095}
+    {0/0,1/26964,2/-16505,3/22229,4/30746,5/20243,6/19064,7/-31218,
+     8/9395,9/-30985,10/22859,11/-8851,12/32144,13/13744,14/21408,15/17599}
   { \node[font=\tiny\ttfamily, col@darkline] at (\k,-0.38) {\v}; }
 
   %--- Grid lines -------------------------------------------------------------
@@ -599,7 +600,7 @@
   \node[font=\footnotesize\bfseries, col@darkline, anchor=east] at (-0.5,0.42)
     {$\mathrm{brev}_8(k)$};
   \node[font=\footnotesize\bfseries, col@darkline, anchor=east] at (-0.5,-0.38)
-    {$\zeta_0^{\mathrm{brev}_8(k)}\!\!\bmod q$};
+    {\texttt{jzetas[k]}};
 
   %--- Bit-box example (k=3): 00000011 -> 11000000 = 192 ----------------------
   \node[font=\tiny, col@darkline, anchor=east] at (-0.05,-1.55) {$k{=}3$:};
@@ -660,12 +661,11 @@
     (4.0,-2.0) to[bend right=20] (bitann.west);
 
 \end{tikzpicture}
-\caption{The bit-reversal permutation $\mathrm{brev}_8$ for the first 16 loop-counter
+\caption{The bit-reversal permutation $\mathrm{brev}_8$ for the first 16 table
          values $k = 0,\dots,15$.  Red cells in the bit-pattern boxes highlight
-         the set bits.  The bottom row gives the Montgomery-form twiddle
-         factor $\zeta_0^{\mathrm{brev}_8(k)} \cdot R \bmod q$ stored in
-         \texttt{jzetas[k]}.  For the forward NTT, the inner loop
-         uses \texttt{jzetas[k]} as the twiddle factor for butterfly group $k$.}
+         the set bits.  The bottom row gives the concrete signed
+         Montgomery-form table entry \texttt{jzetas[k]}; index 0 is padding,
+         and the forward NTT consumes indices 1 through 255.}
 \label{fig:brev}
 \end{figure}
 
@@ -674,7 +674,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm, y=1cm,
+\begin{tikzpicture}[x=1cm, y=1cm, scale=0.86, transform shape,
   triple/.style = {
     rectangle, draw=col@darkline, rounded corners=4pt,
     minimum width=12cm, minimum height=1.3cm,
@@ -693,24 +693,20 @@
     (J) at (0, 5.8)
     {%
      \textbf{pRHL equivalence (RefJasminNTT.ec):}\\
-     $\texttt{equiv}[\texttt{Extracted.poly\_ntt\_jazz} \sim
+     $\texttt{equiv}[\texttt{Hpoly\_extract.M.\_poly\_ntt} \sim
        \texttt{NTT\_Fq.NTT.ntt} :$\\
-     $\texttt{wrel}(\texttt{rp},\texttt{a})\;\wedge\;
-       |\texttt{a}[i]| < 2^{15}
+     $\texttt{poly\_repr\_bound}(\texttt{rp},p,16)
      \;\Longrightarrow\;
-     \texttt{wrel}(\texttt{rp}',\texttt{a}')\;\wedge\;
-       |\texttt{a}'[i]| < 2^{23}]$};
+     \texttt{poly\_repr\_bound}(\texttt{rp}',p',24)]$};
 
   \node[triple=col@imperative!70]
     (I) at (0, 3.1)
     {%
      \textbf{Hoare triple (NTT\_Fq.ec):}\\
      $\texttt{hoare}[\texttt{NTT.ntt} :
-       |\texttt{a}[i]| < 2^{15}$\\
+       \texttt{arg}=(p,\texttt{zetas})$\\
      $\Longrightarrow\;
-     \texttt{a}' = \texttt{NTT\_loop}(\texttt{a})
-     \;\wedge\;
-     |\texttt{a}'[i]| < 2^{23}]$};
+     \texttt{res} = \texttt{NTT\_loop}(p)]$};
 
   \node[triple=col@algebraic!70]
     (A) at (0, 0.4)
@@ -726,14 +722,14 @@
     {%
      \textbf{End-to-end (NTTEndToEnd.ec):}\\
      $\texttt{hoare}[\texttt{poly\_ntt\_jazz} :
-       |\texttt{sint}(\texttt{rp}[i])| < 2^{15}
+       \texttt{poly\_repr\_bound}(\texttt{rp},p,16)
        \;\Longrightarrow\;
-       \texttt{sint}(\texttt{rp}'[i]) = \texttt{full\_ntt}(a)[i]]$};
+       \texttt{poly\_repr\_bound}(\texttt{res},\texttt{full\_ntt}(p),24)]$};
 
   %--- Composition arrows ------------------------------------------------------
   \draw[proof arrow, line width=1.8pt, OliveGreen!70!black]
     (J.south) -- node[right=5pt, annot, OliveGreen!70!black]
-      {Step B: apply pRHL $+$ \texttt{wrel}} (I.north);
+      {Step B: apply pRHL $+$ representation} (I.north);
 
   \draw[proof arrow, line width=1.8pt, OliveGreen!70!black]
     (I.south) -- node[right=5pt, annot, OliveGreen!70!black]
@@ -756,15 +752,15 @@
 
   %--- Proof state tags -------------------------------------------------------
   \node[annot, anchor=east] at (-6.2, 5.8) {machine\\words};
-  \node[annot, anchor=east] at (-6.2, 3.1) {integers\\+ bounds};
+  \node[annot, anchor=east] at (-6.2, 3.1) {field\\arrays};
   \node[annot, anchor=east] at (-6.2, 0.4) {field\\elements};
   \node[annot, anchor=east] at (-6.2,-1.8) {full\\statement};
 
 \end{tikzpicture}
 \caption{Structure of the \easycrypt{} proof judgements.  The topmost
-         judgement (pRHL) relates machine-word arrays to integer arrays.
-         The middle (Hoare) judgement captures the loop semantics in integer
-         arithmetic.  The algebraic equality connects the loop output to the
+         judgement (pRHL) relates machine-word arrays to field-coefficient
+         arrays with signed bit-width bounds.  The middle (Hoare) judgement
+         captures the loop semantics over field arrays.  The algebraic equality connects the loop output to the
          closed-form spectral sum.  The bottom (end-to-end) judgement
          composes all three.}
 \label{fig:ec_proofs}
@@ -775,7 +771,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm, y=1cm,
+\begin{tikzpicture}[x=1cm, y=1cm, scale=0.60, transform shape,
   scheme/.style = {
     rectangle, draw=col@darkline, rounded corners=6pt,
     minimum width=5.5cm, inner sep=10pt,
@@ -865,7 +861,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[x=1cm, y=1cm]
+\begin{tikzpicture}[x=0.94cm, y=1cm]
 
   % Column x positions
   \def\xA{0.0}  % layer name
@@ -880,35 +876,35 @@
   \node[font=\small\bfseries\sffamily, anchor=center] at (\xC, 4.0)
     {Inverse NTT bounds};
   \node[font=\small\bfseries\sffamily, anchor=center] at (\xD, 4.0)
-    {Round-trip};
+    {Identity note};
 
   \draw[col@darkline, thick] (\xA-0.1, 3.65) -- (\xD+1.5, 3.65);
 
   %--- Rows (hardcoded 5 rows via global \bndrow) ------------------------------
   \bndrow{3.10}{1}{Jasmin (W32)}%
-    {$|a[i]|{<}2^{15} \to |a'[i]|{<}2^{23}$}%
-    {$|a[i]|{<}2^{23} \to |a'[i]|{<}2^{15}$}%
-    {${\equiv}\,a{\cdot}R$}
+    {16-bit repr. $\to$ 24-bit repr.}%
+    {16-bit repr. $\to$ 16-bit Mont. repr.}%
+    {if precondition holds}
 
   \bndrow{2.25}{0}{Extracted EC}%
-    {\texttt{wrel}${+}|a|{<}2^{15} \to {+}|a'|{<}2^{23}$}%
-    {\texttt{wrel}${+}|a|{<}2^{23} \to {+}|a'|{<}2^{15}$}%
-    {\texttt{wrel}}
+    {\texttt{repr\_bound} 16 $\to$ 24}%
+    {\texttt{repr\_bound} 16 $\to$ Mont. 16}%
+    {\texttt{repr}}
 
   \bndrow{1.40}{1}{\texttt{NTT\_Fq.ec}}%
-    {$|a[i]|{<}2^{15} \to |a'[i]|{<}2^{23}$}%
-    {$|a[i]|{<}2^{23} \to |a'[i]|{<}2^{15}$}%
-    {$=a$}
+    {$p \to \texttt{full\_ntt}(p)$}%
+    {$p \to \texttt{full\_invntt}(p)$}%
+    {separate maps}
 
   \bndrow{0.55}{0}{\texttt{NTTFullSpec}}%
     {$p\in\mathbb{Z}_q^{256} \to \hat{p}$}%
     {$\hat{p} \to p$}%
-    {$\mathrm{INTT}(\mathrm{NTT}(p)){=}p$}
+    {math identity}
 
   \bndrow{-0.30}{1}{\texttt{NTTEndToEnd}}%
     {pre-cond $\to$ post-cond}%
     {pre-cond $\to$ post-cond}%
-    {top theorem}
+    {no pipeline lemma}
 
   %--- Vertical dividers -------------------------------------------------------
   \foreach \x in {2.2, 5.2, 8.8} {
@@ -925,17 +921,15 @@
   \node[draw=col@darkline, rounded corners=3pt, fill=white,
         font=\scriptsize, inner sep=5pt, align=left]
     at (5.7, -2.4)
-    {\textbf{Bit-width summary (forward NTT):}
-     input $15\,\text{bit} \xrightarrow{\text{stage 1}} 16 \xrightarrow{2} 17
-       \xrightarrow{3} 18 \xrightarrow{4} 19 \xrightarrow{5} 20
-       \xrightarrow{6} 21 \xrightarrow{7} 22 \xrightarrow{8} 23\,\text{bit}$};
+    {\textbf{Bit-width summary (forward NTT):}\\[2pt]
+     input $16\,\text{bit} \xrightarrow{\text{stage 1}} 17 \xrightarrow{2} 18
+       \xrightarrow{3} 19 \xrightarrow{4} 20$\\
+     $\xrightarrow{5} 21
+       \xrightarrow{6} 22 \xrightarrow{7} 23
+       \xrightarrow{\text{post}} 24\,\text{bit}$};
 
 \end{tikzpicture}
-\caption{Coefficient bound propagation across all four abstraction layers
-         for both the forward and inverse NTT, and the round-trip composition.
-         Each layer has its own type of bound expression: machine-word
-         arithmetic bounds at the Jasmin level, integer bounds at the
-         imperative level, field elements at the algebraic level.}
+\caption{Bound propagation for the checked forward and inverse NTT theorems.}
 \label{fig:bounds_table}
 \end{figure}
 
@@ -944,7 +938,7 @@
 %==============================================================================%
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[
+\begin{tikzpicture}[scale=0.90, transform shape,
   x=2.6cm, y=1.6cm,
   ecmod/.style = {
     rectangle, draw=col@darkline, rounded corners=4pt,

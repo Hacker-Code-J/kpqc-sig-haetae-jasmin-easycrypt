@@ -136,7 +136,7 @@
     "HAETAE_HopGames": {
       "direct": true,
       "kind": "ec",
-      "digest": "3dab0b2979115bf5567aed7fc3d4b812"
+      "digest": "02c322aa533ea5bdf5830d68f0eaf901"
     },
     "HAETAE_Keccak1600": {
       "direct": false,

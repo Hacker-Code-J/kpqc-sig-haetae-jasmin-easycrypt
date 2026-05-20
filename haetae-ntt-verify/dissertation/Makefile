@@ -1,12 +1,12 @@
 # Makefile for the HAETAE NTT Verification Dissertation
 # Usage:
-#   make          -- build PDF (pdflatex + bibtex + pdflatex x2)
+#   make          -- build PDF (pdflatex + bibtex8 + pdflatex x2)
 #   make clean    -- remove auxiliary files
 #   make distclean -- also remove the PDF
 
 MAIN    = main
 LATEX   = pdflatex
-BIBTEX  = bibtex
+BIBTEX  = bibtex8
 FLAGS   = -interaction=nonstopmode -halt-on-error
 
 .PHONY: all clean distclean
@@ -28,9 +28,10 @@ $(MAIN).pdf: $(MAIN).tex bibliography/refs.bib \
              chapters/ch09_jasmin_impl.tex \
              chapters/ch10_refinement.tex \
              chapters/ch11_end_to_end.tex \
-             chapters/ch12_conclusion.tex
+             chapters/ch12_conclusion.tex \
+             chapters/tikz_figures.tex
 	$(LATEX) $(FLAGS) $(MAIN)
-	$(BIBTEX) $(MAIN) || true
+	$(BIBTEX) $(MAIN)
 	$(LATEX) $(FLAGS) $(MAIN)
 	$(LATEX) $(FLAGS) $(MAIN)
 

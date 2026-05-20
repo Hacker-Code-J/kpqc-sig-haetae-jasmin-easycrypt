@@ -1077,6 +1077,323 @@ is a conditional premise when it appears as
 prose explanations in this section are only a reading guide for those checked
 statements.
 
+\subsection{Lemma-ledger companion for HAETAE HopGames}
+
+\paragraph{Lemma-ledger criticism for HAETAE HopGames.}
+The current report plus \file{HAETAE\_HopGames.ec} is still not a
+source-independent reconstruction manual.  The script has more than eight
+thousand lines and many theorem surfaces that look similar but have different
+logical status: exact \ec{equiv} results, Hoare invariant preservation,
+probability upper bounds, counted-ROM bad-event bounds, rejection-sampling
+premises, and coarse fallback inequalities.  Without a ledger, a reader could
+mistake a checked erasure equivalence for a sampling-distance theorem, or could
+miss that the structural-to-exact-hyperball bridge is conditional when it is
+used as an antecedent.  The compact rows below identify the proof obligations
+that matter for the final \(\EUFCMA\) path while keeping the EasyCrypt source
+as the authoritative tactic-level artifact.
+
+{\footnotesize
+\begin{longtable}{p{0.20\linewidth}p{0.25\linewidth}p{0.16\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
+\toprule
+\textbf{EasyCrypt item and lines} & \textbf{Mathematical statement} &
+\textbf{Category} & \textbf{Premises and imports} & \textbf{Downstream role} \\
+\midrule
+\ec{require import} and \ec{import} block; 1--21 &
+Imports the generic signature games, HAETAE scheme model, distributions,
+assumption games, transcript predicates, loss terms, rejection facts, ROM
+interface, and counted-ROM programming layer. &
+Imported/library fact and external-assumption boundary. &
+Uses \file{Sig\_ROM.ec}, \file{HAETAE\_Assumptions.ec},
+\file{HAETAE\_Transcript.ec}, \file{HAETAE\_Rejection.ec}, and
+\file{HAETAE\_ROM\_Programming.ec}. &
+Provides all game, hardness, transcript, and bad-event symbols later composed
+by \file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{SigningSimulator}, \ec{RealSigningSimulator},
+\ec{EUF\_CMA\_SimulatedSign}; 23--80 &
+Introduces an abstract signing-simulator interface, realizes it by the real
+scheme signer, and defines a simulator-backed EUF-CMA game with signing-query
+logging. &
+Machine-checked game/module boundary. &
+Requires a \ec{SIG.Scheme}, \ec{SIG.POracle}, and adversary module. &
+Starting point for the simulator-erasure and real-signing exactness lemmas used
+in the security composition. \\
+\midrule
+\ec{transcript\_log\_consistent}, \ec{transcript\_log\_ready},
+\ec{internal\_transcript\_state\_sound}; 81--441 &
+Defines and proves list invariants connecting message-context queries,
+transcripts, signing records, public-key consistency, transcript validity, and
+min-entropy clear logs. &
+Machine-checked fact and invariant family. &
+Uses signing-record soundness and ROM-programming no-failure predicates. &
+Supplies the state predicates preserved by internal transcript games and bad
+forgery bounds. \\
+\midrule
+\ec{EUF\_CMA\_TranscriptSimulatedSign},
+\ec{EUF\_CMA\_InternalTranscriptSign},
+\ec{EUF\_CMA\_ROMInternalTranscriptSign}; 442--612 &
+Adds transcript logs to simulated signing, replaces the scheme call by internal
+signing, and then exposes sampler, message-hash, challenge-hash, and matrix ROM
+calls in the signing game. &
+Machine-checked game modules. &
+Uses transcript constructors, \ec{drandom\_coins}, \ec{sign\_internal}, and
+typed ROM query constructors. &
+Forms the main source games for the ROM-transcript hop in
+\file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{ROMInternalTranscriptAsNMA}; 613--664 &
+Turns the adaptive ROM-internal transcript game into an NMA adversary wrapper
+that internally simulates signing transcripts. &
+Reduction adapter. &
+Uses the adversary through the same oracle/signing interface and reconstructs
+the secret key from the public-key seed field. &
+First structural bridge from EUF-CMA to UF-NMA in the final composition. \\
+\midrule
+\ec{public\_sim\_*} operations and \ec{ROMInternalTranscriptPublicSimAsNMA};
+665--854 &
+Replaces secret-key-dependent signing components by public deterministic
+reconstructions and proves the \ec{\_E} equalities against real signing. &
+Machine-checked fact and reduction adapter. &
+Uses deterministic vector/poly generation, public-key challenge terms, and
+signature-field definitions. &
+Enables exact replacement of structural NMA by public-simulation NMA. \\
+\midrule
+\ec{paper\_sim\_signature\_sample},
+\ec{paper\_sim\_*}, public/real/rejection sample families; 855--1351 &
+Normalizes public coins, real signing coins, and rejection-attempt states into
+one paper-simulation sample type; proves well-formedness and field equality
+lemmas. &
+Machine-checked fact with explanatory sampler-model boundary. &
+Uses signature well-formedness, rejection attempt predicates, and current
+no-abort facts. &
+Provides the sample carrier used by all paper-simulation NMA wrappers. \\
+\midrule
+\ec{PaperSimSigningSampler} and sampler modules; 1352--1586 &
+Defines the sampling interface and seven sampler implementations: ROM public
+sample, real signing sample, RO signing attempt, HAETAE rejection attempt,
+exact-hyperball rejection, exact-hyperball, and RO exact-hyperball. &
+Machine-checked module/procedure boundary. &
+Uses \ec{drandom\_coins}, ROM sampler queries, rejection distributions, and
+\ec{dexact\_hyperball\_signing\_attempt\_state}. &
+Names the endpoints of the paper-simulation and exact-hyperball hop chain. \\
+\midrule
+\ec{StructuralAttemptPaperSample}, \ec{ExactHyperballPaperSample},
+\ec{ROMInternalTranscriptPaperSimAsNMA},
+\ec{ROMInternalTranscriptBudgetedPaperSimAsNMA}; 1587--1765 &
+Defines direct one-procedure sample sources and NMA wrappers, including a
+budgeted wrapper with adversary-hash count, signing count, sampler-query log,
+and sampler-prequery bad flag. &
+Machine-checked game modules and reduction adapters. &
+Uses \ec{PaperSimSigningSampler}, hash-query budgets, signature-query budgets,
+and sampler prequery predicates. &
+Provides the budgeted NMA games whose probabilities are charged to counted-ROM
+and rejection-sampling loss terms. \\
+\midrule
+\ec{ROMInternalTranscriptBudgetedPaperSimNMAQueryBudget}; 1766--2622 &
+Proves signing-count preservation, sampler-expand point/log/budget bounds,
+lazy-ROM sampler freshness, and clean sampler one-call facts. &
+Machine-checked Hoare/probability invariant section. &
+Premises include query-budget disciplines, sampler-ROM coverage, and
+losslessness/freshness of concrete lazy ROM calls. &
+Supplies the one-call and NMA-level sampler-prequery estimates used before the
+exact-hyperball bridge. \\
+\midrule
+\ec{EUF\_CMA\_ROMInternalTranscriptCountedSign},
+\ec{EUF\_CMA\_ROMProgrammedTranscriptCountedSign},
+\ec{EUF\_CMA\_ROMProgrammedTranscriptBudgetedCountedSign},
+\ec{EUF\_CMA\_ROMProgrammedTranscriptBudgetedSampledSign}; 2624--2978 &
+Introduces counted/programmed ROM games, then adds explicit hash/sign budgets,
+programmed challenge sites, and a sampled signing source. &
+Machine-checked game modules. &
+Uses \ec{CountedLazyROM}, \ec{ProgramChallenge}, challenge-query counters, and
+direct signing-coin sampler interfaces. &
+These games expose the bad flags later bounded by counted-ROM programming
+loss. \\
+\midrule
+\ec{InternalTranscriptSignSound}; 2979--3574 &
+Proves internal and ROM-internal transcript-game state soundness, transcript
+validity, log readiness, no-min-entropy, signature-site-clearness, and bad
+forgery zero/count bounds. &
+Machine-checked Hoare and probability fact family. &
+Uses internal transcript invariants and \ec{byphoare} zero-event reasoning. &
+Feeds the ROM-transcript clear-site reductions in the security file. \\
+\midrule
+\ec{CountedROMInternalTranscriptDiscipline}; 3576--3769 &
+Maintains counted-ROM budget state and derives bad-clear, bad-false, counted
+bad zero, budget-sound, and subunit bad-event lemmas. &
+Machine-checked invariant and probability boundary. &
+Uses \ec{CountedLazyROM} state facts and counted-ROM programming bound
+obligation. &
+Connects counted bad flags to \ec{counted\_rom\_programming\_loss\_term}. \\
+\midrule
+\ec{ProgrammedROMTranscriptDiscipline}; 3771--3904 &
+Shows programmed counted games preserve min-entropy-clear state and bounds
+min-entropy and prequery/reprogramming bad events from a budget expression. &
+Machine-checked invariant and probability bound. &
+Uses transcript no-failure lemmas and counted-ROM bad-flag wrappers. &
+Supplies the programmed-ROM discipline consumed by budgeted variants. \\
+\midrule
+\ec{BudgetedProgrammedROMTranscriptDiscipline}; 3906--4518 &
+Proves challenge-query discipline, reprogram discipline, query-budget
+preservation, adaptive prequery lifting, and checked concrete bad-event bounds
+for the budgeted programmed game. &
+Machine-checked invariant and query-budget family. &
+Premises include \ec{hash\_query\_budget\_count}, challenge-query counts, and
+honest-site conflict-freedom. &
+Produces the budget-certified branch bounds used in counted-ROM security
+composition. \\
+\midrule
+\ec{BudgetedSampledROMTranscriptDiscipline}; 4520--5228 &
+Repeats the budget and bad-event discipline for the sampled-direct game and
+proves sampler-message-hash prequery and prequery/reprogramming bad bounds. &
+Machine-checked invariant and probability bound. &
+Uses \ec{DirectSigningCoinSampler} and the ROM-programming prequery lemmas. &
+Prepares the sampled-direct endpoint for equivalence with the programmed game. \\
+\midrule
+\ec{BudgetedProgrammedToSampledDirectBridge}; 5230--5599 &
+Gives equivalences for hash, sign, adversary, and main procedures between
+budgeted programmed counted and sampled-direct games; transfers bad-event
+probabilities. &
+Checked \ec{equiv} family and reduction adapter. &
+Requires module restrictions preventing access to \ec{CountedLazyROM} internals
+and shared game state. &
+Lets the final proof use direct-sampler prequery estimates for the programmed
+game. \\
+\midrule
+\ec{HAETAEROMInternalTranscriptExact}; 5601--5704 &
+Proves oracle/adversary erasure equivalences and
+\ec{haetae\_rom\_internal\_transcript\_erasure\_exact}. &
+Checked exact equivalence. &
+Uses inlining of \ec{HAETAE} and ROM-internal transcript games under module
+separation restrictions. &
+First exact hop from generic EUF-CMA to the ROM-internal transcript game in
+\file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{ROMInternalTranscriptStructuralNMA}; 5706--5868 &
+Relates the ROM-internal transcript game to the structural NMA wrapper and
+proves clear-site and ordinary structural NMA bounds. &
+Checked equivalence/probability inequality. &
+Uses oracle/adversary equivalences and transcript-log clear-site events. &
+Main structural EUF-CMA-to-NMA reduction used by counted and legacy security
+lemmas. \\
+\midrule
+\ec{ROMInternalTranscriptPublicSimNMA},
+\ec{ROMInternalTranscriptROMPaperSimNMA},
+\ec{ROMInternalTranscriptRealSigningPaperSimNMA},
+\ec{ROMInternalTranscriptROSigningAttemptPaperSimNMA}; 5874--6624 &
+Proves exact replacement steps among public simulation, ROM paper simulation,
+real-signing paper simulation, and RO signing-attempt paper simulation. &
+Checked exact equivalence family. &
+Uses public-sim equalities, paper-sample equalities, and sampler module
+restrictions. &
+Builds the NMA-side sampler chain later consumed by Security. \\
+\midrule
+\ec{structural\_to\_exact\_hyperball\_paper\_sample\_loss\_obligation}
+and \ec{concrete\_ro\_*loss} family; 6615--6986 &
+Names the structural-to-exact-hyperball sampling-loss obligation and transports
+that per-call premise through seed freshness, clean logs, and concrete lazy-ROM
+losslessness. &
+Conditional premise plus machine-checked probability inequalities. &
+Premises include sampler freshness, old-log cleanliness, and rejection-sampling
+loss terms. &
+This is the key statistical-loss bridge; it must not be reported as a proved
+paper sampler theorem unless the antecedent is discharged. \\
+\midrule
+\ec{ROMInternalTranscriptROSigningAttemptExactHyperballPaperSimNMA};
+7002--7291 &
+Lifts the structural-to-exact-hyperball loss through NMA games, budgeted
+wrappers, clean conditioning, checked clean lifting, and coarse bounded loss. &
+Machine-checked probability inequality family with conditional branches. &
+Uses the sampling-loss obligation, budgeted NMA wrappers, clean-event lemmas,
+and sometimes coarse \ec{mu\_bounded} reasoning. &
+Provides the RO-signing-attempt to RO-exact-hyperball NMA bounds used by final
+Security lemmas. \\
+\midrule
+\ec{ConcreteROMInternalTranscriptROSigningAttemptExactHyperballPaperSimNMA};
+7318--7817 &
+Specializes the abstract RO-signing-attempt/exact-hyperball bridge to
+\ec{HAETAE\_RO.FRO} and proves signature-event preservation, losslessness,
+projection, and concrete clean-lifting lemmas. &
+Machine-checked concrete ROM lifting. &
+Uses concrete lazy-ROM facts, \ec{dexact\_hyperball} support facts, and
+sampler-event preservation. &
+Supplies concrete evidence for the checked RO sampling hop used by the final
+counted-ROM theorem. \\
+\midrule
+\ec{ROMInternalTranscriptHAETAERejectionPaperSimNMA},
+\ec{ROMInternalTranscriptExactHyperballPaperSimNMA}; 7819--8230 &
+Proves exact swaps from real signing to HAETAE rejection sampling and from
+exact-hyperball rejection sampling to exact-hyperball paper simulation with no
+fallback. &
+Checked exact equivalence and no-fallback theorem family. &
+Uses rejection acceptance/no-abort lemmas from \file{HAETAE\_Rejection.ec}. &
+Removes rejection-specific wrappers before the final exact-hyperball NMA
+assumption is applied. \\
+\midrule
+\ec{ROMInternalTranscriptPaperSimHop}; 8232--8254 &
+Turns a public-sim-to-paper-sim sampling hop into an NMA probability bound with
+\ec{rejection\_sampling\_loss\_term}. &
+Machine-checked probability inequality. &
+Premise: a concrete sampling-hop inequality for the two NMA wrappers. &
+Used by Security when composing paper-simulation NMA bounds. \\
+\midrule
+\ec{TranscriptLoggingErasure}, \ec{RealSigningSimulatorExact}; 8256--8422 &
+Shows transcript logging is observationally erased and the real signing
+simulator matches the scheme signing oracle. &
+Checked exact equivalence. &
+Uses module restrictions excluding game internals and simulator state. &
+Connects the simulator-based games in Security back to the generic
+\ec{SIG.EUF\_CMA} game. \\
+\midrule
+\ec{ForkingAdversary}, \ec{TranscriptExtractor},
+\ec{BimodalTranscriptExtractor}, \ec{BimodalSpecialSoundness\_Game},
+\ec{SpecialSoundness\_Game},
+\ec{BimodalTranscriptExtractor\_As\_ModuleSIS}; 8424--8499 &
+Defines the forking adversary and extractor interfaces and the games that test
+bimodal self-target MSIS and Module-SIS extraction from transcript forks. &
+Imported-interface/game boundary. &
+Uses transcript extraction operators and Module-SIS adapters. &
+Provides the special-soundness interface normalized before final hardness
+composition. \\
+\midrule
+\ec{BimodalSpecialSoundnessLift},
+\ec{special\_soundness\_interfaces\_*},
+\ec{fs\_with\_aborts\_interfaces\_*}; 8500--8649 &
+Proves the bimodal-to-Module-SIS special-soundness lift and packages
+forking, public reconstruction, signer soundness, rejection-bound, and FS
+interfaces as ready. &
+Machine-checked interface theorem family. &
+Uses \ec{forking\_extraction\_obligation\_holds},
+\ec{bimodal\_to\_module\_sis\_lift\_obligation\_holds}, and reduction-term
+nonnegativity. &
+Supplies the interface premise consumed by several Security theorem variants. \\
+\midrule
+\ec{structural\_to\_exact\_hyperball\_*} and
+\ec{dexact\_hyperball\_*boundary\_*}; 8651--8800 &
+Relates structural-to-exact-hyperball obligations to attempt/coin-sample-pair
+loss premises and proves exact-hyperball rejection/no-fallback distribution
+boundary lemmas. &
+Machine-checked implications from conditional premises and model-boundary facts. &
+Uses \file{HAETAE\_Rejection.ec} exact-hyperball support and loss-obligation
+lemmas. &
+Closes local boundary checks but does not prove paper/implementation sampler
+equivalence. \\
+\midrule
+Module restriction families; 1768--1771, 2981--2984, 3578--3585,
+3773--3775, 3908--3911, 4522--4525, 5232--5236, 5603--5606,
+5708--5711, 5876--5879, 6043--6046, 6214--6217, 6420--6423,
+7004--7008, 7821--7824, 8032--8035, 8234--8241, 8258--8264,
+8342--8346, 8502--8505 &
+Declares which adversary, oracle, sampler, and game modules cannot access one
+another's private state. &
+Imported/module-separation fact checked by EasyCrypt. &
+Depends on EasyCrypt's module system and the declared game interfaces. &
+Prevents circular calls and hidden-state leaks in every equivalence and Hoare
+proof used by the final security composition. \\
+\bottomrule
+\end{longtable}
+}
+
 \section{Script companion coverage for HAETAE Security}
 
 \file{HAETAE\_Security.ec} is the composition file.  It does not implement the
@@ -1200,6 +1517,756 @@ machine-checked are the conditional theorem statements and their real-order
 proofs.  The hardness estimates are assumed through the real-valued terms and
 module-game premises.  The prose in this report explains that structure; it is
 not itself part of the EasyCrypt trusted base.
+
+\subsection{Lemma-ledger companion for HAETAE Security}
+
+\paragraph{Lemma-ledger criticism for HAETAE Security.}
+The existing companion coverage correctly says that
+\file{HAETAE\_Security.ec} is a composition file, but it still underexplains
+the theorem boundaries.  The script has many lemmas whose conclusions look like
+the same EUF-CMA bound, while the premises expose different hop surfaces:
+legacy FS-with-aborts terms, counted-ROM programming loss, exact erasure,
+mechanized bimodal-to-Module-SIS lifting, exact-hyperball sampling, checked RO
+sampling, or budgeted paper-sample lifting.  A reader cannot reconstruct the
+logical path unless each lemma family is classified as checked arithmetic
+composition, imported hop theorem, external hardness premise, or conditional
+sampling premise.  The ledger below is therefore a theorem-boundary map, not a
+claim that the report alone replays the EasyCrypt proofs.
+
+{\footnotesize
+\begin{longtable}{p{0.20\linewidth}p{0.25\linewidth}p{0.16\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
+\toprule
+\textbf{EasyCrypt item and lines} & \textbf{Mathematical statement} &
+\textbf{Category} & \textbf{Premises and imports} & \textbf{Downstream role} \\
+\midrule
+\ec{require import} and \ec{import} block; 1--19 &
+Imports generic signature games, HAETAE scheme/algebra/distributions,
+reductions, assumptions, rejection facts, transcript predicates,
+ROM-programming facts, HopGames, and real-order lemmas. &
+Imported/library fact and external-assumption boundary. &
+Uses \file{HAETAE\_HopGames.ec} as the main checked hop provider and
+\file{HAETAE\_Assumptions.ec} for hardness games. &
+Defines the entire theorem-composition environment. \\
+\midrule
+\ec{correctness\_obligation},
+\ec{correctness\_obligation\_holds}; 21--34 &
+Every internally generated signature verifies for the formal HAETAE model. &
+Machine-checked fact. &
+Uses \ec{keygen\_internal}, \ec{sign\_internal}, and
+\ec{verify\_internal\_sign\_internal}. &
+Local correctness fact used before security composition; not a hardness
+assumption. \\
+\midrule
+\ec{correctness\_perfect}; 35--70 &
+The generic correctness game fails with probability zero for the formal scheme. &
+Machine-checked Hoare/probability fact. &
+Requires module restrictions \ec{A <: SIG.CORR\_ADV \{-H, -HAETAE\}} and
+algebra lemmas for valid signatures and current verification norms. &
+Certifies perfect correctness of the EasyCrypt model. \\
+\midrule
+\ec{NoSigningSecurity}, \ec{euf\_cma\_security\_no\_signing}; 73--124 &
+Composes an NMA bound, a bimodal-to-Module-SIS bound, MLWE hardness, and
+Module-SIS hardness to bound an NMA-as-CMA adversary. &
+Machine-checked composition with external cryptographic assumptions. &
+Premises are NMA, MLWE, Module-SIS, and bimodal reduction probabilities; uses
+\ec{SIG.nma\_as\_cma\_exact}. &
+Baseline no-signing theorem; not the main adaptive-signing result. \\
+\midrule
+\ec{euf\_cma\_security},
+\ec{euf\_cma\_security\_with\_hop\_interfaces}; 127--208 &
+Generic EUF-CMA composition from an FS-with-aborts hop, NMA bound,
+bimodal-to-Module-SIS bound, and MLWE/Module-SIS hardness assumptions. &
+Machine-checked real-order composition; conditional premises. &
+Requires \ec{fs\_with\_aborts\_interfaces\_ready} only as an explicit interface
+premise in the second lemma. &
+Template used by later sections after replacing the first hop with more
+specific HopGames lemmas. \\
+\midrule
+\ec{FullReductionWithSimulatorHop}; 211--304 &
+Uses \ec{real\_signing\_simulator\_exact} to replace generic EUF-CMA by the
+simulated-sign game, then applies the generic composition theorem. &
+Checked exact-hop composition. &
+Imports the simulator exactness lemma from HopGames and external hardness
+premises. &
+Connects the generic theorem shape to the simulator game surface. \\
+\midrule
+\ec{FullReductionWithROMTranscriptHop}; 306--405 &
+Uses \ec{haetae\_rom\_internal\_transcript\_erasure\_exact}; splits
+ROM-internal transcript success into clear-site and bad-site branches, charging
+the bad branch to legacy FS terms or counted-ROM programming loss. &
+Machine-checked probability split and checked hop composition. &
+Uses \ec{rom\_internal\_transcript\_bad\_forgery\_bound} and
+\ec{rom\_internal\_transcript\_bad\_forgery\_counted\_bound}. &
+Introduces the counted-ROM path used by the final theorem family. \\
+\midrule
+\ec{MechanizedBimodalModuleSISLift}; 407--459 &
+Proves the bimodal self-target MSIS game is bounded by the Module-SIS adapter
+game plus the zero adapter-loss term, then composes that into EUF-CMA bounds. &
+Machine-checked adapter equality and real-order composition. &
+Uses \ec{bimodal\_msis\_as\_module\_sis\_exact} and
+\ec{bimodal\_to\_msis\_reduction\_loss\_termE}. &
+Removes the need for an arbitrary \ec{Bsis} module in later counted-ROM
+statements. \\
+\midrule
+\ec{MechanizedROMTranscriptBimodalLift}; 461--596 &
+Combines the ROM-transcript hop with the mechanized bimodal-to-Module-SIS
+adapter, both for legacy and counted-ROM bounds, and adds clear-site variants. &
+Machine-checked theorem-boundary composition. &
+Premises are ROM hop or clear-site reductions, an NMA bound, MLWE hardness, and
+Module-SIS hardness for the adapter game. &
+Main bridge from HopGames' ROM transcript lemmas to grouped final bounds. \\
+\midrule
+\ec{MechanizedROMTranscriptConstructedNMALift} declarations; 598--631 &
+Declares the final composition modules and excludes all relevant game,
+wrapper, sampler, and adversary internals from each other. &
+Module restriction family. &
+Depends on EasyCrypt's module separation checker and all prior game/module
+interfaces. &
+Protects every exact equivalence and reduction application in the final
+composition lane. \\
+\midrule
+\ec{euf\_cma\_security\_from\_structural\_nma\_and\_counted\_bimodal}
+through
+\ec{euf\_cma\_security\_from\_real\_signing\_paper\_sim\_nma\_and\_counted\_bimodal};
+633--744 &
+Progressively rewrites the NMA bound through structural, public-sim,
+paper-sim, ROM-paper-sim, and real-signing paper-sim wrappers. &
+Checked exact-hop composition with external hardness premises. &
+Uses HopGames exactness lemmas such as
+\ec{rom\_internal\_nma\_public\_sim\_exact} and
+\ec{rom\_internal\_nma\_real\_signing\_paper\_sim\_exact}. &
+Moves the final theorem toward the sampler implementations used by the checked
+RO sampling hop. \\
+\midrule
+\ec{euf\_cma\_security\_from\_haetae\_rejection\_*},
+\ec{exact\_hyperball\_haetae\_rejection\_nma\_bound\_*},
+\ec{haetae\_rejection\_nma\_bound\_*}; 746--842 &
+Transfers NMA bounds between HAETAE rejection sampling and exact-hyperball
+samplers, with or without an added rejection-sampling loss term. &
+Checked theorem-boundary composition; conditional sampling premise when a hop
+bound is an antecedent. &
+Uses \ec{rom\_internal\_nma\_real\_signing\_haetae\_rejection\_paper\_sim\_exact}
+and exact-hyperball no-fallback lemmas. &
+Builds the rejection-to-exact-hyperball bridge used by final counted-ROM
+theorems. \\
+\midrule
+\ec{real\_signing\_ro\_exact\_hyperball\_*},
+\ec{haetae\_rejection\_ro\_exact\_hyperball\_*}; 843--972 &
+Transfers real-signing and HAETAE-rejection NMA bounds through RO signing
+attempt and RO exact-hyperball samplers, including budgeted lifting with a
+signature-budget multiplier. &
+Machine-checked probability composition with conditional sampling premises. &
+Uses \ec{rom\_internal\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_*}
+from HopGames and the
+\ec{structural\_to\_exact\_hyperball\_paper\_sample\_loss\_obligation}
+antecedent where required. &
+Provides the sampling-hop premises used by the final checked and budgeted
+theorem variants. \\
+\midrule
+\ec{euf\_cma\_security\_from\_exact\_hyperball\_*},
+\ec{euf\_cma\_security\_from\_ro\_exact\_hyperball\_*},
+\ec{euf\_cma\_security\_from\_ro\_signing\_attempt\_*}; 974--1099 &
+Composes exact-hyperball, RO exact-hyperball, and RO signing-attempt NMA hops
+with MLWE and Module-SIS hardness to conclude the counted-ROM EUF-CMA bound. &
+Machine-checked final-bound composition. &
+Premises include NMA hop inequalities plus MLWE and Module-SIS hardness
+probability bounds. &
+These are alternate final theorem surfaces for different supplied sampling-hop
+evidence. \\
+\midrule
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_checked\_from\_loss\_budget},
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_from\_paper\_sample\_lifting};
+1102--1138 &
+Derives the real-signing-to-RO-exact-hyperball hop either from the checked
+loss-budget lemma or from an explicit paper-sample lifting premise. &
+Machine-checked implication; conditional premise for the lifting variant. &
+Uses HopGames' \ec{rom\_internal\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_*}
+lemmas. &
+Supplies the first premise for the final checked RO sampling theorem. \\
+\midrule
+\ec{euf\_cma\_security\_from\_paper\_sample\_lifting\_and\_counted\_bimodal},
+\ec{euf\_cma\_security\_from\_budgeted\_paper\_sample\_lifting\_and\_counted\_bimodal};
+1140--1214 &
+Final counted-ROM bounds that expose either the paper-sample lifting premise or
+the budgeted unbudgeted/budgeted conversion premises explicitly. &
+Machine-checked theorem-boundary composition with conditional sampling
+premises. &
+Requires MLWE hardness, Module-SIS hardness, an RO exact-hyperball NMA bound,
+and sampling-lifting premises. &
+Documents which assumptions must be supplied to avoid relying solely on coarse
+checked fallback bounds. \\
+\midrule
+\ec{euf\_cma\_security\_from\_checked\_ro\_sampling\_hop\_and\_counted\_bimodal};
+1217--1237 &
+Representative checked counted-ROM theorem: if the RO exact-hyperball NMA
+probability plus rejection-sampling loss is bounded by MLWE plus bimodal
+success, and MLWE/Module-SIS are bounded by their hardness terms, then the
+formal HAETAE EUF-CMA game is bounded by
+\ec{haetae\_euf\_counted\_rom\_bound}. &
+Machine-checked final theorem boundary with external hardness premises. &
+Uses \ec{real\_signing\_ro\_exact\_hyperball\_hop\_checked\_from\_loss\_budget}
+and counted-ROM grouped arithmetic. &
+Best current final theorem shape, but still conditional on the formal ROM
+model and rejection/sampling loss ledger. \\
+\midrule
+\ec{euf\_cma\_security\_from\_real\_signing\_exact\_hyperball\_hop\_and\_counted\_bimodal};
+1239--1269 &
+Alternative final theorem starting from a real-signing-to-exact-hyperball hop
+plus an exact-hyperball NMA bound. &
+Machine-checked final theorem boundary with conditional premises. &
+Requires MLWE/Module-SIS hardness and the supplied exact-hyperball NMA
+inequality. &
+Records a non-RO exact-hyperball route through the same counted-ROM final
+bound. \\
+\bottomrule
+\end{longtable}
+}
+
+\subsection{Proof-obligation replay for the final Security theorem path}
+
+\paragraph{Replay-level criticism.}
+The lemma ledger above is enough to locate the final theorem surfaces, but it
+is not yet enough for a mathematician or cryptologist to reconstruct the exact
+EasyCrypt proof obligations used by the two terminal theorem shapes.  In
+particular, the report previously did not spell out which antecedent is passed
+to which \ec{apply}, where the random-oracle/rejection loss enters, which
+HopGames lemma is imported, or whether a sampling hop is proved non-vacuously,
+proved by a coarse boundedness fallback, or simply assumed as a theorem
+premise.  The replay below closes that gap at the proof-obligation level.  It
+is still not a tactic transcript: the EasyCrypt source remains necessary for
+checking module restrictions, exact syntax, local names, and SMT side
+conditions.
+
+\paragraph{Common final-composition frame.}
+Both terminal theorem paths live in
+\ec{MechanizedROMTranscriptConstructedNMALift}.  The modules declared at
+\file{HAETAE\_Security.ec} lines 598--631 are part of the theorem boundary:
+\ec{H} is a signature oracle, \ec{A} is the EUF-CMA adversary, and
+\ec{Bmlwe}/\ec{Bbimodal} are reduction modules for the MLWE and bimodal
+self-target MSIS games.  EasyCrypt checks the module-separation restrictions,
+but the numerical hardness estimates for
+\ec{Pr[MLWE\_Game(Bmlwe).main]} and
+\ec{Pr[ModuleSIS\_Game(BimodalMSIS\_As\_ModuleSIS(Bbimodal)).main]} enter as
+premises.  The final arithmetic target is the imported bound expression
+\ec{haetae\_euf\_counted\_rom\_bound}; expanding that expression is a
+reduction-file exercise, not a new theorem in \file{HAETAE\_Security.ec}.
+
+The common counted-ROM composition engine is
+\ec{euf\_cma\_security\_from\_haetae\_rejection\_paper\_sim\_nma\_and\_counted\_bimodal}
+at lines 746--766.  It rewrites the real-signing paper-simulation NMA game to
+the HAETAE rejection paper-simulation NMA game using
+\ec{rom\_internal\_nma\_real\_signing\_haetae\_rejection\_paper\_sim\_exact},
+then passes the NMA, MLWE, and Module-SIS premises into the earlier
+real-signing-paper-simulation counted-ROM theorem.  Thus the terminal
+theorems do not redo the EUF-CMA game-hop proof; they supply a suitable NMA
+premise for that engine and forward the two hardness premises.
+
+\paragraph{Replay for the checked RO-sampling final theorem.}
+The theorem
+\ec{euf\_cma\_security\_from\_checked\_ro\_sampling\_hop\_and\_counted\_bimodal}
+appears at \file{HAETAE\_Security.ec} lines 1217--1237.  Its statement says:
+if the RO exact-hyperball paper-simulation NMA success probability plus
+\ec{rejection\_sampling\_loss\_term} is bounded by MLWE success plus bimodal
+self-target MSIS success, and if those MLWE/Module-SIS games are bounded by
+their hardness terms, then the formal HAETAE EUF-CMA game is bounded by
+\ec{haetae\_euf\_counted\_rom\_bound}.
+
+{\scriptsize
+\begin{longtable}{p{0.08\linewidth}p{0.25\linewidth}p{0.34\linewidth}p{0.25\linewidth}}
+\toprule
+\textbf{Step} & \textbf{EasyCrypt evidence} & \textbf{Proof obligation replay} &
+\textbf{Status boundary} \\
+\midrule
+1 &
+Lines 1230--1232:
+\ec{move=> ro\_exact\_nma\_hop mlwe\_bound msis\_bound} and
+\ec{apply euf\_cma\_security\_from\_ro\_exact\_hyperball\_sampling\_hop\_and\_counted\_bimodal}. &
+The final theorem is reduced to the RO exact-hyperball counted-ROM theorem at
+lines 1036--1070.  That theorem requires four inputs: a real-signing to RO
+exact-hyperball NMA hop, the RO exact-hyperball NMA-to-MLWE/bimodal premise,
+the MLWE hardness premise, and the Module-SIS hardness premise. &
+Machine-checked proof replay step; not an external assumption. \\
+\midrule
+2 &
+Lines 1233 and 1102--1114:
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_checked\_from\_loss\_budget}. &
+The first required input is discharged by proving
+\[
+\Prb[\ec{RealSigningPaperSimSampler}]
+ \le
+\Prb[\ec{ROExactHyperballPaperSimSampler}]
+ + \ec{rejection\_sampling\_loss\_term}.
+\]
+The local proof applies
+\ec{real\_signing\_ro\_exact\_hyperball\_hop\_from\_ro\_signing\_attempt\_hop}
+and supplies the HopGames lemma
+\ec{rom\_internal\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_loss\_bound}. &
+Machine-checked implication, but its imported HopGames input is a coarse
+fallback bound. \\
+\midrule
+3 &
+\file{HAETAE\_Security.ec} lines 865--884 and
+\file{HAETAE\_HopGames.ec} lines 7291--7314. &
+The real-signing sampler is first rewritten to the RO-signing-attempt sampler
+by \ec{rom\_internal\_nma\_real\_signing\_ro\_attempt\_paper\_sim\_exact}.
+The remaining RO-signing-attempt to RO exact-hyperball inequality is bounded in
+HopGames by \ec{mu\_bounded}, nonnegativity of the right probability, and
+\ec{rejection\_sampling\_loss\_term\_ge1}. &
+Machine-checked, but vacuous as a concrete sampling-distance estimate.  The
+script comment explicitly marks this as a coarse fallback. \\
+\midrule
+4 &
+Lines 1234 and 1218--1223:
+\ec{ro\_exact\_nma\_hop}. &
+The theorem consumes, rather than proves, the premise
+\[
+\Prb[\ec{ROExactHyperballPaperSimSampler}] +
+\ec{rejection\_sampling\_loss\_term}
+\le
+\Prb[\ec{MLWE\_Game}] + \Prb[\ec{BimodalSelfTargetMSIS\_Game}].
+\]
+This premise is the cryptographic/sampler reduction surface for the RO
+exact-hyperball NMA endpoint. &
+Conditional premise.  The report must not describe it as derived in this final
+lemma. \\
+\midrule
+5 &
+Lines 1235--1236 and 1224--1226. &
+\ec{mlwe\_bound} and \ec{msis\_bound} are forwarded unchanged.  The MSIS
+premise is for the adapter game
+\ec{ModuleSIS\_Game(BimodalMSIS\_As\_ModuleSIS(Bbimodal))}. &
+External cryptographic assumption boundary expressed as theorem premises. \\
+\midrule
+6 &
+Lines 1057--1069 and 746--766. &
+The RO exact-hyperball theorem internally applies
+\ec{euf\_cma\_security\_from\_haetae\_rejection\_paper\_sim\_nma\_and\_counted\_bimodal}.
+The real-order step is \ec{ler\_trans}: first convert HAETAE rejection NMA to
+RO exact-hyperball NMA with one rejection-loss term, then use
+\ec{ro\_exact\_nma\_hop}. &
+Machine-checked probability algebra and exact-hop composition. \\
+\bottomrule
+\end{longtable}
+}
+
+The phrase ``checked RO sampling hop'' should therefore be read narrowly.  The
+EasyCrypt theorem is checked, and it imports a checked HopGames bound, but that
+HopGames bound currently uses the fallback
+\ec{rejection\_sampling\_loss\_term\_ge1}.  It is a valid formal implication,
+not a non-vacuous concrete sampler-distance proof.
+
+\paragraph{Replay for the real-signing exact-hyperball final theorem.}
+The theorem
+\ec{euf\_cma\_security\_from\_real\_signing\_exact\_hyperball\_hop\_and\_counted\_bimodal}
+appears at \file{HAETAE\_Security.ec} lines 1239--1269.  Its statement says:
+if real-signing paper simulation is bounded by exact-hyperball paper
+simulation plus one rejection-sampling loss, if exact-hyperball paper
+simulation plus that same loss is bounded by MLWE plus bimodal success, and if
+MLWE/Module-SIS are bounded by their hardness terms, then the formal HAETAE
+EUF-CMA game is bounded by \ec{haetae\_euf\_counted\_rom\_bound}.
+
+{\scriptsize
+\begin{longtable}{p{0.08\linewidth}p{0.25\linewidth}p{0.34\linewidth}p{0.25\linewidth}}
+\toprule
+\textbf{Step} & \textbf{EasyCrypt evidence} & \textbf{Proof obligation replay} &
+\textbf{Status boundary} \\
+\midrule
+1 &
+Lines 1259--1261:
+\ec{move=> real\_exact\_hop exact\_nma\_hop mlwe\_bound msis\_bound} and
+\ec{apply euf\_cma\_security\_from\_exact\_hyperball\_sampling\_hop\_and\_counted\_bimodal}. &
+The theorem reduces to the exact-hyperball counted-ROM theorem at lines
+1007--1034.  That theorem requires a HAETAE-rejection to exact-hyperball
+sampling hop, an exact-hyperball NMA-to-MLWE/bimodal premise, and the two
+hardness premises. &
+Machine-checked proof replay step. \\
+\midrule
+2 &
+Lines 1262--1264 and 819--841:
+\ec{haetae\_rejection\_exact\_hyperball\_sampling\_hop\_from\_real\_signing\_exact\_hyperball\_hop}. &
+The required HAETAE-rejection sampling hop is derived from the supplied
+\ec{real\_exact\_hop}.  The proof rewrites real-signing paper simulation to
+HAETAE-rejection paper simulation and exact-hyperball rejection paper
+simulation to exact-hyperball paper simulation. &
+Machine-checked exact-rewrite composition, but only conditional on the
+\ec{real\_exact\_hop} premise. \\
+\midrule
+3 &
+Lines 1240--1246:
+\ec{real\_exact\_hop}. &
+This premise is the non-RO sampler bridge:
+\[
+\Prb[\ec{RealSigningPaperSimSampler}]
+\le
+\Prb[\ec{ExactHyperballPaperSimSampler}]
++\ec{rejection\_sampling\_loss\_term}.
+\]
+The final theorem does not prove this sampling distance. &
+Conditional premise.  It may be discharged by another lemma or external
+argument, but not by lines 1239--1269 alone. \\
+\midrule
+4 &
+Lines 1247--1252:
+\ec{exact\_nma\_hop}. &
+This premise bounds the exact-hyperball NMA endpoint plus one
+\ec{rejection\_sampling\_loss\_term} by MLWE plus bimodal success.  It is the
+reduction/hardness interface for the exact-hyperball endpoint. &
+Conditional premise connecting sampler endpoint to hardness games. \\
+\midrule
+5 &
+Lines 1253--1255. &
+\ec{mlwe\_bound} and \ec{msis\_bound} are forwarded unchanged, with Module-SIS
+stated for \ec{BimodalMSIS\_As\_ModuleSIS(Bbimodal)}. &
+External MLWE and Module-SIS hardness assumption boundary. \\
+\midrule
+6 &
+Lines 1028--1033 and 787--817. &
+The exact-hyperball counted-ROM theorem applies
+\ec{euf\_cma\_security\_from\_haetae\_rejection\_paper\_sim\_nma\_and\_counted\_bimodal}
+after deriving a HAETAE-rejection NMA bound by \ec{ler\_trans}.  The
+intermediate rewrite uses
+\ec{rom\_internal\_nma\_exact\_hyperball\_rejection\_paper\_sim\_no\_fallback\_exact}. &
+Machine-checked real-order arithmetic plus exact no-fallback rewrite. \\
+\bottomrule
+\end{longtable}
+}
+
+The second final theorem is therefore stronger as a replay surface for
+non-vacuous sampling analysis: it exposes the real-signing-to-exact-hyperball
+hop as an explicit premise instead of hiding it behind the current coarse RO
+fallback.  It is also less self-contained: the user must supply or prove that
+sampling-hop premise separately before the theorem gives a concrete end-to-end
+security estimate.
+
+\paragraph{Replay checklist for reimplementers.}
+To replay either final theorem in EasyCrypt, a reimplementation should first
+instantiate the module restrictions from lines 598--631, then prove or assume
+the relevant NMA endpoint premise, then provide MLWE and Module-SIS hardness
+bounds for the declared reductions, and only then invoke the final composition
+lemma.  The only arithmetic performed in the final theorem bodies is forwarding
+premises through earlier lemmas, \ec{ler\_trans}, exact \ec{rewrite} steps, and
+SMT-dispatched probability facts such as \ec{mu\_bounded}.  None of these
+steps proves MLWE hardness, Module-SIS hardness, SHAKE-to-ROM soundness,
+implementation equivalence, or a non-vacuous rejection-sampler distance unless
+the corresponding premise or imported lemma already supplies it.
+
+\subsection{Non-vacuous replacement roadmap for the RO exact-hyperball fallback}
+
+\paragraph{Fallback criticism.}
+The current EasyCrypt scripts and the preceding report text do identify the
+coarse fallback, but they still do not give enough information to replace it.
+In \file{HAETAE\_HopGames.ec}, the comment at lines 7287--7290 says that the
+intended replacement is a push-forward of the structural-to-exact-hyperball
+attempt loss through \ec{paper\_sim\_sample\_from\_rejection\_attempt}, lifted
+across the NMA wrapper once the lazy-ROM sampler law is exposed.  The checked
+lemma immediately below, however, proves
+\ec{rom\_internal\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_loss\_bound}
+by a boundedness argument: the left probability is at most \(1\), the right
+probability is nonnegative, and
+\ec{rejection\_sampling\_loss\_term\_ge1} makes the additive loss at least
+\(1\).  That is machine-checked, but it proves no meaningful closeness between
+the RO-signing-attempt sampler and the RO exact-hyperball sampler.
+
+Thus the report can truthfully say that the final RO-sampling theorem is
+checked, but it cannot say that the present proof contains a non-vacuous
+random-oracle sampler-distance theorem.  A reader trying to reimplement the
+proof needs the following roadmap, not just the theorem name.
+
+\paragraph{Desired replacement statement.}
+The strongest drop-in replacement would prove the same inequality as the
+current fallback, but without using \ec{rejection\_sampling\_loss\_term\_ge1}:
+\[
+\begin{aligned}
+&\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptPaperSimAsNMA}
+  (A,\ec{ROSigningAttemptPaperSimSampler}))] \\
+&\quad \le
+\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptPaperSimAsNMA}
+  (A,\ec{ROExactHyperballPaperSimSampler}))] +
+\ec{rejection\_sampling\_loss\_term}.
+\end{aligned}
+\]
+If \ec{structural\_to\_exact\_hyperball\_paper\_sample\_loss\_obligation}
+is not globally discharged, the honest replacement should expose it as an
+antecedent, as the existing boundary lemmas already do.  If the proof must go
+through budgeted wrappers, the resulting theorem may instead have
+\ec{rom\_signature\_query\_budget * rejection\_sampling\_loss\_term} plus a
+sampler-prequery term; in that case the final Security bound must be updated
+rather than silently reusing the one-loss theorem.
+
+\paragraph{Current fallback proof structure.}
+{\scriptsize
+\begin{longtable}{p{0.18\linewidth}p{0.29\linewidth}p{0.28\linewidth}p{0.17\linewidth}}
+\toprule
+\textbf{Script item} & \textbf{What the current script proves} &
+\textbf{Why it is insufficient} & \textbf{Status} \\
+\midrule
+\file{HAETAE\_HopGames.ec} 7016--7034 &
+States that a per-mode structural paper-sample loss obligation plus an
+already-lifted NMA inequality gives the same NMA inequality. &
+This is only an identity wrapper over the supplied lifted premise; it does not
+lift the per-call sampler loss through adversarial NMA execution. &
+Machine-checked implication with conditional premise. \\
+\midrule
+Lines 7057--7095 &
+Creates a local one-step fact from
+\ec{structural\_attempt\_exact\_hyperball\_paper\_sample\_one\_step\_loss},
+but the final proof still closes by \ec{mu\_bounded} and a loss-at-least-one
+argument. &
+The one-step fact is not connected to the NMA result, so the proof remains
+vacuous as a distribution comparison. &
+Machine-checked coarse fallback. \\
+\midrule
+Lines 7097--7152 &
+Splits sampled NMA success into a clean branch and the
+\ec{sampler\_bad\_prequery} bad event, then charges the bad event to the
+finite-event-logic bound
+\ec{budgeted\_paper\_sim\_sampler\_bad\_prequery\_nma\_fel\_bound}. &
+This is the right shape for a non-vacuous proof, but it requires a genuine
+clean-lifting inequality as input. &
+Machine-checked conditional bridge. \\
+\midrule
+Lines 7291--7314 &
+Proves the unbudgeted RO-signing-attempt to RO exact-hyperball NMA bound by
+\ec{left\_le1}, \ec{right\_ge0}, and
+\ec{rejection\_sampling\_loss\_term\_ge1}. &
+The result is true for any right-hand game with nonnegative probability; it
+does not use sampler structure, ROM freshness, or the structural loss
+obligation. &
+Machine-checked but vacuous. \\
+\midrule
+Lines 7733--7815 &
+Specializes the concrete \ec{HAETAE\_RO.FRO} budgeted NMA lifting path, but
+the clean-conditioned lemma at lines 7733--7765 again uses boundedness and
+loss-at-least-one. &
+Concrete ROM specialization exists, yet the central clean sampler comparison
+is still not non-vacuous. &
+Machine-checked coarse fallback. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Replacement proof obligations.}
+{\scriptsize
+\begin{longtable}{p{0.20\linewidth}p{0.36\linewidth}p{0.20\linewidth}p{0.16\linewidth}}
+\toprule
+\textbf{Obligation} & \textbf{Required content} & \textbf{Existing evidence} &
+\textbf{Boundary} \\
+\midrule
+Per-call sampler push-forward &
+Show that sampling with \ec{ROSigningAttemptPaperSimSampler.sample\_with\_seed}
+at a fresh sampler site is bounded by
+\ec{ROExactHyperballPaperSimSampler.sample\_with\_seed} plus
+\ec{rejection\_sampling\_loss\_term}, for every postcondition on the resulting
+\ec{paper\_sim\_signature\_sample}. &
+The intended local facts are lines 6625--6676:
+\ec{concrete\_ro\_signing\_attempt\_to\_exact\_hyperball\_sample\_with\_seed\_*}.
+They use the structural paper-sample obligation and freshness. &
+Machine-checked once all premises are available. \\
+\midrule
+Distributional push-forward &
+Connect \ec{dsigning\_attempt\_state} and
+\ec{dexact\_hyperball\_signing\_attempt\_state} through
+\ec{paper\_sim\_sample\_from\_rejection\_attempt}; do not compare raw internal
+states when the games observe paper samples or signatures. &
+The obligation is named at lines 6615--6623.  Lines 8651--8722 show how attempt
+or coin-sample-pair loss obligations imply the paper-sample obligation. &
+Conditional unless the lower-level attempt or coin-sample-pair loss is proved. \\
+\midrule
+Lazy-ROM sampler law &
+Expose that a fresh \ec{sampler\_expand\_query} returns signing coins with law
+\ec{drandom\_coins}, and that projections through \ec{ro\_signing\_coins} are
+the only component used by the sampler. &
+\file{HAETAE\_ROM.ec} lines 99--109 prove
+\ec{sampler\_expand\_query\_dro\_output\_ro\_signing\_coins}.  HopGames uses it
+in sample-with-seed structural lemmas around lines 2285--2480. &
+Machine-checked formal ROM fact; not SHAKE/FIPS evidence. \\
+\midrule
+Freshness and coverage invariant &
+Maintain \ec{sampler\_rom\_covered} and show that a clean seed has not already
+been queried by the adversary or sampler before the sampler call. &
+Lines 168--199 give \ec{sampler\_rom\_covered\_fresh\_after\_clean\_seed} and
+\ec{sampler\_rom\_covered\_old\_log\_clean\_boundary}; lines 6678--6954 package
+old-log and self-logged clean surfaces. &
+Machine-checked invariant family. \\
+\midrule
+Clean-event one-call lifting &
+Lift the per-call sample comparison to one signing-oracle call under the clean
+condition
+\ec{! sampler\_bad\_prequery} and an active signing budget. &
+Lines 7413--7731 provide projection facts between \ec{O.sign} and
+\ec{sample\_with\_seed}, including active signing and exact-hyperball
+projections. &
+Partly machine-checked, but the NMA-level clean lifting still needs a
+non-vacuous composition proof. \\
+\midrule
+Sampler-prequery bad event &
+Split total NMA success into clean success plus \ec{sampler\_bad\_prequery},
+then bound the bad event by query budgets and challenge support. &
+Lines 2062--2223 prove
+\ec{budgeted\_paper\_sim\_sampler\_bad\_prequery\_nma\_fel\_bound}; lines
+7097--7152 already use the correct union-bound skeleton. &
+Machine-checked bad-event bound. \\
+\midrule
+Budgeted-to-unbudgeted adapters &
+Move from unbudgeted NMA wrappers to budgeted wrappers and back without
+changing the observable success event, or explicitly charge any extra loss. &
+The final Security budgeted theorem already exposes
+\ec{attempt\_unbudgeted\_to\_budgeted} and
+\ec{exact\_budgeted\_to\_unbudgeted} premises at lines 1170--1214. &
+Conditional unless exact adapters are proved for the chosen theorem surface. \\
+\midrule
+Final real-order composition &
+Use \ec{ler\_trans}, \ec{ler\_add}, \ec{mu\_sub}, and \ec{mu\_or} to combine
+clean lifting and bad-event bounds, then feed the result into
+\file{HAETAE\_Security.ec}. &
+Existing scripts show the arithmetic pattern at HopGames lines 7097--7152 and
+Security lines 1036--1070. &
+Machine-checked arithmetic once the non-vacuous premises are supplied. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Where the structural obligation enters.}
+The structural-to-exact-hyperball premise must enter before any NMA-level
+probability comparison: it is a one-call distributional statement over
+\ec{dsigning\_attempt\_state} and
+\ec{dexact\_hyperball\_signing\_attempt\_state}.  In the current script this is
+visible at lines 6625--6653 and 6965--6984, where the per-call
+\ec{sample\_with\_seed} and \ec{StructuralAttemptPaperSample.sample} bounds
+invoke \ec{structural\_to\_exact\_hyperball\_paper\_sample\_loss\_obligation}.
+A non-vacuous NMA theorem must propagate exactly that premise through signing
+oracle calls, adversary calls, clean-event preservation, and sampler-prequery
+splitting.  Introducing it only at the final \(\EUFCMA\) composition level is
+too late unless an imported lemma has already performed this lifting.
+
+\paragraph{Proof status after this roadmap.}
+The proof-engineering spike found no direct non-vacuous replacement for the
+unconditional theorem as written.  No new EasyCrypt proof was implemented,
+because existing lemmas stop at either a one-call sampler comparison or an
+identity wrapper over an already-supplied NMA-level premise.  The missing
+machine-checked statement is one of the following theorem surfaces:
+\[
+\begin{aligned}
+&\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptPaperSimAsNMA}
+  (A,\ec{ROSigningAttemptPaperSimSampler}))] \\
+&\quad \le
+\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptPaperSimAsNMA}
+  (A,\ec{ROExactHyperballPaperSimSampler}))] +
+\ec{rejection\_sampling\_loss\_term},
+\end{aligned}
+\]
+derived from
+\ec{structural\_to\_exact\_hyperball\_paper\_sample\_loss\_obligation}
+without \ec{rejection\_sampling\_loss\_term\_ge1}; or the budgeted clean-event
+variant
+\[
+\begin{aligned}
+&\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptBudgetedPaperSimAsNMA}
+  (A,\ec{ROSigningAttemptPaperSimSampler})) :
+  \ec{res} \land \neg\ec{sampler\_bad\_prequery}]\\
+&\quad \le
+\Prb[\ec{UF\_NMA}(\ec{ROMInternalTranscriptBudgetedPaperSimAsNMA}
+  (A,\ec{ROExactHyperballPaperSimSampler}))] +
+\ec{rom\_signature\_query\_budget}\cdot
+\ec{rejection\_sampling\_loss\_term},
+\end{aligned}
+\]
+plus exact or monotone budgeted-to-unbudgeted adapters.  In the second route,
+the checked \ec{budgeted\_paper\_sim\_sampler\_bad\_prequery\_nma\_fel\_bound}
+then supplies the bad-event charge, but it does not itself compare the samplers.
+
+The exact local blockage is therefore not the marginal sampler law:
+\ec{concrete\_ro\_signing\_attempt\_to\_exact\_hyperball\_sample\_with\_seed\_*}
+and \ec{sampler\_expand\_query\_dro\_output\_ro\_signing\_coins} already give
+the per-call ingredients.  The missing proof is the adaptive lifting through
+\ec{ROMInternalTranscriptPaperSimAsNMA} or its budgeted variant, including
+signing-oracle sequencing, clean-event preservation, freshness/coverage, and
+loss accumulation over at most the signing-query budget.  Until that theorem is
+added, the roadmap above is explanatory documentation.  The machine-checked
+facts are the existing EasyCrypt lemmas cited by line range.  The structural
+sampler-distance premise, SHAKE-to-ROM interpretation, and any implementation
+equivalence remain outside the checked fallback lemma unless future EasyCrypt
+code proves them or exposes them explicitly as assumptions.
+
+\paragraph{Focused budgeted clean-event proof spike.}
+The follow-up proof spike inspected the two existing \ec{fel} patterns in
+\file{HAETAE\_HopGames.ec}: the sampler-prequery bound around lines
+2069--2125 and the sampled-direct ROM-programming prequery bound around lines
+4935--5000.  Both are machine-checked bad-event accumulators for one
+execution.  They sum the probability of a flag becoming true over a counter,
+but they do not compare two oracle implementations and do not propagate a
+continuation predicate through \ec{A.forge}.  Consequently, the current
+\ec{fel} surface cannot directly prove the adaptive lossy-oracle statement
+needed for
+\ec{concrete\_rom\_internal\_budgeted\_nma\_ro\_signing\_attempt\_ro\_exact\_hyperball\_clean\_conditioned\_lifting}.
+
+The checked one-call ingredients are present.  In particular,
+\ec{concrete\_budgeted\_o\_sign\_clean\_one\_call\_loss\_from\_self\_logged\_surface}
+connects an active clean signing call using
+\ec{ROSigningAttemptPaperSimSampler} to the corresponding
+\ec{ROExactHyperballPaperSimSampler} call with one
+\ec{rejection\_sampling\_loss\_term} charge, assuming the structural sampler
+obligation, \ec{sampler\_rom\_covered}, a fresh self-logged seed, active
+\ec{signing\_count}, public-key equality, and equality of the sampler secret
+keys.  The source-side projection is
+\ec{concrete\_budgeted\_ro\_signing\_attempt\_o\_sign\_to\_self\_logged\_sample\_active\_projection};
+the target-side projection is
+\ec{concrete\_budgeted\_ro\_exact\_hyperball\_sample\_with\_seed\_to\_o\_sign\_active\_projection}.
+
+The proof-infrastructure spike sharpened the blocker further.  The current
+one-call loss lemma quantifies over predicates of type
+\ec{signature -> bool}.  The continuation needed inside an adaptive adversary
+is not merely a predicate on the returned signature: after \ec{O.sign} returns,
+the rest of \ec{A.forge} can depend on adversary private state, the lazy-ROM
+table, public query and transcript logs, signing records, counters, and future
+oracle calls.  Thus the missing induction principle must be stateful.  Its
+forge-level shape is: for every continuation predicate \(C\) over the final
+forge result and the public final state later used by \ec{UF\_NMA.main}, and
+for related attempt/exact memories with
+\[
+  k =
+  \ec{signature\_query\_budget\_count}
+  - \ec{ROMInternalTranscriptBudgetedPaperSimAsNMA.signing\_count},
+\]
+prove that the attempt game on the clean branch is bounded by the exact game
+plus \(k\cdot\ec{rejection\_sampling\_loss\_term}\).  The active
+\ec{O.sign} premise must itself be stateful:
+\[
+\Pr[\ec{O\_attempt.sign} : R(\ec{res},\ec{post\_state}) \land
+      \neg\ec{sampler\_bad\_prequery}]
+\le
+\Pr[\ec{O\_exact.sign} : R(\ec{res},\ec{post\_state})]
+  + \ec{rejection\_sampling\_loss\_term},
+\]
+where \(R\) includes the post-call relation required by the recursive
+continuation.  The existing signature-only one-call theorem is a component of
+that active-call premise, not the adversary-level lifting principle.
+
+The missing theorem is now isolated as a conditional EasyCrypt proof
+obligation, not as an external cryptographic assumption.  A non-vacuous proof
+would require an adaptive lifting rule with the following invariant before and
+after every active signing-oracle call: both games expose the same
+adversary-visible public key, hash log, transcript log, signing-record log,
+adversary hash counter, and signing counter; the two sampler secret keys are
+equal; the attempt side satisfies \ec{sampler\_rom\_covered}; the attempt side
+is on the clean branch
+\(\neg\ec{ROMInternalTranscriptBudgetedPaperSimAsNMA.sampler\_bad\_prequery}\);
+and the next sampler seed has not already appeared in the adversary or sampler
+logs.  At each active call, the one-call loss lemma should be instantiated with
+the continuation success predicate induced by the rest of \ec{A.forge}; the
+constant charge should then be summed over at most
+\ec{signature\_query\_budget\_count} active calls to obtain
+\ec{rom\_signature\_query\_budget} times
+\ec{rejection\_sampling\_loss\_term}.
+
+No new proof was added in this spike because the repository currently exposes
+exact \ec{equiv}/\ec{byequiv} adversary-call patterns, local \ec{phoare}
+inequalities, and bad-event \ec{fel} machinery, but not the required stateful
+relational/probability-loss adversary-call rule.  The status is therefore: the
+local one-call facts remain machine-checked; the clean-event adaptive lifting
+theorem remains an unproved EasyCrypt proof obligation; the structural
+sampler-distance premise remains a conditional premise; and SHAKE-to-ROM and
+implementation-equivalence claims remain external to this checked theorem path.
 
 \section{Feedback 3 criticism for assumptions, transcripts, and ROM programming}
 
@@ -1419,6 +2486,234 @@ validity.  The explanatory boundary is important.  This file does not prove a
 forking lemma that produces two transcripts from an adversary; it only states
 and checks what follows once a valid forking pair is available.
 
+\subsection{Lemma-ledger companion for HAETAE Transcript}
+
+\paragraph{Lemma-ledger criticism for HAETAE Transcript.}
+The preceding companion section explains the purpose of
+\file{HAETAE\_Transcript.ec}, but by itself it is still not sufficient for a
+mathematician or cryptologist to reconstruct the proof obligations in that
+script.  The evidence is in the script structure: lines 50--112 define several
+different challenge-query, matching, validity, and forking predicates, while
+lines 470--604 turn those predicates into extraction and special-soundness
+obligations.  Without a ledger, a reader can easily conflate a checked
+definition such as \ec{valid\_forking\_pair}, a theorem-boundary predicate such
+as \ec{special\_soundness\_obligation}, and the external cryptographic meaning
+of the Module-SIS hardness game imported through \file{HAETAE\_Assumptions.ec}.
+The report plus script can support reconstruction only if the reader is told
+which operators are pure transcript syntax, which lemmas are checked algebraic
+consequences, and which adversarial production of forks is left to downstream
+HopGames reductions.
+
+\begin{longtable}{p{0.20\linewidth}p{0.25\linewidth}p{0.16\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
+\toprule
+\textbf{EasyCrypt item and lines} & \textbf{Mathematical statement} &
+\textbf{Category} & \textbf{Premises and imports} & \textbf{Downstream role} \\
+\midrule
+\ec{AllCore}, \ec{List}, \ec{HAETAE\_Params}, \ec{HAETAE\_Algebra},
+\ec{HAETAE\_ROM}, \ec{HAETAE\_Assumptions}; 1--9 &
+Imports the tuple/list environment, HAETAE algebra, ROM query vocabulary, and
+SIS adapter vocabulary used by all transcript predicates. &
+Imported/library fact; external-assumption boundary for the hardness-side
+interfaces. &
+No local proof; relies on imported EasyCrypt and project theories. &
+Makes transcript extraction compatible with HopGames and the final
+\file{HAETAE\_Security.ec} reduction chain. \\
+\midrule
+\ec{transcript}; 11--12 &
+Models a transcript as public key, message, context, commitment high bits,
+commitment low bits, message hash, challenge, and signature. &
+Machine-checked fact. &
+Imports HAETAE carrier types from algebra and parameters. &
+Carrier for transcript logs, forking games, and special-soundness extraction
+in \file{HAETAE\_HopGames.ec}. \\
+\midrule
+\ec{signature\_commitment\_highbits},
+\ec{signature\_commitment\_lowbits}, \ec{signature\_message\_hash},
+\ec{signature\_challenge}; 14--29 &
+Defines the transcript-visible fields extracted from a signature, ignoring
+mode, key, message, and context except for typing. &
+Machine-checked fact. &
+Uses \ec{sig\_*} projections from the algebraic signature model. &
+Lets later proofs compare stored transcript fields with signature fields
+without unpacking signatures repeatedly. \\
+\midrule
+\ec{transcript\_pk} through \ec{transcript\_signature},
+\ec{transcript\_of\_signature}; 31--48 &
+Gives tuple projections and the canonical transcript obtained from a public
+signature. &
+Machine-checked fact. &
+Definitional tuple projections plus the signature-field operators above. &
+Used by signing-record logs and ROM programming sites in HopGames. \\
+\midrule
+\ec{transcript\_challenge\_query},
+\ec{transcript\_signature\_challenge\_query}; 50--63 &
+Builds the challenge random-oracle query from either stored transcript fields
+or the embedded signature fields. &
+Machine-checked fact. &
+Uses \ec{challenge\_hash\_query} from \file{HAETAE\_ROM.ec}. &
+Supplies the query equality needed by ROM programming and valid-fork query
+alignment. \\
+\midrule
+\ec{transcript\_verifies}, \ec{transcript\_challenge\_matches},
+\ec{transcript\_signature\_challenge\_matches},
+\ec{transcript\_fields\_match\_signature}, \ec{transcript\_valid},
+\ec{transcript\_public\_equation}; 65--95 &
+Defines verification, output-challenge matching, field consistency, full
+transcript validity, and the public verification equation. &
+Machine-checked fact. &
+Uses \ec{verify\_internal}, \ec{valid\_signature},
+\ec{ro\_challenge\_hash}, and \ec{verify\_public\_equation}. &
+Defines the invariant consumed by valid-forking-pair and transcript-log soundness
+lemmas in HopGames. \\
+\midrule
+\ec{same\_fork\_target}, \ec{distinct\_fork\_challenges},
+\ec{valid\_forking\_pair}; 97--112 &
+A valid fork is two valid transcripts for the same public target with distinct
+challenges. &
+Conditional premise and machine-checked predicate. &
+Requires both transcripts to satisfy \ec{transcript\_valid}. &
+Primary precondition for extraction games; no lemma here proves that an
+adversary produces such a pair. \\
+\midrule
+\ec{transcript\_response}, \ec{transcript\_response\_aux},
+\ec{transcript\_public\_key\_challenge\_term},
+\ec{active\_public\_reconstruction},
+\ec{inactive\_public\_reconstruction}; 114--129 &
+Extracts response components and the public-key challenge contribution used in
+verification reconstruction. &
+Machine-checked fact. &
+Imports signature response projections, \ec{public\_key\_challenge\_term},
+and \ec{polyveck\_zero}. &
+Feeds public-reconstruction lemmas and special-soundness obligations. \\
+\midrule
+\ec{forking\_difference\_solution},
+\ec{fork\_response\_aux\_difference},
+\ec{fork\_public\_challenge\_relation},
+\ec{fork\_response\_aux\_relation},
+\ec{fork\_left\_active\_public\_challenge\_relation},
+\ec{fork\_right\_active\_public\_challenge\_relation},
+\ec{fork\_public\_reconstruction\_cases}; 131--166 &
+Defines the response difference and public reconstruction relations obtained
+from two forked transcripts. &
+Machine-checked fact. &
+Uses vector subtraction/addition and public-key challenge terms from algebra. &
+Local algebraic vocabulary for later extraction and reconstruction obligations. \\
+\midrule
+\ec{fork\_matrix\_source}, \ec{fork\_module\_matrix},
+\ec{fork\_module\_target},
+\ec{bimodal\_selftarget\_msis\_instance\_of\_fork},
+\ec{extract\_bimodal\_selftarget\_msis\_solution},
+\ec{module\_sis\_instance\_of\_fork},
+\ec{extract\_module\_sis\_solution}; 168--215 &
+Constructs the bimodal self-target MSIS instance, candidate solution, and
+Module-SIS adapter output from a valid fork. &
+Machine-checked fact with external-assumption boundary for the hardness game. &
+Uses deterministic matrix generation and \ec{bimodal\_to\_module\_sis\_*}
+from \file{HAETAE\_Assumptions.ec}. &
+Provides the objects returned by HopGames special-soundness and Module-SIS
+reduction modules. \\
+\midrule
+\ec{bimodal\_extraction\_success}; 216--220 &
+States that bimodal extraction returns a nonempty solution and that the
+solution validates for the fork-derived instance. &
+Theorem-boundary predicate. &
+Depends on the extractor and \ec{bimodal\_selftarget\_msis\_valid}. &
+Used to package extraction success before lifting to Module-SIS. \\
+\midrule
+\ec{extract\_bimodal\_forking\_some},
+\ec{extract\_bimodal\_forking\_nonempty}; 222--238 &
+A valid forking pair makes the bimodal extractor return exactly the response
+difference, hence not \ec{None}. &
+Machine-checked fact. &
+Premise: \ec{valid\_forking\_pair md tr1 tr2}. &
+Internal support for \ec{forking\_extraction\_obligation\_holds}. \\
+\midrule
+\ec{transcript\_fields\_match\_signature\_challenge\_*},
+\ec{transcript\_valid\_signature\_challenge\_*}; 240--288 &
+Field consistency and transcript validity make the stored challenge query,
+signature challenge query, and challenge-match predicates agree. &
+Machine-checked fact. &
+Premises: \ec{transcript\_fields\_match\_signature} or
+\ec{transcript\_valid}. &
+Required by ROM programming to switch between transcript and signature views
+of the programmed challenge site. \\
+\midrule
+\ec{transcript\_valid\_public\_equation},
+\ec{transcript\_valid\_commitment\_reconstruction}; 299--331 &
+A valid transcript satisfies the public verification equation and reconstructs
+the stored commitment high bits. &
+Machine-checked fact. &
+Unfolds \ec{verify\_internal}, \ec{verify\_public\_equation}, and transcript
+validity. &
+Connects transcript validity to public reconstruction used in special
+soundness. \\
+\midrule
+\ec{valid\_forking\_pair\_*}; 333--461 &
+Forking pairs have public equations, common challenge-query sites, distinct
+signature challenges, equal reconstructed high bits, and public challenge
+relations. &
+Machine-checked fact family. &
+Premise: \ec{valid\_forking\_pair}; relies on the field-query and public
+reconstruction lemmas above. &
+Supplies the proof obligations consumed by HopGames' special-soundness
+interface readiness lemmas. \\
+\midrule
+\ec{extraction\_success}, \ec{forking\_extraction\_obligation},
+\ec{fork\_public\_reconstruction\_obligation}; 470--484 &
+Defines the Module-SIS extraction-success predicate and the two universal
+obligations over all valid forking pairs. &
+Conditional premise and theorem boundary. &
+Quantifies over \ec{valid\_forking\_pair}; uses Module-SIS validity. &
+Named assumptions/targets for downstream interface readiness; they are not
+adversarial fork-generation lemmas. \\
+\midrule
+\ec{forking\_difference\_solution\_wf},
+\ec{fork\_module\_matrix\_rows\_wf},
+\ec{fork\_module\_matrix\_size},
+\ec{bimodal\_forking\_solution\_valid},
+\ec{forking\_extraction\_obligation\_holds},
+\ec{fork\_public\_reconstruction\_obligation\_holds}; 486--527 &
+Proves well-formedness, matrix size, bimodal solution validity, and the two
+local fork obligations. &
+Machine-checked fact. &
+Uses algebraic well-formedness, \ec{mode\_k}, and previous fork lemmas. &
+Discharges the transcript-side premises used by HopGames special-soundness
+wrappers. \\
+\midrule
+\ec{bimodal\_to\_module\_sis\_lift\_obligation},
+\ec{bimodal\_to\_module\_sis\_lift\_obligation\_holds}; 535--549 &
+States and proves that every valid bimodal self-target solution lifts to a
+valid Module-SIS solution under the imported adapter. &
+Machine-checked fact, imported-interface boundary. &
+Uses \ec{bimodal\_to\_module\_sis\_valid} from assumptions. &
+Bridge from bimodal extraction to the Module-SIS game used in final security. \\
+\midrule
+\ec{special\_soundness\_obligation},
+\ec{special\_soundness\_with\_public\_reconstruction\_obligation},
+\ec{module\_sis\_extraction\_from\_bimodal},
+\ec{special\_soundness\_*}; 551--604 &
+Packages bimodal extraction plus the lift obligation into Module-SIS
+special-soundness, optionally preserving public reconstruction. &
+Machine-checked fact; theorem boundary. &
+Premises are the fork, lift, and public-reconstruction obligations explicitly
+listed in the lemmas. &
+Used by HopGames to certify the special-soundness interface before composing
+with NMA/CMA reductions. \\
+\midrule
+\ec{transcript\_from\_honest\_signing},
+\ec{honest\_transcript\_verifies},
+\ec{transcript\_of\_signature\_*},
+\ec{honest\_transcript\_challenge}; 607--660 &
+Builds the transcript produced by honest signing and proves it verifies, has
+fields matching the signature, and carries the expected challenge hash. &
+Machine-checked fact. &
+Uses \ec{sign\_internal}, \ec{verify\_internal\_sign\_internal}, and signature
+field projections. &
+Supports signing-record soundness, min-entropy no-failure facts, and transcript
+logging in ROM programming and HopGames. \\
+\bottomrule
+\end{longtable}
+
 \section{Script companion coverage for HAETAE ROM Programming}
 
 \file{HAETAE\_ROM\_Programming.ec} defines the counted random-oracle
@@ -1588,6 +2883,323 @@ concrete MLWE/SIS estimate, and does not by itself complete the final
 EUF-CMA theorem.  It supplies the exact bad-event vocabulary and counted-loss
 interfaces that HopGames and Security compose.
 
+\subsection{Lemma-ledger companion for HAETAE ROM Programming}
+
+\paragraph{Lemma-ledger criticism for HAETAE ROM Programming.}
+The existing ROM-programming companion describes the main object families, but
+it still leaves a reconstruction gap.  The script is not merely a dictionary of
+bad-event names: it defines a stateful counted ROM module at lines 250--301,
+Hoare invariants at lines 319--500, min-entropy and prequery bounds at
+lines 617--1386, bad-flag budget wrappers at lines 1455--1478, and
+valid-transcript programming-site closure lemmas at lines 1639--1723.  A reader
+who sees only the family names cannot determine which statements are checked
+probability bounds, which are conditional on query-budget hypotheses, which are
+formal ROM facts, and which are external SHAKE/FIPS modeling assumptions.  The
+ledger below therefore separates formal ROM programming from implementation
+hash assumptions and from the final cryptographic hardness composition.
+
+\begin{longtable}{p{0.20\linewidth}p{0.25\linewidth}p{0.16\linewidth}p{0.18\linewidth}p{0.15\linewidth}}
+\toprule
+\textbf{EasyCrypt item and lines} & \textbf{Mathematical statement} &
+\textbf{Category} & \textbf{Premises and imports} & \textbf{Downstream role} \\
+\midrule
+\ec{AllCore}, \ec{Real}, \ec{Distr}, \ec{List}, \ec{FSet},
+\ec{PROM}, \ec{StdOrder}, \ec{Mu\_mem}, and local imports; 1--16 &
+Imports probability, finite-set, random-oracle, transcript, rejection, and
+loss-term infrastructure. &
+Imported/library fact; external ROM-assumption boundary. &
+No local proof; relies on EasyCrypt libraries and project theories. &
+Defines the formal ROM environment used by HopGames and indirectly by
+\file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{programming\_site}, \ec{programming\_site\_query},
+\ec{programming\_site\_output}; 18--22 &
+A programmable site is a pair of a ROM query and the output to install at that
+query. &
+Machine-checked fact. &
+Uses \ec{ro\_query} and \ec{ro\_output} from \file{HAETAE\_ROM.ec}. &
+Base type for every prequery, reprogramming, and transcript-site predicate. \\
+\midrule
+\ec{programming\_site\_of\_transcript},
+\ec{signature\_programming\_site\_of\_transcript},
+\ec{transcript\_signature\_challenge\_output},
+\ec{actual\_signature\_programming\_site}; 23--37 &
+Builds the challenge programming site from transcript fields, signature fields,
+or the signature's own challenge output. &
+Machine-checked fact. &
+Depends on transcript challenge queries and \ec{ro\_output\_of\_challenge}. &
+Used when HopGames switches between transcript and signature views of a
+programmed challenge. \\
+\midrule
+\ec{honest\_signing\_programming\_site},
+\ec{honest\_signing\_programming\_site\_query}; 39--50 &
+Defines the programming site induced by an honest signing transcript generated
+from secret key, message, context, and signing coins. &
+Machine-checked fact. &
+Uses \ec{transcript\_from\_honest\_signing}. &
+Source of the randomly sampled site in prequery and reprogramming-loss lemmas. \\
+\midrule
+\ec{programmed\_site\_query\_min\_entropy\_bound\_for},
+\ec{programmed\_site\_query\_min\_entropy\_bound}; 51--60 &
+States that every query in a log has at most a given point probability as an
+honest signing programming-site query. &
+Conditional premise. &
+Uses \ec{mu} over a signing-coin distribution; default instance is
+\ec{drandom\_coins}. &
+Input condition for one-step prequery probability bounds in HopGames. \\
+\midrule
+\ec{programming\_site\_matches\_transcript},
+\ec{reprogramming\_failure},
+\ec{challenge\_entropy\_support\_ok},
+\ec{min\_entropy\_failure}; 65--77 &
+Defines correct transcript programming, reprogramming failure, sparse challenge
+support, and the min-entropy bad event. &
+Machine-checked predicate; external modeling boundary for entropy support. &
+Uses transcript challenge matching and \ec{challenge\_sparse}. &
+Bad-event vocabulary for programmed transcript games. \\
+\midrule
+\ec{transcript\_log\_min\_entropy\_clear},
+\ec{signing\_record\_log\_min\_entropy\_clear},
+\ec{fs\_with\_aborts\_failure},
+\ec{transcript\_signature\_programming\_site\_clear},
+\ec{transcript\_log\_signature\_programming\_sites\_clear},
+\ec{fs\_with\_aborts\_bound\_obligation}; 80--99 &
+Lifts bad-event predicates to transcript/signing logs and names the legacy
+Fiat-Shamir-with-aborts loss-obligation nonnegativity check. &
+Machine-checked predicate; theorem-boundary obligation. &
+Depends on reprogramming and min-entropy predicates plus reduction loss terms. &
+Used by HopGames transcript-log invariants; one clear-log predicate is also
+visible in \file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{counted\_rom\_event} and \ec{counted\_event\_is\_*}; 103--131 &
+Defines counted events for hash queries, signature sites, programmed sites, and
+min-entropy checks, with boolean classifiers. &
+Machine-checked fact. &
+Pure local sum-type analysis. &
+Audit vocabulary for counted ROM traces and bad-flag explanations. \\
+\midrule
+\ec{ro\_query\_is\_challenge},
+\ec{challenge\_query\_log\_count},
+\ec{challenge\_query\_log\_count\_*}; 133--192 &
+Classifies challenge-hash queries and proves how consing challenge or
+nonchallenge queries changes the distinct challenge-query count. &
+Machine-checked fact; query-budget invariant. &
+Uses finite-set cardinality over filtered query logs. &
+Discharges HopGames budget obligations for message-hash, matrix, sampler, and
+challenge query steps. \\
+\midrule
+\ec{counted\_trace\_*}; 193--202 &
+Counts the four counted event families by filtering a trace. &
+Machine-checked fact. &
+Uses list filtering and event classifiers. &
+Provides trace-accounting vocabulary, though most downstream use goes through
+higher-level bad-flag lemmas. \\
+\midrule
+\ec{programming\_sites\_same\_query},
+\ec{programming\_sites\_conflict},
+\ec{programming\_site\_prequeried},
+\ec{programming\_site\_reprograms},
+\ec{programming\_site\_fresh},
+\ec{programming\_transcript\_fresh}; 205--234 &
+Defines prequery, reprogramming conflict, freshness, and transcript freshness. &
+Machine-checked predicate. &
+Depends only on query equality, output inequality, query logs, programmed-site
+logs, and min-entropy failure. &
+Core bad-event guards for ROM programming games. \\
+\midrule
+\ec{rom\_counted\_programming\_bad},
+\ec{rom\_counted\_state\_bad},
+\ec{counted\_rom\_programming\_bound\_obligation}; 235--247 &
+Summarizes min-entropy, prequery, and reprogramming bad states and names the
+nonnegativity obligation for the counted loss term. &
+Machine-checked predicate; theorem-boundary obligation. &
+Uses \ec{counted\_rom\_programming\_loss\_term}. &
+Connects local bad flags to the counted-ROM loss term later composed by
+HopGames and Security. \\
+\midrule
+\ec{CountedLazyROM}; 250--301 &
+Stateful wrapper over an oracle with logs for hash queries, programmed sites,
+signature sites, and flags for prequery, reprogramming, and min-entropy bad
+events. &
+Formal ROM modeling fact; module/procedure boundary. &
+Requires an \ec{Oracle}; uses \ec{O.get} and \ec{O.set}. &
+Instantiated inside HopGames to expose counted bad events.  It is not a SHAKE
+implementation theorem. \\
+\midrule
+\ec{SigningCoinSampler}, \ec{DirectSigningCoinSampler}; 302--313 &
+Abstracts coin sampling and gives the direct sampler from \ec{drandom\_coins}. &
+Machine-checked module interface. &
+Uses \ec{drandom\_coins} and its imported distribution facts. &
+Target of \ec{phoare} prequery bounds used in sampled signing games. \\
+\midrule
+\ec{CountedLazyROMStateFacts}; 315--500 &
+Hoare invariants: initialization clears state, \ec{get} preserves clear flags
+and nonchallenge budgets, \ec{observe\_transcript} preserves clear state when
+min-entropy is clear, \ec{program} preserves clear state when fresh, and
+\ec{bad} is false under clear flags. &
+Machine-checked fact. &
+Premises include freshness, nonchallenge-query classification, and
+min-entropy-clear conditions. &
+Supplies HopGames state-invariant steps for counted ROM hybrids. \\
+\midrule
+\ec{CountedROMInterface}, \ec{CountedROMClient},
+\ec{CountedLazyROMBadGame}, \ec{ProgramChallenge},
+\ec{TranscriptProgrammer}, \ec{TranscriptProgrammerFromSite}; 501--549 &
+Defines the client interface, bad-game wrapper, direct challenge-programming
+procedure, and transcript-to-site programmer. &
+Formal ROM modeling fact; module/procedure boundary. &
+Depends on \ec{CountedLazyROM} and the generic oracle interface. &
+Gives the game API whose bad probability is bounded by later lemmas. \\
+\midrule
+\ec{programming\_site\_self\_*},
+\ec{fs\_with\_aborts\_failureE},
+\ec{programming\_site\_prequeried\_*},
+\ec{honest\_signing\_programming\_site\_queryE}; 550--610 &
+Unfolds self-matching, failure decomposition, prequery preservation, and the
+honest signing challenge query. &
+Machine-checked fact family. &
+Uses definitions from transcript, ROM, and honest signing. &
+Local rewriting library for later no-failure, query-budget, and prequery
+bounds. \\
+\midrule
+\ec{programmed\_site\_entropy\_token\_from\_query},
+\ec{honest\_signing\_programming\_site\_query\_entropy\_token},
+\ec{honest\_signing\_programming\_site\_query\_token\_injective},
+\ec{signing\_distribution\_programming\_site\_query\_spread}; 611--671 &
+Extracts an entropy token from a challenge query and bounds the probability
+that a signing distribution hits any fixed programming-site query. &
+Machine-checked fact; conditional premise for arbitrary distributions. &
+Needs \ec{signing\_randomness\_token\_spread} for arbitrary distributions and
+the signing-coin token lemmas from distributions. &
+Min-entropy engine for prequery loss. \\
+\midrule
+\ec{honest\_signing\_programming\_site\_query\_spread},
+\ec{honest\_signing\_programming\_site\_query\_spread\_bound},
+\ec{honest\_signing\_programming\_site\_query\_spread\_bound\_for},
+\ec{honest\_signing\_programming\_site\_query\_is\_challenge}; 673--713 &
+Instantiates the query-spread bound to \ec{drandom\_coins} and proves honest
+programming queries are challenge queries. &
+Machine-checked fact. &
+Uses \ec{signing\_coin\_distribution\_token\_spread}. &
+Turns entropy assumptions into concrete challenge-query budget bounds. \\
+\midrule
+\ec{programming\_site\_prequeried\_honest\_*},
+\ec{honest\_signing\_programming\_site\_outputE},
+\ec{honest\_signing\_programming\_site\_functional\_output},
+\ec{honest\_signing\_programming\_sites\_no\_conflict},
+\ec{actual\_signature\_programming\_site\_*}; 713--883 &
+Shows nonchallenge message-hash consing does not create honest-site prequeries,
+honest sites have functional outputs, honest sites do not conflict, and actual
+signature sites equal honest signing sites. &
+Machine-checked fact. &
+Unfolds \ec{sign\_internal}, challenge query construction, and signature-field
+definitions. &
+Supports message-hash-aware prequery bounds and no-reprogramming arguments in
+HopGames. \\
+\midrule
+\ec{programming\_site\_conflict\_free},
+\ec{programming\_site\_log\_conflict\_free\_for\_honest},
+\ec{programming\_site\_conflict\_free\_no\_reprograms},
+\ec{actual\_signature\_programming\_site\_sign\_internal\_conflict\_step},
+\ec{programmed\_site\_reprogram\_one\_step\_conflict\_free\_zero}; 884--968 &
+Defines conflict-free programmed-site logs and proves honest sites remain
+conflict-free, making one-step reprogramming probability zero under the
+conflict-free premise. &
+Machine-checked fact; conditional premise for the zero-probability lemma. &
+Premise: all honest sites are conflict-free against the current log. &
+Separates reprogramming loss from prequery loss in the counted-ROM argument. \\
+\midrule
+\ec{programmed\_site\_prequery\_one\_step\_*}; 969--1230 &
+Bounds the probability that a sampled honest site is already in a query log,
+using either finite-set cardinality, total budget, challenge-query budget, or
+concrete counter hypotheses. &
+Machine-checked probability bound; query-budget invariant. &
+Premises include min-entropy bounds, cardinality bounds, and
+\ec{hc <= hash\_query\_budget\_count}. &
+Main prequery-loss family used by HopGames sampled-signing hybrids. \\
+\midrule
+\ec{programmed\_site\_prequery\_one\_step\_message\_hash\_counter\_bound},
+\ec{direct\_signing\_coin\_sampler\_*}; 1231--1351 &
+Lifts the prequery bound through a leading message-hash query and into
+\ec{phoare} statements for the direct signing-coin sampler. &
+Machine-checked probability bound. &
+Premises: nonnegative and bounded challenge-query counter plus query-count
+hypothesis. &
+Used when HopGames samples signing coins after message-hash interactions. \\
+\midrule
+\ec{programmed\_site\_prequery\_one\_step\_concrete\_bound},
+\ec{programmed\_site\_prequery\_reprogram\_one\_step\_concrete\_bound}; 1353--1386 &
+Combines concrete prequery and conflict-free reprogramming reasoning into a
+single one-step bad-event bound. &
+Machine-checked probability bound; conditional premise. &
+Requires a cardinality budget and conflict-free honest-site premise. &
+Local one-step bound feeding counted-ROM bad-event accounting. \\
+\midrule
+\ec{programmed\_site\_query\_min\_entropy\_bound\_constant\_impossible},
+\ec{programming\_site\_reprograms\_conflict\_cons},
+\ec{rom\_counted\_programming\_bad\_*},
+\ec{counted\_rom\_programming\_bound\_obligation\_holds}; 1404--1448 &
+Records sanity checks: constant low-entropy query generation contradicts a
+subunit bound; conflicting cons creates reprogramming; min-entropy/prequery
+conditions imply the counted bad predicate; the counted loss term is
+nonnegative. &
+Machine-checked fact. &
+Uses signing-coin losslessness and nonnegativity of reduction loss terms. &
+Guards against vacuous min-entropy and bad-state accounting mistakes. \\
+\midrule
+\ec{CountedLazyROMBadFlags},
+\ec{counted\_lazy\_rom\_bad\_flags\_budget\_sound},
+\ec{counted\_lazy\_rom\_bad\_flags\_*}; 1455--1478 &
+Packages the probability of \ec{CountedLazyROMBadGame} and states that, under
+a budget-soundness premise, it is bounded by
+\ec{counted\_rom\_programming\_loss\_term} and is subunit. &
+Conditional premise and machine-checked probability wrapper. &
+Premise: \ec{counted\_lazy\_rom\_bad\_flags\_budget\_sound} for the exact
+game probability. &
+Theorem boundary used by HopGames when charging bad events to the counted-ROM
+loss term. \\
+\midrule
+\ec{fs\_with\_aborts\_no\_programming\_failure},
+\ec{transcript\_signature\_challenge\_output\_matches},
+\ec{honest\_transcript\_challenge\_entropy\_support},
+\ec{honest\_transcript\_no\_min\_entropy\_failure},
+\ec{signing\_transcript\_relation\_*},
+\ec{signing\_record\_log\_sound\_*},
+\ec{fs\_with\_aborts\_no\_failure\_*}; 1491--1624 &
+Proves honest transcripts and sound signing records do not trigger
+min-entropy or legacy Fiat-Shamir-with-aborts failure when programming matches. &
+Machine-checked fact. &
+Uses signing transcript relations, \ec{challenge\_from\_seed\_sparse} through
+the challenge-sparsity path, and transcript validity. &
+Used by HopGames to maintain clear transcript logs and no-failure side
+conditions. \\
+\midrule
+\ec{transcript\_valid\_programming\_site\_*},
+\ec{transcript\_valid\_actual\_signature\_programming\_site\_*},
+\ec{valid\_forking\_pair\_signature\_programming\_site\_query},
+\ec{valid\_forking\_pair\_programming\_site\_query},
+\ec{valid\_forking\_pair\_self\_programming\_sites\_no\_reprogramming};
+1639--1723 &
+Valid transcripts make transcript and signature programming-site queries agree;
+valid forks share programming-site queries; self-programmed valid sites do not
+count as reprogramming failures. &
+Machine-checked fact. &
+Premises: \ec{transcript\_valid}, \ec{valid\_forking\_pair}, and challenge
+matches. &
+Bridge from transcript special-soundness facts to ROM programming sites in
+HopGames. \\
+\midrule
+\ec{fs\_bound\_parts\_nonnegative},
+\ec{fs\_with\_aborts\_bound\_obligation\_holds}; 1739--1745 &
+Proves nonnegativity of the legacy Fiat-Shamir-with-aborts reprogramming and
+min-entropy loss terms. &
+Machine-checked fact; theorem-boundary obligation. &
+Uses nonnegativity lemmas from \file{HAETAE\_Reductions.ec}. &
+Allows downstream bounds to add these terms safely; it does not prove the old
+paper-style rejection ledger is tight or nonvacuous. \\
+\bottomrule
+\end{longtable}
+
 \section{Feedback 3 criticism for the foundational dependency layer}
 
 The current report is still not enough for a mathematician or cryptologist to
@@ -1735,6 +3347,164 @@ Boundary: the parameter file checks internal arithmetic consistency of the
 formal constants.  It does not prove that these constants are the claimed
 HAETAE standard parameter sets or that they yield a concrete bit-security
 level.
+
+\subsection{Lemma-ledger companion for HAETAE Params}
+
+\paragraph{Lemma-ledger criticism for HAETAE Params.}
+The previous companion coverage identified the parameter families, but it did
+not give enough detail for a reader to reconstruct which later EasyCrypt
+obligations are discharged merely by unfolding numeric constants and which
+claims are outside \file{HAETAE\_Params.ec}.  The gap matters because these
+constants are used everywhere: vector dimensions, challenge weight, norm
+bounds, byte lengths, and sampler supports all inherit their side conditions
+from this file.  The script proves only finite-mode arithmetic facts about the
+formal constants.  It does not prove correspondence with any external HAETAE
+standard document, does not justify a concrete security level, and does not
+introduce MLWE, Module-SIS, ROM, or sampler assumptions.  The ledgers below
+make that boundary explicit.
+
+\paragraph{Imported-interface and assumption ledger for HAETAE Params.}
+{\footnotesize
+\begin{longtable}{p{0.23\linewidth}p{0.16\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{AllCore} &
+1. Imported/library fact. &
+Provides the base logic and arithmetic environment used by the parameter
+definitions and case-split proofs. &
+No local premise.  All later imports of \file{HAETAE\_Params.ec} inherit this
+base proof environment. \\
+\midrule
+Formal parameter table &
+5--62. Machine-checked fact. &
+The file fixes one formal table of values for \ec{Mode2}, \ec{Mode3}, and
+\ec{Mode5}. &
+The table is consumed by \file{HAETAE\_Algebra.ec},
+\file{HAETAE\_Distributions.ec}, \file{HAETAE\_Rejection.ec}, and the hop and
+security scripts through those imports. \\
+\midrule
+External HAETAE-standard correspondence &
+5--62. External cryptographic assumption. &
+The file does not prove that the numeric table matches a particular HAETAE
+submission, standard, or concrete security claim. &
+Any such correspondence must be justified outside this EasyCrypt file.  The
+checked security theorem is relative to these formal constants. \\
+\midrule
+Cryptographic assumptions introduced locally &
+1--113. External cryptographic assumption. &
+None are introduced in \file{HAETAE\_Params.ec}. &
+MLWE, Module-SIS, Fiat-Shamir, ROM, rejection-sampling, and implementation
+equivalence assumptions enter only in later files. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Definition ledger for HAETAE Params.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{seedbytes}, \ec{crhbytes}, \ec{n}, \ec{q}, \ec{dq} &
+5--9. Machine-checked fact. &
+Fixes seed length, CRH byte length, polynomial degree, modulus, and doubled
+modulus for the formal model. &
+No local premise.  Used by algebraic carriers, SHAKE seed slices,
+coefficient-reduction facts, byte packing, and seed/CRH distributions. \\
+\midrule
+\ec{mode} &
+11. Machine-checked fact. &
+Declares the three formal modes \ec{Mode2}, \ec{Mode3}, and \ec{Mode5}. &
+No separate validity predicate exists.  \file{HAETAE\_Scheme.ec} later exposes
+a single abstract \ec{haetae\_mode}; downstream theorems are relative to that
+formal mode. \\
+\midrule
+\ec{mode\_k}, \ec{mode\_l}, \ec{mode\_tau} &
+13--26. Machine-checked fact. &
+Defines per-mode public-vector dimension, secret-vector dimension, and sparse
+challenge prefix weight. &
+Used by \file{HAETAE\_Algebra.ec} for vector/matrix and challenge shape,
+\file{HAETAE\_Distributions.ec} for product-distribution lengths, and
+\file{HAETAE\_Rejection.ec} for attempt-state dimensions. \\
+\midrule
+\ec{mode\_b0sq}, \ec{mode\_b1sq}, \ec{mode\_b2sq} &
+28--41. Machine-checked fact. &
+Defines per-mode squared-norm thresholds for secret, response, and verifier
+norm checks. &
+Used by \ec{secret\_norm\_ok}, \ec{response\_norm\_ok}, and
+\ec{verify\_norm\_ok}; rejection and security scripts inherit these as the
+formal abort/correctness thresholds. \\
+\midrule
+\ec{mode\_ln}, \ec{mode\_alpha\_hint}, \ec{mode\_m} &
+43--50. Machine-checked fact. &
+Defines the signing-sample bound, hint decomposition base, and \(m=l-1\). &
+Used by bounded and hyperball sample carriers, decomposition lemmas, public
+verification columns, and rejection-sampling loss interfaces. \\
+\midrule
+\ec{mode\_crypto\_bytes}, \ec{mode\_polyq\_packedbytes},
+\ec{mode\_publickeybytes} &
+52--62. Machine-checked fact. &
+Defines formal signature/public-key byte lengths and per-polynomial
+\(q\)-packing lengths. &
+Used by public-key packing roundtrips in \file{HAETAE\_Algebra.ec} and by
+rejection packing-abort facts in \file{HAETAE\_Rejection.ec}. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Lemma ledger for HAETAE Params.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt lemma(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{seedbytes\_gt0}, \ec{crhbytes\_gt0}, \ec{n\_gt0},
+\ec{q\_gt0}, \ec{dqE} &
+65--69. Machine-checked fact. &
+Proves positivity for global sizes/modulus and rewrites \ec{dq} to
+\(129026\). &
+No local hypotheses.  Discharges nonempty list, distribution, modulus, and
+division side conditions in \file{HAETAE\_Algebra.ec} and
+\file{HAETAE\_Distributions.ec}. \\
+\midrule
+\ec{mode\_k\_gt0}, \ec{mode\_l\_gt0}, \ec{mode\_tau\_gt0},
+\ec{mode\_tau\_le\_n} &
+71--80. Machine-checked fact. &
+Every formal mode has positive vector dimensions and challenge weight bounded
+by \(n\). &
+Premise is only \ec{md : mode}; proofs are by case analysis.  Used by shape
+lemmas, sparse challenge support, distribution support, and HopGames
+dimension side conditions. \\
+\midrule
+\ec{mode\_b0sq\_gt0}, \ec{mode\_b1sq\_gt0},
+\ec{mode\_b2sq\_gt0}, \ec{mode\_ln\_gt0},
+\ec{mode\_alpha\_hint\_gt0}, \ec{mode\_m\_gt0} &
+83--98. Machine-checked fact. &
+Proves positivity of formal norm thresholds, signing-sample bound,
+hint-decomposition base, and \(m\). &
+Premise is \ec{md : mode}.  Used by norm proofs, bounded-sampler support,
+decomposition arithmetic, keygen seed counters, and rejection threshold
+lemmas. \\
+\midrule
+\ec{mode\_crypto\_bytes\_gt0},
+\ec{mode\_polyq\_packedbytes\_gt0},
+\ec{n\_le\_mode\_polyq\_packedbytes},
+\ec{mode\_publickeybytes\_gt0} &
+101--110. Machine-checked fact. &
+Proves positivity of byte-size interfaces and that a formal \(q\)-packed
+polynomial has at least \(n\) coefficient positions. &
+Premise is \ec{md : mode}.  Used by public-key packing/unpacking,
+verification-matrix reconstruction, and rejection packing-abort proofs. \\
+\bottomrule
+\end{longtable}
+}
 
 \section{Script companion coverage for HAETAE Algebra}
 
@@ -2107,6 +3877,413 @@ checked theorem only under its displayed hypotheses, every use of
 to the paper algorithm, SHAKE security, or implementation behavior as
 explanatory unless another source file proves it.
 
+\paragraph{Lemma-ledger criticism for HAETAE Algebra.}
+The line-range companion above makes the file navigable, but it is still not
+enough, by itself, for a mathematician or cryptologist to reconstruct the
+proof obligations that later scripts cite.  It gives ranges, but not a stable
+ledger of theorem surfaces: which names are definitions, which lemmas are
+checked consequences of those definitions, which side conditions are local
+premises, and which facts enter only because \file{AllCore}, \file{IntDiv},
+\file{List}, \file{HAETAE\_Params.ec}, or \file{HAETAE\_FIPS202.ec} were
+imported.  It also risks hiding the strongest boundary in the algebra file:
+\file{HAETAE\_Algebra.ec} proves correctness of the formal
+\ec{sign\_internal}/\ec{verify\_internal} model, not equivalence to the
+HAETAE paper sampler, SHAKE-as-ROM security, or a Jasmin/C implementation.
+The ledgers below close that documentation gap at the level of names later
+used by \file{HAETAE\_Rejection.ec}, \file{HAETAE\_HopGames.ec}, and
+\file{HAETAE\_Security.ec}.  Repeated coefficient-offset lemmas and sibling
+\ec{\_wf} lemmas are grouped when they have the same proof obligation and the
+same downstream role; the EasyCrypt source remains authoritative for exact
+tactic order and generated subgoals.
+
+\paragraph{Imported-interface ledger for HAETAE Algebra.}
+{\footnotesize
+\begin{longtable}{p{0.23\linewidth}p{0.16\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt interface} & \textbf{Lines / category} &
+\textbf{Statement paraphrase} & \textbf{Premises, imports, downstream role} \\
+\midrule
+\ec{AllCore}, \ec{IntDiv}, \ec{List} &
+1. Imported/library fact. &
+Boolean reasoning, integer division/modulus, lists, \ec{size}, \ec{nth},
+\ec{nseq}, \ec{mkseq}, \ec{range}, \ec{zip}, \ec{foldl}, and equality from
+indexed lists. &
+No local cryptographic premise.  Used in almost every algebra proof; later
+Rejection and HopGames inherit these list and arithmetic facts through this
+model. \\
+\midrule
+\file{HAETAE\_Params.ec} and \ec{HAETAE\_Params} &
+2, 6. Imported/library fact. &
+Provides the formal mode constants, dimensions, modulus, norm bounds, packing
+lengths, positivity lemmas, and mode-case equations. &
+Used by vector dimensions, sparse challenges, norm bounds, packing sizes, and
+the rejection thresholds consumed in \file{HAETAE\_Rejection.ec}.  This is an
+imported formal-parameter interface, not a proof that the constants match a
+standard document. \\
+\midrule
+\file{HAETAE\_FIPS202.ec} and \ec{HAETAE\_FIPS202} &
+2, 7. Imported/library fact. &
+Provides byte-list SHAKE/XOF functions and size/domain lemmas such as
+\ec{shake256\_size}, \ec{shake256\_squeeze\_size}, rate bytes, and domain
+separator facts. &
+Feeds keygen seed-flow lemmas.  It supplies deterministic byte-list facts, not
+a random-oracle theorem and not SHAKE pseudorandomness. \\
+\midrule
+Cryptographic assumptions in this file &
+1--3885. External cryptographic assumption. &
+None are introduced by \file{HAETAE\_Algebra.ec}. &
+MLWE, Module-SIS, ROM, Fiat-Shamir, rejection-sampling, paper-sampler, and
+implementation-equivalence assumptions are outside this file and enter only in
+later security/reduction layers. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Definition ledger for HAETAE Algebra.}
+{\footnotesize
+\begin{longtable}{p{0.24\linewidth}p{0.15\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{byte}, \ec{seed}, \ec{crh}, \ec{random\_coins}, \ec{xof256\_state},
+\ec{message}, \ec{context}, \ec{coeff}, \ec{poly}, \ec{challenge},
+\ec{polyveck}, \ec{polyvecl}, \ec{polyvecm}, \ec{matrix}, \ec{hint\_t},
+\ec{sig\_token}, \ec{pkey}, \ec{encoded\_pkey}, \ec{skey}, \ec{signature} &
+9--29. Machine-checked fact. &
+Fixes the formal carrier universe as integers, lists, and tuples. &
+No local premises.  Consumed by \file{HAETAE\_Scheme.ec} to instantiate
+\file{Sig\_ROM.ec}; all Rejection, HopGames, and Security statements quantify
+over these carriers. \\
+\midrule
+\ec{secret\_key\_of\_seed}, zero vectors/matrices, \ec{poly\_wf},
+\ec{polyveck\_wf}, \ec{polyvecl\_wf}, \ec{crh\_wf},
+\ec{challenge\_wf}, \ec{challenge\_sparse}, \ec{poly\_unit},
+\ec{polyveck\_unit}, \ec{polyvecl\_unit} &
+31--87. Machine-checked fact. &
+Defines zero/default objects and shape, sparse-challenge, and unit-vector
+predicates. &
+Imports mode dimensions from \file{HAETAE\_Params.ec}.  These predicates are
+the side conditions used by signature validity, distributions, rejection
+samples, and transcript validity. \\
+\midrule
+\ec{coeff\_mod}, \ec{coeff\_add}, \ec{coeff\_neg}, \ec{coeff\_sub},
+\ec{coeff\_mul}, \ec{coeff\_double}, \ec{poly\_coeff},
+\ec{poly\_normalize}, \ec{poly\_add}, \ec{poly\_neg}, \ec{poly\_sub},
+\ec{poly\_double}, \ec{poly\_mul}, \ec{poly\_dot},
+\ec{matrix\_vec\_mul}, \ec{polyveck\_add}, \ec{polyveck\_sub},
+\ec{polyveck\_double}, \ec{polyvecl\_sub} &
+108--169. Machine-checked fact. &
+Defines the list-based formal polynomial, vector, and matrix arithmetic used
+by the HAETAE model. &
+Imports \(q\), \(n\), and mode dimensions.  Used by public-key equations,
+verification reconstruction, rejection reject2 balance, and extraction
+relations.  This is not a separate quotient-ring implementation theorem. \\
+\midrule
+\ec{coeff\_q\_bound}, \ec{poly\_coeffs\_q\_bound},
+\ec{polyveck\_coeffs\_q\_bound} &
+291--297. Machine-checked fact. &
+Names coefficient-range predicates for formal \(q\)-bounded values. &
+No cryptographic premise.  Feeds packing poly-\(q\) bounds and public-key
+vector well-formedness. \\
+\midrule
+\ec{coeff\_decompose\_z1\_low}, \ec{coeff\_decompose\_z1\_high},
+\ec{coeff\_lsb}, \ec{coeff\_decompose\_vk\_low},
+\ec{coeff\_decompose\_vk\_high}, \ec{coeff\_decompose\_hint\_high},
+\ec{poly\_highbits}, \ec{poly\_lowbits}, \ec{poly\_vk\_lowbits},
+\ec{poly\_vk\_highbits}, \ec{poly\_hint\_highbits}, vector lifts &
+427--481. Machine-checked fact. &
+Defines formal high/low-bit, verification-key, and hint decomposition
+functions. &
+Imports mode-specific hint bases.  Used by public-key packing, public-key
+verification columns, signer commitments, and Rejection's public-equation
+predicates.  Paper correspondence is explanatory unless separately proved. \\
+\midrule
+\ec{public\_key\_seed\_poly}, \ec{haetae\_shake256\_bytes},
+\ec{haetae\_xof256\_*}, \ec{haetae\_seed\_slice},
+\ec{haetae\_reference\_keygen\_*}, \ec{haetae\_keygen\_*},
+\ec{haetae\_keygen\_sampler\_seed} &
+564--678. Machine-checked fact. &
+Defines deterministic seed expansion, XOF byte-list wrappers, seed-buffer
+slices, and keygen seed components. &
+Imports FIPS202 byte-list functions and parameter lengths.  Used by keygen and
+packed-public-key lemmas.  This is deterministic plumbing, not SHAKE security
+or ROM modeling. \\
+\midrule
+\ec{public\_matrix\_seed}, \ec{public\_secret\_vector\_seed},
+\ec{public\_error\_vector\_seed}, \ec{public\_rounding\_vector\_seed},
+\ec{haetae\_public\_key\_vector\_from\_relation},
+\ec{public\_key\_relation}, \ec{public\_key\_equation\_holds},
+reference-keygen aliases &
+680--840. Machine-checked fact. &
+Defines the formal public-key relation and the reference-named keygen views. &
+Imports formal arithmetic and mode-specific branches.  Used by transcript
+extraction, \file{HAETAE\_Security.ec} correctness, and Module-SIS relation
+setup.  Hardness is not proved here. \\
+\midrule
+\ec{haetae\_mode23\_verification\_column},
+\ec{haetae\_mode5\_verification\_column},
+\ec{public\_key\_verification\_column},
+\ec{haetae\_verification\_matrix\_from\_unpacked},
+\ec{public\_verification\_matrix}, \ec{challenge\_embedding},
+\ec{public\_key\_challenge\_term}, \ec{reconstructed\_highbits},
+\ec{public\_key\_of\_secret} &
+841--903. Machine-checked fact. &
+Defines how public keys induce verification matrices, challenge terms, and
+reconstructed highbits. &
+Used by \ec{verify\_public\_equation}, Rejection field consistency,
+HopGames paper/public simulation rewrites, and final correctness. \\
+\midrule
+\ec{haetae\_public\_key\_*}, \ec{haetae\_pack\_*},
+\ec{haetae\_unpack\_*}, \ec{haetae\_byte\_norm},
+\ec{haetae\_polyq\_*}, \ec{concrete\_haetae\_*} &
+904--1265. Machine-checked fact. &
+Defines the simple and reference-style public-key byte encoders/decoders and
+their well-formedness predicates. &
+Imports packing lengths and integer division.  Used by verification-matrix
+correctness and key recovery lemmas.  Names containing ``concrete'' are still
+formal EasyCrypt objects, not external implementation equivalence. \\
+\midrule
+\ec{valid\_mode}, \ec{valid\_keypair}, \ec{valid\_signature},
+\ec{sig\_*} projections, \ec{encode\_poly}, \ec{encode\_polyveck},
+\ec{encode\_pkey} &
+3039--3062. Machine-checked fact. &
+Defines formal validity and the exact tuple fields of signatures and encoded
+public keys. &
+Consumed by \file{HAETAE\_Transcript.ec}, Rejection attempt relations, HopGames
+transcript games, and \file{HAETAE\_Security.ec}. \\
+\midrule
+\ec{deterministic\_*}, \ec{commitment\_source}, \ec{commitment\_raw},
+\ec{response\_source}, \ec{response\_aux\_vector},
+\ec{signing\_sample\_y1}, \ec{signing\_sample\_y2},
+\ec{signing\_entropy\_token\_of\_coins}, \ec{commitment\_lowbits},
+\ec{message\_hash}, \ec{challenge\_source}, \ec{challenge\_from\_seed},
+\ec{challenge\_hash}, \ec{commitment\_challenge},
+\ec{commitment\_highbits}, \ec{response\_vector}, \ec{hint\_vector},
+\ec{signature\_token} &
+3064--3169. Machine-checked fact. &
+Defines the deterministic formal signing-field generator from a key, message,
+context, and coins.  The first lowbits coefficient stores a coin-derived token. &
+Used by Rejection attempt constructors, HopGames public/paper-simulation
+rewrites, counted-ROM prequery arguments, and transcript soundness.  It is a
+formal model of the signer, not a sampler correspondence proof. \\
+\midrule
+\ec{keygen\_internal}, \ec{sign\_internal},
+\ec{verify\_challenge\_consistent},
+\ec{verify\_reconstructed\_highbits}, \ec{verify\_public\_equation} &
+3373--3405. Machine-checked fact. &
+Defines the formal keygen, signer, challenge-consistency check, and public
+equation check. &
+Used directly by \file{HAETAE\_Scheme.ec}, Rejection relation lemmas, and
+\file{HAETAE\_Security.ec} correctness. \\
+\midrule
+\ec{coeff\_norm\_sq}, \ec{poly\_norm\_sq}, \ec{polyvecl\_norm\_sq},
+\ec{polyveck\_norm\_sq}, \ec{response\_norm\_ok},
+\ec{verify\_norm\_ok}, \ec{verify\_internal} &
+3777--3817. Machine-checked fact. &
+Defines the formal norm predicates and final verifier conjunction. &
+Imports mode norm bounds.  Rejection uses these as acceptance/abort channels;
+Security uses \ec{verify\_internal\_sign\_internal} for correctness. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Lemma ledger for HAETAE Algebra.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt lemma(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{poly\_zero\_size}, \ec{polyveck\_zero\_size},
+\ec{polyvecl\_zero\_size}, \ec{polyvecm\_zero\_size},
+\ec{polyveck\_wf\_nth}, \ec{poly\_zero\_wf},
+\ec{polyveck\_zero\_wf}, \ec{polyvecl\_zero\_wf} &
+39--106. Machine-checked fact. &
+Zero objects have the expected lengths; well-formed vectors expose
+well-formed rows. &
+Imports list facts \ec{size\_nseq}, \ec{allP}, \ec{mem\_nth}.  Used whenever
+later scripts take a default row from a public key, commitment, or sample. \\
+\midrule
+\ec{polyvecl\_sub\_size}, arithmetic \ec{\_wf} lemmas through
+\ec{polyvecl\_sub\_wf} &
+170--289. Machine-checked fact. &
+Formal arithmetic preserves polynomial and vector shape. &
+Imports \ec{size\_mkseq}, \ec{mkseqP}, \ec{foldl} induction, and mode
+positivity.  Downstream: signature validity, verification matrices, Rejection
+state well-formedness. \\
+\midrule
+\ec{coeff\_mod\_q\_bound}, \ec{poly\_*coeffs\_q\_bound},
+\ec{matrix\_vec\_mul\_coeffs\_q\_bound},
+\ec{polyveck\_*coeffs\_q\_bound} &
+298--425. Machine-checked fact. &
+Formal arithmetic constructors produce \(q\)-bounded coefficients. &
+Imports integer modulus facts and \ec{smt}.  Used by poly-\(q\) packing bounds
+and public-key vector range lemmas. \\
+\midrule
+Decomposition \ec{\_wf} lemmas and poly-\(q\) bound lemmas,
+including \ec{polyveck\_vk\_highbits\_mode23\_polyq\_wf} and
+\ec{polyveck\_q\_bound\_mode5\_polyq\_wf} &
+483--1057. Machine-checked fact. &
+High/low-bit and hint decomposition maps preserve shape and satisfy the
+formal poly-\(q\) bounds used for public-key packing. &
+Local premises include \(q\)-bounded inputs and, for Mode2/3 VK highbits,
+\ec{md = Mode2 \/ md = Mode3}.  Used by keygen public-vector and reference
+packing roundtrip lemmas. \\
+\midrule
+\ec{public\_key\_seed\_poly\_wf},
+\ec{public\_key\_seed\_polyvecl\_wf},
+\ec{public\_key\_seed\_polyveck\_wf}, seed/XOF size and layout lemmas through
+\ec{haetae\_keygen\_counter\_next\_gt} &
+1267--1579. Machine-checked fact. &
+Seed-derived objects and keygen seed buffers have the expected formal lengths,
+and the XOF wrapper matches the SHAKE byte-list presentation. &
+Local premises include \ec{0 <= outlen}, \ec{0 <= len}, and
+\ec{size sd = seedbytes}.  Imports FIPS202 size/domain facts.  Used by keygen
+well-formedness and reference seed-flow documentation. \\
+\midrule
+\ec{public\_matrix\_seed\_*}, \ec{public\_secret\_vector\_seed\_wf},
+\ec{public\_error\_vector\_seed\_wf}, \ec{public\_rounding\_vector\_seed\_wf},
+reference/keygen vector \ec{\_wf} and \ec{polyq\_wf} lemmas through
+\ec{public\_key\_vector\_seed\_wf} &
+1581--1839. Machine-checked fact. &
+Formal public matrices, secret/error vectors, rounding vectors, and public-key
+vectors are shape-correct and poly-\(q\)-bounded. &
+Mode cases split Mode2/3 from Mode5.  Used by public-key packing,
+verification-matrix construction, and \file{HAETAE\_Security.ec} correctness. \\
+\midrule
+\ec{public\_key\_mode23\_column\_wf},
+\ec{haetae\_verification\_column\_from\_unpacked\_wf},
+\ec{public\_key\_verification\_column\_wf},
+\ec{public\_verification\_matrix\_size},
+\ec{public\_verification\_matrix\_rows\_wf},
+\ec{challenge\_embedding\_wf}, \ec{public\_key\_of\_secret\_wf},
+seed pack/unpack lemmas &
+1846--1953. Machine-checked fact. &
+Verification matrices and challenge embeddings are well-shaped; seed packing
+roundtrips under seed-size hypotheses. &
+Imports list equality and mode dimensions.  Used by verification public
+equations, transcripts, and packed-key recovery. \\
+\midrule
+\ec{haetae\_polyq\_coeff\_bound\_gt0},
+\ec{haetae\_byte\_norm\_*}, \ec{haetae\_unpack15\_coeff0} through
+\ec{haetae\_unpack15\_coeff7}, reference packer size/wf lemmas &
+1955--2098. Machine-checked fact. &
+Byte normalization is bounded/idempotent, and each 15-byte Mode2/3 coefficient
+lane decodes to the original formal coefficient under range hypotheses. &
+Local premises are explicit numeric ranges.  Imports integer division/modulus
+SMT.  Used only for formal reference-style public-key packing. \\
+\midrule
+\ec{nth\_cat\_size\_plus}, \ec{haetae\_pack\_polyveck\_body\_ref\_nth},
+Mode2/3 coefficient-offset lemmas, \ec{haetae\_unpack\_poly\_q\_ref\_pack\_mode23\_*},
+\ec{haetae\_pack\_vk\_ref\_roundtrip\_mode23} &
+2100--2583. Machine-checked fact. &
+For Mode2/3, reference-style public-key packing followed by unpacking returns
+the same formal polynomial/vector/key. &
+Premises: \ec{md = Mode2 \/ md = Mode3}, seed size, and
+\ec{haetae\_polyq\_*wf}.  Downstream: reference packed-key roundtrip and
+verification-matrix correctness; not external parser equivalence. \\
+\midrule
+\ec{haetae\_unpack\_poly\_q\_ref\_pack\_mode5\_*},
+\ec{haetae\_unpack\_polyveck\_body\_ref\_pack\_mode5},
+\ec{haetae\_pack\_vk\_ref\_roundtrip\_mode5},
+\ec{haetae\_public\_key\_ref\_roundtrip},
+\ec{haetae\_keygen\_public\_key\_ref\_roundtrip} &
+2585--2769. Machine-checked fact. &
+For Mode5 and mode-generic reference keys, formal reference packing roundtrips
+under the displayed well-formedness premises. &
+Premises: seed size and poly-\(q\) well-formedness.  Used by concrete/ref
+verification-matrix correctness lemmas. \\
+\midrule
+\ec{haetae\_pack\_polyveck\_body\_size},
+\ec{haetae\_unpack\_poly\_q\_pack\_at},
+\ec{haetae\_unpack\_polyveck\_body\_pack\_at},
+\ec{haetae\_public\_key\_roundtrip}, public-key encoding/unpacking wf lemmas &
+2771--2964. Machine-checked fact. &
+The simpler model public-key packer is size-correct and roundtrips for
+well-formed inputs. &
+Premises: \ec{poly\_wf}, \ec{polyveck\_wf}, or unpacked-key well-formedness.
+Used by keygen public-key roundtrip and matrix-correctness lemmas. \\
+\midrule
+\ec{packed\_haetae\_reference\_public\_key\_*},
+\ec{concrete\_haetae\_reference\_*wf},
+\ec{haetae\_reference\_keygen\_public\_key\_ref\_roundtrip} &
+2966--3019. Machine-checked fact. &
+Reference-named formal public keys are well-formed and roundtrip through the
+reference-style packer. &
+Imports earlier reference packer lemmas.  Used by concrete/reference
+verification-matrix facts.  Still a formal-object theorem. \\
+\midrule
+\ec{public\_key\_of\_secret\_relation},
+\ec{public\_key\_of\_secret\_equation\_holds} &
+3022--3037. Machine-checked fact. &
+The public key derived from a secret seed satisfies the formal public-key
+relation/equation. &
+Definitional proof.  Used by transcript validity, Rejection signing-attempt
+relations, and Security correctness; it is not a hardness theorem. \\
+\midrule
+Deterministic signing-field lemmas:
+\ec{deterministic\_*wf}, \ec{deterministic\_*unit},
+\ec{commitment\_*wf}, \ec{commitment\_lowbits\_entropy\_token},
+\ec{challenge\_from\_seed\_*}, \ec{challenge\_hash\_*},
+\ec{response\_*}, \ec{signing\_sample\_*}, \ec{hint\_*},
+\ec{message\_hash\_size}, \ec{challenge\_hash\_size} &
+3171--3371. Machine-checked fact. &
+Deterministic signer fields are well-formed/unit/sparse and have expected
+hash lengths; lowbits coefficient zero equals the signing entropy token. &
+Imports list construction facts and mode dimensions.  Used by Rejection
+field-consistency lemmas, HopGames simulation rewrites, and counted-ROM
+prequery/token arguments. \\
+\midrule
+\ec{keygen\_internal\_valid}, \ec{public\_key\_of\_keygen},
+keygen equation lemmas, reference-keygen equation lemmas,
+\ec{haetae\_reference\_keygen\_seed\_flow\_wf\_ok},
+packed-key and verification-matrix identity lemmas through
+\ec{public\_verification\_matrix\_packedE} &
+3407--3605. Machine-checked fact. &
+Honest formal keygen returns a valid keypair, and the various public-key and
+reference-keygen views unfold to the same formal equations. &
+Some lemmas require Mode2/3 premises or seed-size premises.  Used by Security
+correctness and by matrix/public-key bridge lemmas in transcript games. \\
+\midrule
+\ec{packed\_haetae\_keygen\_verification\_matrixE},
+\ec{honest\_public\_verification\_matrix\_eq\_packed\_keygen},
+\ec{concrete\_*verification\_matrix\_*correct},
+\ec{concrete\_*verification\_matrix\_*size},
+\ec{concrete\_*verification\_matrix\_*rows\_wf} &
+3607--3758. Machine-checked fact. &
+The verification matrix obtained from honest keygen or packed/unpacked formal
+keys agrees with the corresponding formal concrete/reference matrix and has
+the expected shape. &
+Premises include \ec{size sd = seedbytes} for keygen concrete matrix
+roundtrip.  Used wherever HopGames or Security move between public keys,
+encoded keys, and verification matrices. \\
+\midrule
+\ec{valid\_signature\_sign\_internal},
+\ec{verify\_challenge\_consistent\_sign\_internal} &
+3760--3775. Machine-checked fact. &
+The formal signer emits a signature satisfying the formal validity predicate
+and challenge consistency under \ec{public\_key\_of\_secret}. &
+Depends on deterministic-field \ec{\_wf}, message/challenge size, and
+challenge/hash definitions.  Used directly in Rejection signing-attempt
+simulation and Security correctness. \\
+\midrule
+\ec{secret\_norm\_ok\_current},
+\ec{response\_norm\_ok\_current},
+\ec{verify\_norm\_ok\_current},
+\ec{verify\_internal\_sign\_internal} &
+3819--3883. Machine-checked fact. &
+Honest formal secret/signature values satisfy norm bounds, and verification of
+\ec{sign\_internal} under \ec{public\_key\_of\_secret} succeeds. &
+Imports mode bounds and deterministic unit-vector lemmas.  This is the local
+formal correctness theorem cited by \file{HAETAE\_Security.ec}; it is not
+EUF-CMA security and not implementation equivalence. \\
+\bottomrule
+\end{longtable}
+}
+
 \paragraph{Algebra import and boundary ledger.}
 \begin{longtable}{p{0.24\linewidth}p{0.66\linewidth}}
 \toprule
@@ -2309,6 +4486,346 @@ Machine-checked equality, but not a paper-sampler equivalence theorem. \\
 Boundary: the file checks distribution properties for the formal carriers.
 It does not by itself prove that the formal signing randomness and bounded
 sample law are the final HAETAE paper distributions.
+
+\subsection{Lemma-ledger companion for HAETAE Distributions}
+
+\paragraph{Lemma-ledger criticism for HAETAE Distributions.}
+The previous distribution companion made the main boundary visible, but it was
+still too coarse for reconstructing proof obligations.  A reader needs to know
+which names are merely product-distribution definitions, which support and
+point-probability facts are machine-checked, where the deterministic
+\ec{signing\_sample\_pair\_of\_coins} surface differs from an entropy-bearing
+sample surface, and where the word ``hyperball'' is only the formal interface
+name of the current bounded-product carrier.  Without a ledger, it is easy to
+overclaim that \file{HAETAE\_Distributions.ec} proves paper-sampler
+correctness, SHAKE-to-ROM behavior, or the sampling-distance premise used in
+later hop games.  It does not.  It proves losslessness, support, domain, and
+point-bound facts for the formal distributions below; the paper-sampler and
+ROM correspondence obligations remain separate conditional or external
+boundaries unless a later checked lemma discharges them.
+
+\paragraph{Imported-interface and assumption ledger for HAETAE Distributions.}
+{\footnotesize
+\begin{longtable}{p{0.23\linewidth}p{0.16\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{AllCore}, \ec{Distr}, \ec{DInterval}, \ec{DList}, \ec{IntDiv},
+\ec{List}, \ec{Real}, \ec{StdOrder} &
+1. Imported/library fact. &
+Provides distributions, intervals, product/list distributions, real
+probabilities, order reasoning, integer division, lists, \ec{mu}, support, and
+losslessness lemmas. &
+No HAETAE-specific premise.  Used by every distribution proof and inherited by
+Rejection and HopGames sampler arguments. \\
+\midrule
+\file{HAETAE\_Params.ec}, \file{HAETAE\_Algebra.ec},
+\ec{HAETAE\_Params}, \ec{HAETAE\_Algebra}, \ec{RealOrder} &
+2, 6--8. Imported/library fact. &
+Imports the formal mode constants, carrier types, well-formedness predicates,
+signing-field constructors, challenge constructor, and real-order tactics. &
+All support lemmas are relative to these formal carriers and parameter
+definitions.  \file{HAETAE\_Algebra.ec} itself does not import this file. \\
+\midrule
+Paper sampler and ROM correspondence &
+61--67, 142--202. External cryptographic assumption. &
+Comments explicitly mark the challenge carrier and hyperball carrier as
+structural/formal surfaces rather than paper-faithful correspondence theorems. &
+Later \file{HAETAE\_Rejection.ec} and \file{HAETAE\_HopGames.ec} can use these
+formal distributions, but equality to the HAETAE paper sampler or SHAKE/ROM
+semantics must be supplied separately. \\
+\midrule
+Structural-to-exact sampling-loss premises &
+Not defined in this file. Conditional premise. &
+The later \ec{structural\_to\_exact\_hyperball} loss obligations compare
+attempt-state distributions built from the sample-pair distributions defined
+here. &
+The distributions file supplies support and point-bound ingredients, not the
+full sampling-distance theorem consumed by \file{HAETAE\_HopGames.ec} and
+\file{HAETAE\_Security.ec}. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Definition ledger for HAETAE Distributions.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{signing\_randomness\_source}, \ec{dbyte}, \ec{dseed}, \ec{dcrh},
+\ec{signing\_entropy\_token\_cardinality},
+\ec{signing\_entropy\_token\_in\_range},
+\ec{signing\_randomness\_byte\_ok},
+\ec{signing\_entropy\_token\_to\_coins},
+\ec{signing\_randomness\_domain}, \ec{dsigning\_entropy\_token},
+\ec{dsigning\_randomness\_source},
+\ec{signing\_randomness\_source\_valid},
+\ec{signing\_randomness\_from\_source},
+\ec{dsigning\_randomness}, \ec{drandom\_coins},
+\ec{signing\_randomness\_point\_bound},
+\ec{signing\_randomness\_token\_spread},
+\ec{signing\_randomness\_distribution\_ok} &
+10--53. Machine-checked fact. &
+Defines byte, seed, CRH, and signing-coin distributions, with a finite entropy
+token embedded into formal signing coins and a point-bound predicate for token
+events. &
+Imports parameter lengths and algebraic coin-token projection.  Used by
+\file{HAETAE\_Scheme.ec} signing, \file{HAETAE\_Rejection.ec} attempt-state
+sampling, \file{HAETAE\_ROM\_Programming.ec} min-entropy bounds, and
+\file{HAETAE\_HopGames.ec} sampler-prequery bounds. \\
+\midrule
+\ec{dcoeff}, \ec{dpoly}, \ec{dpolyveck}, \ec{dpolyvecl}, \ec{dmatrix} &
+55--59. Machine-checked fact. &
+Defines uniform coefficient and product list distributions over the formal
+polynomial/vector/matrix carriers. &
+Imports \(q\), \(n\), \ec{mode\_k}, and \ec{mode\_l}.  Used as primitive
+distribution infrastructure; direct security hops mainly consume the signing
+sample and attempt-state distributions built later. \\
+\midrule
+\ec{dchallenge} &
+61--66. Machine-checked fact. &
+Maps \ec{dcrh} through \ec{challenge\_from\_seed md} to obtain a structural
+prefix-sparse challenge carrier. &
+Imports the algebraic challenge constructor.  The checked support is local to
+that constructor; equality to a specification challenge sampler is not proved
+here. \\
+\midrule
+\ec{signing\_sample\_pair},
+\ec{signing\_sample\_pair\_y1},
+\ec{signing\_sample\_pair\_y2},
+\ec{signing\_sample\_pair\_wf},
+\ec{signing\_sample\_pair\_unit},
+\ec{signing\_sample\_bound},
+\ec{coeff\_bounded\_by}, \ec{poly\_bounded\_by},
+\ec{polyvecl\_bounded\_by}, \ec{polyveck\_bounded\_by},
+\ec{signing\_sample\_pair\_bounded},
+\ec{signing\_sample\_pair\_sample\_ok},
+\ec{signing\_sample\_pair\_of\_coins} &
+68--115. Machine-checked fact. &
+Defines the two-vector signing sample interface, its well-formed/unit/bounded
+predicates, and the deterministic sample extracted from formal signing coins. &
+Imports algebraic \ec{signing\_sample\_y1} and
+\ec{signing\_sample\_y2}.  This is the interface lifted into full signing
+attempt states in \file{HAETAE\_Rejection.ec}. \\
+\midrule
+\ec{dstructural\_signing\_sample\_pair} &
+117--120. Machine-checked fact. &
+Defines a degenerate distribution concentrated on the deterministic sample
+pair from coins. &
+Used by structural attempt-state distributions and by loss lemmas comparing
+structural samples to exact-hyperball samples. \\
+\midrule
+\ec{dsigning\_unit\_coeff}, \ec{dsigning\_unit\_poly},
+\ec{dsigning\_unit\_polyvecl}, \ec{dsigning\_unit\_polyveck},
+\ec{signing\_bounded\_coeff\_cardinality},
+\ec{signing\_bounded\_coeff\_point\_bound},
+\ec{dsigning\_bounded\_coeff}, \ec{dsigning\_bounded\_poly},
+\ec{dsigning\_bounded\_polyvecl}, \ec{dsigning\_bounded\_polyveck},
+\ec{dbounded\_unit\_signing\_sample\_pair} &
+122--149. Machine-checked fact. &
+Defines unit and bounded product sample carriers and a bounded-unit pair
+sampler. &
+Imports \ec{mode\_ln}, \ec{mode\_k}, \ec{mode\_l}, and \(n\).  Used by
+Rejection as an intermediate sampler surface; it is not the paper hyperball
+law. \\
+\midrule
+\ec{dchecked\_hyperball\_signing\_sample\_pair},
+\ec{hyperball\_coeff\_ok}, \ec{hyperball\_poly\_ok},
+\ec{hyperball\_polyvecl\_ok}, \ec{hyperball\_polyveck\_ok},
+\ec{hyperball\_sample\_ok}, \ec{dhyperball\_coeff},
+\ec{dhyperball\_poly}, \ec{dhyperball\_polyvecl},
+\ec{dhyperball\_polyveck}, hyperball point-bound operations,
+\ec{dexact\_hyperball\_signing\_sample\_pair} &
+156--203. Machine-checked fact. &
+Defines the checked bounded-product hyperball-shaped carrier, its support
+predicates, component point bounds, and the current exact interface as a
+product of bounded components. &
+Used by \file{HAETAE\_Rejection.ec} exact-hyperball attempt states and by
+\file{HAETAE\_HopGames.ec} exact-hyperball sampling hops.  The name
+``exact'' is formal here; paper-sphere equivalence remains outside this file. \\
+\midrule
+\ec{signing\_sample\_pair\_distribution\_ok} &
+205--209. Machine-checked fact. &
+Names the contract that a sample-pair distribution is lossless and supports
+only formally sample-ok pairs. &
+Used by sampler-lifting lemmas in \file{HAETAE\_Rejection.ec}. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Lemma ledger for HAETAE Distributions.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt lemma(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{byte\_distribution\_lossless},
+\ec{seed\_distribution\_lossless},
+\ec{crh\_distribution\_lossless} &
+211--223. Machine-checked fact. &
+The byte, seed, and CRH product distributions are lossless. &
+Imports \ec{dinter\_ll}, \ec{dlist\_ll}, and parameter lengths.  Used by
+\file{HAETAE\_Scheme.ec}, \file{HAETAE\_ROM.ec}, and challenge-distribution
+losslessness. \\
+\midrule
+\ec{signing\_entropy\_token\_cardinality\_positive},
+\ec{signing\_entropy\_token\_distribution\_lossless},
+\ec{signing\_randomness\_source\_distribution\_lossless},
+\ec{signing\_coin\_distribution\_lossless} &
+226--248. Machine-checked fact. &
+The entropy-token and signing-coin distributions are well-defined and
+lossless. &
+Imports interval and map losslessness.  Used by signing procedures,
+attempt-state samplers, and HopGames probability calculations over coins. \\
+\midrule
+\ec{signing\_entropy\_token\_to\_coins\_tokenK},
+\ec{signing\_randomness\_from\_source\_tokenK},
+\ec{signing\_entropy\_token\_to\_coins\_size},
+\ec{signing\_entropy\_token\_to\_coins\_byte\_domain},
+\ec{signing\_entropy\_token\_to\_coins\_domain},
+\ec{signing\_randomness\_from\_source\_domain} &
+251--311. Machine-checked fact. &
+Encoding a token into coins recovers the same token, has seed length, and
+satisfies the byte/domain predicates under the token-range premise. &
+Local premise for byte/domain lemmas is
+\ec{signing\_entropy\_token\_in\_range x}.  Used to prove coin support and
+ROM prequery/min-entropy facts. \\
+\midrule
+\ec{signing\_entropy\_token\_distribution\_point\_bound},
+\ec{signing\_randomness\_source\_distribution\_point\_bound},
+\ec{signing\_coin\_distribution\_token\_point\_bound},
+\ec{signing\_coin\_distribution\_token\_spread},
+\ec{signing\_coin\_distribution\_domain},
+\ec{signing\_coin\_distribution\_domain\_full},
+\ec{signing\_coin\_distribution\_ok} &
+314--387. Machine-checked fact. &
+Coin sampling has the stated token point bound, support domain, full-domain
+mass, and distribution-ok contract. &
+Imports \ec{mu}, \ec{dmapE}, interval support, and real-order facts.  Used by
+\file{HAETAE\_ROM\_Programming.ec} and HopGames sampler-prequery bounds. \\
+\midrule
+\ec{coeff\_distribution\_lossless},
+\ec{poly\_distribution\_lossless},
+\ec{polyveck\_distribution\_lossless},
+\ec{polyvecl\_distribution\_lossless},
+\ec{matrix\_distribution\_lossless},
+\ec{challenge\_distribution\_lossless} &
+390--420. Machine-checked fact. &
+Primitive coefficient, polynomial, vector, matrix, and structural challenge
+distributions are lossless. &
+Imports \ec{dinter\_ll}, \ec{dlist\_ll}, \ec{dmap\_ll}, and CRH
+losslessness.  These facts justify well-formed random-oracle output carriers,
+not SHAKE security. \\
+\midrule
+\ec{signing\_sample\_pair\_of\_coins\_wf},
+\ec{signing\_sample\_pair\_of\_coins\_unit},
+\ec{signing\_sample\_bound\_gt0},
+\ec{unit\_coeff\_bounded\_by\_signing\_sample\_bound},
+\ec{poly\_unit\_bounded\_by\_signing\_sample\_bound},
+\ec{polyvecl\_unit\_bounded\_by\_signing\_sample\_bound},
+\ec{polyveck\_unit\_bounded\_by\_signing\_sample\_bound},
+\ec{signing\_sample\_pair\_unit\_bounded},
+\ec{signing\_sample\_pair\_of\_coins\_sample\_ok} &
+423--513. Machine-checked fact. &
+The deterministic sample pair derived from coins is well-formed, unit, and
+bounded by the formal signing-sample bound. &
+Imports algebraic signer-field \ec{\_wf}/\ec{\_unit} lemmas and
+\ec{mode\_ln\_gt0}.  Used by structural sample support and current-signing
+attempt lemmas. \\
+\midrule
+\ec{structural\_signing\_sample\_pair\_lossless},
+\ec{structural\_signing\_sample\_pair\_support},
+\ec{structural\_signing\_sample\_pair\_sample\_ok},
+\ec{structural\_signing\_sample\_pair\_distribution\_ok} &
+516--543. Machine-checked fact. &
+The deterministic structural sample-pair distribution is lossless and supports
+sample-ok pairs. &
+Imports \ec{dunit\_ll} and deterministic sample lemmas.  Used by
+\file{HAETAE\_Rejection.ec} structural attempt-state samplers. \\
+\midrule
+\ec{signing\_unit\_coeff\_lossless},
+\ec{signing\_unit\_coeff\_support},
+\ec{signing\_bounded\_coeff\_cardinality\_positive},
+\ec{signing\_bounded\_coeff\_lossless},
+\ec{signing\_bounded\_coeff\_support},
+\ec{signing\_bounded\_coeff\_supportP},
+\ec{signing\_bounded\_coeff\_point\_bound},
+\ec{signing\_bounded\_coeff\_point\_bound\_nonnegative},
+\ec{dlist\_size\_point\_bound}, \ec{dlist\_point\_bound},
+\ec{hyperball\_coeff\_point\_bound\_nonnegative},
+\ec{hyperball\_coeff\_point\_boundE} &
+553--674. Machine-checked fact. &
+Unit and bounded coefficient distributions have the stated support,
+losslessness, nonnegative point bounds, and list-point-bound lifting lemmas. &
+Imports \ec{duniform}, \ec{dinter}, list-distribution, and real
+multiplication/order facts.  Used by hyperball polynomial/vector point bounds
+and sampling-loss bookkeeping. \\
+\midrule
+\ec{signing\_unit\_poly\_lossless},
+\ec{signing\_unit\_poly\_support},
+\ec{signing\_bounded\_poly\_lossless},
+\ec{signing\_bounded\_poly\_support},
+\ec{signing\_bounded\_poly\_supportP},
+\ec{hyperball\_poly\_point\_bound\_nonnegative},
+\ec{hyperball\_poly\_lossless},
+\ec{hyperball\_poly\_support},
+\ec{hyperball\_poly\_supportP},
+\ec{hyperball\_poly\_point\_boundE} &
+676--777. Machine-checked fact. &
+Polynomial unit/bounded/hyperball distributions are lossless, have the
+intended support predicates, and satisfy the product point bound. &
+Premises include list sizes governed by \(n\).  Used by vector sampler support
+and exact-hyperball pair point-bound proofs. \\
+\midrule
+Vector support, losslessness, and point-bound families for
+\ec{dsigning\_unit\_polyvecl}, \ec{dsigning\_unit\_polyveck},
+\ec{dsigning\_bounded\_polyvecl}, \ec{dsigning\_bounded\_polyveck},
+\ec{dhyperball\_polyvecl}, and \ec{dhyperball\_polyveck} &
+778--1027. Machine-checked fact. &
+Product vector samplers are lossless, support the corresponding unit/bounded
+or hyperball predicates, and have nonnegative point bounds. &
+Imports \ec{mode\_l\_gt0}, \ec{mode\_k\_gt0}, and polynomial support/point
+lemmas.  Used by checked and exact sample-pair support and by Rejection
+attempt-state support equivalences. \\
+\midrule
+\ec{bounded\_unit\_signing\_sample\_pair\_lossless},
+\ec{bounded\_unit\_signing\_sample\_pair\_support},
+\ec{bounded\_unit\_signing\_sample\_pair\_sample\_ok},
+\ec{bounded\_unit\_signing\_sample\_pair\_distribution\_ok},
+\ec{checked\_hyperball\_signing\_sample\_pair\_lossless},
+\ec{checked\_hyperball\_signing\_sample\_pair\_support},
+\ec{checked\_hyperball\_signing\_sample\_pair\_distribution\_ok},
+\ec{hyperball\_sample\_ok\_sample\_ok},
+\ec{exact\_hyperball\_signing\_sample\_pair\_lossless},
+\ec{exact\_hyperball\_signing\_sample\_pair\_support},
+\ec{exact\_hyperball\_signing\_sample\_pair\_supportP},
+\ec{exact\_hyperball\_signing\_sample\_pair\_sample\_ok},
+\ec{exact\_hyperball\_signing\_sample\_pair\_distribution\_ok} &
+1029--1182. Machine-checked fact. &
+The bounded-unit, checked-hyperball, and current exact-hyperball pair
+distributions are lossless and satisfy the sample-pair distribution contract. &
+Imports component vector support/losslessness.  Used directly by
+\file{HAETAE\_Rejection.ec} sampler-ok lemmas and by HopGames exact-hyperball
+sampling procedures. \\
+\midrule
+\ec{exact\_hyperball\_signing\_sample\_pair\_point\_bound},
+\ec{exact\_hyperball\_signing\_sample\_pair\_checkedE} &
+1192--1208. Machine-checked fact. &
+The current exact-hyperball pair distribution has the product point bound and
+is equal to the checked bounded-product carrier. &
+Imports product-distribution point-bound facts.  This is the strongest local
+theorem boundary for sampling: it identifies two formal carriers, not a
+paper-sampler equivalence or a rejection-loop correspondence proof. \\
+\bottomrule
+\end{longtable}
+}
 
 \section{Script companion coverage for HAETAE Rejection}
 
@@ -3298,6 +5815,155 @@ Boundary: this is a random-oracle interface definition, not a theorem that any
 concrete SHAKE invocation behaves randomly.  That modeling step remains the
 ROM assumption boundary.
 
+\subsection{Lemma-ledger companion for HAETAE ROM}
+
+\paragraph{Lemma-ledger criticism for HAETAE ROM.}
+The previous companion coverage described the ROM interface, but it was not yet
+sufficient for a reader to reconstruct the proof obligations attached to the
+query dictionary.  It did not identify which names are query constructors,
+which names are output projections, which facts are distribution losslessness
+lemmas, and which boundary is only the external interpretation of the formal
+oracle as a random oracle for SHAKE-like calls.  This matters because
+\file{HAETAE\_ROM\_Programming.ec}, \file{HAETAE\_Transcript.ec}, and
+\file{HAETAE\_HopGames.ec} all count or program particular constructors, and a
+single confused constructor changes the bad-event statement.  The ledger below
+keeps the formal \ec{FullRO} instantiation separate from the external ROM
+modeling assumption.
+
+\paragraph{Imported-interface and assumption ledger for HAETAE ROM.}
+{\footnotesize
+\begin{longtable}{p{0.24\linewidth}p{0.15\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{AllCore}, \ec{Distr}, \ec{List}, \ec{PROM} &
+1. Imported/library fact. &
+Imports the core logic, probability distributions, lists, and generic
+programmable random-oracle library. &
+No HAETAE-specific premise.  The \ec{PROM.FullRO} interface is the formal
+oracle machinery later used by HopGames and ROM programming. \\
+\midrule
+\file{HAETAE\_Params.ec}, \file{HAETAE\_Algebra.ec},
+\file{HAETAE\_Distributions.ec} &
+2, 6--8. Imported/library fact. &
+Imports formal mode values, carrier types, algebraic challenge/matrix
+constructors, and output distributions. &
+Used to type queries and outputs and to prove \ec{dro\_output} lossless.  These
+are formal-model imports, not SHAKE security. \\
+\midrule
+\ec{clone import FullRO as HAETAE\_RO} &
+80--84. Imported/library fact. &
+Instantiates the generic full random oracle with HAETAE query and output types
+and \ec{dro\_output}. &
+The clone supplies \ec{HAETAE\_RO.FRO} and its state/method vocabulary used by
+\file{HAETAE\_ROM\_Programming.ec} and \file{HAETAE\_HopGames.ec}. \\
+\midrule
+Concrete SHAKE/FIPS-to-ROM interpretation &
+1--111. External cryptographic assumption. &
+The file does not prove that SHAKE or any implementation behaves as this
+formal random oracle. &
+That modeling step remains outside \file{HAETAE\_ROM.ec}; later theorems are
+ROM theorems unless a separate standard-model hash argument is supplied. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Definition ledger for HAETAE ROM.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{ro\_query}, \ec{MessageHashQuery}, \ec{ChallengeHashQuery},
+\ec{MatrixExpandQuery}, \ec{SamplerExpandQuery} &
+10--14. Machine-checked fact. &
+Defines the four disjoint formal ROM input classes: message hash, challenge
+hash, matrix expansion, and sampler expansion. &
+Used by \file{HAETAE\_Transcript.ec} challenge-site definitions,
+\file{HAETAE\_ROM\_Programming.ec} counted-query predicates, and HopGames
+sampler/challenge bad events. \\
+\midrule
+\ec{ro\_output} &
+15. Machine-checked fact. &
+Defines a ROM output as a tuple of CRH bytes, challenge, matrix, and signing
+coins. &
+Projection discipline is essential: each query class consumes only the
+component relevant to that query. \\
+\midrule
+\ec{message\_hash\_query}, \ec{challenge\_hash\_query},
+\ec{matrix\_expand\_query}, \ec{sampler\_expand\_query} &
+17--24. Machine-checked fact. &
+Names the canonical constructors used by the scheme and transcript scripts. &
+Downstream proofs count challenge queries and sampler queries by recognizing
+these constructors; they are not interchangeable. \\
+\midrule
+\ec{ro\_crh\_zero}, \ec{ro\_challenge\_zero}, \ec{ro\_matrix\_zero},
+\ec{ro\_random\_coins\_zero}, \ec{ro\_output\_zero},
+\ec{ro\_output\_to\_*}, \ec{ro\_output\_of\_*} &
+27--45. Machine-checked fact. &
+Defines zero/default output components, tuple projections, and embeddings of a
+single component into the full output tuple. &
+Used to state and prove output-distribution laws.  These are formal tuple
+operations, not hash-domain-separation proofs. \\
+\midrule
+\ec{dmatrix\_for\_query}, \ec{dro\_output} &
+48--57. Machine-checked fact. &
+Defines the distribution sampled for each query class and embeds it into the
+appropriate output component. &
+Imports \ec{dcrh}, \ec{dchallenge}, \ec{dmatrix}, and
+\ec{drandom\_coins}.  This is the output law passed to \ec{FullRO}. \\
+\midrule
+\ec{Oracle}, \ec{POracle} &
+85--91. Imported/library fact. &
+Re-exports full and public oracle module-type interfaces from \ec{FRO}. &
+Used by \file{HAETAE\_Scheme.ec}, \file{HAETAE\_ROM\_Programming.ec}, and
+HopGames modules to state what oracle methods are available. \\
+\midrule
+\ec{ro\_message\_hash}, \ec{ro\_challenge\_hash}, \ec{ro\_matrix},
+\ec{ro\_signing\_coins} &
+93--97. Machine-checked fact. &
+Names the output projections used after a ROM call. &
+\file{HAETAE\_Scheme.ec} uses these selectors; HopGames relies on their
+projection equations when replacing sampler ROM calls by distribution facts. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Lemma ledger for HAETAE ROM.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt lemma(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{matrix\_query\_distribution\_lossless} &
+59--65. Machine-checked fact. &
+The matrix distribution selected by a \((mode, seed)\) query is lossless. &
+Imports \ec{matrix\_distribution\_lossless}.  Used inside the full output
+losslessness proof. \\
+\midrule
+\ec{ro\_output\_distribution\_lossless} &
+67--77. Machine-checked fact. &
+For every ROM query, \ec{dro\_output q} is lossless. &
+Proof splits by query constructor and imports distribution losslessness for
+CRH, challenge, matrix, and signing coins.  Required by the \ec{FullRO} clone
+and all oracle-call game proofs. \\
+\midrule
+\ec{sampler\_expand\_query\_dro\_output\_ro\_signing\_coins} &
+99--107. Machine-checked fact. &
+Projecting signing coins from the output law of a sampler-expansion query has
+exactly distribution \ec{drandom\_coins}. &
+Used by sampler-freshness and sampler-prequery lemmas in HopGames and ROM
+programming; it is a formal marginal law, not a SHAKE proof. \\
+\bottomrule
+\end{longtable}
+}
+
 \section{Script companion coverage for HAETAE Scheme}
 
 \file{HAETAE\_Scheme.ec} clones the generic signature-game interface and
@@ -3344,6 +6010,110 @@ Boundary: this file exposes the formal scheme to generic games.  It does not
 prove security; it also does not prove byte-level implementation equivalence.
 The checked facts about validity and correctness are imported from
 \file{HAETAE\_Algebra.ec} and consumed later in \file{HAETAE\_Security.ec}.
+
+\subsection{Lemma-ledger companion for HAETAE Scheme}
+
+\paragraph{Lemma-ledger criticism for HAETAE Scheme.}
+The earlier report explained the scheme at the object-family level, but it did
+not expose enough proof-script detail to reconstruct the interface boundary.
+The scheme file contains no lemmas; its proof significance is in the exact
+clone instantiation and the exact program text of \ec{kg}, \ec{sign}, and
+\ec{verify}.  In particular, the signing procedure fixes the ROM query order
+that later bad-event arguments rely on.  It samples seed coins, queries
+\ec{sampler\_expand\_query}, replaces the coins by \ec{ro\_signing\_coins},
+then queries message hash and challenge hash before returning
+\ec{sign\_internal}.  The ledger below records that wiring without treating it
+as a proof of security, implementation equivalence, or SHAKE correctness.
+
+\paragraph{Imported-interface and assumption ledger for HAETAE Scheme.}
+{\footnotesize
+\begin{longtable}{p{0.24\linewidth}p{0.15\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{AllCore}, \file{Sig\_ROM.ec}, \file{HAETAE\_Params.ec},
+\file{HAETAE\_Algebra.ec}, \file{HAETAE\_Distributions.ec},
+\file{HAETAE\_ROM.ec} &
+1--10. Imported/library fact. &
+Imports the generic signature-game skeleton plus the HAETAE formal types,
+algorithms, distributions, and ROM dictionary. &
+No local cryptographic premise.  The file only wires those imported surfaces
+into one scheme module. \\
+\midrule
+\ec{clone import Sig\_ROM as SIG} &
+12--20. Imported/library fact. &
+Instantiates the abstract signature-game interface with HAETAE public keys,
+secret keys, messages, contexts, signatures, ROM queries, ROM outputs, and
+\ec{dro\_output}. &
+All \ec{SIG.Correctness}, \ec{SIG.EUF\_CMA}, \ec{SIG.UF\_NMA}, adversary, and
+oracle module types in HopGames and Security refer to this clone. \\
+\midrule
+Security theorem assumptions introduced locally &
+1--66. External cryptographic assumption. &
+None are introduced by \file{HAETAE\_Scheme.ec}. &
+The file defines the formal scheme interface.  Hardness assumptions, ROM
+modeling, sampler correspondence, and implementation equivalence enter
+elsewhere or remain external. \\
+\midrule
+Direct theorem boundary &
+1--66. Explanatory prose. &
+\file{HAETAE\_Scheme.ec} contains no local lemmas or theorems. &
+All theorem-level reasoning over \ec{HAETAE} occurs in \file{HAETAE\_Security.ec}
+and \file{HAETAE\_HopGames.ec}, usually after inlining these procedures. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Procedure ledger for HAETAE Scheme.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{haetae\_mode} &
+22. Conditional premise. &
+An abstract formal mode parameter selects which parameter table the scheme
+uses. &
+All top-level bounds are relative to this mode.  Later obligations such as
+\ec{fs\_with\_aborts\_interfaces\_ready haetae\_mode} are mode-indexed. \\
+\midrule
+\ec{module HAETAE(H : SIG.POracle)} &
+24--65. Machine-checked fact. &
+Defines a formal signature scheme parameterized by a public random-oracle
+interface. &
+This is the concrete scheme argument to \ec{SIG.Correctness},
+\ec{SIG.EUF\_CMA}, and \ec{SIG.UF\_NMA}. \\
+\midrule
+\ec{HAETAE(H).kg} &
+25--34. Machine-checked fact. &
+Samples \ec{sd} from \ec{dseed}, derives \ec{rhoprime}, queries
+\ec{matrix\_expand\_query haetae\_mode rhoprime}, and returns
+\ec{keygen\_internal haetae\_mode rhoprime}. &
+Imports seed distribution, keygen seed derivation, ROM query constructor, and
+\ec{keygen\_internal}.  Used in correctness and game-equivalence proofs after
+inlining. \\
+\midrule
+\ec{HAETAE(H).sign} &
+36--57. Machine-checked fact. &
+Samples \ec{drandom\_coins}, queries the sampler ROM site, replaces coins by
+\ec{ro\_signing\_coins}, derives the public key, queries message hash and
+challenge hash, then returns \ec{sign\_internal}. &
+This fixes the formal query order and active-signing surface used by
+\file{HAETAE\_ROM\_Programming.ec} and \file{HAETAE\_HopGames.ec}.  It is not
+a proof that a concrete implementation makes the same calls. \\
+\midrule
+\ec{HAETAE(H).verify} &
+59--64. Machine-checked fact. &
+Verification is exactly \ec{verify\_internal haetae\_mode pk m ctx sig}. &
+Correctness and EUF-CMA games use this verifier.  Algebra proves
+\ec{verify\_internal\_sign\_internal}; this file only exposes the call. \\
+\bottomrule
+\end{longtable}
+}
 
 \section{Script companion coverage for HAETAE Events and hash support}
 
@@ -3392,6 +6162,116 @@ For a reimplementation, these support files should be handled before claiming
 the algebra layer is reproduced.  Their imported facts are dependencies of the
 formal model, even though the top-level security theorem remains a
 random-oracle-model theorem.
+
+\subsection{Lemma-ledger companion for HAETAE Events}
+
+\paragraph{Lemma-ledger criticism for HAETAE Events.}
+The previous report put \file{HAETAE\_Events.ec} in a combined support-file
+table, which was useful for orientation but too weak for reconstructing the
+event boundary.  The file is small, but it names the rejection-failure
+predicates and proves that the current formal algorithms avoid them.  Those
+facts must not be mistaken for a probability estimate for a paper rejection
+loop or for an implementation-level no-abort theorem.  They are checked
+boolean facts about \ec{keygen\_internal}, \ec{sign\_internal}, and the
+formal norm predicates imported from \file{HAETAE\_Algebra.ec}.  Downstream,
+\file{HAETAE\_Rejection.ec} imports this vocabulary directly; HopGames and
+Security see it through the rejection layer rather than by expanding these
+definitions.
+
+\paragraph{Imported-interface and assumption ledger for HAETAE Events.}
+{\footnotesize
+\begin{longtable}{p{0.24\linewidth}p{0.15\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{AllCore}, \file{HAETAE\_Params.ec}, \file{HAETAE\_Algebra.ec},
+\ec{HAETAE\_Params}, \ec{HAETAE\_Algebra} &
+1--7. Imported/library fact. &
+Imports the formal parameter, key/signature validity, norm, keygen, and signer
+definitions used to state event predicates. &
+\file{HAETAE\_Rejection.ec} imports \file{HAETAE\_Events.ec} directly; HopGames
+and Security consume the resulting event vocabulary transitively. \\
+\midrule
+External rejection-sampling estimates &
+1--57. External cryptographic assumption. &
+No rejection probability or paper rejection-loop estimate is introduced in
+this file. &
+Such estimates are handled by \file{HAETAE\_Rejection.ec},
+\file{HAETAE\_HopGames.ec}, \file{HAETAE\_Security.ec}, or remain external
+conditional premises. \\
+\bottomrule
+\end{longtable}
+}
+
+\paragraph{Definition and lemma ledger for HAETAE Events.}
+{\footnotesize
+\begin{longtable}{p{0.25\linewidth}p{0.14\linewidth}p{0.28\linewidth}p{0.23\linewidth}}
+\toprule
+\textbf{EasyCrypt object(s)} & \textbf{Lines / category} &
+\textbf{Mathematical statement paraphrase} &
+\textbf{Local premises, imports, downstream role} \\
+\midrule
+\ec{keygen\_rejection\_failure} &
+9--10. Machine-checked fact. &
+Keygen failure is the disjunction of invalid keypair or failed secret-norm
+predicate. &
+Imports \ec{valid\_keypair} and \ec{secret\_norm\_ok}.  Used as named event
+vocabulary for the rejection layer. \\
+\midrule
+\ec{signing\_rejection\_failure} &
+12--13. Machine-checked fact. &
+Signing failure is the disjunction of invalid signature or failed response
+norm predicate. &
+Imports \ec{valid\_signature} and \ec{response\_norm\_ok}.  Downstream
+rejection proofs can refer to this event without restating the predicate. \\
+\midrule
+\ec{verification\_rejection\_failure} &
+15--16. Machine-checked fact. &
+Verification failure is the disjunction of invalid signature or failed
+verification-norm predicate. &
+Imports \ec{valid\_signature} and \ec{verify\_norm\_ok}.  Used only as formal
+event vocabulary, not as a probability bound. \\
+\midrule
+\ec{any\_rejection\_failure} &
+18--22. Machine-checked fact. &
+Combines keygen, signing, and verification rejection failures by disjunction. &
+This is the strongest combined event predicate exposed locally; later proofs
+generally reason through \file{HAETAE\_Rejection.ec}. \\
+\midrule
+\ec{keygen\_rejection\_free\_current} &
+24--30. Machine-checked fact. &
+The current formal \ec{keygen\_internal} output does not satisfy
+\ec{keygen\_rejection\_failure}. &
+Proof unfolds current keygen, key validity, secret norm, and mode cases.  This
+is formal-model no-failure, not an implementation theorem. \\
+\midrule
+\ec{signing\_rejection\_free\_current} &
+32--38. Machine-checked fact. &
+The current formal \ec{sign\_internal} output does not satisfy
+\ec{signing\_rejection\_failure}. &
+Imports \ec{valid\_signature\_sign\_internal} and
+\ec{response\_norm\_ok\_current}.  Used to justify clean current-signing
+branches. \\
+\midrule
+\ec{verification\_rejection\_free\_current} &
+40--46. Machine-checked fact. &
+The current formal \ec{sign\_internal} output does not satisfy
+\ec{verification\_rejection\_failure}. &
+Imports \ec{valid\_signature\_sign\_internal} and
+\ec{verify\_norm\_ok\_current}.  Used as the verifier-side clean-event fact. \\
+\midrule
+\ec{accepted\_transcript\_rejection\_free\_current} &
+48--55. Machine-checked fact. &
+The keygen-plus-sign transcript produced by the current formal algorithms is
+outside \ec{any\_rejection\_failure}. &
+Depends on the three component rejection-free lemmas.  It is the local
+combined theorem boundary for events; top-level security still relies on later
+hop/reduction arguments and hardness premises. \\
+\bottomrule
+\end{longtable}
+}
 
 \section{Evidence required for a standalone claim}
 

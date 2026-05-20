@@ -8,8 +8,8 @@
 \section{Overview}
 
 The high-assurance implementation of the \haetae{} NTT is written in the
-\jasmin{} programming language.  Three source files collectively implement the
-forward NTT, inverse NTT, and base multiplication:
+\jasmin{} programming language.  Four source/support files collectively
+implement the forward NTT, inverse NTT, and base multiplication:
 
 \begin{itemize}
   \item \texttt{reduce.jinc}: Montgomery reduction and field multiplication.
@@ -20,6 +20,13 @@ forward NTT, inverse NTT, and base multiplication:
 
 The \jasmin{} source is compiled to x86-64 assembly (\texttt{hpoly.s}) and
 simultaneously extracted to an \easycrypt{} module for formal verification.
+This chapter records two implementation shapes.  The original direct-loop
+program is kept in the listings because it makes the correspondence with the
+C reference and the \easycrypt{} loop invariants transparent.  The current
+checked implementation used to regenerate \texttt{hpoly.s}, however, is the
+stage-specialised full-safe constant-time version described below: the public
+NTT schedule is split into fixed stage helpers, and the exported wrappers carry
+explicit regular and speculative constant-time contracts.
 
 \section{Montgomery Reduction in Jasmin}
 
@@ -87,48 +94,53 @@ inline fn __fqmul(reg u32 a, reg u32 b) -> reg u32 {
 }
 \end{lstlisting}
 
-This computes $a \cdot b \cdot R^{-1} \bmod q$ where both $a$ and $b$ are
-expected to be in the range $(-2^{15}, 2^{15})$, so their 64-bit product
-does not overflow.
+This computes $a \cdot b \cdot R^{-1} \bmod q$.  The refinement proof
+discharges the product-range side condition for the NTT cases, including
+16-bit twiddle factors multiplied by coefficients bounded by the current
+stage invariant.
 
 \section{Forward NTT Kernel}
 
-\subsection{Source Code}
+\subsection{Original Direct Source Code}
 
 \begin{lstlisting}[language=Jasmin,
-  caption={Forward NTT kernel in \texttt{poly.jinc}},
+  caption={Original direct forward NTT kernel in \texttt{poly.jinc}},
   label={lst:ntt_jasmin}]
 inline fn _poly_ntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
   reg u32 zeta, t;
-  reg u64 t64;
-  reg int len, start, j, k;
+  reg int len, start, j, zetasctr;
 
-  k = 1;
+  zetasctr = 0;
   len = 128;
 
   while (len > 0) {
     start = 0;
     while (start < 256) {
-      zeta = (u32) jzetas[k];
-      k += 1;
+      zetasctr += 1;
+      zeta = (u32) jzetas[zetasctr];
 
       j = start;
       while (j < start + len) {
-        t64  = (64s)(zeta);
-        t64 *= (64s)(rp[j + len]);
-        t    = __montgomery_reduce(t64);
+        t = __fqmul(zeta, rp[j + len]);
 
         rp[j + len] = rp[j] - t;
         rp[j]       = rp[j] + t;
         j += 1;
       }
-      start += 2 * len;
+      start = j + len;
     }
     len >>= 1;
   }
   return rp;
 }
 \end{lstlisting}
+
+\Cref{lst:ntt_jasmin} is the original direct implementation.  It is retained
+as the readable algorithmic baseline: it exposes the same three nested loops as
+the C reference.  In the current compiler-checked source, this public outer
+schedule is no longer represented by run-time variables \jasm{len},
+\jasm{start}, and \jasm{zetasctr}.  Instead, each stage is a separate helper
+with literal bounds and a literal twiddle-table base.
 
 \subsection{Structural Correspondence}
 
@@ -137,20 +149,25 @@ correspondence to the C reference (\Cref{lst:c_ntt}) and the \easycrypt{}
 specification (\Cref{lst:ntt_spec}):
 
 \begin{center}
-\begin{tabular}{lll}
+\small
+\begin{tabular}{
+  >{\raggedright\arraybackslash}p{0.18\textwidth}
+  >{\raggedright\arraybackslash}p{0.42\textwidth}
+  >{\raggedright\arraybackslash}p{0.28\textwidth}}
 \toprule
 Aspect & C reference & \jasmin{} \\
 \midrule
-Outer loop & \texttt{for (len = 128; len > 0; len >>= 1)} &
-             \texttt{while (len > 0) \{...; len >>= 1;\}} \\
-Middle loop & \texttt{for (start = 0; start < 256; start += 2*len)} &
+Outer loop & \texttt{len = 128; len > 0; len >>= 1} &
+             \texttt{while (len > 0)} \\
+Middle loop & \texttt{start < 256; start += 2*len} &
               equivalent \texttt{while} \\
-Inner loop & \texttt{for (j = start; j < start+len; j++)} &
+Inner loop & \texttt{j = start; j < start+len; j++} &
              equivalent \texttt{while} \\
-Twiddle & \texttt{zetas[k++]} & \texttt{jzetas[k]; k += 1} \\
-Butterfly & \texttt{t = mont\_reduce(zeta * a[j+len])} & same \\
+Twiddle & \texttt{zetas[k++]} & \texttt{zetasctr += 1; jzetas[zetasctr]} \\
+Butterfly & \texttt{mont\_reduce(zeta * a[j+len])} & same \\
 \bottomrule
 \end{tabular}
+\normalsize
 \end{center}
 
 The key difference is the use of explicit type casts in \jasmin{} to manage
@@ -160,57 +177,126 @@ word widths.
 
 In \jasmin{}, the global constant table \texttt{jzetas} is accessed as a
 \jasm{u32} array.  The entry at index $k$ is the Montgomery form of the
-$k$-th twiddle factor.  The access pattern \jasm{jzetas[k]} with $k$
-starting at 1 and incrementing each iteration of the middle loop ensures
-that consecutive twiddle factors are consumed in order.
+$k$-th twiddle factor.  The access pattern increments \jasm{zetasctr}
+before each read, so the forward kernel consumes \jasm{jzetas[1]} through
+\jasm{jzetas[255]}; \jasm{jzetas[0]} is padding.
+
+\subsection{Full-Safe Stage-Specialised Forward Kernel}
+
+The full-safe implementation keeps the same butterfly operations and twiddle
+order, but makes every stage bound explicit to the \jasmin{} safety checker.
+For the first forward stage, the checker sees the literal facts
+\jasm{block < 1}, \jasm{j < 128}, and \jasm{offset = idx + 128}; hence both
+\jasm{rp[idx]} and \jasm{rp[offset]} are statically within the 256-word
+polynomial.  The remaining helpers instantiate the same pattern for
+\(64,32,16,8,4,2,1\).
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Current full-safe forward NTT stage shape in \texttt{poly.jinc}},
+  label={lst:ntt_jasmin_safe_stage}]
+fn _poly_ntt_stage_128(reg mut ptr u32[256] rp)
+    -> reg ptr u32[256] {
+  reg ptr u32[256] zetasp;
+  reg ui64 block, j, start, idx, offset;
+  reg u32 zeta, t, s, coeff;
+
+  zetasp = jzetas;
+  block = 0;
+  while (block < 1) {
+    zeta = zetasp[1 + block];
+    start = block;
+    start <<= 8;
+    j = 0;
+    while (j < 128) {
+      idx = j;
+      idx += start;
+      s = rp[idx];
+      offset = idx;
+      offset += 128;
+      coeff = rp[offset];
+      t = __fqmul(zeta, coeff);
+      coeff = s;
+      coeff -= t;
+      rp[offset] = coeff;
+      s += t;
+      rp[idx] = s;
+      j += 1;
+    }
+    block += 1;
+  }
+  return rp;
+}
+
+fn _poly_ntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  rp = _poly_ntt_stage_128(rp);
+  rp = _poly_ntt_stage_64(rp);
+  rp = _poly_ntt_stage_32(rp);
+  rp = _poly_ntt_stage_16(rp);
+  rp = _poly_ntt_stage_8(rp);
+  rp = _poly_ntt_stage_4(rp);
+  rp = _poly_ntt_stage_2(rp);
+  rp = _poly_ntt_stage_1(rp);
+  return rp;
+}
+\end{lstlisting}
+
+The transformation is proof-preserving at the algorithmic level: the sequence
+of helper calls is the fixed unrolling of the original public \jasm{len}
+schedule.  The implementation change is motivated by compiler verification,
+not by a change in the mathematical NTT.
 
 \section{Inverse NTT Kernel}
 
 \begin{lstlisting}[language=Jasmin,
-  caption={Inverse NTT kernel in \texttt{poly.jinc} (condensed)},
+  caption={Original direct inverse NTT kernel in \texttt{poly.jinc} (condensed)},
   label={lst:invntt_jasmin}]
 inline fn _poly_invntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
-  reg u32 zeta, t, f;
-  reg u64 t64;
-  reg int len, start, j, k;
+  reg u32 zeta, t, coeff;
+  reg int len, start, j, zetasctr;
 
-  k = 255;
+  zetasctr = 0;
   len = 1;
 
   while (len < 256) {
     start = 0;
     while (start < 256) {
-      zeta = (u32) jzetas_inv[k];
-      k -= 1;
+      zeta = (u32) jzetas_inv[zetasctr];
+      zetasctr += 1;
 
       j = start;
       while (j < start + len) {
         t           = rp[j];
-        rp[j]       = t + rp[j + len];
-
-        t64  = (64s)(zeta);
-        t64 *= (64s)(t - rp[j + len]);
-        rp[j + len] = __montgomery_reduce(t64);
+        coeff       = rp[j + len];
+        rp[j]       = t + coeff;
+        rp[j + len] = __fqmul(zeta, t - coeff);
 
         j += 1;
       }
-      start += 2 * len;
+      start = j + len;
     }
     len <<= 1;
   }
 
   /* Final scaling */
-  f = (u32) jzetas_inv[255];
+  zeta = (u32) jzetas_inv[255];
   j = 0;
   while (j < 256) {
-    t64  = (64s)(f);
-    t64 *= (64s)(rp[j]);
-    rp[j] = __montgomery_reduce(t64);
+    rp[j] = __fqmul(zeta, rp[j]);
     j += 1;
   }
   return rp;
 }
 \end{lstlisting}
+
+The inverse butterfly loop consumes \texttt{jzetas\_inv[0..254]}.  The final
+scaling loop is the only place where \texttt{jzetas\_inv[255]} is read.
+\Cref{lst:invntt_jasmin} is likewise retained as the original direct-loop
+form.  The current checked source splits the inverse transform into helpers
+\jasm{\_poly\_invntt\_stage\_1}, \jasm{\_poly\_invntt\_stage\_2}, \(\ldots\),
+\jasm{\_poly\_invntt\_stage\_128}, followed by \jasm{\_poly\_invntt\_scale}.
+The helper sequence fixes the twiddle bases
+\(0,128,192,224,240,248,252,254\), and the scale helper reads
+\jasm{jzetas\_inv[255]}.
 
 \subsection{Inverse Butterfly Structure}
 
@@ -227,10 +313,27 @@ with twiddle $w$ applied to the lower output, the inverse butterfly computes
 $(a+b, w(a-b))$ and is composed with the twiddle application on the upper
 output in the forward case.
 
+\begin{lstlisting}[language=Jasmin,
+  caption={Current full-safe inverse NTT schedule in \texttt{poly.jinc}},
+  label={lst:invntt_jasmin_safe_schedule}]
+fn _poly_invntt(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  rp = _poly_invntt_stage_1(rp);
+  rp = _poly_invntt_stage_2(rp);
+  rp = _poly_invntt_stage_4(rp);
+  rp = _poly_invntt_stage_8(rp);
+  rp = _poly_invntt_stage_16(rp);
+  rp = _poly_invntt_stage_32(rp);
+  rp = _poly_invntt_stage_64(rp);
+  rp = _poly_invntt_stage_128(rp);
+  rp = _poly_invntt_scale(rp);
+  return rp;
+}
+\end{lstlisting}
+
 \section{Exported Entry Points}
 
 \begin{lstlisting}[language=Jasmin,
-  caption={Exported functions in \texttt{hpoly.jazz}},
+  caption={Original exported functions in \texttt{hpoly.jazz}},
   label={lst:hpoly}]
 export fn poly_ntt_jazz(reg mut ptr u32[256] rp)
     -> reg ptr u32[256] {
@@ -254,35 +357,107 @@ export fn poly_basemul_jazz(
 }
 \end{lstlisting}
 
+\Cref{lst:hpoly} is the original wrapper form.  The current full-safe
+constant-time wrapper form adds explicit contracts for both ordinary
+constant-time checking and speculative constant-time checking.  The
+\jasm{\#init\_msf()} call initializes the microarchitectural speculation
+fence state required by \texttt{jasmin-ct --speculative}; in the generated
+assembly it emits an \texttt{lfence} at the public entry point.
+
+\begin{lstlisting}[language=Jasmin,
+  caption={Current constant-time exported wrappers in \texttt{hpoly.jazz}},
+  label={lst:hpoly_safe}]
+#[ct = "rp -> rp"]
+#[sct = "{ ptr: transient, val: secret } -> { ptr: public, val: secret }"]
+export
+fn poly_ntt_jazz(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  _ = #init_msf();
+  rp = _poly_ntt(rp);
+  return rp;
+}
+
+#[ct = "rp -> rp"]
+#[sct = "{ ptr: transient, val: secret } -> { ptr: public, val: secret }"]
+export
+fn poly_invntt_jazz(reg mut ptr u32[256] rp) -> reg ptr u32[256] {
+  _ = #init_msf();
+  rp = _poly_invntt(rp);
+  return rp;
+}
+
+#[ct = "rp × ap × bp -> {ap, bp, rp}"]
+#[sct = "
+{ ptr: transient, val: secret } ×
+{ ptr: transient, val: secret } ×
+{ ptr: transient, val: secret } ->
+{ ptr: public, val: secret }
+"]
+export
+fn poly_basemul_jazz(reg mut ptr u32[256] rp,
+                     reg const ptr u32[256] ap bp) -> reg ptr u32[256] {
+  _ = #init_msf();
+  rp = _poly_basemul(rp, ap, bp);
+  return rp;
+}
+\end{lstlisting}
+
 The \jasm{export} keyword triggers both assembly generation and \easycrypt{}
 extraction.  The ABI of \jasm{poly\_ntt\_jazz} takes a pointer to a 256-word
 array in a register and returns the same pointer after in-place modification.
 
-\section{Safety Verification}
+\section{Safety and Constant-Time Verification}
 
-The \jasmin{} safety checker verifies that all array accesses are in bounds:
+For the original direct-loop code, the safety argument is the natural
+mathematical one:
 \begin{itemize}
   \item \texttt{rp[j]} and \texttt{rp[j+len]} are accessed with
         $j \in [\texttt{start}, \texttt{start}+\texttt{len})$ and
         $j + \texttt{len} \in [\texttt{start}+\texttt{len}, \texttt{start}+2\texttt{len})$.
         Both ranges are within $[0, 256)$ by the loop bounds.
-  \item \texttt{jzetas[k]} is accessed with $k \in [1, 256)$, which is
-        within the bounds of the 256-element twiddle table.
+  \item The forward kernel accesses \texttt{jzetas[zetasctr]} with
+        \(\texttt{zetasctr}\in[1,256)\).  The inverse kernel accesses
+        \texttt{jzetas\_inv[0..254]} in the butterfly loops and
+        \texttt{jzetas\_inv[255]} in the final scaling loop.
 \end{itemize}
 
-All safety conditions are discharged automatically by the \jasmin{} compiler's
-safety analysis.
+The current full-safe implementation makes these facts syntactic for the
+compiler by specialising each public stage.  The following checks were run on
+\texttt{jasmin/hpoly.jazz} after regenerating the source:
+
+\begin{lstlisting}[
+  caption={Compiler checks for the full-safe constant-time implementation},
+  label={lst:jasmin_safe_ct_checks}]
+jasminc -checksafety -o /tmp/hpoly-safe.s jasmin/hpoly.jazz
+  poly_ntt_jazz:    No Safety Violation
+  poly_invntt_jazz: No Safety Violation
+  poly_basemul_jazz: No Safety Violation
+
+jasmin-ct jasmin/hpoly.jazz
+  regular constant-time check: passed
+
+jasmin-ct --speculative jasmin/hpoly.jazz
+  speculative constant-time check: passed
+\end{lstlisting}
+
+The constant-time contracts treat polynomial coefficients as secret and require
+all branch conditions, loop counts, and memory addresses to depend only on
+public stage parameters and public pointers after \jasm{\#init\_msf()}.
+Consequently, the checked assembly has a fixed instruction and memory-access
+schedule for all coefficient values.
 
 \section{Generated Assembly}
 
 The compiled assembly \texttt{hpoly.s} contains straightforward x86-64 code.
 Key assembly features include:
 \begin{itemize}
-  \item Register allocation: loop variables (\texttt{len}, \texttt{start},
-        \texttt{j}, \texttt{k}) are assigned to general-purpose registers
-        \texttt{r8}--\texttt{r15}.
+  \item Register allocation: stage-local variables (\texttt{block},
+        \texttt{start}, \texttt{j}, \texttt{idx}, and \texttt{offset}) are
+        assigned to general-purpose registers.
   \item Montgomery reduction uses \texttt{imul} (signed 64-bit multiply)
         and \texttt{sar} (arithmetic shift right) instructions.
+  \item The exported wrappers contain an entry \texttt{lfence}, emitted by
+        \jasm{\#init\_msf()}, to satisfy the speculative constant-time
+        contract.
   \item No SIMD instructions are used in the scalar implementation; a
         vectorised (AVX2) version is possible but beyond the scope of this
         dissertation.

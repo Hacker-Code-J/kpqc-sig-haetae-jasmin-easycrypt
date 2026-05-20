@@ -5,10 +5,10 @@
 \chapter{Jasmin-to-EasyCrypt Refinement Proof}
 \label{ch:refinement}
 
-\section{Overview of \texttt{RefJasminNTT.ec}}
+\section{Overview of the Jasmin Refinement Proofs}
 
-The file \texttt{RefJasminNTT.ec} (1000+ lines) bridges the gap between the
-machine-level \jasmin{} implementation and the abstract algorithmic
+The file \texttt{RefJasminNTT.ec} (2609 lines) bridges the gap between the
+original direct-loop \jasmin{} implementation and the abstract algorithmic
 specification.  It is the most technically demanding proof file in the
 development, requiring simultaneous reasoning about:
 \begin{enumerate}
@@ -18,6 +18,48 @@ development, requiring simultaneous reasoning about:
   \item Equivalence of three-level nested loops.
 \end{enumerate}
 
+The proof presentation in this chapter follows the original direct-loop
+program shown in \Cref{lst:ntt_jasmin,lst:invntt_jasmin}.  The current
+full-safe Jasmin source described in \Cref{lst:ntt_jasmin_safe_stage} and
+\Cref{lst:invntt_jasmin_safe_schedule} exposes the same public stage schedule
+as a composition of fixed helpers.  Thus the algorithmic refinement argument is
+read stage by stage: each helper is the corresponding instance of the old
+outer-loop body, with the public \jasm{len} and twiddle-base values made
+literal for \texttt{jasminc}.
+
+The current machine-checked full-safe artifact keeps the original
+\texttt{RefJasminNTT.ec} proof boundary as historical documentation and adds a
+separate \texttt{easycrypt-ct} bridge for the compiler-safe source:
+\texttt{Hpoly\_loop.ec} defines a proof-only direct-loop model with the same
+tables and multiplication routine as the extraction,
+\texttt{RefJasminNTT\allowbreak Loop.ec} reuses the direct-loop refinement proof against
+that model, and \texttt{CTLoopEquiv.ec} proves that the helperized
+\texttt{Hpoly\_extract} procedures are equivalent to the proof-only loop.
+The final theorems in \texttt{NTTEndToEnd.ec} therefore target the full-safe
+\jasmin{} extraction, not only the old direct-loop presentation.
+
+\subsection{Full-Safe Constant-Time Bridge}
+
+The helperized source changes the control-flow shape seen by \texttt{jasminc}
+but not the public NTT schedule.  The proof uses this fact as a small
+translation layer rather than duplicating the whole refinement:
+\begin{enumerate}
+  \item \textbf{\texttt{Hpoly\_loop.ec}}: a direct-loop EasyCrypt model of the
+        full-safe source, sharing the extracted constants and
+        \ec{\_\_fqmul} implementation.
+  \item \textbf{\texttt{RefJasminNTT\allowbreak Loop.ec}}: the existing Jasmin-to-imperative
+        refinement proof retargeted from the old extraction to
+        \texttt{Hpoly\_loop}.
+  \item \textbf{\texttt{CTLoopEquiv.ec}}: pRHL equivalence proofs from the
+        helperized full-safe extraction \texttt{Hpoly\_extract.M.\_poly\_ntt}
+        and \texttt{Hpoly\_extract.M.\_poly\_invntt} to the direct-loop model,
+        including the exported wrapper procedures.
+\end{enumerate}
+
+This preserves the old code and proof text for comparison while giving the
+current compiler-checked implementation a machine-checked functional
+correctness path.
+
 \section{Word-to-Coefficient Correspondence}
 
 \subsection{The Linking Predicate}
@@ -26,23 +68,28 @@ The central predicate connecting machine words to mathematical integers is:
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={Array correspondence predicate in \texttt{RefJasminNTT.ec}},
-  label={lst:wrel}]
-pred wrel (rp : W32.t Array256.t) (a : int Array256.t) =
-  forall i, 0 <= i < 256 =>
-    W32.to_sint rp.[i] = a.[i].
+  label={lst:poly-repr}]
+pred poly_repr (rp : BArray1024.t) (p : coeff Array256.t) =
+  forall i, i \in range 0 256 =>
+    word_to_coeff (BArray1024.get32 rp i) = p.[i].
+
+op poly_repr_bound (rp : BArray1024.t) (p : coeff Array256.t) (sz : int) =
+  poly_repr rp p /\
+  forall i, i \in range 0 256 =>
+    Fq.bw32 (BArray1024.get32 rp i) sz.
 \end{lstlisting}
 
-This predicate asserts that the 32-bit word representation of each element
-in \texttt{rp} equals the integer in \texttt{a}.  Note that \ec{W32.to\_sint}
-applies the two's-complement signed interpretation.
+The representation predicate maps each 32-bit word to a field coefficient,
+and the bound component records the signed bit-width needed to justify word
+addition, subtraction, and Montgomery multiplication.
 
 \subsection{Preservation Under Arithmetic}
 
 \begin{lemma}[Word addition preservation]
-  If $\ec{wrel}(\texttt{rp}, \texttt{a})$ and $|a[i]|, |b[i]| < 2^{30}$,
-  then $\ec{wrel}(\texttt{rp} \oplus_{32} \texttt{b}, \texttt{a} + \texttt{b})$
-  where $\oplus_{32}$ denotes 32-bit word addition.
-\label{lem:wrel_add}
+  If two 32-bit words represent coefficients with signed bit-widths below
+  31, then word addition and subtraction agree with field addition and
+  subtraction under \ec{word\_to\_coeff}.
+\label{lem:word-add-repr}
 \end{lemma}
 
 \begin{proof}
@@ -51,7 +98,9 @@ applies the two's-complement signed interpretation.
     \op{W32.to\_sint}(\op{W32.of\_int}(a) + \op{W32.of\_int}(b)) = a + b,
   \]
   which holds because the 32-bit arithmetic does not overflow when both
-  operands are bounded by $2^{30}$.
+  operands are bounded by $2^{30}$.  The checked lemmas are
+  \ec{word\_to\_coeff\_add}, \ec{word\_to\_coeff\_sub},
+  \ec{forward\_butterfly\_bounds}, and \ec{inverse\_butterfly\_bounds}.
 \end{proof}
 
 \section{Montgomery Reduction Correspondence}
@@ -65,8 +114,8 @@ computation:
 \begin{lemma}[Montgomery reduction word correspondence]
   Let $z \in \Z$ with $|z| < 2^{31} \cdot q$.  Then:
   \[
-    \op{W32.to\_sint}(\op{Extracted.montgomery\_reduce}(\op{W64.of\_int}(z)))
-    = \op{NTT\_Fq.montgomery\_reduce}(z).
+    \op{W32.to\_sint}(\op{Hpoly\_extract.M.\_\_montgomery\_reduce}(z))
+    = \op{SREDC}(z).
   \]
 \label{lem:mont_word_corr}
 \end{lemma}
@@ -83,11 +132,11 @@ computation:
 \subsection{Individual Butterfly}
 
 \begin{lemma}[Single butterfly correspondence]
-  Let $\texttt{rp}, \texttt{a}$ satisfy $\ec{wrel}(\texttt{rp}, \texttt{a})$,
-  and let $|a[j]|, |a[j+\ell]| < 2^{15}$ and $|\zeta| < 2^{15}$.  Then after
-  executing one butterfly step:
+  Let the concrete array and abstract array satisfy \ec{poly\_repr\_bound},
+  and suppose the butterfly operands satisfy the stage bit-width bounds.
+  Then after executing one butterfly step:
   \[
-    \ec{wrel}(\texttt{rp}', \texttt{a}'),
+    \ec{poly\_repr\_bound}(\texttt{rp}',\texttt{a}',\mathit{next\_sz}),
   \]
   where $\texttt{a}'$ is the result of the abstract butterfly and
   $\texttt{rp}'$ is the result of the machine butterfly.
@@ -97,14 +146,20 @@ computation:
 \begin{proof}
   The machine butterfly computes:
   \begin{align*}
-    t &= \op{W32}(\op{Extracted.mont\_reduce}(\zeta \cdot \texttt{rp}[j+\ell])) \\
+    t &= \op{\_\_fqmul}(\zeta,\texttt{rp}[j+\ell]) \\
     \texttt{rp}'[j+\ell] &= \texttt{rp}[j] - t \\
     \texttt{rp}'[j] &= \texttt{rp}[j] + t
   \end{align*}
-  By \Cref{lem:mont_word_corr}, $\op{W32.to\_sint}(t) = \op{mont}(\zeta \cdot a[j+\ell])$.
-  By \Cref{lem:wrel_add}, the addition/subtraction preserves the correspondence
-  (using bounds $|a[j]|, |\op{mont}(\zeta \cdot a[j+\ell])| < 2^{16}$, so
-  their sum/difference is bounded by $2^{17} < 2^{30}$, safe in 32-bit words).
+  By \Cref{lem:mont_word_corr}, the \texttt{\_\_fqmul} call implements the
+  field multiplication by the abstract twiddle factor after cancelling the
+  Montgomery factor in the concrete table.
+  By \Cref{lem:word-add-repr}, the addition/subtraction preserves the
+  correspondence under the stage-dependent bounds.  The proof uses
+  \ec{fwd\_stage\_bound}, \ec{fwd\_inner\_bound}, and
+  \ec{fwd\_middle\_bound}: a butterfly advances the touched cells from the
+  current stage bit-width to the next one, while untouched cells keep the
+  current bound.  The checked range lemmas ensure all word additions and
+  subtractions stay below the 32-bit overflow threshold.
 \end{proof}
 
 \section{Loop Equivalence Proofs}
@@ -112,31 +167,36 @@ computation:
 \subsection{Inner Loop Equivalence}
 
 \begin{lemma}[Inner loop correspondence]
-  Given $\ec{wrel}(\texttt{rp}, \texttt{a})$ and bounds $|a[i]| < 2^{15}$:
+  Given \ec{poly\_repr\_bound} for the current concrete and abstract arrays:
   \[
-    \ec{hoare}[\ec{Extracted.inner\_loop} \sim \ec{NTT\_Fq.inner\_loop} :
-      \ec{wrel}(\texttt{rp}, \texttt{a}) \Rightarrow \ec{wrel}(\texttt{rp}', \texttt{a}')].
+  \begin{aligned}
+    &\ec{equiv}[
+      \ec{Hpoly\_extract.M.\_poly\_ntt}
+      \sim \ec{NTT\_Fq.NTT.ntt}:\\
+    &\qquad
+      \ec{poly\_repr\_bound} \Rightarrow \ec{poly\_repr\_bound}].
+  \end{aligned}
   \]
 \label{lem:inner_corr}
 \end{lemma}
 
 \begin{proof}
   By induction on the inner loop counter $j$, using \Cref{lem:butterfly_corr}
-  as the inductive step.  The bound on coefficients increases by at most
-  $2^{16}$ per butterfly (from \Cref{thm:mont_correct}), but the inner loop
-  uses the same twiddle factor throughout, so the number of butterflies per
-  inner loop execution is exactly $\ell$.
+  as the inductive step.  The bound argument is not an additive
+  ``\(2^{16}\) per butterfly'' estimate; it is the checked bit-width
+  transition recorded by \ec{fwd\_inner\_bound} and discharged by the
+  butterfly store lemmas.
 \end{proof}
 
 \subsection{Full NTT Loop Equivalence}
 
 \begin{theorem}[Forward NTT loop equivalence]
-  Let $\texttt{rp}$ satisfy $|a[i]| < 2^{15}$ for all $i$.  Then:
+  Let $\texttt{rp}$ represent an abstract polynomial with 16-bit signed
+  coefficient bounds.  Then:
   \begin{align*}
-    &\ec{hoare}[\ec{Extracted.poly\_ntt\_jazz} \sim \ec{NTT\_Fq.NTT.ntt} : \\
-    &\quad \ec{wrel}(\texttt{rp}, \texttt{a}) \\
-    &\quad \Rightarrow \ec{wrel}(\texttt{rp}', \texttt{a}') \;\wedge\;
-     \forall i.\; |a'[i]| < 2^{23}].
+    &\ec{equiv}[\ec{Hpoly\_extract.M.\_poly\_ntt} \sim \ec{NTT\_Fq.NTT.ntt} : \\
+    &\quad \ec{poly\_repr\_bound}\;\text{with bound }16 \\
+    &\quad \Rightarrow \ec{poly\_repr\_bound}\;\text{with bound }24].
   \end{align*}
 \label{thm:ntt_loop_equiv}
 \end{theorem}
@@ -151,37 +211,39 @@ computation:
           decreasing variant.
     \item The inner loop uses \Cref{lem:inner_corr}.
   \end{enumerate}
-  The bound $|a'[i]| < 2^{23}$ follows from \Cref{thm:ntt_bounds}.
+  The 24-bit output bound follows from \Cref{thm:ntt_bounds}.
 \end{proof}
 
 \section{Main Refinement Lemmas}
 
-The two main lemmas of \texttt{RefJasminNTT.ec} are:
+The two main lemmas of the original \texttt{RefJasminNTT.ec} proof are:
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={Main refinement lemmas in \texttt{RefJasminNTT.ec}},
   label={lst:ref_lemmas}]
 (* Forward NTT: Jasmin core ~ NTT_Fq, bounds 16 -> 24 *)
-lemma poly_ntt_core_ref rp a :
-  wrel rp a =>
-  (forall i, 0 <= i < 256 => `|a.[i]| < 2^15) =>
-  equiv[Extracted.poly_ntt_jazz ~ NTT_Fq.NTT.ntt :
-    ={arg} /\ wrel arg{1} arg{2} ==>
-    wrel res{1} res{2} /\
-    forall i, 0 <= i < 256 => `|res{2}.[i]| < 2^23].
+equiv poly_ntt_core_ref :
+  Hpoly_extract.M._poly_ntt ~ NTT_Fq.NTT.ntt :
+  NTT_Fq.poly_repr_bound rp{1} r{2} 16 /\
+  zetas{2} = NTT_Fq.zetas
+  ==> NTT_Fq.poly_repr_bound res{1} res{2} 24.
 
-(* Inverse NTT: Jasmin core ~ NTT_Fq, bounds 16 -> 16, Montgomery *)
-lemma poly_invntt_core_ref rp a :
-  wrel rp a =>
-  (forall i, 0 <= i < 256 => `|a.[i]| < 2^23) =>
-  equiv[Extracted.poly_invntt_jazz ~ NTT_Fq.NTT.invntt :
-    ={arg} /\ wrel arg{1} arg{2} ==>
-    wrel res{1} res{2} /\
-    forall i, 0 <= i < 256 => `|res{2}.[i]| < 2^15].
+(* Inverse NTT: Jasmin core ~ NTT_Fq, bounds 16 -> 16, Montgomery output *)
+equiv poly_invntt_core_ref :
+  Hpoly_extract.M._poly_invntt ~ NTT_Fq.NTT.invntt :
+  NTT_Fq.poly_repr_bound rp{1} r{2} 16 /\
+  zetas_inv{2} = NTT_Fq.zetas_inv
+  ==> NTT_Fq.poly_repr_bound res{1}
+        (NTT_Fq.array256_mont res{2}) 16.
 \end{lstlisting}
 
-These two lemmas represent the central contribution of \texttt{RefJasminNTT.ec}.
-Once proved, they serve as the foundation for the end-to-end theorem.
+These two lemmas represent the central contribution of the original
+\texttt{RefJasminNTT.ec}.  In the full-safe artifact, the corresponding
+lemmas are provided by \texttt{RefJasminNTT\allowbreak Loop.ec} over
+\texttt{Hpoly\_loop.M}; \texttt{CTLoopEquiv.ec} then transfers their Hoare
+postconditions to \texttt{Hpoly\_extract.M}, the actual helperized extraction.
+Once composed, they serve as the foundation for the end-to-end theorem for the
+full-safe constant-time Jasmin source.
 
 \section{Proof Engineering Challenges}
 
@@ -197,28 +259,40 @@ lemmas from \texttt{Fq.ec}.
 \subsection{64-bit Product Non-Overflow}
 
 The 64-bit product $\zeta \cdot a[j+\ell]$ requires:
-$|\zeta| \cdot |a[j+\ell]| < 2^{63}$.
-Since $|\zeta| < q < 2^{16}$ and $|a[j+\ell]| < 2^{23}$ (after the forward
-NTT), we have $|\zeta \cdot a[j+\ell]| < 2^{39} \ll 2^{63}$.
-This is verified in the proof as a side condition.
+$|\zeta| \cdot |a[j+\ell]| < 2^{63}$.  The checked product lemmas cover a
+16-bit twiddle word multiplied by a coefficient with up to a 24-bit signed
+bound.  Since \(q < 2^{16}\), this gives a product below \(2^{40}\), far below
+the signed 64-bit limit.  This is verified in the proof as a side condition.
 
 \subsection{Twiddle Factor Table Agreement}
 
 The \easycrypt{} extracted module accesses the twiddle table as a global
-constant.  The refinement proof must show that this global constant agrees
-with the \ec{zetas} array defined in \texttt{NTT\_Fq.ec}.  This is
-established by a computation lemma:
+constant.  The refinement proof must relate those concrete Montgomery words
+to the abstract \ec{zetas} array defined in \texttt{NTT\_Fq.ec}.  The relation
+is not direct equality of signed integers: the concrete words represent
+Montgomery-form coefficients, and slot 0 of \texttt{jzetas} is padding.
+The checked bridge cancels the Montgomery factor at the point where
+\texttt{\_\_fqmul} applies one REDC step:
 
 \begin{lemma}[Twiddle table agreement]
-  For all $k \in [0, 256)$:
-  $\op{W32.to\_sint}(\ec{jzetas}[k]) = \ec{NTT\_Fq.zetas}[k]$.
+  For all $k \in [1, 256)$:
+  \[
+    \ec{word\_to\_coeff}(\ec{jzetas}[k]) \cdot R^{-1}
+      = \ec{NTT\_Fq.zetas}[k].
+  \]
 \label{lem:zetas_agree}
 \end{lemma}
 
 \begin{proof}
-  Both tables are defined by the same formula modulo $q = 64513$.  Since
-  $q < 2^{16}$, all entries fit in 16 bits and the signed interpretation
-  agrees with the unsigned value.  Verified by the SMT backend.
+  The lemma \ec{jzetas\_get} identifies the concrete table entry with
+  \ec{array256\_mont zetas}.  The lemma \ec{mont\_cancel} then multiplies by
+  \(R^{-1}\) and uses \(R\cdot R^{-1}=1\) in \(\F_q\).  The inverse table is
+  handled similarly for indices \(0,\dots,254\), while index 255 is a separate
+  final-scaling lemma:
+  \[
+    \ec{word\_to\_coeff}(\ec{jzetas\_inv}[255])\cdot R^{-1}
+      = \ec{scale255}\cdot R.
+  \]
 \end{proof}
 
 \subsection{In-Place Update Semantics}

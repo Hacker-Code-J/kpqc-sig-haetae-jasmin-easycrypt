@@ -7,7 +7,7 @@
 
 \section{Overview of \texttt{NTTEndToEnd.ec}}
 
-The file \texttt{NTTEndToEnd.ec} (105 lines) is the apex of the verification
+The file \texttt{NTTEndToEnd.ec} (144 lines) is the apex of the verification
 chain.  It imports all preceding modules and states the final correctness
 theorems that directly relate the exported \jasmin{} functions to the abstract
 spectral NTT specification.
@@ -17,8 +17,8 @@ spectral NTT specification.
   label={lst:e2e_imports}]
 require import NTTFullSpec NTTFullAlgebra.
 require import NTT_Fq Fq GFq Rq.
-require import RefJasminNTT.
-require import Hpoly_extract.
+require import RefJasminNTTLoop CTLoopEquiv.
+require import Hpoly_extract Hpoly_loop.
 \end{lstlisting}
 
 \section{Main Correctness Theorems}
@@ -27,118 +27,109 @@ require import Hpoly_extract.
 
 \begin{theorem}[Jasmin NTT correctness]
   \label{thm:main_ntt}
-  Let $\texttt{rp} : \ec{W32.t}^{256}$ be a word array encoding a polynomial
-  with 16-bit signed coefficients (i.e., $|\op{W32.to\_sint}(\texttt{rp}[i])| < 2^{15}$
-  for all $i$).  Then executing \jasm{poly\_ntt\_jazz(\texttt{rp})} produces
+  Let \(\texttt{rp}\) be a Jasmin word array represented in EasyCrypt as a
+  \ec{BArray1024.t}, encoding a polynomial \(p\) with 16-bit signed
+  coefficients.  Then executing \jasm{poly\_ntt\_jazz(\texttt{rp})} produces
   an output array $\texttt{rp}'$ satisfying:
   \[
-    \op{W32.to\_sint}(\texttt{rp}'[i]) = \op{full\_ntt}(a)[i] \pmod{q},
-    \quad i = 0, \dots, 255,
+    \texttt{rp}' \;\text{represents}\; \op{full\_ntt}(p)
+    \;\text{with 24-bit bounds},
   \]
-  where $a[i] = \op{W32.to\_sint}(\texttt{rp}[i])$ for all $i$.
 \end{theorem}
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={End-to-end NTT correctness statement},
   label={lst:e2e_ntt}]
-lemma jasmin_ntt_full (rp : W32.t Array256.t) :
-  (forall i, 0 <= i < 256 =>
-     `|W32.to_sint rp.[i]| < 2^15) =>
-  hoare[M.poly_ntt_jazz :
-    arg = rp ==>
-    let a  = Array256.init (fun i => W32.to_sint rp.[i]) in
-    let rp' = res in
-    forall i, 0 <= i < 256 =>
-      W32.to_sint rp'.[i] =
-        (NTTFullSpec.full_ntt a).[i] %% q].
+op jasmin_ntt_full_post (rp : BArray1024.t) (p : poly) =
+  NTT_Fq.poly_repr_bound rp (NTTFullSpec.full_ntt p) 24.
 
-lemma haetae_jasmin_ntt_correct (rp : W32.t Array256.t)
-    (a : int Array256.t) :
-  (forall i, 0 <= i < 256 =>
-     W32.to_sint rp.[i] = a.[i] /\ `|a.[i]| < 2^15) =>
-  hoare[M.poly_ntt_jazz :
-    arg = rp ==>
-    let rp' = res in
-    forall i, 0 <= i < 256 =>
-      W32.to_sint rp'.[i] = (NTTFullSpec.full_ntt a).[i]].
+lemma haetae_jasmin_ntt_correct p :
+  hoare [Hpoly_extract.M.poly_ntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res (NTTFullSpec.full_ntt p) 24].
 \end{lstlisting}
 
 \subsection{Inverse NTT Correctness}
 
 \begin{theorem}[Jasmin inverse NTT correctness]
   \label{thm:main_invntt}
-  Let $\texttt{rp} : \ec{W32.t}^{256}$ encode a polynomial with 23-bit
-  coefficients (i.e., $|\op{W32.to\_sint}(\texttt{rp}[i])| < 2^{23}$).
+  Let $\texttt{rp}$ encode a polynomial \(p\) satisfying the 16-bit bound
+  required by the checked inverse kernel theorem.
   Then executing \jasm{poly\_invntt\_jazz(\texttt{rp})} produces an output
   array $\texttt{rp}'$ satisfying:
   \[
-    \op{W32.to\_sint}(\texttt{rp}'[i])
-    \equiv \op{full\_invntt}(a)[i] \cdot R \pmod{q},
-    \quad i = 0, \dots, 255,
+    \texttt{rp}' \;\text{represents}\;
+      \ec{array256\_mont}(\op{full\_invntt}(p)),
   \]
-  where $a[i] = \op{W32.to\_sint}(\texttt{rp}[i])$ and $R = 2^{32}$.
+  i.e. the inverse output is represented with one Montgomery factor \(R\).
 \end{theorem}
 
 \begin{lstlisting}[language=EasyCrypt,
   caption={End-to-end inverse NTT correctness statement},
   label={lst:e2e_invntt}]
-lemma haetae_jasmin_invntt_correct (rp : W32.t Array256.t)
-    (a : int Array256.t) :
-  (forall i, 0 <= i < 256 =>
-     W32.to_sint rp.[i] = a.[i] /\ `|a.[i]| < 2^23) =>
-  hoare[M.poly_invntt_jazz :
-    arg = rp ==>
-    let rp' = res in
-    forall i, 0 <= i < 256 =>
-      W32.to_sint rp'.[i] =
-        ((NTTFullSpec.full_invntt a).[i] * Fq.rmont) %% q].
+op jasmin_invntt_full_post (rp : BArray1024.t) (p : poly) =
+  NTT_Fq.poly_repr_bound rp
+    (NTT_Fq.array256_mont (NTTFullSpec.full_invntt p)) 16.
+
+lemma haetae_jasmin_invntt_correct p :
+  hoare [Hpoly_extract.M.poly_invntt_jazz :
+    NTT_Fq.poly_repr_bound rp p 16 ==>
+    NTT_Fq.poly_repr_bound res
+      (NTT_Fq.array256_mont (NTTFullSpec.full_invntt p)) 16].
 \end{lstlisting}
 
-The Montgomery factor $\texttt{rmont} = R^{-1} \bmod q = 50386$ in the
-postcondition reflects the fact that the inverse NTT output is in Montgomery
-form (scaled by $R$).  This is the standard convention in lattice-based
-cryptography: NTT outputs are kept in Montgomery form for efficient subsequent
-multiplications.
+The \ec{array256\_mont} postcondition is the precise Montgomery-form
+convention: each abstract coefficient is multiplied by \(R\), not by
+\(R^{-1}\).  The value \(R^{-1}\) appears internally when cancelling a
+Montgomery multiplication, but it is not the final representation factor.
 
-\section{Round-Trip Theorem}
+\section{Round-Trip Consequence}
 
-\begin{theorem}[Round-trip correctness]
+\begin{proposition}[Abstract round-trip with Montgomery output]
   \label{thm:roundtrip}
-  For any polynomial $a \in \Z_q^{256}$ with $|a[i]| < 2^{15}$:
+  For any polynomial $a \in \Z_q^{256}$:
   \[
-    \op{poly\_invntt\_jazz}(\op{poly\_ntt\_jazz}(a))
-    \equiv a \cdot R \pmod{q} \text{ (componentwise)}.
+    \op{full\_invntt}(\op{full\_ntt}(a)) = a.
   \]
-\end{theorem}
+Consequently, a concrete inverse call whose input represents
+\(\op{full\_ntt}(a)\) and satisfies the inverse theorem's representation
+bound returns a word array representing \(\ec{array256\_mont}(a)\), i.e.,
+\(a\cdot R\) componentwise.
+\end{proposition}
 
 \begin{proof}
-  Composing \Cref{thm:main_ntt} and \Cref{thm:main_invntt}:
+  At the mathematical layer:
   \begin{align*}
-    \op{poly\_ntt\_jazz}(a)[i]
-    &= \op{full\_ntt}(a)[i] \pmod{q}, \\
-    \op{poly\_invntt\_jazz}(\op{full\_ntt}(a))[i]
-    &= \op{full\_invntt}(\op{full\_ntt}(a))[i] \cdot R \pmod{q} \\
-    &= a[i] \cdot R \pmod{q},
+    \op{full\_invntt}(\op{full\_ntt}(a))[i]
+    &= a[i],
   \end{align*}
-  where the last step uses \Cref{thm:intt_correct}.
+  by \Cref{thm:intt_correct}.  The concrete inverse theorem then wraps the
+  result in \ec{array256\_mont}, giving the \(R\)-scaled representation.
 \end{proof}
 
-\Cref{thm:roundtrip} is the \emph{operational} correctness statement: applying
-the NTT and then the inverse NTT returns the original polynomial (times the
-Montgomery factor $R$), which can be absorbed by the Montgomery representation
-convention used throughout \haetae{}.
+\Cref{thm:roundtrip} is a representation-level consequence, not an additional
+top-level theorem in \ec{NTTEndToEnd.ec}.  The checked file states the forward
+and inverse exported-function theorems separately, and the dissertation does
+not cite a direct one-procedure in-place pipeline theorem.
 
 \section{Proof Composition}
 
-The end-to-end proofs are assembled from three chains:
+The end-to-end proofs are assembled from four chains:
 
 \begin{enumerate}
-  \item \textbf{Jasmin $\to$ Imperative}: \Cref{thm:ntt_loop_equiv} from
-        \texttt{RefJasminNTT.ec}.
+  \item \textbf{Full-safe extraction $\to$ proof loop}:
+        \texttt{CTLoopEquiv.ec} proves that the helperized full-safe
+        \texttt{Hpoly\_extract} procedures implement the same transition as
+        the proof-only direct-loop model in \texttt{Hpoly\_loop.ec}.
+  \item \textbf{Proof loop $\to$ Imperative}: \Cref{thm:ntt_loop_equiv} is
+        instantiated by \texttt{RefJasminNTT\allowbreak Loop.ec}.
   \item \textbf{Imperative $\to$ Abstract}: \Cref{thm:ntt_correct} from
         \texttt{NTTFullAlgebra.ec}.
-  \item \textbf{Abstract $\to$ Round-trip}: \Cref{thm:intt_correct} from
-        \texttt{NTTFullSpec.ec}.
+  \item \textbf{Abstract inverse identity}: \Cref{thm:intt_correct} is the
+        pen-and-paper field argument stated in this dissertation.  The
+        checked EasyCrypt files prove the forward and inverse maps against
+        \ec{full\_ntt} and \ec{full\_invntt} separately; they do not add a
+        standalone checked round-trip lemma.
 \end{enumerate}
 
 The composition is expressed in \easycrypt{} as sequential lemma application:
@@ -148,12 +139,21 @@ The composition is expressed in \easycrypt{} as sequential lemma application:
   label={lst:e2e_proof}]
 proof haetae_jasmin_ntt_correct.
   move => rp a ha.
-  (* Step 1: Jasmin -> Imperative (RefJasminNTT) *)
-  have h1 := poly_ntt_core_ref ha.
-  (* Step 2: Imperative -> Abstract (NTTFullAlgebra) *)
-  have h2 := ntt_imp_to_spec h1.
-  (* Step 3: Conclude *)
-  exact h2.
+  (* Step 1: proof-only core loop -> imperative -> abstract. *)
+  have hloop_core :
+    hoare [Hpoly_loop.M._poly_ntt :
+      NTT_Fq.poly_repr_bound rp a 16 ==>
+      jasmin_ntt_full_post res a].
+  + by conseq RefJasminNTT.poly_ntt_core_ref
+      (NTTFullAlgebra.ntt_full_ntt a) => /#.
+  (* Step 2: proof-only exported wrapper. *)
+  have hloop_jazz :
+    hoare [Hpoly_loop.M.poly_ntt_jazz :
+      NTT_Fq.poly_repr_bound rp a 16 ==>
+      jasmin_ntt_full_post res a].
+  + by conseq RefJasminNTT.poly_ntt_jazz_ref hloop_core => /#.
+  (* Step 3: helperized full-safe extraction -> proof-only wrapper. *)
+  by conseq CTLoopEquiv.poly_ntt_jazz_ct_loop hloop_jazz => /#.
 qed.
 \end{lstlisting}
 
@@ -170,57 +170,69 @@ qed.
         termination proofs and loop invariants.
 
   \item \textbf{\texttt{NTTFullSpec.ec}}: Abstract NTT definitions and
-        the round-trip identity (pending full discharge of orthogonality
-        lemma via the algebra library).
+        conversion lemmas from the relational specifications to
+        \ec{full\_ntt} and \ec{full\_invntt}.
 
-  \item \textbf{\texttt{RefJasminNTT.ec}}: The two main refinement lemmas
+  \item \textbf{\texttt{RefJasminNTT.ec}}: The preserved original direct-loop
+        proof boundary and its two main refinement lemmas
         \ec{poly\_ntt\_core\_ref} and \ec{poly\_invntt\_core\_ref}.
+
+  \item \textbf{\texttt{Hpoly\_loop.ec}}: The proof-only direct-loop model
+        used as the stable target for the full-safe helperized extraction.
+
+  \item \textbf{\texttt{RefJasminNTT\allowbreak Loop.ec}}: The direct-loop refinement
+        proof retargeted to \texttt{Hpoly\_loop}.
+
+  \item \textbf{\texttt{CTLoopEquiv.ec}}: The pRHL bridge proving equivalence
+        between the full-safe \texttt{Hpoly\_extract} procedures and
+        \texttt{Hpoly\_loop}, including exported wrappers.
+
+  \item \textbf{\texttt{NTTFullAlgebra.ec}}: The stage-induction theorems
+        \ec{ntt\_full\_ntt} and \ec{invntt\_full\_invntt}.
+
+  \item \textbf{\texttt{NTTEndToEnd.ec}}: The composed top-level Hoare
+        statements for the exported Jasmin functions.
 \end{enumerate}
 
-\subsection{Remaining Proof Obligation}
+\subsection{Machine-Checked Top-Level Compilation}
 
-The one remaining gap, identified in \texttt{AGENT.md}, is the complete
-machine-checked bridge from \ec{NTT\_Fq.NTT.ntt} to \ec{NTTFullSpec.full\_ntt}
-via the stage decomposition in \texttt{NTTFullAlgebra.ec}.
-
-Specifically, the butterfly-stage induction lemma (\Cref{lem:butterfly_stage})
-requires:
-\begin{itemize}
-  \item A complete specification of the partial NTT $\NTT_s$ in terms of
-        array segments indexed by stage $s$.
-  \item A formal connection between the loop counter $k$ and the spectral
-        index $\brev_8(2^s + g)$.
-  \item The finite sum manipulation proving that the butterfly update
-        transforms $\NTT_s$ to $\NTT_{s+1}$.
-\end{itemize}
-
-This step is conceptually straightforward but requires significant
-proof engineering effort due to the index arithmetic involved.  The
-MLKEM development did not provide a reusable template for this exact
-structure (\Cref{rem:haetae_mlkem}), requiring the development of new
-infrastructure in \texttt{NTTFullAlgebra.ec}.
+The checked development currently compiles through \texttt{NTTEndToEnd.ec} in
+\texttt{easycrypt-ct}.  This means the full-safe helperized Jasmin extraction,
+the proof-loop refinement, the imperative-to-abstract stage proofs, and the
+final composition are all discharged for the scalar NTT and inverse NTT
+covered by this dissertation.  Remaining limitations are scope limitations,
+not open proof gaps in the NTT chain: AVX2 vectorisation, base multiplication,
+and full protocol-level security integration are outside the proved artifact.
 
 \section{Summary of Verification Metrics}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Verification metrics by file}
 \label{tab:metrics}
-\begin{tabular}{lrrrl}
+\small
+\begin{tabular}{
+  >{\raggedright\arraybackslash}p{0.32\textwidth}
+  rr
+  >{\raggedright\arraybackslash}p{0.28\textwidth}}
 \toprule
-File & Lines & Lemmas & \% Proved & Status \\
+File & Lines & Named lemmas & Status \\
 \midrule
-\texttt{Fq.ec}           & 536  & 42 & 100\% & Complete \\
-\texttt{GFq.ec}          & 28   & 5  & 100\% & Complete \\
-\texttt{Rq.ec}           & 118  & 12 & 100\% & Complete \\
-\texttt{Montgomery.ec}   & 180  & 15 & 100\% & Complete \\
-\texttt{NTT\_Fq.ec}      & 989  & 38 & 100\% & Complete \\
-\texttt{NTTFullSpec.ec}  & 160  & 8  & 75\%  & Partial \\
-\texttt{NTTFullAlgebra.ec} & 1024 & 61 & 70\%  & Partial \\
-\texttt{RefJasminNTT.ec} & 1052 & 18 & 100\% & Complete \\
-\texttt{NTTEndToEnd.ec}  & 105  & 4  & 50\%  & Partial \\
+\texttt{Fq.ec}           & 535  & 16  & Compiled \\
+\texttt{GFq.ec}          & 27   & 0   & Compiled field instantiation \\
+\texttt{Rq.ec}           & 117  & 0   & Compiled ring interface \\
+\texttt{Montgomery.ec}   & 427  & 29  & Compiled \\
+\texttt{NTT\_Fq.ec}      & 988  & 52  & Compiled \\
+\texttt{NTTFullSpec.ec}  & 160  & 10  & Compiled \\
+\texttt{NTTFullAlgebra.ec} & 3085 & 111 & Compiled \\
+\texttt{RefJasminNTT.ec} & 2609 & 103 & Preserved direct-loop proof \\
+\texttt{Hpoly\_loop.ec} & 156 & 0 & Compiled proof-loop model \\
+\texttt{RefJasminNTT\allowbreak Loop.ec} & 2629 & 105 & Compiled full-safe refinement target \\
+\texttt{CTLoopEquiv.ec} & 657 & 14 & Compiled helper bridge \\
+\texttt{NTTEndToEnd.ec}  & 144  & 10  & Compiled full-safe top-level \\
 \midrule
-\textbf{Total}           & \textbf{4192} & \textbf{203} & \textbf{$\approx$88\%} & \\
+\textbf{Total}           & \textbf{11534} & \textbf{450} & \textbf{Compiled through full-safe end-to-end} \\
 \bottomrule
 \end{tabular}
+\normalsize
 \end{table}

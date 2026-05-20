@@ -36,13 +36,14 @@ The NTT converts polynomials from the \emph{coefficient domain} to the
 \label{eq:ntt_mul}
 \end{equation}
 where $\odot$ denotes componentwise multiplication.  A single polynomial
-multiplication thus costs $3 \cdot O(n \log n)$ field operations (two forward
-NTTs, one componentwise multiplication, one inverse NTT) instead of $O(n^2)$.
+multiplication thus costs two forward NTTs, one componentwise multiplication,
+and one inverse NTT, for overall $O(n \log n)$ field operations instead of
+$O(n^2)$.
 
 \section{\haetae{} NTT Parameters}
 \label{sec:haetae_params}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{\haetae{} NTT parameters}
 \label{tab:params}
@@ -50,11 +51,11 @@ NTTs, one componentwise multiplication, one inverse NTT) instead of $O(n^2)$.
 \toprule
 Symbol & Value & Description \\
 \midrule
-$q$    & $64513$ & Modulus ($= 2^8 \cdot 252 + 1 = 251 \cdot 256 + 1$) \\
+$q$    & $64513$ & Modulus ($= 2^8 \cdot 252 + 1 = 252 \cdot 256 + 1$) \\
 $n$    & $256$   & Polynomial degree \\
 $\zeta_0$ & $426$ & Primitive $512$th root of unity in $\F_q$ \\
 $R$    & $2^{32}$ & Montgomery base \\
-$\mathsf{QINV}$ & $940508161$ & $-q^{-1} \bmod 2^{32}$ \\
+$\mathsf{QINV}$ & $940508161$ & $q^{-1} \bmod 2^{32}$ \\
 $\mathsf{MONT}$ & $14321$ & $R \bmod q = 2^{32} \bmod q$ \\
 $\mathsf{MONTSQ}$ & $4214$ & $R^2 \bmod q = 2^{64} \bmod q$ \\
 $R^{-1}$ & $50386$ & $R^{-1} \bmod q$ \\
@@ -65,33 +66,34 @@ $f$ & $-29720$ & Inverse NTT scaling constant (in Montgomery form) \\
 
 \subsection{Twiddle Factors}
 
-The forward NTT uses 256 precomputed twiddle factors stored in an array
-\texttt{zetas[256]}.  The $k$-th factor is $\mathsf{MONT} \cdot \zeta_0^{\brev_8(k)}
-\bmod q$ (stored in Montgomery form), for $k = 1, 2, \dots, 256$.  The array
-is indexed starting at $k = 1$ because the $k = 0$ factor (unity) is implicit
-in the loop initialisation.
+The forward NTT uses 256 table slots in the reference array
+\texttt{zetas[256]}.  Slot 0 is a padding value and the forward loop reads
+indices $1,\dots,255$.  For $1 \le k < 256$, the concrete table entry is the
+signed 32-bit representative of
+$\mathsf{MONT} \cdot \zeta_0^{\brev_8(k)} \bmod q$.
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
-\caption{First sixteen twiddle factors \texttt{zetas[1..16]} (in Montgomery form)}
+\caption{First sixteen forward twiddle factors \texttt{zetas[1..16]} (signed Montgomery form)}
 \label{tab:zetas}
 \begin{tabular}{r|rrrrrrrr}
 \toprule
 $k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
 \midrule
-\texttt{zetas}$[k]$ & 14321 & 26798 & 6943 & 15978 & 5568 & 5921 & 16245 & 3978 \\
+\texttt{zetas}$[k]$ & 26964 & -16505 & 22229 & 30746 & 20243 & 19064 & -31218 & 9395 \\
 \midrule
 $k$ & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\
 \midrule
-\texttt{zetas}$[k]$ & 26903 & 7074 & 7428 & 16539 & 5742 & 5953 & 17095 & 4032 \\
+\texttt{zetas}$[k]$ & -30985 & 22859 & -8851 & 32144 & 13744 & 21408 & 17599 & -16039 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The inverse NTT uses a separate array \texttt{zetas\_inv[256]} whose entries
-are the modular inverses of the corresponding forward twiddle factors, again
-stored in Montgomery form.  The final entry \texttt{zetas\_inv[255]} encodes
-the scaling constant $f = n^{-1} \cdot \mathsf{MONT}^2 \bmod q = -29720$.
+The C inverse NTT reads the forward table in reverse order as
+\texttt{-zetas[--k]}.  The \jasmin{} extraction stores the same inverse
+butterfly constants explicitly as \texttt{jzetas\_inv[0..254]} and reserves
+\texttt{jzetas\_inv[255]} for the final scaling constant
+$f = n^{-1} \cdot \mathsf{MONT}^2 \bmod q = -29720$.
 
 \section{Reference C Implementation}
 \label{sec:c_impl}
@@ -136,15 +138,18 @@ The loop nest has three levels:
 Key observations:
 \begin{itemize}
   \item After stage $s$ (with $\ell = 2^{7-s}$), the array is arranged so
-        that coefficient $a[j]$ holds the partial sum over the subset
-        $\{j \bmod 2^\ell, j + 2^\ell, j + 2 \cdot 2^\ell, \dots\}$.
+        that each processed segment represents the checked
+        \ec{partial\_ntt} sum for the current segment length.  The formal
+        invariant is indexed by \((\ell,\mathit{start},\mathit{bsj})\), not
+        by a congruence class modulo \(2^\ell\).
 
   \item The twiddle counter $k$ advances monotonically from 1 to 255,
         consuming all 255 non-trivial twiddle factors.
 
-  \item No modular reduction is applied at the output of butterfly pairs;
-        coefficients grow by at most one bit per stage (from 16-bit inputs
-        to at most 24-bit after 8 stages).
+  \item No modular reduction is applied at the output of butterfly pairs.
+        The checked proof tracks stage-dependent signed bit-width bounds:
+        the forward refinement theorem assumes a 16-bit input bound and
+        proves a 24-bit output bound.
 \end{itemize}
 
 \subsection{Inverse NTT}
@@ -157,14 +162,15 @@ void invntt_tomont(int32_t a[256]) {
   int32_t t, zeta;
   const int32_t f = -29720;   /* mont^2 / 256 mod q */
 
-  k = 255;
+  k = 256;
   for (len = 1; len < 256; len <<= 1) {
-    for (start = 0; start < 256; start += 2 * len) {
-      zeta = zetas_inv[k--];
+    for (start = 0; start < 256; start = j + len) {
+      zeta = -zetas[--k];
       for (j = start; j < start + len; j++) {
         t        = a[j];
         a[j]     = t + a[j + len];
-        a[j+len] = montgomery_reduce((int64_t)zeta * (t - a[j+len]));
+        a[j+len] = t - a[j+len];
+        a[j+len] = montgomery_reduce((int64_t)zeta * a[j+len]);
       }
     }
   }
@@ -174,11 +180,11 @@ void invntt_tomont(int32_t a[256]) {
 \end{lstlisting}
 
 The inverse NTT reverses the butterfly ordering: $\ell$ increases from 1 to
-128, and the twiddle counter $k$ decreases from 255 to 1.  The final loop
-multiplies each coefficient by $f = -29720 \equiv n^{-1} \cdot R^2 \cdot
-(-1) \pmod{q}$, with the Montgomery reduction removing one factor of $R$,
-leaving each coefficient multiplied by $n^{-1} \cdot R \pmod{q}$ (i.e., in
-Montgomery form).
+128, and the C twiddle counter starts at 256 so that the first butterfly
+uses \texttt{-zetas[255]}.  The final loop multiplies each coefficient by
+$f = -29720 \equiv n^{-1} \cdot R^2 \pmod{q}$, with the Montgomery reduction
+removing one factor of $R$ and leaving each coefficient multiplied by
+$n^{-1} \cdot R \pmod{q}$ (i.e., in Montgomery form).
 
 \subsection{Montgomery Reduction}
 
@@ -203,18 +209,21 @@ shift by 32 is an arithmetic right shift on signed integers.
 The file \texttt{test\_haetae\_ntt.c} provides a reference test harness that:
 \begin{enumerate}
   \item Generates random polynomial inputs within the valid range.
-  \item Applies the forward NTT.
-  \item Applies the inverse NTT.
-  \item Verifies that the output matches the input (modulo $q$).
+  \item Compares the C forward NTT with the \jasmin{} forward NTT.
+  \item Compares the C inverse NTT with the \jasmin{} inverse NTT.
+  \item Checks the combined C and \jasmin{} forward--inverse pipelines agree.
 \end{enumerate}
 
-All test cases pass with the reference C code, providing empirical confidence
-in the correctness of the algorithm before formal verification.
+These tests provide empirical C/Jasmin agreement.  The round-trip claim used
+for interpretation is the mathematical abstract inverse identity together
+with the two separate EasyCrypt end-to-end theorems when the inverse theorem's
+input-bound precondition is satisfied; it is not inferred from this test
+harness alone, and it is not packaged as a standalone checked pipeline theorem.
 
 \section{Structural Comparison with MLKEM NTT}
 \label{sec:haetae_vs_mlkem}
 
-\begin{table}[h]
+\begin{table}[htbp]
 \centering
 \caption{Comparison of \haetae{} and MLKEM NTT structures}
 \label{tab:haetae_mlkem}

@@ -3,7 +3,7 @@ Root: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/h
 Proof dir: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security/provable-security/easycrypt
 Manifest: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security/provable-security/proof-files.txt
 Per-file timeout: 900s
-Attempts per file: 4
+Attempts per file: 1
 
 === HAETAE_Security.ec ===
 PASS HAETAE_Security.ec attempt=1

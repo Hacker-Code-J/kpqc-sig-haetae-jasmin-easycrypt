@@ -7,10 +7,12 @@
 
 \section{Overview of \texttt{NTT\_Fq.ec}}
 
-The file \texttt{NTT\_Fq.ec} (989 lines) is the central algorithmic
+The file \texttt{NTT\_Fq.ec} (988 lines) is the central algorithmic
 specification of this dissertation.  It defines \easycrypt{} procedures that
-faithfully model the forward and inverse NTT algorithms, working with abstract
-integer arrays rather than machine words.  The file serves two purposes:
+faithfully model the forward and inverse NTT algorithms over field elements,
+separating the algorithmic butterfly structure from the machine-word
+Montgomery arithmetic proved in the refinement layer.  The file serves two
+purposes:
 \begin{enumerate}
   \item It provides an \emph{algorithmically correct} specification against
         which the \jasmin{} implementation can be formally compared.
@@ -20,20 +22,25 @@ integer arrays rather than machine words.  The file serves two purposes:
 
 \section{Twiddle Factor Table}
 
-The forward NTT uses the constant array \ec{zetas : int Array256.t} defined in
-\texttt{NTT\_Fq.ec}, corresponding exactly to the C array \texttt{zetas[256]}.
-Each entry is $\zeta_0^{\brev_8(k)} \cdot R \bmod q$ for $k = 0, 1, \dots, 255$.
+The forward NTT uses the constant array
+\ec{zetas : coeff Array256.t} defined in \texttt{NTT\_Fq.ec}.  This is the
+abstract field table: \ec{zetas[k]} is the bare field element
+$\zeta_0^{\brev_8(k)}$, not the concrete Montgomery word stored in C/Jasmin.
+The concrete table is related to it by \ec{array256\_mont}.  In particular,
+the abstract entry \ec{zetas[0]} is $1$, while the concrete C/Jasmin slot 0
+is padding and is never read by the forward loop.
 
 \begin{lemma}[Twiddle factor definition]
   For all $k \in [0, 256)$:
   \[
-    \ec{zetas}[k] = (\zeta_0^{\brev_8(k)} \cdot R) \bmod q,
+    \ec{zetas}[k] = \zeta_0^{\brev_8(k)},
   \]
   where $\zeta_0 = 426$ and $R = 2^{32}$.
 \label{lem:zetas_def}
 \end{lemma}
 
-This is proved by unfolding the definition and computing in $\Z_{64513}$.
+The Montgomery-word connection to the implementation table is proved
+separately by the \ec{jzetas\_get} and \ec{jzetas\_get\_cancel} lemmas.
 
 \section{Forward NTT Procedure}
 
@@ -45,29 +52,30 @@ The forward NTT is specified as the \easycrypt{} procedure \ec{NTT.ntt}:
   caption={Forward NTT specification in \texttt{NTT\_Fq.ec}},
   label={lst:ntt_spec}]
 module NTT = {
-  proc ntt(a : int Array256.t) : int Array256.t = {
-    var len, start, j, k : int;
-    var t, zeta           : int;
+  proc ntt(r : coeff Array256.t,
+           zetas : coeff Array256.t) : coeff Array256.t = {
+    var len, start, j, zetasctr;
+    var t, zeta_;
 
-    k <- 1;
+    zetasctr <- 0;
     len <- 128;
-    while (len > 0) {
+    while (1 <= len) {
       start <- 0;
       while (start < 256) {
-        zeta <- zetas.[k];
-        k    <- k + 1;
+        zetasctr <- zetasctr + 1;
+        zeta_ <- zetas.[zetasctr];
         j    <- start;
         while (j < start + len) {
-          t        <- montgomery_reduce (zeta * a.[j + len]);
-          a.[j + len] <- a.[j] - t;
-          a.[j]    <- a.[j] + t;
+          t <- zeta_ * r.[j + len];
+          r.[j + len] <- r.[j] + (-t);
+          r.[j]       <- r.[j] + t;
           j        <- j + 1;
         }
-        start <- start + 2 * len;
+        start <- j + len;
       }
       len <- len %/ 2;
     }
-    return a;
+    return r;
   }
 }.
 \end{lstlisting}
@@ -85,23 +93,27 @@ The three-level nested loop has the following structure:
 
   \item[Inner loop] \texttt{while (j < start + len)}: performs $\ell$
         butterfly operations within each group, all using the same twiddle
-        factor \texttt{zeta = zetas[k]}.
+        factor \texttt{zeta\_ = zetas[zetasctr]}.
 \end{description}
 
-The twiddle counter $k$ advances once per group (per iteration of the middle
-loop), consuming a total of $\sum_{s=0}^{7} 2^s = 255$ twiddle factors.
+The twiddle counter \ec{zetasctr} advances once per group (per iteration of
+the middle loop), consuming a total of $\sum_{s=0}^{7} 2^s = 255$ twiddle
+factors.
 
 \subsection{Loop Invariants}
 
 \begin{definition}[Outer loop invariant $I_{\text{out}}$]
   After completing all stages with $\ell' > \ell$:
   \begin{enumerate}
-    \item $k = 256 / \ell$: the twiddle counter has consumed all factors
-          for completed stages.
+    \item $\mathit{zetasctr} = \ec{fwd\_zbase}(\ell)$, where
+          \ec{fwd\_zbase} maps
+          $128,64,32,\dots,1$ to $0,1,3,\dots,127$.
     \item For all $i \in [0, 256)$, the coefficient $a[i]$ is partially
           transformed: it equals the sum of the appropriate butterfly outputs
           through stage $8 - \log_2(\ell)$.
-    \item For all $i \in [0, 256)$, $|a[i]| < 2^{15 + (8 - \log_2 \ell)}$.
+    \item For all $i \in [0, 256)$, the concrete word at index \(i\)
+          satisfies the stage bit-width \ec{fwd\_stage\_bound} applied to
+          \(\ell\).
   \end{enumerate}
 \label{def:outer_inv}
 \end{definition}
@@ -110,8 +122,10 @@ loop), consuming a total of $\sum_{s=0}^{7} 2^s = 255$ twiddle factors.
   After completing all groups with $\mathit{start}' < \mathit{start}$ in stage $s$:
   \begin{enumerate}
     \item Indices in $[0, \mathit{start})$ have been processed by stage $s$.
-    \item $k = 256/\ell + \mathit{start}/(2\ell)$: twiddle counter
-          accounts for completed groups.
+    \item $\mathit{zetasctr} =
+          \ec{fwd\_zbase}(\ell) + \mathit{start}/(2\ell)$:
+          the twiddle counter accounts for completed groups.  The next
+          concrete read is therefore at index $\mathit{zetasctr}+1$.
     \item Bounds are maintained as in $I_{\text{out}}$.
   \end{enumerate}
 \label{def:mid_inv}
@@ -122,10 +136,13 @@ loop), consuming a total of $\sum_{s=0}^{7} 2^s = 255$ twiddle factors.
   \mathit{start}+2\ell)$:
   \begin{enumerate}
     \item Indices in $[\mathit{start}, j)$ and $[\mathit{start}+\ell, j+\ell)$
-          have been updated by the butterfly with factor $\zeta = \ec{zetas}[k-1]$.
+          have been updated by the butterfly with factor
+          $\zeta = \ec{zetas}[\mathit{zetasctr}]$.
     \item Indices in $[j, \mathit{start}+\ell)$ are unchanged from before
           this stage.
-    \item Bounds: $|a[i]| < 2^{16+s}$ for updated indices.
+    \item Bounds: updated indices use the next stage bit-width, as encoded by
+          \ec{fwd\_inner\_bound}; untouched indices retain the current
+          \ec{fwd\_stage\_bound} for \(\ell\).
   \end{enumerate}
 \label{def:inner_inv}
 \end{definition}
@@ -164,36 +181,36 @@ The inverse NTT is specified as the \easycrypt{} procedure \ec{NTT.invntt}:
 module NTT = {
   (* ... ntt as above ... *)
 
-  proc invntt(a : int Array256.t) : int Array256.t = {
-    var len, start, j, k : int;
-    var t, zeta           : int;
-    var f                 : int;
+  proc invntt(r : coeff Array256.t,
+              zetas_inv : coeff Array256.t) : coeff Array256.t = {
+    var len, start, j, zetasctr;
+    var t, zeta_;
 
-    f <- -29720;  (* Montgomery form of 1/256 *)
-    k <- 255;
+    zetasctr <- 0;
     len <- 1;
     while (len < 256) {
       start <- 0;
       while (start < 256) {
-        zeta <- zetas_inv.[k];
-        k    <- k - 1;
+        zeta_ <- zetas_inv.[zetasctr];
+        zetasctr <- zetasctr + 1;
         j    <- start;
         while (j < start + len) {
-          t           <- a.[j];
-          a.[j]       <- t + a.[j + len];
-          a.[j + len] <- montgomery_reduce (zeta * (t - a.[j + len]));
+          t <- r.[j];
+          r.[j]       <- t + r.[j + len];
+          r.[j + len] <- t + (-r.[j + len]);
+          r.[j + len] <- zeta_ * r.[j + len];
           j           <- j + 1;
         }
-        start <- start + 2 * len;
+        start <- j + len;
       }
       len <- len * 2;
     }
     j <- 0;
     while (j < 256) {
-      a.[j] <- montgomery_reduce (f * a.[j]);
+      r.[j] <- r.[j] * zetas_inv.[255];
       j <- j + 1;
     }
-    return a;
+    return r;
   }
 }.
 \end{lstlisting}
@@ -204,50 +221,51 @@ The inverse NTT differs from the forward NTT in the following ways:
 \begin{enumerate}
   \item The outer loop runs $\ell$ from 1 to 128 (increasing, rather than
         decreasing from 128 to 1).
-  \item The twiddle counter $k$ \emph{decreases} from 255 to 1.
+  \item The abstract inverse table is read at indices $0,\dots,254$ during
+        the butterfly loops.
   \item The butterfly is ``gentle-side-up'': the update to $a[j+\ell]$
-        includes a Montgomery reduction, while the update to $a[j]$ is
-        a plain addition.
+        multiplies the difference by the inverse twiddle, while the update
+        to $a[j]$ is a plain addition.
   \item An extra final loop scales every coefficient by
-        $f = -29720$ via Montgomery reduction.
+        \ec{zetas\_inv[255]}, which is the field element $256^{-1}$ in
+        \texttt{NTT\_Fq.ec}.  The concrete \jasmin{} table stores the
+        corresponding Montgomery word $-29720$.
 \end{enumerate}
 
 \subsection{Final Scaling}
 
 \begin{lemma}[Final scaling correctness]
-  Let $a \in \Z^{256}$ be the array after the main inverse NTT loops,
-  with $|a[i]| < 2^{23}$.  After the final scaling loop:
+  Let $a \in \F_q^{256}$ be the array after the main inverse NTT loops.
+  In the abstract imperative specification, after the final scaling loop:
   \[
-    a'[i] \equiv a[i] \cdot (256)^{-1} \cdot R \pmod{q}
+    a'[i] = a[i] \cdot 256^{-1}.
   \]
-  and $|a'[i]| < q/2$ for all $i$.
 \label{lem:final_scale}
 \end{lemma}
 
 \begin{proof}
-  The constant $f = -29720$ satisfies
-  $f \equiv -\mathsf{MONT}^2 \cdot 256^{-1} \pmod{q}$.
-  Thus:
-  \begin{align*}
-    \op{mont\_reduce}(f \cdot a[i])
-    &\equiv f \cdot a[i] \cdot R^{-1} \pmod{q} \\
-    &\equiv (-R^2 \cdot 256^{-1}) \cdot a[i] \cdot R^{-1} \pmod{q} \\
-    &\equiv -R \cdot 256^{-1} \cdot a[i] \pmod{q}.
-  \end{align*}
-  The negative sign is absorbed by the fact that the inverse NTT formula
-  itself has an implicit sign from the negacyclic structure.  The bound
-  $|a'[i]| < q/2$ follows from \Cref{thm:mont_correct}.
+  The checked lemma \ec{zetas\_inv\_255} establishes
+  \ec{zetas\_inv[255] = scale255}, where
+  \ec{scale255 = inv (incoeff 256)}.  Thus the field-level loop multiplies
+  by $256^{-1}$.  At the concrete \jasmin{} layer, the word
+  \texttt{jzetas\_inv[255]} is $-29720$, and
+  \[
+    -29720 \equiv 256^{-1} R^2 \pmod q.
+  \]
+  One Montgomery multiplication by this word removes one factor of $R$,
+  producing the representation relation
+  \ec{array256\_mont} for the final inverse output.
 \end{proof}
 
-\section{Round-Trip Theorem at the Imperative Level}
+\section{Round-Trip Consequence}
 
-\begin{theorem}[Imperative round-trip]
-  For any input array $a$ with $|a[i]| < 2^{15}$ for all $i$:
+\begin{proposition}[Mathematical round-trip consequence]
+  At the abstract field level, the forward and inverse spectral maps satisfy:
   \[
-    \ec{NTT.invntt}(\ec{NTT.ntt}(a)) \equiv a \pmod{q} \text{ (pointwise)}.
+    \INTT(\NTT(a)) = a.
   \]
 \label{thm:imp_roundtrip}
-\end{theorem}
+\end{proposition}
 
 \begin{proof}[Proof sketch]
   By composition of correctness lemmas:
@@ -255,13 +273,18 @@ The inverse NTT differs from the forward NTT in the following ways:
     \item $\ec{NTT.ntt}(a) = \hat{a}$ where $\hat{a}[i] = \NTT(a)[i]$
           (from the forward NTT correctness, proved in \Cref{ch:algebra}).
     \item $\ec{NTT.invntt}(\hat{a}) = a'$ where
-          $a'[i] = \INTT(\hat{a})[i] \cdot R \bmod q$
-          (from the inverse NTT correctness with the Montgomery factor).
-    \item $\INTT(\NTT(a)) = a$ (abstract round-trip, from \Cref{prop:roundtrip}).
-    \item The Montgomery factor $R$ is absorbed by the representation convention
-          in the inverse NTT output.
+          $a'[i] = \INTT(\hat{a})[i]$
+          (from the inverse NTT correctness).
+    \item $\INTT(\NTT(a)) = a$ by the mathematical orthogonality argument.
+    \item The concrete Jasmin theorem adds the \ec{array256\_mont}
+          representation relation, so the exported inverse output is stored
+          in Montgomery form.
   \end{enumerate}
-  The full proof is completed in \ec{NTTEndToEnd.ec}.
+  The checked EasyCrypt development proves the forward and inverse Hoare
+  statements used in the first two steps.  The final abstract identity above
+  is stated as a mathematical consequence in the dissertation; the checked
+  files do not introduce an additional one-procedure in-place pipeline theorem
+  or a standalone checked round-trip lemma.
 \end{proof}
 
 \section{Twiddle Factor Synchronisation}
@@ -275,7 +298,9 @@ point in the algorithm.  This invariant is captured formally as:
   At any point during the execution of \ec{NTT.ntt}, with current values
   $\ell_{\mathrm{cur}}$ and $\mathit{start}_{\mathrm{cur}}$:
   \[
-    k = \frac{256}{\ell_{\mathrm{cur}}} + \frac{\mathit{start}_{\mathrm{cur}}}{2\ell_{\mathrm{cur}}}.
+    \mathit{zetasctr} =
+      \ec{fwd\_zbase}(\ell_{\mathrm{cur}}) +
+      \frac{\mathit{start}_{\mathrm{cur}}}{2\ell_{\mathrm{cur}}}.
   \]
 \label{lem:twiddle_sync}
 \end{lemma}

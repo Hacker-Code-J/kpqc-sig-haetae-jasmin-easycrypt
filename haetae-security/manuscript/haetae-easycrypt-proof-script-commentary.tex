@@ -1,0 +1,673 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{longtable}
+
+\newcommand{\ecfile}[1]{\texttt{#1}}
+\newcommand{\ecname}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\claimstatus}[1]{\textbf{#1}}
+
+\title{EasyCrypt Proof-Script Commentary for the HAETAE Provable-Security Artifact}
+\author{}
+\date{May 2026}
+
+\begin{document}
+\maketitle
+
+\section{Purpose}
+
+This note records manuscript-ready commentary for the EasyCrypt proof
+scripts in the HAETAE provable-security artifact.  The goal is to state
+precisely what the checked development establishes, what remains
+conditional, and which proof obligations should be targeted next.
+
+\paragraph{Verification command.}
+The checked proof surface is the manifest
+\ecfile{provable-security/proof-files.txt}.  The repository verification
+gate is:
+\begin{quote}
+\ecname{sh provable-security/verify-provable-security.sh}
+\end{quote}
+The gate compiles each listed EasyCrypt file with include paths
+\ecfile{provable-security/easycrypt} and \ecfile{kyber-security}.  In the
+current run, all sixteen manifest files compiled successfully and the
+script ended with \ecname{RESULT: PASS}.
+
+\section{Honest Machine-Checked Claim}
+
+The current EasyCrypt development machine-checks a formal HAETAE model,
+perfect correctness for that model, and a family of conditional EUF-CMA
+reduction theorems in the random-oracle setting.  The strongest checked
+EUF-CMA theorem bounds the adversary success probability by the counted
+HAETAE ROM bound, assuming an explicit exact-hyperball NMA bound and
+abstract MLWE and Module-SIS hardness bounds.  The artifact does not prove
+unconditional cryptographic security, does not discharge the cryptographic
+hardness assumptions, and does not contain a HAETAE SUF-CMA theorem beyond
+the generic SUF-CMA game definition.
+
+\section{Claim Matrix}
+
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.30\linewidth}
+                  >{\raggedright\arraybackslash}p{0.36\linewidth}
+                  >{\raggedright\arraybackslash}p{0.24\linewidth}}
+\toprule
+Claim & EasyCrypt item & Status \\
+\midrule
+\endhead
+HAETAE signing and verification are perfectly correct in the EasyCrypt
+model.
+&
+\ecname{correctness_perfect},
+\ecfile{HAETAE\_Security.ec:40}
+&
+\claimstatus{Machine-checked, model-conditional.}
+\\
+\addlinespace
+The EUF-CMA experiment is defined.
+&
+\ecname{module EUF_CMA},
+\ecfile{Sig\_ROM.ec:94}
+&
+\claimstatus{Game/interface definition only.}
+\\
+\addlinespace
+The SUF-CMA experiment is defined.
+&
+\ecname{module SUF_CMA},
+\ecfile{Sig\_ROM.ec:174}
+&
+\claimstatus{Definition only.}  No HAETAE SUF-CMA theorem was found in the
+checked proof surface.
+\\
+\addlinespace
+The abstract HAETAE EUF-CMA bound follows from a Fiat--Shamir hop, an NMA
+bound, a bimodal-to-MSIS hop, and MLWE/Module-SIS hardness bounds.
+&
+\ecname{euf_cma_security},
+\ecfile{HAETAE\_Security.ec:136}
+&
+\claimstatus{Conditional/abstract reduction.}
+\\
+\addlinespace
+The counted-ROM HAETAE EUF-CMA bound follows from the exact-hyperball NMA
+premise and abstract hardness premises.
+&
+\ecname{euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal},
+\ecfile{HAETAE\_Security.ec:1217}
+&
+\claimstatus{Machine-checked conditional reduction.}
+\\
+\addlinespace
+The budget-explicit path exposes the signing-budget adapters and the
+sampling-loss obligation.
+&
+\ecname{euf_cma_security_from_budgeted_paper_sample_lifting_and_counted_bimodal},
+\ecfile{HAETAE\_Security.ec:1170}
+&
+\claimstatus{Conditional; exposes proof obligations.}
+\\
+\addlinespace
+The bimodal self-target MSIS game can be related to Module-SIS.
+&
+\ecname{bimodal_to_module_sis_reduction_bound},
+\ecfile{HAETAE\_Security.ec:418}
+&
+\claimstatus{Checked wrapper, hardness-conditional.}
+\\
+\bottomrule
+\end{longtable}
+
+\section{Dependency Chain for the Strongest EUF-CMA Theorem}
+
+The strongest theorem in the current checked surface is
+\ecname{euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal}
+in \ecfile{HAETAE\_Security.ec:1217}.  Its conclusion is:
+\begin{quote}
+\ecname{Pr[SIG.EUF_CMA(H, HAETAE, A).main() @ &m : res] <= haetae_euf_counted_rom_bound}.
+\end{quote}
+The theorem depends on the following chain.
+
+\begin{enumerate}[leftmargin=*]
+\item The theorem applies
+\ecname{euf_cma_security_from_ro_exact_hyperball_sampling_hop_and_counted_bimodal}
+(\ecfile{HAETAE\_Security.ec:1036}).
+
+\item The real-signing to RO exact-hyperball hop is supplied by
+\ecname{real_signing_ro_exact_hyperball_hop_checked_from_loss_budget}
+(\ecfile{HAETAE\_Security.ec:1102}).
+
+\item That lemma applies
+\ecname{real_signing_ro_exact_hyperball_hop_from_ro_signing_attempt_hop}
+(\ecfile{HAETAE\_Security.ec:865}) and then calls
+\ecname{rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound}
+(\ecfile{HAETAE\_HopGames.ec:7554}).
+
+\item The current proof of
+\ecname{rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound}
+is a coarse fallback: it uses probability boundedness and
+\ecname{rejection_sampling_loss_term_ge1} rather than an adversary-level
+sampling hybrid.  This makes the statement checked, but not a non-vacuous
+cryptographic sampling-loss proof.
+
+\item The final EUF-CMA theorem also assumes the exact-hyperball NMA
+premise:
+\begin{quote}
+\ecname{Pr[UF_NMA(... ROExactHyperballPaperSimSampler ...)] + rejection_sampling_loss_term <= Pr[MLWE_Game(Bmlwe)] + Pr[BimodalSelfTargetMSIS_Game(Bbimodal)]}.
+\end{quote}
+This premise is not discharged by the theorem itself.
+
+\item The MLWE and Module-SIS terms are abstract hardness premises:
+\ecname{mlwe_hardness_term} and \ecname{module_sis_hardness_term} in
+\ecfile{HAETAE\_Reductions.ec:9--10}.
+\end{enumerate}
+
+\section{Trust Boundaries}
+
+\paragraph{Abstract types and distributions.}
+The model declares \ecname{mlwe_instance} as abstract and introduces
+lossless distributions such as \ecname{dmlwe_real},
+\ecname{dmlwe_random}, \ecname{dmodule_sis_instance}, and
+\ecname{dbimodal_selftarget_msis_instance}
+(\ecfile{HAETAE\_Assumptions.ec:9--19}).  These are part of the formal
+model boundary.
+
+\paragraph{Hardness terms.}
+The quantities \ecname{mlwe_hardness_term} and
+\ecname{module_sis_hardness_term} are abstract real-valued bounds
+(\ecfile{HAETAE\_Reductions.ec:9--10}).  EasyCrypt checks reductions to
+these terms; it does not establish the concrete hardness of MLWE or
+Module-SIS.
+
+\paragraph{Declared modules.}
+The theorem sections declare adversaries and reductions, for example
+\ecname{H}, \ecname{A}, \ecname{Bmlwe}, \ecname{Bbimodal}, and
+\ecname{Bsis} in \ecfile{HAETAE\_Security.ec:129--134}.  The checked
+statements are parametric over these interfaces.
+
+\paragraph{Coarse bounds.}
+Several lemmas use the fact that a probability is at most one together
+with \ecname{rejection_sampling_loss_term_ge1}.  The important remaining
+coarse sites are
+\ecfile{HAETAE\_HopGames.ec:7305},
+\ecfile{HAETAE\_HopGames.ec:7402},
+\ecfile{HAETAE\_HopGames.ec:7554}, and
+\ecfile{HAETAE\_HopGames.ec:9593}.  These are checked EasyCrypt facts,
+but they should be described as fallback or vacuous bounds, not as tight
+cryptographic reductions.
+
+\section{Recent Proof-Script Improvement}
+
+The latest proof improvement extends the bridge chain in
+\ecfile{provable-security/easycrypt/HAETAE\_HopGames.ec}.  The first is
+\ecname{concrete_ro_signing_attempt_to_exact_hyperball_sample_with_seed_clean_state_loss}
+at line 6844.  It lifts the existing clean one-call sampler loss to
+predicates that may mention the final random-oracle global state, provided
+the proof supplies left and right framing inequalities.  The second is
+\ecname{concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface}
+at line 6912, specialized to the budgeted NMA adapter's ROM query logs.
+The latest addition is
+\ecname{concrete_budgeted_o_sign_clean_stateful_loss_from_sample_frames}
+at line 8034.  It composes the state-aware sampler bridge with explicit
+attempt-side and exact-side \ecname{O.sign} frame inequalities, proving that
+one clean active signing call can be lifted with one
+\ecname{rejection_sampling_loss_term} once the continuation has already been
+summarized as predicates over the returned signature, the sampled
+\ecname{paper_sim_signature_sample}, and the final random-oracle state.
+
+These lemmas are non-vacuous because they reuse the checked one-call loss
+instead of relying on \ecname{rejection_sampling_loss_term_ge1}.  They are
+still bridge or surface lemmas: they do not yet replace the adversary-level
+NMA fallback at \ecfile{HAETAE\_HopGames.ec:7554}, and the concrete clean
+NMA lifting at \ecfile{HAETAE\_HopGames.ec:9593} remains coarse.
+
+\paragraph{Current first-active two-call work.}
+The proof script now contains a seed-sensitive suffix attempt for the
+actual first-active two-call \ecname{O.sign} branch.  The new EasyCrypt
+surface introduces \ecname{concrete\_fro\_get\_step}, a pure model of the
+checked lazy random-oracle \ecname{FRO.get} map update, and
+\ecname{concrete\_two\_call\_first\_active\_o\_sign\_suffix\_kernel},
+which records the sampler-expand query, reconstructs the sampler ROM
+entry from the sampled signing coins, runs the message-hash and
+challenge-hash suffix, computes the signature/transcript, and evaluates
+the full-state postcondition.  The seeded bridge
+\ecname{structural\_to\_exact\_hyperball\_seeded\_coin\_sample\_pair\_suffix\_loss\_from\_point\_loss}
+keeps the stronger point-loss premise and does not use the coarse NMA
+target.  Verification is pending in this edit pass; the commentary should
+only be upgraded to a checked claim after \ecname{HAETAE\_HopGames.ec} and
+the full manifest compile successfully.
+
+\section{Publication Wording}
+
+\paragraph{Acceptable wording.}
+We machine-checked in EasyCrypt a HAETAE random-oracle model, a perfect
+correctness theorem, and conditional EUF-CMA reduction chains with explicit
+MLWE and Module-SIS hardness assumptions and stated sampling/ROM trust
+boundaries.
+
+\paragraph{Too-strong wording to avoid.}
+The manuscript should not say that HAETAE is fully machine-checked secure,
+unconditionally secure, SUF-CMA verified, or that every cryptographic
+reduction and sampling hop has been discharged non-vacuously.
+
+\paragraph{Precise statement.}
+The EasyCrypt artifact verifies a conditional EUF-CMA theorem for the
+modeled HAETAE signature scheme: assuming the stated exact-hyperball NMA
+bound and abstract MLWE/Module-SIS hardness bounds, the adversary's
+EUF-CMA success probability is bounded by the counted HAETAE ROM security
+expression.  The proof is machine-checked over the listed EasyCrypt files,
+but the final cryptographic claim remains conditional on the abstract
+hardness assumptions, declared reduction interfaces, and several explicit
+sampling/ROM boundaries, including coarse fallback bounds that should not
+be presented as tight reductions.
+
+\section{Recommended Next Codex Request}
+
+The highest-value next request is to target the smallest adversary-level
+gap that the new bridge lemmas make approachable.  The request should also
+make the manuscript file a live work product: every proof-status change must
+be reflected in this document before the agent stops.
+
+\begin{quote}
+\small
+You are a Codex AI agent in the current HAETAE EasyCrypt project.  Task:
+replace the coarse EasyCrypt proof of the budgeted clean NMA sampling
+lifting with a non-vacuous proof using the checked one-call sampling-loss
+bridges.  Start from
+\ecname{concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting}
+in \ecfile{provable-security/easycrypt/HAETAE\_HopGames.ec}.  Do not make
+broad refactors.  Preserve existing theorem statements unless a minimal
+strengthening is necessary.  Use
+\ecname{concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface}
+and related projection lemmas to prove the clean conditioned NMA bound by
+lifting one \ecname{O.sign} call and accumulating at most
+\ecname{rom_signature_query_budget * rejection_sampling_loss_term}.  Avoid
+using \ecname{rejection_sampling_loss_term_ge1} or probability-boundedness
+as the main proof.
+
+Continuously maintain the manuscript commentary while working.  Update
+\ecfile{manuscript/haetae-easycrypt-proof-script-commentary.tex} whenever a
+proof status changes: before editing, record the target and current trust
+boundary; after each successful proof step, update the relevant claim matrix,
+dependency chain, and recent proof-script improvement text; after any failed
+attempt, record the blocker only if it changes the proof plan or trust
+boundary; after verification, update the commands/results and publication
+wording if the honest claim changed.  Keep the LaTeX concise and
+manuscript-ready, not as a raw work log.
+
+Rerun \ecname{sh provable-security/verify-provable-security.sh} and compile
+the manuscript LaTeX if \ecname{pdflatex} is available.  Report exactly which
+coarse-bound dependency was removed, which premises remain, which manuscript
+sections were updated, and any new proof obligations.
+\end{quote}
+
+\section{Continuous Documentation Protocol}
+
+Proof development and manuscript maintenance should proceed together.  The
+document is not merely an after-the-fact summary: it is the running record of
+the current honest security claim.  A Codex agent working on the proof should
+update the manuscript at four checkpoints:
+
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Before proof edits:} identify the target lemma, the current
+fallback or premise it relies on, and the expected non-vacuous replacement.
+
+\item \textbf{After a checked proof step:} update the claim matrix and
+dependency chain if a lemma changes status from coarse, premise-level, or
+abstract to non-vacuously proved.
+
+\item \textbf{After a failed proof attempt:} update the proof plan only when
+the failure reveals a real missing lemma, interface mismatch, or trust
+boundary.  Do not turn transient tactic failures into manuscript content.
+
+\item \textbf{After verification:} record the exact EasyCrypt verification
+command, the result, the changed theorem status, and any change to acceptable
+publication wording.
+\end{enumerate}
+
+\subsection*{Current Proof-Edit Checkpoint}
+
+The active proof target is
+\ecname{concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting}
+in \ecfile{provable-security/easycrypt/HAETAE\_HopGames.ec}.  Its current
+proof is a coarse fallback: it bounds the clean conditioned NMA event by
+one and then uses
+\ecname{rom_signature_query_budget * rejection_sampling_loss_term >= 1}.
+The intended replacement is a non-vacuous lifting argument that applies the
+checked one-call bridge
+\ecname{concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface}
+inside the budgeted signing oracle and accumulates at most
+\ecname{rom_signature_query_budget * rejection_sampling_loss_term} over the
+checked signing-query budget.
+
+\subsection*{Proof Attempt Status}
+
+A new checked local support lemma,
+\ecname{concrete_budgeted_o_sign_clean_stateful_loss_from_sample_frames},
+now proves the one-call stateful frame step.  Its proof is non-vacuous: it
+uses
+\ecname{concrete_budgeted_o_sign_sample_with_seed_clean_state_loss_surface}
+and does not appeal to \ecname{rejection_sampling_loss_term_ge1} or
+probability boundedness.
+
+The direct replacement of the target NMA lemma is still blocked by an
+adversary-continuation gap rather than by a local sampling lemma.  The new
+stateful frame lemma handles one active \ecname{O.sign} call after the
+pre-call state and post-call continuation have already been summarized by
+explicit frame inequalities.  The target NMA lemma needs a stronger rule:
+after an active signing call, the postcondition is the rest of the adaptive
+adversary execution plus the final UF-NMA verifier.  That continuation
+depends on \ecname{glob A}, \ecname{glob HAETAE_RO.FRO}, the
+transcript/signing logs, the query counters, and the clean flag, not only on
+the returned signature.
+
+Consequently, replacing the target proof non-vacuously requires one of the
+following checked ingredients before the target lemma can be closed:
+\begin{enumerate}[leftmargin=*]
+\item a stateful approximate call rule for
+\ecname{ROMInternalTranscriptBudgetedPaperSimAsNMA(...).O.sign} that accepts
+continuation predicates over the full post-call state and adds one
+\ecname{rejection_sampling_loss_term}; or
+\item a concrete hybrid wrapper, analogous to EasyCrypt's hybrid theorem,
+that packages adversary hash queries as leaks, packages signing as the
+hybridized oracle, proves the one-switch stateful signing lemma, and sums
+the loss over \ecname{signature_query_budget_count} active signing calls.
+\end{enumerate}
+
+The current target lemma therefore remains in the trust boundary until that
+adversary-level stateful lifting principle is proved.  Replacing its body
+with a proof that merely routes through another coarse lemma, or again uses
+\ecname{rejection_sampling_loss_term_ge1}, would not change the honest
+security claim.
+
+The current follow-up isolates and checks the saturated half of that missing
+interface.  The proof script now contains
+\ecname{concrete_budgeted_o_sign_saturated_fallback_equiv}
+(\ecfile{HAETAE\_HopGames.ec:8672}),
+\ecname{concrete_budgeted_o_sign_saturated_fallback_full_state_equiv}
+(\ecfile{HAETAE\_HopGames.ec:8701}),
+\ecname{concrete_budgeted_ah_get_full_state_equiv}
+(\ecfile{HAETAE\_HopGames.ec:8758}),
+\ecname{concrete_budgeted_adversary_forge_saturated_fallback_equiv}
+(\ecfile{HAETAE\_HopGames.ec:8832}), and
+\ecname{concrete_budgeted_adversary_forge_saturated_clean_fallback_lifts}
+(\ecfile{HAETAE\_HopGames.ec:8920}).  Together these lemmas show that,
+once \ecname{signature_query_budget_count <= signing_count}, the adaptive
+\ecname{A.forge} continuation can keep making hash and signing calls without
+incurring additional sampler loss: hash calls are simulated identically, and
+post-budget signing calls take the same fallback branch in the signing-attempt
+and exact-hyperball worlds while preserving the ROM, transcript, query-log,
+and clean-flag state.  The new probability-lifting wrapper converts the
+saturated equivalence into the exact inequality needed for predicates of the
+form \ecname{R res (glob HAETAE_RO.FRO)} under the clean event.
+
+This is a checked adversary-level saturated-continuation fact, but it is not
+yet the active-call accumulation theorem.  The remaining interface is the
+one-switch active-call hybrid: before saturation, choose one active call
+satisfying \ecname{signing_count < signature_query_budget_count}, apply
+\ecname{concrete_budgeted_o_sign_clean_stateful_loss_from_sample_frames}
+(\ecfile{HAETAE\_HopGames.ec:8034}) to that call, carry the full ROM and
+transcript state through the remaining \ecname{A.forge} continuation, then sum
+exactly one \ecname{rejection_sampling_loss_term} for each active call.  No
+unchecked one-switch lemma was kept in the source.
+
+The current active-call follow-up adds an explicit checked two-call hybrid
+wrapper for the concrete route:
+\ecname{ROMInternalTranscriptBudgetedTwoCallHybridAsNMA}
+(\ecfile{HAETAE\_HopGames.ec:1766}), plus the three intended instances
+\ecname{ROMInternalTranscriptBudgetedTwoCallG0AsNMA}
+(\ecfile{HAETAE\_HopGames.ec:1879}),
+\ecname{ROMInternalTranscriptBudgetedTwoCallG1AsNMA}
+(\ecfile{HAETAE\_HopGames.ec:1885}), and
+\ecname{ROMInternalTranscriptBudgetedTwoCallG2AsNMA}
+(\ecfile{HAETAE\_HopGames.ec:1891}).  The wrapper keeps the same ROM,
+transcript, query-log, and clean-flag state as the budgeted game, but selects
+\ecname{First.sample_with_seed} on the first active call and
+\ecname{Second.sample_with_seed} on the second active call.  Thus
+\ecname{G0} uses signing-attempt sampling twice, \ecname{G1} switches the
+first active call to exact-hyperball sampling, and \ecname{G2} uses
+exact-hyperball sampling twice.  These are now real EasyCrypt games, not just
+comments or planned notation.
+
+The same follow-up retains two checked counter facts for the concrete
+two-call route:
+\ecname{budgeted_paper_sim_sign_oracle_first_active_sets_one}
+(\ecfile{HAETAE\_HopGames.ec:1926}) and
+\ecname{budgeted_paper_sim_sign_oracle_second_active_saturates}
+(\ecfile{HAETAE\_HopGames.ec:1943}).  These lemmas use
+\ecname{signature_query_budget_count = 2} to show that the first active
+\ecname{O.sign} call moves \ecname{signing_count} from \ecname{0} to
+\ecname{1}, and the second active call moves it from \ecname{1} to the
+saturated budget value.  They justify reducing the intended hybrid proof to
+two active switches followed by the already checked saturated continuation,
+but they do not by themselves compose the sampling loss through the adaptive
+continuation.
+
+The current first-switch follow-up proves the exact continuation needed after
+the first active signing call, but does not yet prove the approximate
+\ecname{G0 -> G1} bound itself.  Once the shared two-call state satisfies
+\ecname{1 <= signing_count}, \ecname{G0} and \ecname{G1} no longer use the
+different first-call sampler: the next active call uses the signing-attempt
+\ecname{Second} sampler on both sides, and post-budget calls use the same
+fallback branch.  This is checked at the hash-oracle level by
+\ecname{concrete_two_call_g0_g1_post_first_ah_get_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9002}), at the signing-oracle level by
+\ecname{concrete_two_call_g0_g1_post_first_o_sign_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9080}), and through the adaptive adversary
+continuation by
+\ecname{concrete_two_call_g0_g1_post_first_adversary_forge_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9171}).  The probability wrapper
+\ecname{concrete_two_call_g0_g1_post_first_clean_adversary_lifts}
+(\ecfile{HAETAE\_HopGames.ec:9264}) packages this as a clean-event
+continuation fact with zero additional sampler loss.  The remaining missing
+principle was the approximate split at the first active \ecname{O.sign} call:
+apply the one-call rejection-sampling loss to that call and then resume with
+the checked post-first continuation.
+
+The latest first-active-call follow-up adds the checked frame-composition
+lemma
+\ecname{concrete_two_call_g0_g1_first_active_o_sign_clean_stateful_loss_from_sample_frames}
+(\ecfile{HAETAE\_HopGames.ec:8509}).  This is the two-call-wrapper analogue
+of the one-call stateful bridge: under clean ROM coverage, equal sampler
+secret-key state, and \ecname{signing_count = 0}, it turns explicit
+attempt-side and exact-side sample-frame premises into a one
+\ecname{rejection_sampling_loss_term} bound from
+\ecname{ROMInternalTranscriptBudgetedTwoCallG0AsNMA.O.sign} to
+\ecname{ROMInternalTranscriptBudgetedTwoCallG1AsNMA.O.sign}.  Its predicate
+surface includes the returned signature, the final ROM global, and the full
+two-call adapter state
+(\ecname{pk_current}, \ecname{queries}, \ecname{transcripts},
+\ecname{records}, \ecname{adversary_hash_count}, \ecname{signing_count},
+\ecname{adversary_hash_queries}, \ecname{sampler_expand_queries}, and
+\ecname{sampler_bad_prequery}), and the event records
+\ecname{1 <= signing_count}.  This makes the lemma continuation-ready, but
+the general full-state sample-frame inequalities remain premises of this
+generic lemma.
+
+The newest concrete frame step discharges the signature-level first-active
+\ecname{O.sign} switch without using \ecname{mu_bounded},
+\ecname{rejection_sampling_loss_term_ge1}, or the coarse target lemma.  The
+attempt side is checked by
+\ecname{concrete_two_call_g0_first_active_o_sign_active_clean_signature_structural_le}
+(\ecfile{HAETAE\_HopGames.ec:8236}) and
+\ecname{concrete_two_call_g0_first_active_o_sign_to_self_logged_sample_active_projection}
+(\ecfile{HAETAE\_HopGames.ec:8386}).  The exact side is checked by
+\ecname{concrete_two_call_g1_first_active_o_sign_active_signature_exact}
+(\ecfile{HAETAE\_HopGames.ec:8319}) and
+\ecname{concrete_two_call_g1_exact_sample_with_seed_to_first_active_o_sign_projection}
+(\ecfile{HAETAE\_HopGames.ec:8466}).  These projections are then packaged in
+\ecname{concrete_two_call_g0_g1_first_active_o_sign_clean_signature_loss}
+(\ecfile{HAETAE\_HopGames.ec:8614}), which gives a concrete
+\ecname{G0.O.sign <= G1.O.sign + rejection_sampling_loss_term} bound for
+signature predicates under \ecname{signing_count = 0}, clean ROM coverage,
+and equal sampler secret-key state.  The remaining adversary-level gap is to
+lift that first-call switch to predicates over the full post-call
+ROM/transcript/two-call adapter state and then apply
+\ecname{concrete_two_call_g0_g1_post_first_clean_adversary_lifts} as the
+adaptive continuation.
+
+The latest full-state-lift pass checked the seed-sensitive bridge that was
+missing from the signature-only switch.  The helper
+\ecname{concrete_mu_dlet_ge_point} (\ecfile{HAETAE\_HopGames.ec:8672}) proves
+that one point contribution is bounded by the probability of the whole
+continuation bind.  Using that helper,
+\ecname{structural_to_exact_hyperball_coin_sample_pair_suffix_loss_from_point_loss}
+(\ecfile{HAETAE\_HopGames.ec:8683}) lifts the rejection-sampling point-loss
+obligation through an arbitrary common randomized suffix over
+\ecname{signing_attempt_coin_sample_pair}.  This bridge is seed-sensitive:
+the suffix may observe the sampled signing seed as well as the sampled paper
+simulation value.
+
+The checked wrapper
+\ecname{concrete_two_call_g0_g1_first_active_o_sign_clean_full_state_loss_from_coin_sample_suffix_frames}
+(\ecfile{HAETAE\_HopGames.ec:8743}) packages that bridge for the desired
+full-state \ecname{G0.O.sign <= G1.O.sign + rejection_sampling_loss_term}
+surface.  Its final predicate ranges over the returned signature,
+\ecname{glob HAETAE\_RO.FRO}, \ecname{pk_current}, query/transcript/record
+logs, counters, adversary and sampler query logs, and
+\ecname{sampler_bad_prequery}.  The lemma is still a frame-composition result:
+it requires concrete left and right frame inequalities connecting the actual
+two-call \ecname{O.sign} code to a common suffix kernel \ecname{K}.  Those
+frame inequalities are now the exact remaining obligation for the full-state
+first-call switch.
+
+This new bridge deliberately uses the stronger
+\ecname{structural_to_exact_hyperball_sample_pair_point_loss_obligation},
+not only the paper-sample predicate obligation.  The stronger premise is
+needed because the full post-call state can depend on the seed recorded in
+\ecname{sampler_expand_queries}, and because the two post-sampler
+\ecname{FRO.get} calls make the final ROM global a randomized continuation of
+the coin/sample pair rather than a boolean predicate on
+\ecname{paper_sim_signature_sample}.  No new unchecked EasyCrypt assumption
+was added.  The concrete full-state \ecname{O.sign} switch, the adversary-level
+\ecname{G0 -> G1} lift, and the coarse NMA target lemma remain unchanged.
+
+The exact endpoint of the two-call hybrid is now connected to the existing
+exact-hyperball budgeted game by checked equivalences.  The proof script first
+aligns the hash oracle in
+\ecname{concrete_two_call_g2_exact_budgeted_ah_get_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9312}), then aligns the signing oracle in
+\ecname{concrete_two_call_g2_exact_budgeted_o_sign_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9389}).  The signing-oracle proof explicitly
+case-splits on the active/saturated branch and on whether the active call is
+the first or second one, forcing the wrapper's
+\ecname{First}/\ecname{Second} dispatch before simulation.  These two oracle
+equivalences are lifted through \ecname{A.forge} by
+\ecname{concrete_two_call_g2_exact_budgeted_adversary_forge_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9462}), through the wrapper's public
+\ecname{forge} procedure by
+\ecname{concrete_two_call_g2_exact_budgeted_forge_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9554}), and finally through the NMA game by
+\ecname{concrete_two_call_g2_exact_budgeted_nma_equiv}
+(\ecfile{HAETAE\_HopGames.ec:9569}).  This closes the exact \ecname{G2}
+endpoint; the remaining work is the adversary-level \ecname{G0 -> G1}
+lift, now starting from a checked signature-level first-call switch, and the
+second active-call switch \ecname{G1 -> G2}.
+
+\subsection*{Verification Checkpoint}
+
+After the current follow-up, the EasyCrypt source retains the checked
+stateful one-call frame lemma, the checked first-active two-call
+sample-frame composition lemma, the checked concrete first-active
+signature-level \ecname{G0}/\ecname{G1} \ecname{O.sign} loss lemma, the
+checked explicit two-call hybrid games, the checked post-first
+\ecname{G0}/\ecname{G1} continuation, the checked exact
+\ecname{G2} endpoint equivalence, the
+checked active counter lemmas, the checked saturated adversary-continuation
+equivalence, and the checked saturated clean probability-lifting wrapper.  The
+edited EasyCrypt file was locally checked
+with:
+\begin{quote}
+\ecname{easycrypt compile provable-security/easycrypt/HAETAE_HopGames.ec -max-provers 1 -I provable-security/easycrypt -I kyber-security}
+\end{quote}
+The file compiled successfully.  The full proof gate was rerun with:
+\begin{quote}
+\ecname{sh provable-security/verify-provable-security.sh}
+\end{quote}
+The command compiled all sixteen manifest files successfully and ended with
+\ecname{RESULT: PASS}.  The target clean NMA lifting theorem
+\ecname{concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting}
+(\ecfile{HAETAE\_HopGames.ec:9593}) remains machine-checked only as a coarse
+fallback; the checked one-call stateful frame lemma, explicit two-call hybrid
+games, first-active two-call sample-frame composition lemma, concrete
+first-active signature-level \ecname{O.sign} switch, post-first
+\ecname{G0}/\ecname{G1} continuation, exact \ecname{G2} endpoint
+equivalence, active counter lemmas, and saturated adversary-continuation
+lemmas are non-vacuous pieces, but they have not yet removed that fallback.
+This manuscript file was also recompiled with
+\ecname{pdflatex -interaction=nonstopmode -halt-on-error}; compilation
+succeeded, with only overfull-box warnings from long EasyCrypt identifiers.
+
+\subsection*{Seed-Sensitive Suffix-Frame Follow-Up}
+
+The current seed-sensitive suffix-frame follow-up has not yet produced a
+checked full-state first-active \ecname{O.sign} switch.  The active proof
+attempt instantiates the seeded suffix-kernel bridge shape for the actual
+two-call first-active branch.  The \ecname{G0} frame
+\ecname{concrete\_two\_call\_g0\_first\_active\_o\_sign\_clean\_full\_state\_frame\_to\_seeded\_coin\_sample\_suffix}
+now compiles past its previous rejected post-sampler pointwise
+\ecname{mu\_eq} blocker.  The local repair adds a checked pointwise
+post-sampler two-\ecname{FRO.get} helper,
+\ecname{rejected\_clean\_signature\_event\_two\_fro\_get\_drop\_count\_suffix\_false},
+which matches the generated count-dropped clean rejection predicate without
+using coarse \ecname{mu\_bounded} or
+\ecname{rejection\_sampling\_loss\_term\_ge1} reasoning.
+
+The most recent full compile command was:
+\begin{quote}
+\ecname{easycrypt compile provable-security/easycrypt/HAETAE\_HopGames.ec -max-provers 1 -I provable-security/easycrypt -I kyber-security}
+\end{quote}
+This run passed the \ecname{G0} frame and then failed with
+\ecname{cannot prove goal (strict)} in the next downstream
+\ecname{G1} frame lemma,
+\ecname{concrete\_two\_call\_g1\_first\_active\_o\_sign\_clean\_full\_state\_frame\_from\_seeded\_coin\_sample\_suffix}.
+Therefore the full-state first-active \ecname{G0 -> G1}
+\ecname{O.sign} switch and the adversary-level lift through
+\ecname{concrete\_two\_call\_g0\_g1\_post\_first\_clean\_adversary\_lifts}
+remain unchecked.  The stronger
+\ecname{structural\_to\_exact\_hyperball\_sample\_pair\_point\_loss\_obligation}
+premise is still present, and the coarse NMA target lemma has not been
+changed.
+
+\section{Prioritized Proof Plan}
+
+\begin{enumerate}[leftmargin=*]
+\item Replace
+\ecname{concrete_rom_internal_budgeted_nma_ro_signing_attempt_ro_exact_hyperball_clean_conditioned_lifting}
+(\ecfile{HAETAE\_HopGames.ec:9593}).  Expected edits:
+\ecfile{provable-security/easycrypt/HAETAE\_HopGames.ec}.  Difficulty:
+high.  Strategy: prove an adversary-call hybrid over the budgeted
+\ecname{O.sign} oracle, apply
+\ecname{concrete_budgeted_o_sign_clean_stateful_loss_from_sample_frames} at
+the selected clean active signing call, use
+\ecname{budgeted_paper_sim_sign_oracle_first_active_sets_one} and
+\ecname{budgeted_paper_sim_sign_oracle_second_active_saturates} to split the
+two active switches, use
+\ecname{concrete_budgeted_adversary_forge_saturated_clean_fallback_lifts} for
+the post-budget continuation, and accumulate the loss by the checked
+signing-count budget.
+
+\item Replace
+\ecname{rom_internal_nma_ro_signing_attempt_ro_exact_hyperball_loss_bound}
+(\ecfile{HAETAE\_HopGames.ec:7554}).  Expected edits:
+\ecfile{provable-security/easycrypt/HAETAE\_HopGames.ec} and possibly
+\ecfile{HAETAE\_Security.ec} if the final theorem should use the
+budget-explicit path.  Difficulty: medium-high.  Strategy: route through
+budgeted clean lifting and the bad-prequery finite-event-loss bound rather
+than through \ecname{rejection_sampling_loss_term_ge1}.
+
+\item Discharge the exact-hyperball NMA-to-hardness premise in
+\ecname{euf_cma_security_from_checked_ro_sampling_hop_and_counted_bimodal}
+(\ecfile{HAETAE\_Security.ec:1217}).  Expected edits:
+\ecfile{HAETAE\_HopGames.ec}, \ecfile{HAETAE\_Transcript.ec},
+\ecfile{HAETAE\_Assumptions.ec}, and \ecfile{HAETAE\_Security.ec}.
+Difficulty: high.  Strategy: connect the exact-hyperball NMA game to the
+MLWE and bimodal self-target MSIS games via the existing transcript,
+special-soundness, and bimodal-to-Module-SIS machinery.
+\end{enumerate}
+
+\end{document}
