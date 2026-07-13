@@ -17,6 +17,25 @@ inline fn _api_copy_raw_to_32(reg mut ptr u8[32] dstp,
   return dstp;
 }
 
+inline fn _api_copy_addr_to_32(reg mut ptr u8[32] dstp,
+                               reg u64 srcp) -> reg ptr u8[32]
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < 32)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 addr];
+    dstp[i] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
 inline fn _api_copy_raw_to_2752_prefix(reg mut ptr u8[2752] dstp,
                                 reg ui64 srcp,
                                 reg ui64 len) -> reg ptr u8[2752]
@@ -42,6 +61,31 @@ inline fn _api_copy_raw_to_2752_prefix(reg mut ptr u8[2752] dstp,
   return dstp;
 }
 
+inline fn _api_copy_addr_to_2752_prefix(reg mut ptr u8[2752] dstp,
+                                        reg u64 srcp,
+                                        reg u64 len) -> reg ptr u8[2752]
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 addr];
+    dstp[i] = b;
+    i += 1;
+  }
+  while (i < 2752)
+  {
+    dstp[i] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
 inline fn _api_copy_raw_to_2948_prefix(reg mut ptr u8[2948] dstp,
                                 reg ui64 srcp,
                                 reg ui64 len) -> reg ptr u8[2948]
@@ -61,6 +105,31 @@ inline fn _api_copy_raw_to_2948_prefix(reg mut ptr u8[2948] dstp,
   while (i < 2948)
   {
     dstp[(64u)i] = 0;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_addr_to_2948_prefix(reg mut ptr u8[2948] dstp,
+                                        reg u64 srcp,
+                                        reg u64 len) -> reg ptr u8[2948]
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 addr];
+    dstp[i] = b;
+    i += 1;
+  }
+  while (i < 2948)
+  {
+    dstp[i] = 0;
     i += 1;
   }
 
@@ -121,6 +190,26 @@ inline fn _api_copy_2948_to_raw(reg ui64 dstp,
     addr = dstp;
     addr += i;
     [:u8 (64u)addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn _api_copy_2948_to_addr(reg u64 dstp,
+                                 reg const ptr u8[2948] srcp,
+                                 reg u64 len) -> reg u64
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[i];
+    addr = dstp;
+    addr += i;
+    [:u8 addr] = b;
     i += 1;
   }
 

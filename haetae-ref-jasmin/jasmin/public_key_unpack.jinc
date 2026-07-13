@@ -145,6 +145,7 @@ fn __polymatkl_expand_matA_with_vecA(reg mut ptr u32[8192] matp,
                                      reg u64 m) -> reg ptr u32[8192]
 {
   reg u64 i j base nonce;
+  #[msf] reg u64 ms;
 
   i = 0;
   base = 0;
@@ -158,6 +159,18 @@ fn __polymatkl_expand_matA_with_vecA(reg mut ptr u32[8192] matp,
     () = #spill(seedp, rows, cols, m, i, base);
     matp = _poly_uniform_at(matp, base, seedp, nonce);
     () = #unspill(seedp, rows, cols, m, i, base);
+    () = #declassify(rows);
+    () = #declassify(cols);
+    () = #declassify(m);
+    () = #declassify(i);
+    () = #declassify(base);
+    ms = #init_msf();
+    matp = #protect_ptr(matp, ms);
+    rows = #protect(rows, ms);
+    cols = #protect(cols, ms);
+    m = #protect(m, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
     base += HAETAE_N;
 
     j = 0;
@@ -170,6 +183,20 @@ fn __polymatkl_expand_matA_with_vecA(reg mut ptr u32[8192] matp,
       () = #spill(seedp, rows, cols, m, i, j, base);
       matp = _poly_uniform_at(matp, base, seedp, nonce);
       () = #unspill(seedp, rows, cols, m, i, j, base);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(m);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(base);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      m = #protect(m, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      base = #protect(base, ms);
       j += 1;
       base += HAETAE_N;
     }
@@ -190,6 +217,7 @@ fn _unpack_vk_m23_full(reg mut ptr u32[8192] matp,
   stack u32[2048] b;
   reg ptr u32[2048] bp;
   reg u64 count;
+  #[msf] reg u64 ms;
 
   bp = b;
 
@@ -198,16 +226,46 @@ fn _unpack_vk_m23_full(reg mut ptr u32[8192] matp,
   () = #spill(bp, k, l, m);
   matp = __polymatkl_expand_matA_with_vecA(matp, seedu, k, l, m);
   () = #unspill(bp, k, l, m);
+  () = #declassify(k);
+  () = #declassify(l);
+  () = #declassify(m);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
+  m = #protect(m, ms);
   matp = _polymatkl_double(matp, k, l);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
 
   count = k;
   count *= HAETAE_N;
+  count = #protect(count, ms);
   bp = _polyvec_double(bp, count);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  matp = #protect_ptr(matp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
   bp = __polyvec_sub_left_inplace(bp, matp, l, k);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  count = #protect(count, ms);
   bp = _polyvec_double(bp, count);
   () = #spill(matp, k, l);
   bp = _polyvec_ntt(bp, k);
   () = #unspill(matp, k, l);
+  () = #declassify(k);
+  () = #declassify(l);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
   matp = _polymat_set_first_column(matp, bp, k, l);
 
   return matp;
@@ -221,6 +279,7 @@ fn _unpack_vk_m5_full(reg mut ptr u32[8192] matp,
 {
   stack u32[2048] b;
   reg ptr u32[2048] bp;
+  #[msf] reg u64 ms;
 
   bp = b;
 
@@ -229,7 +288,19 @@ fn _unpack_vk_m5_full(reg mut ptr u32[8192] matp,
   () = #spill(bp, k, l);
   matp = _polymatkl_expand_matA(matp, seedu, k, l);
   () = #unspill(bp, k, l);
+  () = #declassify(k);
+  () = #declassify(l);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
   matp = _polymatkl_double(matp, k, l);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
   matp = _polymat_set_first_column(matp, bp, k, l);
 
   return matp;

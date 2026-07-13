@@ -100,6 +100,7 @@ inline fn _singular_full(reg const ptr u32[2048] s1p,
   reg ptr u16[HAETAE_N] brvp;
   reg const ptr u32[HAETAE_N] xp;
   reg u64 i base r;
+  #[msf] reg u64 ms;
 
   inputp = input;
   sump = sum;
@@ -117,6 +118,17 @@ inline fn _singular_full(reg const ptr u32[2048] s1p,
     inputp = _fft_full(inputp, rootsp);
     sump = _sk_singular_value_accumulate_fft_sqabs(sump, inputp);
     () = #unspill(s1p, s2p, i, base);
+    () = #declassify(i);
+    () = #declassify(base);
+    ms = #init_msf();
+    s1p = #protect_ptr(s1p, ms);
+    s2p = #protect_ptr(s2p, ms);
+    inputp = #protect_ptr(inputp, ms);
+    sump = #protect_ptr(sump, ms);
+    rootsp = #protect_ptr(rootsp, ms);
+    brvp = #protect_ptr(brvp, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
     base += HAETAE_N;
     i += 1;
   }
@@ -131,6 +143,17 @@ inline fn _singular_full(reg const ptr u32[2048] s1p,
     inputp = _fft_full(inputp, rootsp);
     sump = _sk_singular_value_accumulate_fft_sqabs(sump, inputp);
     () = #unspill(s1p, s2p, i, base);
+    () = #declassify(i);
+    () = #declassify(base);
+    ms = #init_msf();
+    s1p = #protect_ptr(s1p, ms);
+    s2p = #protect_ptr(s2p, ms);
+    inputp = #protect_ptr(inputp, ms);
+    sump = #protect_ptr(sump, ms);
+    rootsp = #protect_ptr(rootsp, ms);
+    brvp = #protect_ptr(brvp, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
     base += HAETAE_N;
     i += 1;
   }

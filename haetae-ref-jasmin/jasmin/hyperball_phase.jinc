@@ -11,6 +11,7 @@ fn _polyfixveclk_scale_and_check(reg mut ptr u32[2048] y1p,
   stack ptr u32[2048] sy1p sy2p;
   stack ptr u64[4] sstatep;
   reg u64 lcount total kcount counts bound norm accepted;
+  #[msf] reg u64 ms;
 
   sy1p = y1p;
   sy2p = y2p;
@@ -33,6 +34,11 @@ fn _polyfixveclk_scale_and_check(reg mut ptr u32[2048] y1p,
   kcount = total;
   kcount -= lcount;
   norm = _polyfixveclk_sqnorm2_2048(y1p, lcount, y2p, kcount);
+  () = #declassify(norm);
+  () = #declassify(bound);
+  ms = #init_msf();
+  norm = #protect(norm, ms);
+  bound = #protect(bound, ms);
   accepted = 0;
   if (norm <= bound)
   {
@@ -44,4 +50,57 @@ fn _polyfixveclk_scale_and_check(reg mut ptr u32[2048] y1p,
   y1p = sy1p;
   y2p = sy2p;
   return y1p, y2p, statep;
+}
+
+fn _polyfixveclk_scale_and_check_values(reg mut ptr u32[2048] y1p,
+                                        reg mut ptr u32[2048] y2p,
+                                        reg const ptr u64[4096] samplesp,
+                                        reg const ptr u8[512] signsp,
+                                        reg const ptr u64[2] scalep,
+                                        reg u64 lcount,
+                                        reg u64 total,
+                                        reg u64 bound)
+                                        -> reg ptr u32[2048],
+                                           reg ptr u32[2048],
+                                           reg u64
+{
+  stack ptr u32[2048] sy1p sy2p;
+  reg u64 kcount counts norm accepted;
+  #[msf] reg u64 ms;
+
+  () = #declassify(lcount);
+  () = #declassify(total);
+  () = #declassify(bound);
+  ms = #init_msf();
+  lcount = #protect(lcount, ms);
+  total = #protect(total, ms);
+  bound = #protect(bound, ms);
+
+  sy1p = y1p;
+  sy2p = y2p;
+
+  counts = total;
+  counts <<= 32;
+  counts |= lcount;
+  y1p, y2p = _polyfixveclk_scale_samples(y1p, y2p, samplesp, signsp, scalep,
+                                         counts);
+  sy1p = y1p;
+  sy2p = y2p;
+
+  kcount = total;
+  kcount -= lcount;
+  norm = _polyfixveclk_sqnorm2_2048(y1p, lcount, y2p, kcount);
+  () = #declassify(norm);
+  ms = #init_msf();
+  norm = #protect(norm, ms);
+  bound = #protect(bound, ms);
+  accepted = 0;
+  if (norm <= bound)
+  {
+    accepted = 1;
+  }
+
+  y1p = sy1p;
+  y2p = sy2p;
+  return y1p, y2p, accepted;
 }

@@ -5,6 +5,7 @@ require "sign.jinc"
 require "fft_tables.jinc"
 require "singular_values.jinc"
 
+#[ct = "s1p * s2p -> {s1p, s2p}"]
 export
 fn sk_singular_value_full_m2_jazz(reg const ptr u32[2048] s1p,
                                   reg const ptr u32[2048] s2p) -> reg u64
@@ -14,6 +15,7 @@ fn sk_singular_value_full_m2_jazz(reg const ptr u32[2048] s1p,
   return r;
 }
 
+#[ct = "s1p * s2p -> {s1p, s2p}"]
 export
 fn sk_singular_value_full_m3_jazz(reg const ptr u32[2048] s1p,
                                   reg const ptr u32[2048] s2p) -> reg u64
@@ -23,6 +25,7 @@ fn sk_singular_value_full_m3_jazz(reg const ptr u32[2048] s1p,
   return r;
 }
 
+#[ct = "s1p * s2p -> {s1p, s2p}"]
 export
 fn sk_singular_value_full_m5_jazz(reg const ptr u32[2048] s1p,
                                   reg const ptr u32[2048] s2p) -> reg u64

@@ -84,11 +84,9 @@ fn _hyperball_full(reg mut ptr u32[2048] y1p,
   stack u64[2] invsqrt;
   stack u64[2] start_cube;
   stack u64[2] start_three;
-  stack u64[4] state;
   reg ptr u64[4096] samplesp;
   reg ptr u8[512] signsp;
   reg ptr u64[2] sqsump invsqrtp cubep threep;
-  reg ptr u64[4] statep;
   reg u64 ni accepted idx total len sampleoff signoff scale lcoeffs tcoeffs;
 
   samplesp = samples;
@@ -97,7 +95,6 @@ fn _hyperball_full(reg mut ptr u32[2048] y1p,
   invsqrtp = invsqrt;
   cubep = start_cube;
   threep = start_three;
-  statep = state;
 
   cubep[0] = cube0;
   cubep[1] = cube1;
@@ -154,14 +151,10 @@ fn _hyperball_full(reg mut ptr u32[2048] y1p,
     lcoeffs <<= 8;
     tcoeffs = total;
     tcoeffs <<= 8;
-    statep[0] = lcoeffs;
-    statep[1] = tcoeffs;
-    statep[2] = bound_const;
-    statep[3] = 0;
-    y1p, y2p, statep = _polyfixveclk_scale_and_check(y1p, y2p, statep,
-                                                     samplesp, signsp,
-                                                     sqsump);
-    accepted = statep[3];
+    y1p, y2p, accepted =
+        _polyfixveclk_scale_and_check_values(y1p, y2p, samplesp, signsp,
+                                             sqsump, lcoeffs, tcoeffs,
+                                             bound_const);
   }
 
   bp = _hyperball_b_raw(bp, seedu, ni);
@@ -170,6 +163,7 @@ fn _hyperball_full(reg mut ptr u32[2048] y1p,
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * public -> public * public * secret * counterp"]
 export
 fn polyfixveclk_sample_hyperball_mode2_jazz(reg mut ptr u32[2048] y1p,
                                             reg mut ptr u32[2048] y2p,
@@ -182,6 +176,7 @@ fn polyfixveclk_sample_hyperball_mode2_jazz(reg mut ptr u32[2048] y1p,
                                                reg ptr u64[1]
 {
   reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 4;
   kcount = 2;
@@ -191,12 +186,26 @@ fn polyfixveclk_sample_hyperball_mode2_jazz(reg mut ptr u32[2048] y1p,
   cube1 = 0x1162;
   three0 = 0x693861ad937b;
   three1 = 0x9caa56;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale_const = #protect(scale_const, ms);
+  bound_const = #protect(bound_const, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _hyperball_full(
       y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
       cube0, cube1, three0, three1);
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * public -> public * public * secret * counterp"]
 export
 fn polyfixveclk_sample_hyperball_mode3_jazz(reg mut ptr u32[2048] y1p,
                                             reg mut ptr u32[2048] y2p,
@@ -209,6 +218,7 @@ fn polyfixveclk_sample_hyperball_mode3_jazz(reg mut ptr u32[2048] y1p,
                                                reg ptr u64[1]
 {
   reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 6;
   kcount = 3;
@@ -218,12 +228,26 @@ fn polyfixveclk_sample_hyperball_mode3_jazz(reg mut ptr u32[2048] y1p,
   cube1 = 0x978;
   three0 = 0x7ad215218533;
   three1 = 0x7ff1c9;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale_const = #protect(scale_const, ms);
+  bound_const = #protect(bound_const, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _hyperball_full(
       y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
       cube0, cube1, three0, three1);
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * public -> public * public * secret * counterp"]
 export
 fn polyfixveclk_sample_hyperball_mode5_jazz(reg mut ptr u32[2048] y1p,
                                             reg mut ptr u32[2048] y2p,
@@ -236,6 +260,7 @@ fn polyfixveclk_sample_hyperball_mode5_jazz(reg mut ptr u32[2048] y1p,
                                                reg ptr u64[1]
 {
   reg u64 lcount kcount scale_const bound_const cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 7;
   kcount = 4;
@@ -245,6 +270,19 @@ fn polyfixveclk_sample_hyperball_mode5_jazz(reg mut ptr u32[2048] y1p,
   cube1 = 0x702;
   three0 = 0x5768588eed31;
   three1 = 0x73bd40;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale_const = #protect(scale_const, ms);
+  bound_const = #protect(bound_const, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _hyperball_full(
       y1p, y2p, bp, counterp, seedu, lcount, kcount, scale_const, bound_const,
       cube0, cube1, three0, three1);

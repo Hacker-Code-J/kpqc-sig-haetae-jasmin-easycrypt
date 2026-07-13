@@ -23,12 +23,12 @@ inline fn __sign_shake256_absorb_byte(reg mut ptr u64[25] sp,
 
 inline fn __sign_shake256_absorb_fixed(reg mut ptr u64[25] sp,
                                        reg u64 pos,
-                                       reg ui64 inp,
+                                       reg u64 inp,
                                        inline int inlen) -> reg ptr u64[25],
                                                             reg u64
 {
-  reg ui64 i off;
-  reg ui64 addr;
+  reg u64 i off;
+  reg u64 addr;
   reg u8 b;
 
   i = 0;
@@ -37,7 +37,7 @@ inline fn __sign_shake256_absorb_fixed(reg mut ptr u64[25] sp,
     off = i;
     addr = inp;
     addr += off;
-    b = [:u8 (64u)addr];
+    b = [:u8 addr];
     sp = __sign_shake256_absorb_byte(sp, pos, b);
     pos += 1;
     i += 1;
@@ -46,13 +46,13 @@ inline fn __sign_shake256_absorb_fixed(reg mut ptr u64[25] sp,
   return sp, pos;
 }
 
-inline fn __sign_shake256_squeeze_first(reg ui64 outp,
+inline fn __sign_shake256_squeeze_first(reg u64 outp,
                                         reg ptr u64[25] sp,
-                                        inline int outlen) -> reg ui64
+                                        inline int outlen) -> reg u64
 {
-  reg ui64 i;
+  reg u64 i;
   reg u64 idx lane t;
-  reg ui64 addr;
+  reg u64 addr;
   reg u8 b shift;
 
   i = 0;
@@ -69,7 +69,7 @@ inline fn __sign_shake256_squeeze_first(reg ui64 outp,
     b = (8u)t;
     addr = outp;
     addr += i;
-    [:u8 (64u)addr] = b;
+    [:u8 addr] = b;
     i += 1;
     idx += 1;
   }
@@ -77,27 +77,38 @@ inline fn __sign_shake256_squeeze_first(reg ui64 outp,
   return outp;
 }
 
+#[sct = "transient * transient -> transient"]
 fn _keypair_expand_seedbuf(reg ui64 outp,
                            reg ui64 seedp) -> reg ui64
 {
   stack u64[25] s;
   reg ptr u64[25] sp;
-  reg u64 pos rate;
+  reg u64 pos rate outa seeda;
   reg u8 domain;
+  #[msf] reg u64 ms;
+
+  outa = (64u)outp;
+  seeda = (64u)seedp;
+  () = #declassify(outa);
+  () = #declassify(seeda);
+  ms = #init_msf();
+  outa = #protect(outa, ms);
+  seeda = #protect(seeda, ms);
 
   sp = s;
   sp = _keccak_init_state(sp);
   pos = 0;
-  sp, pos = __sign_shake256_absorb_fixed(sp, pos, seedp, 32);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, seeda, 32);
   rate = 136;
   domain = 0x1f;
   sp = _keccak_finalize(sp, pos, rate, domain);
   sp = _keccakf1600(sp);
-  outp = __sign_shake256_squeeze_first(outp, sp, 128);
+  outa = __sign_shake256_squeeze_first(outa, sp, 128);
 
   return outp;
 }
 
+#[sct = "transient * transient * transient * transient -> transient"]
 fn _sign_expand_seedbuf(reg ui64 outp,
                         reg ui64 keyp,
                         reg ui64 rndp,
@@ -105,20 +116,35 @@ fn _sign_expand_seedbuf(reg ui64 outp,
 {
   stack u64[25] s;
   reg ptr u64[25] sp;
-  reg u64 pos rate;
+  reg u64 pos rate outa keya rnda mua;
   reg u8 domain;
+  #[msf] reg u64 ms;
+
+  outa = (64u)outp;
+  keya = (64u)keyp;
+  rnda = (64u)rndp;
+  mua = (64u)mup;
+  () = #declassify(outa);
+  () = #declassify(keya);
+  () = #declassify(rnda);
+  () = #declassify(mua);
+  ms = #init_msf();
+  outa = #protect(outa, ms);
+  keya = #protect(keya, ms);
+  rnda = #protect(rnda, ms);
+  mua = #protect(mua, ms);
 
   sp = s;
   sp = _keccak_init_state(sp);
   pos = 0;
-  sp, pos = __sign_shake256_absorb_fixed(sp, pos, keyp, 32);
-  sp, pos = __sign_shake256_absorb_fixed(sp, pos, rndp, 32);
-  sp, pos = __sign_shake256_absorb_fixed(sp, pos, mup, 64);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, keya, 32);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, rnda, 32);
+  sp, pos = __sign_shake256_absorb_fixed(sp, pos, mua, 64);
   rate = 136;
   domain = 0x1f;
   sp = _keccak_finalize(sp, pos, rate, domain);
   sp = _keccakf1600(sp);
-  outp = __sign_shake256_squeeze_first(outp, sp, 64);
+  outa = __sign_shake256_squeeze_first(outa, sp, 64);
 
   return outp;
 }
@@ -145,28 +171,44 @@ fn _sign_prepare_pre(reg mut ptr u8[257] prep,
   return prep;
 }
 
+#[sct = "transient * transient * transient * transient -> transient"]
 fn _sign_move_message_to_sm(reg ui64 smp,
                             reg ui64 mp,
                             reg ui64 mlen,
                             reg ui64 sigbytes) -> reg ui64
 {
-  reg ui64 i off;
-  reg ui64 srcp dstp;
+  reg u64 i off;
+  reg u64 srcp dstp smpa mpa mlena sigbytesa;
   reg u8 b;
+  #[msf] reg u64 ms;
+
+  smpa = (64u)smp;
+  mpa = (64u)mp;
+  mlena = (64u)mlen;
+  sigbytesa = (64u)sigbytes;
+  () = #declassify(smpa);
+  () = #declassify(mpa);
+  () = #declassify(mlena);
+  () = #declassify(sigbytesa);
+  ms = #init_msf();
+  smpa = #protect(smpa, ms);
+  mpa = #protect(mpa, ms);
+  mlena = #protect(mlena, ms);
+  sigbytesa = #protect(sigbytesa, ms);
 
   i = 0;
-  while (i < mlen)
+  while (i < mlena)
   {
-    off = mlen;
+    off = mlena;
     off -= 1;
     off -= i;
-    srcp = mp;
+    srcp = mpa;
     srcp += off;
-    dstp = smp;
-    dstp += sigbytes;
+    dstp = smpa;
+    dstp += sigbytesa;
     dstp += off;
-    b = [:u8 (64u)srcp];
-    [:u8 (64u)dstp] = b;
+    b = [:u8 srcp];
+    [:u8 dstp] = b;
     i += 1;
   }
 
@@ -178,20 +220,35 @@ fn _sign_open_copy_message(reg ui64 mp,
                            reg ui64 sigbytes,
                            reg ui64 mlen) -> reg ui64
 {
-  reg ui64 i;
-  reg ui64 srcp dstp;
+  reg u64 i;
+  reg u64 srcp dstp mpa smpa sigbytesa mlena;
   reg u8 b;
+  #[msf] reg u64 ms;
+
+  mpa = (64u)mp;
+  smpa = (64u)smp;
+  sigbytesa = (64u)sigbytes;
+  mlena = (64u)mlen;
+  () = #declassify(mpa);
+  () = #declassify(smpa);
+  () = #declassify(sigbytesa);
+  () = #declassify(mlena);
+  ms = #init_msf();
+  mpa = #protect(mpa, ms);
+  smpa = #protect(smpa, ms);
+  sigbytesa = #protect(sigbytesa, ms);
+  mlena = #protect(mlena, ms);
 
   i = 0;
-  while (i < mlen)
+  while (i < mlena)
   {
-    srcp = smp;
-    srcp += sigbytes;
+    srcp = smpa;
+    srcp += sigbytesa;
     srcp += i;
-    dstp = mp;
+    dstp = mpa;
     dstp += i;
-    b = [:u8 (64u)srcp];
-    [:u8 (64u)dstp] = b;
+    b = [:u8 srcp];
+    [:u8 dstp] = b;
     i += 1;
   }
 
@@ -201,15 +258,24 @@ fn _sign_open_copy_message(reg ui64 mp,
 fn _sign_open_zero_message(reg ui64 mp,
                            reg ui64 smlen) -> reg ui64
 {
-  reg ui64 i;
-  reg ui64 dstp;
+  reg u64 i;
+  reg u64 dstp mpa smlena;
+  #[msf] reg u64 ms;
+
+  mpa = (64u)mp;
+  smlena = (64u)smlen;
+  () = #declassify(mpa);
+  () = #declassify(smlena);
+  ms = #init_msf();
+  mpa = #protect(mpa, ms);
+  smlena = #protect(smlena, ms);
 
   i = 0;
-  while (i < smlen)
+  while (i < smlena)
   {
-    dstp = mp;
+    dstp = mpa;
     dstp += i;
-    [:u8 (64u)dstp] = 0;
+    [:u8 dstp] = 0;
     i += 1;
   }
 
@@ -411,6 +477,7 @@ inline fn _sign_verify_recover_w_z2(reg mut ptr u32[2048] wp,
   return wp, z2p;
 }
 
+#[sct = "transient * transient * transient * transient * transient * transient -> secret"]
 fn _sign_verify_prepare_z1_wprime(reg ui64 z1p,
                                   reg ui64 wprimep,
                                   reg ui64 highzp,
@@ -418,28 +485,50 @@ fn _sign_verify_prepare_z1_wprime(reg ui64 z1p,
                                   reg ui64 cp,
                                   reg ui64 lcount) -> reg u64
 {
-  reg ui64 i off addr;
+  reg u64 i off addr;
+  reg u64 z1a wprimea highza lowza cpa lcounta;
   reg u64 total coeff prod;
   reg u32 high low z c w;
+  #[msf] reg u64 ms;
+
+  z1a = (64u)z1p;
+  wprimea = (64u)wprimep;
+  highza = (64u)highzp;
+  lowza = (64u)lowzp;
+  cpa = (64u)cp;
+  lcounta = (64u)lcount;
+  () = #declassify(z1a);
+  () = #declassify(wprimea);
+  () = #declassify(highza);
+  () = #declassify(lowza);
+  () = #declassify(cpa);
+  () = #declassify(lcounta);
+  ms = #init_msf();
+  z1a = #protect(z1a, ms);
+  wprimea = #protect(wprimea, ms);
+  highza = #protect(highza, ms);
+  lowza = #protect(lowza, ms);
+  cpa = #protect(cpa, ms);
+  lcounta = #protect(lcounta, ms);
 
   total = 0;
   i = 0;
-  while (i < lcount)
+  while (i < lcounta)
   {
     off = i;
     off <<= 2;
-    addr = highzp;
+    addr = highza;
     addr += off;
-    high = [:u32 (64u)addr];
-    addr = lowzp;
+    high = [:u32 addr];
+    addr = lowza;
     addr += off;
-    low = [:u32 (64u)addr];
+    low = [:u32 addr];
     high <<= 8;
     z = high;
     z += low;
-    addr = z1p;
+    addr = z1a;
     addr += off;
-    [:u32 (64u)addr] = z;
+    [:u32 addr] = z;
 
     coeff = (64s)z;
     prod = coeff * coeff;
@@ -447,15 +536,15 @@ fn _sign_verify_prepare_z1_wprime(reg ui64 z1p,
 
     if (i < HAETAE_N)
     {
-      addr = cp;
+      addr = cpa;
       addr += off;
-      c = [:u32 (64u)addr];
+      c = [:u32 addr];
       w = z;
       w -= c;
       w &= 1;
-      addr = wprimep;
+      addr = wprimea;
       addr += off;
-      [:u32 (64u)addr] = w;
+      [:u32 addr] = w;
     }
 
     i += 1;
@@ -470,10 +559,16 @@ fn _sign_verify_norm_reject(reg const ptr u32[2048] z2p,
                             reg u64 bound) -> reg u64
 {
   reg u64 total z2norm reject;
+  #[msf] reg u64 ms;
 
   z2norm = _polyvec_sqnorm2(z2p, kcount);
   total = z1norm;
   total += z2norm;
+  () = #declassify(total);
+  () = #declassify(bound);
+  ms = #init_msf();
+  total = #protect(total, ms);
+  bound = #protect(bound, ms);
 
   reject = 0;
   if (total > bound)
@@ -571,13 +666,13 @@ fn _sk_singular_value_accumulate_fft_sqabs(reg mut ptr u32[256] sump,
   return sump;
 }
 
-inline fn _sk_singular_value_finish(reg ui64 sump,
+inline fn _sk_singular_value_finish(reg u64 sump,
                                     inline int best_count,
                                     inline int tau,
                                     inline int rem) -> reg u64
 {
   stack u32[5] bestm;
-  reg ui64 i j off addr;
+  reg u64 i j off addr;
   reg u64 r;
   reg u32 x y min fac notfac res tmp;
 
@@ -588,7 +683,7 @@ inline fn _sk_singular_value_finish(reg ui64 sump,
     off <<= 2;
     addr = sump;
     addr += off;
-    x = [:u32 (64u)addr];
+    x = [:u32 addr];
     bestm[i] = x;
     i += 1;
   }
@@ -600,7 +695,7 @@ inline fn _sk_singular_value_finish(reg ui64 sump,
     off <<= 2;
     addr = sump;
     addr += off;
-    x = [:u32 (64u)addr];
+    x = [:u32 addr];
 
     j = 0;
     while (j < best_count)
@@ -709,6 +804,7 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
   stack u64 stotal1 stotal2 sgate sreject1_bound sreject2_bound;
   reg u64 i off total coeff prod reject1 reject2 addr;
   reg u32 factor twice y cs z tmp;
+  #[msf] reg u64 ms;
 
   sz1p = ptrsp[0];
   sz2p = ptrsp[1];
@@ -741,9 +837,15 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     off <<= 2;
     addr = sy1p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     y = [:u32 addr];
     addr = scs1p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     cs = [:u32 addr];
     cs *= factor;
     cs *= HAETAE_LN;
@@ -751,6 +853,9 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     z += cs;
     addr = sz1p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     [:u32 addr] = z;
 
     coeff = (64s)z;
@@ -764,6 +869,9 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     tmp -= y;
     addr = sz1tmpp;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     [:u32 addr] = tmp;
 
     coeff = (64s)tmp;
@@ -782,9 +890,15 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     off <<= 2;
     addr = sy2p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     y = [:u32 addr];
     addr = scs2p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     cs = [:u32 addr];
     cs *= factor;
     cs *= HAETAE_LN;
@@ -792,6 +906,9 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     z += cs;
     addr = sz2p;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     [:u32 addr] = z;
 
     coeff = (64s)z;
@@ -805,6 +922,9 @@ fn _sign_add_cs_and_check(reg const ptr u64[8] ptrsp,
     tmp -= y;
     addr = sz2tmpp;
     addr += off;
+    () = #declassify(addr);
+    ms = #init_msf();
+    addr = #protect(addr, ms);
     [:u32 addr] = tmp;
 
     coeff = (64s)tmp;

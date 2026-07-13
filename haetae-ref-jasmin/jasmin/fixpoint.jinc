@@ -419,86 +419,82 @@ fn _polyfixveclk_scale_samples(reg mut ptr u32[2048] y1p,
                                reg u64 counts) -> reg ptr u32[2048],
                                                  reg ptr u32[2048]
 {
-  stack ptr u32[2048] sy1p sy2p;
-  stack ptr u64[4096] ssamplesp;
-  stack ptr u8[512] ssignsp;
-  stack ptr u64[2] sscalep;
-  stack u64 si sj slcount stotal;
-  reg ptr u32[2048] outp;
-  reg const ptr u64[4096] samplesp_tmp;
-  reg const ptr u8[512] signsp_tmp;
-  reg const ptr u64[2] scalep_tmp;
   reg u64 i j lcount total byte_idx sample;
   reg u32 sign32 r;
   reg u8 shift sign8;
-
-  sy1p = y1p;
-  sy2p = y2p;
-  ssamplesp = samplesp;
-  ssignsp = signsp;
-  sscalep = scalep;
+  #[msf] reg u64 ms;
 
   lcount = counts;
   lcount &= 0xffffffff;
   total = counts;
   total >>= 32;
-  slcount = lcount;
-  stotal = total;
+  () = #declassify(lcount);
+  () = #declassify(total);
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  samplesp = #protect_ptr(samplesp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  scalep = #protect_ptr(scalep, ms);
+  lcount = #protect(lcount, ms);
+  total = #protect(total, ms);
 
-  si = 0;
-  while { i = si; lcount = slcount; } (i < lcount)
+  i = 0;
+  while (i < lcount)
   {
     byte_idx = i;
     byte_idx >>= 3;
-    signsp_tmp = ssignsp;
-    sign32 = (32u)signsp_tmp[byte_idx];
+    sign32 = (32u)signsp[byte_idx];
     shift = (8u)i;
     shift &= 7;
     sign8 = __bit_at_u8(sign32, shift);
 
-    samplesp_tmp = ssamplesp;
-    sample = samplesp_tmp[i];
-    si = i;
-    scalep_tmp = sscalep;
-    r = _fixpoint_mul_rnd13(sample, scalep_tmp, sign8);
-    i = si;
-    outp = sy1p;
-    outp[i] = r;
-    sy1p = outp;
+    sample = samplesp[i];
+    () = #spill(y1p, y2p, samplesp, signsp, scalep, lcount, total, i);
+    r = _fixpoint_mul_rnd13(sample, scalep, sign8);
+    () = #unspill(y1p, y2p, samplesp, signsp, scalep, lcount, total, i);
+    ms = #init_msf();
+    y1p = #protect_ptr(y1p, ms);
+    y2p = #protect_ptr(y2p, ms);
+    samplesp = #protect_ptr(samplesp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    scalep = #protect_ptr(scalep, ms);
+    lcount = #protect(lcount, ms);
+    total = #protect(total, ms);
+    i = #protect(i, ms);
+    y1p[i] = r;
 
     i += 1;
-    si = i;
   }
 
-  sj = 0;
-  while { i = si; total = stotal; } (i < total)
+  j = 0;
+  while (i < total)
   {
     byte_idx = i;
     byte_idx >>= 3;
-    signsp_tmp = ssignsp;
-    sign32 = (32u)signsp_tmp[byte_idx];
+    sign32 = (32u)signsp[byte_idx];
     shift = (8u)i;
     shift &= 7;
     sign8 = __bit_at_u8(sign32, shift);
 
-    samplesp_tmp = ssamplesp;
-    sample = samplesp_tmp[i];
-    si = i;
-    scalep_tmp = sscalep;
-    r = _fixpoint_mul_rnd13(sample, scalep_tmp, sign8);
-    i = si;
-    j = sj;
-    outp = sy2p;
-    outp[j] = r;
-    sy2p = outp;
+    sample = samplesp[i];
+    () = #spill(y1p, y2p, samplesp, signsp, scalep, total, i, j);
+    r = _fixpoint_mul_rnd13(sample, scalep, sign8);
+    () = #unspill(y1p, y2p, samplesp, signsp, scalep, total, i, j);
+    ms = #init_msf();
+    y1p = #protect_ptr(y1p, ms);
+    y2p = #protect_ptr(y2p, ms);
+    samplesp = #protect_ptr(samplesp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    scalep = #protect_ptr(scalep, ms);
+    total = #protect(total, ms);
+    i = #protect(i, ms);
+    j = #protect(j, ms);
+    y2p[j] = r;
 
     i += 1;
     j += 1;
-    si = i;
-    sj = j;
   }
 
-  y1p = sy1p;
-  y2p = sy2p;
   return y1p, y2p;
 }

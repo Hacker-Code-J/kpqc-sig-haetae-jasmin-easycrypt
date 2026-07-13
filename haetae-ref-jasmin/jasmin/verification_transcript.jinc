@@ -6,8 +6,18 @@ fn __verify_shake256_absorb_raw(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  statep = #protect_ptr(statep, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inp);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inp = #protect(inp, ms);
+  inlen = #protect(inlen, ms);
   while (inlen != 0)
   {
     lane = pos;
@@ -28,10 +38,21 @@ fn __verify_shake256_absorb_raw(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, inlen, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, inlen, pos);
+      () = #declassify(inp);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      sp = #protect_ptr(sp, ms);
+      statep = #protect_ptr(statep, ms);
+      inp = #protect(inp, ms);
+      inlen = #protect(inlen, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -43,8 +64,14 @@ fn __verify_shake256_absorb_byte(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t;
   reg u8 shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  statep = #protect_ptr(statep, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   lane = pos;
   lane >>= 3;
   t = (64u)b;
@@ -60,9 +87,16 @@ fn __verify_shake256_absorb_byte(reg mut ptr u64[25] sp,
     () = #spill(statep, pos);
     sp = _keccakf1600(sp);
     () = #unspill(statep, pos);
+    () = #declassify(pos);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
+    statep = #protect_ptr(statep, ms);
+    pos = #protect(pos, ms);
     pos = 0;
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -75,8 +109,17 @@ fn __verify_shake256_absorb_buf(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  statep = #protect_ptr(statep, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inlen = #protect(inlen, ms);
   i = 0;
   while (i < inlen)
   {
@@ -97,10 +140,21 @@ fn __verify_shake256_absorb_buf(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, inlen, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, inlen, i, pos);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      sp = #protect_ptr(sp, ms);
+      statep = #protect_ptr(statep, ms);
+      inp = #protect_ptr(inp, ms);
+      inlen = #protect(inlen, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -113,8 +167,15 @@ fn __verify_shake256_absorb_mu32(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  statep = #protect_ptr(statep, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   i = 0;
   while (i < 32)
   {
@@ -131,6 +192,8 @@ fn __verify_shake256_absorb_mu32(reg mut ptr u64[25] sp,
     pos += 1;
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -164,6 +227,7 @@ fn __verify_hash_mu(reg mut ptr u8[32] mup,
   reg ptr u64[2] stp;
   reg u64 inlen ctxflag ctxlen;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   stp = st;
@@ -175,8 +239,14 @@ fn __verify_hash_mu(reg mut ptr u8[32] mup,
   () = #spill(prep, prelen, mp, mlen);
   sp, stp = __verify_shake256_absorb_raw(sp, stp, vkp, inlen);
   () = #unspill(prep, prelen, mp, mlen);
+  () = #declassify(prelen);
+  ms = #init_msf();
+  prelen = #protect(prelen, ms);
   ctxflag = prelen;
   ctxflag >>= 63;
+  () = #declassify(ctxflag);
+  ms = #init_msf();
+  ctxflag = #protect(ctxflag, ms);
   if (ctxflag == 0)
   {
     () = #spill(mp, mlen);
@@ -188,6 +258,9 @@ fn __verify_hash_mu(reg mut ptr u8[32] mup,
     ctxlen = prelen;
     ctxlen <<= 1;
     ctxlen >>= 1;
+    () = #declassify(ctxlen);
+    ms = #init_msf();
+    ctxlen = #protect(ctxlen, ms);
     b = (8u)ctxlen;
     () = #spill(mp, mlen, prep, ctxlen);
     sp, stp = __verify_shake256_absorb_byte(sp, stp, b);
@@ -242,6 +315,7 @@ fn __verify_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[136] bp;
   reg u64 i pos bidx limit;
   reg u32 b old;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -251,6 +325,8 @@ fn __verify_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp, tau);
   bp, sp = __poly_challenge_squeeze256_136(bp, sp);
   () = #unspill(cp, tau);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m23_init(cp);
   i = HAETAE_N;
@@ -263,12 +339,17 @@ fn __verify_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
       () = #spill(cp, i);
       bp, sp = __poly_challenge_squeeze256_136(bp, sp);
       () = #unspill(cp, i);
+      ms = #init_msf();
+      cp = #protect_ptr(cp, ms);
       pos = 0;
     }
 
     b = (32u)bp[pos];
     pos += 1;
     bidx = (64u)b;
+    () = #declassify(bidx);
+    ms = #init_msf();
+    bidx = #protect(bidx, ms);
     limit = i;
     limit += 1;
 
@@ -295,6 +376,7 @@ fn __verify_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   stack u8[32] buf;
   reg ptr u64[25] sp;
   reg ptr u8[32] bp;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -305,6 +387,8 @@ fn __verify_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp);
   bp, sp = __poly_challenge_squeeze256_32(bp, sp);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m5_frombytes(cp, bp);
   return cp;
@@ -328,7 +412,10 @@ inline fn _sign_verify_tail_m23(reg const ptr u32[2048] wp,
   reg ptr u32[HAETAE_N] cprimep;
   reg u64 count highlen reject vklen tau;
   reg u64 vkp prep prelen mp mlen;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   highp = highbuf;
   lsbp = lsb;
   mup = mu;
@@ -341,27 +428,49 @@ inline fn _sign_verify_tail_m23(reg const ptr u32[2048] wp,
   highlen = highbits_len_i;
 
   () = #spill(wp, wprimep, cp, vkp, prep, prelen, mp, mlen);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  highlen = #protect(highlen, ms);
   highp = __verify_zero_highbuf(highp, highlen);
   () = #unspill(wp, wprimep, cp, vkp, prep, prelen, mp, mlen);
 
   count = k_i;
   () = #spill(wprimep, cp, vkp, prep, prelen, mp, mlen);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  wp = #protect_ptr(wp, ms);
+  count = #protect(count, ms);
   highp = _pack_vec_highbits_m23(highp, wp, count);
   () = #unspill(wprimep, cp, vkp, prep, prelen, mp, mlen);
 
   () = #spill(cp, vkp, prep, prelen, mp, mlen, highp);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  wprimep = #protect_ptr(wprimep, ms);
   lsbp = _pack_poly_lsb(lsbp, wprimep);
   () = #unspill(cp, vkp, prep, prelen, mp, mlen, highp);
 
   vklen = vklen_i;
   () = #spill(cp, highp, lsbp, cprimep, highlen);
+  ms = #init_msf();
+  mup = #protect_ptr(mup, ms);
   mup = __verify_hash_mu(mup, vkp, prep, prelen, mp, mlen, vklen);
   () = #unspill(cp, highp, lsbp, cprimep, highlen);
 
   tau = tau_i;
   () = #spill(cp);
+  ms = #init_msf();
+  cprimep = #protect_ptr(cprimep, ms);
+  highp = #protect_ptr(highp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
+  tau = #protect(tau, ms);
   cprimep = __verify_challenge_m23(cprimep, highp, highlen, lsbp, mup, tau);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  cprimep = #protect_ptr(cprimep, ms);
   reject = _poly_mismatch(cp, cprimep);
 
   return reject;
@@ -381,7 +490,10 @@ inline fn _sign_verify_tail_m5(reg const ptr u32[2048] wp,
   reg ptr u32[HAETAE_N] cprimep;
   reg u64 count highlen reject vklen;
   reg u64 vkp prep prelen mp mlen;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   highp = highbuf;
   lsbp = lsb;
   mup = mu;
@@ -394,26 +506,47 @@ inline fn _sign_verify_tail_m5(reg const ptr u32[2048] wp,
   highlen = 1152;
 
   () = #spill(wp, wprimep, cp, vkp, prep, prelen, mp, mlen);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  highlen = #protect(highlen, ms);
   highp = __verify_zero_highbuf(highp, highlen);
   () = #unspill(wp, wprimep, cp, vkp, prep, prelen, mp, mlen);
 
   count = 4;
   () = #spill(wprimep, cp, vkp, prep, prelen, mp, mlen);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  wp = #protect_ptr(wp, ms);
+  count = #protect(count, ms);
   highp = _pack_vec_highbits_m5(highp, wp, count);
   () = #unspill(wprimep, cp, vkp, prep, prelen, mp, mlen);
 
   () = #spill(cp, vkp, prep, prelen, mp, mlen, highp);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  wprimep = #protect_ptr(wprimep, ms);
   lsbp = _pack_poly_lsb(lsbp, wprimep);
   () = #unspill(cp, vkp, prep, prelen, mp, mlen, highp);
 
   vklen = 2080;
   () = #spill(cp, highp, lsbp, cprimep, highlen);
+  ms = #init_msf();
+  mup = #protect_ptr(mup, ms);
   mup = __verify_hash_mu(mup, vkp, prep, prelen, mp, mlen, vklen);
   () = #unspill(cp, highp, lsbp, cprimep, highlen);
 
   () = #spill(cp);
+  ms = #init_msf();
+  cprimep = #protect_ptr(cprimep, ms);
+  highp = #protect_ptr(highp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
   cprimep = __verify_challenge_m5(cprimep, highp, highlen, lsbp, mup);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  cprimep = #protect_ptr(cprimep, ms);
   reject = _poly_mismatch(cp, cprimep);
 
   return reject;

@@ -20,12 +20,16 @@ fn _fft_init_and_bitrev(reg mut ptr u32[512] rp,
   reg u64 i idx ridx;
   reg u16 inv;
   reg u32 c root val;
+  #[msf] reg u64 ms;
 
   i = 0;
   while (i < 256)
   {
     inv = brvp[i];
     ridx = (64u)inv;
+    () = #declassify(ridx);
+    ms = #init_msf();
+    ridx = #protect(ridx, ms);
     ridx <<= 1;
 
     c = xp[i];

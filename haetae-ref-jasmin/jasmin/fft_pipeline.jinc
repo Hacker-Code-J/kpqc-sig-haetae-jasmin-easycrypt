@@ -2,6 +2,7 @@ fn _fft_full(reg mut ptr u32[512] datap,
              reg const ptr u32[512] rootsp) -> reg ptr u32[512]
 {
   reg u64 r m md2 n k even odd twid stride;
+  #[msf] reg u64 ms;
 
   r = 1;
   m = 2;
@@ -26,6 +27,21 @@ fn _fft_full(reg mut ptr u32[512] datap,
         () = #spill(rootsp, r, m, md2, n, k, stride);
         datap = _fft_butterfly(datap, rootsp, even, odd, twid);
         () = #unspill(rootsp, r, m, md2, n, k, stride);
+        () = #declassify(r);
+        () = #declassify(m);
+        () = #declassify(md2);
+        () = #declassify(n);
+        () = #declassify(k);
+        () = #declassify(stride);
+        ms = #init_msf();
+        datap = #protect_ptr(datap, ms);
+        rootsp = #protect_ptr(rootsp, ms);
+        r = #protect(r, ms);
+        m = #protect(m, ms);
+        md2 = #protect(md2, ms);
+        n = #protect(n, ms);
+        k = #protect(k, ms);
+        stride = #protect(stride, ms);
         k += 1;
       }
 

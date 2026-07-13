@@ -4,8 +4,12 @@ fn __poly_challenge_shake256_finalize(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t;
   reg u8 shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   lane = pos;
   lane >>= 3;
   shift = (8u)pos;
@@ -23,42 +27,68 @@ fn __poly_challenge_shake256_finalize(reg mut ptr u64[25] sp,
   return sp;
 }
 
-fn __poly_challenge_shake256_absorb(reg mut ptr u64[25] sp,
-                                    reg mut ptr u64[2] statep,
-                                    reg ui64 inp,
-                                    reg u64 inlen) -> reg ptr u64[25],
-                                                      reg ptr u64[2]
+#[sct = "
+{ ptr: public, val: secret } *
+{ ptr: public, val: secret } *
+public *
+public ->
+{ ptr: public, val: secret } *
+{ ptr: public, val: secret } *
+public *
+public
+"]
+inline fn __poly_challenge_shake256_absorb(reg mut ptr u64[25] sp,
+                                           reg mut ptr u64[2] statep,
+                                           reg u64 inp,
+                                           reg u64 inlen) -> reg ptr u64[25],
+                                                             reg ptr u64[2],
+                                                             reg u64,
+                                                             reg u64
 {
-  reg u64 pos lane t;
+  reg u64 pos lane t todo;
   reg u8 b shift;
+  #[msf] reg u64 ms;
+  reg bool cond cond_pos;
 
+  ms = #init_msf();
   pos = statep[0];
-  while (inlen != 0)
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
+  todo = inlen;
+  while { cond = todo != 0; } (cond)
   {
-    lane = pos;
-    lane >>= 3;
-    b = [:u8 (64u)inp];
-    t = (64u)b;
-    shift = (8u)pos;
-    shift &= 7;
-    shift <<= 3;
-    t <<= (shift & 63);
-    sp[lane] ^= t;
-    inp += 1;
-    pos += 1;
-    inlen -= 1;
-
-    if (pos == 136)
+    ms = #update_msf(cond, ms);
+    cond_pos = pos < 136;
+    if (cond_pos)
     {
-      () = #spill(statep, inp, inlen, pos);
-      sp = _keccakf1600(sp);
-      () = #unspill(statep, inp, inlen, pos);
-      pos = 0;
+      ms = #update_msf(cond_pos, ms);
+      lane = pos;
+      lane >>= 3;
+      b = [:u8 inp];
+      b = #protect_8(b, ms);
+      t = (64u)b;
+      shift = (8u)pos;
+      shift &= 7;
+      shift <<= 3;
+      t <<= (shift & 63);
+      sp[lane] ^= t;
+      inp += 1;
+      pos += 1;
+      inlen -= 1;
+      todo -= 1;
+    }
+    else
+    {
+      ms = #update_msf(!cond_pos, ms);
+      todo = 0;
     }
   }
+  ms = #update_msf(!cond, ms);
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
 
   statep[0] = pos;
-  return sp, statep;
+  return sp, statep, inp, inlen;
 }
 
 fn __poly_challenge_absorb_twice(reg mut ptr u64[25] sp,
@@ -69,22 +99,67 @@ fn __poly_challenge_absorb_twice(reg mut ptr u64[25] sp,
 {
   stack u64[2] st;
   reg ptr u64[2] stp;
-  reg ui64 inp;
-  reg u64 inlen;
+  reg u64 inp;
+  reg u64 inlen pos;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
   stp = st;
   stp[0] = 0;
   stp[1] = 136;
+  stp = #protect_ptr(stp, ms);
 
   sp = _keccak_init_state(sp);
-  inp = in1p;
+  ms = #init_msf();
+  inp = (64u)in1p;
+  () = #declassify(inp);
+  inp = #protect(inp, ms);
   inlen = in1len;
-  () = #spill(in2p, in2len);
-  sp, stp = __poly_challenge_shake256_absorb(sp, stp, inp, inlen);
-  () = #unspill(in2p, in2len);
-  inp = in2p;
+  while (inlen != 0)
+  {
+    () = #spill(in2p, in2len);
+    sp, stp, inp, inlen =
+      __poly_challenge_shake256_absorb(sp, stp, inp, inlen);
+    () = #unspill(in2p, in2len);
+    ms = #init_msf();
+    stp = #protect_ptr(stp, ms);
+    pos = stp[0];
+    () = #declassify(pos);
+    pos = #protect(pos, ms);
+    if (pos == 136)
+    {
+      () = #spill(in2p, in2len, inp, inlen, stp);
+      sp = _keccakf1600(sp);
+      () = #unspill(in2p, in2len, inp, inlen, stp);
+      ms = #init_msf();
+      stp = #protect_ptr(stp, ms);
+      stp[0] = 0;
+    }
+  }
+  inp = (64u)in2p;
+  () = #declassify(inp);
+  ms = #init_msf();
+  inp = #protect(inp, ms);
   inlen = in2len;
-  sp, stp = __poly_challenge_shake256_absorb(sp, stp, inp, inlen);
+  while (inlen != 0)
+  {
+    sp, stp, inp, inlen =
+      __poly_challenge_shake256_absorb(sp, stp, inp, inlen);
+    ms = #init_msf();
+    stp = #protect_ptr(stp, ms);
+    pos = stp[0];
+    () = #declassify(pos);
+    pos = #protect(pos, ms);
+    if (pos == 136)
+    {
+      () = #spill(inp, inlen, stp);
+      sp = _keccakf1600(sp);
+      () = #unspill(inp, inlen, stp);
+      ms = #init_msf();
+      stp = #protect_ptr(stp, ms);
+      stp[0] = 0;
+    }
+  }
   sp = __poly_challenge_shake256_finalize(sp, stp);
 
   return sp;
@@ -96,11 +171,14 @@ fn __poly_challenge_squeeze256_136(reg mut ptr u8[136] outp,
 {
   reg u64 i j lane t idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   idx = 0;
   () = #spill(outp, idx);
   sp = _keccakf1600(sp);
   () = #unspill(outp, idx);
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
 
   i = 0;
   while (i < 136)
@@ -131,11 +209,14 @@ fn __poly_challenge_squeeze256_32(reg mut ptr u8[32] outp,
 {
   reg u64 i j lane t idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   idx = 0;
   () = #spill(outp, idx);
   sp = _keccakf1600(sp);
   () = #unspill(outp, idx);
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
 
   i = 0;
   while (i < 32)
@@ -172,6 +253,7 @@ fn _poly_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[136] bp;
   reg u64 i pos bidx limit mulen;
   reg u32 b old;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -184,6 +266,8 @@ fn _poly_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp, tau);
   bp, sp = __poly_challenge_squeeze256_136(bp, sp);
   () = #unspill(cp, tau);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m23_init(cp);
   i = HAETAE_N;
@@ -196,12 +280,17 @@ fn _poly_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
       () = #spill(cp, i);
       bp, sp = __poly_challenge_squeeze256_136(bp, sp);
       () = #unspill(cp, i);
+      ms = #init_msf();
+      cp = #protect_ptr(cp, ms);
       pos = 0;
     }
 
     b = (32u)bp[pos];
     pos += 1;
     bidx = (64u)b;
+    () = #declassify(bidx);
+    ms = #init_msf();
+    bidx = #protect(bidx, ms);
     limit = i;
     limit += 1;
 
@@ -227,6 +316,7 @@ fn _poly_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u64[25] sp;
   reg ptr u8[32] bp;
   reg u64 mulen;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -239,6 +329,8 @@ fn _poly_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp);
   bp, sp = __poly_challenge_squeeze256_32(bp, sp);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m5_frombytes(cp, bp);
   return cp;

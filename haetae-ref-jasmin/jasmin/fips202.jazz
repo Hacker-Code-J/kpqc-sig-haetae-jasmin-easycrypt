@@ -6,45 +6,79 @@ inline fn __fips202_absorb_once_fixed(reg mut ptr u64[25] sp,
                                       reg u8 domain,
                                       inline int rate) -> reg ptr u64[25]
 {
-  reg u64 i lane t;
+  reg u64 i lane t inpa ratev;
   reg u8 b shift;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
   sp = _keccak_init_state(sp);
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  inpa = (64u)inp;
+  () = #declassify(inpa);
+  inpa = #protect(inpa, ms);
+  ratev = rate;
+  () = #declassify(ratev);
+  ratev = #protect(ratev, ms);
+  () = #declassify(inlen);
+  inlen = #protect(inlen, ms);
+  () = #declassify(domain);
+  domain = #protect_8(domain, ms);
 
-  while (inlen >= rate)
+  while (inlen >= ratev)
   {
     i = 0;
-    while (i < rate)
+    ms = #init_msf();
+    while
     {
+      cond = i < ratev;
+    } (cond)
+    {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
-      t = [:u64 (64u)inp];
+      t = [:u64 inpa];
+      t = #protect(t, ms);
       sp[lane] ^= t;
-      inp += 8;
+      inpa += 8;
       i += 8;
     }
+    ms = #update_msf(!cond, ms);
 
-    inlen -= rate;
-    () = #spill(inp, inlen, domain);
+    inlen -= ratev;
+    () = #spill(ratev, inpa, inlen, domain);
     sp = _keccakf1600(sp);
-    () = #unspill(inp, inlen, domain);
+    () = #unspill(ratev, inpa, inlen, domain);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
+    ratev = #protect(ratev, ms);
+    inpa = #protect(inpa, ms);
+    inlen = #protect(inlen, ms);
+    domain = #protect_8(domain, ms);
   }
 
   i = 0;
-  while (i < inlen)
+  ms = #init_msf();
+  while
   {
+    cond = i < inlen;
+  } (cond)
+  {
+    ms = #update_msf(cond, ms);
     lane = i;
     lane >>= 3;
-    b = [:u8 (64u)inp];
+    b = [:u8 inpa];
+    b = #protect_8(b, ms);
     t = (64u)b;
     shift = (8u)i;
     shift &= 7;
     shift <<= 3;
     t <<= (shift & 63);
     sp[lane] ^= t;
-    inp += 1;
+    inpa += 1;
     i += 1;
   }
+  ms = #update_msf(!cond, ms);
 
   lane = i;
   lane >>= 3;
@@ -55,7 +89,7 @@ inline fn __fips202_absorb_once_fixed(reg mut ptr u64[25] sp,
   t <<= (shift & 63);
   sp[lane] ^= t;
 
-  lane = rate;
+  lane = ratev;
   lane >>= 3;
   lane -= 1;
   t = 1;
@@ -73,8 +107,10 @@ inline fn __fips202_shake_once(reg ui64 outp,
 {
   stack u64[25] st;
   reg ptr u64[25] sp;
-  reg u64 i lane t ratev;
+  reg u64 i lane t ratev outa;
   reg u8 b shift domain;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
   sp = st;
   domain = 0x1f;
@@ -82,36 +118,66 @@ inline fn __fips202_shake_once(reg ui64 outp,
   sp = __fips202_absorb_once_fixed(sp, inp, inlen, domain, rate);
   () = #unspill(outp, outlen);
   ratev = rate;
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  outa = (64u)outp;
+  () = #declassify(outa);
+  outa = #protect(outa, ms);
+  () = #declassify(outlen);
+  outlen = #protect(outlen, ms);
+  () = #declassify(ratev);
+  ratev = #protect(ratev, ms);
 
   while (outlen >= ratev)
   {
-    () = #spill(outp, outlen, ratev);
+    () = #spill(outp, outa, outlen, ratev);
     sp = _keccakf1600(sp);
-    () = #unspill(outp, outlen, ratev);
+    () = #unspill(outp, outa, outlen, ratev);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
+    outa = #protect(outa, ms);
+    outlen = #protect(outlen, ms);
+    ratev = #protect(ratev, ms);
 
     i = 0;
-    while (i < ratev)
+    ms = #init_msf();
+    while
     {
+      cond = i < ratev;
+    } (cond)
+    {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
       t = sp[lane];
-      [:u64 (64u)outp] = t;
+      [:u64 outa] = t;
+      outa += 8;
       outp += 8;
       i += 8;
     }
+    ms = #update_msf(!cond, ms);
 
     outlen -= ratev;
   }
 
   if (outlen != 0)
   {
-    () = #spill(outp, outlen);
+    () = #spill(outp, outa, outlen);
     sp = _keccakf1600(sp);
-    () = #unspill(outp, outlen);
+    () = #unspill(outp, outa, outlen);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
+    outa = #protect(outa, ms);
+    outlen = #protect(outlen, ms);
 
     i = 0;
-    while (i < outlen)
+    ms = #init_msf();
+    while
     {
+      cond = i < outlen;
+    } (cond)
+    {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
       t = sp[lane];
@@ -120,10 +186,12 @@ inline fn __fips202_shake_once(reg ui64 outp,
       shift <<= 3;
       t >>= (shift & 63);
       b = (8u)t;
-      [:u8 (64u)outp] = b;
+      [:u8 outa] = b;
+      outa += 1;
       outp += 1;
       i += 1;
     }
+    ms = #update_msf(!cond, ms);
   }
 
   return outp;
@@ -137,8 +205,10 @@ inline fn __fips202_sha3(reg ui64 hp,
 {
   stack u64[25] st;
   reg ptr u64[25] sp;
-  reg u64 i t;
+  reg u64 i t lanesv hpa;
   reg u8 domain;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
   sp = st;
   domain = 0x06;
@@ -146,19 +216,35 @@ inline fn __fips202_sha3(reg ui64 hp,
   sp = __fips202_absorb_once_fixed(sp, inp, inlen, domain, rate);
   sp = _keccakf1600(sp);
   () = #unspill(hp);
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  hpa = (64u)hp;
+  () = #declassify(hpa);
+  hpa = #protect(hpa, ms);
+  lanesv = lanes;
+  () = #declassify(lanesv);
+  lanesv = #protect(lanesv, ms);
 
   i = 0;
-  while (i < lanes)
+  ms = #init_msf();
+  while
   {
+    cond = i < lanesv;
+  } (cond)
+  {
+    ms = #update_msf(cond, ms);
     t = sp[i];
-    [:u64 (64u)hp] = t;
+    [:u64 hpa] = t;
+    hpa += 8;
     hp += 8;
     i += 1;
   }
+  ms = #update_msf(!cond, ms);
 
   return hp;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn fips202_shake128_jazz(reg ui64 outp,
                          reg u64 outlen,
@@ -169,6 +255,7 @@ fn fips202_shake128_jazz(reg ui64 outp,
   return outp;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn fips202_shake256_jazz(reg ui64 outp,
                          reg u64 outlen,
@@ -179,6 +266,7 @@ fn fips202_shake256_jazz(reg ui64 outp,
   return outp;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn fips202_sha3_256_jazz(reg ui64 hp,
                          reg ui64 inp,
@@ -188,6 +276,7 @@ fn fips202_sha3_256_jazz(reg ui64 hp,
   return hp;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn fips202_sha3_512_jazz(reg ui64 hp,
                          reg ui64 inp,

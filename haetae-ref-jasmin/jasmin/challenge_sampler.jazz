@@ -3,6 +3,7 @@ require "keccak.jinc"
 require "challenge.jinc"
 require "challenge_sampler.jinc"
 
+#[ct = "cp * public * public * public * public -> cp"]
 export
 fn poly_challenge_m23_jazz(reg mut ptr u32[HAETAE_N] cp,
                            reg ui64 highbitsp,
@@ -14,6 +15,7 @@ fn poly_challenge_m23_jazz(reg mut ptr u32[HAETAE_N] cp,
   return cp;
 }
 
+#[ct = "cp * public * public * public -> cp"]
 export
 fn poly_challenge_m5_jazz(reg mut ptr u32[HAETAE_N] cp,
                           reg ui64 highbitsp,

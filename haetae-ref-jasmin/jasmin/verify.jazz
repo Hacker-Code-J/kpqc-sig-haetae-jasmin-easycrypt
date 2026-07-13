@@ -59,41 +59,53 @@ fn _verify_prepare_z1_wprime(reg mut ptr u32[2048] z1p,
   return z1p, wprimep, total;
 }
 
-fn _verify_copy_desc(reg mut ptr u64[5] outp,
-                     reg const ptr u64[5] inp) -> reg ptr u64[5]
+inline fn _verify_publish_reject(reg u64 reject) -> reg u64
 {
-  reg u64 i v;
+  #[msf] reg u64 ms;
 
-  i = 0;
-  while (i < 5)
-  {
-    v = inp[i];
-    outp[i] = v;
-    i += 1;
-  }
-
-  return outp;
+  () = #declassify(reject);
+  ms = #init_msf();
+  reject = #protect(reject, ms);
+  return reject;
 }
 
-inline fn _verify_matrix_crt(reg mut ptr u32[2048] z1p,
-                             reg mut ptr u32[2048] highp,
-                             reg const ptr u32[8192] a1p,
-                             reg const ptr u32[HAETAE_N] wprimep,
-                             reg u64 rows,
-                             reg u64 cols) -> reg ptr u32[2048],
-                                               reg ptr u32[2048]
+fn _verify_matrix_crt(reg mut ptr u32[2048] z1p,
+                      reg mut ptr u32[2048] highp,
+                      reg const ptr u32[8192] a1p,
+                      reg const ptr u32[HAETAE_N] wprimep,
+                      reg u64 rows,
+                      reg u64 cols) -> reg ptr u32[2048],
+                                        reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
   () = #spill(highp, a1p, rows, cols);
   z1p = _polyvec_ntt(z1p, cols);
   () = #unspill(highp, a1p, rows, cols);
 
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  a1p = #protect_ptr(a1p, ms);
+  z1p = #protect_ptr(z1p, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   highp = _polymat_pointwise_acc(highp, a1p, z1p, rows, cols);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  rows = #protect(rows, ms);
   highp = _polyvec_invntt(highp, rows);
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  highp = #protect_ptr(highp, ms);
+  wprimep = #protect_ptr(wprimep, ms);
+  rows = #protect(rows, ms);
   z1p = _polyveck_poly_fromcrt(z1p, highp, wprimep, rows);
   count = rows;
   count *= HAETAE_N;
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  count = #protect(count, ms);
   z1p = _polyvec_freeze2q(z1p, count);
 
   return z1p, highp;
@@ -136,6 +148,7 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
   reg ptr u32[512] h_symbolwp hb_symbolwp;
   reg ptr u32[132] h_dsymswp hb_dsymswp;
   reg u64 reject k l m lcount kcount badv sqnorm2 bound;
+  #[msf] reg u64 ms;
 
   if (siglen != sigbytes_i)
   {
@@ -147,7 +160,11 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
     l = l_i;
     m = m_i;
     copydescp = desc;
-    copydescp = _verify_copy_desc(copydescp, descp);
+    copydescp[0] = descp[0];
+    copydescp[1] = descp[1];
+    copydescp[2] = descp[2];
+    copydescp[3] = descp[3];
+    copydescp[4] = descp[4];
     a1p = a1;
     () = #spill(sigp, l, k);
     a1p = _unpack_vk_m23_full(a1p, vkp, vku, k, l, m);
@@ -170,14 +187,28 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
     highzp = highz;
     hp = h;
     badp = bad;
+    ms = #init_msf();
+    badp = #protect_ptr(badp, ms);
     badp[0] = 0;
     () = #spill(a1p, l, k);
+    ms = #init_msf();
+    cp = #protect_ptr(cp, ms);
+    lowzp = #protect_ptr(lowzp, ms);
+    highzp = #protect_ptr(highzp, ms);
+    hp = #protect_ptr(hp, ms);
+    badp = #protect_ptr(badp, ms);
+    sigp = #protect_ptr(sigp, ms);
     cp, lowzp, highzp, hp, badp = _unpack_sig_full(
         cp, lowzp, highzp, hp, badp, sigp, h_symbolwp, h_dsymswp,
         hb_symbolwp, hb_dsymswp, l_i, hb_count_i, hb_m_i, hb_offset_i,
         h_count_i, h_m_i, h_offset_i, base_hb_i, base_h_i, payload_limit_i);
     () = #unspill(a1p, l, k);
+    ms = #init_msf();
+    badp = #protect_ptr(badp, ms);
     badv = badp[0];
+    () = #declassify(badv);
+    ms = #init_msf();
+    badv = #protect(badv, ms);
 
     if (badv != 0)
     {
@@ -190,11 +221,25 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
       lcount = l;
       lcount *= HAETAE_N;
       () = #spill(a1p, hp, k, l);
+      ms = #init_msf();
+      z1p = #protect_ptr(z1p, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      highzp = #protect_ptr(highzp, ms);
+      lowzp = #protect_ptr(lowzp, ms);
+      cp = #protect_ptr(cp, ms);
+      lcount = #protect(lcount, ms);
       z1p, wprimep, sqnorm2 =
           _verify_prepare_z1_wprime(z1p, wprimep, highzp, lowzp, cp, lcount);
       () = #unspill(a1p, hp, k, l);
 
       highbitsp = highbits;
+      ms = #init_msf();
+      z1p = #protect_ptr(z1p, ms);
+      highbitsp = #protect_ptr(highbitsp, ms);
+      a1p = #protect_ptr(a1p, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      k = #protect(k, ms);
+      l = #protect(l, ms);
       () = #spill(hp, wprimep, cp, k);
       z1p, highbitsp = _verify_matrix_crt(z1p, highbitsp, a1p, wprimep, k, l);
       () = #unspill(hp, wprimep, cp, k);
@@ -203,6 +248,13 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
       z2p = z2;
       kcount = k;
       kcount *= HAETAE_N;
+      ms = #init_msf();
+      wp = #protect_ptr(wp, ms);
+      z2p = #protect_ptr(z2p, ms);
+      z1p = #protect_ptr(z1p, ms);
+      hp = #protect_ptr(hp, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      kcount = #protect(kcount, ms);
       () = #spill(wprimep, cp, kcount, sqnorm2);
       wp, z2p = _sign_verify_recover_w_z2(wp, z2p, z1p, hp, wprimep, kcount,
                                           HAETAE_HINT_HALF_ALPHA_M23,
@@ -212,10 +264,23 @@ inline fn _verify_full_m23(reg const ptr u8[2948] sigp,
       () = #unspill(wprimep, cp, kcount, sqnorm2);
 
       bound = b2sq_i;
+      ms = #init_msf();
+      z2p = #protect_ptr(z2p, ms);
+      sqnorm2 = #protect(sqnorm2, ms);
+      kcount = #protect(kcount, ms);
+      bound = #protect(bound, ms);
       reject = _sign_verify_norm_reject(z2p, sqnorm2, kcount, bound);
+      () = #declassify(reject);
+      ms = #init_msf();
+      reject = #protect(reject, ms);
       if (reject == 0)
       {
-        taildescp = desc;
+        taildescp = copydescp;
+        ms = #init_msf();
+        wp = #protect_ptr(wp, ms);
+        wprimep = #protect_ptr(wprimep, ms);
+        cp = #protect_ptr(cp, ms);
+        taildescp = #protect_ptr(taildescp, ms);
         reject = _sign_verify_tail_m23(wp, wprimep, cp, taildescp, k_i,
                                        highbits_len_i, vkbytes_i, tau_i);
       }
@@ -244,6 +309,7 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
   reg ptr u32[512] h_symbolwp hb_symbolwp;
   reg ptr u32[132] h_dsymswp hb_dsymswp;
   reg u64 reject k l lcount kcount badv sqnorm2 bound;
+  #[msf] reg u64 ms;
 
   if (siglen != 2948)
   {
@@ -254,7 +320,11 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
     k = 4;
     l = 7;
     copydescp = desc;
-    copydescp = _verify_copy_desc(copydescp, descp);
+    copydescp[0] = descp[0];
+    copydescp[1] = descp[1];
+    copydescp[2] = descp[2];
+    copydescp[3] = descp[3];
+    copydescp[4] = descp[4];
     a1p = a1;
     () = #spill(sigp, l, k);
     a1p = _unpack_vk_m5_full(a1p, vkp, vku, k, l);
@@ -270,14 +340,28 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
     highzp = highz;
     hp = h;
     badp = bad;
+    ms = #init_msf();
+    badp = #protect_ptr(badp, ms);
     badp[0] = 0;
     () = #spill(a1p, l, k);
+    ms = #init_msf();
+    cp = #protect_ptr(cp, ms);
+    lowzp = #protect_ptr(lowzp, ms);
+    highzp = #protect_ptr(highzp, ms);
+    hp = #protect_ptr(hp, ms);
+    badp = #protect_ptr(badp, ms);
+    sigp = #protect_ptr(sigp, ms);
     cp, lowzp, highzp, hp, badp = _unpack_sig_full(
         cp, lowzp, highzp, hp, badp, sigp, h_symbolwp, h_dsymswp,
         hb_symbolwp, hb_dsymswp, 7, 1792, 19, 9, 1024, 33, 471, 501, 358,
         1122);
     () = #unspill(a1p, l, k);
+    ms = #init_msf();
+    badp = #protect_ptr(badp, ms);
     badv = badp[0];
+    () = #declassify(badv);
+    ms = #init_msf();
+    badv = #protect(badv, ms);
 
     if (badv != 0)
     {
@@ -290,11 +374,25 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
       lcount = l;
       lcount *= HAETAE_N;
       () = #spill(a1p, hp, k, l);
+      ms = #init_msf();
+      z1p = #protect_ptr(z1p, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      highzp = #protect_ptr(highzp, ms);
+      lowzp = #protect_ptr(lowzp, ms);
+      cp = #protect_ptr(cp, ms);
+      lcount = #protect(lcount, ms);
       z1p, wprimep, sqnorm2 =
           _verify_prepare_z1_wprime(z1p, wprimep, highzp, lowzp, cp, lcount);
       () = #unspill(a1p, hp, k, l);
 
       highbitsp = highbits;
+      ms = #init_msf();
+      z1p = #protect_ptr(z1p, ms);
+      highbitsp = #protect_ptr(highbitsp, ms);
+      a1p = #protect_ptr(a1p, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      k = #protect(k, ms);
+      l = #protect(l, ms);
       () = #spill(hp, wprimep, cp, k);
       z1p, highbitsp = _verify_matrix_crt(z1p, highbitsp, a1p, wprimep, k, l);
       () = #unspill(hp, wprimep, cp, k);
@@ -303,6 +401,13 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
       z2p = z2;
       kcount = k;
       kcount *= HAETAE_N;
+      ms = #init_msf();
+      wp = #protect_ptr(wp, ms);
+      z2p = #protect_ptr(z2p, ms);
+      z1p = #protect_ptr(z1p, ms);
+      hp = #protect_ptr(hp, ms);
+      wprimep = #protect_ptr(wprimep, ms);
+      kcount = #protect(kcount, ms);
       () = #spill(wprimep, cp, kcount, sqnorm2);
       wp, z2p = _sign_verify_recover_w_z2(wp, z2p, z1p, hp, wprimep, kcount,
                                           HAETAE_HINT_HALF_ALPHA_M5,
@@ -312,10 +417,23 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
       () = #unspill(wprimep, cp, kcount, sqnorm2);
 
       bound = 597386433;
+      ms = #init_msf();
+      z2p = #protect_ptr(z2p, ms);
+      sqnorm2 = #protect(sqnorm2, ms);
+      kcount = #protect(kcount, ms);
+      bound = #protect(bound, ms);
       reject = _sign_verify_norm_reject(z2p, sqnorm2, kcount, bound);
+      () = #declassify(reject);
+      ms = #init_msf();
+      reject = #protect(reject, ms);
       if (reject == 0)
       {
-        taildescp = desc;
+        taildescp = copydescp;
+        ms = #init_msf();
+        wp = #protect_ptr(wp, ms);
+        wprimep = #protect_ptr(wprimep, ms);
+        cp = #protect_ptr(cp, ms);
+        taildescp = #protect_ptr(taildescp, ms);
         reject = _sign_verify_tail_m5(wp, wprimep, cp, taildescp);
       }
     }
@@ -324,12 +442,11 @@ inline fn _verify_full_m5(reg const ptr u8[2948] sigp,
   return reject;
 }
 
-export
-fn sign_verify_internal_mode2_jazz(reg const ptr u8[2948] sigp,
-                                   reg u64 siglen,
-                                   reg const ptr u8[2752] vkp,
-                                   reg ui64 vku,
-                                   reg const ptr u64[5] descp) -> reg u64
+fn _verify_full_mode2(reg const ptr u8[2948] sigp,
+                      reg u64 siglen,
+                      reg const ptr u8[2752] vkp,
+                      reg ui64 vku,
+                      reg const ptr u64[5] descp) -> reg u64
 {
   reg u64 reject;
   reject = _verify_full_m23(sigp, siglen, vkp, vku, descp, 2, 4, 3, 1474, 992,
@@ -338,12 +455,11 @@ fn sign_verify_internal_mode2_jazz(reg const ptr u8[2948] sigp,
   return reject;
 }
 
-export
-fn sign_verify_internal_mode3_jazz(reg const ptr u8[2948] sigp,
-                                   reg u64 siglen,
-                                   reg const ptr u8[2752] vkp,
-                                   reg ui64 vku,
-                                   reg const ptr u64[5] descp) -> reg u64
+fn _verify_full_mode3(reg const ptr u8[2948] sigp,
+                      reg u64 siglen,
+                      reg const ptr u8[2752] vkp,
+                      reg ui64 vku,
+                      reg const ptr u64[5] descp) -> reg u64
 {
   reg u64 reject;
   reject = _verify_full_m23(sigp, siglen, vkp, vku, descp, 3, 6, 5, 2349, 1472,
@@ -352,6 +468,54 @@ fn sign_verify_internal_mode3_jazz(reg const ptr u8[2948] sigp,
   return reject;
 }
 
+fn _verify_full_mode5(reg const ptr u8[2948] sigp,
+                      reg u64 siglen,
+                      reg const ptr u8[2752] vkp,
+                      reg ui64 vku,
+                      reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+  reject = _verify_full_m5(sigp, siglen, vkp, vku, descp);
+  return reject;
+}
+
+#[ct = "public * public * public * public * descp -> public"]
+export
+fn sign_verify_internal_mode2_jazz(reg const ptr u8[2948] sigp,
+                                   reg u64 siglen,
+                                   reg const ptr u8[2752] vkp,
+                                   reg ui64 vku,
+                                   reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+  #[msf] reg u64 ms;
+
+  () = #declassify(siglen);
+  ms = #init_msf();
+  siglen = #protect(siglen, ms);
+  reject = _verify_full_mode2(sigp, siglen, vkp, vku, descp);
+  return reject;
+}
+
+#[ct = "public * public * public * public * descp -> public"]
+export
+fn sign_verify_internal_mode3_jazz(reg const ptr u8[2948] sigp,
+                                   reg u64 siglen,
+                                   reg const ptr u8[2752] vkp,
+                                   reg ui64 vku,
+                                   reg const ptr u64[5] descp) -> reg u64
+{
+  reg u64 reject;
+  #[msf] reg u64 ms;
+
+  () = #declassify(siglen);
+  ms = #init_msf();
+  siglen = #protect(siglen, ms);
+  reject = _verify_full_mode3(sigp, siglen, vkp, vku, descp);
+  return reject;
+}
+
+#[ct = "public * public * public * public * descp -> public"]
 export
 fn sign_verify_internal_mode5_jazz(reg const ptr u8[2948] sigp,
                                    reg u64 siglen,
@@ -360,7 +524,12 @@ fn sign_verify_internal_mode5_jazz(reg const ptr u8[2948] sigp,
                                    reg const ptr u64[5] descp) -> reg u64
 {
   reg u64 reject;
-  reject = _verify_full_m5(sigp, siglen, vkp, vku, descp);
+  #[msf] reg u64 ms;
+
+  () = #declassify(siglen);
+  ms = #init_msf();
+  siglen = #protect(siglen, ms);
+  reject = _verify_full_mode5(sigp, siglen, vkp, vku, descp);
   return reject;
 }
 
@@ -390,7 +559,9 @@ inline fn _api_verify_mode2_raw(reg ui64 sigu,
     vkp = vk;
     descp = desc;
     sigp = _api_copy_raw_to_2948_prefix(sigp, sigu, 1474);
+    () = #declassify(sigp);
     vkp = _api_copy_raw_to_2752_prefix(vkp, vku, 992);
+    () = #declassify(vkp);
     descp[0] = (64u)vku;
     descp[1] = (64u)preu;
     descp[2] = prelen;
@@ -427,7 +598,9 @@ inline fn _api_verify_mode3_raw(reg ui64 sigu,
     vkp = vk;
     descp = desc;
     sigp = _api_copy_raw_to_2948_prefix(sigp, sigu, 2349);
+    () = #declassify(sigp);
     vkp = _api_copy_raw_to_2752_prefix(vkp, vku, 1472);
+    () = #declassify(vkp);
     descp[0] = (64u)vku;
     descp[1] = (64u)preu;
     descp[2] = prelen;
@@ -464,7 +637,9 @@ inline fn _api_verify_mode5_raw(reg ui64 sigu,
     vkp = vk;
     descp = desc;
     sigp = _api_copy_raw_to_2948_prefix(sigp, sigu, 2948);
+    () = #declassify(sigp);
     vkp = _api_copy_raw_to_2752_prefix(vkp, vku, 2080);
+    () = #declassify(vkp);
     descp[0] = (64u)vku;
     descp[1] = (64u)preu;
     descp[2] = prelen;
@@ -487,6 +662,7 @@ fn cryptolab_haetae_mode2_verify_internal(reg ui64 sigu,
 
   reject = _api_verify_mode2_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                  (64u)preu, (64u)prelen, vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
@@ -503,6 +679,7 @@ fn cryptolab_haetae_mode3_verify_internal(reg ui64 sigu,
 
   reject = _api_verify_mode3_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                  (64u)preu, (64u)prelen, vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
@@ -519,6 +696,7 @@ fn cryptolab_haetae_mode5_verify_internal(reg ui64 sigu,
 
   reject = _api_verify_mode5_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                  (64u)preu, (64u)prelen, vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
@@ -545,6 +723,7 @@ fn cryptolab_haetae_mode2_verify(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode2_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                    (64u)ctxu, prelen, vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
@@ -572,6 +751,7 @@ fn cryptolab_haetae_mode3_verify(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode3_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                    (64u)ctxu, prelen, vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
@@ -599,6 +779,7 @@ fn cryptolab_haetae_mode5_verify(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode5_raw(sigu, (64u)siglen, (64u)mu, (64u)mlen,
                                    (64u)ctxu, prelen, vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
@@ -641,6 +822,7 @@ fn cryptolab_haetae_mode2_open(reg ui64 mu,
       reject = _api_verify_mode2_raw(smu, 1474, (64u)msgu, (64u)mlen,
                                      (64u)ctxu, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = (64u)mlen;
@@ -695,6 +877,7 @@ fn cryptolab_haetae_mode3_open(reg ui64 mu,
       reject = _api_verify_mode3_raw(smu, 2349, (64u)msgu, (64u)mlen,
                                      (64u)ctxu, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = (64u)mlen;
@@ -749,6 +932,7 @@ fn cryptolab_haetae_mode5_open(reg ui64 mu,
       reject = _api_verify_mode5_raw(smu, 2948, (64u)msgu, (64u)mlen,
                                      (64u)ctxu, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = (64u)mlen;
@@ -766,6 +950,7 @@ fn cryptolab_haetae_mode5_open(reg ui64 mu,
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_verify_internal_desc(reg ui64 sigu,
                                                reg ui64 vku,
@@ -773,7 +958,11 @@ fn cryptolab_haetae_mode2_verify_internal_desc(reg ui64 sigu,
                                                -> reg u64
 {
   reg u64 siglen maddr mlen preaddr prelen reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -781,10 +970,12 @@ fn cryptolab_haetae_mode2_verify_internal_desc(reg ui64 sigu,
   prelen = apip[4];
   reject = _api_verify_mode2_raw(sigu, siglen, maddr, mlen, preaddr, prelen,
                                  vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_verify_internal_desc(reg ui64 sigu,
                                                reg ui64 vku,
@@ -792,7 +983,11 @@ fn cryptolab_haetae_mode3_verify_internal_desc(reg ui64 sigu,
                                                -> reg u64
 {
   reg u64 siglen maddr mlen preaddr prelen reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -800,10 +995,12 @@ fn cryptolab_haetae_mode3_verify_internal_desc(reg ui64 sigu,
   prelen = apip[4];
   reject = _api_verify_mode3_raw(sigu, siglen, maddr, mlen, preaddr, prelen,
                                  vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_verify_internal_desc(reg ui64 sigu,
                                                reg ui64 vku,
@@ -811,7 +1008,11 @@ fn cryptolab_haetae_mode5_verify_internal_desc(reg ui64 sigu,
                                                -> reg u64
 {
   reg u64 siglen maddr mlen preaddr prelen reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -819,17 +1020,23 @@ fn cryptolab_haetae_mode5_verify_internal_desc(reg ui64 sigu,
   prelen = apip[4];
   reject = _api_verify_mode5_raw(sigu, siglen, maddr, mlen, preaddr, prelen,
                                  vku);
+  reject = _verify_publish_reject(reject);
   if (reject == 0) { r = 0; } else { r = _api_reject(); }
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_verify_desc(reg ui64 sigu,
                                       reg ui64 vku,
                                       reg const ptr u64[5] apip) -> reg u64
 {
   reg u64 siglen maddr mlen ctxaddr ctxlen prelen flag reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -847,18 +1054,24 @@ fn cryptolab_haetae_mode2_verify_desc(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode2_raw(sigu, siglen, maddr, mlen, ctxaddr, prelen,
                                    vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_verify_desc(reg ui64 sigu,
                                       reg ui64 vku,
                                       reg const ptr u64[5] apip) -> reg u64
 {
   reg u64 siglen maddr mlen ctxaddr ctxlen prelen flag reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -876,18 +1089,24 @@ fn cryptolab_haetae_mode3_verify_desc(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode3_raw(sigu, siglen, maddr, mlen, ctxaddr, prelen,
                                    vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_verify_desc(reg ui64 sigu,
                                       reg ui64 vku,
                                       reg const ptr u64[5] apip) -> reg u64
 {
   reg u64 siglen maddr mlen ctxaddr ctxlen prelen flag reject r;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   siglen = apip[0];
   maddr = apip[1];
   mlen = apip[2];
@@ -905,11 +1124,13 @@ fn cryptolab_haetae_mode5_verify_desc(reg ui64 sigu,
     prelen += flag;
     reject = _api_verify_mode5_raw(sigu, siglen, maddr, mlen, ctxaddr, prelen,
                                    vku);
+    reject = _verify_publish_reject(reject);
     if (reject == 0) { r = 0; } else { r = _api_reject(); }
   }
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_open_desc(reg ui64 mu,
                                     reg ui64 mlenu,
@@ -919,7 +1140,11 @@ fn cryptolab_haetae_mode2_open_desc(reg ui64 mu,
 {
   reg ui64 msgu;
   reg u64 smlen mlen ctxaddr ctxlen prelen flag reject r badlen;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   smlen = apip[0];
   ctxaddr = apip[1];
   ctxlen = apip[2];
@@ -949,6 +1174,7 @@ fn cryptolab_haetae_mode2_open_desc(reg ui64 mu,
       reject = _api_verify_mode2_raw(smu, 1474, (64u)msgu, mlen,
                                      ctxaddr, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = mlen;
@@ -966,6 +1192,7 @@ fn cryptolab_haetae_mode2_open_desc(reg ui64 mu,
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_open_desc(reg ui64 mu,
                                     reg ui64 mlenu,
@@ -975,7 +1202,11 @@ fn cryptolab_haetae_mode3_open_desc(reg ui64 mu,
 {
   reg ui64 msgu;
   reg u64 smlen mlen ctxaddr ctxlen prelen flag reject r badlen;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   smlen = apip[0];
   ctxaddr = apip[1];
   ctxlen = apip[2];
@@ -1005,6 +1236,7 @@ fn cryptolab_haetae_mode3_open_desc(reg ui64 mu,
       reject = _api_verify_mode3_raw(smu, 2349, (64u)msgu, mlen,
                                      ctxaddr, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = mlen;
@@ -1022,6 +1254,7 @@ fn cryptolab_haetae_mode3_open_desc(reg ui64 mu,
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_open_desc(reg ui64 mu,
                                     reg ui64 mlenu,
@@ -1031,7 +1264,11 @@ fn cryptolab_haetae_mode5_open_desc(reg ui64 mu,
 {
   reg ui64 msgu;
   reg u64 smlen mlen ctxaddr ctxlen prelen flag reject r badlen;
+  #[msf] reg u64 ms;
 
+  () = #declassify(apip);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   smlen = apip[0];
   ctxaddr = apip[1];
   ctxlen = apip[2];
@@ -1061,6 +1298,7 @@ fn cryptolab_haetae_mode5_open_desc(reg ui64 mu,
       reject = _api_verify_mode5_raw(smu, 2948, (64u)msgu, mlen,
                                      ctxaddr, prelen, vku);
     }
+    reject = _verify_publish_reject(reject);
     if (reject == 0)
     {
       [:u64 (64u)mlenu] = mlen;

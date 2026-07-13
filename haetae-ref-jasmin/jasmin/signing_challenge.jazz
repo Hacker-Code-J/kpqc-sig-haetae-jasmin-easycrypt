@@ -28,8 +28,17 @@ fn __sign_challenge_shake256_absorb_buf(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inlen = #protect(inlen, ms);
   i = 0;
   while (i < inlen)
   {
@@ -50,10 +59,21 @@ fn __sign_challenge_shake256_absorb_buf(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, inlen, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, inlen, i, pos);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect_ptr(inp, ms);
+      inlen = #protect(inlen, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -66,8 +86,15 @@ fn __sign_challenge_shake256_absorb32(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   i = 0;
   while (i < 32)
   {
@@ -88,10 +115,19 @@ fn __sign_challenge_shake256_absorb32(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, i, pos);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect_ptr(inp, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -135,6 +171,7 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[136] bp;
   reg u64 i pos bidx limit;
   reg u32 b old;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -144,6 +181,8 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp, tau);
   bp, sp = __poly_challenge_squeeze256_136(bp, sp);
   () = #unspill(cp, tau);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m23_init(cp);
   i = HAETAE_N;
@@ -156,12 +195,17 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
       () = #spill(cp, i);
       bp, sp = __poly_challenge_squeeze256_136(bp, sp);
       () = #unspill(cp, i);
+      ms = #init_msf();
+      cp = #protect_ptr(cp, ms);
       pos = 0;
     }
 
     b = (32u)bp[pos];
     pos += 1;
     bidx = (64u)b;
+    () = #declassify(bidx);
+    ms = #init_msf();
+    bidx = #protect(bidx, ms);
     limit = i;
     limit += 1;
 
@@ -188,6 +232,7 @@ fn __sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   stack u8[32] buf;
   reg ptr u64[25] sp;
   reg ptr u8[32] bp;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -198,6 +243,8 @@ fn __sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp);
   bp, sp = __poly_challenge_squeeze256_32(bp, sp);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m5_frombytes(cp, bp);
   return cp;
@@ -219,6 +266,7 @@ inline fn _sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[1152] highbufp;
   reg ptr u8[32] lsbp;
   reg u64 count coeffs highlen tau;
+  #[msf] reg u64 ms;
 
   highbufp = highbuf;
   lsbp = lsb;
@@ -233,17 +281,34 @@ inline fn _sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(cp, ayp, y0p, mup, count, highlen, tau);
 
   () = #spill(cp, highp, y0p, mup, count, tau);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highlen = #protect(highlen, ms);
   highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
   () = #unspill(cp, highp, y0p, mup, count, tau);
 
   () = #spill(cp, y0p, mup, tau);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highp = #protect_ptr(highp, ms);
+  count = #protect(count, ms);
   highbufp = _pack_vec_highbits_m23(highbufp, highp, count);
   () = #unspill(cp, y0p, mup, tau);
 
   () = #spill(cp, highbufp, highlen, mup, tau);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  y0p = #protect_ptr(y0p, ms);
   lsbp = _pack_poly_lsb(lsbp, y0p);
   () = #unspill(cp, highbufp, highlen, mup, tau);
 
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highbufp = #protect_ptr(highbufp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
+  tau = #protect(tau, ms);
   cp = __sign_challenge_m23(cp, highbufp, highlen, lsbp, mup, tau);
 
   return cp, highp;
@@ -262,6 +327,7 @@ inline fn _sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[1152] highbufp;
   reg ptr u8[32] lsbp;
   reg u64 count coeffs highlen;
+  #[msf] reg u64 ms;
 
   highbufp = highbuf;
   lsbp = lsb;
@@ -275,22 +341,39 @@ inline fn _sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(cp, ayp, y0p, mup, count, highlen);
 
   () = #spill(cp, highp, y0p, mup, count);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highlen = #protect(highlen, ms);
   highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
   () = #unspill(cp, highp, y0p, mup, count);
 
   () = #spill(cp, y0p, mup);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highp = #protect_ptr(highp, ms);
+  count = #protect(count, ms);
   highbufp = _pack_vec_highbits_m5(highbufp, highp, count);
   () = #unspill(cp, y0p, mup);
 
   () = #spill(cp, highbufp, highlen, mup);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  y0p = #protect_ptr(y0p, ms);
   lsbp = _pack_poly_lsb(lsbp, y0p);
   () = #unspill(cp, highbufp, highlen, mup);
 
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highbufp = #protect_ptr(highbufp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
   cp = __sign_challenge_m5(cp, highbufp, highlen, lsbp, mup);
 
   return cp, highp;
 }
 
+#[ct = "cp * highp * ayp * y0p * mup -> cp * {ayp, highp}"]
 export
 fn sign_challenge_mode2_jazz(reg mut ptr u32[HAETAE_N] cp,
                              reg mut ptr u32[2048] highp,
@@ -300,10 +383,19 @@ fn sign_challenge_mode2_jazz(reg mut ptr u32[HAETAE_N] cp,
                              -> reg ptr u32[HAETAE_N],
                                 reg ptr u32[2048]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  y0p = #protect_ptr(y0p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sign_challenge_m23(cp, highp, ayp, y0p, mup, 2, 576, 58);
   return cp, highp;
 }
 
+#[ct = "cp * highp * ayp * y0p * mup -> cp * {ayp, highp}"]
 export
 fn sign_challenge_mode3_jazz(reg mut ptr u32[HAETAE_N] cp,
                              reg mut ptr u32[2048] highp,
@@ -313,10 +405,19 @@ fn sign_challenge_mode3_jazz(reg mut ptr u32[HAETAE_N] cp,
                              -> reg ptr u32[HAETAE_N],
                                 reg ptr u32[2048]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  y0p = #protect_ptr(y0p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sign_challenge_m23(cp, highp, ayp, y0p, mup, 3, 864, 80);
   return cp, highp;
 }
 
+#[ct = "cp * highp * ayp * y0p * mup -> cp * {ayp, highp}"]
 export
 fn sign_challenge_mode5_jazz(reg mut ptr u32[HAETAE_N] cp,
                              reg mut ptr u32[2048] highp,
@@ -326,6 +427,14 @@ fn sign_challenge_mode5_jazz(reg mut ptr u32[HAETAE_N] cp,
                              -> reg ptr u32[HAETAE_N],
                                 reg ptr u32[2048]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  y0p = #protect_ptr(y0p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sign_challenge_m5(cp, highp, ayp, y0p, mup);
   return cp, highp;
 }

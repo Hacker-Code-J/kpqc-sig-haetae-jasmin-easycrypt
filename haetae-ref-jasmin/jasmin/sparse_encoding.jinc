@@ -35,6 +35,8 @@ fn _encode_h_full(reg mut ptr u8[2048] outp,
   reg ptr u64[2] statep;
   reg ptr u64[1] badp;
   reg u64 badv off size;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   symsp = symbols;
   encp = encoding;
@@ -45,27 +47,44 @@ fn _encode_h_full(reg mut ptr u8[2048] outp,
   symsp, badp = _encode_h_prepare(symsp, badp, hp, count, mh, offset);
   () = #unspill(outp, encp, statep, esymsp, count);
   badv = badp[0];
+  () = #declassify(badv);
+  ms = #init_msf();
+  badv = #protect(badv, ms);
 
-  if (badv != 0)
+  b = badv != 0;
+  if (b)
   {
+    ms = #update_msf(b, ms);
     size = 0;
   }
   else
   {
+    ms = #update_msf(!b, ms);
     () = #spill(outp, count);
     encp, statep = _rans_encode(encp, statep, symsp, esymsp, count);
     () = #unspill(outp, count);
     badv = statep[1];
+    () = #declassify(badv);
+    ms = #init_msf();
+    badv = #protect(badv, ms);
 
-    if (badv != 0)
+    b = badv != 0;
+    if (b)
     {
+      ms = #update_msf(b, ms);
       size = 0;
     }
     else
     {
+      ms = #update_msf(!b, ms);
       off = statep[0];
       size = count;
       size -= off;
+      () = #declassify(off);
+      () = #declassify(size);
+      ms = #init_msf();
+      off = #protect(off, ms);
+      size = #protect(size, ms);
       outp = __copy_encoded_suffix(outp, encp, off, size);
     }
   }
@@ -89,6 +108,8 @@ fn _encode_hb_z1_full(reg mut ptr u8[2048] outp,
   reg ptr u64[2] statep;
   reg ptr u64[1] badp;
   reg u64 badv off size;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   symsp = symbols;
   encp = encoding;
@@ -99,27 +120,44 @@ fn _encode_hb_z1_full(reg mut ptr u8[2048] outp,
   symsp, badp = _encode_hb_z1_prepare(symsp, badp, hp, count, mhb, offset);
   () = #unspill(outp, encp, statep, esymsp, count);
   badv = badp[0];
+  () = #declassify(badv);
+  ms = #init_msf();
+  badv = #protect(badv, ms);
 
-  if (badv != 0)
+  b = badv != 0;
+  if (b)
   {
+    ms = #update_msf(b, ms);
     size = 0;
   }
   else
   {
+    ms = #update_msf(!b, ms);
     () = #spill(outp, count);
     encp, statep = _rans_encode(encp, statep, symsp, esymsp, count);
     () = #unspill(outp, count);
     badv = statep[1];
+    () = #declassify(badv);
+    ms = #init_msf();
+    badv = #protect(badv, ms);
 
-    if (badv != 0)
+    b = badv != 0;
+    if (b)
     {
+      ms = #update_msf(b, ms);
       size = 0;
     }
     else
     {
+      ms = #update_msf(!b, ms);
       off = statep[0];
       size = count;
       size -= off;
+      () = #declassify(off);
+      () = #declassify(size);
+      ms = #init_msf();
+      off = #protect(off, ms);
+      size = #protect(size, ms);
       outp = __copy_encoded_suffix(outp, encp, off, size);
     }
   }
@@ -143,6 +181,8 @@ fn _decode_h_full(reg mut ptr u32[2048] hp,
   reg ptr u8[2048] symsp;
   reg ptr u64[3] statep;
   reg u64 bad hcut;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   symsp = symbols;
   statep = state;
@@ -156,12 +196,21 @@ fn _decode_h_full(reg mut ptr u32[2048] hp,
   () = #unspill(hp, badp, count, mh, offset);
 
   bad = statep[1];
-  if (bad == 0)
+  () = #declassify(bad);
+  ms = #init_msf();
+  bad = #protect(bad, ms);
+  b = bad == 0;
+  if (b)
   {
+    ms = #update_msf(b, ms);
     hcut = mh;
     hcut -= 1;
     hcut >>= 1;
     hp = _decode_h_apply(hp, symsp, count, hcut, offset);
+  }
+  else
+  {
+    ms = #update_msf(!b, ms);
   }
 
   badp[0] = bad;
@@ -184,6 +233,8 @@ fn _decode_hb_z1_full(reg mut ptr u32[2048] hp,
   reg ptr u8[2048] symsp;
   reg ptr u64[3] statep;
   reg u64 bad;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   symsp = symbols;
   statep = state;
@@ -197,9 +248,18 @@ fn _decode_hb_z1_full(reg mut ptr u32[2048] hp,
   () = #unspill(hp, badp, count, offset);
 
   bad = statep[1];
-  if (bad == 0)
+  () = #declassify(bad);
+  ms = #init_msf();
+  bad = #protect(bad, ms);
+  b = bad == 0;
+  if (b)
   {
+    ms = #update_msf(b, ms);
     hp = _decode_hb_z1_apply(hp, symsp, count, offset);
+  }
+  else
+  {
+    ms = #update_msf(!b, ms);
   }
 
   badp[0] = bad;

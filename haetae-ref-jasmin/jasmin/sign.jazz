@@ -30,8 +30,18 @@ fn _sf_shake256_absorb_addr(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inp);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inp = #protect(inp, ms);
+  inlen = #protect(inlen, ms);
   while (inlen != 0)
   {
     lane = pos;
@@ -52,10 +62,21 @@ fn _sf_shake256_absorb_addr(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, inlen, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, inlen, pos);
+      () = #declassify(inp);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect(inp, ms);
+      inlen = #protect(inlen, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -68,8 +89,17 @@ fn _sf_shake256_absorb_sk(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t i;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  skp = #protect_ptr(skp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inlen = #protect(inlen, ms);
   i = 0;
   while (i < inlen)
   {
@@ -90,10 +120,21 @@ fn _sf_shake256_absorb_sk(reg mut ptr u64[25] sp,
       () = #spill(statep, skp, inlen, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, skp, inlen, i, pos);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      skp = #protect_ptr(skp, ms);
+      inlen = #protect(inlen, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -106,8 +147,17 @@ fn _sf_shake256_absorb_pre(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t i;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  prep = #protect_ptr(prep, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inlen = #protect(inlen, ms);
   i = 0;
   while (i < inlen)
   {
@@ -128,10 +178,21 @@ fn _sf_shake256_absorb_pre(reg mut ptr u64[25] sp,
       () = #spill(statep, prep, inlen, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, prep, inlen, i, pos);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      prep = #protect_ptr(prep, ms);
+      inlen = #protect(inlen, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -141,8 +202,14 @@ fn _sf_shake256_finalize(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane t;
   reg u8 shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   lane = pos;
   lane >>= 3;
   shift = (8u)pos;
@@ -160,41 +227,31 @@ fn _sf_shake256_finalize(reg mut ptr u64[25] sp,
   return sp;
 }
 
+#[ct = "outp * secret -> secret * secret"]
 fn _sf_shake256_squeeze64(reg mut ptr u8[64] outp,
                           reg mut ptr u64[25] sp) -> reg ptr u8[64],
                                                     reg ptr u64[25]
 {
-  reg u64 i j lane t idx;
-  reg u8 b;
+  reg u64 i lane t;
+  #[msf] reg u64 ms;
 
-  idx = 0;
-  () = #spill(outp, idx);
-  sp = _keccakf1600(sp);
-  () = #unspill(outp, idx);
-
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
+  sp = #protect_ptr(sp, ms);
   i = 0;
   while (i < 64)
   {
     lane = i;
     lane >>= 3;
     t = sp[lane];
-
-    j = 0;
-    while (j < 8)
-    {
-      b = (8u)t;
-      outp[idx] = b;
-      t >>= 8;
-      idx += 1;
-      j += 1;
-    }
-
+    outp.[:u64 i] = t;
     i += 8;
   }
 
   return outp, sp;
 }
 
+#[ct = "mup * public * public * public * public * public * public -> secret"]
 fn _sf_mu_rawpre(reg mut ptr u8[64] mup,
                  reg const ptr u8[2752] skp,
                  reg u64 vkbytes,
@@ -207,25 +264,39 @@ fn _sf_mu_rawpre(reg mut ptr u8[64] mup,
   stack u64[2] st;
   reg ptr u64[25] sp;
   reg ptr u64[2] stp;
+  #[msf] reg u64 ms;
 
+  () = #declassify(mup);
   sp = state;
   stp = st;
   stp[0] = 0;
   stp[1] = 136;
   sp = _keccak_init_state(sp);
-  () = #spill(preaddr, prelen, maddr, mlen);
+  () = #spill(mup, preaddr, prelen, maddr, mlen);
   sp, stp = _sf_shake256_absorb_sk(sp, stp, skp, vkbytes);
-  () = #unspill(preaddr, prelen, maddr, mlen);
-  () = #spill(maddr, mlen);
+  () = #unspill(mup, preaddr, prelen, maddr, mlen);
+  () = #spill(mup, maddr, mlen);
   sp, stp = _sf_shake256_absorb_addr(sp, stp, preaddr, prelen);
-  () = #unspill(maddr, mlen);
+  () = #unspill(mup, maddr, mlen);
+  () = #spill(mup);
   sp, stp = _sf_shake256_absorb_addr(sp, stp, maddr, mlen);
+  () = #unspill(mup);
+  () = #spill(mup);
   sp = _sf_shake256_finalize(sp, stp);
+  () = #unspill(mup);
+  () = #declassify(mup);
+  () = #spill(mup);
+  sp = _keccakf1600(sp);
+  () = #unspill(mup);
+  () = #declassify(mup);
+  ms = #init_msf();
+  mup = #protect_ptr(mup, ms);
   mup, sp = _sf_shake256_squeeze64(mup, sp);
 
   return mup;
 }
 
+#[ct = "mup * public * public * public * public * public * public -> secret"]
 fn _sf_mu_preptr(reg mut ptr u8[64] mup,
                  reg const ptr u8[2752] skp,
                  reg u64 vkbytes,
@@ -238,20 +309,33 @@ fn _sf_mu_preptr(reg mut ptr u8[64] mup,
   stack u64[2] st;
   reg ptr u64[25] sp;
   reg ptr u64[2] stp;
+  #[msf] reg u64 ms;
 
+  () = #declassify(mup);
   sp = state;
   stp = st;
   stp[0] = 0;
   stp[1] = 136;
   sp = _keccak_init_state(sp);
-  () = #spill(prep, prelen, maddr, mlen);
+  () = #spill(mup, prep, prelen, maddr, mlen);
   sp, stp = _sf_shake256_absorb_sk(sp, stp, skp, vkbytes);
-  () = #unspill(prep, prelen, maddr, mlen);
-  () = #spill(maddr, mlen);
+  () = #unspill(mup, prep, prelen, maddr, mlen);
+  () = #spill(mup, maddr, mlen);
   sp, stp = _sf_shake256_absorb_pre(sp, stp, prep, prelen);
-  () = #unspill(maddr, mlen);
+  () = #unspill(mup, maddr, mlen);
+  () = #spill(mup);
   sp, stp = _sf_shake256_absorb_addr(sp, stp, maddr, mlen);
+  () = #unspill(mup);
+  () = #spill(mup);
   sp = _sf_shake256_finalize(sp, stp);
+  () = #unspill(mup);
+  () = #declassify(mup);
+  () = #spill(mup);
+  sp = _keccakf1600(sp);
+  () = #unspill(mup);
+  () = #declassify(mup);
+  ms = #init_msf();
+  mup = #protect_ptr(mup, ms);
   mup, sp = _sf_shake256_squeeze64(mup, sp);
 
   return mup;
@@ -424,6 +508,7 @@ fn _sf_poly_uniform_at_seed32(reg mut ptr u32[8192] ap,
   reg ptr u8[1024] bufp;
   reg u64 ctr buflen off i idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -432,17 +517,28 @@ fn _sf_poly_uniform_at_seed32(reg mut ptr u32[8192] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 168;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 336;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 504;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 672;
   ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  () = #declassify(base);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  base = #protect(base, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
@@ -462,10 +558,25 @@ fn _sf_poly_uniform_at_seed32(reg mut ptr u32[8192] ap,
 
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
     buflen = 168;
     buflen += off;
+    () = #declassify(base);
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    base = #protect(base, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -478,6 +589,7 @@ fn _sf_polymatkl_expand_with_vecA_seed32(reg mut ptr u32[8192] matp,
                                          reg u64 m) -> reg ptr u32[8192]
 {
   reg u64 i j base nonce;
+  #[msf] reg u64 ms;
 
   i = 0;
   base = 0;
@@ -491,6 +603,19 @@ fn _sf_polymatkl_expand_with_vecA_seed32(reg mut ptr u32[8192] matp,
     () = #spill(seedp, rows, cols, m, i, base);
     matp = _sf_poly_uniform_at_seed32(matp, base, seedp, nonce);
     () = #unspill(seedp, rows, cols, m, i, base);
+    () = #declassify(rows);
+    () = #declassify(cols);
+    () = #declassify(m);
+    () = #declassify(i);
+    () = #declassify(base);
+    ms = #init_msf();
+    matp = #protect_ptr(matp, ms);
+    seedp = #protect_ptr(seedp, ms);
+    rows = #protect(rows, ms);
+    cols = #protect(cols, ms);
+    m = #protect(m, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
     base += HAETAE_N;
 
     j = 0;
@@ -503,6 +628,21 @@ fn _sf_polymatkl_expand_with_vecA_seed32(reg mut ptr u32[8192] matp,
       () = #spill(seedp, rows, cols, m, i, j, base);
       matp = _sf_poly_uniform_at_seed32(matp, base, seedp, nonce);
       () = #unspill(seedp, rows, cols, m, i, j, base);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(m);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(base);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      seedp = #protect_ptr(seedp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      m = #protect(m, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      base = #protect(base, ms);
       j += 1;
       base += HAETAE_N;
     }
@@ -519,6 +659,7 @@ fn _sf_polymatkl_expand_seed32(reg mut ptr u32[8192] matp,
                                reg u64 cols) -> reg ptr u32[8192]
 {
   reg u64 i j base nonce rowbase m;
+  #[msf] reg u64 ms;
 
   m = cols;
   m -= 1;
@@ -541,6 +682,21 @@ fn _sf_polymatkl_expand_seed32(reg mut ptr u32[8192] matp,
       () = #spill(seedp, rows, cols, m, i, j, rowbase);
       matp = _sf_poly_uniform_at_seed32(matp, base, seedp, nonce);
       () = #unspill(seedp, rows, cols, m, i, j, rowbase);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(m);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(rowbase);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      seedp = #protect_ptr(seedp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      m = #protect(m, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      rowbase = #protect(rowbase, ms);
       j += 1;
     }
 
@@ -563,6 +719,7 @@ fn _sf_unpack_sk_mode2(reg mut ptr u32[8192] matp,
   stack u32[2048] b;
   reg ptr u32[2048] bp;
   reg u64 count kr lr mr vkbr;
+  #[msf] reg u64 ms;
 
   kr = 2;
   lr = 4;
@@ -573,6 +730,7 @@ fn _sf_unpack_sk_mode2(reg mut ptr u32[8192] matp,
   () = #spill(bp, s1p, s2p, keyp, skp);
   matp = _sf_polymatkl_expand_with_vecA_seed32(matp, skp, kr, lr, mr);
   () = #unspill(bp, s1p, s2p, keyp, skp);
+  bp = b;
   matp = _polymatkl_double(matp, kr, lr);
   count = kr;
   count *= HAETAE_N;
@@ -582,6 +740,11 @@ fn _sf_unpack_sk_mode2(reg mut ptr u32[8192] matp,
   () = #spill(matp, s1p, s2p, keyp, skp);
   bp = _polyvec_ntt(bp, kr);
   () = #unspill(matp, s1p, s2p, keyp, skp);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  kr = #protect(kr, ms);
+  lr = #protect(lr, ms);
   matp = _polymat_set_first_column(matp, bp, kr, lr);
   s1p, s2p, keyp = _unpack_sk_m23(s1p, s2p, keyp, skp, vkbr, mr, kr);
 
@@ -600,6 +763,7 @@ fn _sf_unpack_sk_mode3(reg mut ptr u32[8192] matp,
   stack u32[2048] b;
   reg ptr u32[2048] bp;
   reg u64 count kr lr mr vkbr;
+  #[msf] reg u64 ms;
 
   kr = 3;
   lr = 6;
@@ -610,6 +774,7 @@ fn _sf_unpack_sk_mode3(reg mut ptr u32[8192] matp,
   () = #spill(bp, s1p, s2p, keyp, skp);
   matp = _sf_polymatkl_expand_with_vecA_seed32(matp, skp, kr, lr, mr);
   () = #unspill(bp, s1p, s2p, keyp, skp);
+  bp = b;
   matp = _polymatkl_double(matp, kr, lr);
   count = kr;
   count *= HAETAE_N;
@@ -619,6 +784,11 @@ fn _sf_unpack_sk_mode3(reg mut ptr u32[8192] matp,
   () = #spill(matp, s1p, s2p, keyp, skp);
   bp = _polyvec_ntt(bp, kr);
   () = #unspill(matp, s1p, s2p, keyp, skp);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  kr = #protect(kr, ms);
+  lr = #protect(lr, ms);
   matp = _polymat_set_first_column(matp, bp, kr, lr);
   s1p, s2p, keyp = _unpack_sk_m23(s1p, s2p, keyp, skp, vkbr, mr, kr);
 
@@ -637,6 +807,7 @@ fn _sf_unpack_sk_mode5(reg mut ptr u32[8192] matp,
   stack u32[2048] b;
   reg ptr u32[2048] bp;
   reg u64 kr lr mr vkbr;
+  #[msf] reg u64 ms;
 
   kr = 4;
   lr = 7;
@@ -647,7 +818,13 @@ fn _sf_unpack_sk_mode5(reg mut ptr u32[8192] matp,
   () = #spill(bp, s1p, s2p, keyp, skp);
   matp = _sf_polymatkl_expand_seed32(matp, skp, kr, lr);
   () = #unspill(bp, s1p, s2p, keyp, skp);
+  bp = b;
   matp = _polymatkl_double(matp, kr, lr);
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  bp = #protect_ptr(bp, ms);
+  kr = #protect(kr, ms);
+  lr = #protect(lr, ms);
   matp = _polymat_set_first_column(matp, bp, kr, lr);
   s1p, s2p, keyp = _unpack_sk_m5(s1p, s2p, keyp, skp, vkbr, mr, kr);
 
@@ -723,6 +900,7 @@ fn _sf_sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   reg ptr u64[1] coefcntp;
   reg u64 block off signbytes bytecnt counts total got firstflag remaining;
   reg u64 dont bufoff outoff;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -736,7 +914,24 @@ fn _sf_sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   {
     () = #spill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
     bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #declassify(bufp);
     () = #unspill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
+    () = #declassify(block);
+    () = #declassify(off);
+    () = #declassify(len);
+    () = #declassify(sampleoff);
+    () = #declassify(signoff);
+    ms = #init_msf();
+    bufp = #protect_ptr(bufp, ms);
+    sp = #protect_ptr(sp, ms);
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    block = #protect(block, ms);
+    off = #protect(off, ms);
+    len = #protect(len, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
     off += 136;
     block += 1;
   }
@@ -763,7 +958,21 @@ fn _sf_sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   rp, sqsump, coefcntp = __sample_gauss_at(rp, sqsump, coefcntp, bufp,
                                            counts, dont, bufoff, outoff);
   () = #unspill(signsp, sp, len, bytecnt, signbytes, dont, sampleoff, signoff);
+  ms = #init_msf();
+  rp = #protect_ptr(rp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  sqsump = #protect_ptr(sqsump, ms);
+  coefcntp = #protect_ptr(coefcntp, ms);
+  sp = #protect_ptr(sp, ms);
+  len = #protect(len, ms);
+  bytecnt = #protect(bytecnt, ms);
+  signbytes = #protect(signbytes, ms);
+  dont = #protect(dont, ms);
+  sampleoff = #protect(sampleoff, ms);
+  signoff = #protect(signoff, ms);
   got = coefcntp[0];
+  () = #declassify(got);
+  got = #protect(got, ms);
   total = got;
   firstflag = 1;
 
@@ -780,8 +989,33 @@ fn _sf_sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
     () = #spill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
                 dont, off, sampleoff, signoff);
     bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #declassify(bufp);
     () = #unspill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
                   dont, off, sampleoff, signoff);
+    () = #declassify(bytecnt);
+    () = #declassify(signbytes);
+    () = #declassify(firstflag);
+    () = #declassify(len);
+    () = #declassify(total);
+    () = #declassify(dont);
+    () = #declassify(off);
+    () = #declassify(sampleoff);
+    () = #declassify(signoff);
+    ms = #init_msf();
+    bufp = #protect_ptr(bufp, ms);
+    sp = #protect_ptr(sp, ms);
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    bytecnt = #protect(bytecnt, ms);
+    signbytes = #protect(signbytes, ms);
+    firstflag = #protect(firstflag, ms);
+    len = #protect(len, ms);
+    total = #protect(total, ms);
+    dont = #protect(dont, ms);
+    off = #protect(off, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
 
     bytecnt = 136;
     bytecnt += off;
@@ -799,7 +1033,23 @@ fn _sf_sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
                                              counts, dont, bufoff, outoff);
     () = #unspill(signsp, sp, len, bytecnt, signbytes, firstflag, total, dont,
                   sampleoff, signoff);
+    ms = #init_msf();
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    coefcntp = #protect_ptr(coefcntp, ms);
+    sp = #protect_ptr(sp, ms);
+    len = #protect(len, ms);
+    bytecnt = #protect(bytecnt, ms);
+    signbytes = #protect(signbytes, ms);
+    firstflag = #protect(firstflag, ms);
+    total = #protect(total, ms);
+    dont = #protect(dont, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
     got = coefcntp[0];
+    () = #declassify(got);
+    got = #protect(got, ms);
     total += got;
     firstflag = 0;
   }
@@ -870,6 +1120,15 @@ fn _sf_scale_and_check(reg mut ptr u32[2048] y1p,
                                          reg u64
 {
   reg u64 counts kcount norm accepted;
+  #[msf] reg u64 ms;
+
+  () = #declassify(lcount);
+  () = #declassify(total);
+  () = #declassify(bound);
+  ms = #init_msf();
+  lcount = #protect(lcount, ms);
+  total = #protect(total, ms);
+  bound = #protect(bound, ms);
 
   counts = total;
   counts <<= 32;
@@ -880,6 +1139,10 @@ fn _sf_scale_and_check(reg mut ptr u32[2048] y1p,
   kcount = total;
   kcount -= lcount;
   norm = _polyfixveclk_sqnorm2_2048(y1p, lcount, y2p, kcount);
+  () = #declassify(norm);
+  ms = #init_msf();
+  norm = #protect(norm, ms);
+  bound = #protect(bound, ms);
   accepted = 0;
   if (norm <= bound)
   {
@@ -916,6 +1179,7 @@ fn _sf_hyperball_full(reg mut ptr u32[2048] y1p,
   reg ptr u8[512] signsp;
   reg ptr u64[2] sqsump invsqrtp cubep threep;
   reg u64 ni accepted idx total len sampleoff signoff scale lcoeffs tcoeffs;
+  #[msf] reg u64 ms;
 
   samplesp = samples;
   signsp = signs;
@@ -989,11 +1253,15 @@ fn _sf_hyperball_full(reg mut ptr u32[2048] y1p,
 
   bp = _sf_hyperball_b_raw(bp, seedp, ni);
   () = #unspill(counterp);
+  () = #declassify(counterp);
+  ms = #init_msf();
+  counterp = #protect_ptr(counterp, ms);
   counterp[0] = ni;
 
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * seedp -> public * public * {bp, counterp, seedp} * counterp"]
 export
 fn _sf_hyperball_mode2(reg mut ptr u32[2048] y1p,
                        reg mut ptr u32[2048] y2p,
@@ -1005,6 +1273,7 @@ fn _sf_hyperball_mode2(reg mut ptr u32[2048] y1p,
                                                      reg ptr u64[1]
 {
   reg u64 lcount kcount scale bound cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 4;
   kcount = 2;
@@ -1014,12 +1283,27 @@ fn _sf_hyperball_mode2(reg mut ptr u32[2048] y1p,
   cube1 = 0x1162;
   three0 = 0x693861ad937b;
   three1 = 0x9caa56;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  seedp = #protect_ptr(seedp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale = #protect(scale, ms);
+  bound = #protect(bound, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _sf_hyperball_full(
       y1p, y2p, bp, counterp, seedp, lcount, kcount, scale, bound, cube0,
       cube1, three0, three1);
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * seedp -> public * public * {bp, counterp, seedp} * counterp"]
 export
 fn _sf_hyperball_mode3(reg mut ptr u32[2048] y1p,
                        reg mut ptr u32[2048] y2p,
@@ -1031,6 +1315,7 @@ fn _sf_hyperball_mode3(reg mut ptr u32[2048] y1p,
                                                      reg ptr u64[1]
 {
   reg u64 lcount kcount scale bound cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 6;
   kcount = 3;
@@ -1040,12 +1325,27 @@ fn _sf_hyperball_mode3(reg mut ptr u32[2048] y1p,
   cube1 = 0x978;
   three0 = 0x7ad215218533;
   three1 = 0x7ff1c9;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  seedp = #protect_ptr(seedp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale = #protect(scale, ms);
+  bound = #protect(bound, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _sf_hyperball_full(
       y1p, y2p, bp, counterp, seedp, lcount, kcount, scale, bound, cube0,
       cube1, three0, three1);
   return y1p, y2p, bp, counterp;
 }
 
+#[ct = "public * public * bp * counterp * seedp -> public * public * {bp, counterp, seedp} * counterp"]
 export
 fn _sf_hyperball_mode5(reg mut ptr u32[2048] y1p,
                        reg mut ptr u32[2048] y2p,
@@ -1057,6 +1357,7 @@ fn _sf_hyperball_mode5(reg mut ptr u32[2048] y1p,
                                                      reg ptr u64[1]
 {
   reg u64 lcount kcount scale bound cube0 cube1 three0 three1;
+  #[msf] reg u64 ms;
 
   lcount = 7;
   kcount = 4;
@@ -1066,6 +1367,20 @@ fn _sf_hyperball_mode5(reg mut ptr u32[2048] y1p,
   cube1 = 0x702;
   three0 = 0x5768588eed31;
   three1 = 0x73bd40;
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  bp = #protect_ptr(bp, ms);
+  counterp = #protect_ptr(counterp, ms);
+  seedp = #protect_ptr(seedp, ms);
+  lcount = #protect(lcount, ms);
+  kcount = #protect(kcount, ms);
+  scale = #protect(scale, ms);
+  bound = #protect(bound, ms);
+  cube0 = #protect(cube0, ms);
+  cube1 = #protect(cube1, ms);
+  three0 = #protect(three0, ms);
+  three1 = #protect(three1, ms);
   y1p, y2p, bp, counterp = _sf_hyperball_full(
       y1p, y2p, bp, counterp, seedp, lcount, kcount, scale, bound, cube0,
       cube1, three0, three1);
@@ -1219,8 +1534,17 @@ fn __sign_challenge_shake256_absorb_buf(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  () = #declassify(inlen);
+  pos = #protect(pos, ms);
+  inlen = #protect(inlen, ms);
   i = 0;
   while (i < inlen)
   {
@@ -1241,10 +1565,21 @@ fn __sign_challenge_shake256_absorb_buf(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, inlen, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, inlen, i, pos);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect_ptr(inp, ms);
+      inlen = #protect(inlen, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -1257,8 +1592,15 @@ fn __sign_challenge_shake256_absorb_mu32(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   i = 0;
   while (i < 32)
   {
@@ -1279,10 +1621,19 @@ fn __sign_challenge_shake256_absorb_mu32(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, i, pos);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect_ptr(inp, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -1295,8 +1646,15 @@ fn __sign_challenge_shake256_absorb32(reg mut ptr u64[25] sp,
 {
   reg u64 pos lane i t;
   reg u8 b shift;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
+  inp = #protect_ptr(inp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   i = 0;
   while (i < 32)
   {
@@ -1317,10 +1675,19 @@ fn __sign_challenge_shake256_absorb32(reg mut ptr u64[25] sp,
       () = #spill(statep, inp, i, pos);
       sp = _keccakf1600(sp);
       () = #unspill(statep, inp, i, pos);
+      () = #declassify(pos);
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
+      sp = #protect_ptr(sp, ms);
+      inp = #protect_ptr(inp, ms);
+      i = #protect(i, ms);
+      pos = #protect(pos, ms);
       pos = 0;
     }
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -1364,6 +1731,7 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[136] bp;
   reg u64 i pos bidx limit;
   reg u32 b old;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -1373,6 +1741,8 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp, tau);
   bp, sp = __poly_challenge_squeeze256_136(bp, sp);
   () = #unspill(cp, tau);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m23_init(cp);
   i = HAETAE_N;
@@ -1385,12 +1755,17 @@ fn __sign_challenge_m23(reg mut ptr u32[HAETAE_N] cp,
       () = #spill(cp, i);
       bp, sp = __poly_challenge_squeeze256_136(bp, sp);
       () = #unspill(cp, i);
+      ms = #init_msf();
+      cp = #protect_ptr(cp, ms);
       pos = 0;
     }
 
     b = (32u)bp[pos];
     pos += 1;
     bidx = (64u)b;
+    () = #declassify(bidx);
+    ms = #init_msf();
+    bidx = #protect(bidx, ms);
     limit = i;
     limit += 1;
 
@@ -1417,6 +1792,7 @@ fn __sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   stack u8[32] buf;
   reg ptr u64[25] sp;
   reg ptr u8[32] bp;
+  #[msf] reg u64 ms;
 
   sp = state;
   bp = buf;
@@ -1427,6 +1803,8 @@ fn __sign_challenge_m5(reg mut ptr u32[HAETAE_N] cp,
   () = #spill(cp);
   bp, sp = __poly_challenge_squeeze256_32(bp, sp);
   () = #unspill(cp);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
 
   cp = _poly_challenge_m5_frombytes(cp, bp);
   return cp;
@@ -1444,6 +1822,7 @@ fn _sf_challenge_mode2(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[1152] highbufp;
   reg ptr u8[32] lsbp;
   reg u64 coeffs highlen k tau;
+  #[msf] reg u64 ms;
 
   coeffs = 512;
   highlen = 576;
@@ -1456,11 +1835,25 @@ fn _sf_challenge_mode2(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(cp, ayp, y0p, mup);
   highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
   () = #spill(cp, y0p, mup);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highp = #protect_ptr(highp, ms);
+  k = #protect(k, ms);
   highbufp = _pack_vec_highbits_m23(highbufp, highp, k);
   () = #unspill(cp, y0p, mup);
   () = #spill(cp, highbufp, mup);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  y0p = #protect_ptr(y0p, ms);
   lsbp = _pack_poly_lsb(lsbp, y0p);
   () = #unspill(cp, highbufp, mup);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highbufp = #protect_ptr(highbufp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
+  tau = #protect(tau, ms);
   cp = __sign_challenge_m23(cp, highbufp, highlen, lsbp, mup, tau);
 
   return cp, highp;
@@ -1478,6 +1871,7 @@ fn _sf_challenge_mode3(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[1152] highbufp;
   reg ptr u8[32] lsbp;
   reg u64 coeffs highlen k tau;
+  #[msf] reg u64 ms;
 
   coeffs = 768;
   highlen = 864;
@@ -1490,11 +1884,25 @@ fn _sf_challenge_mode3(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(cp, ayp, y0p, mup);
   highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
   () = #spill(cp, y0p, mup);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highp = #protect_ptr(highp, ms);
+  k = #protect(k, ms);
   highbufp = _pack_vec_highbits_m23(highbufp, highp, k);
   () = #unspill(cp, y0p, mup);
   () = #spill(cp, highbufp, mup);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  y0p = #protect_ptr(y0p, ms);
   lsbp = _pack_poly_lsb(lsbp, y0p);
   () = #unspill(cp, highbufp, mup);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highbufp = #protect_ptr(highbufp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
+  tau = #protect(tau, ms);
   cp = __sign_challenge_m23(cp, highbufp, highlen, lsbp, mup, tau);
 
   return cp, highp;
@@ -1512,6 +1920,7 @@ fn _sf_challenge_mode5(reg mut ptr u32[HAETAE_N] cp,
   reg ptr u8[1152] highbufp;
   reg ptr u8[32] lsbp;
   reg u64 coeffs highlen k;
+  #[msf] reg u64 ms;
 
   coeffs = 1024;
   highlen = 1152;
@@ -1523,11 +1932,24 @@ fn _sf_challenge_mode5(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(cp, ayp, y0p, mup);
   highbufp = __sign_challenge_zero_highbuf(highbufp, highlen);
   () = #spill(cp, y0p, mup);
+  ms = #init_msf();
+  highbufp = #protect_ptr(highbufp, ms);
+  highp = #protect_ptr(highp, ms);
+  k = #protect(k, ms);
   highbufp = _pack_vec_highbits_m5(highbufp, highp, k);
   () = #unspill(cp, y0p, mup);
   () = #spill(cp, highbufp, mup);
+  ms = #init_msf();
+  lsbp = #protect_ptr(lsbp, ms);
+  y0p = #protect_ptr(y0p, ms);
   lsbp = _pack_poly_lsb(lsbp, y0p);
   () = #unspill(cp, highbufp, mup);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highbufp = #protect_ptr(highbufp, ms);
+  lsbp = #protect_ptr(lsbp, ms);
+  mup = #protect_ptr(mup, ms);
+  highlen = #protect(highlen, ms);
   cp = __sign_challenge_m5(cp, highbufp, highlen, lsbp, mup);
 
   return cp, highp;
@@ -1550,6 +1972,7 @@ fn _sf_round_challenge_mode2(reg mut ptr u32[HAETAE_N] cp,
                                                             reg ptr u32[HAETAE_N]
 {
   reg u64 lr kr kcount;
+  #[msf] reg u64 ms;
 
   lr = 4;
   kr = 2;
@@ -1561,9 +1984,26 @@ fn _sf_round_challenge_mode2(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(z2rndp, z10p, cp, mup);
   ayp = _polymat_pointwise_acc(ayp, a1p, z1rndp, kr, lr);
   ayp = _polyvec_invntt(ayp, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z2rndp = #protect_ptr(z2rndp, ms);
+  kcount = #protect(kcount, ms);
   ayp, z2rndp = _sign_add_double_z2rnd(ayp, z2rndp, kcount);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  kr = #protect(kr, ms);
   ayp = _sf_polyveck_poly_fromcrt_inplace(ayp, z10p, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  kcount = #protect(kcount, ms);
   ayp = _polyvec_freeze2q(ayp, kcount);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sf_challenge_mode2(cp, highp, ayp, z10p, mup);
 
   return cp, highp, ayp, z1rndp, z2rndp, z10p;
@@ -1586,6 +2026,7 @@ fn _sf_round_challenge_mode3(reg mut ptr u32[HAETAE_N] cp,
                                                             reg ptr u32[HAETAE_N]
 {
   reg u64 lr kr kcount;
+  #[msf] reg u64 ms;
 
   lr = 6;
   kr = 3;
@@ -1597,9 +2038,26 @@ fn _sf_round_challenge_mode3(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(z2rndp, z10p, cp, mup);
   ayp = _polymat_pointwise_acc(ayp, a1p, z1rndp, kr, lr);
   ayp = _polyvec_invntt(ayp, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z2rndp = #protect_ptr(z2rndp, ms);
+  kcount = #protect(kcount, ms);
   ayp, z2rndp = _sign_add_double_z2rnd(ayp, z2rndp, kcount);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  kr = #protect(kr, ms);
   ayp = _sf_polyveck_poly_fromcrt_inplace(ayp, z10p, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  kcount = #protect(kcount, ms);
   ayp = _polyvec_freeze2q(ayp, kcount);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sf_challenge_mode3(cp, highp, ayp, z10p, mup);
 
   return cp, highp, ayp, z1rndp, z2rndp, z10p;
@@ -1622,6 +2080,7 @@ fn _sf_round_challenge_mode5(reg mut ptr u32[HAETAE_N] cp,
                                                             reg ptr u32[HAETAE_N]
 {
   reg u64 lr kr kcount;
+  #[msf] reg u64 ms;
 
   lr = 7;
   kr = 4;
@@ -1633,9 +2092,26 @@ fn _sf_round_challenge_mode5(reg mut ptr u32[HAETAE_N] cp,
   () = #unspill(z2rndp, z10p, cp, mup);
   ayp = _polymat_pointwise_acc(ayp, a1p, z1rndp, kr, lr);
   ayp = _polyvec_invntt(ayp, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z2rndp = #protect_ptr(z2rndp, ms);
+  kcount = #protect(kcount, ms);
   ayp, z2rndp = _sign_add_double_z2rnd(ayp, z2rndp, kcount);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  kr = #protect(kr, ms);
   ayp = _sf_polyveck_poly_fromcrt_inplace(ayp, z10p, kr);
+  ms = #init_msf();
+  ayp = #protect_ptr(ayp, ms);
+  kcount = #protect(kcount, ms);
   ayp = _polyvec_freeze2q(ayp, kcount);
+  ms = #init_msf();
+  cp = #protect_ptr(cp, ms);
+  highp = #protect_ptr(highp, ms);
+  ayp = #protect_ptr(ayp, ms);
+  z10p = #protect_ptr(z10p, ms);
+  mup = #protect_ptr(mup, ms);
   cp, highp = _sf_challenge_mode5(cp, highp, ayp, z10p, mup);
 
   return cp, highp, ayp, z1rndp, z2rndp, z10p;
@@ -1979,6 +2455,7 @@ fn _sf_signature_core_mode2(reg mut ptr u8[2948] sigp,
   reg ptr u32[HAETAE_N] cp z10p;
   reg u64 reject bad s1polys s2polys lcount kcount b1bound b0bound;
   reg u8 bv;
+  #[msf] reg u64 ms;
 
   seedbufp = seedbuf;
   keyp = key;
@@ -2025,6 +2502,9 @@ fn _sf_signature_core_mode2(reg mut ptr u8[2948] sigp,
     z1p, z2p, z1tmpp, z2tmpp, reject =
         _sf_z_check(z1p, z2p, z1tmpp, z2tmpp, y1p, y2p, cp, s1p, s2p, bv,
                     lcount, kcount, b1bound, b0bound);
+    () = #declassify(reject);
+    ms = #init_msf();
+    reject = #protect(reject, ms);
     bad = 1;
     if (reject == 0)
     {
@@ -2032,6 +2512,9 @@ fn _sf_signature_core_mode2(reg mut ptr u8[2948] sigp,
                                           z1p, z2p);
       sigp, bad = _sf_pack_mode2(sigp, cp, z1rndp, hp);
     }
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
   }
 
   return sigp;
@@ -2072,6 +2555,7 @@ fn _sf_signature_core_mode3(reg mut ptr u8[2948] sigp,
   reg ptr u32[HAETAE_N] cp z10p;
   reg u64 reject bad s1polys s2polys lcount kcount b1bound b0bound;
   reg u8 bv;
+  #[msf] reg u64 ms;
 
   seedbufp = seedbuf;
   keyp = key;
@@ -2118,6 +2602,9 @@ fn _sf_signature_core_mode3(reg mut ptr u8[2948] sigp,
     z1p, z2p, z1tmpp, z2tmpp, reject =
         _sf_z_check(z1p, z2p, z1tmpp, z2tmpp, y1p, y2p, cp, s1p, s2p, bv,
                     lcount, kcount, b1bound, b0bound);
+    () = #declassify(reject);
+    ms = #init_msf();
+    reject = #protect(reject, ms);
     bad = 1;
     if (reject == 0)
     {
@@ -2125,6 +2612,9 @@ fn _sf_signature_core_mode3(reg mut ptr u8[2948] sigp,
                                           z1p, z2p);
       sigp, bad = _sf_pack_mode3(sigp, cp, z1rndp, hp);
     }
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
   }
 
   return sigp;
@@ -2165,6 +2655,7 @@ fn _sf_signature_core_mode5(reg mut ptr u8[2948] sigp,
   reg ptr u32[HAETAE_N] cp z10p;
   reg u64 reject bad s1polys s2polys lcount kcount b1bound b0bound;
   reg u8 bv;
+  #[msf] reg u64 ms;
 
   seedbufp = seedbuf;
   keyp = key;
@@ -2211,6 +2702,9 @@ fn _sf_signature_core_mode5(reg mut ptr u8[2948] sigp,
     z1p, z2p, z1tmpp, z2tmpp, reject =
         _sf_z_check(z1p, z2p, z1tmpp, z2tmpp, y1p, y2p, cp, s1p, s2p, bv,
                     lcount, kcount, b1bound, b0bound);
+    () = #declassify(reject);
+    ms = #init_msf();
+    reject = #protect(reject, ms);
     bad = 1;
     if (reject == 0)
     {
@@ -2218,11 +2712,15 @@ fn _sf_signature_core_mode5(reg mut ptr u8[2948] sigp,
                                           z1p, z2p);
       sigp, bad = _sf_pack_mode5(sigp, cp, z1rndp, hp);
     }
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
   }
 
   return sigp;
 }
 
+#[ct = "sigp * public * public * public -> sigp"]
 export
 fn crypto_sign_signature_internal_mode2_jazz(reg mut ptr u8[2948] sigp,
                                              reg const ptr u8[2752] skp,
@@ -2233,7 +2731,10 @@ fn crypto_sign_signature_internal_mode2_jazz(reg mut ptr u8[2948] sigp,
   stack u8[64] mu;
   reg ptr u8[64] mup;
   reg u64 preaddr prelen maddr mlen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   mup = mu;
   vkbytes = 992;
   preaddr = descp[0];
@@ -2241,10 +2742,12 @@ fn crypto_sign_signature_internal_mode2_jazz(reg mut ptr u8[2948] sigp,
   maddr = descp[2];
   mlen = descp[3];
   mup = _sf_mu_rawpre(mup, skp, vkbytes, preaddr, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode2(sigp, skp, rndp, mup);
   return sigp;
 }
 
+#[ct = "sigp * public * public * public -> sigp"]
 export
 fn crypto_sign_signature_internal_mode3_jazz(reg mut ptr u8[2948] sigp,
                                              reg const ptr u8[2752] skp,
@@ -2255,7 +2758,10 @@ fn crypto_sign_signature_internal_mode3_jazz(reg mut ptr u8[2948] sigp,
   stack u8[64] mu;
   reg ptr u8[64] mup;
   reg u64 preaddr prelen maddr mlen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   mup = mu;
   vkbytes = 1472;
   preaddr = descp[0];
@@ -2263,10 +2769,12 @@ fn crypto_sign_signature_internal_mode3_jazz(reg mut ptr u8[2948] sigp,
   maddr = descp[2];
   mlen = descp[3];
   mup = _sf_mu_rawpre(mup, skp, vkbytes, preaddr, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode3(sigp, skp, rndp, mup);
   return sigp;
 }
 
+#[ct = "sigp * public * public * public -> sigp"]
 export
 fn crypto_sign_signature_internal_mode5_jazz(reg mut ptr u8[2948] sigp,
                                              reg const ptr u8[2752] skp,
@@ -2277,7 +2785,10 @@ fn crypto_sign_signature_internal_mode5_jazz(reg mut ptr u8[2948] sigp,
   stack u8[64] mu;
   reg ptr u8[64] mup;
   reg u64 preaddr prelen maddr mlen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   mup = mu;
   vkbytes = 2080;
   preaddr = descp[0];
@@ -2285,10 +2796,12 @@ fn crypto_sign_signature_internal_mode5_jazz(reg mut ptr u8[2948] sigp,
   maddr = descp[2];
   mlen = descp[3];
   mup = _sf_mu_rawpre(mup, skp, vkbytes, preaddr, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode5(sigp, skp, rndp, mup);
   return sigp;
 }
 
+#[ct = "sigp * public * public -> sigp"]
 export
 fn crypto_sign_signature_mode2_jazz(reg mut ptr u8[2948] sigp,
                                     reg const ptr u8[2752] skp,
@@ -2301,25 +2814,34 @@ fn crypto_sign_signature_mode2_jazz(reg mut ptr u8[2948] sigp,
   reg ptr u8[257] prep;
   reg ptr u8[32] rndp;
   reg ptr u8[64] mup;
+  reg const ptr u64[4] descq;
   reg u64 maddr mlen ctxaddr ctxlen prelen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descq = descp;
+  descq = #protect_ptr(descq, ms);
   prep = pre;
   rndp = rnd;
   mup = mu;
   vkbytes = 992;
-  maddr = descp[0];
-  mlen = descp[1];
-  ctxaddr = descp[2];
-  ctxlen = descp[3];
+  maddr = descq[0];
+  mlen = descq[1];
+  ctxaddr = descq[2];
+  ctxlen = descq[3];
   prep = _sf_prepare_pre_raw(prep, ctxaddr, ctxlen);
+  () = #declassify(prep);
   rndp = #randombytes(rndp);
+  () = #declassify(rndp);
   prelen = ctxlen;
   prelen += 1;
   mup = _sf_mu_preptr(mup, skp, vkbytes, prep, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode2(sigp, skp, rndp, mup);
   return sigp;
 }
 
+#[ct = "sigp * public * public -> sigp"]
 export
 fn crypto_sign_signature_mode3_jazz(reg mut ptr u8[2948] sigp,
                                     reg const ptr u8[2752] skp,
@@ -2333,7 +2855,10 @@ fn crypto_sign_signature_mode3_jazz(reg mut ptr u8[2948] sigp,
   reg ptr u8[32] rndp;
   reg ptr u8[64] mup;
   reg u64 maddr mlen ctxaddr ctxlen prelen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   prep = pre;
   rndp = rnd;
   mup = mu;
@@ -2343,14 +2868,18 @@ fn crypto_sign_signature_mode3_jazz(reg mut ptr u8[2948] sigp,
   ctxaddr = descp[2];
   ctxlen = descp[3];
   prep = _sf_prepare_pre_raw(prep, ctxaddr, ctxlen);
+  () = #declassify(prep);
   rndp = #randombytes(rndp);
+  () = #declassify(rndp);
   prelen = ctxlen;
   prelen += 1;
   mup = _sf_mu_preptr(mup, skp, vkbytes, prep, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode3(sigp, skp, rndp, mup);
   return sigp;
 }
 
+#[ct = "sigp * public * public -> sigp"]
 export
 fn crypto_sign_signature_mode5_jazz(reg mut ptr u8[2948] sigp,
                                     reg const ptr u8[2752] skp,
@@ -2364,7 +2893,10 @@ fn crypto_sign_signature_mode5_jazz(reg mut ptr u8[2948] sigp,
   reg ptr u8[32] rndp;
   reg ptr u8[64] mup;
   reg u64 maddr mlen ctxaddr ctxlen prelen vkbytes;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   prep = pre;
   rndp = rnd;
   mup = mu;
@@ -2374,10 +2906,13 @@ fn crypto_sign_signature_mode5_jazz(reg mut ptr u8[2948] sigp,
   ctxaddr = descp[2];
   ctxlen = descp[3];
   prep = _sf_prepare_pre_raw(prep, ctxaddr, ctxlen);
+  () = #declassify(prep);
   rndp = #randombytes(rndp);
+  () = #declassify(rndp);
   prelen = ctxlen;
   prelen += 1;
   mup = _sf_mu_preptr(mup, skp, vkbytes, prep, prelen, maddr, mlen);
+  () = #declassify(mup);
   sigp = _sf_signature_core_mode5(sigp, skp, rndp, mup);
   return sigp;
 }
@@ -2400,17 +2935,23 @@ fn cryptolab_haetae_mode2_signature_internal(reg ui64 sigu,
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
   skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
+  () = #declassify(skp);
   rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(rndp);
   descp[0] = (64u)preu;
   descp[1] = (64u)prelen;
   descp[2] = (64u)mu;
   descp[3] = (64u)mlen;
+  () = #declassify(descp);
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode2_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 1474);
   [:u64 (64u)siglenu] = 1474;
@@ -2436,17 +2977,23 @@ fn cryptolab_haetae_mode3_signature_internal(reg ui64 sigu,
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
   skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
+  () = #declassify(skp);
   rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(rndp);
   descp[0] = (64u)preu;
   descp[1] = (64u)prelen;
   descp[2] = (64u)mu;
   descp[3] = (64u)mlen;
+  () = #declassify(descp);
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode3_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 2349);
   [:u64 (64u)siglenu] = 2349;
@@ -2472,17 +3019,23 @@ fn cryptolab_haetae_mode5_signature_internal(reg ui64 sigu,
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
   skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
+  () = #declassify(skp);
   rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(rndp);
   descp[0] = (64u)preu;
   descp[1] = (64u)prelen;
   descp[2] = (64u)mu;
   descp[3] = (64u)mlen;
+  () = #declassify(descp);
+  ms = #init_msf();
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode5_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 2948);
   [:u64 (64u)siglenu] = 2948;
@@ -2504,7 +3057,8 @@ fn cryptolab_haetae_mode2_signature(reg ui64 sigu,
   reg ptr u8[2948] sigp;
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
-  reg u64 r;
+  reg u64 d0 d1 d2 d3 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2516,10 +3070,27 @@ fn cryptolab_haetae_mode2_signature(reg ui64 sigu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
-    descp[0] = (64u)mu;
-    descp[1] = (64u)mlen;
-    descp[2] = (64u)ctxu;
-    descp[3] = (64u)ctxlen;
+  () = #declassify(skp);
+    ms = #init_msf();
+    d0 = (64u)mu;
+    d1 = (64u)mlen;
+    d2 = (64u)ctxu;
+    d3 = (64u)ctxlen;
+    () = #declassify(d0);
+    () = #declassify(d1);
+    () = #declassify(d2);
+    () = #declassify(d3);
+    d0 = #protect(d0, ms);
+    d1 = #protect(d1, ms);
+    d2 = #protect(d2, ms);
+    d3 = #protect(d3, ms);
+    descp = #protect_ptr(descp, ms);
+    descp[0] = d0;
+    descp[1] = d1;
+    descp[2] = d2;
+    descp[3] = d3;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode2_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 1474);
     [:u64 (64u)siglenu] = 1474;
@@ -2543,6 +3114,7 @@ fn cryptolab_haetae_mode3_signature(reg ui64 sigu,
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2554,10 +3126,14 @@ fn cryptolab_haetae_mode3_signature(reg ui64 sigu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
+  () = #declassify(skp);
     descp[0] = (64u)mu;
     descp[1] = (64u)mlen;
     descp[2] = (64u)ctxu;
     descp[3] = (64u)ctxlen;
+    () = #declassify(descp);
+    ms = #init_msf();
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode3_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 2349);
     [:u64 (64u)siglenu] = 2349;
@@ -2581,6 +3157,7 @@ fn cryptolab_haetae_mode5_signature(reg ui64 sigu,
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2592,10 +3169,14 @@ fn cryptolab_haetae_mode5_signature(reg ui64 sigu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
+  () = #declassify(skp);
     descp[0] = (64u)mu;
     descp[1] = (64u)mlen;
     descp[2] = (64u)ctxu;
     descp[3] = (64u)ctxlen;
+    () = #declassify(descp);
+    ms = #init_msf();
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode5_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 2948);
     [:u64 (64u)siglenu] = 2948;
@@ -2620,6 +3201,7 @@ fn cryptolab_haetae_mode2_sign(reg ui64 smu,
   reg ptr u64[4] descp;
   reg ui64 dst total;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2631,10 +3213,14 @@ fn cryptolab_haetae_mode2_sign(reg ui64 smu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
+  () = #declassify(skp);
     descp[0] = (64u)mu;
     descp[1] = (64u)mlen;
     descp[2] = (64u)ctxu;
     descp[3] = (64u)ctxlen;
+    () = #declassify(descp);
+    ms = #init_msf();
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode2_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 1474);
     dst = smu;
@@ -2664,6 +3250,7 @@ fn cryptolab_haetae_mode3_sign(reg ui64 smu,
   reg ptr u64[4] descp;
   reg ui64 dst total;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2675,10 +3262,14 @@ fn cryptolab_haetae_mode3_sign(reg ui64 smu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
+  () = #declassify(skp);
     descp[0] = (64u)mu;
     descp[1] = (64u)mlen;
     descp[2] = (64u)ctxu;
     descp[3] = (64u)ctxlen;
+    () = #declassify(descp);
+    ms = #init_msf();
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode3_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 2349);
     dst = smu;
@@ -2708,6 +3299,7 @@ fn cryptolab_haetae_mode5_sign(reg ui64 smu,
   reg ptr u64[4] descp;
   reg ui64 dst total;
   reg u64 r;
+  #[msf] reg u64 ms;
 
   if (ctxlen > 255)
   {
@@ -2719,10 +3311,14 @@ fn cryptolab_haetae_mode5_sign(reg ui64 smu,
     skp = sk;
     descp = desc;
     skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
+  () = #declassify(skp);
     descp[0] = (64u)mu;
     descp[1] = (64u)mlen;
     descp[2] = (64u)ctxu;
     descp[3] = (64u)ctxlen;
+    () = #declassify(descp);
+    ms = #init_msf();
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode5_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 2948);
     dst = smu;
@@ -2736,6 +3332,7 @@ fn cryptolab_haetae_mode5_sign(reg ui64 smu,
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_signature_internal_desc(reg ui64 sigu,
                                                   reg ui64 siglenu,
@@ -2752,18 +3349,32 @@ fn cryptolab_haetae_mode2_signature_internal_desc(reg ui64 sigu,
   reg ptr u8[2752] skp;
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
-  reg u64 r;
+  reg u64 skaddr rndaddr r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
-  skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
-  rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(sku);
+  () = #declassify(rndu);
+  skaddr = (64u)sku;
+  rndaddr = (64u)rndu;
+  ms = #init_msf();
+  skaddr = #protect(skaddr, ms);
+  rndaddr = #protect(rndaddr, ms);
+  skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 1408);
+  () = #declassify(skp);
+  rndp = _api_copy_addr_to_32(rndp, rndaddr);
+  () = #declassify(rndp);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   descp[0] = apip[0];
   descp[1] = apip[1];
   descp[2] = apip[2];
   descp[3] = apip[3];
+  () = #declassify(descp);
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode2_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 1474);
   [:u64 (64u)siglenu] = 1474;
@@ -2771,6 +3382,7 @@ fn cryptolab_haetae_mode2_signature_internal_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_signature_internal_desc(reg ui64 sigu,
                                                   reg ui64 siglenu,
@@ -2787,18 +3399,32 @@ fn cryptolab_haetae_mode3_signature_internal_desc(reg ui64 sigu,
   reg ptr u8[2752] skp;
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
-  reg u64 r;
+  reg u64 skaddr rndaddr r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
-  skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
-  rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(sku);
+  () = #declassify(rndu);
+  skaddr = (64u)sku;
+  rndaddr = (64u)rndu;
+  ms = #init_msf();
+  skaddr = #protect(skaddr, ms);
+  rndaddr = #protect(rndaddr, ms);
+  skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2112);
+  () = #declassify(skp);
+  rndp = _api_copy_addr_to_32(rndp, rndaddr);
+  () = #declassify(rndp);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   descp[0] = apip[0];
   descp[1] = apip[1];
   descp[2] = apip[2];
   descp[3] = apip[3];
+  () = #declassify(descp);
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode3_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 2349);
   [:u64 (64u)siglenu] = 2349;
@@ -2806,6 +3432,7 @@ fn cryptolab_haetae_mode3_signature_internal_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_signature_internal_desc(reg ui64 sigu,
                                                   reg ui64 siglenu,
@@ -2822,18 +3449,32 @@ fn cryptolab_haetae_mode5_signature_internal_desc(reg ui64 sigu,
   reg ptr u8[2752] skp;
   reg ptr u8[32] rndp;
   reg ptr u64[4] descp;
-  reg u64 r;
+  reg u64 skaddr rndaddr r;
+  #[msf] reg u64 ms;
 
   sigp = sig;
   skp = sk;
   rndp = rnd;
   descp = desc;
-  skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
-  rndp = _api_copy_raw_to_32(rndp, rndu);
+  () = #declassify(sku);
+  () = #declassify(rndu);
+  skaddr = (64u)sku;
+  rndaddr = (64u)rndu;
+  ms = #init_msf();
+  skaddr = #protect(skaddr, ms);
+  rndaddr = #protect(rndaddr, ms);
+  skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2752);
+  () = #declassify(skp);
+  rndp = _api_copy_addr_to_32(rndp, rndaddr);
+  () = #declassify(rndp);
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   descp[0] = apip[0];
   descp[1] = apip[1];
   descp[2] = apip[2];
   descp[3] = apip[3];
+  () = #declassify(descp);
+  descp = #protect_ptr(descp, ms);
   sigp = crypto_sign_signature_internal_mode5_jazz(sigp, skp, rndp, descp);
   sigu = _api_copy_2948_to_raw(sigu, sigp, 2948);
   [:u64 (64u)siglenu] = 2948;
@@ -2841,6 +3482,7 @@ fn cryptolab_haetae_mode5_signature_internal_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_signature_desc(reg ui64 sigu,
                                          reg ui64 siglenu,
@@ -2853,9 +3495,13 @@ fn cryptolab_haetae_mode2_signature_desc(reg ui64 sigu,
   reg ptr u8[2948] sigp;
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
-  reg u64 ctxlen r;
+  reg u64 ctxlen skaddr r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -2865,11 +3511,20 @@ fn cryptolab_haetae_mode2_signature_desc(reg ui64 sigu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 1408);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = apip[0];
     descp[1] = apip[1];
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode2_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 1474);
     [:u64 (64u)siglenu] = 1474;
@@ -2878,6 +3533,7 @@ fn cryptolab_haetae_mode2_signature_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_signature_desc(reg ui64 sigu,
                                          reg ui64 siglenu,
@@ -2890,9 +3546,13 @@ fn cryptolab_haetae_mode3_signature_desc(reg ui64 sigu,
   reg ptr u8[2948] sigp;
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
-  reg u64 ctxlen r;
+  reg u64 ctxlen skaddr r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -2902,11 +3562,20 @@ fn cryptolab_haetae_mode3_signature_desc(reg ui64 sigu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2112);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = apip[0];
     descp[1] = apip[1];
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode3_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 2349);
     [:u64 (64u)siglenu] = 2349;
@@ -2915,6 +3584,7 @@ fn cryptolab_haetae_mode3_signature_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_signature_desc(reg ui64 sigu,
                                          reg ui64 siglenu,
@@ -2927,9 +3597,13 @@ fn cryptolab_haetae_mode5_signature_desc(reg ui64 sigu,
   reg ptr u8[2948] sigp;
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
-  reg u64 ctxlen r;
+  reg u64 ctxlen skaddr r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -2939,11 +3613,20 @@ fn cryptolab_haetae_mode5_signature_desc(reg ui64 sigu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2752);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = apip[0];
     descp[1] = apip[1];
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode5_jazz(sigp, skp, descp);
     sigu = _api_copy_2948_to_raw(sigu, sigp, 2948);
     [:u64 (64u)siglenu] = 2948;
@@ -2952,6 +3635,7 @@ fn cryptolab_haetae_mode5_signature_desc(reg ui64 sigu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_sign_desc(reg ui64 smu,
                                     reg ui64 smlenu,
@@ -2965,11 +3649,15 @@ fn cryptolab_haetae_mode2_sign_desc(reg ui64 smu,
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
   reg ui64 dst;
-  reg u64 maddr mlen ctxlen daddr total r;
+  reg u64 maddr mlen ctxlen daddr skaddr total r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   maddr = apip[0];
   mlen = apip[1];
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -2983,11 +3671,20 @@ fn cryptolab_haetae_mode2_sign_desc(reg ui64 smu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 1408);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 1408);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = daddr;
     descp[1] = mlen;
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode2_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 1474);
     total = 1474;
@@ -2998,6 +3695,7 @@ fn cryptolab_haetae_mode2_sign_desc(reg ui64 smu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_sign_desc(reg ui64 smu,
                                     reg ui64 smlenu,
@@ -3011,11 +3709,15 @@ fn cryptolab_haetae_mode3_sign_desc(reg ui64 smu,
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
   reg ui64 dst;
-  reg u64 maddr mlen ctxlen daddr total r;
+  reg u64 maddr mlen ctxlen daddr skaddr total r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   maddr = apip[0];
   mlen = apip[1];
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -3029,11 +3731,20 @@ fn cryptolab_haetae_mode3_sign_desc(reg ui64 smu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 2112);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2112);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = daddr;
     descp[1] = mlen;
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode3_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 2349);
     total = 2349;
@@ -3044,6 +3755,7 @@ fn cryptolab_haetae_mode3_sign_desc(reg ui64 smu,
   return r;
 }
 
+#[ct = "public * public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_sign_desc(reg ui64 smu,
                                     reg ui64 smlenu,
@@ -3057,11 +3769,15 @@ fn cryptolab_haetae_mode5_sign_desc(reg ui64 smu,
   reg ptr u8[2752] skp;
   reg ptr u64[4] descp;
   reg ui64 dst;
-  reg u64 maddr mlen ctxlen daddr total r;
+  reg u64 maddr mlen ctxlen daddr skaddr total r;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  apip = #protect_ptr(apip, ms);
   maddr = apip[0];
   mlen = apip[1];
   ctxlen = apip[3];
+  () = #declassify(apip);
   if (ctxlen > 255)
   {
     r = _api_reject();
@@ -3075,11 +3791,20 @@ fn cryptolab_haetae_mode5_sign_desc(reg ui64 smu,
     sigp = sig;
     skp = sk;
     descp = desc;
-    skp = _api_copy_raw_to_2752_prefix(skp, sku, 2752);
+    () = #declassify(sku);
+    skaddr = (64u)sku;
+    ms = #init_msf();
+    skaddr = #protect(skaddr, ms);
+    skp = _api_copy_addr_to_2752_prefix(skp, skaddr, 2752);
+  () = #declassify(skp);
+    ms = #init_msf();
+    apip = #protect_ptr(apip, ms);
     descp[0] = daddr;
     descp[1] = mlen;
     descp[2] = apip[2];
     descp[3] = ctxlen;
+    () = #declassify(descp);
+    descp = #protect_ptr(descp, ms);
     sigp = crypto_sign_signature_mode5_jazz(sigp, skp, descp);
     smu = _api_copy_2948_to_raw(smu, sigp, 2948);
     total = 2948;

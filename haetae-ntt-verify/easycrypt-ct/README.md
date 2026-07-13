@@ -61,9 +61,19 @@ enter `easycrypt-ct` internally.  Each run writes a transcript under
 `logs/full-functional-correctness.run.log`, plus per-target EasyCrypt logs
 such as `logs/RefJasminNTTLoop.compile.log`.
 
-The full check compiles the proof-only loop model, the retargeted direct-loop
-proof, the CT-to-loop equivalence bridge, and the final end-to-end theorem.  It
-also scans those proof targets for `admit`, `abort`, and `axiom`.  The old
-`RefJasminNTT.ec` file is not part of the full check because it is preserved to
-show the pre-CT direct-loop proof shape.  All check scripts use `-no-eco` so
-stale EasyCrypt cache files cannot mask the result.
+The full check compiles every current EasyCrypt source used by the full-safe
+constant-time proof bundle, in dependency order, with `-no-eco`:
+
+- generated support theories: `Array256.ec`, `BArray1024.ec`,
+  `WArray1024.ec`, `Hpoly_extract.ec`
+- arithmetic and algebra theories: `Fastexp.ec`, `Montgomery.ec`, `GFq.ec`,
+  `Rq.ec`, `Fq.ec`, `NTT_Fq.ec`, `NTTFullSpec.ec`, `NTTFullAlgebra.ec`
+- CT proof theories: `FunctionalSupport.ec`, `Hpoly_loop.ec`,
+  `RefJasminNTTLoop.ec`, `CTLoopEquiv.ec`, `NTTEndToEnd.ec`
+
+It then scans all current checked targets for `admit` and `abort`, and checks
+that EasyCrypt `axiom` declarations are confined to the expected foundational
+boundary files `GFq.ec` and `Montgomery.ec`.  The old `RefJasminNTT.ec` file is
+not part of the full check because it is preserved to show the pre-CT
+direct-loop proof shape.  All check scripts use `-no-eco` so stale EasyCrypt
+cache files cannot mask the result.

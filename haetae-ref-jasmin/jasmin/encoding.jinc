@@ -9,6 +9,16 @@ fn _encode_h_prepare(reg mut ptr u8[2048] symsp,
   reg u64 i bad hcut upper tmp64;
   reg u32 tmp off32;
   reg u8 s;
+  #[msf] reg u64 ms;
+
+  () = #declassify(count);
+  () = #declassify(mh);
+  () = #declassify(offset);
+  ms = #init_msf();
+  hp = #protect_ptr(hp, ms);
+  count = #protect(count, ms);
+  mh = #protect(mh, ms);
+  offset = #protect(offset, ms);
 
   hcut = mh;
   hcut -= 1;
@@ -29,6 +39,9 @@ fn _encode_h_prepare(reg mut ptr u8[2048] symsp,
     {
       tmp = hp[i];
       tmp64 = (64u)tmp;
+      () = #declassify(tmp64);
+      ms = #init_msf();
+      tmp64 = #protect(tmp64, ms);
       if (hcut < tmp64)
       {
         if (tmp64 <= upper)
@@ -60,6 +73,7 @@ fn _rans_encode(reg mut ptr u8[2048] encp,
   reg u64 i off bad idx prod hi;
   reg u32 x x_max rcp_freq bias packed cmpl_freq rcp_shift q byte32;
   reg u8 s byte;
+  #[msf] reg u64 ms;
 
   x = 8388608;
   off = count;
@@ -77,8 +91,14 @@ fn _rans_encode(reg mut ptr u8[2048] encp,
       s = symsp[i];
       idx = (64u)s;
       idx *= 4;
+      () = #declassify(idx);
+      ms = #init_msf();
+      idx = #protect(idx, ms);
 
       x_max = esymsp[idx];
+      () = #declassify(x_max);
+      ms = #init_msf();
+      x_max = #protect_32(x_max, ms);
       idx += 1;
       rcp_freq = esymsp[idx];
       idx += 1;
@@ -90,6 +110,9 @@ fn _rans_encode(reg mut ptr u8[2048] encp,
       cmpl_freq &= 0xffff;
       rcp_shift = packed;
       rcp_shift >>= 16;
+      () = #declassify(rcp_shift);
+      ms = #init_msf();
+      rcp_shift = #protect_32(rcp_shift, ms);
 
       while (x >= x_max)
       {
@@ -253,10 +276,21 @@ fn _rans_decode(reg mut ptr u8[2048] symsp,
   reg u64 i off bad idx x64 again tmp64 count size_in m upper;
   reg u32 x tmp word s32 packed start freq q low;
   reg u8 byte s;
+  reg bool cond;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   count = statep[0];
   size_in = statep[1];
   m = statep[2];
+  () = #declassify(count);
+  () = #declassify(size_in);
+  () = #declassify(m);
+  ms = #init_msf();
+  count = #protect(count, ms);
+  size_in = #protect(size_in, ms);
+  m = #protect(m, ms);
+  () = #spill(statep);
   upper = 1;
   upper <<= 31;
   bad = 0;
@@ -274,48 +308,84 @@ fn _rans_decode(reg mut ptr u8[2048] symsp,
   x |= tmp;
 
   x64 = (64u)x;
-  if (x64 < 8388608)
+  () = #declassify(x64);
+  ms = #init_msf();
+  x64 = #protect(x64, ms);
+  x = (32u)x64;
+  b = x64 < 8388608;
+  if (b)
   {
+    ms = #update_msf(b, ms);
     bad = 1;
   }
-  if (x64 >= upper)
+  else
   {
+    ms = #update_msf(!b, ms);
+  }
+  b = x64 >= upper;
+  if (b)
+  {
+    ms = #update_msf(b, ms);
     bad = 1;
+  }
+  else
+  {
+    ms = #update_msf(!b, ms);
   }
 
   i = 0;
-  while (i < count)
+  while
   {
-    if (bad != 0)
+    cond = i < count;
+  } (cond)
+  {
+    ms = #update_msf(cond, ms);
+    b = bad != 0;
+    if (b)
     {
+      ms = #update_msf(b, ms);
       i = count;
     }
     else
     {
+      ms = #update_msf(!b, ms);
       idx = (64u)x;
       idx &= 1023;
       tmp64 = idx;
       tmp64 &= 1;
       idx >>= 1;
       word = symbolwp[idx];
-      if (tmp64 != 0)
+      () = #declassify(tmp64);
+      tmp64 = #protect(tmp64, ms);
+      b = tmp64 != 0;
+      if (b)
       {
+        ms = #update_msf(b, ms);
         word >>= 16;
+      }
+      else
+      {
+        ms = #update_msf(!b, ms);
       }
       s32 = word;
       s32 &= 0xffff;
 
       tmp64 = (64u)s32;
-      if (tmp64 >= m)
+      () = #declassify(tmp64);
+      tmp64 = #protect(tmp64, ms);
+      b = tmp64 >= m;
+      if (b)
       {
+        ms = #update_msf(b, ms);
         bad = 1;
       }
       else
       {
-        s = (8u)s32;
+        ms = #update_msf(!b, ms);
+        s = (8u)tmp64;
         symsp[i] = s;
 
-        idx = (64u)s32;
+        idx = tmp64;
         packed = dsymswp[idx];
         start = packed;
         start &= 0xffff;
@@ -332,14 +402,27 @@ fn _rans_decode(reg mut ptr u8[2048] symsp,
         x = q;
 
         again = 1;
-        while (again != 0)
+        ms = #mov_msf(ms);
+        while
         {
+          cond = again != 0;
+        } (cond)
+        {
+          ms = #update_msf(cond, ms);
           x64 = (64u)x;
-          if (x64 < 8388608)
+          () = #declassify(x64);
+          x64 = #protect(x64, ms);
+          b = x64 < 8388608;
+          if (b)
           {
-            if (off < size_in)
+            ms = #update_msf(b, ms);
+            b = off < size_in;
+            if (b)
             {
+              ms = #update_msf(b, ms);
               byte = bufp[off];
+              () = #declassify(byte);
+              byte = #protect_8(byte, ms);
               off += 1;
               x <<= 8;
               tmp = (32u)byte;
@@ -347,19 +430,35 @@ fn _rans_decode(reg mut ptr u8[2048] symsp,
             }
             else
             {
+              ms = #update_msf(!b, ms);
               again = 0;
             }
           }
           else
           {
+            ms = #update_msf(!b, ms);
             again = 0;
           }
+          () = #declassify(again);
         }
+        ms = #update_msf(!cond, ms);
 
         i += 1;
       }
     }
+    () = #declassify(i);
+    () = #declassify(off);
+    () = #declassify(bad);
+    x64 = (64u)x;
+    () = #declassify(x64);
+    ms = #init_msf();
+    i = #protect(i, ms);
+    off = #protect(off, ms);
+    bad = #protect(bad, ms);
+    x64 = #protect(x64, ms);
+    x = (32u)x64;
   }
+  ms = #update_msf(!cond, ms);
 
   if (bad == 0)
   {
@@ -373,6 +472,7 @@ fn _rans_decode(reg mut ptr u8[2048] symsp,
     }
   }
 
+  () = #unspill(statep);
   statep[0] = off;
   statep[1] = bad;
   return symsp, statep;
@@ -387,6 +487,8 @@ fn _decode_h_apply(reg mut ptr u32[2048] hp,
   reg u64 i tmp64;
   reg u32 tmp off32;
   reg u8 s;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   off32 = (32u)offset;
   i = 0;
@@ -395,9 +497,18 @@ fn _decode_h_apply(reg mut ptr u32[2048] hp,
     s = symsp[i];
     tmp = (32u)s;
     tmp64 = (64u)tmp;
-    if (hcut < tmp64)
+    () = #declassify(tmp64);
+    ms = #init_msf();
+    tmp64 = #protect(tmp64, ms);
+    b = hcut < tmp64;
+    if (b)
     {
+      ms = #update_msf(b, ms);
       tmp += off32;
+    }
+    else
+    {
+      ms = #update_msf(!b, ms);
     }
     hp[i] = tmp;
     i += 1;
@@ -441,6 +552,17 @@ fn _encode_hb_z1_prepare(reg mut ptr u8[2048] symsp,
   reg u64 tmp;
   reg u32 a;
   reg u8 s;
+  reg bool b;
+  #[msf] reg u64 ms;
+
+  () = #declassify(count);
+  () = #declassify(mhb);
+  () = #declassify(offset);
+  ms = #init_msf();
+  hp = #protect_ptr(hp, ms);
+  count = #protect(count, ms);
+  mhb = #protect(mhb, ms);
+  offset = #protect(offset, ms);
 
   bad = 0;
   i = 0;
@@ -457,18 +579,29 @@ fn _encode_hb_z1_prepare(reg mut ptr u8[2048] symsp,
       tmp += offset;
       neg = tmp;
       neg >>s= 63;
-      if (neg != 0)
+      () = #declassify(neg);
+      ms = #init_msf();
+      neg = #protect(neg, ms);
+      b = neg != 0;
+      if (b)
       {
+        ms = #update_msf(b, ms);
         bad = 1;
       }
       else
       {
-        if (tmp >= mhb)
+        ms = #update_msf(!b, ms);
+        () = #declassify(tmp);
+        tmp = #protect(tmp, ms);
+        b = tmp >= mhb;
+        if (b)
         {
+          ms = #update_msf(b, ms);
           bad = 1;
         }
         else
         {
+          ms = #update_msf(!b, ms);
           s = (8u)tmp;
           symsp[i] = s;
         }

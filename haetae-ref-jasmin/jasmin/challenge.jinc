@@ -79,6 +79,7 @@ fn _poly_challenge_m5_frombytes(reg mut ptr u32[HAETAE_N] cp,
       bit = byte;
       bit >>= j;
       bit &= 1;
+      () = #declassify(bit);
       cp[idx] = bit;
     }
     i += 1;
@@ -111,6 +112,7 @@ fn _poly_challenge_m23_frombytes(reg mut ptr u32[HAETAE_N] cp,
 {
   reg u64 i pos bidx limit;
   reg u32 run b old tmp;
+  #[msf] reg u64 ms;
 
   tmp = ip[0];
   i = (64u)tmp;
@@ -127,6 +129,9 @@ fn _poly_challenge_m23_frombytes(reg mut ptr u32[HAETAE_N] cp,
         b = (32u)bp[pos];
         pos += 1;
         bidx = (64u)b;
+        () = #declassify(bidx);
+        ms = #init_msf();
+        bidx = #protect(bidx, ms);
         limit = i;
         limit += 1;
 

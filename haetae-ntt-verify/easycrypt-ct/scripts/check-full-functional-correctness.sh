@@ -35,7 +35,8 @@ log_contains() {
 }
 
 proof_hole_scan() {
-  pattern='(^|[^[:alnum:]_])(admit|abort|axiom)([^[:alnum:]_]|$)'
+  pattern="$1"
+  shift
 
   if [ "$SEARCH_TOOL" = "rg" ]; then
     rg -n "$pattern" "$@"
@@ -51,7 +52,9 @@ ui_kv "Workspace" "$EC_DIR"
 ui_kv "Logs" "$LOG_DIR"
 ui_kv "Run log" "logs/full-functional-correctness.run.log"
 ui_kv "Mode" "fresh EasyCrypt compile (-no-eco)"
-ui_kv "Proof holes" "scan for admit, abort, axiom"
+ui_kv "Coverage" "all current .ec sources except preserved legacy RefJasminNTT.ec"
+ui_kv "Proof holes" "scan for admit and abort"
+ui_kv "Axioms" "allowed only in GFq.ec and Montgomery.ec"
 ui_kv "Search" "$SEARCH_TOOL"
 ui_kv "Retries" "$MAX_EASYCRYPT_ATTEMPTS EasyCrypt attempts on why3server startup failures"
 if [ "$INVOCATION_DIR" != "$EC_DIR" ]; then
@@ -129,9 +132,29 @@ print_summary() {
   done < "$SUMMARY_FILE"
 }
 
-TOTAL_STEPS=5
+VERIFY_TARGETS=(
+  Array256.ec
+  BArray1024.ec
+  WArray1024.ec
+  Hpoly_extract.ec
+  Fastexp.ec
+  Montgomery.ec
+  GFq.ec
+  Rq.ec
+  Fq.ec
+  NTT_Fq.ec
+  NTTFullSpec.ec
+  NTTFullAlgebra.ec
+  FunctionalSupport.ec
+  Hpoly_loop.ec
+  RefJasminNTTLoop.ec
+  CTLoopEquiv.ec
+  NTTEndToEnd.ec
+)
+
+TOTAL_STEPS=$((${#VERIFY_TARGETS[@]} + 2))
 STEP=1
-for target in Hpoly_loop.ec RefJasminNTTLoop.ec CTLoopEquiv.ec NTTEndToEnd.ec
+for target in "${VERIFY_TARGETS[@]}"
 do
   compile_target "$target" "$STEP" "$TOTAL_STEPS"
   STEP=$((STEP + 1))
@@ -142,13 +165,12 @@ scan_display="logs/proof-hole-scan.log"
 scan_start=$(date +%s)
 
 ui_step "$STEP" "$TOTAL_STEPS" "Proof-hole scan"
-ui_kv "Pattern" "admit | abort | axiom"
+ui_kv "Pattern" "admit | abort"
 ui_kv "Log" "$scan_display"
 
 set +e
-proof_hole_scan \
-  Hpoly_loop.ec RefJasminNTTLoop.ec CTLoopEquiv.ec \
-  NTTEndToEnd.ec NTTFullAlgebra.ec NTTFullSpec.ec > "$scan_log" 2>&1
+proof_hole_scan '(^|[^[:alnum:]_])(admit|abort)([^[:alnum:]_]|$)' \
+  "${VERIFY_TARGETS[@]}" > "$scan_log" 2>&1
 scan_status="$?"
 set -e
 scan_end=$(date +%s)
@@ -160,7 +182,7 @@ if [ "$scan_status" -eq 0 ]; then
   ui_cat < "$scan_log"
   print_summary
   echo
-  ui_fail "proof-hole scan found admit/abort/axiom markers"
+  ui_fail "proof-hole scan found admit/abort markers"
   exit 1
 fi
 
@@ -172,9 +194,54 @@ if [ "$scan_status" -ne 1 ]; then
   exit "$scan_status"
 fi
 
-printf 'No admit/abort/axiom markers found in checked proof targets.\n' > "$scan_log"
+printf 'No admit/abort markers found in current checked proof targets.\n' > "$scan_log"
 ui_pass "no proof-hole markers found in $scan_elapsed"
 printf '%s|PASS|%s|%s\n' "proof-hole scan" "$scan_elapsed" "$scan_display" >> "$SUMMARY_FILE"
+
+STEP=$((STEP + 1))
+axiom_log="$LOG_DIR/axiom-boundary-scan.log"
+axiom_display="logs/axiom-boundary-scan.log"
+axiom_start=$(date +%s)
+
+ui_step "$STEP" "$TOTAL_STEPS" "Axiom boundary scan"
+ui_kv "Pattern" "axiom declarations"
+ui_kv "Allowed" "GFq.ec, Montgomery.ec"
+ui_kv "Log" "$axiom_display"
+
+set +e
+proof_hole_scan '^[[:space:]]*axiom[[:space:]]' \
+  "${VERIFY_TARGETS[@]}" > "$axiom_log" 2>&1
+axiom_status="$?"
+set -e
+axiom_end=$(date +%s)
+axiom_elapsed=$(ui_elapsed $((axiom_end - axiom_start)))
+
+if [ "$axiom_status" -eq 0 ]; then
+  unexpected_axioms=$(awk -F: '$1 != "GFq.ec" && $1 != "Montgomery.ec" { print }' "$axiom_log")
+  if [ "$unexpected_axioms" != "" ]; then
+    ui_fail "unexpected axiom declarations found in $axiom_elapsed"
+    printf '%s|FAIL|%s|%s\n' "axiom boundary scan" "$axiom_elapsed" "$axiom_display" >> "$SUMMARY_FILE"
+    printf '%s\n' "$unexpected_axioms" | ui_cat
+    print_summary
+    echo
+    ui_fail "axiom declarations escaped the expected foundational boundary"
+    exit 1
+  fi
+
+  printf '\nAxiom declarations are confined to the expected foundational boundary: GFq.ec and Montgomery.ec.\n' >> "$axiom_log"
+  ui_pass "axiom declarations confined to expected foundational files in $axiom_elapsed"
+  printf '%s|PASS|%s|%s\n' "axiom boundary scan" "$axiom_elapsed" "$axiom_display" >> "$SUMMARY_FILE"
+elif [ "$axiom_status" -eq 1 ]; then
+  printf 'No axiom declarations found in current checked proof targets.\n' > "$axiom_log"
+  ui_pass "no axiom declarations found in $axiom_elapsed"
+  printf '%s|PASS|%s|%s\n' "axiom boundary scan" "$axiom_elapsed" "$axiom_display" >> "$SUMMARY_FILE"
+else
+  ui_fail "axiom boundary scan command failed in $axiom_elapsed"
+  printf '%s|FAIL|%s|%s\n' "axiom boundary scan" "$axiom_elapsed" "$axiom_display" >> "$SUMMARY_FILE"
+  ui_cat < "$axiom_log"
+  print_summary
+  exit "$axiom_status"
+fi
 
 RUN_END=$(date +%s)
 RUN_ELAPSED=$(ui_elapsed $((RUN_END - RUN_START)))

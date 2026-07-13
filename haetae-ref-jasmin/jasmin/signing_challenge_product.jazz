@@ -1,13 +1,24 @@
 require "params.jinc"
 require "poly.jinc"
 
+#[ct = "cs2p * s2p * chatp * public -> {chatp, cs2p, s2p}"]
 export
 fn sign_compute_cs2_jazz(reg mut ptr u32[2048] cs2p,
                          reg const ptr u32[2048] s2p,
                          reg const ptr u32[HAETAE_N] chatp,
                          reg u64 count) -> reg ptr u32[2048]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  cs2p = #protect_ptr(cs2p, ms);
+  s2p = #protect_ptr(s2p, ms);
+  chatp = #protect_ptr(chatp, ms);
+  count = #protect(count, ms);
   cs2p = _polyvec_poly_pointwise(cs2p, s2p, chatp, count);
+  ms = #init_msf();
+  cs2p = #protect_ptr(cs2p, ms);
+  count = #protect(count, ms);
   cs2p = _polyvec_invntt(cs2p, count);
 
   return cs2p;

@@ -5,11 +5,14 @@ fn __poly_sample_squeeze128(reg mut ptr u8[1024] outp,
 {
   reg u64 i j lane t idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   idx = outoff;
   () = #spill(outp, outoff, idx);
   sp = _keccakf1600(sp);
   () = #unspill(outp, outoff, idx);
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
 
   i = 0;
   while (i < 168)
@@ -41,11 +44,14 @@ fn __poly_sample_squeeze256(reg mut ptr u8[1024] outp,
 {
   reg u64 i j lane t idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   idx = outoff;
   () = #spill(outp, outoff, idx);
   sp = _keccakf1600(sp);
   () = #unspill(outp, outoff, idx);
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
 
   i = 0;
   while (i < 136)
@@ -269,6 +275,8 @@ fn __poly_uniform_consume(reg mut ptr u32[8192] ap,
   reg u64 pos rem live idx;
   reg u8 byte;
   reg u32 t u;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -297,12 +305,21 @@ fn __poly_uniform_consume(reg mut ptr u32[8192] ap,
         u <<= 8;
         t |= u;
 
-        if (t < HAETAE_Q)
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
+        b = t < HAETAE_Q;
+        if (b)
         {
+          ms = #update_msf(b, ms);
           idx = base;
           idx += ctr;
           ap[idx] = t;
           ctr += 1;
+        }
+        else
+        {
+          ms = #update_msf(!b, ms);
         }
       }
     }
@@ -321,6 +338,8 @@ fn __poly_uniform_eta_consume(reg mut ptr u32[8192] ap,
   reg u64 pos live idx;
   reg u8 byte;
   reg u32 t r;
+  reg bool b;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -338,8 +357,13 @@ fn __poly_uniform_eta_consume(reg mut ptr u32[8192] ap,
         t = (32u)byte;
         pos += 1;
 
-        if (t < 243)
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
+        b = t < 243;
+        if (b)
         {
+          ms = #update_msf(b, ms);
           r = __poly_sample_mod3(t);
           idx = base;
           idx += ctr;
@@ -393,6 +417,10 @@ fn __poly_uniform_eta_consume(reg mut ptr u32[8192] ap,
             ctr += 1;
           }
         }
+        else
+        {
+          ms = #update_msf(!b, ms);
+        }
       }
       else
       {
@@ -415,6 +443,7 @@ fn _poly_uniform_at(reg mut ptr u32[8192] ap,
   reg ptr u8[1024] bufp;
   reg u64 ctr buflen off i idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -423,17 +452,24 @@ fn _poly_uniform_at(reg mut ptr u32[8192] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 168;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 336;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 504;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 672;
   ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
@@ -453,10 +489,17 @@ fn _poly_uniform_at(reg mut ptr u32[8192] ap,
 
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
     buflen = 168;
     buflen += off;
     ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -472,6 +515,7 @@ fn _poly_uniform_eta_at(reg mut ptr u32[8192] ap,
   reg ptr u64[25] sp;
   reg ptr u8[1024] bufp;
   reg u64 ctr off buflen;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -480,18 +524,257 @@ fn _poly_uniform_eta_at(reg mut ptr u32[8192] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 136;
   ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
     ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
+  }
+
+  return ap;
+}
+
+fn __poly_sample_shake128_init_addr(reg mut ptr u64[25] sp,
+                                    reg u64 seedp,
+                                    reg u64 nonce) -> reg ptr u64[25]
+{
+  reg u64 src;
+  reg u64 pos lane t n;
+  reg u8 b shift;
+  inline int k;
+
+  sp = _keccak_init_state(sp);
+
+  src = seedp;
+  n = nonce;
+  pos = 0;
+  while (pos < 32)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 src];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    src += 1;
+    pos += 1;
+  }
+
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)n;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    n >>= 8;
+    pos += 1;
+  }
+
+  t = 0x1f;
+  t <<= 16;
+  sp[4] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[20] ^= t;
+
+  return sp;
+}
+
+fn __poly_sample_shake256_init_addr(reg mut ptr u64[25] sp,
+                                    reg u64 seedp,
+                                    reg u64 nonce) -> reg ptr u64[25]
+{
+  reg u64 src;
+  reg u64 pos lane t n;
+  reg u8 b shift;
+  inline int k;
+
+  sp = _keccak_init_state(sp);
+
+  src = seedp;
+  n = nonce;
+  pos = 0;
+  while (pos < 64)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 src];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    src += 1;
+    pos += 1;
+  }
+
+  for k = 0 to 2
+  {
+    lane = pos;
+    lane >>= 3;
+    b = (8u)n;
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    n >>= 8;
+    pos += 1;
+  }
+
+  t = 0x1f;
+  t <<= 16;
+  sp[8] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[16] ^= t;
+
+  return sp;
+}
+
+fn _poly_uniform_at_addr(reg mut ptr u32[8192] ap,
+                         reg u64 base,
+                         reg u64 seedp,
+                         reg u64 nonce) -> reg ptr u32[8192]
+{
+  stack u64[25] state;
+  stack u8[1024] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[1024] bufp;
+  reg u64 ctr buflen off i idx;
+  reg u8 b;
+  #[msf] reg u64 ms;
+
+  sp = state;
+  bufp = buf;
+
+  sp = __poly_sample_shake128_init_addr(sp, seedp, nonce);
+  off = 0;
+  () = #spill(ap, base);
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
+  off = 168;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
+  off = 336;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
+  off = 504;
+  bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
+  () = #unspill(ap, base);
+
+  ctr = 0;
+  buflen = 672;
+  ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ctr = #protect(ctr, ms);
+
+  while (ctr < HAETAE_N)
+  {
+    off = buflen;
+    off &= 1;
+
+    i = 0;
+    while (i < off)
+    {
+      idx = buflen;
+      idx -= off;
+      idx += i;
+      b = bufp[idx];
+      bufp[i] = b;
+      i += 1;
+    }
+
+    () = #spill(ap, base, ctr, buflen);
+    bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+    () = #declassify(bufp);
+    () = #unspill(ap, base, ctr, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
+    buflen = 168;
+    buflen += off;
+    ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
+  }
+
+  return ap;
+}
+
+fn _poly_uniform_eta_at_addr(reg mut ptr u32[8192] ap,
+                             reg u64 base,
+                             reg u64 seedp,
+                             reg u64 nonce) -> reg ptr u32[8192]
+{
+  stack u64[25] state;
+  stack u8[1024] buf;
+  reg ptr u64[25] sp;
+  reg ptr u8[1024] bufp;
+  reg u64 ctr off buflen;
+  #[msf] reg u64 ms;
+
+  sp = state;
+  bufp = buf;
+
+  sp = __poly_sample_shake256_init_addr(sp, seedp, nonce);
+  off = 0;
+  () = #spill(ap, base);
+  bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
+  () = #unspill(ap, base);
+
+  ctr = 0;
+  buflen = 136;
+  ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ctr = #protect(ctr, ms);
+
+  while (ctr < HAETAE_N)
+  {
+    () = #spill(ap, base, ctr, buflen);
+    bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+    () = #declassify(bufp);
+    () = #unspill(ap, base, ctr, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
+    ap, ctr = __poly_uniform_eta_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ctr = #protect(ctr, ms);
   }
 
   return ap;

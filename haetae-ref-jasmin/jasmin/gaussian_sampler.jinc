@@ -5,11 +5,16 @@ fn __sample_full_squeeze256(reg mut ptr u8[8192] outp,
 {
   reg u64 i j lane t idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   idx = outoff;
   () = #spill(outp, outoff, idx);
   sp = _keccakf1600(sp);
   () = #unspill(outp, outoff, idx);
+  ms = #init_msf();
+  outp = #protect_ptr(outp, ms);
+  sp = #protect_ptr(sp, ms);
+  idx = #protect(idx, ms);
 
   i = 0;
   while (i < 136)
@@ -60,6 +65,7 @@ fn __sample_gauss_at(reg mut ptr u64[4096] rp,
   reg u64 len bytecnt pos coefcnt last sample accepted accepted64 dont;
   reg u64 s0 s1 sqr0 sqr1 mask carry base outidx;
   reg u8 byte;
+  #[msf] reg u64 ms;
 
   srp = rp;
   ssqsump = sqsump;
@@ -102,11 +108,25 @@ fn __sample_gauss_at(reg mut ptr u64[4096] rp,
       () = #spill(len, bytecnt, pos, coefcnt);
       sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
       () = #unspill(len, bytecnt, pos, coefcnt);
+      () = #declassify(coefcnt);
+      () = #declassify(len);
+      () = #declassify(pos);
+      () = #declassify(bytecnt);
+      () = #declassify(accepted);
+      ms = #init_msf();
+      coefcnt = #protect(coefcnt, ms);
+      len = #protect(len, ms);
+      pos = #protect(pos, ms);
+      bytecnt = #protect(bytecnt, ms);
+      accepted = #protect(accepted, ms);
 
       last = len;
       last -= 1;
       dont = sdont;
+      () = #declassify(dont);
+      dont = #protect(dont, ms);
       rp_tmp = srp;
+      rp_tmp = #protect_ptr(rp_tmp, ms);
       if (dont != 0)
       {
         if (coefcnt == last)
@@ -140,6 +160,8 @@ fn __sample_gauss_at(reg mut ptr u64[4096] rp,
       sqr0 &= mask;
       sqr1 &= mask;
       sqsum_tmp = ssqsump;
+      ms = #init_msf();
+      sqsum_tmp = #protect_ptr(sqsum_tmp, ms);
       s0 = sqsum_tmp[0];
       s1 = sqsum_tmp[1];
       s0 += sqr0;
@@ -216,6 +238,7 @@ fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   reg ptr u64[1] coefcntp;
   reg u64 block off signbytes bytecnt counts total got firstflag remaining;
   reg u64 dont bufoff outoff;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -229,7 +252,24 @@ fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   {
     () = #spill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
     bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #declassify(bufp);
     () = #unspill(rp, signsp, sqsump, block, off, len, sampleoff, signoff);
+    () = #declassify(block);
+    () = #declassify(off);
+    () = #declassify(len);
+    () = #declassify(sampleoff);
+    () = #declassify(signoff);
+    ms = #init_msf();
+    bufp = #protect_ptr(bufp, ms);
+    sp = #protect_ptr(sp, ms);
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    block = #protect(block, ms);
+    off = #protect(off, ms);
+    len = #protect(len, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
     off += 136;
     block += 1;
   }
@@ -256,7 +296,21 @@ fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
   rp, sqsump, coefcntp = __sample_gauss_at(rp, sqsump, coefcntp, bufp,
                                            counts, dont, bufoff, outoff);
   () = #unspill(signsp, sp, len, bytecnt, signbytes, dont, sampleoff, signoff);
+  ms = #init_msf();
+  rp = #protect_ptr(rp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  sqsump = #protect_ptr(sqsump, ms);
+  coefcntp = #protect_ptr(coefcntp, ms);
+  sp = #protect_ptr(sp, ms);
+  len = #protect(len, ms);
+  bytecnt = #protect(bytecnt, ms);
+  signbytes = #protect(signbytes, ms);
+  dont = #protect(dont, ms);
+  sampleoff = #protect(sampleoff, ms);
+  signoff = #protect(signoff, ms);
   got = coefcntp[0];
+  () = #declassify(got);
+  got = #protect(got, ms);
   total = got;
   firstflag = 1;
 
@@ -273,8 +327,33 @@ fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
     () = #spill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
                 dont, off, sampleoff, signoff);
     bufp, sp = __sample_full_squeeze256(bufp, off, sp);
+    () = #declassify(bufp);
     () = #unspill(rp, signsp, sqsump, bytecnt, signbytes, firstflag, len, total,
                   dont, off, sampleoff, signoff);
+    () = #declassify(bytecnt);
+    () = #declassify(signbytes);
+    () = #declassify(firstflag);
+    () = #declassify(len);
+    () = #declassify(total);
+    () = #declassify(dont);
+    () = #declassify(off);
+    () = #declassify(sampleoff);
+    () = #declassify(signoff);
+    ms = #init_msf();
+    bufp = #protect_ptr(bufp, ms);
+    sp = #protect_ptr(sp, ms);
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    bytecnt = #protect(bytecnt, ms);
+    signbytes = #protect(signbytes, ms);
+    firstflag = #protect(firstflag, ms);
+    len = #protect(len, ms);
+    total = #protect(total, ms);
+    dont = #protect(dont, ms);
+    off = #protect(off, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
 
     bytecnt = 136;
     bytecnt += off;
@@ -292,7 +371,23 @@ fn _sample_gauss_N_full_at(reg mut ptr u64[4096] rp,
                                              counts, dont, bufoff, outoff);
     () = #unspill(signsp, sp, len, bytecnt, signbytes, firstflag, total, dont,
                   sampleoff, signoff);
+    ms = #init_msf();
+    rp = #protect_ptr(rp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    sqsump = #protect_ptr(sqsump, ms);
+    coefcntp = #protect_ptr(coefcntp, ms);
+    sp = #protect_ptr(sp, ms);
+    len = #protect(len, ms);
+    bytecnt = #protect(bytecnt, ms);
+    signbytes = #protect(signbytes, ms);
+    firstflag = #protect(firstflag, ms);
+    total = #protect(total, ms);
+    dont = #protect(dont, ms);
+    sampleoff = #protect(sampleoff, ms);
+    signoff = #protect(signoff, ms);
     got = coefcntp[0];
+    () = #declassify(got);
+    got = #protect(got, ms);
     total += got;
     firstflag = 0;
   }

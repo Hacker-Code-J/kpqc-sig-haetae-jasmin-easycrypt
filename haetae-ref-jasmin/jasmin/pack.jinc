@@ -193,16 +193,15 @@ fn _pack_sig_suffix(reg mut ptr u8[2948] sigp,
   return sigp;
 }
 
-fn _pack_sig_size_offsets(reg mut ptr u64[5] statep) -> reg ptr u64[5]
+fn __pack_sig_size_offsets_values(reg u64 hbsize,
+                                  reg u64 hsize,
+                                  reg u64 base_hb,
+                                  reg u64 base_h,
+                                  reg u64 payload_limit) -> reg u64,
+                                                           reg u64
 {
-  reg u64 hbsize hsize base_hb base_h payload_limit bad upper_hb upper_h;
+  reg u64 bad upper_hb upper_h;
   reg u64 off_hb off_h packed total;
-
-  hbsize = statep[0];
-  hsize = statep[1];
-  base_hb = statep[2];
-  base_h = statep[3];
-  payload_limit = statep[4];
 
   bad = 0;
   if (hsize == 0)
@@ -254,6 +253,23 @@ fn _pack_sig_size_offsets(reg mut ptr u64[5] statep) -> reg ptr u64[5]
     packed |= off_hb;
   }
 
+  () = #declassify(packed);
+  () = #declassify(bad);
+  return packed, bad;
+}
+
+fn _pack_sig_size_offsets(reg mut ptr u64[5] statep) -> reg ptr u64[5]
+{
+  reg u64 hbsize hsize base_hb base_h payload_limit bad packed;
+
+  hbsize = statep[0];
+  hsize = statep[1];
+  base_hb = statep[2];
+  base_h = statep[3];
+  payload_limit = statep[4];
+
+  packed, bad = __pack_sig_size_offsets_values(hbsize, hsize, base_hb, base_h,
+                                               payload_limit);
   statep[0] = packed;
   statep[1] = bad;
   return statep;

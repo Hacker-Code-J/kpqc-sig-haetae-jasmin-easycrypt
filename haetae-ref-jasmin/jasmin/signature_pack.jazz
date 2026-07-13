@@ -5,6 +5,7 @@ require "sparse_encoding.jinc"
 require "encoding_tables.jinc"
 require "signature_pack.jinc"
 
+#[ct = "sigp * badp * cp * lowp * public * public -> {cp, lowp, sigp} * badp"]
 export
 fn pack_sig_mode2_full_jazz(reg mut ptr u8[2948] sigp,
                             reg mut ptr u64[1] badp,
@@ -15,7 +16,15 @@ fn pack_sig_mode2_full_jazz(reg mut ptr u8[2948] sigp,
                             -> reg ptr u8[2948], reg ptr u64[1]
 {
   reg ptr u32[132] hb_esymsp h_esymsp;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sigp = #protect_ptr(sigp, ms);
+  badp = #protect_ptr(badp, ms);
+  cp = #protect_ptr(cp, ms);
+  lowp = #protect_ptr(lowp, ms);
+  hbzp = #protect_ptr(hbzp, ms);
+  hp = #protect_ptr(hp, ms);
   hb_esymsp = jmode2_hb_z1_esyms;
   h_esymsp = jmode2_h_esyms;
   sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,
@@ -24,6 +33,7 @@ fn pack_sig_mode2_full_jazz(reg mut ptr u8[2948] sigp,
   return sigp, badp;
 }
 
+#[ct = "sigp * badp * cp * lowp * public * public -> {cp, lowp, sigp} * badp"]
 export
 fn pack_sig_mode3_full_jazz(reg mut ptr u8[2948] sigp,
                             reg mut ptr u64[1] badp,
@@ -34,7 +44,15 @@ fn pack_sig_mode3_full_jazz(reg mut ptr u8[2948] sigp,
                             -> reg ptr u8[2948], reg ptr u64[1]
 {
   reg ptr u32[132] hb_esymsp h_esymsp;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sigp = #protect_ptr(sigp, ms);
+  badp = #protect_ptr(badp, ms);
+  cp = #protect_ptr(cp, ms);
+  lowp = #protect_ptr(lowp, ms);
+  hbzp = #protect_ptr(hbzp, ms);
+  hp = #protect_ptr(hp, ms);
   hb_esymsp = jmode3_hb_z1_esyms;
   h_esymsp = jmode3_h_esyms;
   sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,
@@ -43,6 +61,7 @@ fn pack_sig_mode3_full_jazz(reg mut ptr u8[2948] sigp,
   return sigp, badp;
 }
 
+#[ct = "sigp * badp * cp * lowp * public * public -> {cp, lowp, sigp} * badp"]
 export
 fn pack_sig_mode5_full_jazz(reg mut ptr u8[2948] sigp,
                             reg mut ptr u64[1] badp,
@@ -53,7 +72,15 @@ fn pack_sig_mode5_full_jazz(reg mut ptr u8[2948] sigp,
                             -> reg ptr u8[2948], reg ptr u64[1]
 {
   reg ptr u32[132] hb_esymsp h_esymsp;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  sigp = #protect_ptr(sigp, ms);
+  badp = #protect_ptr(badp, ms);
+  cp = #protect_ptr(cp, ms);
+  lowp = #protect_ptr(lowp, ms);
+  hbzp = #protect_ptr(hbzp, ms);
+  hp = #protect_ptr(hp, ms);
   hb_esymsp = jmode5_hb_z1_esyms;
   h_esymsp = jmode5_h_esyms;
   sigp, badp = _pack_sig_full(sigp, badp, cp, lowp, hbzp, hp, hb_esymsp,

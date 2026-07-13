@@ -4,6 +4,7 @@ require "sampler.jinc"
 require "polynomial_sampler.jinc"
 require "gaussian_sampler.jinc"
 
+#[ct = "rp * signsp * sqsump * public * nonce * public -> rp * signsp * sqsump"]
 export
 fn sample_gauss_N_full_jazz(reg mut ptr u64[4096] rp,
                             reg mut ptr u8[512] signsp,
@@ -14,6 +15,14 @@ fn sample_gauss_N_full_jazz(reg mut ptr u64[4096] rp,
                                               reg ptr u8[512],
                                               reg ptr u64[2]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  rp = #protect_ptr(rp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  sqsump = #protect_ptr(sqsump, ms);
+  nonce = #protect(nonce, ms);
+  len = #protect(len, ms);
   rp, signsp, sqsump = _sample_gauss_N_full(rp, signsp, sqsump, seedp, nonce,
                                             len);
   return rp, signsp, sqsump;

@@ -6,6 +6,7 @@ require "pack.jinc"
 require "challenge_sampler.jinc"
 require "verification_transcript.jinc"
 
+#[ct = "wp * wprimep * cp * public -> cp"]
 export
 fn sign_verify_tail_mode2_jazz(reg const ptr u32[2048] wp,
                                reg const ptr u32[HAETAE_N] wprimep,
@@ -18,6 +19,7 @@ fn sign_verify_tail_mode2_jazz(reg const ptr u32[2048] wp,
   return reject;
 }
 
+#[ct = "wp * wprimep * cp * public -> cp"]
 export
 fn sign_verify_tail_mode3_jazz(reg const ptr u32[2048] wp,
                                reg const ptr u32[HAETAE_N] wprimep,
@@ -30,6 +32,7 @@ fn sign_verify_tail_mode3_jazz(reg const ptr u32[2048] wp,
   return reject;
 }
 
+#[ct = "wp * wprimep * cp * public -> cp"]
 export
 fn sign_verify_tail_mode5_jazz(reg const ptr u32[2048] wp,
                                reg const ptr u32[HAETAE_N] wprimep,

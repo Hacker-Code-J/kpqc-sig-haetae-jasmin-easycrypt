@@ -4,6 +4,7 @@ fn _polyveck_expand_vecA(reg mut ptr u32[8192] vp,
                          reg u64 m) -> reg ptr u32[8192]
 {
   reg u64 i base nonce;
+  #[msf] reg u64 ms;
 
   nonce = k;
   nonce <<= 8;
@@ -16,6 +17,18 @@ fn _polyveck_expand_vecA(reg mut ptr u32[8192] vp,
     () = #spill(seedp, k, m, i, base, nonce);
     vp = _poly_uniform_at(vp, base, seedp, nonce);
     () = #unspill(seedp, k, m, i, base, nonce);
+    () = #declassify(i);
+    () = #declassify(base);
+    () = #declassify(nonce);
+    () = #declassify(k);
+    () = #declassify(m);
+    ms = #init_msf();
+    vp = #protect_ptr(vp, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
+    nonce = #protect(nonce, ms);
+    k = #protect(k, ms);
+    m = #protect(m, ms);
     i += 1;
     base += HAETAE_N;
     nonce += 1;
@@ -30,6 +43,7 @@ fn _polyvec_expand_eta(reg mut ptr u32[8192] vp,
                        reg u64 count) -> reg ptr u32[8192]
 {
   reg u64 i base;
+  #[msf] reg u64 ms;
 
   i = 0;
   base = 0;
@@ -38,6 +52,16 @@ fn _polyvec_expand_eta(reg mut ptr u32[8192] vp,
     () = #spill(seedp, nonce, count, i, base);
     vp = _poly_uniform_eta_at(vp, base, seedp, nonce);
     () = #unspill(seedp, nonce, count, i, base);
+    () = #declassify(i);
+    () = #declassify(base);
+    () = #declassify(nonce);
+    () = #declassify(count);
+    ms = #init_msf();
+    vp = #protect_ptr(vp, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
+    nonce = #protect(nonce, ms);
+    count = #protect(count, ms);
     i += 1;
     base += HAETAE_N;
     nonce += 1;
@@ -52,6 +76,7 @@ fn _polymatkl_expand_matA(reg mut ptr u32[8192] matp,
                           reg u64 cols) -> reg ptr u32[8192]
 {
   reg u64 i j m base nonce rowbase;
+  #[msf] reg u64 ms;
 
   m = cols;
   m -= 1;
@@ -74,6 +99,20 @@ fn _polymatkl_expand_matA(reg mut ptr u32[8192] matp,
       () = #spill(seedp, rows, cols, m, i, j, rowbase);
       matp = _poly_uniform_at(matp, base, seedp, nonce);
       () = #unspill(seedp, rows, cols, m, i, j, rowbase);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(m);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(rowbase);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      m = #protect(m, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      rowbase = #protect(rowbase, ms);
       j += 1;
     }
 
@@ -90,6 +129,7 @@ fn _polymatkm_expand_matA(reg mut ptr u32[8192] matp,
                           reg u64 cols) -> reg ptr u32[8192]
 {
   reg u64 i j base nonce rowbase;
+  #[msf] reg u64 ms;
 
   i = 0;
   rowbase = 0;
@@ -109,6 +149,18 @@ fn _polymatkm_expand_matA(reg mut ptr u32[8192] matp,
       () = #spill(seedp, rows, cols, i, j, rowbase);
       matp = _poly_uniform_at(matp, base, seedp, nonce);
       () = #unspill(seedp, rows, cols, i, j, rowbase);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(rowbase);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      rowbase = #protect(rowbase, ms);
       j += 1;
     }
 

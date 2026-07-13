@@ -1,6 +1,7 @@
 require "keccak.jinc"
 require "shake256_multi_absorb.jinc"
 
+#[ct = "statep * public * public * public * public -> secret"]
 export
 fn shake256_absorb_twice_jazz(reg mut ptr u64[26] statep,
                               reg ui64 in1p,
@@ -8,10 +9,17 @@ fn shake256_absorb_twice_jazz(reg mut ptr u64[26] statep,
                               reg ui64 in2p,
                               reg u64 in2len) -> reg ptr u64[26]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  in1len = #protect(in1len, ms);
+  in2len = #protect(in2len, ms);
   statep = _shake256_absorb_twice(statep, in1p, in1len, in2p, in2len);
   return statep;
 }
 
+#[ct = "statep * public * public * public * public -> secret"]
 export
 fn shake256_absorb_twice_start_jazz(reg mut ptr u64[26] statep,
                                     reg ui64 in1p,
@@ -19,23 +27,41 @@ fn shake256_absorb_twice_start_jazz(reg mut ptr u64[26] statep,
                                     reg ui64 in2p,
                                     reg u64 in2len) -> reg ptr u64[26]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  in1len = #protect(in1len, ms);
+  in2len = #protect(in2len, ms);
   statep = _shake256_absorb_twice_start(statep, in1p, in1len, in2p, in2len);
   return statep;
 }
 
+#[ct = "public * public * public -> secret"]
 export
 fn shake256_absorb_final_jazz(reg mut ptr u64[26] statep,
                               reg ui64 inp,
                               reg u64 inlen) -> reg ptr u64[26]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  inlen = #protect(inlen, ms);
   statep = _shake256_absorb_final(statep, inp, inlen);
   return statep;
 }
 
+#[ct = "statep * public -> secret"]
 export
 fn shake256_absorb_thrice_jazz(reg mut ptr u64[26] statep,
                                reg const ptr u64[6] descp) -> reg ptr u64[26]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  descp = #protect_ptr(descp, ms);
   statep = _shake256_absorb_thrice_desc(statep, descp);
   return statep;
 }

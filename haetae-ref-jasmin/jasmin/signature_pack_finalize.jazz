@@ -2,6 +2,7 @@ require "params.jinc"
 require "pack.jinc"
 require "signature_pack_finalize.jinc"
 
+#[ct = "sigp * public * hbencp * hencp -> {hbencp, hencp, sigp} * public"]
 export
 fn pack_sig_finish_jazz(reg mut ptr u8[2948] sigp,
                         reg mut ptr u64[5] statep,
@@ -9,14 +10,27 @@ fn pack_sig_finish_jazz(reg mut ptr u8[2948] sigp,
                         reg const ptr u8[2048] hencp) -> reg ptr u8[2948],
                                                    reg ptr u64[5]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  sigp = #protect_ptr(sigp, ms);
+  statep = #protect_ptr(statep, ms);
+  hbencp = #protect_ptr(hbencp, ms);
+  hencp = #protect_ptr(hencp, ms);
   sigp, statep = _pack_sig_finish(sigp, statep, hbencp, hencp);
   return sigp, statep;
 }
 
+#[ct = "public * public -> public"]
 export
 fn unpack_sig_finish_jazz(reg mut ptr u64[4] statep,
                           reg const ptr u8[2948] sigp) -> reg ptr u64[4]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sigp = #protect_ptr(sigp, ms);
   statep = _unpack_sig_finish(statep, sigp);
   return statep;
 }

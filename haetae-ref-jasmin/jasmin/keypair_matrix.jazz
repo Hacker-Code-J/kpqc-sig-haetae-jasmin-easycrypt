@@ -19,6 +19,7 @@ fn _keypair_copy_vec(reg mut ptr u32[2048] rp,
   return rp;
 }
 
+#[ct = "bp * s1hatp * ap * s1p * public * public -> {ap, bp, s1hatp, s1p} * {s1hatp, s1p}"]
 export
 fn keypair_m23_matrix_jazz(reg mut ptr u32[2048] bp,
                            reg mut ptr u32[2048] s1hatp,
@@ -29,21 +30,42 @@ fn keypair_m23_matrix_jazz(reg mut ptr u32[2048] bp,
                                            reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1p = #protect_ptr(s1p, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   count = cols;
   count *= HAETAE_N;
+  count = #protect(count, ms);
   s1hatp = _keypair_copy_vec(s1hatp, s1p, count);
 
   () = #spill(bp, ap, rows, cols);
   s1hatp = _polyvec_ntt(s1hatp, cols);
   () = #unspill(bp, ap, rows, cols);
+  () = #declassify(rows);
+  () = #declassify(cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
 
   bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  rows = #protect(rows, ms);
   bp = _polyvec_invntt(bp, rows);
 
   return bp, s1hatp;
 }
 
+#[ct = "bp * s1hatp * ap * s1p * public * public -> {ap, bp, s1hatp, s1p} * {s1hatp, s1p}"]
 export
 fn keypair_m5_matrix_jazz(reg mut ptr u32[2048] bp,
                           reg mut ptr u32[2048] s1hatp,
@@ -54,30 +76,57 @@ fn keypair_m5_matrix_jazz(reg mut ptr u32[2048] bp,
                                           reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1p = #protect_ptr(s1p, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   count = cols;
   count *= HAETAE_N;
+  count = #protect(count, ms);
   s1hatp = _keypair_copy_vec(s1hatp, s1p, count);
 
   () = #spill(bp, ap, rows, cols);
   s1hatp = _polyvec_ntt(s1hatp, cols);
   () = #unspill(bp, ap, rows, cols);
+  () = #declassify(rows);
+  () = #declassify(cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
 
   bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
 
   return bp, s1hatp;
 }
 
+#[ct = "dstp * srcp * public -> {dstp, srcp}"]
 export
 fn keypair_copy_ntt_jazz(reg mut ptr u32[2048] dstp,
                          reg const ptr u32[2048] srcp,
                          reg u64 count) -> reg ptr u32[2048]
 {
   reg u64 coeffs;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  dstp = #protect_ptr(dstp, ms);
+  srcp = #protect_ptr(srcp, ms);
+  count = #protect(count, ms);
   coeffs = count;
   coeffs *= HAETAE_N;
+  coeffs = #protect(coeffs, ms);
   dstp = _keypair_copy_vec(dstp, srcp, coeffs);
+  ms = #init_msf();
+  dstp = #protect_ptr(dstp, ms);
+  count = #protect(count, ms);
   dstp = _polyvec_ntt(dstp, count);
 
   return dstp;

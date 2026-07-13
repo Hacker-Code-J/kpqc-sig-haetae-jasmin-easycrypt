@@ -5,11 +5,15 @@ fn _pack_sig_finish(reg mut ptr u8[2948] sigp,
                                                reg ptr u64[5]
 {
   reg u64 hbsize hsize offsets bad;
+  #[msf] reg u64 ms;
 
   hbsize = statep[0];
   hsize = statep[1];
   statep = _pack_sig_size_offsets(statep);
   bad = statep[1];
+  () = #declassify(bad);
+  ms = #init_msf();
+  bad = #protect(bad, ms);
   if (bad == 0)
   {
     offsets = statep[0];
@@ -24,9 +28,13 @@ fn _unpack_sig_finish(reg mut ptr u64[4] statep,
 {
   reg u64 hbsize hsize padlen bad i idx bb;
   reg u32 b;
+  #[msf] reg u64 ms;
 
   statep = _unpack_sig_size_offsets(statep, sigp);
   bad = statep[3];
+  () = #declassify(bad);
+  ms = #init_msf();
+  bad = #protect(bad, ms);
   if (bad == 0)
   {
     hbsize = statep[0];
@@ -46,8 +54,13 @@ fn _unpack_sig_finish(reg mut ptr u64[4] statep,
       i += 1;
     }
 
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
     if (bad != 0)
     {
+      ms = #init_msf();
+      statep = #protect_ptr(statep, ms);
       statep[3] = 1;
     }
   }

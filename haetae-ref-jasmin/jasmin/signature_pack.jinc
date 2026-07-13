@@ -61,50 +61,50 @@ inline fn _pack_sig_full(reg mut ptr u8[2948] sigp,
 {
   stack u8[2048] hbenc;
   stack u8[2048] henc;
-  stack u64[5] state;
   reg ptr u8[2048] hbencp;
   reg ptr u8[2048] hencp;
-  reg ptr u64[5] statep;
   reg u64 hbsize hsize bad prefix_off offsets;
   reg u64 sigbytes lcount hb_count hb_m hb_offset;
   reg u64 h_count h_m h_offset base_hb base_h payload_limit;
+  #[msf] reg u64 ms;
 
   hbencp = hbenc;
   hencp = henc;
-  statep = state;
 
   sigbytes = sigbytes_i;
   lcount = lcount_i;
-  () = #spill(badp, hbencp, hencp, statep, hbzp, hp, hb_esymsp, h_esymsp);
+  () = #spill(badp, hbencp, hencp, hbzp, hp, hb_esymsp, h_esymsp);
   sigp = _pack_sig_prefix(sigp, cp, lowp, lcount, sigbytes);
-  () = #unspill(badp, hbencp, hencp, statep, hbzp, hp, hb_esymsp, h_esymsp);
+  () = #unspill(badp, hbencp, hencp, hbzp, hp, hb_esymsp, h_esymsp);
 
   hb_count = hb_count_i;
   hb_m = hb_m_i;
   hb_offset = hb_offset_i;
-  () = #spill(sigp, badp, hencp, statep, hp, h_esymsp);
+  () = #spill(sigp, badp, hencp, hp, h_esymsp);
   hbencp, hbsize = _encode_hb_z1_full(hbencp, hbzp, hb_esymsp, hb_count,
                                       hb_m, hb_offset);
-  () = #unspill(sigp, badp, hencp, statep, hp, h_esymsp);
+  () = #unspill(sigp, badp, hencp, hp, h_esymsp);
 
   h_count = h_count_i;
   h_m = h_m_i;
   h_offset = h_offset_i;
-  () = #spill(sigp, badp, hbencp, statep, hbsize);
+  () = #spill(sigp, badp, hbencp, hbsize);
   hencp, hsize = _encode_h_full(hencp, hp, h_esymsp, h_count, h_m, h_offset);
-  () = #unspill(sigp, badp, hbencp, statep, hbsize);
+  () = #unspill(sigp, badp, hbencp, hbsize);
 
   base_hb = base_hb_i;
   base_h = base_h_i;
   payload_limit = payload_limit_i;
-  statep[0] = hbsize;
-  statep[1] = hsize;
-  statep[2] = base_hb;
-  statep[3] = base_h;
-  statep[4] = payload_limit;
-  statep = _pack_sig_size_offsets(statep);
-  offsets = statep[0];
-  bad = statep[1];
+  () = #declassify(hbsize);
+  () = #declassify(hsize);
+  ms = #init_msf();
+  hbsize = #protect(hbsize, ms);
+  hsize = #protect(hsize, ms);
+  offsets, bad = __pack_sig_size_offsets_values(hbsize, hsize, base_hb, base_h,
+                                                payload_limit);
+  ms = #init_msf();
+  offsets = #protect(offsets, ms);
+  bad = #protect(bad, ms);
   if (bad == 0)
   {
     lcount = lcount_i;

@@ -404,25 +404,388 @@ fn poly_basemul_jazz(reg mut ptr u32[256] rp,
 The \jasm{export} keyword triggers both assembly generation and \easycrypt{}
 extraction.  The ABI of \jasm{poly\_ntt\_jazz} takes a pointer to a 256-word
 array in a register and returns the same pointer after in-place modification.
+The argument names follow the conventional pointer suffix \jasm{p}.  Thus
+\jasm{rp} is the result-polynomial pointer.  It is mutable and is used in-place
+by \jasm{poly\_ntt\_jazz} and \jasm{poly\_invntt\_jazz}; in
+\jasm{poly\_basemul\_jazz} it names the destination array that receives the
+coefficientwise products.  The names \jasm{ap} and \jasm{bp} are the two
+read-only input-polynomial pointers for the base-multiplication operands
+\(a\) and \(b\).  All three pointers range over arrays of
+\jasm{u32[256]} coefficients, but only \jasm{rp} is declared \jasm{mut};
+the current checked wrapper declares \jasm{ap} and \jasm{bp} as
+\jasm{const} to make their read-only role explicit.
 
 \section{Safety and Constant-Time Verification}
 
-For the original direct-loop code, the safety argument is the natural
-mathematical one:
+The \jasmin{} verification obligations attached to this chapter are not only
+functional.  Functional refinement, which is carried out later in
+\easycrypt{}, proves that the extracted procedures implement the mathematical
+NTT.  The compiler-side checks discussed here prove two lower-level
+properties that must hold before the functional statement can be trusted as an
+implementation statement: the program must be \emph{safe}, so that the
+low-level execution is defined, and it must be \emph{constant time}, so that
+its control flow and memory-access pattern do not depend on polynomial
+coefficients.  The account below follows the local \jasmin{} checkout at
+\texttt{\$HOME/jasmin}: the safety checker is implemented under
+\texttt{compiler/safetylib}, the regular constant-time checker in
+\texttt{compiler/src/ct\_checker\_forward.ml}, the speculative checker in
+\texttt{compiler/src/sct\_checker\_forward.ml}, and the command-line entry
+point for the latter two in \texttt{compiler/entry/jasmin\_ct.ml}.
+The conceptual background is the CCS 2017 \jasmin{} paper~\cite{Almeida2017},
+which presents the language as a way to keep assembly-level control while
+making source-level safety and timing analyses tractable.  That paper describes
+the original source-analysis pipeline in terms of two translations: a
+functional embedding used to prove safety, and a constant-time instrumentation
+whose product program reduces timing security to a safety proof.  The local
+tooling used in this dissertation has evolved, but the proof principles are the
+same: first establish that the execution is defined, then establish that the
+observable trace is independent of secrets, and finally rely on the
+\jasmin{} compiler's preservation argument to carry those source-level
+properties to the generated assembly.
+
+\subsection{What Safety Means for This Code}
+
+Safety is the definedness layer of the proof.  The \jasmin{} type system gives
+each pointer and array an element width and a length, for example
+\jasm{reg mut ptr u32[256] rp}.  The safety checker then verifies that every
+operation which could be undefined at the assembly level is executed only
+under conditions that make it valid.  For this scalar NTT implementation the
+important safety obligations are:
 \begin{itemize}
-  \item \texttt{rp[j]} and \texttt{rp[j+len]} are accessed with
-        $j \in [\texttt{start}, \texttt{start}+\texttt{len})$ and
-        $j + \texttt{len} \in [\texttt{start}+\texttt{len}, \texttt{start}+2\texttt{len})$.
-        Both ranges are within $[0, 256)$ by the loop bounds.
-  \item The forward kernel accesses \texttt{jzetas[zetasctr]} with
-        \(\texttt{zetasctr}\in[1,256)\).  The inverse kernel accesses
-        \texttt{jzetas\_inv[0..254]} in the butterfly loops and
-        \texttt{jzetas\_inv[255]} in the final scaling loop.
+  \item \textbf{Valid memory accesses.}  Every read and write through
+        \jasm{rp}, \jasm{ap}, or \jasm{bp} must be inside the corresponding
+        256-word polynomial object.  Every access to \jasm{jzetas} or
+        \jasm{jzetas\_inv} must be inside the 256-entry global table.
+  \item \textbf{Alignment and access width.}  A \jasm{u32} access must be made
+        at an address that is valid for a 32-bit load or store.  In the source
+        this is expressed by typed \jasm{u32[256]} pointers rather than by
+        byte-level address arithmetic.
+  \item \textbf{Defined control flow.}  Loops must have public, bounded
+        schedules.  The checker reports termination obligations separately
+        from memory obligations; in this implementation all loops count over
+        fixed stage constants.
+  \item \textbf{Defined use of primitive operations.}  Word arithmetic itself
+        is not C-style undefined arithmetic: \jasmin{} word operations have
+        fixed bit-vector semantics.  The safety proof therefore does not need
+        to prove absence of signed overflow in Montgomery arithmetic.  It does
+        need to prove that primitive operations are used at valid types and
+        widths and that memory operands are valid.
 \end{itemize}
 
-The current full-safe implementation makes these facts syntactic for the
-compiler by specialising each public stage.  The following checks were run on
-\texttt{jasmin/hpoly.jazz} after regenerating the source:
+In the CCS 2017 presentation, this safety condition is explained through a
+near one-to-one functional embedding of \jasmin{} into a verification language:
+fixed-size \jasmin{} arrays become fixed-size sequences, memory is modeled as
+byte blocks, and every memory read or write is guarded by validity assertions
+for the addressed byte range~\cite{Almeida2017}.  The modern
+\jasm{-checksafety} command no longer needs to be described as a Dafny proof in
+order to use it in this artifact, but the generated obligations have the same
+shape.  A safety success means that every array index, memory address, shift
+amount, and other potentially failing operation has been proved valid under the
+function's typed calling convention and loop invariants.
+
+The present implementation uses a deliberately small fragment of that memory
+model.  The source code in \texttt{poly.jinc} has no explicit raw memory
+access of the form \jasm{[p + e]} and no source-level stack array.  Its
+observable memory operations are typed array/pointer operations:
+\jasm{rp[idx]}, \jasm{rp[offset]}, \jasm{ap[i]}, \jasm{bp[i]}, and reads from
+the global tables \jasm{jzetas} and \jasm{jzetas\_inv}.  Thus the abstract
+byte-block obligations from CCS17 specialize here to simple word-array
+obligations: each caller-provided polynomial pointer must designate a valid
+256-word \jasm{u32} region, and every computed index must lie in
+\([0,256)\).  This is why the implementation avoids pointer arithmetic in the
+source even though the generated x86 code necessarily lowers the same facts to
+base-plus-scaled-index addressing.
+
+The mathematical safety argument for the original direct-loop code is simple.
+For a forward stage with length \(\ell\), the inner loop reads and writes
+\(\texttt{rp}[j]\) and \(\texttt{rp}[j+\ell]\), with
+\[
+  j \in [\texttt{start}, \texttt{start}+\ell)
+  \quad\text{and}\quad
+  j+\ell \in [\texttt{start}+\ell,\texttt{start}+2\ell).
+\]
+The middle loop advances \(\texttt{start}\) by \(2\ell\), so the two half-blocks
+are always contained in one interval
+\([\texttt{start},\texttt{start}+2\ell)\subseteq[0,256)\).  The inverse
+butterfly has the same address shape.  The twiddle-table argument is also
+fixed: the forward transform consumes \(\texttt{jzetas}[1]\) through
+\(\texttt{jzetas}[255]\); the inverse butterfly stages consume
+\(\texttt{jzetas\_inv}[0]\) through \(\texttt{jzetas\_inv}[254]\); and the
+final scaling loop consumes \(\texttt{jzetas\_inv}[255]\).
+Base multiplication has the simplest safety shape.  The loop counter
+\jasm{i} ranges from \(0\) to \(255\), each iteration reads exactly
+\jasm{ap[i]} and \jasm{bp[i]}, and it writes exactly \jasm{rp[i]}.  The
+declarations in \texttt{hpoly.jazz} mark \jasm{ap} and \jasm{bp} as
+\jasm{const} pointers, so the safety proof for this routine also matches the
+intended data-flow role: the two source polynomials are read, and the result
+polynomial is the only destination.
+
+The stage-specialised implementation exists to make these same facts directly
+visible to the automatic checker.  A human can infer from the direct program
+that the triple \((\texttt{len},\texttt{start},\texttt{j})\) maintains the
+range invariant above.  An abstract interpreter is deliberately more local and
+more conservative: it must discover enough arithmetic relationships between
+mutable loop variables to prove every array access.  The full-safe source
+therefore replaces the public run-time stage variable \jasm{len} by eight
+helper functions with literal lengths \(128,64,32,16,8,4,2,1\).  In a helper
+with length \(\ell\), the code has the schematic form
+\[
+  \texttt{block}<\frac{256}{2\ell},\qquad
+  \texttt{j}<\ell,\qquad
+  \texttt{start}=\texttt{block}\cdot 2\ell,\qquad
+  \texttt{offset}=\texttt{start}+\texttt{j}+\ell.
+\]
+Consequently the checker only needs local arithmetic to derive
+\[
+  0 \leq \texttt{idx} < 256
+  \quad\text{and}\quad
+  0 \leq \texttt{offset} < 256.
+\]
+The first forward helper shown in \Cref{lst:ntt_jasmin_safe_stage} is the
+extreme case: \(\texttt{block}<1\), \(\texttt{j}<128\), and
+\(\texttt{offset}=\texttt{j}+128\).  Later helpers instantiate the same proof
+with smaller \(\ell\) and more blocks.  The inverse helpers use the same
+address proof in the opposite stage order, and the final scaling helper has
+only the single index obligation \(0\leq j<256\).
+
+\subsection{Regular Constant-Time Typing}
+
+The regular constant-time checker is a security type checker.  Its lattice has
+public, secret, and polymorphic levels.  Public data may influence observable
+timing behaviour; secret data may not.  Polymorphic levels are used in
+function contracts so that a returned value can be described as depending on a
+particular input without forcing that input to be public.  The checker then
+walks the program and enforces the following discipline.
+
+The semantic property behind this type discipline is trace equality.  The
+\jasmin{} paper instruments the operational semantics with a leakage trace
+recording the branches taken and the memory read/write operations performed
+during execution.  A command is constant time when any two executions that
+agree on public inputs produce the same leakage trace, even if their secret
+state differs~\cite{Almeida2017}.  This is a termination-insensitive property,
+so safety is checked separately and first; the dissertation follows the same
+ordering by pairing \jasm{jasminc -checksafety} with \jasm{jasmin-ct}.
+
+\begin{itemize}
+  \item Conditions of \jasm{if} statements, \jasm{while} guards, and loop
+        bounds must type-check as public.  Thus a secret coefficient cannot
+        determine whether an instruction executes.
+  \item Memory addresses and array indices must type-check as public.  Thus a
+        secret coefficient cannot determine which cache line is read or
+        written.
+  \item Operations classified by the architecture as not constant time may be
+        used only on public operands.  This is why the checker is parameterised
+        by the architecture-specific predicate passed to
+        \texttt{jasmin-ct}.
+  \item The result of a memory load is treated conservatively as secret unless
+        its source is known more precisely through the typed array discipline.
+        This is exactly the desired default for cryptographic state.
+\end{itemize}
+
+This is a proof relative to the \jasmin{} x86 leakage model used by the
+checker.  Following CCS17, the observable trace records branches and memory
+read/write operations, while instructions classified as constant-time by the
+architecture model do not add secret-dependent leakage obligations.  This
+matters for the present code because Montgomery multiplication lowers to
+\texttt{imul} and \texttt{sar} instructions on coefficient-derived registers:
+the checker accepts these arithmetic operations under the selected x86 model,
+but it would reject a use of secret data in an operation that the model marks
+as non-constant-time or in any address/branch expression.
+
+The CCS 2017 toolchain checked this property by inserting publicness
+annotations on control-flow conditions, memory accesses, and array accesses,
+then using a Boogie product program that executes two copies of the program in
+lockstep.  Publicness assertions become relational equalities between the
+original and shadow executions; proving the product program safe proves that
+the two leakage traces coincide~\cite{Almeida2017}.  The local
+\jasm{jasmin-ct} checker used here is a lighter direct type checker, but it is
+enforcing the same relational idea syntactically: anything that contributes to
+the leakage trace must be public.
+
+For the \haetae{} NTT, all data-dependent values are coefficient values or
+intermediate products inside \jasm{\_\_fqmul} and
+\jasm{\_\_montgomery\_reduce}.  Those values flow through additions,
+subtractions, casts, shifts, and multiplications, but they never flow into a
+branch condition, a loop bound, or an address expression.  The schedule is
+fixed by the public stage constants.  The table indices are also public:
+\jasm{1 + block}, \jasm{2 + block}, \(\ldots\), and the inverse-stage bases are
+literal constants.  Therefore the memory trace of the NTT is independent of
+the coefficients even though the loaded and stored words themselves are
+secret.
+
+The same trace argument applies to \jasm{\_poly\_basemul}.  The routine has
+one public loop counter \jasm{i}; on each iteration it reads \jasm{ap[i]} and
+\jasm{bp[i]}, computes \jasm{\_\_fqmul(a, b)}, and writes the result to
+\jasm{rp[i]}.  The loaded coefficients \jasm{a} and \jasm{b} are secret, and
+the Montgomery product is secret, but the only branch condition is
+\jasm{i < HAETAE\_N} and the only addresses use the public index \jasm{i}.
+The generated assembly consequently contains the expected public-counter loop:
+loads from the two source bases at scale four, a store to the result base at
+the same public index, and a comparison of the loop counter with \(256\).  This
+is exactly the CCS17 leakage discipline instantiated on the actual scalar
+base-multiplication code.
+
+The exported contracts in \Cref{lst:hpoly_safe} record this policy at the ABI
+boundary.  The contract \jasm{\#[ct = "rp -> rp"]} says that the output of the
+in-place NTT has the same security dependence as its input polynomial.  It
+does not say that the polynomial is public; it says that the function preserves
+the input's security level while the checker separately enforces public use of
+control and address expressions.  For base multiplication, the contract
+\jasm{\#[ct = "rp * ap * bp -> \{ap, bp, rp\}"]} records
+the analogous three-argument policy.  Here the identifiers \jasm{rp},
+\jasm{ap}, and \jasm{bp} are also used as named security levels in the
+\jasmin{} annotation syntax.  They are chosen to match the pointer variables:
+\jasm{rp} labels the result-pointer argument, while \jasm{ap} and \jasm{bp}
+label the two source-polynomial arguments.  The result type
+\jasm{\{ap, bp, rp\}} is intentionally conservative: the returned pointer is
+allowed to carry dependence on all three input labels, even though the source
+body returns the destination pointer after writing all 256 cells.  The
+important constant-time fact is separate from minimality of this return label:
+the checker still requires the loop index used in \jasm{ap[i]}, \jasm{bp[i]},
+and \jasm{rp[i]} to be public, so secret coefficient values can affect only the
+words written to \jasm{rp}, not which locations are read or written.
+
+\subsection{Speculative Constant-Time Typing}
+
+The speculative checker strengthens the regular property against transient
+execution.  In the source language this is expressed by the \jasm{sct}
+attribute.  Unlike the regular \jasm{ct} contract, an \jasm{sct} type
+distinguishes the security of a pointer value from the security of the memory
+contents reachable through that pointer:
+\[
+  \text{\jasm{\{ ptr: }}\ell_p\text{\jasm{, val: }}\ell_v
+  \text{\jasm{ \}}}.
+\]
+It also distinguishes ordinary execution from speculative execution.  The
+special level \jasm{transient} is printed by the Jasmin checker for the pair
+\((\text{normal public},\text{speculative secret})\).  Thus an argument of type
+\[
+  \jasm{\{ ptr: transient, val: secret \}}
+\]
+means: on the architecturally committed path, the pointer is public enough to
+be used as an address; during speculative execution, the checker treats it as
+potentially secret until a speculation barrier or hardening operation has
+established a public status.  The memory values remain secret in both modes.
+
+The instruction \jasm{\#init\_msf()} is the explicit boundary used by the
+exported wrappers.  In the checker it initializes the \jasmin{} MSF state and
+normalises speculative security levels after the public entry point has been
+reached.  In the x86-64 lowering used here, the corresponding exported
+assembly contains an \texttt{lfence}.  The wrappers therefore have the shape
+\[
+  \text{transient pointer input}
+  \xrightarrow{\ \text{\jasm{\#init\_msf()}}\ }
+  \text{public pointer schedule with secret values}.
+\]
+After that boundary, the same fixed-stage argument used for regular
+constant-time applies, but now every array access is checked in the stronger
+speculative type environment.  The output contract
+\jasm{\{ ptr: public, val: secret \}} states that returning the pointer does
+not leak secret information and that the polynomial contents are still secret.
+For \jasm{poly\_basemul\_jazz}, the three input arguments all have the
+same speculative type: each pointer is transient at entry and each pointed-to
+polynomial value is secret.  After \jasm{\#init\_msf()}, the checker may use
+\jasm{rp}, \jasm{ap}, and \jasm{bp} as public address bases, while the values
+loaded from \jasm{ap[i]} and \jasm{bp[i]} remain secret and flow only into the
+stored coefficient \jasm{rp[i]}.
+
+This distinction matters for an exported cryptographic routine.  A regular
+constant-time proof rules out leaks from committed branches and committed
+addresses.  Speculative constant-time additionally prevents the proof from
+silently assuming that a public-looking pointer or bound remains public under
+transient execution before the entry fence has taken effect.  In this
+implementation there are no secret-dependent bounds to harden inside the
+polynomial kernels; the only required hardening point is the public wrapper
+entry.
+
+\subsection{Why Source-Level Checks Apply to Assembly}
+
+The \jasmin{} paper separates two questions that are easy to conflate.  The
+first is whether the source program is safe and constant time.  The second is
+whether compilation can invalidate those properties.  Jasmin's answer is to
+restrict the compiler to predictable transformations and prove semantic
+preservation in Coq, then argue that the compiler also preserves the
+constant-time leakage property~\cite{Almeida2017}.  In particular, the compiler
+does not perform the aggressive optimisations that are dangerous for
+constant-time code, such as replacing computations on secret values with table
+lookups or introducing case splits on secret-dependent ranges.  Conditional
+operations are lowered to constant-time conditional instructions rather than to
+secret-dependent branches, and transformations such as loop unrolling or
+constant propagation remove only public, fixed control structure.
+
+This point is central for the present artifact.  The verification commands are
+run on \texttt{jasmin/hpoly.jazz}, not by manually auditing every generated
+assembly instruction.  That is meaningful because the \jasmin{} compilation
+discipline is designed so that source-level public schedule and public address
+facts remain public in the assembly trace.  The generated \texttt{hpoly.s}
+therefore inherits the fixed-stage NTT schedule: any additional loads or stores
+introduced by allocation are at locations determined by the public calling
+convention and public loop counters, not by coefficient values.
+
+This can be seen directly in the generated scalar assembly.  The exported
+wrappers begin with an \texttt{lfence} corresponding to \jasm{\#init\_msf()}.
+The base-multiplication loop lowers \jasm{ap[i]}, \jasm{bp[i]}, and
+\jasm{rp[i]} to indexed memory operands with the public loop counter as the
+scaled index; the loop branch compares that counter against the constant
+\(256\).  Likewise, each NTT stage loop branches on public counters and uses
+addresses formed from the public base pointer, public stage constants, and
+public counters.  Secret coefficients appear in arithmetic registers and in
+stored words, but not in branch predicates or address registers.
+
+\subsection{Instantiation for the \haetae{} NTT}
+
+Combining the safety and timing arguments gives a precise invariant for every
+exported routine:
+\begin{itemize}
+  \item \textbf{Public schedule.}  The number of iterations in every loop is a
+        function only of the fixed transform size \(256\) and the current
+        stage length.  It is independent of coefficient values.
+  \item \textbf{Public addresses.}  The address expressions for
+        \jasm{rp[idx]}, \jasm{rp[offset]}, \jasm{ap[i]}, \jasm{bp[i]}, and
+        the twiddle tables are affine expressions in public loop counters and
+        literal stage constants.
+  \item \textbf{Secret arithmetic.}  Coefficients, products, Montgomery
+        reductions, and butterfly sums are allowed to be secret.  They affect
+        stored values but never affect which instructions execute or which
+        addresses are touched.
+  \item \textbf{Defined accesses.}  The same public affine expressions are
+        bounded strongly enough to prove all array indices lie in
+        \([0,256)\).
+  \item \textbf{Speculation boundary.}  Each exported wrapper initializes the
+        MSF state before calling the internal kernel, turning transient pointer
+        inputs into public pointer schedules while preserving secret values.
+\end{itemize}
+
+The implementation style is therefore intentionally conservative.  It avoids
+data-dependent conditional subtraction, table lookups indexed by coefficients,
+variable-length loops, and secret-dependent pointer arithmetic.  Some of these
+patterns could be made secure with additional masking or hardening, but they
+would enlarge the trusted timing argument.  The scalar helperized code keeps
+the checker's proof obligation identical to the informal cryptographic rule:
+only the public NTT schedule determines the trace.
+
+This is the main reason the verification claim is persuasive rather than only
+a tool invocation.  The desired statement is a two-run noninterference
+property: two calls that satisfy the same public ABI and pointer-validity
+preconditions, but contain different secret coefficient values, must have the
+same branch and memory-address trace.  Safety supplies the defined-execution
+premise for those two runs; regular constant-time typing proves that every
+expression contributing to the trace is public; speculative constant-time
+typing proves that the exported entry boundary first converts transient pointer
+inputs into public address bases without making polynomial contents public;
+and the Jasmin compiler-preservation theorem carries those source facts to
+the generated assembly.  In this implementation each premise can be inspected
+directly in the source: loop guards are public constants and counters, address
+expressions are affine in public counters and stage offsets, and coefficients
+appear only in arithmetic registers and stored words.  The checker is
+therefore validating the same invariant a manual audit would look for, but it
+does so exhaustively over all stages, all loop iterations, and all exported
+routines.
+
+\subsection{Concrete Checks}
+
+The following checks were run on \texttt{jasmin/hpoly.jazz} after regenerating
+the source:
 
 \begin{lstlisting}[
   caption={Compiler checks for the full-safe constant-time implementation},
@@ -439,11 +802,16 @@ jasmin-ct --speculative jasmin/hpoly.jazz
   speculative constant-time check: passed
 \end{lstlisting}
 
-The constant-time contracts treat polynomial coefficients as secret and require
-all branch conditions, loop counts, and memory addresses to depend only on
-public stage parameters and public pointers after \jasm{\#init\_msf()}.
-Consequently, the checked assembly has a fixed instruction and memory-access
-schedule for all coefficient values.
+The three results should be read together.  The safety result says that the
+compiler found no possible out-of-bounds, invalid, or misaligned execution of
+the exported routines under the typed input-pointer assumptions.  The regular
+constant-time result says that committed control flow and committed memory
+addresses are independent of secret coefficients.  The speculative
+constant-time result says that this remains valid in the stronger transient
+model induced by the \jasm{sct} annotations and the \jasm{\#init\_msf()}
+boundary.  Consequently, the checked assembly has a fixed instruction and
+memory-access schedule for all coefficient values, while the values carried by
+that schedule remain secret.
 
 \section{Generated Assembly}
 

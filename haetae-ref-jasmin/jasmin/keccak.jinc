@@ -308,30 +308,25 @@ inline fn __keccakf1600_statepermute(reg ptr u64[25] a) -> reg ptr u64[25]
   stack u64[25] se;
   reg ptr u64[25] e;
   reg ptr u64[24] rcp;
-  reg ui64 c;
   reg u64 rc;
+  inline int c;
 
   e = se;
-  c = 0;
 
-  while
+  for c = 0 to 12
   {
-    () = #spill(c);
     e = _keccak_pround(e, a);
     a, e = #swap(e, a);
     rcp = haetae_keccak1600_rc;
-    rc = rcp[c];
+    rc = rcp[2 * c];
     e[0] ^= rc;
 
     a = _keccak_pround(a, e);
     a, e = #swap(e, a);
     rcp = haetae_keccak1600_rc;
-    rc = rcp[c + 1];
+    rc = rcp[2 * c + 1];
     a[0] ^= rc;
-    () = #unspill(c);
-    c += 2;
   }
-  (c < HAETAE_KECCAK_ROUNDS - 1)
 
   return a;
 }
@@ -348,45 +343,69 @@ fn _keccak_absorb_once(reg mut ptr u64[25] sp,
                        reg u64 inlen,
                        reg u8 domain) -> reg ptr u64[25]
 {
-  reg u64 i lane t;
+  reg u64 i lane t inpa;
   reg u8 b shift;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
+  ms = #init_msf();
   sp = _keccak_init_state(sp);
+  ms = #init_msf();
+  sp = #protect_ptr(sp, ms);
+  inpa = (64u)inp;
+  () = #declassify(inpa);
+  inpa = #protect(inpa, ms);
+  () = #declassify(rate);
+  rate = #protect(rate, ms);
+  () = #declassify(inlen);
+  inlen = #protect(inlen, ms);
+  () = #declassify(domain);
+  domain = #protect_8(domain, ms);
 
   while (inlen >= rate)
   {
     i = 0;
-    while (i < rate)
+    ms = #init_msf();
+    while { cond = i < rate; } (cond)
     {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
-      t = [:u64 (64u)inp];
+      t = [:u64 inpa];
+      t = #protect(t, ms);
       sp[lane] ^= t;
-      inp += 8;
+      inpa += 8;
       i += 8;
     }
+    ms = #update_msf(!cond, ms);
 
     inlen -= rate;
-    () = #spill(rate, inp, inlen, domain);
+    () = #spill(rate, inpa, inlen, domain);
     sp = _keccakf1600(sp);
-    () = #unspill(rate, inp, inlen, domain);
+    () = #unspill(rate, inpa, inlen, domain);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
   }
 
   i = 0;
-  while (i < inlen)
+  ms = #init_msf();
+  while { cond = i < inlen; } (cond)
   {
+    ms = #update_msf(cond, ms);
     lane = i;
     lane >>= 3;
-    b = [:u8 (64u)inp];
+    b = [:u8 inpa];
+    b = #protect_8(b, ms);
     t = (64u)b;
     shift = (8u)i;
     shift &= 7;
     shift <<= 3;
     t <<= (shift & 63);
     sp[lane] ^= t;
-    inp += 1;
+    inpa += 1;
     i += 1;
   }
+  ms = #update_msf(!cond, ms);
 
   sp = _keccak_finalize(sp, i, rate, domain);
 
@@ -398,24 +417,41 @@ fn _keccak_squeezeblocks(reg ui64 outp,
                          reg mut ptr u64[25] sp,
                          reg u64 rate) -> reg ptr u64[25]
 {
-  reg u64 i lane t;
+  reg u64 i lane t outa;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
+  ms = #init_msf();
+  outa = (64u)outp;
+  () = #declassify(outa);
+  outa = #protect(outa, ms);
+  () = #declassify(nblocks);
+  nblocks = #protect(nblocks, ms);
+  () = #declassify(rate);
+  rate = #protect(rate, ms);
+  sp = #protect_ptr(sp, ms);
   while (nblocks != 0)
   {
-    () = #spill(outp, nblocks, rate);
+    () = #spill(outa, nblocks, rate);
     sp = _keccakf1600(sp);
-    () = #unspill(outp, nblocks, rate);
+    () = #unspill(outa, nblocks, rate);
+    ms = #init_msf();
+    sp = #protect_ptr(sp, ms);
+    outa = #protect(outa, ms);
+    rate = #protect(rate, ms);
 
     i = 0;
-    while (i < rate)
+    while { cond = i < rate; } (cond)
     {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
       t = sp[lane];
-      [:u64 (64u)outp] = t;
-      outp += 8;
+      [:u64 outa] = t;
+      outa += 8;
       i += 8;
     }
+    ms = #update_msf(!cond, ms);
 
     nblocks -= 1;
   }
@@ -429,61 +465,78 @@ fn _keccak_absorb(reg mut ptr u64[25] sp,
                   reg u64 inlen) -> reg ptr u64[25],
                                      reg ptr u64[2]
 {
-  reg u64 pos rate i end lane delta t;
+  reg u64 pos rate lane t inpa todo;
   reg u8 b shift;
+  #[msf] reg u64 ms;
+  reg bool cond cond_pos;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   rate = statep[1];
+  () = #declassify(rate);
+  rate = #protect(rate, ms);
+  inpa = (64u)inp;
+  () = #declassify(inpa);
+  inpa = #protect(inpa, ms);
+  () = #declassify(inlen);
+  inlen = #protect(inlen, ms);
 
-  end = pos;
-  end += inlen;
-  while (end >= rate)
+  while (inlen != 0)
   {
-    i = pos;
-    while (i < rate)
+    todo = inlen;
+    ms = #init_msf();
+    while { cond = todo != 0; } (cond)
     {
-      lane = i;
-      lane >>= 3;
-      b = [:u8 (64u)inp];
-      t = (64u)b;
-      shift = (8u)i;
-      shift &= 7;
-      shift <<= 3;
-      t <<= (shift & 63);
-      sp[lane] ^= t;
-      inp += 1;
-      i += 1;
+      ms = #update_msf(cond, ms);
+      cond_pos = pos < rate;
+      if (cond_pos)
+      {
+        ms = #update_msf(cond_pos, ms);
+        lane = pos;
+        lane >>= 3;
+        b = [:u8 inpa];
+        b = #protect_8(b, ms);
+        t = (64u)b;
+        shift = (8u)pos;
+        shift &= 7;
+        shift <<= 3;
+        t <<= (shift & 63);
+        sp[lane] ^= t;
+        inpa += 1;
+        pos += 1;
+        inlen -= 1;
+        todo -= 1;
+      }
+      else
+      {
+        ms = #update_msf(!cond_pos, ms);
+        todo = 0;
+      }
     }
+    ms = #update_msf(!cond, ms);
+    () = #declassify(pos);
+    pos = #protect(pos, ms);
+    rate = #protect(rate, ms);
 
-    delta = rate;
-    delta -= pos;
-    inlen -= delta;
-    () = #spill(rate, inp, inlen);
-    sp = _keccakf1600(sp);
-    () = #unspill(rate, inp, inlen);
-    pos = 0;
-    end = inlen;
+    if (pos == rate)
+    {
+      () = #spill(rate, inpa, inlen, statep);
+      sp = _keccakf1600(sp);
+      () = #unspill(rate, inpa, inlen, statep);
+      ms = #init_msf();
+      sp = #protect_ptr(sp, ms);
+      statep = #protect_ptr(statep, ms);
+      pos = 0;
+    }
   }
 
-  end = pos;
-  end += inlen;
-  i = pos;
-  while (i < end)
-  {
-    lane = i;
-    lane >>= 3;
-    b = [:u8 (64u)inp];
-    t = (64u)b;
-    shift = (8u)i;
-    shift &= 7;
-    shift <<= 3;
-    t <<= (shift & 63);
-    sp[lane] ^= t;
-    inp += 1;
-    i += 1;
-  }
-
-  statep[0] = i;
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  statep[0] = pos;
   return sp, statep;
 }
 
@@ -493,29 +546,54 @@ fn _keccak_squeeze(reg mut ptr u64[25] sp,
                    reg u64 outlen) -> reg ptr u64[25],
                                       reg ptr u64[2]
 {
-  reg u64 pos rate i end lane delta t;
+  reg u64 pos rate i end lane delta t outa;
   reg u8 b shift;
+  #[msf] reg u64 ms;
+  reg bool cond;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sp = #protect_ptr(sp, ms);
   pos = statep[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   rate = statep[1];
+  () = #declassify(rate);
+  rate = #protect(rate, ms);
+  outa = (64u)outp;
+  () = #declassify(outa);
+  outa = #protect(outa, ms);
+  () = #declassify(outlen);
+  outlen = #protect(outlen, ms);
 
   while (outlen != 0)
   {
     if (pos == rate)
     {
-      () = #spill(rate, outp, outlen);
+      () = #spill(rate, outa, outlen, statep);
       sp = _keccakf1600(sp);
-      () = #unspill(rate, outp, outlen);
+      () = #unspill(rate, outa, outlen, statep);
+      ms = #init_msf();
+      sp = #protect_ptr(sp, ms);
+      statep = #protect_ptr(statep, ms);
+      rate = #protect(rate, ms);
+      outa = #protect(outa, ms);
+      outlen = #protect(outlen, ms);
       pos = 0;
     }
 
     end = pos;
     end += outlen;
     end = rate if end > rate;
+    () = #declassify(end);
+    ms = #init_msf();
+    end = #protect(end, ms);
 
     i = pos;
-    while (i < end)
+    ms = #init_msf();
+    while { cond = i < end; } (cond)
     {
+      ms = #update_msf(cond, ms);
       lane = i;
       lane >>= 3;
       t = sp[lane];
@@ -524,17 +602,23 @@ fn _keccak_squeeze(reg mut ptr u64[25] sp,
       shift <<= 3;
       t >>= (shift & 63);
       b = (8u)t;
-      [:u8 (64u)outp] = b;
-      outp += 1;
+      [:u8 outa] = b;
+      outa += 1;
       i += 1;
     }
+    ms = #update_msf(!cond, ms);
 
     delta = i;
     delta -= pos;
     outlen -= delta;
     pos = i;
+    () = #declassify(pos);
+    pos = #protect(pos, ms);
+    outlen = #protect(outlen, ms);
   }
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   statep[0] = pos;
   return sp, statep;
 }
@@ -646,7 +730,10 @@ inline fn _shake_state_absorb(reg mut ptr u64[26] statep,
   reg ptr u64[25] sp;
   reg u64 pos;
   reg u32 pos32;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   sp = statep[0:25];
   stp = st;
   pos32 = statep.[:u32 200];
@@ -657,9 +744,13 @@ inline fn _shake_state_absorb(reg mut ptr u64[26] statep,
   () = #spill(statep);
   sp, stp = _keccak_absorb(sp, stp, inp, inlen);
   () = #unspill(statep);
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
 
   statep[0:25] = sp;
   pos = stp[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   pos32 = (32u)pos;
   statep.[:u32 200] = pos32;
   statep.[:u32 204] = 0;
@@ -700,7 +791,10 @@ inline fn _shake_state_squeeze(reg mut ptr u64[26] statep,
   reg ptr u64[25] sp;
   reg u64 pos;
   reg u32 pos32;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   sp = statep[0:25];
   stp = st;
   pos32 = statep.[:u32 200];
@@ -711,9 +805,13 @@ inline fn _shake_state_squeeze(reg mut ptr u64[26] statep,
   () = #spill(statep);
   sp, stp = _keccak_squeeze(sp, stp, outp, outlen);
   () = #unspill(statep);
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
 
   statep[0:25] = sp;
   pos = stp[0];
+  () = #declassify(pos);
+  pos = #protect(pos, ms);
   pos32 = (32u)pos;
   statep.[:u32 200] = pos32;
   statep.[:u32 204] = 0;

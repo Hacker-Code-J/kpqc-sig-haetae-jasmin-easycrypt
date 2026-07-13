@@ -108,6 +108,7 @@ fn __sample_gauss_sigma76_regs(reg const ptr u8[17] randp)
   reg u64 rand_gauss16 rand_rej x y0 y1 rounded exp_in exp;
   reg u64 t u accepted sqr0 sqr1;
   reg u8 byte;
+  #[msf] reg u64 ms;
 
   byte = randp[0];
   rand_gauss16 = (64u)byte;
@@ -205,6 +206,9 @@ fn __sample_gauss_sigma76_regs(reg const ptr u8[17] randp)
   exp_in |= t;
   exp_in += 1;
   exp_in >>= 1;
+  () = #declassify(exp_in);
+  ms = #init_msf();
+  exp_in = #protect(exp_in, ms);
 
   exp = _approx_exp(exp_in);
   accepted = rand_rej;
@@ -269,6 +273,7 @@ fn _sample_gauss(reg mut ptr u64[512] rp,
   reg u64 len bytecnt pos coefcnt last sample accepted accepted64 dont;
   reg u64 s0 s1 sqr0 sqr1 mask carry;
   reg u8 byte;
+  #[msf] reg u64 ms;
 
   srp = rp;
   ssqsump = sqsump;
@@ -305,11 +310,25 @@ fn _sample_gauss(reg mut ptr u64[512] rp,
       }
 
       sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+      () = #declassify(coefcnt);
+      () = #declassify(len);
+      () = #declassify(pos);
+      () = #declassify(bytecnt);
+      () = #declassify(accepted);
+      ms = #init_msf();
+      coefcnt = #protect(coefcnt, ms);
+      len = #protect(len, ms);
+      pos = #protect(pos, ms);
+      bytecnt = #protect(bytecnt, ms);
+      accepted = #protect(accepted, ms);
 
       last = len;
       last -= 1;
       dont = sdont;
+      () = #declassify(dont);
+      dont = #protect(dont, ms);
       rp_tmp = srp;
+      rp_tmp = #protect_ptr(rp_tmp, ms);
       if (dont != 0)
       {
         if (coefcnt == last)
@@ -339,6 +358,8 @@ fn _sample_gauss(reg mut ptr u64[512] rp,
       sqr0 &= mask;
       sqr1 &= mask;
       sqsum_tmp = ssqsump;
+      ms = #init_msf();
+      sqsum_tmp = #protect_ptr(sqsum_tmp, ms);
       s0 = sqsum_tmp[0];
       s1 = sqsum_tmp[1];
       s0 += sqr0;
@@ -429,6 +450,7 @@ fn _rej_uniform(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
   reg u64 ctr pos rem;
   reg u8 byte;
   reg u32 t u;
+  #[msf] reg u64 ms;
 
   ctr = 0;
   pos = 0;
@@ -450,6 +472,9 @@ fn _rej_uniform(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
       pos += 1;
       u <<= 8;
       t |= u;
+      () = #declassify(t);
+      ms = #init_msf();
+      t = #protect_32(t, ms);
 
       if (t < HAETAE_Q)
       {
@@ -551,6 +576,7 @@ fn _rej_eta(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
   reg u64 ctr pos;
   reg u8 byte;
   reg u32 t r;
+  #[msf] reg u64 ms;
 
   ctr = 0;
   pos = 0;
@@ -561,6 +587,9 @@ fn _rej_eta(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
       byte = bp[pos];
       t = (32u)byte;
       pos += 1;
+      () = #declassify(t);
+      ms = #init_msf();
+      t = #protect_32(t, ms);
       if (t < 243)
       {
         r = __mod3(t);

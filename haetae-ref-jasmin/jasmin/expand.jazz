@@ -3,42 +3,70 @@ require "keccak.jinc"
 require "polynomial_sampler.jinc"
 require "expand.jinc"
 
+#[ct = "vp * public * public * m -> vp"]
 export
 fn polyveck_expand_vecA_jazz(reg mut ptr u32[8192] vp,
                              reg ui64 seedp,
                              reg u64 k,
                              reg u64 m) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  vp = #protect_ptr(vp, ms);
+  k = #protect(k, ms);
+  m = #protect(m, ms);
   vp = _polyveck_expand_vecA(vp, seedp, k, m);
   return vp;
 }
 
+#[ct = "vp * public * nonce * public -> vp"]
 export
 fn polyvec_expand_eta_jazz(reg mut ptr u32[8192] vp,
                            reg ui64 seedp,
                            reg u64 nonce,
                            reg u64 count) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  vp = #protect_ptr(vp, ms);
+  nonce = #protect(nonce, ms);
+  count = #protect(count, ms);
   vp = _polyvec_expand_eta(vp, seedp, nonce, count);
   return vp;
 }
 
+#[ct = "matp * public * public * public -> matp"]
 export
 fn polymatkl_expand_matA_jazz(reg mut ptr u32[8192] matp,
                               reg ui64 seedp,
                               reg u64 rows,
                               reg u64 cols) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   matp = _polymatkl_expand_matA(matp, seedp, rows, cols);
   return matp;
 }
 
+#[ct = "matp * public * public * public -> matp"]
 export
 fn polymatkm_expand_matA_jazz(reg mut ptr u32[8192] matp,
                               reg ui64 seedp,
                               reg u64 rows,
                               reg u64 cols) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   matp = _polymatkm_expand_matA(matp, seedp, rows, cols);
   return matp;
 }

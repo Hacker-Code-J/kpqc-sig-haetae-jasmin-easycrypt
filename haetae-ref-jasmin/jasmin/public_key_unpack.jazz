@@ -8,6 +8,7 @@ require "polynomial_sampler.jinc"
 require "expand.jinc"
 require "public_key_unpack.jinc"
 
+#[ct = "matp * vkp * public * public * public * public -> {matp, vkp}"]
 export
 fn unpack_vk_m23_full_jazz(reg mut ptr u32[8192] matp,
                            reg const ptr u8[2752] vkp,
@@ -16,10 +17,19 @@ fn unpack_vk_m23_full_jazz(reg mut ptr u32[8192] matp,
                            reg u64 l,
                            reg u64 m) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  vkp = #protect_ptr(vkp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
+  m = #protect(m, ms);
   matp = _unpack_vk_m23_full(matp, vkp, seedu, k, l, m);
   return matp;
 }
 
+#[ct = "matp * vkp * public * public * public -> {matp, vkp}"]
 export
 fn unpack_vk_m5_full_jazz(reg mut ptr u32[8192] matp,
                           reg const ptr u8[2752] vkp,
@@ -27,10 +37,18 @@ fn unpack_vk_m5_full_jazz(reg mut ptr u32[8192] matp,
                           reg u64 k,
                           reg u64 l) -> reg ptr u32[8192]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  vkp = #protect_ptr(vkp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
   matp = _unpack_vk_m5_full(matp, vkp, seedu, k, l);
   return matp;
 }
 
+#[ct = "matp * s0p * s1p * keyp * skp * public -> {matp, skp} * {s0p, skp} * {s1p, skp} * {keyp, skp}"]
 export
 fn unpack_sk_mode2_full_jazz(reg mut ptr u32[8192] matp,
                              reg mut ptr u32[2048] s0p,
@@ -43,19 +61,39 @@ fn unpack_sk_mode2_full_jazz(reg mut ptr u32[8192] matp,
                                                reg ptr u8[32]
 {
   reg u64 k l m vkbytes;
+  #[msf] reg u64 ms;
 
   k = 2;
   l = 4;
   m = 3;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
+  m = #protect(m, ms);
   () = #spill(s0p, s1p, keyp, skp, k, m);
   matp = _unpack_vk_m23_full(matp, skp, seedu, k, l, m);
   () = #unspill(s0p, s1p, keyp, skp, k, m);
 
   vkbytes = 992;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  vkbytes = #protect(vkbytes, ms);
+  m = #protect(m, ms);
+  k = #protect(k, ms);
   s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, m, k);
   return matp, s0p, s1p, keyp;
 }
 
+#[ct = "matp * s0p * s1p * keyp * skp * public -> {matp, skp} * {s0p, skp} * {s1p, skp} * {keyp, skp}"]
 export
 fn unpack_sk_mode3_full_jazz(reg mut ptr u32[8192] matp,
                              reg mut ptr u32[2048] s0p,
@@ -68,19 +106,39 @@ fn unpack_sk_mode3_full_jazz(reg mut ptr u32[8192] matp,
                                                reg ptr u8[32]
 {
   reg u64 k l m vkbytes;
+  #[msf] reg u64 ms;
 
   k = 3;
   l = 6;
   m = 5;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
+  m = #protect(m, ms);
   () = #spill(s0p, s1p, keyp, skp, k, m);
   matp = _unpack_vk_m23_full(matp, skp, seedu, k, l, m);
   () = #unspill(s0p, s1p, keyp, skp, k, m);
 
   vkbytes = 1472;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  vkbytes = #protect(vkbytes, ms);
+  m = #protect(m, ms);
+  k = #protect(k, ms);
   s0p, s1p, keyp = _unpack_sk_m23(s0p, s1p, keyp, skp, vkbytes, m, k);
   return matp, s0p, s1p, keyp;
 }
 
+#[ct = "matp * s0p * s1p * keyp * skp * public -> {matp, skp} * {s0p, skp} * {s1p, skp} * {keyp, skp}"]
 export
 fn unpack_sk_mode5_full_jazz(reg mut ptr u32[8192] matp,
                              reg mut ptr u32[2048] s0p,
@@ -93,15 +151,34 @@ fn unpack_sk_mode5_full_jazz(reg mut ptr u32[8192] matp,
                                                reg ptr u8[32]
 {
   reg u64 k l m vkbytes;
+  #[msf] reg u64 ms;
 
   k = 4;
   l = 7;
   m = 6;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  k = #protect(k, ms);
+  l = #protect(l, ms);
+  m = #protect(m, ms);
   () = #spill(s0p, s1p, keyp, skp, k, m);
   matp = _unpack_vk_m5_full(matp, skp, seedu, k, l);
   () = #unspill(s0p, s1p, keyp, skp, k, m);
 
   vkbytes = 2080;
+  ms = #init_msf();
+  matp = #protect_ptr(matp, ms);
+  s0p = #protect_ptr(s0p, ms);
+  s1p = #protect_ptr(s1p, ms);
+  keyp = #protect_ptr(keyp, ms);
+  skp = #protect_ptr(skp, ms);
+  vkbytes = #protect(vkbytes, ms);
+  m = #protect(m, ms);
+  k = #protect(k, ms);
   s0p, s1p, keyp = _unpack_sk_m5(s0p, s1p, keyp, skp, vkbytes, m, k);
   return matp, s0p, s1p, keyp;
 }

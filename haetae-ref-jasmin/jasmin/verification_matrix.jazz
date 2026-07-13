@@ -1,6 +1,7 @@
 require "params.jinc"
 require "poly.jinc"
 
+#[ct = "z1p * highp * a1p * public * public -> z1p * {a1p, highp, z1p}"]
 export
 fn sign_verify_matrix_ntt_acc_jazz(reg mut ptr u32[2048] z1p,
                                    reg mut ptr u32[2048] highp,
@@ -9,16 +10,33 @@ fn sign_verify_matrix_ntt_acc_jazz(reg mut ptr u32[2048] z1p,
                                    reg u64 cols) -> reg ptr u32[2048],
                                                    reg ptr u32[2048]
 {
+  reg u64 cols_ntt;
+  #[msf] reg u64 ms;
+
+  cols_ntt = cols;
   () = #spill(highp, a1p, rows, cols);
-  z1p = _polyvec_ntt(z1p, cols);
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  cols_ntt = #protect(cols_ntt, ms);
+  z1p = _polyvec_ntt(z1p, cols_ntt);
   () = #unspill(highp, a1p, rows, cols);
 
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  a1p = #protect_ptr(a1p, ms);
+  z1p = #protect_ptr(z1p, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
   highp = _polymat_pointwise_acc(highp, a1p, z1p, rows, cols);
+  ms = #init_msf();
+  highp = #protect_ptr(highp, ms);
+  rows = #protect(rows, ms);
   highp = _polyvec_invntt(highp, rows);
 
   return z1p, highp;
 }
 
+#[ct = "z1p * highp * wprimep * public -> {highp, wprimep, z1p}"]
 export
 fn sign_verify_crt_freeze_jazz(reg mut ptr u32[2048] z1p,
                                reg const ptr u32[2048] highp,
@@ -26,10 +44,19 @@ fn sign_verify_crt_freeze_jazz(reg mut ptr u32[2048] z1p,
                                reg u64 rows) -> reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  highp = #protect_ptr(highp, ms);
+  wprimep = #protect_ptr(wprimep, ms);
+  rows = #protect(rows, ms);
   z1p = _polyveck_poly_fromcrt(z1p, highp, wprimep, rows);
   count = rows;
   count *= HAETAE_N;
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  count = #protect(count, ms);
   z1p = _polyvec_freeze2q(z1p, count);
 
   return z1p;

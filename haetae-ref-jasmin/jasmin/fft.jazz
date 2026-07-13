@@ -1,10 +1,16 @@
 require "fft.jinc"
 require "fft_pipeline.jinc"
 
+#[ct = "datap * rootsp -> {datap, rootsp}"]
 export
 fn fft_full_jazz(reg mut ptr u32[512] datap,
                  reg const ptr u32[512] rootsp) -> reg ptr u32[512]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  datap = #protect_ptr(datap, ms);
+  rootsp = #protect_ptr(rootsp, ms);
   datap = _fft_full(datap, rootsp);
   return datap;
 }

@@ -11,6 +11,65 @@ require "fft_tables.jinc"
 require "singular_values.jinc"
 require "api.jinc"
 
+inline fn __kp_api_copy_addr_to_32(reg mut ptr u8[32] dstp,
+                                   reg u64 srcp) -> reg ptr u8[32]
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < 32)
+  {
+    addr = srcp;
+    addr += i;
+    b = [:u8 addr];
+    dstp[i] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn __kp_api_copy_2080_to_addr(reg u64 dstp,
+                                     reg const ptr u8[2080] srcp,
+                                     reg u64 len) -> reg u64
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[i];
+    addr = dstp;
+    addr += i;
+    [:u8 addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
+inline fn __kp_api_copy_2752_to_addr(reg u64 dstp,
+                                     reg const ptr u8[2752] srcp,
+                                     reg u64 len) -> reg u64
+{
+  reg u64 i addr;
+  reg u8 b;
+
+  i = 0;
+  while (i < len)
+  {
+    b = srcp[i];
+    addr = dstp;
+    addr += i;
+    [:u8 addr] = b;
+    i += 1;
+  }
+
+  return dstp;
+}
+
 fn __kp_shake128_init_seedbuf(reg mut ptr u64[25] sp,
                               reg const ptr u8[128] seedp,
                               reg u64 seedoff,
@@ -128,6 +187,7 @@ fn __kp_poly_uniform_consume_poly(reg mut ptr u32[HAETAE_N] ap,
   reg u64 pos rem live;
   reg u8 byte;
   reg u32 t u;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -155,6 +215,9 @@ fn __kp_poly_uniform_consume_poly(reg mut ptr u32[HAETAE_N] ap,
         pos += 1;
         u <<= 8;
         t |= u;
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
 
         if (t < HAETAE_Q)
         {
@@ -177,6 +240,7 @@ fn __kp_poly_uniform_eta_consume_poly(reg mut ptr u32[HAETAE_N] ap,
   reg u64 pos live;
   reg u8 byte;
   reg u32 t r;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -193,6 +257,9 @@ fn __kp_poly_uniform_eta_consume_poly(reg mut ptr u32[HAETAE_N] ap,
         byte = bp[pos];
         t = (32u)byte;
         pos += 1;
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
 
         if (t < 243)
         {
@@ -260,6 +327,7 @@ fn __kp_poly_uniform_consume_2048(reg mut ptr u32[2048] ap,
   reg u64 pos rem live idx;
   reg u8 byte;
   reg u32 t u;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -287,6 +355,9 @@ fn __kp_poly_uniform_consume_2048(reg mut ptr u32[2048] ap,
         pos += 1;
         u <<= 8;
         t |= u;
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
 
         if (t < HAETAE_Q)
         {
@@ -312,6 +383,7 @@ fn __kp_poly_uniform_eta_consume_2048(reg mut ptr u32[2048] ap,
   reg u64 pos live idx;
   reg u8 byte;
   reg u32 t r;
+  #[msf] reg u64 ms;
 
   pos = 0;
   live = 1;
@@ -328,6 +400,9 @@ fn __kp_poly_uniform_eta_consume_2048(reg mut ptr u32[2048] ap,
         byte = bp[pos];
         t = (32u)byte;
         pos += 1;
+        () = #declassify(t);
+        ms = #init_msf();
+        t = #protect_32(t, ms);
 
         if (t < 243)
         {
@@ -406,6 +481,7 @@ fn _kp_poly_uniform_at_seedbuf(reg mut ptr u32[HAETAE_N] ap,
   reg ptr u8[1024] bufp;
   reg u64 ctr buflen off i idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -414,17 +490,26 @@ fn _kp_poly_uniform_at_seedbuf(reg mut ptr u32[HAETAE_N] ap,
   off = 0;
   () = #spill(ap);
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 168;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 336;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 504;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap);
 
   ctr = 0;
   buflen = 672;
   ap, ctr = __kp_poly_uniform_consume_poly(ap, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
@@ -444,10 +529,23 @@ fn _kp_poly_uniform_at_seedbuf(reg mut ptr u32[HAETAE_N] ap,
 
     () = #spill(ap, ctr, buflen);
     bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, ctr, buflen);
     buflen = 168;
     buflen += off;
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __kp_poly_uniform_consume_poly(ap, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -465,6 +563,7 @@ fn _kp_poly_uniform_at_seedbuf_8192(reg mut ptr u32[8192] ap,
   reg ptr u8[1024] bufp;
   reg u64 ctr buflen off i idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -473,17 +572,28 @@ fn _kp_poly_uniform_at_seedbuf_8192(reg mut ptr u32[8192] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 168;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 336;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 504;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 672;
   ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  () = #declassify(base);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  base = #protect(base, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
@@ -503,10 +613,25 @@ fn _kp_poly_uniform_at_seedbuf_8192(reg mut ptr u32[8192] ap,
 
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
     buflen = 168;
     buflen += off;
+    () = #declassify(base);
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    base = #protect(base, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __poly_uniform_consume(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -524,6 +649,7 @@ fn _kp_poly_uniform_at_seedbuf_2048(reg mut ptr u32[2048] ap,
   reg ptr u8[1024] bufp;
   reg u64 ctr buflen off i idx;
   reg u8 b;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -532,17 +658,28 @@ fn _kp_poly_uniform_at_seedbuf_2048(reg mut ptr u32[2048] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 168;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 336;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   off = 504;
   bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 672;
   ap, ctr = __kp_poly_uniform_consume_2048(ap, base, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  () = #declassify(base);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  base = #protect(base, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
@@ -562,10 +699,25 @@ fn _kp_poly_uniform_at_seedbuf_2048(reg mut ptr u32[2048] ap,
 
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze128(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
     buflen = 168;
     buflen += off;
+    () = #declassify(base);
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    base = #protect(base, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __kp_poly_uniform_consume_2048(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -581,6 +733,7 @@ fn _kp_poly_uniform_eta_at_seedbuf(reg mut ptr u32[HAETAE_N] ap,
   reg ptr u64[25] sp;
   reg ptr u8[1024] bufp;
   reg u64 ctr off buflen;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -589,18 +742,37 @@ fn _kp_poly_uniform_eta_at_seedbuf(reg mut ptr u32[HAETAE_N] ap,
   off = 0;
   () = #spill(ap);
   bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap);
 
   ctr = 0;
   buflen = 136;
   ap, ctr = __kp_poly_uniform_eta_consume_poly(ap, ctr, bufp, buflen);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
     () = #spill(ap, ctr, buflen);
     bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, ctr, buflen);
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __kp_poly_uniform_eta_consume_poly(ap, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -617,6 +789,7 @@ fn _kp_poly_uniform_eta_at_seedbuf_2048(reg mut ptr u32[2048] ap,
   reg ptr u64[25] sp;
   reg ptr u8[1024] bufp;
   reg u64 ctr off buflen;
+  #[msf] reg u64 ms;
 
   sp = state;
   bufp = buf;
@@ -625,18 +798,41 @@ fn _kp_poly_uniform_eta_at_seedbuf_2048(reg mut ptr u32[2048] ap,
   off = 0;
   () = #spill(ap, base);
   bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
   () = #unspill(ap, base);
 
   ctr = 0;
   buflen = 136;
   ap, ctr = __kp_poly_uniform_eta_consume_2048(ap, base, ctr, bufp, buflen);
+  () = #declassify(base);
+  () = #declassify(ctr);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bufp = #protect_ptr(bufp, ms);
+  base = #protect(base, ms);
+  ctr = #protect(ctr, ms);
 
   while (ctr < HAETAE_N)
   {
     () = #spill(ap, base, ctr, buflen);
     bufp, sp = __poly_sample_squeeze256(bufp, off, sp);
+  () = #declassify(bufp);
     () = #unspill(ap, base, ctr, buflen);
+    () = #declassify(base);
+    () = #declassify(ctr);
+    () = #declassify(buflen);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    base = #protect(base, ms);
+    ctr = #protect(ctr, ms);
+    buflen = #protect(buflen, ms);
     ap, ctr = __kp_poly_uniform_eta_consume_2048(ap, base, ctr, bufp, buflen);
+    () = #declassify(ctr);
+    ms = #init_msf();
+    ap = #protect_ptr(ap, ms);
+    bufp = #protect_ptr(bufp, ms);
+    ctr = #protect(ctr, ms);
   }
 
   return ap;
@@ -648,6 +844,7 @@ fn _kp_polymatkm_expand_matA(reg mut ptr u32[8192] matp,
                              reg u64 cols) -> reg ptr u32[8192]
 {
   reg u64 i j base nonce rowbase seedoff;
+  #[msf] reg u64 ms;
 
   seedoff = 0;
   i = 0;
@@ -669,6 +866,21 @@ fn _kp_polymatkm_expand_matA(reg mut ptr u32[8192] matp,
       matp = _kp_poly_uniform_at_seedbuf_8192(matp, base, seedp, seedoff,
                                               nonce);
       () = #unspill(seedp, rows, cols, i, j, rowbase, seedoff);
+      () = #declassify(rows);
+      () = #declassify(cols);
+      () = #declassify(i);
+      () = #declassify(j);
+      () = #declassify(rowbase);
+      () = #declassify(seedoff);
+      ms = #init_msf();
+      matp = #protect_ptr(matp, ms);
+      seedp = #protect_ptr(seedp, ms);
+      rows = #protect(rows, ms);
+      cols = #protect(cols, ms);
+      i = #protect(i, ms);
+      j = #protect(j, ms);
+      rowbase = #protect(rowbase, ms);
+      seedoff = #protect(seedoff, ms);
       j += 1;
     }
 
@@ -685,6 +897,7 @@ fn _kp_polyveck_expand_vecA(reg mut ptr u32[2048] vp,
                             reg u64 m) -> reg ptr u32[2048]
 {
   reg u64 i base nonce seedoff;
+  #[msf] reg u64 ms;
 
   seedoff = 0;
   nonce = k;
@@ -698,6 +911,21 @@ fn _kp_polyveck_expand_vecA(reg mut ptr u32[2048] vp,
     () = #spill(seedp, k, m, i, base, nonce, seedoff);
     vp = _kp_poly_uniform_at_seedbuf_2048(vp, base, seedp, seedoff, nonce);
     () = #unspill(seedp, k, m, i, base, nonce, seedoff);
+    () = #declassify(k);
+    () = #declassify(m);
+    () = #declassify(i);
+    () = #declassify(base);
+    () = #declassify(nonce);
+    () = #declassify(seedoff);
+    ms = #init_msf();
+    vp = #protect_ptr(vp, ms);
+    seedp = #protect_ptr(seedp, ms);
+    k = #protect(k, ms);
+    m = #protect(m, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
+    nonce = #protect(nonce, ms);
+    seedoff = #protect(seedoff, ms);
     i += 1;
     base += HAETAE_N;
     nonce += 1;
@@ -712,6 +940,7 @@ fn _kp_polyvec_expand_eta(reg mut ptr u32[2048] vp,
                           reg u64 count) -> reg ptr u32[2048]
 {
   reg u64 i base seedoff;
+  #[msf] reg u64 ms;
 
   seedoff = 32;
   i = 0;
@@ -721,6 +950,19 @@ fn _kp_polyvec_expand_eta(reg mut ptr u32[2048] vp,
     () = #spill(seedp, nonce, count, i, base, seedoff);
     vp = _kp_poly_uniform_eta_at_seedbuf_2048(vp, base, seedp, seedoff, nonce);
     () = #unspill(seedp, nonce, count, i, base, seedoff);
+    () = #declassify(nonce);
+    () = #declassify(count);
+    () = #declassify(i);
+    () = #declassify(base);
+    () = #declassify(seedoff);
+    ms = #init_msf();
+    vp = #protect_ptr(vp, ms);
+    seedp = #protect_ptr(seedp, ms);
+    nonce = #protect(nonce, ms);
+    count = #protect(count, ms);
+    i = #protect(i, ms);
+    base = #protect(base, ms);
+    seedoff = #protect(seedoff, ms);
     i += 1;
     base += HAETAE_N;
     nonce += 1;
@@ -805,6 +1047,7 @@ fn _kp_m23_matrix(reg mut ptr u32[2048] bp,
                                   reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
   count = cols;
   count *= HAETAE_N;
@@ -813,8 +1056,19 @@ fn _kp_m23_matrix(reg mut ptr u32[2048] bp,
   () = #spill(bp, ap, rows, cols);
   s1hatp = _polyvec_ntt(s1hatp, cols);
   () = #unspill(bp, ap, rows, cols);
+  () = #declassify(rows);
+  () = #declassify(cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
 
   bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  rows = #protect(rows, ms);
   bp = _polyvec_invntt(bp, rows);
 
   return bp, s1hatp;
@@ -829,6 +1083,7 @@ fn _kp_m5_matrix(reg mut ptr u32[2048] bp,
                                  reg ptr u32[2048]
 {
   reg u64 count;
+  #[msf] reg u64 ms;
 
   count = cols;
   count *= HAETAE_N;
@@ -837,6 +1092,14 @@ fn _kp_m5_matrix(reg mut ptr u32[2048] bp,
   () = #spill(bp, ap, rows, cols);
   s1hatp = _polyvec_ntt(s1hatp, cols);
   () = #unspill(bp, ap, rows, cols);
+  () = #declassify(rows);
+  () = #declassify(cols);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  ap = #protect_ptr(ap, ms);
+  s1hatp = #protect_ptr(s1hatp, ms);
+  rows = #protect(rows, ms);
+  cols = #protect(cols, ms);
 
   bp = _polymat_pointwise_acc(bp, ap, s1hatp, rows, cols);
 
@@ -881,6 +1144,7 @@ inline fn _keypair_full_m23(reg mut ptr u8[2080] vkp,
   reg ptr u32[8192] matp;
   reg ptr u32[2048] ap bp s1p s1hatp s2p;
   reg u64 counter nonce count sv reject bound kr mr vkbr;
+  #[msf] reg u64 ms;
 
   seedbufp = seedbuf;
   matp = mat;
@@ -914,10 +1178,27 @@ inline fn _keypair_full_m23(reg mut ptr u8[2080] vkp,
 
     count = kr;
     count *= HAETAE_N;
+    () = #declassify(kr);
+    () = #declassify(mr);
+    () = #declassify(count);
+    ms = #init_msf();
+    bp = #protect_ptr(bp, ms);
+    s1p = #protect_ptr(s1p, ms);
+    s2p = #protect_ptr(s2p, ms);
+    ap = #protect_ptr(ap, ms);
+    seedbufp = #protect_ptr(seedbufp, ms);
+    kr = #protect(kr, ms);
+    mr = #protect(mr, ms);
+    count = #protect(count, ms);
     bp, s2p = _keypair_finalize_m23(bp, s2p, ap, count);
 
     sv = _singular_full(s1p, s2p, m, k, best_count, tau, rem);
     bound = singular_bound;
+    () = #declassify(sv);
+    () = #declassify(bound);
+    ms = #init_msf();
+    sv = #protect(sv, ms);
+    bound = #protect(bound, ms);
     reject = 0;
     if (sv > bound)
     {
@@ -950,6 +1231,7 @@ inline fn _keypair_full_m5(reg mut ptr u8[2080] vkp,
   reg ptr u32[8192] matp;
   reg ptr u32[2048] bp s1p s1hatp s2p s2hatp;
   reg u64 counter nonce count sv reject bound kr mr vkbr;
+  #[msf] reg u64 ms;
 
   seedbufp = seedbuf;
   matp = mat;
@@ -977,6 +1259,11 @@ inline fn _keypair_full_m5(reg mut ptr u8[2080] vkp,
 
     sv = _singular_full(s1p, s2p, 6, 4, 3, 128, 0);
     bound = 778065;
+    () = #declassify(sv);
+    () = #declassify(bound);
+    ms = #init_msf();
+    sv = #protect(sv, ms);
+    bound = #protect(bound, ms);
     reject = 0;
     if (sv > bound)
     {
@@ -991,6 +1278,18 @@ inline fn _keypair_full_m5(reg mut ptr u8[2080] vkp,
 
   count = kr;
   count *= HAETAE_N;
+  () = #declassify(kr);
+  () = #declassify(mr);
+  () = #declassify(count);
+  ms = #init_msf();
+  bp = #protect_ptr(bp, ms);
+  s1p = #protect_ptr(s1p, ms);
+  s2p = #protect_ptr(s2p, ms);
+  s2hatp = #protect_ptr(s2hatp, ms);
+  seedbufp = #protect_ptr(seedbufp, ms);
+  kr = #protect(kr, ms);
+  mr = #protect(mr, ms);
+  count = #protect(count, ms);
   bp = _keypair_finalize_m5(bp, s2hatp, count);
 
   rhop = seedbufp[0 : 32];
@@ -1001,6 +1300,7 @@ inline fn _keypair_full_m5(reg mut ptr u8[2080] vkp,
   return vkp, skp;
 }
 
+#[ct = "vkp * skp * seedp -> {seedp, vkp} * {seedp, skp, vkp}"]
 export
 fn crypto_sign_keypair_internal_mode2_jazz(reg mut ptr u8[2080] vkp,
                                            reg mut ptr u8[2752] skp,
@@ -1008,10 +1308,17 @@ fn crypto_sign_keypair_internal_mode2_jazz(reg mut ptr u8[2080] vkp,
                                            -> reg ptr u8[2080],
                                               reg ptr u8[2752]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m23(vkp, skp, seedp, 2, 3, 992, 5, 58, 24, 611098);
   return vkp, skp;
 }
 
+#[ct = "vkp * skp * seedp -> {seedp, vkp} * {seedp, skp, vkp}"]
 export
 fn crypto_sign_keypair_internal_mode3_jazz(reg mut ptr u8[2080] vkp,
                                            reg mut ptr u8[2752] skp,
@@ -1019,10 +1326,17 @@ fn crypto_sign_keypair_internal_mode3_jazz(reg mut ptr u8[2080] vkp,
                                            -> reg ptr u8[2080],
                                               reg ptr u8[2752]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m23(vkp, skp, seedp, 3, 5, 1472, 4, 80, 16, 852505);
   return vkp, skp;
 }
 
+#[ct = "vkp * skp * seedp -> {seedp, vkp} * {seedp, skp, vkp}"]
 export
 fn crypto_sign_keypair_internal_mode5_jazz(reg mut ptr u8[2080] vkp,
                                            reg mut ptr u8[2752] skp,
@@ -1030,10 +1344,17 @@ fn crypto_sign_keypair_internal_mode5_jazz(reg mut ptr u8[2080] vkp,
                                            -> reg ptr u8[2080],
                                               reg ptr u8[2752]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m5(vkp, skp, seedp);
   return vkp, skp;
 }
 
+#[ct = "vkp * skp -> secret * secret"]
 export
 fn crypto_sign_keypair_mode2_jazz(reg mut ptr u8[2080] vkp,
                                   reg mut ptr u8[2752] skp)
@@ -1042,13 +1363,21 @@ fn crypto_sign_keypair_mode2_jazz(reg mut ptr u8[2080] vkp,
 {
   stack u8[32] seed;
   reg ptr u8[32] seedp;
+  #[msf] reg u64 ms;
 
   seedp = seed;
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   seedp = #randombytes(seedp);
+  ms = #init_msf();
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m23(vkp, skp, seedp, 2, 3, 992, 5, 58, 24, 611098);
   return vkp, skp;
 }
 
+#[ct = "vkp * skp -> secret * secret"]
 export
 fn crypto_sign_keypair_mode3_jazz(reg mut ptr u8[2080] vkp,
                                   reg mut ptr u8[2752] skp)
@@ -1057,13 +1386,21 @@ fn crypto_sign_keypair_mode3_jazz(reg mut ptr u8[2080] vkp,
 {
   stack u8[32] seed;
   reg ptr u8[32] seedp;
+  #[msf] reg u64 ms;
 
   seedp = seed;
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   seedp = #randombytes(seedp);
+  ms = #init_msf();
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m23(vkp, skp, seedp, 3, 5, 1472, 4, 80, 16, 852505);
   return vkp, skp;
 }
 
+#[ct = "vkp * skp -> secret * secret"]
 export
 fn crypto_sign_keypair_mode5_jazz(reg mut ptr u8[2080] vkp,
                                   reg mut ptr u8[2752] skp)
@@ -1072,13 +1409,21 @@ fn crypto_sign_keypair_mode5_jazz(reg mut ptr u8[2080] vkp,
 {
   stack u8[32] seed;
   reg ptr u8[32] seedp;
+  #[msf] reg u64 ms;
 
   seedp = seed;
+  ms = #init_msf();
+  vkp = #protect_ptr(vkp, ms);
+  skp = #protect_ptr(skp, ms);
+  seedp = #protect_ptr(seedp, ms);
   seedp = #randombytes(seedp);
+  ms = #init_msf();
+  seedp = #protect_ptr(seedp, ms);
   vkp, skp = _keypair_full_m5(vkp, skp, seedp);
   return vkp, skp;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode2_keypair_internal(reg ui64 vku,
                                            reg ui64 sku,
@@ -1090,19 +1435,34 @@ fn cryptolab_haetae_mode2_keypair_internal(reg ui64 vku,
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
   reg ptr u8[32] seedp;
-  reg u64 r;
+  reg u64 r vkua skua seedua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
   seedp = seed;
-  seedp = _api_copy_raw_to_32(seedp, seedu);
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  seedua = (64u)seedu;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(seedu);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  () = #declassify(seedua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
+  seedua = #protect(seedua, ms);
+  seedp = __kp_api_copy_addr_to_32(seedp, seedua);
   vkp, skp = crypto_sign_keypair_internal_mode2_jazz(vkp, skp, seedp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 992);
-  sku = _api_copy_2752_to_raw(sku, skp, 1408);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 992);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 1408);
   r = 0;
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode3_keypair_internal(reg ui64 vku,
                                            reg ui64 sku,
@@ -1114,19 +1474,34 @@ fn cryptolab_haetae_mode3_keypair_internal(reg ui64 vku,
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
   reg ptr u8[32] seedp;
-  reg u64 r;
+  reg u64 r vkua skua seedua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
   seedp = seed;
-  seedp = _api_copy_raw_to_32(seedp, seedu);
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  seedua = (64u)seedu;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(seedu);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  () = #declassify(seedua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
+  seedua = #protect(seedua, ms);
+  seedp = __kp_api_copy_addr_to_32(seedp, seedua);
   vkp, skp = crypto_sign_keypair_internal_mode3_jazz(vkp, skp, seedp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 1472);
-  sku = _api_copy_2752_to_raw(sku, skp, 2112);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 1472);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 2112);
   r = 0;
   return r;
 }
 
+#[ct = "public * public * public -> public"]
 export
 fn cryptolab_haetae_mode5_keypair_internal(reg ui64 vku,
                                            reg ui64 sku,
@@ -1138,19 +1513,34 @@ fn cryptolab_haetae_mode5_keypair_internal(reg ui64 vku,
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
   reg ptr u8[32] seedp;
-  reg u64 r;
+  reg u64 r vkua skua seedua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
   seedp = seed;
-  seedp = _api_copy_raw_to_32(seedp, seedu);
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  seedua = (64u)seedu;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(seedu);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  () = #declassify(seedua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
+  seedua = #protect(seedua, ms);
+  seedp = __kp_api_copy_addr_to_32(seedp, seedua);
   vkp, skp = crypto_sign_keypair_internal_mode5_jazz(vkp, skp, seedp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 2080);
-  sku = _api_copy_2752_to_raw(sku, skp, 2752);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 2080);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 2752);
   r = 0;
   return r;
 }
 
+#[ct = "public * public -> public"]
 export
 fn cryptolab_haetae_mode2_keypair(reg ui64 vku,
                                   reg ui64 sku) -> reg u64
@@ -1159,17 +1549,28 @@ fn cryptolab_haetae_mode2_keypair(reg ui64 vku,
   stack u8[2752] sk;
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
-  reg u64 r;
+  reg u64 r vkua skua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
   vkp, skp = crypto_sign_keypair_mode2_jazz(vkp, skp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 992);
-  sku = _api_copy_2752_to_raw(sku, skp, 1408);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 992);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 1408);
   r = 0;
   return r;
 }
 
+#[ct = "public * public -> public"]
 export
 fn cryptolab_haetae_mode3_keypair(reg ui64 vku,
                                   reg ui64 sku) -> reg u64
@@ -1178,17 +1579,28 @@ fn cryptolab_haetae_mode3_keypair(reg ui64 vku,
   stack u8[2752] sk;
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
-  reg u64 r;
+  reg u64 r vkua skua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
   vkp, skp = crypto_sign_keypair_mode3_jazz(vkp, skp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 1472);
-  sku = _api_copy_2752_to_raw(sku, skp, 2112);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 1472);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 2112);
   r = 0;
   return r;
 }
 
+#[ct = "public * public -> public"]
 export
 fn cryptolab_haetae_mode5_keypair(reg ui64 vku,
                                   reg ui64 sku) -> reg u64
@@ -1197,13 +1609,23 @@ fn cryptolab_haetae_mode5_keypair(reg ui64 vku,
   stack u8[2752] sk;
   reg ptr u8[2080] vkp;
   reg ptr u8[2752] skp;
-  reg u64 r;
+  reg u64 r vkua skua;
+  #[msf] reg u64 ms;
 
   vkp = vk;
   skp = sk;
+  vkua = (64u)vku;
+  skua = (64u)sku;
+  () = #declassify(vku);
+  () = #declassify(sku);
+  () = #declassify(vkua);
+  () = #declassify(skua);
+  ms = #init_msf();
+  vkua = #protect(vkua, ms);
+  skua = #protect(skua, ms);
   vkp, skp = crypto_sign_keypair_mode5_jazz(vkp, skp);
-  vku = _api_copy_2080_to_raw(vku, vkp, 2080);
-  sku = _api_copy_2752_to_raw(sku, skp, 2752);
+  vkua = __kp_api_copy_2080_to_addr(vkua, vkp, 2080);
+  skua = __kp_api_copy_2752_to_addr(skua, skp, 2752);
   r = 0;
   return r;
 }

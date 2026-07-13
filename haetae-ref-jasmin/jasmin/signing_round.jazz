@@ -41,6 +41,7 @@ inline fn _sign_round_lk_copy0(reg mut ptr u32[2048] z1p,
   return z1p, z2p, z10p;
 }
 
+#[ct = "z1p * z2p * z10p * y1p * y2p -> {y1p, z1p} * {y2p, z2p} * {y1p, z10p}"]
 export
 fn sign_round_lk_copy0_mode2_jazz(reg mut ptr u32[2048] z1p,
                                   reg mut ptr u32[2048] z2p,
@@ -51,10 +52,19 @@ fn sign_round_lk_copy0_mode2_jazz(reg mut ptr u32[2048] z1p,
                                      reg ptr u32[2048],
                                      reg ptr u32[HAETAE_N]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  z2p = #protect_ptr(z2p, ms);
+  z10p = #protect_ptr(z10p, ms);
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
   z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1024, 512);
   return z1p, z2p, z10p;
 }
 
+#[ct = "z1p * z2p * z10p * y1p * y2p -> {y1p, z1p} * {y2p, z2p} * {y1p, z10p}"]
 export
 fn sign_round_lk_copy0_mode3_jazz(reg mut ptr u32[2048] z1p,
                                   reg mut ptr u32[2048] z2p,
@@ -65,10 +75,19 @@ fn sign_round_lk_copy0_mode3_jazz(reg mut ptr u32[2048] z1p,
                                      reg ptr u32[2048],
                                      reg ptr u32[HAETAE_N]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  z2p = #protect_ptr(z2p, ms);
+  z10p = #protect_ptr(z10p, ms);
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
   z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1536, 768);
   return z1p, z2p, z10p;
 }
 
+#[ct = "z1p * z2p * z10p * y1p * y2p -> {y1p, z1p} * {y2p, z2p} * {y1p, z10p}"]
 export
 fn sign_round_lk_copy0_mode5_jazz(reg mut ptr u32[2048] z1p,
                                   reg mut ptr u32[2048] z2p,
@@ -79,6 +98,14 @@ fn sign_round_lk_copy0_mode5_jazz(reg mut ptr u32[2048] z1p,
                                      reg ptr u32[2048],
                                      reg ptr u32[HAETAE_N]
 {
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  z1p = #protect_ptr(z1p, ms);
+  z2p = #protect_ptr(z2p, ms);
+  z10p = #protect_ptr(z10p, ms);
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
   z1p, z2p, z10p = _sign_round_lk_copy0(z1p, z2p, z10p, y1p, y2p, 1792, 1024);
   return z1p, z2p, z10p;
 }

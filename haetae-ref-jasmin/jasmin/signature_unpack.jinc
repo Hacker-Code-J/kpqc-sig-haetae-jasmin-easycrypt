@@ -25,6 +25,7 @@ fn __unpack_sig_finish_at(reg mut ptr u64[4] statep,
 {
   reg u64 base_hb base_h payload_limit hbsize hsize padlen total bad i idx bb;
   reg u32 b;
+  #[msf] reg u64 ms;
 
   base_hb = statep[0];
   base_h = statep[1];
@@ -37,10 +38,22 @@ fn __unpack_sig_finish_at(reg mut ptr u64[4] statep,
   hsize = (64u)b;
   hsize += base_h;
 
+  () = #declassify(hbsize);
+  () = #declassify(hsize);
+  () = #declassify(payload_limit);
+  ms = #init_msf();
+  hbsize = #protect(hbsize, ms);
+  hsize = #protect(hsize, ms);
+  payload_limit = #protect(payload_limit, ms);
+
   bad = 0;
   padlen = 0;
   total = hbsize;
   total += hsize;
+  () = #declassify(total);
+  ms = #init_msf();
+  total = #protect(total, ms);
+  payload_limit = #protect(payload_limit, ms);
   if (total > payload_limit)
   {
     bad = 1;
@@ -51,6 +64,11 @@ fn __unpack_sig_finish_at(reg mut ptr u64[4] statep,
     padlen -= total;
   }
 
+  () = #declassify(bad);
+  () = #declassify(padlen);
+  ms = #init_msf();
+  bad = #protect(bad, ms);
+  padlen = #protect(padlen, ms);
   if (bad == 0)
   {
     i = 0;
@@ -67,12 +85,25 @@ fn __unpack_sig_finish_at(reg mut ptr u64[4] statep,
       i += 1;
     }
 
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
     if (bad != 0)
     {
       bad = 1;
     }
   }
 
+  () = #declassify(hbsize);
+  () = #declassify(hsize);
+  () = #declassify(padlen);
+  () = #declassify(bad);
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  hbsize = #protect(hbsize, ms);
+  hsize = #protect(hsize, ms);
+  padlen = #protect(padlen, ms);
+  bad = #protect(bad, ms);
   statep[0] = hbsize;
   statep[1] = hsize;
   statep[2] = padlen;
@@ -114,6 +145,7 @@ inline fn _unpack_sig_full(reg mut ptr u32[HAETAE_N] cp,
   reg u64 lcount suffix_off hbsize hsize bad enc_off;
   reg u64 hb_count hb_m hb_offset h_count h_m h_offset;
   reg u64 base_hb base_h payload_limit;
+  #[msf] reg u64 ms;
 
   hbencp = hbenc;
   hencp = henc;
@@ -131,17 +163,35 @@ inline fn _unpack_sig_full(reg mut ptr u32[HAETAE_N] cp,
   base_hb = base_hb_i;
   base_h = base_h_i;
   payload_limit = payload_limit_i;
+  () = #spill(hbzp, hp, badp, hbencp, hencp, sigp, suffix_off, h_symbolwp,
+              h_dsymswp, hb_symbolwp, hb_dsymswp);
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  base_hb = #protect(base_hb, ms);
+  base_h = #protect(base_h, ms);
+  payload_limit = #protect(payload_limit, ms);
   statep[0] = base_hb;
   statep[1] = base_h;
   statep[2] = payload_limit;
   statep[3] = 0;
+  () = #unspill(hbzp, hp, badp, hbencp, hencp, sigp, suffix_off, h_symbolwp,
+                h_dsymswp, hb_symbolwp, hb_dsymswp);
   () = #spill(hbzp, hp, badp, hbencp, hencp, suffix_off);
   statep = __unpack_sig_finish_at(statep, sigp, suffix_off);
   () = #unspill(hbzp, hp, badp, hbencp, hencp, suffix_off);
 
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
   hbsize = statep[0];
   hsize = statep[1];
   bad = statep[3];
+  () = #declassify(hbsize);
+  () = #declassify(hsize);
+  () = #declassify(bad);
+  ms = #init_msf();
+  hbsize = #protect(hbsize, ms);
+  hsize = #protect(hsize, ms);
+  bad = #protect(bad, ms);
 
   if (bad == 0)
   {
@@ -160,6 +210,9 @@ inline fn _unpack_sig_full(reg mut ptr u32[HAETAE_N] cp,
                                     hb_dsymswp, hb_count, hb_m, hb_offset);
     () = #unspill(hp, hencp, hsize, h_symbolwp, h_dsymswp);
     bad = badp[0];
+    () = #declassify(bad);
+    ms = #init_msf();
+    bad = #protect(bad, ms);
 
     if (bad == 0)
     {
@@ -169,9 +222,15 @@ inline fn _unpack_sig_full(reg mut ptr u32[HAETAE_N] cp,
       hp, badp = _decode_h_full(hp, badp, hencp, hsize, h_symbolwp,
                                 h_dsymswp, h_count, h_m, h_offset);
       bad = badp[0];
+      () = #declassify(bad);
+      ms = #init_msf();
+      bad = #protect(bad, ms);
     }
   }
 
+  ms = #init_msf();
+  badp = #protect_ptr(badp, ms);
+  bad = #protect(bad, ms);
   badp[0] = bad;
   return cp, lowp, hbzp, hp, badp;
 }
