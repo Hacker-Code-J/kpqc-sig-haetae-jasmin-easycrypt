@@ -1,0 +1,42 @@
+HAETAE mode-2 key-generation matrix, finalization, and singular-word proof verification
+Date (UTC): 2026-07-28T06:16:08Z
+Command: ./scripts/verify-keygen-m23-matrix-proof.sh
+Toolchain: easycrypt=/home/hacker-code-j/.opam/easycrypt-5.2/bin/easycrypt; Why3 platform, version 1.8.0; max-provers=1
+Actual target: easycrypt/extract/keygen-mode2-parent/KeygenMode2ParentTarget.ec
+Proof manifest: manifests/keygen-m23-matrix-proof-files.txt
+Project NTT loop support: easycrypt/support/RefJasminNTTLoop.ec
+Imported NTT dependency directory: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/../haetae-ntt-verify/easycrypt-ct
+
+PASS canonical source hash check
+PASS: mode-2 key-generation parent extraction has zero regeneration drift (32 files, 56 procedures)
+PASS: key-generation sampler-caller extraction has zero regeneration drift (25 files, 31 procedures)
+PASS: target NTT extraction has zero regeneration drift (10 files)
+PASS NTT support hash check (18 files)
+PASS compile spec/KeygenM23MatrixSpec.ec
+PASS compile spec/KeygenM23ArithmeticSpec.ec
+PASS compile spec/KeygenM23FinalizeSpec.ec
+PASS compile spec/KeygenM23FinalizeSemantics.ec
+PASS compile spec/KeygenM23FinalizeArraySemantics.ec
+PASS compile spec/KeygenM23FinalizeHAETAEBridge.ec
+PASS compile spec/KeygenM23SingularSpec.ec
+PASS compile spec/KeygenM23SingularFFTSpec.ec
+PASS compile refinement/TargetKeygenM23Matrix.ec
+PASS compile refinement/TargetKeygenM23WideSupport.ec
+PASS compile refinement/TargetKeygenM23WideNTT.ec
+PASS compile refinement/TargetKeygenM23Pointwise.ec
+PASS compile refinement/TargetKeygenM23WideInvNTT.ec
+PASS compile refinement/TargetKeygenM23Arithmetic.ec
+PASS compile refinement/TargetKeygenM23ParentComposition.ec
+PASS compile refinement/TargetKeygenM23Finalize.ec
+PASS compile refinement/TargetKeygenM23FinalizeComposition.ec
+PASS compile refinement/TargetKeygenM23FinalizeSemanticComposition.ec
+PASS compile refinement/TargetKeygenM23SingularHelpers.ec
+PASS compile refinement/TargetKeygenM23SingularTotality.ec
+PASS compile refinement/TargetKeygenM23SingularFFT.ec
+PASS compile refinement/TargetKeygenM23Singular.ec
+PASS compile refinement/TargetKeygenM23FullFirstAttempt.ec
+PASS proof-hole scan (no admit/abort proof commands)
+PASS authored axiom declaration scan (no declarations)
+PASS debug command scan (no print goal/all commands)
+RESULT: PASS compiled=23 total=23 mode=-no-eco
+Exit status: 0

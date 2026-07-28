@@ -1,0 +1,43 @@
+HAETAE key-generation sampler consumer and caller proof verification
+Date (UTC): 2026-07-22T11:54:52Z
+Command: ./scripts/verify-keygen-sampler-callers-proof.sh
+Generated target: easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec
+Authored specifications: easycrypt/spec/KeygenSamplerCallersSpec.ec; easycrypt/spec/KeygenUniformXofLeafSpec.ec; easycrypt/spec/KeygenEtaSamplerSpec.ec; easycrypt/spec/KeygenKeccak1600Spec.ec; easycrypt/spec/KeygenShakeStreamSpec.ec; easycrypt/spec/KeygenSeedXofSpec.ec
+Authored refinements: easycrypt/refinement/TargetKeygenSamplerCallers.ec; easycrypt/refinement/TargetKeygenUniformXofLeaf.ec; easycrypt/refinement/TargetKeygenEtaSampler.ec; easycrypt/refinement/TargetKeygenKeccak1600.ec; easycrypt/refinement/TargetKeygenShakeStream.ec; easycrypt/refinement/TargetKeygenSeedXof.ec
+Proof manifest: manifests/keygen-sampler-callers-proof-files.txt
+Source manifest: manifests/sources.sha256
+Toolchain: manifests/toolchain.md
+
+PASS canonical source hash check (64 pinned inputs)
+PASS: key-generation sampler-caller extraction has zero regeneration drift (25 files, 31 procedures)
+PASS dedicated Why3 server startup max-provers=1
+PASS compile extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec
+PASS compile spec/KeygenSamplerCallersSpec.ec
+PASS compile spec/KeygenUniformXofLeafSpec.ec
+PASS compile spec/KeygenEtaSamplerSpec.ec
+PASS compile spec/KeygenKeccak1600Spec.ec
+PASS compile spec/KeygenShakeStreamSpec.ec
+PASS compile spec/KeygenSeedXofSpec.ec
+PASS compile refinement/TargetKeygenSamplerCallers.ec
+PASS compile refinement/TargetKeygenUniformXofLeaf.ec
+PASS compile refinement/TargetKeygenEtaSampler.ec
+PASS compile refinement/TargetKeygenKeccak1600.ec
+PASS compile refinement/TargetKeygenShakeStream.ec
+PASS compile refinement/TargetKeygenSeedXof.ec
+PASS proof-hole scan (no admit/abort proof commands)
+PASS axiom declaration scan (none found)
+Checked artifact SHA-256 values:
+38ed7d2dd67b0a3af7dc76a6b7447847ea120eec0151dbd093a2b8d0e9a4c249  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec
+638d9f46db5e8a1f9fa89f5d461a2b691945b189b8c80832646f2122f558607b  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenSamplerCallersSpec.ec
+dba3c329e5ba5057c11fe8af7892000d88442c88ebd1ccafd6d7ddf8783ec4d6  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenUniformXofLeafSpec.ec
+233652bc6ea33f9327a2a0a3685f1a610bfdc4afdf06bfc5e758b7d64f3e2e62  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenEtaSamplerSpec.ec
+d1a44606866a5f8f8028102758b7a163134707bfd20080d3e3df68cbad1958c8  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenKeccak1600Spec.ec
+a07ebbd78de3dca5c53bd47617044b5d4529448b3cf64651d49ba3e9e662a97f  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenShakeStreamSpec.ec
+2cffa2ceb1145174c0a18d80e703760e99243d3021a67ce6ad79cc0d63c54739  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/spec/KeygenSeedXofSpec.ec
+5badda47c168a2e66b7fb561a79ee29886950a06ef393b5eb0a05016c0388e60  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenSamplerCallers.ec
+818c229d8ee697f0e8603d30d0844cea9fd9638a234dbf7efeb7f3c4825e8293  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenUniformXofLeaf.ec
+668364ae314eef3484feb5a5bbfa9f784ba639654ae5f816831706fea1b55bdb  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenEtaSampler.ec
+ab6af7cda9ed63685addd26bca664767d4a403bf569433d4c2f6f811f91266e7  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenKeccak1600.ec
+295e7ecb0a83b5dea5b155823beb63f222e9940172895e0a94e939bc211d5a18  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenShakeStream.ec
+af1ee347b0e5f35b39b4685908ee3dd887d12dee7fea77662ee7f9309de592db  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/refinement/TargetKeygenSeedXof.ec
+RESULT: PASS compiled=13 total=13 mode=-no-eco

@@ -1,0 +1,614 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={A Mathematical Reading of TargetKeygenEtaSampler.ec},
+  pdfsubject={HAETAE centered-trit consumer correctness}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\uint}[1]{\langle #1\rangle_{\mathrm u}}
+\newcommand{\sint}[1]{\langle #1\rangle_{\mathrm s}}
+\newcommand{\Frame}{\mathsf{Frame}_{256}}
+\newcommand{\WordFrame}{\mathsf{WordFrame}}
+\newcommand{\Centered}{\mathsf{Centered}}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{Centered-Trit Extraction for HAETAE\\
+\large A mathematical reading of \code{TargetKeygenEtaSampler.ec}}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The eta consumer reads bytes, rejects the thirteen values from $243$ through
+$255$, and turns each accepted byte into as many as five coefficients in
+$\{-1,0,1\}$.  The EasyCrypt development checks the machine arithmetic,
+exact capped decoder, counter, centered prefix, and frame.  It also follows
+successive exact 136-byte SHAKE256 blocks through the generated whole eta leaf
+and lifts the finite decoded prefix through the actual eta vector caller.  The
+finite consumer terminates unconditionally; the actual whole leaf terminates
+with probability one under an explicit deterministic finite-prefix progress
+certificate.  These facts do not prove that every input has such a certificate,
+a probability distribution, or the security of HAETAE.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{The result in one sentence.}
+Whenever the extracted consumer returns from a state satisfying the stated
+capacity and prefix assumptions, it has written at most 256 coefficients,
+every coefficient in its established prefix represents $-1$, $0$, or $1$,
+and every 32-bit word outside the reserved polynomial block is unchanged.  The
+finite consumer is unconditionally lossless, and the actual whole eta leaf is
+lossless under the explicit \code{eta_progress_prefix} certificate and its
+exact seed, slice, base, and capacity premises.
+\end{resultbox}
+
+\section{The Mathematical Question}
+
+The procedure under study is
+\begin{center}
+\code{__kp_poly_uniform_eta_consume_2048}.
+\end{center}
+It takes an output array $A$, a base $b$, a coefficient counter $k$, a byte
+buffer $B$, and a buffer length $L$.  It returns an updated pair $(A',k')$.
+All five inputs are values in the extracted EasyCrypt model; there are no
+physical pointers in the theorem statement.
+
+The procedure is deterministic once the buffer is fixed.  Its local question
+is therefore not ``is this a random sampler?'' but rather:
+\begin{quote}
+Which values can it write, how far can its counter advance, and which parts of
+the output array can it modify?
+\end{quote}
+
+The authored file \code{KeygenEtaSamplerSpec.ec} supplies mathematical
+predicates and arithmetic lemmas.  The file
+\code{TargetKeygenEtaSampler.ec} applies them directly to the generated
+procedure through ordinary Hoare judgments.  It does not compare the target
+with a separate high-level sampling procedure.
+
+\section{Words, Arrays, and Polynomial Blocks}
+
+A 32-bit word $w$ has an unsigned value
+$\uint{w}\in\{0,\ldots,2^{32}-1\}$ and a signed two's-complement value
+$\sint{w}\in\{-2^{31},\ldots,2^{31}-1\}$.  A 64-bit word has the analogous
+unsigned interpretation; the intended interpretation will always be clear
+from context.
+
+The output type \code{BArray8192} contains $8192$ bytes.  The proof accesses
+it in aligned 32-bit units, so its word capacity is
+\[
+  C=8192/4=2048.
+\]
+Write $A[i]$ for the 32-bit word returned by
+\code{BArray8192.get32 A i}.  A polynomial occupies
+\[
+  N=256
+\]
+consecutive words.  Thus a base $b$ is a word index, not a byte offset.  The
+input buffer \code{BArray1024} contains $1024$ bytes and is read with
+\code{get8}.
+
+\begin{definition}[Frame and centeredness predicates]
+For arrays $A_0,A$, an integer base $b$, and integers $s,t$, define
+\begin{align*}
+ \Frame(A_0,A;b)
+   &\iff \forall i\in[0,C),\quad
+      i\notin[b,b+N)\Longrightarrow A[i]=A_0[i],\\
+ \WordFrame_{s:t}(A_0,A;b)
+   &\iff \forall i\in[0,C),\quad
+      i\notin[b+s,b+t)\Longrightarrow A[i]=A_0[i],\\
+ \Centered(A;b,s,t)
+   &\iff \forall i\in[s,t),\quad
+      -1\le \sint{A[b+i]}\le1.
+\end{align*}
+\end{definition}
+
+The first predicate permits changes anywhere in the complete reserved block.
+The second is a tighter, interval-specific frame predicate.  The specification
+proves useful one-write lemmas about both predicates, but the final consumer
+theorem uses only the coarse predicate $\Frame$.  In particular, the authored
+theorem does not state a tight frame for exactly the newly filled interval.
+
+The centered predicate is also deliberately modest: it records only the
+range $\{-1,0,1\}$.  It does not remember which input byte produced a
+coefficient or assert any probability law.
+
+\section{The Centered Residue Map}
+
+For a 32-bit word $x$, define
+\[
+  r(x)=\uint{x}\bmod 3
+\]
+and
+\[
+  c(x)=
+  \begin{cases}
+    -1,&r(x)=2,\\
+    r(x),&r(x)=0\text{ or }1.
+  \end{cases}
+\]
+The word written by the specification is
+\[
+  \widehat c(x)=\operatorname{W32.of\_int}(c(x)).
+\]
+The representation of $-1$ is therefore the word $2^{32}-1$, whose signed
+interpretation is $-1$.
+
+\begin{proposition}[Centered residue facts]
+For every 32-bit word $x$,
+\[
+  0\le r(x)<3,
+  \qquad -1\le c(x)\le1,
+  \qquad \sint{\widehat c(x)}=c(x).
+\]
+Consequently $-1\le\sint{\widehat c(x)}\le1$.
+\end{proposition}
+
+The generated helper names contain \code{mod3}, but they return this
+\emph{centered} residue rather than the ordinary residue in $\{0,1,2\}$.
+
+\section{Five Base-3 Digits from One Byte}
+
+The implementation replaces division by $3$ with a multiplication and a
+right shift.  The key integer identity is
+\begin{equation}
+  \left\lfloor\frac{171x}{512}\right\rfloor
+  =\left\lfloor\frac{x}{3}\right\rfloor,
+  \qquad 0\le x\le242.
+  \label{eq:div3}
+\end{equation}
+Since $512=2^9$, the left side is implemented by multiplying by $171$ and
+shifting right by nine bits.  The proof also establishes the bound cascade
+\[
+  242\longmapsto80\longmapsto26\longmapsto8\longmapsto2.
+\]
+These small bounds justify every later machine-word calculation and exclude
+overflow in the multiplication used here.
+
+For an accepted byte $x<243=3^5$, put
+\[
+  q_j=\left\lfloor\frac{x}{3^j}\right\rfloor,
+  \qquad
+  d_j=q_j\bmod3,
+  \qquad 0\le j<5.
+\]
+Then
+\[
+  x=\sum_{j=0}^{4}d_j3^j,
+\]
+and the five intended outputs are
+\[
+  c(q_0),\ c(q_1),\ c(q_2),\ c(q_3),\ c(q_4).
+\]
+The last quotient satisfies $0\le q_4\le2$.  The generated code centers it
+with the formula
+\[
+  q_4-3\left\lfloor\frac{q_4}{2}\right\rfloor,
+\]
+which gives $0,1,-1$ for $q_4=0,1,2$, respectively.
+
+Let $M_{242}$, $M_{26}$, and $M_8$ denote, respectively, the generated
+procedures \code{__poly_sample_mod3},
+\code{__poly_sample_mod3_leq26}, and
+\code{__poly_sample_mod3_leq8}.  The refinement file proves the exact
+contracts
+\begin{align*}
+ \uint{x}\le242
+   &\Longrightarrow M_{242}(x)=\widehat c(x),\\
+ \uint{x}\le26
+   &\Longrightarrow M_{26}(x)=\widehat c(x),\\
+ \uint{x}\le8
+   &\Longrightarrow M_8(x)=\widehat c(x).
+\end{align*}
+
+\section{A Mathematical Transcription of the Consumer}
+\label{sec:transcription}
+
+For an ordinary in-bounds buffer length $0\le L\le1024$, the generated
+control flow has the following transparent form.  This is a transcription of
+the code, not an exact-output theorem stated in the current EasyCrypt files.
+
+\begin{quote}
+\begin{verbatim}
+p := 0
+while k < 256 and p < L:
+    x := unsigned value of B[p]
+    p := p + 1
+
+    if x < 243:
+        q := x
+        for j = 0,1,2,3,4:
+            if k = 256: break
+            A[b+k] := encoded centered residue c(q)
+            k := k + 1
+            if j < 4: q := floor(q/3)
+
+return (A,k)
+\end{verbatim}
+\end{quote}
+
+Thus bytes $243,\ldots,255$ are rejected: consuming such a byte changes
+neither $A$ nor $k$.  An accepted byte contributes up to five coefficients,
+but every write after the first is guarded by $k<256$.  The first write is
+safe because the outer loop has already established $k<256$.  The loop stops
+when the polynomial is full or the declared buffer length is exhausted.
+
+The actual target uses 64-bit words for $b,k,p,L$.  Its capacity hypothesis
+implies that, while $k<256$,
+\[
+  \uint{b+k}=\uint{b}+\uint{k},
+\]
+so the machine address is the ordinary word index used above.
+
+\section{The Three Machine-Checked Consumer Theorems}
+
+An EasyCrypt Hoare judgment in this section has a partial-correctness reading:
+if the procedure returns from a state satisfying the precondition, its result
+satisfies the postcondition.  Separately, \code{eta_consume2048_ll} proves
+unconditional termination of this finite consumer using a bounded variant;
+that fact does not say that one block fills all 256 positions.
+
+\begin{theorem}[Counter bound]
+Let $k_0$ be the initial 64-bit counter.  If
+\[
+  k=k_0
+  \qquad\text{and}\qquad
+  \uint{k_0}\le256,
+\]
+then every returned counter $k'$ satisfies
+\[
+  \uint{k_0}\le\uint{k'}\le256.
+\]
+\end{theorem}
+
+This theorem neither says that the counter reaches $256$ nor gives a formula
+for the number of accepted or rejected bytes.
+
+\begin{theorem}[Centered prefix]
+Let $A_0$ be the initial array, $k_0$ the initial counter, and $b_0$ the
+integer represented by the 64-bit base.  Suppose
+\[
+\begin{gathered}
+ A=A_0,\qquad k=k_0,\qquad \uint{b}=b_0,\\
+ b_0+256\le2048,\qquad \uint{k_0}\le256,\\
+ \Centered(A_0;b_0,0,\uint{k_0}).
+\end{gathered}
+\]
+If the consumer returns $(A',k')$, then
+\[
+  \Centered(A';b_0,0,\uint{k'}).
+\]
+\end{theorem}
+
+The initial-prefix assumption allows the consumer to resume filling a
+partially constructed polynomial.  The conclusion states only centeredness,
+not equality of the old prefix or the origin of each new value.
+
+\begin{theorem}[Reserved-block frame]
+Let $A_0$ be the initial array and $b_0$ the integer represented by the
+64-bit base.  Suppose
+\[
+  A=A_0,\qquad \uint{b}=b_0,\qquad
+  b_0+256\le2048,\qquad 0\le\uint{k}\le256.
+\]
+If the consumer returns $(A',k')$, then
+\[
+  \Frame(A_0,A';b_0).
+\]
+Equivalently, every 32-bit word outside
+$[b_0,b_0+256)$ has its original value.
+\end{theorem}
+
+These are three separately stated Hoare theorems about the same deterministic
+procedure.  The source does not package their conclusions into one combined
+theorem.
+
+\section{Why the Proof Works}
+
+The generated program contains one outer consumption loop.  The refinement
+checks that loop three times, choosing the invariant appropriate to each
+postcondition.
+
+\subsection{Counter induction}
+
+With initial counter $k_0$, the invariant is
+\[
+  \uint{k_0}\le\uint{k}\le256.
+\]
+Rejected bytes leave $k$ unchanged.  Each successful write increments $k$ by
+one, and a write occurs only while $k<256$.  Hence the invariant is preserved.
+This proof inlines the three centered-residue helpers because their returned
+values are irrelevant to the counter argument.
+
+\subsection{Centered-prefix induction}
+
+The invariant is
+\[
+\begin{aligned}
+ &\Centered(A;b_0,0,\uint{k}),\\
+ &\uint{b}=b_0,\qquad b_0+256\le2048,\qquad
+ 0\le\uint{k}\le256.
+\end{aligned}
+\]
+On a successful step, the helper-correctness theorem supplies a word whose
+signed value is between $-1$ and $1$.  The program writes it at the next index
+$b_0+\uint{k}$ and increments $k$.  The single-write centeredness lemma then
+extends the interval from $[0,\uint{k})$ to $[0,\uint{k}+1)$.  This argument is
+repeated for each of the five possible digits.
+
+\subsection{Frame induction}
+
+The invariant is
+\[
+\begin{aligned}
+ &\Frame(A_0,A;b_0),\\
+ &\uint{b}=b_0,\qquad b_0+256\le2048,\qquad
+ 0\le\uint{k}\le256.
+\end{aligned}
+\]
+Here the value returned by a residue helper may be treated as arbitrary.  The
+only relevant fact is that the next write index lies inside
+$[b_0,b_0+256)$.  A single-write frame lemma therefore preserves the
+invariant.  This separation is useful: value correctness proves centeredness,
+whereas address correctness proves confinement.
+
+The stronger block theorem records the exact emitted list as
+$\operatorname{take}_{256}$ of the incoming prefix followed by the decoded
+block.  The whole-leaf stream invariant composes those lists across successive
+exact SHAKE256 blocks.
+
+\section{Certificate-Conditioned Whole-Leaf Termination}
+
+For fixed seed array $S$, seed offset $o$, nonce $\nu$, and block limit $L$,
+let $C(r)$ be the size of the capped eta decoding of the first $r$ consecutive
+136-byte SHAKE256 blocks from the exact padded state for
+$S[o:o+64]\Vert\operatorname{LE}_2(\nu)$.  The predicate
+\code{eta_progress_prefix S o nonce L}, written
+$P_\eta(S,o,\nu,L)$ below, is a deterministic certificate with two parts:
+\begin{enumerate}
+\item $L\ge1$ and $C(L)=256$; and
+\item for every $1\le r<L$, if $C(r)<256$, then $C(r)<C(r+1)$.
+\end{enumerate}
+It is a property of one concrete finite SHAKE256 byte sequence, not a
+randomness assumption.  In particular, the strict-progress clause rules out
+an all-rejected next block at every certified incomplete prefix.
+
+\begin{theorem}[Actual eta-leaf probability-one termination]
+Fix an initial seed array $S$, seed offset $o$, nonce $\nu$, word base $b$,
+and limit $L$.  Suppose the generated leaf receives exactly those seed,
+offset, nonce, and base values, and
+\[
+  b+256\le2048,
+  \qquad \uint{o}+64\le128,
+  \qquad P_\eta(S,o,\nu,L).
+\]
+Then
+\code{_kp_poly_uniform_eta_at_seedbuf_2048} terminates with probability one.
+\end{theorem}
+
+This is the pHoare theorem \code{eta2048_leaf_progress_ll}.  Because the
+generated leaf is deterministic, probability one here is a losslessness
+statement under the displayed precondition.  The development does not prove
+\code{eta_progress_prefix} for every seed, offset, and nonce; it also does not
+lift per-leaf certificates through a parameterized eta-vector caller in this
+file.  A separate parent refinement lifts five certificates through the two
+fixed eta callers of the first attempt, but not through the actual mode-2
+retry loop.
+
+\section{The Distributional Bridge Is Conditional}
+
+\begin{boundarybox}
+\textbf{Conditional mathematical observation, not a theorem in these files.}
+If $X$ is uniform on the 256 byte values, then
+\[
+  \Pr[X<243]=\frac{243}{256}.
+\]
+Conditional on $X<243$, the value $X$ is uniform on
+$\{0,\ldots,242\}$.  Base-3 expansion is a bijection
+\[
+  \{0,\ldots,242\}\longleftrightarrow\{0,1,2\}^{5},
+\]
+so its five digits are jointly uniform.  Applying the bijection
+$0\mapsto0$, $1\mapsto1$, $2\mapsto-1$ makes the five centered digits jointly
+uniform on $\{-1,0,1\}^{5}$.
+\end{boundarybox}
+
+This observation explains the threshold $243=3^5$ and its relevance to an
+eta-$1$ sampler.  To turn it into an implementation theorem one would still
+need the appropriate distributional assumptions or game transition and a
+proof that suitable progress certificates exist with the required
+probability.  The deterministic buffer-to-SHAKE256 connection, refill
+sequence, rejection decisions, 256-value cap, and certificate-conditioned
+leaf termination are already machine checked.
+
+\section{Security Relevance and Exact Boundary}
+
+The proved facts are useful local obligations for a future HAETAE security
+argument:
+\begin{itemize}
+\item centeredness establishes the support needed for coefficient and norm
+      bounds;
+\item the counter bound prevents more than 256 coefficients from being
+      established in one polynomial block; and
+\item the frame theorem isolates the block that the consumer may modify,
+      which is necessary when composing several polynomial operations.
+\end{itemize}
+
+They stop before probabilistic or end-to-end security reasoning.
+
+\begin{center}
+\small
+\begin{tabularx}{0.98\textwidth}{>{\raggedright\arraybackslash}p{0.57\textwidth}X}
+\toprule
+Claim & Status here \\
+\midrule
+Machine arithmetic returns centered residues on its stated domains & Proved \\
+Returned counter lies between its initial value and $256$ & Proved \\
+Established prefix contains only $-1,0,1$ & Proved \\
+Words outside the reserved 256-word block are unchanged & Proved \\
+Acceptance removes modulo bias for an independent uniform byte & Conditional observation \\
+Input bytes are uniform or independent & Not proved \\
+Finite leaf blocks equal the checked SHAKE256 stream & Proved on return \\
+The finite consumer terminates & Proved unconditionally \\
+One finite consumer call fills all 256 positions & Not guaranteed \\
+The returned array equals an exact capped flattened digit sequence & Proved on return \\
+The tight frame covers exactly the newly written interval & Not stated for the consumer \\
+\code{buflen} is at most the 1024-byte buffer capacity & Not assumed here \\
+The whole eta leaf has an exact finite-stream/range/frame contract & Proved on return \\
+The whole eta leaf terminates under \code{eta_progress_prefix} and the exact bounds & Proved with probability one \\
+Every seed and nonce has a suitable progress certificate & Not proved \\
+The two fixed first-attempt eta callers terminate under five bundled
+certificates & Proved in the separate parent refinement \\
+The actual mode-2 retry loop terminates & Not proved \\
+The full key generator is semantically composed & Not proved \\
+Constant-time, speculative-execution, or leakage security & Not proved here \\
+HAETAE security in a cryptographic game & Not proved here \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+In particular, the generated target contains erased declassification markers
+and protection operations, but the judgments in this file do not use a
+leakage semantics.  Also, the frame theorem compares 32-bit words; it is not
+presented as a theorem about physical pointer separation or source-level
+memory safety.
+
+\section{Translation Back to the EasyCrypt Files}
+
+The mathematical definitions and the extracted implementation are separated
+as follows.
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}X}
+\toprule
+Artifact & Mathematical role \\
+\midrule
+Authored specification & Centered-residue map, frame and interval predicates,
+division identity, no-wrap fact, and one-write preservation lemmas. \\
+Authored refinement & Helper arithmetic contracts and the three Hoare theorems
+for the extracted consumer. \\
+Generated target & Bit-level residue helpers and the concrete byte-consumption
+loop transcribed in Section~\ref{sec:transcription}. \\
+\bottomrule
+\end{tabularx}
+
+The corresponding paths are:
+\begin{center}
+\footnotesize
+\code{easycrypt/spec/KeygenEtaSamplerSpec.ec}\\
+\code{easycrypt/refinement/TargetKeygenEtaSampler.ec}\\
+\code{easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec}
+\end{center}
+
+\begin{center}
+\footnotesize
+\begin{tabularx}{0.98\textwidth}{>{\raggedright\arraybackslash}p{0.39\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+Mathematical statement & EasyCrypt lemma \\
+\midrule
+$0\le r(x)<3$ & \code{base3_residue_range} \\
+$-1\le c(x)\le1$ and correct signed encoding &
+\code{centered_trit_value_range}, \code{centered_trit_to_sint} \\
+Equation~\eqref{eq:div3} & \code{div3_via_171} \\
+64-bit base-plus-counter does not wrap & \code{base_counter_no_wrap8192} \\
+One write preserves the coarse frame & \code{poly_frame8192_set32_word} \\
+One centered write extends the filled interval &
+\code{centered_interval8192_set32_word} \\
+Multiply-and-shift computes division by three & \code{div3_step_word} \\
+The three centered-residue helper contracts &
+\code{mod3_full_correct}, \code{mod3_leq26_correct},
+\code{mod3_leq8_correct} \\
+Counter theorem & \code{eta_consume2048_counter} \\
+Centered-prefix theorem & \code{eta_consume2048_centered} \\
+Reserved-block frame theorem & \code{eta_consume2048_frame} \\
+Exact 136-byte consumer contract & \code{eta_consume2048_block136} \\
+Unconditional finite-consumer termination & \code{eta_consume2048_ll} \\
+Exact whole-leaf finite stream & \code{eta2048_leaf_stream} \\
+Whole-leaf centered range and frame & \code{eta2048_leaf_correct} \\
+Certificate-conditioned whole-leaf termination & \code{eta2048_leaf_progress_ll} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Replaying the Machine-Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{center}
+\code{./scripts/verify-keygen-sampler-callers-proof.sh}
+\end{center}
+This proof gate includes both \code{KeygenEtaSamplerSpec.ec} and
+\code{TargetKeygenEtaSampler.ec}, together with their generated target and
+the other sampler-caller proof units.  It checks source and extraction drift,
+compiles the authored theories, and scans them for proof holes and authored
+axiom declarations.
+
+Build this guide independently with
+\begin{quote}
+\begin{verbatim}
+cd haetae-ref-easycrypt/latex
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenEtaSampler.tex
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenEtaSampler.tex
+\end{verbatim}
+\end{quote}
+The PDF is written to \code{build/TargetKeygenEtaSampler.pdf}.
+
+\section*{Conclusion}
+
+An accepted byte has five base-3 digits; verified word-level arithmetic maps
+each digit into $\{-1,0,1\}$.  The proof establishes the exact capped decoder,
+counter control, centeredness, confinement to one block, and its composition
+with successive exact SHAKE256 blocks through the generated whole leaf.  The
+bounded consumer terminates unconditionally, and the actual leaf terminates
+with probability one under its explicit deterministic progress certificate.
+Universal certificate existence, caller totality, and the probabilistic or
+cryptographic sampler proof remain open in general; the two fixed
+first-attempt eta callers and proof-only prefix now have
+certificate-conditioned totality.
+
+\end{document}

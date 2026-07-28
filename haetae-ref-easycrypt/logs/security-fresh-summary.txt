@@ -1,0 +1,33 @@
+HAETAE security proof fresh-compilation summary
+Date (UTC): 2026-07-13T03:49:44Z
+Command: easycrypt compile -no-eco <target> -I <proof-dir> -I <kyber-security>
+Proof manifest: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-security/provable-security/proof-files.txt
+Source manifest: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/manifests/sources.sha256
+Toolchain record: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/manifests/toolchain.md
+
+PASS HAETAE_Security.ec
+PASS Sig_ROM.ec
+PASS HAETAE_HopGames.ec
+PASS HAETAE_Reductions.ec
+PASS HAETAE_ROM.ec
+PASS HAETAE_ROM_Programming.ec
+PASS HAETAE_Scheme.ec
+PASS HAETAE_Transcript.ec
+PASS HAETAE_Events.ec
+PASS HAETAE_Assumptions.ec
+PASS HAETAE_Distributions.ec
+PASS HAETAE_Rejection.ec
+PASS HAETAE_Algebra.ec
+PASS HAETAE_Params.ec
+PASS HAETAE_FIPS202.ec
+PASS HAETAE_Keccak1600.ec
+PASS proof-hole scan (no admit/abort proof commands)
+PASS axiom declaration scan (none found)
+PASS: 140 declarations covered across 16 managed EasyCrypt files
+  abstract_type: 8
+  bodyless_op: 8
+  module_type: 27
+  declared_module: 97
+theorem-premise check: PASS (25 theorems; 104 premises)
+paper-gap owner check: PASS (8/8 source gaps; all open premise gap IDs owned)
+RESULT: PASS passed=16 total=16 mode=-no-eco

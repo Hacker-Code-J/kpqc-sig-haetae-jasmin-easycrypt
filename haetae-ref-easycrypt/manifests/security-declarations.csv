@@ -1,0 +1,141 @@
+file,line,kind,symbol,classification,status,linked_id,closure_criterion
+HAETAE_Security.ec,37,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,38,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary correctness adversary quantified by the game.
+HAETAE_Security.ec,75,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,76,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,77,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,78,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,79,declared_module,Bsis,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact Module-SIS game.
+HAETAE_Security.ec,129,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,130,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,131,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,132,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,133,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,134,declared_module,Bsis,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact Module-SIS game.
+HAETAE_Security.ec,213,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,215,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,218,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,219,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,220,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,221,declared_module,Bsis,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact Module-SIS game.
+HAETAE_Security.ec,308,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,311,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,314,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,315,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,316,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,317,declared_module,Bsis,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact Module-SIS game.
+HAETAE_Security.ec,409,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,411,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,414,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,415,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,416,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,463,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,466,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,469,declared_module,N,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_Security.ec,470,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,471,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+HAETAE_Security.ec,600,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_Security.ec,614,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_Security.ec,628,declared_module,Samp,implementation correspondence obligation,TO_PROVE,OBL-REJECTION,Instantiate with the exact HAETAE rejection sampler and prove its accepted distribution.
+HAETAE_Security.ec,630,declared_module,Bmlwe,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain only as a quantified reduction module over the exact MLWE game.
+HAETAE_Security.ec,631,declared_module,Bbimodal,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain only as a quantified reduction module over the exact bimodal self-target MSIS game.
+Sig_ROM.ec,5,abstract_type,pkey,idealized model interface,RETAINED,OBL-COMPOSE,Retain only as a generic signature-game type and bind it to the concrete HAETAE public-key type.
+Sig_ROM.ec,6,abstract_type,skey,idealized model interface,RETAINED,OBL-COMPOSE,Retain only as a generic signature-game type and bind it to the concrete HAETAE secret-key type.
+Sig_ROM.ec,7,abstract_type,message,idealized model interface,RETAINED,OBL-COMPOSE,Retain only as a generic signature-game type and bind it to the concrete HAETAE message type.
+Sig_ROM.ec,8,abstract_type,context,idealized model interface,RETAINED,OBL-COMPOSE,Retain only as a generic signature-game type and bind it to the concrete HAETAE context type.
+Sig_ROM.ec,9,abstract_type,signature,idealized model interface,RETAINED,OBL-COMPOSE,Retain only as a generic signature-game type and bind it to the concrete HAETAE signature type.
+Sig_ROM.ec,10,abstract_type,ro_query,idealized model interface,RETAINED,MODEL-ROM,Retain only as a generic ROM input type and bind it to the concrete domain-separated HAETAE query type.
+Sig_ROM.ec,11,abstract_type,ro_output,idealized model interface,RETAINED,MODEL-ROM,Retain only as a generic ROM output type and bind it to the concrete HAETAE output type.
+Sig_ROM.ec,13,bodyless_op,dro_output,idealized model interface,RETAINED,MODEL-ROM,Retain only as a generic ROM distribution parameter and bind it to the concrete query-indexed HAETAE distribution.
+Sig_ROM.ec,36,module_type,Oracle,idealized model interface,RETAINED,MODEL-ROM,Retain as the initialized full random-oracle interface backed by the reviewed FullRO library.
+Sig_ROM.ec,40,module_type,POracle,idealized model interface,RETAINED,MODEL-ROM,Retain as the public random-oracle query interface backed by the reviewed FullRO library.
+Sig_ROM.ec,44,module_type,Scheme,implementation correspondence obligation,TO_PROVE,OBL-COMPOSE,Instantiate with a scheme proved equivalent to the extracted Jasmin public APIs.
+Sig_ROM.ec,51,module_type,CORR_ADV,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary adversary interface used by the correctness game.
+Sig_ROM.ec,73,module_type,SignOracle,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the EUF-CMA signing-oracle interface.
+Sig_ROM.ec,77,module_type,Adversary,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary interface with stated oracle access.
+Sig_ROM.ec,81,module_type,NMA_Adversary,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary interface with stated oracle access.
+Sig_ROM.ec,145,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+Sig_ROM.ec,146,declared_module,S,implementation correspondence obligation,TO_PROVE,OBL-COMPOSE,Instantiate with a scheme proved equivalent to the extracted Jasmin public APIs.
+Sig_ROM.ec,147,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary no-message adversary quantified by the reduction.
+HAETAE_HopGames.ec,23,module_type,SigningSimulator,implementation correspondence obligation,TO_PROVE,OBL-SIGN,Instantiate with the paper-faithful HAETAE signing simulator and prove the required hop.
+HAETAE_HopGames.ec,1352,module_type,PaperSimSigningSampler,implementation correspondence obligation,TO_PROVE,OBL-REJECTION,Instantiate with the exact HAETAE rejection sampler and prove its accepted distribution.
+HAETAE_HopGames.ec,1899,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,1900,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,1902,declared_module,Samp,implementation correspondence obligation,TO_PROVE,OBL-REJECTION,Instantiate with the exact HAETAE rejection sampler and prove its accepted distribution.
+HAETAE_HopGames.ec,3162,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,3164,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,3759,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,3761,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,3954,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,3956,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,4089,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,4092,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,4703,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,4706,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,5413,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,5417,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,5784,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,5786,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,5889,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,5891,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,6057,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,6059,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,6224,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,6227,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,6395,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,6398,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,6601,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,6604,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,7267,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,7271,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,7583,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,12446,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,12449,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,12657,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,12660,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,12859,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,12861,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,12863,declared_module,Samp,implementation correspondence obligation,TO_PROVE,OBL-REJECTION,Instantiate with the exact HAETAE rejection sampler and prove its accepted distribution.
+HAETAE_HopGames.ec,12883,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,12885,declared_module,S,implementation correspondence obligation,TO_PROVE,OBL-COMPOSE,Instantiate with a scheme proved equivalent to the extracted Jasmin public APIs.
+HAETAE_HopGames.ec,12887,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,12889,declared_module,Sim,implementation correspondence obligation,TO_PROVE,OBL-SIGN,Instantiate with the paper-faithful HAETAE signing simulator and prove the required hop.
+HAETAE_HopGames.ec,12967,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,12969,declared_module,S,implementation correspondence obligation,TO_PROVE,OBL-COMPOSE,Instantiate with a scheme proved equivalent to the extracted Jasmin public APIs.
+HAETAE_HopGames.ec,12971,declared_module,A,idealized model interface,RETAINED,OBL-COMPOSE,Retain as the arbitrary EUF-CMA adversary quantified by the theorem.
+HAETAE_HopGames.ec,13049,module_type,ForkingAdversary,idealized model interface,RETAINED,OBL-FORK,Retain as the arbitrary forking adversary interface over the programmed oracle.
+HAETAE_HopGames.ec,13053,module_type,TranscriptExtractor,implementation correspondence obligation,TO_PROVE,OBL-FORK,Instantiate with an extractor proved sound for two accepting HAETAE transcripts.
+HAETAE_HopGames.ec,13058,module_type,BimodalTranscriptExtractor,implementation correspondence obligation,TO_PROVE,OBL-FORK,Instantiate with an extractor satisfying the exact bimodal self-target MSIS relation and norm bound.
+HAETAE_HopGames.ec,13127,declared_module,H,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_HopGames.ec,13128,declared_module,S,implementation correspondence obligation,TO_PROVE,OBL-COMPOSE,Instantiate with a scheme proved equivalent to the extracted Jasmin public APIs.
+HAETAE_HopGames.ec,13129,declared_module,F,idealized model interface,RETAINED,OBL-FORK,Retain as the arbitrary forking adversary quantified by special soundness.
+HAETAE_HopGames.ec,13130,declared_module,X,implementation correspondence obligation,TO_PROVE,OBL-FORK,Instantiate with an extractor satisfying the exact bimodal self-target MSIS relation and norm bound.
+HAETAE_HopGames.ec,13160,module_type,BimodalToModuleSIS,implementation correspondence obligation,TO_PROVE,OBL-FORK,Instantiate with a proved distribution-preserving lift into the exact Module-SIS game.
+HAETAE_Reductions.ec,9,bodyless_op,mlwe_hardness_term,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain as the explicit MLWE advantage term after defining and linking the exact hardness game.
+HAETAE_Reductions.ec,10,bodyless_op,module_sis_hardness_term,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the explicit Module-SIS advantage term after defining and linking the exact hardness game.
+HAETAE_ROM.ec,85,module_type,Oracle,idealized model interface,RETAINED,MODEL-ROM,Retain as the initialized domain-separated HAETAE random-oracle interface.
+HAETAE_ROM.ec,89,module_type,POracle,idealized model interface,RETAINED,MODEL-ROM,Retain as the public domain-separated HAETAE random-oracle query interface.
+HAETAE_ROM_Programming.ec,302,module_type,SigningCoinSampler,implementation correspondence obligation,TO_PROVE,OBL-REJECTION,Instantiate with the exact signing-coin source and prove its distributional contract.
+HAETAE_ROM_Programming.ec,317,declared_module,O,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_ROM_Programming.ec,501,module_type,CountedROMInterface,idealized model interface,RETAINED,MODEL-ROM,Retain as the counted lazy-ROM observation interface used by the game proof.
+HAETAE_ROM_Programming.ec,508,module_type,CountedROMClient,idealized model interface,RETAINED,MODEL-ROM,Retain as the arbitrary counted-ROM client interface used by the bad-event bound.
+HAETAE_ROM_Programming.ec,540,module_type,TranscriptProgrammer,implementation correspondence obligation,TO_PROVE,OBL-CHALLENGE,Instantiate with the full encoded HAETAE transcript programmer and prove query correspondence.
+HAETAE_ROM_Programming.ec,1457,declared_module,O,idealized model interface,RETAINED,MODEL-ROM,Retain as a universally quantified random-oracle module under the declared restrictions.
+HAETAE_ROM_Programming.ec,1458,declared_module,A,idealized model interface,RETAINED,MODEL-ROM,Retain as the arbitrary counted-ROM client quantified by the bad-event theorem.
+HAETAE_Scheme.ec,22,bodyless_op,haetae_mode,implementation correspondence obligation,TO_VALIDATE,PARAMS,Instantiate separately for modes 2 3 and 5 and validate every mode-dependent constant against the target source.
+HAETAE_Assumptions.ec,9,abstract_type,mlwe_instance,structural placeholder to remove,TO_PROVE,CRYPTO-MLWE,Replace with the exact HAETAE MLWE instance representation and parameterized sample space.
+HAETAE_Assumptions.ec,15,bodyless_op,dmlwe_real,structural placeholder to remove,TO_PROVE,CRYPTO-MLWE,Define the exact HAETAE MLWE real-instance distribution and prove losslessness.
+HAETAE_Assumptions.ec,16,bodyless_op,dmlwe_random,structural placeholder to remove,TO_PROVE,CRYPTO-MLWE,Define the exact HAETAE MLWE random-instance distribution and prove losslessness.
+HAETAE_Assumptions.ec,17,bodyless_op,dmodule_sis_instance,structural placeholder to remove,TO_PROVE,CRYPTO-MSIS,Define the exact HAETAE Module-SIS instance distribution including norm and mode parameters.
+HAETAE_Assumptions.ec,18,bodyless_op,dbimodal_selftarget_msis_instance,structural placeholder to remove,TO_PROVE,OBL-FORK,Define the fork-induced bimodal self-target MSIS distribution and prove its lift to the exact Module-SIS game.
+HAETAE_Assumptions.ec,91,module_type,MLWE_Distinguisher,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain as the arbitrary distinguisher interface for the exact MLWE game.
+HAETAE_Assumptions.ec,117,module_type,ModuleSIS_Solver,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the arbitrary solver interface for the exact Module-SIS relation game.
+HAETAE_Assumptions.ec,132,module_type,BimodalSelfTargetMSIS_Solver,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the arbitrary solver interface for the exact bimodal self-target relation game.
+HAETAE_Assumptions.ec,207,declared_module,B,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the arbitrary bimodal self-target solver quantified by the lift theorem.
+HAETAE_Assumptions.ec,227,module_type,ModuleSIS_ModeSolver,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the mode-indexed solver interface for the exact Module-SIS relation game.
+HAETAE_Assumptions.ec,232,module_type,BimodalSelfTargetMSIS_ModeSolver,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the mode-indexed solver interface for the exact bimodal self-target relation game.
+HAETAE_Assumptions.ec,290,declared_module,B,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the arbitrary mode-indexed bimodal solver quantified by the lift theorem.
+HAETAE_Assumptions.ec,310,module_type,MLWE_Reduction,retained cryptographic assumption,RETAINED,CRYPTO-MLWE,Retain as the reduction interface whose success is bounded by the exact MLWE advantage.
+HAETAE_Assumptions.ec,314,module_type,BimodalSelfTargetMSIS_Reduction,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the reduction interface for the exact bimodal self-target MSIS game.
+HAETAE_Assumptions.ec,318,module_type,ModuleSIS_Reduction,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the reduction interface whose success is bounded by the exact Module-SIS advantage.
+HAETAE_Assumptions.ec,360,declared_module,B,retained cryptographic assumption,RETAINED,CRYPTO-MSIS,Retain as the arbitrary bimodal reduction quantified by the Module-SIS lift theorem.

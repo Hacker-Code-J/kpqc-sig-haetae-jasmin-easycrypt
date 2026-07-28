@@ -1,0 +1,592 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={A Mathematical Reading of TargetKeygenSamplerCallers.ec},
+  pdfsubject={HAETAE sampler-caller schedule refinement}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\W}{\mathbb W_{64}}
+\newcommand{\enc}[1]{\left[#1\right]_{64}}
+\newcommand{\uint}[1]{\langle #1\rangle}
+\newcommand{\AL}{\mathcal A_{\mathrm L}}
+\newcommand{\AS}{\mathcal A_{\mathrm S}}
+\newcommand{\Seed}{\mathcal S}
+\newcommand{\UL}{\mathcal U_{\mathrm L}}
+\newcommand{\US}{\mathcal U_{\mathrm S}}
+\newcommand{\ES}{\mathcal E_{\mathrm S}}
+\newcommand{\SchedMat}{\mathsf M}
+\newcommand{\SchedVec}{\mathsf V}
+\newcommand{\SchedEta}{\mathsf E}
+\newcommand{\GenMat}{\widehat{\mathsf M}}
+\newcommand{\GenVec}{\widehat{\mathsf V}}
+\newcommand{\GenEta}{\widehat{\mathsf E}}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{Three Array Schedules in HAETAE\\
+\large A mathematical reading of \code{TargetKeygenSamplerCallers.ec}}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The verified program contains three loops that repeatedly call polynomial
+sampling subroutines.  The relational theorems check their arithmetic and
+ordering against transparent integer schedules.  Separate Hoare theorems in
+the same refinement carry exact finite SHAKE decoder prefixes, coefficient
+ranges, and aggregate frames through the two actual uniform callers and the
+actual eta caller.  These are deterministic schedule and partial-correctness
+results, not sampler-distribution theorems.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{The result in one sentence.}
+The generated matrix, vector, and eta callers have the same returned-array
+behavior as the explicit schedules in Definition~\ref{def:schedules}; the
+proof uses no semantic property of a sampler beyond applying the same fixed
+procedure to equal arguments.
+\end{resultbox}
+
+\section{The Mathematical Question}
+
+Each caller starts with an array and a seed buffer.  It repeatedly invokes a
+lower-level subroutine with five arguments:
+\[
+  (\text{current array},\ \text{output base},\ \text{seed buffer},\
+    \text{seed offset},\ \text{nonce}).
+\]
+The lower-level subroutine returns a new array, which becomes the input to the
+next call.
+
+Jasmin is the language of the implementation.  Here ``generated'' or
+``extracted'' means mechanically translated from Jasmin into EasyCrypt, while
+the ``authored schedule'' is a short, hand-written EasyCrypt loop used for
+comparison.
+
+The verification question is:
+
+\begin{quote}
+Can every iteration of the generated word-level loop be paired with the
+corresponding integer-indexed iteration, so that both sides pass the same five
+arguments to the same subroutine and ultimately return equal arrays?
+\end{quote}
+
+There are three callers:
+\begin{itemize}
+\item a nested loop that constructs a matrix of polynomials;
+\item a single loop that constructs a vector using the uniform sampler; and
+\item a single loop that constructs a vector using the eta sampler.
+\end{itemize}
+
+The proof answers this question affirmatively at the level of the returned
+array.  It does not export a separate theorem about call traces.  The authored
+schedule is a code-derived normal form of these loops, not an independent
+specification of HAETAE from the paper.
+
+\section{A Model with Opaque Sampling Subroutines}
+
+Let
+\[
+  \W = \Z/2^{64}\Z
+\]
+be the set of 64-bit words.  For an integer $x$, write $\enc{x}$ for its
+residue in $\W$.  For $w\in\W$, write $\uint{w}$ for its canonical
+representative in $\{0,\ldots,2^{64}-1\}$.
+
+Let $\AL$ be the set of large arrays, $\AS$ the set of small arrays, and
+$\Seed$ the set of seed buffers.  In the extracted model, a large array has
+8192 32-bit slots, a small array has 2048 32-bit slots, and a seed buffer has
+128 bytes.  A base is an index measured in 32-bit slots, whereas a seed offset
+is measured in bytes.
+
+For sets $X$ and $Y$, the notation $X\rightharpoonup Y$ means a function that
+may be undefined on some inputs.  We use this notation because a sampling
+procedure may fail to return.  We name the three lower-level procedures as
+partial maps:
+\begin{align*}
+  \UL &: \AL\times\W\times\Seed\times\W\times\W
+          \rightharpoonup \AL,\\
+  \US &: \AS\times\W\times\Seed\times\W\times\W
+          \rightharpoonup \AS,\\
+  \ES &: \AS\times\W\times\Seed\times\W\times\W
+          \rightharpoonup \AS.
+\end{align*}
+Here $\UL$ is the uniform-sampling procedure for a large output array, $\US$
+is its small-array counterpart, and $\ES$ is the eta-sampling procedure.  The
+symbol $\rightharpoonup$ is deliberate: the present artifact does not prove
+that the rejection loops inside these procedures terminate unconditionally.
+Separate leaf pHoare theorems prove probability-one termination under explicit
+deterministic progress certificates, but those certificate premises are not
+part of the caller-schedule equivalences.  A later parent refinement lifts
+bundled certificates through the fixed \(2\times3\) matrix, two-slot vector,
+and first-attempt eta callers.
+
+These symbols denote the three fixed procedures extracted from the Jasmin
+source; the theorem is not universally quantified over substitute functions.
+Nothing in the main refinement theorem describes the fixed maps further, so
+they may be viewed as black boxes for purposes of this proof.  In particular,
+the proof does not assume that they are uniform samplers, or even that they
+modify only the 256 positions starting at the supplied base.
+
+\section{The Three Transparent Schedules}
+\label{sec:schedules}
+
+The following definitions express exactly what the authored EasyCrypt schedule
+programs do.  All bases and nonces are words in $\W$, so the brackets
+$\enc{\cdot}$ include reduction modulo $2^{64}$.
+
+\begin{definition}[Matrix, vector, and eta schedules]
+\label{def:schedules}
+Let $S$ be a seed buffer.
+
+\paragraph{Matrix schedule.}
+Let $A\in\AL$ and $R,C\in\W$, and put $r=\uint{R}$ and $c=\uint{C}$.
+Define $A^{(0)}=A$.  For every row $0\le i<r$, set
+\[
+  A^{(i,0)}=A^{(i)},
+\]
+and, for $0\le j<c$, define
+\[
+  A^{(i,j+1)}=
+  \UL\!\left(
+    A^{(i,j)},
+    \enc{256(ic+j)},
+    S,
+    \enc{0},
+    \enc{256i+j}
+  \right).
+\]
+After the row is complete, set $A^{(i+1)}=A^{(i,c)}$.  The matrix schedule is
+\[
+  \SchedMat(A,S,R,C)=A^{(r)}.
+\]
+
+\paragraph{Uniform-vector schedule.}
+Let $A\in\AS$ and $K,M\in\W$, and put $k=\uint{K}$ and $m=\uint{M}$.
+Starting from $B^{(0)}=A$, define for $0\le i<k$
+\[
+  B^{(i+1)}=
+  \US\!\left(
+    B^{(i)},
+    \enc{256i},
+    S,
+    \enc{0},
+    \enc{256k+m+i}
+  \right).
+\]
+The vector schedule is
+\[
+  \SchedVec(A,S,K,M)=B^{(k)}.
+\]
+
+\paragraph{Eta-vector schedule.}
+Let $A\in\AS$ and $N,T\in\W$, where $N$ is the initial nonce, and put
+$t=\uint{T}$.  Starting from $D^{(0)}=A$, define for $0\le i<t$
+\[
+  D^{(i+1)}=
+  \ES\!\left(
+    D^{(i)},
+    \enc{256i},
+    S,
+    \enc{32},
+    N+\enc{i}
+  \right).
+\]
+The eta schedule is
+\[
+  \SchedEta(A,S,N,T)=D^{(t)}.
+\]
+\end{definition}
+
+Each recurrence is itself partial: if one displayed sampler call does not
+return, that recurrence and its final schedule value are undefined.
+
+These definitions make the essential arithmetic visible:
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Schedule & Indices & Output base & Nonce \\
+\midrule
+Matrix & $(i,j)$ & $256(ic+j)$ & $256i+j$ \\
+Uniform vector & $i$ & $256i$ & $256k+m+i$ \\
+Eta vector & $i$ & $256i$ & $N+i$ in $\W$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+The matrix and uniform-vector schedules use seed offset $0$; the eta schedule
+uses seed offset $32$.
+
+\section{The Theorem Proved by the Refinement File}
+
+Let $\GenMat$, $\GenVec$, and $\GenEta$ denote the three procedures generated
+from the Jasmin source.  They use word-valued counters and update their bases
+and nonces incrementally.
+
+\begin{theorem}[Caller-schedule refinement]
+\label{thm:main}
+As partial transformations of their input arrays,
+\begin{align*}
+  \GenMat(A,S,R,C) &= \SchedMat(A,S,R,C),\\
+  \GenVec(A,S,K,M) &= \SchedVec(A,S,K,M),\\
+  \GenEta(A,S,N,T) &= \SchedEta(A,S,N,T).
+\end{align*}
+The matrix equality holds for $A\in\AL$, $S\in\Seed$, and $R,C\in\W$; the
+vector equality for $A\in\AS$, $S\in\Seed$, and $K,M\in\W$; and the eta
+equality for $A\in\AS$, $S\in\Seed$, and $N,T\in\W$.  On each such input, the
+two sides have the same definedness and, when they return, the same array.  The
+theorem does not assert a separate equality of call traces.
+\end{theorem}
+
+Thus equality as partial transformations includes whether the two sides
+return, without claiming that the samplers terminate on every input (called
+``losslessness'' in EasyCrypt).  Certificate-conditioned leaf totality does
+not change this unconditional, parameterized caller-equivalence reading.  A
+separate parent-prefix refinement proves fixed mode-2 caller totality under
+bundled certificates.  If a common black-box call fails to return outside
+those premises, both sides have reached that same call from equal arguments.
+The EasyCrypt judgments are the formal source of
+Theorem~\ref{thm:main}; the notation above is its deterministic mathematical
+reading.
+
+\begin{remark}[No hidden size assumptions]
+The three equivalence statements do not assume $rc\le32$, $k\le8$, or
+$t\le8$.  Their formulas are word equalities and are therefore interpreted
+modulo $2^{64}$.  Separate arithmetic lemmas show that the intended HAETAE
+parameters fit the array capacities, but those lemmas are not hypotheses of
+Theorem~\ref{thm:main}.
+\end{remark}
+
+\section{Why the Proof Is an Induction}
+
+The checked relational loop invariants have the mathematical content of three
+elementary induction arguments.  Their only fact about a black box is this:
+identical five-argument tuples give calls with identical definedness and, when
+the calls return, identical outputs.  In EasyCrypt this appears as three
+self-equivalence lemmas, one for each of $\UL$, $\US$, and $\ES$.
+
+\subsection{Uniform-vector induction}
+
+At the start of iteration $i$, the induction hypothesis identifies the
+generated state with the transparent schedule as follows:
+\[
+\begin{array}{c|c}
+\text{generated word variable} & \text{mathematical value} \\
+\hline
+\text{counter} & \enc{i} \\
+\text{base} & \enc{256i} \\
+\text{nonce} & \enc{256k+m+i} \\
+\text{seed offset} & \enc{0}.
+\end{array}
+\]
+The two current arrays and the seed buffers are also equal.  Consequently both
+sides call $\US$ with the same five arguments and obtain the same next array.
+The generated program then adds $1$ to its counter and nonce and adds $256$ to
+its base.  These updates turn the displayed formulas for $i$ into the formulas
+for $i+1$.  The base case $i=0$ is exactly the generated initialization
+\[
+  \text{base}=\enc{0},\qquad \text{nonce}=\enc{256k+m}.
+\]
+The implementation realizes multiplication by $256$ as an eight-bit left
+shift, so its source expression is $(K\ll8)+M$.
+
+\subsection{Eta-vector induction}
+
+The eta caller has the same structure, but its initial nonce is an input $N$.
+The transparent schedule keeps $N$ fixed, while the generated program mutates
+its local nonce.  The induction hypothesis is
+\[
+  \text{counter}=\enc{i},\qquad
+  \text{base}=\enc{256i},\qquad
+  \text{current nonce}=N+\enc{i},\qquad
+  \text{seed offset}=\enc{32}.
+\]
+Both sides therefore make the same call to $\ES$.  Incrementing the generated
+counter and nonce and advancing the base by $256$ proves the induction step.
+
+\subsection{Nested matrix induction}
+
+The outer induction hypothesis, at the start of row $i$, is
+\[
+  \text{row counter}=\enc{i},\qquad
+  \text{row base}=\enc{ic},\qquad
+  \text{seed offset}=\enc{0}.
+\]
+Inside that row, the inner induction adds
+\[
+  \text{column counter}=\enc{j}.
+\]
+The generated program computes
+\[
+  \text{base}=\enc{256(ic+j)},\qquad
+  \text{nonce}=\enc{256i+j},
+\]
+so both sides call $\UL$ with the same arguments.  Increasing $j$ proves the
+inner induction step.  At the end of the row, the generated update
+\[
+  \text{row base}\leftarrow \text{row base}+C
+\]
+changes $\enc{ic}$ into $\enc{(i+1)c}$, which proves the outer step.
+
+\subsection{Why the loop guards agree}
+
+The generated loops compare 64-bit words, whereas Definitions~\ref{def:schedules}
+use integers.  During a loop, the counter relation is $\text{counter}=\enc{i}$
+with $0\le i\le\uint{K}$ (or the corresponding row, column, or count bound).
+On this range,
+\[
+  \enc{i}<_{\mathrm u}K
+  \quad\Longleftrightarrow\quad
+  i<\uint{K},
+\]
+where $<_{\mathrm u}$ is unsigned word comparison.  Hence the generated loop
+and the transparent loop stop at the same index.
+
+\section{A Concrete Mode-2 Example}
+
+The companion specification contains separate arithmetic lemmas for the
+intended mode-2 values $k=2$ and $m=3$.  These lemmas are not used by
+Theorem~\ref{thm:main}, and no current EasyCrypt theorem proves that the full
+mode-2 key generator supplies these parameters.  Substituting
+$R=\enc{2},C=\enc{3}$ in the matrix schedule gives two rows and three columns:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$(i,j)$ & Linear position $ic+j$ & Base & Nonce \\
+\midrule
+$(0,0)$ & $0$ & $0$ & $0$ \\
+$(0,1)$ & $1$ & $256$ & $1$ \\
+$(0,2)$ & $2$ & $512$ & $2$ \\
+$(1,0)$ & $3$ & $768$ & $256$ \\
+$(1,1)$ & $4$ & $1024$ & $257$ \\
+$(1,2)$ & $5$ & $1280$ & $258$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Substituting $K=\enc{2},M=\enc{3}$ in the uniform-vector schedule gives two
+calls:
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$i$ & Base $256i$ & Nonce $256k+m+i$ \\
+\midrule
+$0$ & $0$ & $515$ \\
+$1$ & $256$ & $516$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For a retry index $q$, a separate arithmetic lemma proves the five eta nonce
+values
+\[
+  5q,\quad 5q+1,\quad 5q+2,\quad 5q+3,\quad 5q+4.
+\]
+It does \emph{not} prove that the complete key-generation program groups the
+first three values into one eta call and the last two into another.  Nor does
+Theorem~\ref{thm:main} prove that the complete program supplies $k=2$, $m=3$,
+or this retry index.  Those are later composition obligations.
+
+The companion theory also proves the following independent arithmetic facts:
+\begin{itemize}
+\item if $0\le r,c$, $rc\le32$, $0\le i<r$, and $0\le j<c$, the matrix base
+for $(i,j)$ through base$+255$ lies below $8192$;
+\item if $0\le q\le8$ and $0\le i<q$, the linear base for $i$ through
+base$+255$ lies below $2048$; and
+\item the 256-slot regions for distinct nonnegative linear indices are
+disjoint.
+\end{itemize}
+These facts are machine checked, but the three refinement proofs do not invoke
+them.
+
+\section{What the Theorem Does Not Prove}
+
+\begin{boundarybox}
+Theorem~\ref{thm:main} proves the organization of the caller loops relative to
+the same opaque subroutines.  It does not prove that those subroutines have the
+cryptographic or memory properties suggested by their names.
+\end{boundarybox}
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.43\textwidth}X}
+\toprule
+Question & Status \\
+\midrule
+Do $\UL$ and $\US$ implement the exact finite SHAKE128 decoder path? &
+Proved on return by the separate stream Hoare theorems. \\
+Does $\ES$ implement SHAKE256 and the intended eta distribution? &
+The exact finite SHAKE256 decoder path is proved on return; its probability distribution is not. \\
+Do the sampling loops terminate on every input (are they ``lossless'' in
+EasyCrypt)? &
+Not unconditionally.  Separate leaf theorems are probability one only under
+explicit deterministic progress certificates.  A separate parent refinement
+proves totality of the fixed mode-2 callers and proof-only prefix under a
+bundle of thirteen such certificates, not for every input. \\
+Does a call modify only the intended 256-slot output region? &
+Yes in the separate leaf and aggregate caller frame theorems. \\
+Are physical pointers separated and memory accesses safe? &
+The extraction uses value arrays, so source-level pointer properties are not
+represented. \\
+Do seed offsets $0$ and $32$ select the paper's intended named seeds? &
+The raw offsets and seed-expansion slices are checked, and a separate
+proof-only actual-parent prefix composes that expanded buffer into the
+sampler calls.  Paper-name identification and full-parent dataflow remain
+open. \\
+Does the full mode-2 key generator call these procedures with the intended
+parameters and retry schedule? &
+Its actual 32-file/56-procedure closure is extracted.  A separate proof-only
+prefix checks parameters \(k=2,m=3\) and the first five eta nonces, but it is
+not \code{_keypair_full_m23} and does not cover rejection retries or later
+calls. \\
+Does this establish paper-level \code{expandA}/\code{expandS} correctness or a
+security-game distribution? &
+No. \\
+\bottomrule
+\end{tabularx}
+
+The extracted model also treats speculative-load-hardening protection
+operations as identities and erases source annotations such as
+\code{spill}, \code{unspill}, and \code{declassify}.  Therefore this result is
+not a constant-time or speculative-execution security proof.
+
+\section{Translation Back to the EasyCrypt Files}
+
+A reader interested only in the mathematics can stop after the previous
+section.  The following table locates each mathematical object in the artifact.
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.23\textwidth}X}
+\toprule
+Artifact & Mathematical role \\
+\midrule
+Generated target & Generated definitions of $\UL$, $\US$, $\ES$, and the three word-level
+callers $\GenMat$, $\GenVec$, $\GenEta$. \\
+Authored schedule & Definitions of the transparent schedules, word/integer identities, capacity
+facts, and concrete mode-2 arithmetic. \\
+Authored refinement & The three black-box self-equivalences and the three instances of
+Theorem~\ref{thm:main}. \\
+\bottomrule
+\end{tabularx}
+
+The corresponding paths are:
+\begin{center}
+\footnotesize
+\code{easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec}\\
+\code{easycrypt/spec/KeygenSamplerCallersSpec.ec}\\
+\code{easycrypt/refinement/TargetKeygenSamplerCallers.ec}
+\end{center}
+
+The theorem-name correspondence is:
+\begin{center}
+\small
+\begin{tabularx}{0.96\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}X}
+\toprule
+Mathematical statement & EasyCrypt lemma \\
+\midrule
+$\UL$ agrees with itself on equal inputs &
+\code{uniform8192_leaf_self_equiv} \\
+$\US$ agrees with itself on equal inputs &
+\code{uniform2048_leaf_self_equiv} \\
+$\ES$ agrees with itself on equal inputs &
+\code{eta2048_leaf_self_equiv} \\
+$\GenVec=\SchedVec$ & \code{expand_vecA_relative_orchestration_equiv} \\
+$\GenEta=\SchedEta$ & \code{expand_eta_relative_orchestration_equiv} \\
+$\GenMat=\SchedMat$ & \code{expand_matA_relative_orchestration_equiv} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+An EasyCrypt judgment of the form
+\begin{center}
+\code{equiv [generated ~ schedule : equal inputs ==> equal result]}
+\end{center}
+should be read here as equality of the two returned-array behaviors.  The
+formal postcondition mentions only the result.  The alignment of calls is the
+inductive proof method, not a separately exposed trace statement.
+
+\section{Replaying the Machine-Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{center}
+\code{./scripts/verify-keygen-sampler-callers-proof.sh}
+\end{center}
+The script starts a Why3 server, checks the pinned sources, rejects extraction
+drift, compiles the generated target and the two authored theories with
+\code{-no-eco}, and scans the authored files for proof holes and axiom
+declarations.
+
+The current unified extraction selects the three caller roots and
+\code{_kp_expand_seedbuf}; its exact closure contains 25 generated files and
+31 procedures.  The proof manifest contains the generated target plus six
+specifications and six refinements.  The separate actual mode-2 parent gate
+checks a 32-file, 56-procedure closure.  Its dedicated 17-entry proof gate
+also transfers selected contracts to the parent target and checks the
+proof-only first-attempt sampler prefix.  Proof-hole and axiom scans do not
+establish that every imported dependency is axiom free, and extraction
+agreement does not prove the extractor correct.
+
+Build this guide with
+\begin{quote}
+\begin{verbatim}
+cd haetae-ref-easycrypt/latex
+make
+\end{verbatim}
+\end{quote}
+The PDF is written to
+\code{build/TargetKeygenSamplerCallers.pdf}.
+
+\section*{Conclusion}
+
+The relational core proves that word-level counters, bases, and nonces describe
+the same three recurrences as transparent integer counters.  Separate Hoare
+proofs now supply exact finite decoder, range, and frame contracts through the
+actual callers, and the standalone seed-XOF theorem identifies the 128-byte
+expansion and slices on return.  The actual leaves also have
+certificate-conditioned probability-one termination theorems.  Universal
+certificates, full-parent and retry semantics, source-pointer properties,
+sampler distributions, and full key-generation composition remain the next
+boundary; a separate proof-only actual-parent prefix now crosses the local
+dataflow cut through the first eta attempt.
+
+\end{document}

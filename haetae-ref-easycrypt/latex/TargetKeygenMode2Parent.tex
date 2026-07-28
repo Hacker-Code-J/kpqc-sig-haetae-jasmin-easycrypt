@@ -1,0 +1,437 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+\definecolor{artifactgray}{HTML}{F2F4F5}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={The Checked Sampler Prefix of the HAETAE Mode-2 Parent},
+  pdfsubject={Actual-parent procedure transfer and certificate-conditioned sampler prefix}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\W}{\mathbb W_{64}}
+\newcommand{\uint}[1]{\langle #1\rangle}
+\newcommand{\Expand}{\mathsf{Expand}}
+\newcommand{\PM}{\mathsf P_{\mathrm M}}
+\newcommand{\PV}{\mathsf P_{\mathrm V}}
+\newcommand{\PE}{\mathsf P_{\eta}}
+\newcommand{\Prefix}{\mathsf{Prefix}_{2,3}}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{The Checked Sampler Prefix of the HAETAE Mode-2 Parent\\
+\large A mathematical reading of \code{TargetKeygenMode2Parent*.ec}}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The actual extracted mode-2 key-generation target contains the complete
+\code{_keypair_full_m23} procedure.  The new refinement first transfers the
+previous seed-expansion, sampler-leaf, and caller results to procedures in
+that actual parent module.  It then checks a proof-only program that follows
+the parent's sampler prefix for parameters \(k=2\) and \(m=3\): one seed
+expansion, six matrix polynomials, two uniform-vector polynomials, and the
+five eta polynomials of the first retry attempt.  Deterministic finite-prefix
+certificates name a sufficient termination witness for each of these thirteen
+sampler leaves.  Under the combined certificate predicate, a pHoare theorem
+proves probability-one termination of the whole proof-only prefix.  The
+checked prefix is deliberately not the full keypair procedure and proves no
+rejection-sampling distribution or key-generation security theorem.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{The result in one sentence.}
+Previously checked finite-stream, range, frame, and certificate-conditioned
+leaf results now apply to the corresponding procedures in the actual
+mode-2-parent target, and a proof-only \(k=2,m=3\) prefix composes their
+on-return semantics and certificate-conditioned probability-one termination
+through the first five eta nonces.
+\end{resultbox}
+
+\section{The Actual Parent and the Checked Cut}
+
+The deterministic mode-2 entry
+\code{crypto_sign_keypair_internal_mode2_jazz} invokes
+\code{_keypair_full_m23} with
+\[
+ (k,m,\textit{vkbytes},\textit{best\_count},\tau,\textit{rem},
+   \textit{singular\_bound})
+ = (2,3,992,5,58,24,611098).
+\]
+The generated EasyCrypt target preserves the following call path:
+\[
+\begin{array}{rcl}
+\textit{seedbuf}&\leftarrow&
+  \text{\code{_kp_expand_seedbuf}}(\textit{seedbuf},\textit{rawSeed}),\\
+\textit{mat}&\leftarrow&
+  \text{\code{_kp_polymatkm_expand_matA}}(\textit{mat},\textit{seedbuf},2,3),\\
+\textit{avec}&\leftarrow&
+  \text{\code{_kp_polyveck_expand_vecA}}(\textit{avec},\textit{seedbuf},2,3).
+\end{array}
+\]
+It then sets \(\textit{counter}=0\) and enters a retry loop.  One attempt
+samples
+\[
+\begin{array}{rcl}
+s_1&\leftarrow&
+  \text{\code{_kp_polyvec_expand_eta}}(s_1,\textit{seedbuf},
+    \textit{counter},3),\\
+s_2&\leftarrow&
+  \text{\code{_kp_polyvec_expand_eta}}(s_2,\textit{seedbuf},
+    \textit{counter}+3,2),
+\end{array}
+\]
+and advances the counter by \(3+2=5\).  The full parent next calls
+\code{_kp_m23_matrix}, \code{_keypair_finalize_m23}, and
+\code{_singular_full}; a singular-value comparison decides whether another
+attempt is needed.  On acceptance it selects bytes \(0\)--\(31\) and
+\(96\)--\(127\) of the expanded seed and packs the public and secret keys.
+
+The authored module \code{CheckedMode2ParentSamplerPrefix} reproduces only
+the green cut below:
+\[
+\begin{array}{c}
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.82\textwidth}{\centering
+seed expansion \(\rightarrow\) \(2\times3\) matrix expansion
+\(\rightarrow\) two-slot uniform vector
+\(\rightarrow\) first \(3+2\) eta slots}}\\[0.7em]
+\textcolor{artifactred}{\Downarrow\quad\text{proof cut}}\\[0.7em]
+\fcolorbox{artifactred}{artifactgray}{\parbox{0.82\textwidth}{\centering
+matrix/NTT computation \(\rightarrow\) finalize
+\(\rightarrow\) singular-value rejection and retries
+\(\rightarrow\) packing}}
+\end{array}
+\]
+Every call above the cut uses a procedure from
+\code{KeygenMode2ParentTarget.M}.  Nevertheless, the authored prefix is a
+separate proof observer; it is not extracted Jasmin.
+
+\begin{boundarybox}
+\textbf{Identity boundary.}
+\code{CheckedMode2ParentSamplerPrefix.run} is not
+\code{Parent._keypair_full_m23}.  A theorem about the former must not be cited
+as semantics or termination of the latter.
+\end{boundarybox}
+
+\section{Seven Bridges into the Actual Parent Module}
+
+Earlier refinements were stated about procedures in
+\code{KeygenSamplerCallersTarget.M}.  The actual parent is extracted into the
+separate module \code{KeygenMode2ParentTarget.M}.  Similar source text in two
+targets is not, by itself, a logical bridge between these EasyCrypt modules.
+The refinement therefore proves seven relational equivalences:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.42\textwidth}X}
+\toprule
+Actual-parent procedure & Bridge theorem\\
+\midrule
+\code{_kp_expand_seedbuf} &
+\code{kp_expand_seedbuf_cross_equiv}\\
+\code{_kp_poly_uniform_at_seedbuf_8192} &
+\code{uniform8192_leaf_cross_equiv}\\
+\code{_kp_poly_uniform_at_seedbuf_2048} &
+\code{uniform2048_leaf_cross_equiv}\\
+\code{_kp_poly_uniform_eta_at_seedbuf_2048} &
+\code{eta2048_leaf_cross_equiv}\\
+\code{_kp_polymatkm_expand_matA} &
+\code{expand_matA_cross_equiv}\\
+\code{_kp_polyveck_expand_vecA} &
+\code{expand_vecA_cross_equiv}\\
+\code{_kp_polyvec_expand_eta} &
+\code{expand_eta_cross_equiv}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Each judgment starts the parent and sampler-target procedures with equal
+arguments and proves equal results.  The proofs are syntactic procedure
+simulations.  The dedicated gate separately verifies that the 24 generated
+theories shared by the two extraction closures are byte-identical.
+
+The equivalences transport the existing contracts to parent-qualified
+theorems.  Four Hoare theorems cover the exact 128-byte seed expansion and its
+uniform, eta, and key slices.  Three more cover the matrix, uniform-vector,
+and eta-vector finite streams together with their range and aggregate frame
+properties.  Finally, three pHoare theorems transport probability-one
+termination of the large uniform leaf, small uniform leaf, and eta leaf under
+their exact progress-certificate and capacity premises.
+
+\begin{remark}
+The transported caller Hoare theorems are partial-correctness judgments: they
+describe a call if it returns.  The transported leaf pHoare theorems are
+totality judgments, but only for one leaf call satisfying its explicit
+certificate.  These are different claims.
+\end{remark}
+
+\section{The Mode-2 Certificate Bundle}
+
+Let \(S\) be the raw 32-byte seed and let \(E=\Expand(S)\) be the exact
+128-byte SHAKE256 expansion.  Three endpoint maps provide deterministic
+finite witnesses:
+\[
+ L_{\mathrm M}:\{0,1\}\times\{0,1,2\}\to\mathbb Z,\qquad
+ L_{\mathrm V}:\{0,1\}\to\mathbb Z,\qquad
+ L_\eta:\{0,\ldots,4\}\to\mathbb Z.
+\]
+Write \(P_{\mathrm u}(E,o,n,L)\) for
+\code{uniform_progress_prefix} and
+\(P_\eta(E,o,n,L)\) for \code{eta_progress_prefix}.  The specification
+packages the following finite obligations.
+
+\begin{definition}[Matrix bundle]
+\[
+ \PM(E,L_{\mathrm M})\iff
+ \bigwedge_{\substack{0\le i<2\\0\le j<3}}
+ P_{\mathrm u}(E,0,256i+j,L_{\mathrm M}(i,j)).
+\]
+This is six certificates, one for each matrix polynomial.
+\end{definition}
+
+\begin{definition}[Uniform-vector bundle]
+\[
+ \PV(E,L_{\mathrm V})\iff
+ \bigwedge_{0\le i<2}
+ P_{\mathrm u}(E,0,515+i,L_{\mathrm V}(i)).
+\]
+The starting nonce \(515=256\cdot2+3\) is the caller schedule for
+\(k=2,m=3\).
+\end{definition}
+
+\begin{definition}[First-attempt eta bundle]
+\[
+ \PE(E,L_\eta)\iff
+ \bigwedge_{0\le i<5}P_\eta(E,32,i,L_\eta(i)).
+\]
+Slots \(0,1,2\) belong to \(s_1\), while slots \(3,4\) belong to \(s_2\).
+\end{definition}
+
+The predicate \code{mode2_sampler_prefix_progress} requires these three
+bundles for every expanded buffer matching the raw seed.  Since
+\code{output_matches} determines the exact SHAKE256 bytes, this form lets a
+caller state the premise before executing seed expansion.
+
+\begin{boundarybox}
+\textbf{Certificate boundary.}
+The specification defines what a suitable set of \(6+2+5=13\) finite
+certificates means.  It does not prove that these witnesses exist for every
+seed, and a deterministic certificate does not establish uniformity,
+independence, or any other sampler-distribution property.
+\end{boundarybox}
+
+\section{On-Return Semantics of the Checked Prefix}
+
+The procedure \code{CheckedMode2ParentSamplerPrefix.run} returns
+\[
+ (E,M,A,S_1,S_2,c).
+\]
+The Hoare theorem
+\code{checked_mode2_parent_sampler_prefix_correct} proves, conditional on
+return:
+\begin{itemize}
+\item \(E\) is the exact 128-byte expansion of the raw seed, including the
+  named uniform, eta, and key slices;
+\item \(M\) contains six exact finite SHAKE128-decoded polynomial witnesses,
+  every produced coefficient is in the checked uniform range, and bytes
+  outside the six-polynomial prefix retain their initial values;
+\item \(A\) has the analogous finite-stream, range, and frame properties for
+  two uniform polynomials;
+\item \(S_1\) consists of three exact finite SHAKE256 eta-decoded polynomials,
+  is centered, and satisfies its aggregate frame;
+\item \(S_2\) has the same properties for two eta polynomials starting at
+  nonce \(3\); and
+\item \(c=5\), both as the mode-2 retry span and as a concrete 64-bit word.
+\end{itemize}
+
+This is a semantic composition result rather than merely a call-schedule
+equivalence.  Its matrix, vector, and eta conclusions refer to the same
+returned expanded seed \(E\), and its calls are made through the actual parent
+module.
+
+\section{Certificate-Conditioned Totality of the Prefix}
+
+The totality proof is assembled in the same order as the program:
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.48\textwidth}X}
+\toprule
+Program fragment & Probability-one termination theorem\\
+\midrule
+Exact parent seed expansion, with its output relation &
+\code{parent_kp_expand_seedbuf_output_matches_pr}\\
+Fixed \(2\times3\) matrix caller &
+\code{mode2_matrix_uniform_progress_ll}\\
+Fixed two-slot uniform-vector caller &
+\code{mode2_expand_vecA_progress_ll}\\
+Eta caller at nonce \(0\), count \(3\) &
+\code{mode2_eta_nonce0_count3_progress_ll}\\
+Eta caller at nonce \(3\), count \(2\) &
+\code{mode2_eta_nonce3_count2_progress_ll}\\
+Whole proof-only sampler prefix &
+\code{checked_mode2_parent_sampler_prefix_progress_ll}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The matrix and vector judgments assume their respective certificate bundles.
+The two eta judgments assume the shared five-slot first-attempt bundle.
+The final pHoare theorem starts before seed expansion: its premise is exactly
+\[
+  \text{\code{mode2_sampler_prefix_progress}}
+  (S,L_{\mathrm M},L_{\mathrm V},L_\eta).
+\]
+Seed expansion returns the exact \(E=\Expand(S)\); the specification then
+specializes the premise to \(\PM(E,L_{\mathrm M})\),
+\(\PV(E,L_{\mathrm V})\), and \(\PE(E,L_\eta)\).  The four fixed callers are
+therefore lossless in sequence, so \code{run} returns with probability one.
+
+The pHoare theorem's postcondition is \code{true}: it is a termination theorem,
+not a duplicate semantic theorem.  Together with
+\code{checked_mode2_parent_sampler_prefix_correct}, it gives the two separate
+ingredients ``returns under the bundle'' and ``has the displayed result when
+it returns.''  The artifact does not package them as one stronger pHoare
+postcondition.
+
+\section{Dependency and Proof Cuts}
+
+The checked implications can be read from bottom to top:
+\[
+\begin{array}{c}
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.86\textwidth}{\centering
+exact Keccak/SHAKE refinements; finite uniform and eta decoders;
+leaf range/frame and certificate-conditioned leaf totality}}\\[0.65em]
+\Downarrow\\[0.65em]
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.86\textwidth}{\centering
+sampler-target seed and caller theorems}}\\[0.65em]
+\Downarrow\quad\text{seven cross-module equivalences}\\[0.65em]
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.86\textwidth}{\centering
+parent-qualified seed, caller, and leaf theorems}}\\[0.65em]
+\Downarrow\quad\text{\(k=2,m=3\) proof-only composition}\\[0.65em]
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.86\textwidth}{\centering
+checked first-attempt sampler-prefix semantics and
+certificate-conditioned probability-one termination}}\\[0.65em]
+\textcolor{artifactred}{\Downarrow}\quad
+\text{\textcolor{artifactred}{matrix/NTT, finalize, singular rejection, retries, and packing not crossed}}\\[0.65em]
+\fcolorbox{artifactred}{artifactgray}{\parbox{0.86\textwidth}{\centering
+\code{Parent._keypair_full_m23} semantics and termination;
+abstract key generation and implementation-level security}}
+\end{array}
+\]
+
+The red cut is substantive.  In particular, the present certificate bundle
+contains only eta nonces \(0,\ldots,4\).  A rejected first attempt would use
+the next five nonces, and no theorem here proves acceptance, bounds the number
+of retries, or supplies certificates for later attempts.
+
+\section{Exact Claim Boundary}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.48\textwidth}X}
+\toprule
+Claim & Status\\
+\midrule
+The seven selected procedures in the actual parent target agree with their
+sampler-target copies on equal inputs &
+Proved by seven \code{equiv} judgments\\
+Exact seed slices and finite-stream/range/frame caller semantics are available
+for actual-parent-module procedures &
+Proved as parent-qualified Hoare theorems\\
+Each selected uniform or eta leaf terminates under its own exact progress
+certificate and memory bounds &
+Proved as parent-qualified pHoare theorems\\
+The fixed matrix, uniform-vector, and two first-attempt eta callers terminate
+under the corresponding bundle predicates &
+Proved by the four fixed-caller pHoare theorems\\
+The proof-only mode-2 prefix has the displayed semantic postcondition on
+return &
+Proved\\
+The proof-only mode-2 prefix terminates under
+\code{mode2_sampler_prefix_progress} &
+Proved by \code{checked_mode2_parent_sampler_prefix_progress_ll}\\
+Every seed has all thirteen progress certificates &
+Not proved\\
+The actual \code{_keypair_full_m23} returns, accepts its first attempt, or
+satisfies the prefix postcondition &
+Not proved\\
+Matrix/NTT, finalize, singular-value rejection, later retry attempts, and key
+packing are semantically refined &
+Not proved\\
+The decoded values have the distributions assumed by HAETAE, or the target
+inherits the abstract EUF-CMA theorem &
+Not proved\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Replaying the Machine-Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{center}
+\code{./scripts/verify-keygen-mode2-parent-proof.sh}
+\end{center}
+The dedicated gate checks pinned source hashes, rejects extraction drift in
+both the actual-parent and sampler-caller closures, verifies identity of their
+24 shared generated theories, and compiles the 17-entry proof manifest with
+\code{-no-eco}.  It also scans the authored specifications and refinements for
+\code{admit}, \code{abort}, and axiom declarations.  The retained 2026-07-23
+full run reports 17 of 17 entries compiled and all source, drift, shared-file
+identity, proof-hole, and axiom checks passing.
+
+Build this guide with
+\begin{quote}
+\begin{verbatim}
+cd haetae-ref-easycrypt/latex
+make build/TargetKeygenMode2Parent.pdf
+\end{verbatim}
+\end{quote}
+
+\section*{Conclusion}
+
+The refinement now reaches procedures in the actual mode-2-parent extraction
+and composes one faithful sampler-prefix shape using the fixed dimensions and
+first-attempt nonce schedule.  The combined certificate premise is sufficient
+for probability-one termination of that proof-only prefix.  Its exact stopping
+point is equally important: the checked program is proof-only, and the full
+parent's algebraic work, singularity-controlled retry loop, packing,
+distributions, and security composition remain outside the theorem.
+
+\end{document}

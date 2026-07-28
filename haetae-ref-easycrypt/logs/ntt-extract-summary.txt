@@ -1,0 +1,20 @@
+HAETAE target NTT extraction verification
+Date (UTC): 2026-07-13T07:43:56Z
+Source: ../haetae-ref-jasmin/jasmin/hpoly.jazz
+Functions: poly_ntt_jazz poly_invntt_jazz
+Extraction model: barray
+Toolchain: manifests/toolchain.md
+
+PASS: target NTT extraction has zero regeneration drift (10 files)
+PASS compile Array24.ec
+PASS compile Array256.ec
+PASS compile Array64.ec
+PASS compile BArray1024.ec
+PASS compile BArray192.ec
+PASS compile BArray256.ec
+PASS compile HpolyTarget.ec
+PASS compile WArray1024.ec
+PASS compile WArray192.ec
+PASS compile WArray256.ec
+cd0b8f4a5a4a0f9685bd21edb0df5b2f6760863b0a0ce6c06b462969e12764a4  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/extract/ntt/HpolyTarget.ec
+RESULT: PASS compiled=10 total=10 mode=-no-eco

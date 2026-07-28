@@ -1,0 +1,453 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+\definecolor{artifactgray}{HTML}{F2F4F5}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={A Mathematical Map of the HAETAE EasyCrypt Refinement Layer},
+  pdfsubject={Specifications, refinements, and their role in HAETAE security}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\W}[1]{\mathbb W_{#1}}
+\newcommand{\uint}[1]{\langle #1\rangle}
+\newcommand{\Frame}{\mathsf{Frame}}
+\newcommand{\Prefix}{\mathsf{Prefix}}
+\newcommand{\Centered}{\mathsf{Centered}}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{From Extracted Loops to HAETAE Security\\
+\large A mathematical map of \code{spec/*.ec} and \code{refinement/*.ec}}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The fifteen authored EasyCrypt files comprise six matched
+specification/refinement pairs and a mode-2-parent specification with two
+refinements.  They verify the generated Keccak-f transition, finite SHAKE
+streams, seed-only 128-byte expansion and slices, uniform and eta
+decoder/range/frame contracts, three caller schedules, and transfer of the
+selected procedures into the actual-parent target.  A proof-only \(k=2,m=3\)
+prefix composes the first-attempt sampler semantics and terminates with
+probability one under thirteen explicit deterministic progress certificates.
+This note maps those theorems into one picture.  They do not prove universal
+certificate existence, semantics of \code{_keypair_full_m23}, or that the
+extracted implementation realizes the probability distributions assumed by
+the HAETAE EUF-CMA reduction.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{The result in one sentence.}
+The current refinement layer establishes several necessary links from
+extracted Jasmin code to well-formed sampler behavior, but the links from
+SHAKE streams to ideal distributions, from the checked proof-only sampler
+prefix to full key generation, and from the implementation to the abstract
+security games remain separate proof obligations.
+\end{resultbox}
+
+\section{Six Pairs and One Parent Layer in Five Mathematical Notes}
+
+The source files divide naturally by a shared prefix:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.15\textwidth}
+  >{\raggedright\arraybackslash}p{0.40\textwidth}X}
+\toprule
+Layer & Authored source files & Mathematical note \\
+\midrule
+SHAKE256 framing &
+\code{KeygenShakeStreamSpec.ec}\newline
+\code{TargetKeygenShakeStream.ec} &
+\emph{SHAKE256 state construction} \\
+Keccak-f transition &
+\code{KeygenKeccak1600Spec.ec}\newline
+\code{TargetKeygenKeccak1600.ec} &
+\emph{SHAKE streams and seed expansion} \\
+Seed-only XOF &
+\code{KeygenSeedXofSpec.ec}\newline
+\code{TargetKeygenSeedXof.ec} &
+\emph{SHAKE streams and seed expansion} \\
+Uniform leaves &
+\code{KeygenUniformXofLeafSpec.ec}\newline
+\code{TargetKeygenUniformXofLeaf.ec} &
+\emph{Uniform XOF leaves} \\
+Eta consumer &
+\code{KeygenEtaSamplerSpec.ec}\newline
+\code{TargetKeygenEtaSampler.ec} &
+\emph{Eta rejection sampler} \\
+Caller schedules &
+\code{KeygenSamplerCallersSpec.ec}\newline
+\code{TargetKeygenSamplerCallers.ec} &
+\emph{Sampler caller schedules} \\
+Mode-2 parent prefix &
+\code{KeygenMode2ParentSpec.ec}\newline
+\code{TargetKeygenMode2Parent.ec}\newline
+{\scriptsize\code{TargetKeygenMode2ParentComposition.ec}} &
+\emph{Mode-2 actual-parent sampler prefix} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Each pair gives a vocabulary in its \code{Spec} file and proves facts about
+procedures in the generated target in its \code{Target} refinement file.  A
+pair is therefore best read as one mathematical unit.
+
+\section{How to Read the EasyCrypt Judgments}
+
+Let
+\[
+  \W n=\Z/2^n\Z,
+\]
+and write $\uint w\in\{0,\ldots,2^n-1\}$ for the unsigned representative of
+$w\in\W n$.  The generated program uses words in $\W8$, $\W{32}$, and
+$\W{64}$, while the specifications use ordinary integers whenever loop bounds
+and array positions can be shown not to wrap.
+
+An EasyCrypt type named \code{BArray8192} is an array of 8192 \emph{bytes}.
+When accessed through 32-bit words it has $8192/4=2048$ word slots.  This unit
+conversion explains why a procedure whose name ends in \code{2048} operates
+on \code{BArray8192}; similarly, the \code{8192} specialization uses a
+32768-byte array.
+
+Two judgment forms occur in these files:
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.25\textwidth}X}
+\toprule
+EasyCrypt form & Mathematical reading \\
+\midrule
+\code{hoare[P : pre ==> post]} &
+Partial correctness: if the deterministic procedure $P$ is started in a state
+satisfying the precondition and returns, its result satisfies the
+postcondition.  A separate losslessness theorem would be needed to conclude
+termination on every input. \\
+\code{equiv[P ~ Q : pre ==> post]} &
+Relational equivalence: executions of $P$ and $Q$ are compared from related
+inputs.  In the caller file the exported postcondition mentions only equality
+of returned arrays, not equality of an exposed call trace. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+No procedure in this fifteen-file surface contains an EasyCrypt probabilistic
+sampling command.  Distributional conclusions therefore require additional
+lemmas connecting deterministic XOF output to an abstract probabilistic model.
+
+\section{The Verified Layers}
+
+\subsection{Exact Keccak, SHAKE, and seed expansion}
+
+Starting from a zero 200-byte Keccak state, the checked initializer absorbs
+64 selected seed bytes and the two least-significant nonce bytes, then inserts
+the SHAKE suffix and the final rate bit.  Expanding the proved recurrence gives
+the rate-block byte string
+\[
+  S[o:o+64]\;\Vert\;\operatorname{LE}_2(\nu)\;\Vert\;
+  \mathtt{1f}\;\Vert\;0^{68}\;\Vert\;\mathtt{80},
+\]
+under the premise $\uint o+64\le128$.  Companion theorems prove the generated
+24-round Keccak-f transition, exact rate-block serialization, and bounded
+consecutive SHAKE128/SHAKE256 squeeze blocks.  The seed-only Hoare theorem
+proves on return that \code{_kp_expand_seedbuf} equals the first 128 SHAKE256
+bytes of its 32-byte seed; named corollaries identify output ranges $0$--$31$,
+$32$--$95$, and $96$--$127$.
+
+\subsection{Uniform leaf range and frame}
+
+Put $q=64513$ and $N=256$.  For either destination capacity
+$m\in\{2048,8192\}$ word slots, let an extracted uniform leaf return $A'$ from
+input array $A$ at word base $b$.  Under $b+N\le m$, the two checked
+postconditions are
+\[
+  0\le \operatorname{uint}_{32}(A'[b+i])<q
+  \qquad(0\le i<N)
+\]
+and
+\[
+  A'[j]=A[j]
+  \quad\text{for every byte }j\notin[4b,4(b+N)).
+\]
+They are conditional on return.  Internally, a finite-buffer consumer forms a
+16-bit little-endian candidate and accepts it exactly when it is below $q$.
+Stronger stream theorems connect the four-block prelude and every later block
+to one exact finite SHAKE128 byte sequence on return.  Both bounded generated
+consumers terminate unconditionally.  That fact does not prove that either
+whole uniform leaf eventually obtains 256 accepted candidates.  Separately,
+\code{uniform2048_leaf_progress_ll} and
+\code{uniform8192_leaf_progress_ll} prove probability-one termination of the
+two actual leaves under exact seed, slice, base, and capacity premises plus a
+concrete \code{uniform_progress_prefix} certificate.  Its finite endpoint has
+at least 256 accepted candidates, and every preceding still-incomplete
+full-block prefix from block four makes strict progress.  The certificate is
+not proved for every input.  The parent refinement lifts a six-certificate
+bundle through the fixed \(2\times3\) matrix caller and a two-certificate
+bundle through the fixed vector caller.
+
+\subsection{Eta consumer support, counter, and frame}
+
+For a 32-bit word $x$, define the centered residue
+\[
+  \chi(x)=
+  \begin{cases}
+    -1,&\operatorname{uint}_{32}(x)\bmod3=2,\\
+    \operatorname{uint}_{32}(x)\bmod3,&\text{otherwise}.
+  \end{cases}
+\]
+The generated arithmetic helpers are proved to compute the word encoding of
+$\chi(x)$ on their stated input ranges.  The key identity is
+\[
+  \left\lfloor\frac{171x}{512}\right\rfloor
+  =\left\lfloor\frac{x}{3}\right\rfloor,
+  \qquad 0\le x\le242.
+\]
+
+The finite eta consumer rejects a byte $x\ge243=3^5$.  From an accepted byte
+it attempts to write the five centered base-3 digits, stopping early if the
+256-word destination is full.  If the initial counter is at most 256 and any
+existing prefix is already centered, then on return:
+\begin{itemize}
+\item the counter has not decreased and is at most 256;
+\item every word in the returned established prefix has signed value in
+  $\{-1,0,1\}$; and
+\item no word outside the reserved 256-word block has changed.
+\end{itemize}
+The current file also composes the exact capped decoder through successive
+136-byte SHAKE256 overwrite blocks.  On return, the whole eta leaf has exactly
+256 centered coefficients, and the actual eta caller carries a separate exact
+finite witness for every selected vector slot.  The bounded eta consumer is
+unconditionally lossless.  In addition, \code{eta2048_leaf_progress_ll} proves
+probability-one termination of the actual eta leaf under exact seed, slice,
+base, and capacity premises plus a concrete
+\code{eta_progress_prefix} certificate.  The certificate supplies a finite
+full endpoint and strict decoded-count progress at each preceding incomplete
+block prefix.  Its existence is not proved for every input.  The parent
+refinement lifts five such certificates through the two fixed eta callers of
+the first attempt; it does not prove totality of the actual retry loop.
+
+\subsection{Caller schedules}
+
+The caller refinement treats the three sampler leaves as fixed opaque partial
+maps.  It proves that the extracted matrix, uniform-vector, and eta-vector
+loops return the same arrays as transparent integer-indexed schedules.  The
+essential bases and nonces are
+\[
+\begin{array}{c|c|c}
+\text{caller} & \text{word base} & \text{nonce}\\
+\hline
+\text{matrix }(i,j) & [256(ic+j)]_{64} & [256i+j]_{64}\\
+\text{uniform vector }i & [256i]_{64} & [256k+m+i]_{64}\\
+\text{eta vector }i & [256i]_{64} & \nu+[i]_{64}.
+\end{array}
+\]
+This relational result is an iterator-correctness theorem.  Separate Hoare
+theorems supply finite leaf semantics, ranges, and aggregate caller frames.
+Seven cross-module equivalences transport the seed, three leaf, and three
+caller results to procedures in the actual-parent target.  An authored
+proof-only prefix then composes seed expansion, the \(2\times3\) matrix caller,
+the two-slot uniform-vector caller, and eta callers for nonces \(0\)--\(4\).
+Its semantic theorem is conditional on return; a separate pHoare theorem
+proves probability-one termination under the bundled \(6+2+5\) progress
+certificates.  Neither theorem is about \code{_keypair_full_m23}.
+
+\section{What Can and Cannot Be Composed Today}
+
+The local layers are deliberately compatible: the caller theorem invokes the
+same fixed uniform and eta leaves studied by the local Hoare proofs.  The
+parent layer now crosses one compositional cut, through the first sampler
+attempt of a proof-only \(k=2,m=3\) prefix.  No end-to-end key-generation
+theorem is exported, however.
+
+\begin{center}
+\setlength{\fboxsep}{7pt}
+\begin{tabular}{c}
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.78\textwidth}{\centering
+Generated EasyCrypt targets from the sampler-caller and actual-parent
+Jasmin closures}}\\[0.6em]
+$\Downarrow$ \quad extraction gates, six proof pairs, and parent triplet\\[0.6em]
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.78\textwidth}{\centering
+Exact Keccak/SHAKE bytes and seed slices; uniform/eta finite decoders;
+range/frame; bounded-consumer totality; certificate-conditioned uniform/eta
+leaf totality; caller schedules}}\\[0.6em]
+$\Downarrow$ \quad proof-only actual-parent sampler prefix checked\\[0.6em]
+\fcolorbox{artifactgreen}{artifactgray}{\parbox{0.78\textwidth}{\centering
+Parent-qualified seed/caller semantics and first-attempt sampler-prefix
+composition for \(k=2,m=3\), with certificate-conditioned totality}}\\[0.6em]
+$\Downarrow$ \quad \textcolor{artifactred}{missing distributions,
+\code{_keypair_full_m23}, retry/downstream semantics, and packing}\\[0.6em]
+\fcolorbox{artifactred}{artifactgray}{\parbox{0.78\textwidth}{\centering
+Abstract HAETAE key generation with the distributions assumed by the scheme}}\\[0.6em]
+$\Downarrow$ \quad \textcolor{artifactred}{missing keygen/sign/verify
+implementation refinement}\\[0.6em]
+\fcolorbox{artifactred}{artifactgray}{\parbox{0.78\textwidth}{\centering
+Implementation-level EUF-CMA theorem}}
+\end{tabular}
+\end{center}
+
+The green boxes are supported by the extraction and proof gates.
+The red boxes name composition goals, not consequences of the present
+theorems.
+
+\section{Connection to the Provable-Security Development}
+
+The repository's separate provable-security development contains an abstract
+HAETAE scheme and EUF-CMA bounds.  For example,
+\code{HAETAE_Security.ec} bounds the forgery probability under explicit
+game-hop and hardness premises.  That theorem concerns the abstract module
+\code{HAETAE}; it is not automatically a theorem about the Jasmin program.
+
+An implementation-level security statement needs a bridge of the following
+logical form.  If an implementation $I$ and abstract scheme $H$ have the same
+observable behavior in the security experiment, then
+\[
+  \Pr[\operatorname{Forge}(I)]
+  =\Pr[\operatorname{Forge}(H)]
+  \le \operatorname{HAETAE\_EUF\_bound}.
+\]
+The files documented here contribute local premises for the first equality;
+they do not prove it.  The repository traceability table accordingly records
+the sampler-XOF path as partial and the paper-faithful EUF-CMA surface as
+partial.  Full mode-2 Jasmin security composition remains unchecked.
+
+\begin{boundarybox}
+\textbf{Security interpretation.}
+Range and frame postconditions are safety properties.  They prevent malformed
+coefficients and out-of-region functional-array writes on terminating runs.
+They do not imply that coefficients are uniform, independent, unpredictable,
+or distributed as required by a security reduction.
+\end{boundarybox}
+
+\section{Remaining Proof Obligations}
+
+A complete bridge from these local refinements to HAETAE provable security
+still requires, at minimum:
+
+\begin{enumerate}
+\item semantic composition with the actual \code{_keypair_full_m23} past the
+  current proof cut, including matrix/NTT work, finalize, singular rejection,
+  retry control, seed selection, and packing;
+\item probabilistic theorems for the uniform rejection sampler and centered
+  base-3 sampler, plus universal progress-certificate existence or another
+  unconditional almost-sure-termination argument;
+\item certificates and semantic contracts for later retry attempts, together
+  with an acceptance or retry-termination argument;
+\item refinement of the complete key-generation result to the abstract HAETAE
+  key-generation distribution, including remaining adjustments documented by
+  the repository;
+\item corresponding implementation refinements for signing and verification;
+  and
+\item a final game-level equivalence transferring the abstract EUF-CMA bound
+  to the target implementation, together with separate memory-safety and
+  leakage claims if those are desired.
+\end{enumerate}
+
+This list separates functional correctness from cryptographic assumptions:
+proving a correct deterministic decoder is different from proving that its
+input is an ideal or pseudorandom XOF stream.
+
+\section{Suggested Reading Order}
+
+For a mathematical reader, the most efficient order is:
+
+\begin{enumerate}
+\item \code{TargetKeygenSamplerCallers.pdf}: the simplest proof, consisting of
+  closed-form schedules and ordinary induction;
+\item \code{TargetKeygenUniformXofLeaf.pdf}: frame and range invariants for a
+  rejection sampler;
+\item \code{TargetKeygenEtaSampler.pdf}: centered base-3 arithmetic and the
+  five-write consumer invariant; and
+\item \code{TargetKeygenShakeStream.pdf}: exact byte/lane framing at the XOF
+  boundary; and
+\item \code{TargetKeygenMode2Parent.pdf}: transfer into the actual-parent
+  target and the checked first-attempt sampler prefix.
+\end{enumerate}
+
+Return to the present map after reading the five notes to see which arrows
+toward the security theorem are checked and which are still open.
+
+\section{Machine-Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{quote}
+\begin{verbatim}
+./scripts/verify-keygen-sampler-callers-proof.sh
+\end{verbatim}
+\end{quote}
+The gate checks pinned source hashes and extraction drift across the unified
+25-file/31-procedure target, then compiles one generated target followed by six
+specifications and six refinements with \code{-no-eco}.  The retained
+2026-07-22 full run reports 13 compiled entries and passing scans of the
+authored files for proof holes and axiom declarations.  The actual mode-2 parent has a separate
+32-file/56-procedure extraction gate.  The dedicated semantic gate is
+\begin{quote}
+\begin{verbatim}
+./scripts/verify-keygen-mode2-parent-proof.sh
+\end{verbatim}
+\end{quote}
+It checks both extraction closures and their 24 byte-identical shared
+generated theories, then compiles a 17-entry \code{-no-eco} manifest containing
+both targets, seven specifications, and eight refinements.  The retained
+2026-07-23 run reports 17 of 17 entries compiled and passing source, drift,
+shared-file identity, proof-hole, and axiom checks.
+
+The source-to-document status map is maintained in
+\code{manifests/traceability.csv}.  The abstract security development and its
+own verification instructions live under
+\code{haetae-security/provable-security/}.
+
+\section*{Conclusion}
+
+The current \code{spec/*.ec} files define the mathematical predicates needed
+to reason about concrete arrays, counters, and framing.  The corresponding
+\code{refinement/*.ec} files prove that selected generated procedures satisfy
+those predicates.  Together they form a useful deterministic foundation for
+HAETAE implementation security.  Exact finite XOF bytes are no longer the
+missing bridge; universal progress certificates, generic caller totality,
+sampler
+distributions, full \code{_keypair_full_m23} and retry/downstream semantics,
+source-pointer properties, full-algorithm refinement, and game composition
+remain open.  A proof-only actual-parent sampler prefix now composes the
+previous local results through the first five eta nonces.
+
+\end{document}

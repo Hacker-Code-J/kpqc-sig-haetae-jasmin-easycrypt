@@ -1,0 +1,10 @@
+HAETAE Jasmin forced-build and test summary
+Date (UTC): 2026-07-13T03:06:00Z
+Command: make -B -C /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-jasmin test
+Source manifest: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/manifests/sources.sha256
+Toolchain record: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/manifests/toolchain.md
+
+Smoke completion markers: 3
+Failure marker scan: PASS (no "Invalid on" output)
+KAT comparison: PASS (make target and all diff commands exited 0)
+RESULT: PASS make-exit=0 modes=3

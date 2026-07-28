@@ -1,0 +1,52 @@
+HAETAE mode-2 key-generation seed XOF extraction verification
+Date (UTC): 2026-07-13T07:43:56Z
+Source: ../haetae-ref-jasmin/jasmin/keypair.jazz
+Selected function: _kp_expand_seedbuf
+Extraction model: barray
+Generated file manifest: manifests/keygen-seed-xof-extract-files.txt
+Procedure closure manifest: manifests/keygen-seed-xof-procedures.txt
+Toolchain: manifests/toolchain.md
+
+PASS canonical source hash check (62 pinned inputs)
+Pinned source and parsed-dependency SHA-256 values:
+8b2ddac2862122d1c9d58767cbc5caa2caad39c8f41fa8096d66ffa77b783e01  ../haetae-ref-jasmin/jasmin/keypair.jazz
+e5ad577762e32a78b534807d3e8d2144a3692cbceea5473ff76f6406b2359d27  ../haetae-ref-jasmin/jasmin/params.jinc
+32f8054b77282ab8e9a469117d7e28afb728bb5948ab2d3a6a7da56e2030a735  ../haetae-ref-jasmin/jasmin/keccak.jinc
+edea9a843ab463c8a897aa41098cd89aa407b6c069fefe17e03a37362e150867  ../haetae-ref-jasmin/jasmin/polynomial_sampler.jinc
+7e3b3205688a75b3b4ab719c3b29b2c16c08ac4198662c238ed0686e22d97030  ../haetae-ref-jasmin/jasmin/expand.jinc
+f9d5d07bd231248a352cee0fbab62945412dcca8bfe1f43952f7f6b6cc58b95a  ../haetae-ref-jasmin/jasmin/poly.jinc
+a095a458f43d132b7f8032b3a76dc70b3ad00c910b02f0d9c4fdf0f08303074f  ../haetae-ref-jasmin/jasmin/pack.jinc
+a68a64843ba92133e575c2f43bb574bed313b503807919ec1f96a14da843931e  ../haetae-ref-jasmin/jasmin/sign.jinc
+e32a380d9675426b5ef95acd9dab3f2fbad4378216eab18483dd50d0d47ef437  ../haetae-ref-jasmin/jasmin/fft.jinc
+b85cef28cf75bfc85284b880197515a67f8ac4c7e62fd4a166e06c266968cab6  ../haetae-ref-jasmin/jasmin/fft_pipeline.jinc
+8524ac11b7251f21ec84b26e4b2fe6b3bfc4f837eda892c294bcda55b6e164d6  ../haetae-ref-jasmin/jasmin/fft_tables.jinc
+f75b2a66efe3901a5acfac58e76cb1f05a1b9d81237c1e4c25b4adc6af9af12e  ../haetae-ref-jasmin/jasmin/singular_values.jinc
+4d04b8e74c51ff17236460f93103d43d2f9dcbc78b510191aa2c1a6283aba8a0  ../haetae-ref-jasmin/jasmin/api.jinc
+5a7f95d76359a04a528d816e2622dd219ca409137f0b0cfc475bf3028610e207  ../haetae-ref-jasmin/jasmin/reduce.jinc
+c01e43399b793573972cbbfac478483003eb046f168884ecfadb674d4b0bd820  ../haetae-ref-jasmin/jasmin/zetas.jinc
+
+PASS: key-generation seed XOF extraction has zero regeneration drift (20 files, 15 procedures)
+PASS compile Array128.ec
+PASS compile Array24.ec
+PASS compile Array25.ec
+PASS compile Array256.ec
+PASS compile Array32.ec
+PASS compile Array5.ec
+PASS compile Array512.ec
+PASS compile BArray1024.ec
+PASS compile BArray128.ec
+PASS compile BArray192.ec
+PASS compile BArray200.ec
+PASS compile BArray2048.ec
+PASS compile BArray32.ec
+PASS compile BArray40.ec
+PASS compile BArray512.ec
+PASS compile KeygenSeedXofTarget.ec
+PASS compile WArray1024.ec
+PASS compile WArray192.ec
+PASS compile WArray2048.ec
+PASS compile WArray512.ec
+PASS proof-hole scan (no admit/abort proof commands)
+PASS axiom declaration scan (none found)
+64d89bfacff0fc793a1c99286fbde7811dd33ce183dc6860c800d073a4e22ca1  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/extract/keygen-seed-xof/KeygenSeedXofTarget.ec
+RESULT: PASS compiled=20 total=20 procedures=15 mode=-no-eco

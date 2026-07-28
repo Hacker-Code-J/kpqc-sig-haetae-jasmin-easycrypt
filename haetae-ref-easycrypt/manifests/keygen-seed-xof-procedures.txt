@@ -1,0 +1,15 @@
+_keccak_init_state
+_keccak_finalize
+__keccakf1600_index
+__keccakf1600_rho_offset
+__keccakf1600_rho
+__rol_u64
+__andn_u64
+__keccak_theta_sum
+__keccak_theta_rol
+__keccak_rol_sum
+__keccak_set_row
+_keccak_pround
+__keccakf1600_statepermute
+_keccakf1600
+_kp_expand_seedbuf

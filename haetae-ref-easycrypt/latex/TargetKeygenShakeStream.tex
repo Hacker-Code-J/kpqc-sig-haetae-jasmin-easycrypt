@@ -1,0 +1,583 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={A Mathematical Reading of TargetKeygenShakeStream.ec},
+  pdfsubject={HAETAE key-generation SHAKE256 state framing}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Wviii}{\mathbb W_{8}}
+\newcommand{\Wlxiv}{\mathbb W_{64}}
+\newcommand{\enc}[1]{\left[#1\right]_{64}}
+\newcommand{\uint}[1]{\langle #1\rangle}
+\newcommand{\Lane}{\operatorname{L}}
+\newcommand{\Abs}{\operatorname{Abs}}
+\newcommand{\SeedAbs}{\operatorname{SeedAbs}}
+\newcommand{\NonceRun}{\operatorname{NonceRun}}
+\newcommand{\Final}{\operatorname{Final}}
+\newcommand{\Frame}{\operatorname{Frame}}
+\newcommand{\low}{\operatorname{low}_{8}}
+\newcommand{\zext}{\operatorname{zext}_{64}}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{derivedbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactblue}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactblue}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{SHAKE Streams and Seed Expansion in HAETAE\\
+\large A mathematical reading of the Keccak, stream, and seed-XOF refinements}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The initializer studied in detail prepares one exact padded 200-byte Keccak
+state.  The current proof surface goes further: it proves the generated
+24-round Keccak-f transition, exact rate-block serialization, bounded
+consecutive SHAKE128/SHAKE256 blocks, and---for the seed-only path---on-return
+equality of \code{_kp_expand_seedbuf} with the first 128 SHAKE256 bytes of its
+32-byte seed.  None of these deterministic statements models the output as
+random or establishes a HAETAE security claim.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{Machine-checked result.}
+Let $s$ be a 128-byte buffer, let $o$ be a 64-bit offset satisfying
+$\uint{o}+64\le 128$, and let $n$ be a 64-bit nonce.  On every terminating
+execution, the extracted initializer returns exactly the state obtained from
+a zero state by absorbing
+\[
+  s[o],s[o+1],\ldots,s[o+63],\quad
+  n\bmod 256,\quad
+  \left\lfloor n/256\right\rfloor\bmod 256,
+\]
+then XORing $\mathtt{0x1f}$ into byte position $66$ and $\mathtt{0x80}$ into
+byte position $135$.  This is a pre-permutation state, not a SHAKE output.
+\end{resultbox}
+
+\section{What Is Being Verified?}
+
+The implementation procedure is
+\code{__kp_shake256_init_seedbuf}.  It receives an existing state, a seed
+buffer, a seed offset, and a nonce.  Its execution has four stages:
+\begin{enumerate}
+\item overwrite all 25 Keccak lanes with zero;
+\item absorb 64 bytes beginning at the given seed offset;
+\item absorb two bytes from the low end of the nonce; and
+\item insert the SHAKE256 domain suffix and the final rate bit.
+\end{enumerate}
+
+The detailed initializer proof gives a direct recurrence for every lane
+update.  Companion Keccak and stream theories then connect the target
+permutation and squeeze calls to the checked finite sponge model, while the
+seed-XOF theory specializes that model to the 32-byte seed-only message and a
+128-byte result.
+
+Throughout the note, statements are classified as follows:
+\begin{center}
+\begin{tabularx}{0.94\textwidth}{>{\raggedright\arraybackslash}p{0.25\textwidth}X}
+\toprule
+Label & Meaning \\
+\midrule
+\textcolor{artifactgreen}{Machine checked} & An EasyCrypt lemma in the two authored theories. \\
+\textcolor{artifactblue}{Derived} & An ordinary mathematical consequence obtained by expanding the checked definitions. \\
+\textcolor{artifactred}{Missing security statement} & A property that is needed for a full security bridge but is not proved here. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Words, Bytes, and Keccak Lanes}
+
+Let
+\[
+  \Wviii=\Z/2^8\Z,
+  \qquad
+  \Wlxiv=\Z/2^{64}\Z.
+\]
+For an integer $x$, write $\enc{x}$ for its residue in $\Wlxiv$.  For
+$w\in\Wlxiv$, write $\uint{w}\in\{0,\ldots,2^{64}-1\}$ for its unsigned
+representative.  Addition and shifting of program words are word operations;
+ordinary integer arithmetic is used only after applying $\uint{\cdot}$.
+
+The seed buffer is an element of $\Wviii^{128}$.  The state is an element of
+$\Wviii^{200}$, viewed as 25 consecutive 64-bit lanes.  Write $\Lane_\ell(S)$
+for lane $\ell$ of state $S$, where $0\le\ell<25$.  The predicate
+\[
+  \operatorname{Zero}(S)
+  \quad\Longleftrightarrow\quad
+  \forall\,0\le\ell<25,\quad \Lane_\ell(S)=0
+\]
+is the mathematical reading of \code{zero_lanes}.
+
+The first 17 lanes form the 136-byte, or 1088-bit, SHAKE256 rate portion.  The
+remaining eight lanes form its 64-byte capacity portion.  The EasyCrypt
+theorem itself is expressed using the 25 lanes; the rate/capacity terminology
+is the standard SHAKE256 interpretation of those positions.
+
+\section{The State-Update Recurrences}
+
+\subsection{Absorbing one byte}
+
+For a byte position $p\in\Wlxiv$, put
+\[
+  \lambda(p)=\uint{p\mathbin{\gg}3},
+  \qquad
+  \delta(p)=8\bigl(\uint{p}\bmod 8\bigr).
+\]
+The one-byte absorption operation is
+\begin{equation}
+\label{eq:absorb}
+  \Abs(S,b,p)
+  =S\left[
+    \lambda(p)\leftarrow
+    \Lane_{\lambda(p)}(S)
+      \mathbin{\oplus}
+      \bigl(\zext(b)\mathbin{\ll}\delta(p)\bigr)
+  \right].
+\end{equation}
+Thus byte positions $8\ell,\ldots,8\ell+7$ occupy successive eight-bit
+regions of lane $\ell$.  In the implementation, masks make the permitted
+shift range explicit; for every position used here,
+$\delta(p)\in\{0,8,\ldots,56\}$.
+
+\subsection{Absorbing the seed slice}
+
+For $i\ge0$, define the exact word-indexed seed byte
+\[
+  b_i(s,o)
+  =s_{\uint{o+\enc{i}}}.
+\]
+Starting from $S_0=I$, set
+\begin{equation}
+\label{eq:seed-rec}
+  S_{i+1}=\Abs(S_i,b_i(s,o),\enc{i}).
+\end{equation}
+Then
+\[
+  \SeedAbs(I,s,o,c)=S_c.
+\]
+The specification implements this recurrence as a left fold.  It proves the
+two expected identities
+\begin{align}
+  \SeedAbs(I,s,o,0)&=I,\label{eq:seed-zero}\\
+  \SeedAbs(I,s,o,c+1)
+    &=\Abs\bigl(\SeedAbs(I,s,o,c),b_c(s,o),\enc{c}\bigr)
+      \quad(c\ge0).\label{eq:seed-succ}
+\end{align}
+
+The refinement theorem assumes $\uint{o}+64\le128$.  Consequently, for
+$0\le i<64$, word addition does not wrap and
+\[
+  \uint{o+\enc{i}}=\uint{o}+i\le127.
+\]
+The recurrence therefore reads exactly the contiguous slice
+$s[o],\ldots,s[o+63]$.
+
+\subsection{Absorbing two nonce bytes}
+
+A nonce accumulator is a triple $(S,q,p)$ consisting of a state, the
+unconsumed part of a nonce, and the next byte position.  Define
+\begin{equation}
+\label{eq:nonce-step}
+  \mathcal N(S,q,p)
+  =\bigl(
+      \Abs(S,\low(q),p),
+      q\mathbin{\gg}8,
+      p+\enc{1}
+    \bigr).
+\end{equation}
+The operation $\NonceRun((S,q,p),c)$ applies $\mathcal N$ exactly $c$ times.
+Its checked fold identities are
+\begin{align}
+  \NonceRun(x,0)&=x,\label{eq:nonce-zero}\\
+  \NonceRun(x,c+1)&=\mathcal N(\NonceRun(x,c))
+    \quad(c\ge0).\label{eq:nonce-succ}
+\end{align}
+
+The initializer starts at byte position $64$ and takes two steps.  If
+\[
+  n_0=\uint{n}\bmod256,
+  \qquad
+  n_1=\left\lfloor\uint{n}/256\right\rfloor\bmod256,
+\]
+the two absorbed bytes are therefore $n_0$ at position $64$ and $n_1$ at
+position $65$.  This is the two-byte little-endian encoding of the nonce
+modulo $2^{16}$.
+
+\subsection{Inserting the suffix and final rate bit}
+
+For a state $S$, define
+\begin{equation}
+\label{eq:final}
+  \Final(S)
+  =S[8\leftarrow \Lane_8(S)\oplus(31\ll16)]
+     [16\leftarrow \Lane_{16}(S)\oplus(1\ll63)].
+\end{equation}
+The value $31=\mathtt{0x1f}$ occupies byte position
+$8\cdot8+2=66$.  The bit $1\ll63$ in lane 16 is global bit
+$16\cdot64+63=1087$, the final bit of the 1088-bit rate portion; in bytes it
+is $\mathtt{0x80}$ at position $135$.
+
+\section{The Exact Machine-Checked Statements}
+
+\begin{definition}[Framing relation]
+\label{def:frame}
+Let $R$ be a returned state.  Define
+\begin{align*}
+  \Frame(R,s,o,n)
+  \quad\Longleftrightarrow\quad
+  \exists I,\;&\operatorname{Zero}(I)\ \land\\[-0.25em]
+  &R=\Final\!\left(
+      \pi_1\NonceRun\!\left(
+        (\SeedAbs(I,s,o,64),n,\enc{64}),2
+      \right)
+    \right),
+\end{align*}
+where $\pi_1$ selects the state component of the nonce accumulator.
+\end{definition}
+
+\begin{theorem}[Zero-initialization]
+\label{thm:zero}
+For an arbitrary input state, the checked Hoare triple is
+\[
+  \{\mathsf{true}\}\quad
+  \text{\texttt{\_keccak\_init\_state}}\quad
+  \{R\mid\operatorname{Zero}(R)\}.
+\]
+In words: whenever the procedure returns, all 25 lanes of its result are zero.
+\end{theorem}
+
+\begin{theorem}[Seed-buffer framing]
+\label{thm:frame}
+Fix a seed $s$, offset $o$, and nonce $n$.  The checked Hoare triple is
+\[
+\begin{split}
+  \{\,&\mathtt{seedp}=s\ \land\ \mathtt{seedoff}=o\ \land\
+       \mathtt{nonce}=n\ \land\ \uint{o}+64\le128\,\}\\
+  &\text{\texttt{\_\_kp\_shake256\_init\_seedbuf}}\\
+  \{\,&R\mid\Frame(R,s,o,n)\,\}.
+\end{split}
+\]
+There is no premise on the incoming state: the procedure first invokes the
+zero-initialization routine.  There is also no upper bound on $n$; the
+definition itself specifies that only two nonce bytes are absorbed.
+\end{theorem}
+
+These are ordinary Hoare postconditions.  Separate lemmas prove unconditional
+losslessness for state initialization, both seed-buffer initializers, both
+squeeze procedures, and the fixed-bound Keccak-f stack.  Thus the displayed
+postconditions can also be lifted to probability-one pHoare statements.
+
+\section{A Derived Normal Form}
+
+\begin{derivedbox}
+\textbf{Derived, not a separately named EasyCrypt theorem.}
+Expanding Definition~\ref{def:frame} gives the lane and byte formulas below.
+They make the checked recurrence readable but should not be confused with an
+additional security theorem.
+\end{derivedbox}
+
+\begin{proposition}[Lane normal form]
+\label{prop:lanes}
+Assume $\uint{o}+64\le128$, and let $R$ satisfy $\Frame(R,s,o,n)$.  For
+$0\le\ell<8$,
+\[
+  \Lane_\ell(R)
+  =\bigoplus_{r=0}^{7}
+    \left(
+      \zext\bigl(s_{\uint{o}+8\ell+r}\bigr)\ll8r
+    \right).
+\]
+Writing $n_0=\uint{n}\bmod256$ and
+$n_1=\lfloor\uint{n}/256\rfloor\bmod256$, the remaining lanes are
+\begin{align*}
+  \Lane_8(R)
+    &=\zext(n_0)\oplus(\zext(n_1)\ll8)\oplus(31\ll16),\\
+  \Lane_9(R)=\cdots=\Lane_{15}(R)&=0,\\
+  \Lane_{16}(R)&=1\ll63,\\
+  \Lane_{17}(R)=\cdots=\Lane_{24}(R)&=0.
+\end{align*}
+\end{proposition}
+
+Equivalently, under the standard little-endian byte interpretation of the
+imported Jasmin array model, the full 200-byte state is
+\begin{equation}
+\label{eq:byte-normal}
+\underbrace{
+  s[o:o+64]\ \Vert\
+  \operatorname{LE}_{2}(n)\ \Vert\
+  \mathtt{1f}\ \Vert\
+  \mathtt{00}^{68}\ \Vert\
+  \mathtt{80}
+}_{136\text{ rate bytes}}
+\ \Vert\
+\underbrace{\mathtt{00}^{64}}_{64\text{ capacity bytes}}.
+\end{equation}
+The counts are exact:
+$64+2+1+68+1=136$ rate bytes and $136+64=200$ state bytes.
+
+One immediate consequence is worth making explicit:
+\[
+  n\equiv n'\pmod{2^{16}}
+  \quad\Longrightarrow\quad
+  \Frame(R,s,o,n)\text{ and }\Frame(R,s,o,n')
+  \text{ describe the same state}.
+\]
+This is not a defect in the proof; it records the initializer's two-byte nonce
+format.  A later caller-level proof must show that the intended nonce schedule
+does not collide modulo $2^{16}$.
+
+\section{The Proof as Ordinary Induction}
+
+The EasyCrypt script uses weakest-precondition reasoning, so it encounters the
+last loop first.  The mathematical argument is clearer in execution order.
+
+\subsection{Induction for zeroing the state}
+
+After $i$ iterations, use the invariant
+\[
+  0\le\uint{i}\le25,
+  \qquad
+  \forall\,0\le\ell<\uint{i},\quad\Lane_\ell(S)=0.
+\]
+The base case is empty.  One iteration assigns zero to lane $i$ and increments
+the counter.  When the unsigned guard $i<25$ becomes false, the counter bounds
+force $\uint{i}=25$, so every lane is zero.  This proves
+Theorem~\ref{thm:zero}.
+
+\subsection{Induction for the 64 seed bytes}
+
+Let $I$ be the state returned by the zeroing routine.  After $i$ seed-loop
+iterations, the invariant is
+\[
+  S=\SeedAbs(I,s,o,i),
+  \qquad 0\le i\le64,
+  \qquad \operatorname{Zero}(I).
+\]
+Equation~\eqref{eq:seed-zero} is the base case.  The next program iteration is
+exactly Equation~\eqref{eq:seed-succ}.  The proof additionally checks that
+incrementing the 64-bit position does not wrap while $i\le64$.  At loop exit,
+the guard and bounds give $i=64$.
+
+\subsection{Induction for the two nonce bytes}
+
+Starting from
+\[
+  (S_0,q_0,p_0)
+  =(\SeedAbs(I,s,o,64),n,\enc{64}),
+\]
+the invariant after $k$ iterations is
+\[
+  (S_k,q_k,p_k)
+  =\NonceRun((S_0,q_0,p_0),k),
+  \qquad 0\le k\le2.
+\]
+Equation~\eqref{eq:nonce-zero} proves the base case, and
+Equation~\eqref{eq:nonce-succ} proves the step.  The false guard at exit and
+the bounds imply $k=2$.
+
+\subsection{The final two assignments}
+
+After the loops, the target XORs $31\ll16$ into lane 8 and $1\ll63$ into lane
+16.  Unfolding Equation~\eqref{eq:final} makes these assignments identical to
+$\Final$.  Combining the three inductions gives Definition~\ref{def:frame} and
+Theorem~\ref{thm:frame}.
+
+\section{Why This Matters for HAETAE Security}
+
+The checked theorem can exclude several implementation-level transcript
+errors:
+\begin{itemize}
+\item retaining data from an earlier Keccak state;
+\item reading the wrong 64-byte seed slice;
+\item reversing the two nonce bytes or absorbing the wrong number of them;
+\item placing the SHAKE suffix at the wrong byte; and
+\item setting the final rate bit at the wrong position.
+\end{itemize}
+
+This makes Theorem~\ref{thm:frame} a useful first link between the extracted
+key-generation implementation and a future mathematical sponge model.  It
+fixes the exact transcript that such a model must receive.
+
+\begin{boundarybox}
+\textbf{Remaining security boundary.}
+The current deterministic proofs cover the generated Keccak-f transition,
+finite squeeze sequences, and seed-only expansion.  They do not show that
+SHAKE output is random or pseudorandom, prove sampler distributions, or
+compose the actual mode-2 parent with the paper-level security games.
+\end{boundarybox}
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.46\textwidth}X}
+\toprule
+Question & Status \\
+\midrule
+Does the routine construct the state in Equation~\eqref{eq:byte-normal}? &
+Yes, as the derived normal form of the machine-checked framing relation. \\
+Does this routine call a Keccak-f permutation? &
+No; its complete target body contains only zeroing, byte absorption, and the
+two final XOR assignments. \\
+Do companion generated squeeze procedures produce checked rate blocks? &
+Yes, with exact state transitions, serialization, and bounded composition. \\
+Is the target Keccak-f implementation related to an abstract permutation? &
+Yes; \code{keccakf1600_correct} proves the exact 24-round lane transition. \\
+Does \code{_kp_expand_seedbuf} match SHAKE256? &
+On return, all 128 bytes match the first 128 SHAKE256 bytes of the 32-byte seed; three corollaries identify the output slices. \\
+Are SHAKE outputs modeled as random, pseudorandom, or collision resistant? &
+No probabilistic statement is present. \\
+Are seeds proved uniform, secret, or independent? &
+No; the theorem quantifies over an arbitrary seed buffer. \\
+Are caller nonces proved distinct modulo $2^{16}$? &
+No; only the two-byte serialization is proved here. \\
+Do the finite byte consumers terminate? &
+Yes, unconditionally; this does not by itself establish whole-leaf
+termination.  Separate leaf theorems require explicit deterministic progress
+certificates. \\
+Do the rejection samplers have the required distributions? &
+Not proved. \\
+Is the complete HAETAE mode-2 key generator connected to the paper-level
+security games? &
+Not by this theorem. \\
+Does this establish source-pointer safety, constant-time behavior, or
+extraction correctness? &
+No; the theorem concerns the returned value in the generated fixed-array
+model. \\
+\bottomrule
+\end{tabularx}
+
+For a complete security bridge, later work must extend the checked proof-only
+actual-parent sampler prefix through \code{_keypair_full_m23}, prove nonce
+separation and the required sampler distributions, and finally connect those
+implementation-level distributions to the HAETAE security games.  Universal
+progress certificates and source-level memory safety are separate obligations.
+
+\section{Translation Back to the EasyCrypt Artifact}
+
+A reader interested only in the mathematics can stop here.  The following
+tables identify the exact source of each definition and theorem.
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.29\textwidth}X}
+\toprule
+Artifact region & Mathematical content \\
+\midrule
+Byte-array declarations & A 128-byte seed buffer and a 200-byte state. \\
+Specification, lines 11--69 & Zero-state predicate, one-byte absorption,
+seed and nonce folds, finalization, and the framing relation. \\
+Specification, lines 71--94 & Base and successor identities for the two
+folds. \\
+Generated target, lines 446--454 & The 25-lane zeroing loop. \\
+Generated target, lines 892--945 & The complete specialized initializer. \\
+Refinement, lines 13--47 & The zero-initialization Hoare proof. \\
+Refinement, lines 49--140 & The seed-buffer framing Hoare proof. \\
+\bottomrule
+\end{tabularx}
+
+The corresponding paths are:
+\begin{center}
+\footnotesize
+\code{easycrypt/extract/keygen-sampler-callers/BArray128.ec}\\
+\code{easycrypt/extract/keygen-sampler-callers/BArray200.ec}\\
+\code{easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec}\\
+\code{easycrypt/spec/KeygenShakeStreamSpec.ec}\\
+\code{easycrypt/refinement/TargetKeygenShakeStream.ec}\\
+\code{easycrypt/spec/KeygenKeccak1600Spec.ec}\\
+\code{easycrypt/refinement/TargetKeygenKeccak1600.ec}\\
+\code{easycrypt/spec/KeygenSeedXofSpec.ec}\\
+\code{easycrypt/refinement/TargetKeygenSeedXof.ec}
+\end{center}
+
+\begin{center}
+\small
+\begin{tabularx}{0.96\textwidth}{>{\raggedright\arraybackslash}p{0.42\textwidth}X}
+\toprule
+Mathematical statement & EasyCrypt lemma \\
+\midrule
+Equation~\eqref{eq:seed-zero} & \code{seed_absorb0} \\
+Equation~\eqref{eq:seed-succ} & \code{seed_absorb_succ} \\
+Equation~\eqref{eq:nonce-zero} & \code{nonce_run0} \\
+Equation~\eqref{eq:nonce-succ} & \code{nonce_run_succ} \\
+Theorem~\ref{thm:zero} & \code{keccak_init_state_zero} \\
+Theorem~\ref{thm:frame} & \code{shake256_init_seedbuf_framing} \\
+Proposition~\ref{prop:lanes} & Derived from the framing definition; no
+separate lemma in these files. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Replaying the Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{quote}
+\begin{verbatim}
+./scripts/verify-keygen-sampler-callers-proof.sh
+\end{verbatim}
+\end{quote}
+This gate includes the Keccak, stream, and seed-XOF specification/refinement
+pairs, compiles them with the pinned generated target, and scans the authored
+proof surface for forbidden proof holes and axiom declarations.
+
+Build this note directly with
+\begin{quote}
+\begin{verbatim}
+cd haetae-ref-easycrypt/latex
+mkdir -p build
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenShakeStream.tex
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenShakeStream.tex
+\end{verbatim}
+\end{quote}
+The PDF is written to \code{build/TargetKeygenShakeStream.pdf}.
+
+\section*{Conclusion}
+
+The initializer framing theorem is now one part of a larger checked chain:
+exact padded states, the generated 24-round Keccak-f transition, serialized
+finite squeeze blocks, and the seed-only 128-byte SHAKE256 expansion on return.
+The remaining gap is probabilistic and compositional rather than a missing
+finite Keccak/SHAKE byte model.
+
+\end{document}

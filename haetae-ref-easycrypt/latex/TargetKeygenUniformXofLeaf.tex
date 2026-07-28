@@ -1,0 +1,724 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\definecolor{artifactblue}{HTML}{1F4E79}
+\definecolor{artifactgreen}{HTML}{1E6B45}
+\definecolor{artifactred}{HTML}{8B2F2F}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=artifactblue,
+  urlcolor=artifactblue,
+  pdftitle={A Mathematical Reading of TargetKeygenUniformXofLeaf.ec},
+  pdfsubject={HAETAE uniform-XOF leaf range and frame verification}
+}
+
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\setlength{\emergencystretch}{3em}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\code}[1]{\nolinkurl{#1}}
+\newcommand{\Z}{\mathbb Z}
+\newcommand{\Wsixtyfour}{\mathbb W_{64}}
+\newcommand{\Wthirtytwo}{\mathbb W_{32}}
+\newcommand{\uint}[1]{\left\langle #1\right\rangle}
+\newcommand{\word}[2]{\operatorname{word}_{#1}(#2)}
+\newcommand{\Frame}{\operatorname{Frame}}
+\newcommand{\Prefix}{\operatorname{Prefix}}
+\newcommand{\Consumer}{\mathcal C}
+\newcommand{\Leaf}{\mathcal U}
+
+\newenvironment{resultbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactgreen}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactgreen}\hrule\end{minipage}\end{center}}
+
+\newenvironment{assumptionbox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactblue}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactblue}\hrule\end{minipage}\end{center}}
+
+\newenvironment{boundarybox}
+  {\begin{center}\begin{minipage}{0.94\linewidth}\color{artifactred}\hrule\vspace{0.6em}\color{black}}
+  {\vspace{0.6em}\color{artifactred}\hrule\end{minipage}\end{center}}
+
+\title{Uniform Rejection-Sampling Leaves in HAETAE\\
+\large A mathematical reading of \code{TargetKeygenUniformXofLeaf.ec}}
+\author{HAETAE reference EasyCrypt artifact}
+\date{Artifact state checked 2026-07-23}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+The extracted key-generation code fills a polynomial with 256 residues by
+reading 16-bit candidates from a SHAKE128 path and rejecting candidates at
+least $64513$.  The current EasyCrypt files prove the exact finite SHAKE128
+stream-to-decoder relation through both generated leaves, coefficient range,
+and confinement of writes to the assigned polynomial.  The bounded consumers
+terminate unconditionally; each actual whole leaf terminates with probability
+one under an explicit deterministic finite-prefix progress certificate and
+exact seed/base/capacity/slice premises.  The development does not prove such
+a certificate for every input or derive uniformity or independence from the
+deterministic stream model.
+\end{abstract}
+
+\begin{resultbox}
+\textbf{The result in one sentence.}
+Let a destination contain either 2048 or 8192 32-bit slots.  If slots
+$b,\ldots,b+255$ fit in that destination and the corresponding extracted leaf
+returns, then those 256 slots contain integers in
+$\{0,\ldots,64512\}$, while every byte outside those slots is unchanged.  Under
+the corresponding exact seed and memory premises plus
+\code{uniform_progress_prefix}, either actual leaf terminates with probability
+one.
+\end{resultbox}
+
+\section{The Mathematical Question}
+
+The program has two versions of the same sampler.  They differ only in the
+capacity of the destination array.  Both versions start from a seed buffer,
+an offset into that buffer, and a nonce.  They obtain bytes through an
+extracted SHAKE128 code path, read consecutive pairs as 16-bit integers, and
+keep a candidate precisely when it is less than
+\[
+  q=64513.
+\]
+They stop after accepting
+\[
+  n=256
+\]
+candidates.
+
+The verification question answered by the two authored EasyCrypt theories is
+deliberately narrower than full sampler correctness:
+
+\begin{quote}
+Assuming that the requested 256-word destination region fits, what can be
+said about the returned words and about the rest of the destination array?
+\end{quote}
+
+The answer is independent of the contents of the byte stream.  The acceptance
+test itself enforces the coefficient range, and the output index itself
+enforces the frame property.  Consequently, these proofs can treat the
+SHAKE-related calls without any semantic specification.
+
+\section{Memory Model and the Two Capacities}
+
+EasyCrypt models the relevant memories as fixed byte arrays.  A 32-bit word
+occupies four consecutive bytes.  For an array $A$, write $\word{A}{i}$ for
+the unsigned 32-bit word stored in slot $i$.
+
+The names use two different units.  The suffix of an extracted leaf is its
+capacity in \emph{32-bit slots}, whereas a type name such as
+\code{BArray8192} gives its capacity in \emph{bytes}.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Leaf suffix & Destination type & Bytes & 32-bit slots \\
+\midrule
+\code{2048} & \code{BArray8192} & 8192 & 2048 \\
+\code{8192} & \code{BArray32768} & 32768 & 8192 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Thus ``the 2048 case'' below means an 8192-byte destination with 2048 word
+slots, and ``the 8192 case'' means a 32768-byte destination with 8192 word
+slots.  Correspondingly, specification identifiers ending in \code{8192}
+refer to the small byte array, and identifiers ending in \code{32768} refer
+to the large byte array.  A base is measured in word slots.  A seed offset is
+measured in bytes.
+
+Machine counters and bases belong to
+\[
+  \Wsixtyfour=\Z/2^{64}\Z.
+\]
+For $x\in\Wsixtyfour$, write $\uint{x}\in\{0,\ldots,2^{64}-1\}$ for
+its unsigned representative.  Machine addition is modulo $2^{64}$; later we
+will identify the condition that makes it agree with ordinary integer
+addition.
+
+\section{The Two Mathematical Predicates}
+
+Fix a word capacity $m\in\{2048,8192\}$, so that the corresponding byte
+array has length $4m$.  Let $A_0$ be a reference array, $A$ a current array,
+and $b\in\Z$ an integer base.
+
+\begin{definition}[The polynomial byte region]
+The 256-word region starting at $b$ is the half-open byte interval
+\[
+  I_b=[\,4b,\ 4(b+n)\,).
+\]
+It has length $4n=1024$ bytes.
+\end{definition}
+
+\begin{definition}[Frame predicate]
+The predicate
+\[
+  \Frame_m(A_0,A;b)
+\]
+holds when every valid byte outside $I_b$ has its original value:
+\[
+  \forall j\in\Z,\quad
+  0\le j<4m\ \land\ j\notin I_b
+  \ \Longrightarrow\ A[j]=A_0[j].
+\]
+The predicate intentionally says nothing about bytes inside $I_b$.
+\end{definition}
+
+\begin{definition}[Bounded accepted prefix]
+For an integer $c$, define
+\[
+  \Prefix_m(A;b,c)
+  \quad\Longleftrightarrow\quad
+  \forall i\in\Z,\quad
+  0\le i<c\ \Longrightarrow\
+  0\le\word{A}{b+i}<q.
+\]
+The lower bound is automatic because \(\word{A}{b+i}\) is interpreted as an
+unsigned word.  The EasyCrypt source therefore writes only the upper bound.
+\end{definition}
+
+The specification theory proves the elementary algebra needed later:
+\begin{itemize}
+\item $\Frame_m(A,A;b)$, and frame relations compose transitively;
+\item writing one word at $b+s$, where $0\le s<n$, preserves the frame;
+\item $\Prefix_m(A;b,0)$ holds vacuously; and
+\item if $\Prefix_m(A;b,c)$, $0\le c<n$, and $0\le w<q$, then writing
+  $w$ at $b+c$ establishes $\Prefix_m(A';b,c+1)$.
+\end{itemize}
+
+There is one necessary bridge between machine indices and integer indices.
+For machine words $\beta,\gamma\in\Wsixtyfour$, if
+\[
+  \uint{\beta}+n\le m
+  \qquad\text{and}\qquad
+  \uint{\gamma}<n,
+\]
+then
+\[
+  \uint{\beta+\gamma}=\uint{\beta}+\uint{\gamma}.
+  \tag{1}\label{eq:no-wrap}
+\]
+The capacity premise therefore prevents the machine computation of
+\code{base + ctr} from wrapping modulo $2^{64}$ in any accepted-write branch.
+
+\section{The Finite Consumer in Mathematical Form}
+
+Let
+\[
+  \Consumer_m(A,b,c,B,L)=(A',c')
+\]
+denote the finite-buffer consumer for word capacity $m$.  Here $A$ is the
+destination, $b,c\in\Wsixtyfour$, $B$ is a 1024-byte working buffer, and
+$L\in\Wsixtyfour$ is the reported number of available bytes.
+
+The extracted loop has the following normal form.  Its variables
+$p$ (position) and $\ell$ (live flag) start at $0$ and $1$.
+
+\begin{enumerate}
+\item If $256\le_{\mathrm u}c$, set $\ell=0$.
+\item Otherwise compute $r=L-p$ in $\Wsixtyfour$.  If
+  $r<_{\mathrm u}2$, set $\ell=0$.
+\item Otherwise read two bytes and form the little-endian candidate
+  \[
+    t=B[p]+2^8B[p+1]\in\{0,\ldots,2^{16}-1\},
+  \]
+  then replace $p$ by $p+2$.
+\item If $t<q$, store the 32-bit representation of $t$ at slot $b+c$ and
+  replace $c$ by $c+1$.  If $t\ge q$, leave $A$ and $c$ unchanged.
+\item Repeat while $\ell\ne0$.
+\end{enumerate}
+
+This finite consumer does not promise to fill the polynomial.  It may return
+with $c'<256$ because its current buffer has no complete two-byte candidate
+left.  The whole leaf is responsible for obtaining more bytes and calling the
+consumer again.
+
+The separate lemmas \code{uniform_consume2048_ll} and
+\code{uniform_consume8192_ll} prove that these finite consumers terminate on
+every input.  This bounded-helper totality does not imply that the enclosing
+rejection loop eventually collects 256 accepted candidates.
+
+The two consumers have the same mathematical form.  The actual extracted
+procedures are \code{__kp_poly_uniform_consume_2048} for $m=2048$ and
+\code{__poly_uniform_consume} for $m=8192$.
+
+\section{The Exact Partial-Correctness Theorems}
+
+A Hoare statement
+\[
+  \{P\}\ f\ \{Q\}
+\]
+is read in this document as follows: if a call begins in a state satisfying
+$P$ and the call returns, then its result satisfies $Q$.  It does not, by
+itself, assert that the call returns.  This qualification applies to every
+theorem in this section.
+
+The next three results hold once for $m=2048$ and once for $m=8192$.
+
+\begin{theorem}[Finite-consumer counter bound]
+\label{thm:counter}
+Let $c_0\in\Wsixtyfour$.  If the input counter is $c_0$ and
+$\uint{c_0}\le n$, then, on return,
+\[
+  \uint{c_0}\le\uint{c'}\le n.
+\]
+No destination-capacity premise is needed for this counter-only statement.
+\end{theorem}
+
+\begin{theorem}[Finite-consumer frame preservation]
+\label{thm:consumer-frame}
+Suppose
+\begin{align*}
+  &\Frame_m(A_0,A;b_0),
+  &&\uint{b}=b_0,\\
+  &b_0+n\le m,
+  &&0\le\uint{c}\le n.
+\end{align*}
+If
+$\Consumer_m(A,b,c,B,L)=(A',c')$ returns, then
+\[
+  \Frame_m(A_0,A';b_0)
+  \qquad\text{and}\qquad
+  0\le\uint{c'}\le n.
+\]
+The input need not equal $A_0$; it is enough that earlier computation has
+already preserved the same frame.
+\end{theorem}
+
+\begin{theorem}[Finite-consumer prefix extension]
+\label{thm:consumer-range}
+Suppose
+\begin{align*}
+  &\uint{b}=b_0,
+  &&b_0+n\le m,\\
+  &\Prefix_m(A;b_0,\uint{c}),
+  &&0\le\uint{c}\le n.
+\end{align*}
+If
+$\Consumer_m(A,b,c,B,L)=(A',c')$ returns, then
+\[
+  0\le\uint{c'}\le n
+  \qquad\text{and}\qquad
+  \Prefix_m(A';b_0,\uint{c'}).
+\]
+\end{theorem}
+
+Now let
+\[
+  \Leaf_m(A,b,S,o,\nu)=A'
+\]
+denote the complete extracted leaf.  The seed buffer $S$ has 128 bytes, and
+$b,o,\nu\in\Wsixtyfour$ are respectively the output base, seed offset, and
+nonce.  Theorems~\ref{thm:leaf-range} and~\ref{thm:leaf-frame} are again
+proved separately for both capacities.
+
+\begin{theorem}[Whole-leaf range]
+\label{thm:leaf-range}
+If
+\[
+  \uint{b}=b_0
+  \qquad\text{and}\qquad
+  b_0+n\le m,
+\]
+then, whenever $\Leaf_m(A,b,S,o,\nu)$ returns an array $A'$,
+\[
+  \Prefix_m(A';b_0,n).
+\]
+Equivalently, all 256 returned target words lie in
+$\{0,\ldots,64512\}$.
+\end{theorem}
+
+\begin{theorem}[Whole-leaf frame]
+\label{thm:leaf-frame}
+Under the same base and capacity premises, whenever
+$\Leaf_m(A_0,b,S,o,\nu)$ returns an array $A'$,
+\[
+  \Frame_m(A_0,A';b_0).
+\]
+\end{theorem}
+
+The range and frame properties appear as separate EasyCrypt lemmas.  Since
+they concern the same deterministic procedures under the same capacity
+premise, they may be read together as the following mathematical corollary.
+
+\begin{corollary}[Returned polynomial block]
+\label{cor:combined}
+If the target region fits and the leaf returns, then
+\[
+  \forall i\in\{0,\ldots,255\},\qquad
+  0\le\word{A'}{b_0+i}<64513,
+\]
+and
+\[
+  \forall j\in[0,4m)\setminus I_{b_0},\qquad A'[j]=A_0[j].
+\]
+\end{corollary}
+
+\section{Why the Proof Is an Induction}
+
+The EasyCrypt tactics implement ordinary invariant arguments.  Three
+invariants contain essentially the entire mathematical proof.
+
+\subsection{The counter invariant}
+
+For a consumer that starts at $c_0$, use
+\[
+  \uint{c_0}\le\uint{c}\le256.
+\]
+A stop or rejection branch leaves $c$ unchanged.  An acceptance branch is
+reached only while $c<_{\mathrm u}256$, and it changes $c$ to $c+1$.
+Therefore it cannot pass 256, and the small value of $c$ prevents word
+overflow.  This proves Theorem~\ref{thm:counter}.
+
+\subsection{The frame invariant}
+
+Use
+\[
+  \Frame_m(A_0,A;b_0)
+  \quad\land\quad
+  \uint{b}=b_0
+  \quad\land\quad
+  b_0+256\le m
+  \quad\land\quad
+  0\le\uint{c}\le256.
+\]
+Only an acceptance branch writes to the destination.  Its guard gives
+$\uint{c}<256$, and equation~\eqref{eq:no-wrap} turns the machine index
+$b+c$ into the integer slot $b_0+\uint{c}$.  That slot lies in the designated
+256-word block, so the one-word frame lemma preserves the invariant.  This
+proves Theorem~\ref{thm:consumer-frame}.
+
+\subsection{The prefix invariant}
+
+Use
+\[
+  \Prefix_m(A;b_0,\uint{c})
+  \quad\land\quad
+  \uint{b}=b_0
+  \quad\land\quad
+  b_0+256\le m
+  \quad\land\quad
+  0\le\uint{c}\le256.
+\]
+If a candidate is rejected, the prefix does not change.  If it is accepted,
+the branch condition supplies $0\le t<q$.  The program writes $t$ into the
+next slot and increments $c$, so the one-word prefix-extension lemma proves
+the invariant for the new state.  This proves
+Theorem~\ref{thm:consumer-range}.
+
+\subsection{Lifting the invariant to the whole leaf}
+
+The whole leaf initializes $c=0$, for which the prefix property is vacuous.
+Every call to the finite consumer preserves it.  If the outer loop returns,
+its false guard says $\uint{c}\ge256$, while the invariant says
+$\uint{c}\le256$.  Thus $\uint{c}=256$, which changes a valid prefix into the
+full conclusion of Theorem~\ref{thm:leaf-range}.  The frame argument lifts in
+the same way, starting from the reflexive fact
+$\Frame_m(A_0,A_0;b_0)$.
+
+These range and frame proofs do not use a decreasing variant for the rejection
+loop.  They derive their postconditions from the exit guard \emph{if exit
+occurs}.  The finite consumers are unconditionally lossless by separate
+bounded-variant proofs.  Separate pHoare theorems supply whole-leaf
+losslessness under an explicit progress certificate; that stronger premise is
+not needed for these functional postconditions.
+
+\section{What the Whole Leaf Does Operationally}
+
+The extracted target contains the following code path:
+\begin{enumerate}
+\item initialize a 200-byte Keccak state from 32 bytes beginning at the seed
+  offset and two little-endian bytes of the nonce;
+\item call the extracted SHAKE128 squeeze routine four times, obtaining
+  $4\cdot168=672$ bytes;
+\item call the finite consumer with counter zero;
+\item while fewer than 256 values have been accepted, retain a possible
+  one-byte tail, squeeze another 168 bytes, and call the consumer again.
+\end{enumerate}
+
+The nonce input has type $\Wsixtyfour$, but the initializer's two-iteration
+loop absorbs only its low 16 bits.  The range and frame theorems impose no
+premise on the seed offset or nonce.
+
+The current stream theorems go beyond this operational reading.  Under an
+in-bounds 32-byte seed slice, they relate the four-block prelude and every
+later 168-byte squeeze to one exact finite SHAKE128 byte sequence, and relate
+the stored prefix to the strict-$<64513$ candidates accepted from that
+sequence.  Range and frame correctness remain valid independently of that
+stronger stream interpretation.
+
+\section{Certificate-Conditioned Whole-Leaf Termination}
+
+For a fixed seed array $S$, seed offset $o$, nonce $\nu$, and block limit $L$,
+let $C(r)$ be the number of strict-$<64513$ little-endian candidates among the
+first $r$ consecutive 168-byte SHAKE128 blocks from the exact padded state for
+$S[o:o+32]\Vert\operatorname{LE}_2(\nu)$.  The predicate
+\code{uniform_progress_prefix S o nonce L}, written
+$P_{\mathrm u}(S,o,\nu,L)$ below, is a deterministic certificate with two
+parts:
+\begin{enumerate}
+\item $L\ge4$ and $C(L)\ge256$; and
+\item for every $4\le r<L$, if $C(r)<256$, then $C(r)<C(r+1)$.
+\end{enumerate}
+It is a property of one concrete finite SHAKE128 byte sequence, not a
+randomness assumption.  The strict-progress clause rules out a next block with
+no accepted candidates at every certified incomplete full-block prefix.
+
+\begin{theorem}[Actual uniform-leaf probability-one termination]
+Fix an initial seed array $S$, seed offset $o$, nonce $\nu$, word base $b$,
+and limit $L$.  Suppose the generated leaf receives exactly those seed,
+offset, nonce, and base values, and
+\[
+  b+256\le m,
+  \qquad \uint{o}+32\le128,
+  \qquad P_{\mathrm u}(S,o,\nu,L),
+\]
+where $m=2048$ for the 2048-word-destination leaf and $m=8192$ for the
+8192-word-destination leaf.  Then the corresponding actual leaf terminates
+with probability one.
+\end{theorem}
+
+The two pHoare theorems are \code{uniform2048_leaf_progress_ll} and
+\code{uniform8192_leaf_progress_ll}.  Because the generated leaves are
+deterministic, probability one here is a losslessness statement under the
+displayed precondition.  The development does not prove
+\code{uniform_progress_prefix} for every seed, offset, and nonce, and it does
+not lift per-leaf certificates through a parameterized caller in this file.
+A separate parent refinement now lifts six certificates through the fixed
+\(2\times3\) matrix caller and two through the fixed vector caller, then uses
+them in a proof-only mode-2 sampler prefix.  It is not the full mode-2 parent.
+
+\section{The Conditional Distribution Calculation}
+
+\begin{assumptionbox}
+\textbf{Conditional statement, not an EasyCrypt result in these files.}
+Assume that the successive two-byte candidates are independent and uniformly
+distributed in $\{0,\ldots,2^{16}-1\}$.  Under this extra assumption, the
+accepted values are independent and uniform in $\{0,\ldots,q-1\}$, and the
+rejection loop terminates almost surely.
+\end{assumptionbox}
+
+The calculation is elementary.  Exactly $q=64513$ of the $2^{16}=65536$
+candidates pass the test, so
+\[
+  \Pr[t<q]=\frac{64513}{65536}\approx0.9843903.
+\]
+For every $a\in\{0,\ldots,q-1\}$,
+\[
+  \Pr[t=a\mid t<q]
+  =\frac{1/65536}{q/65536}
+  =\frac1q.
+\]
+The expected number of candidates needed for 256 acceptances would be
+\[
+  256\frac{65536}{64513}\approx260.06.
+\]
+
+This calculation explains why the implementation is shaped like a uniform
+sampler.  The deterministic refinement now connects the extracted Keccak and
+squeeze path to an exact SHAKE128 byte sequence, but it does not model that
+sequence as random or prove the independence premise used in this
+calculation.  The concrete progress certificate above supplies conditional
+termination for one finite stream; it does not supply the probabilistic premise
+or a universal certificate.
+
+\section{Security Relevance and Proof Boundary}
+
+The verified properties are useful components of a larger HAETAE proof:
+\begin{itemize}
+\item the 256 output words are canonical representatives modulo $q$;
+\item accepted writes cannot cross the assigned polynomial boundary;
+\item callers may compose the frame property when they allocate disjoint
+  256-word regions; and
+\item the same reasoning applies to both destination capacities.
+\end{itemize}
+
+They establish a well-formedness layer, not the sampler distribution required
+by a cryptographic reduction:
+\[
+\begin{array}{c}
+\text{extracted leaf}
+\xrightarrow{\text{proved: range and frame}}
+\text{well-formed polynomial memory}
+\\[0.6em]
+\text{well-formed polynomial memory}
+\xrightarrow{\substack{\text{not proved here:}\\[-0.2em]
+                        \text{XOF and distribution}}}
+\text{ideal uniform vector in }(\Z/q\Z)^{256}.
+\end{array}
+\]
+
+\begin{boundarybox}
+\textbf{Precise boundary.}
+The authored refinement file contains unary Hoare proofs about the target
+program.  It does not contain an equivalence with an ideal random sampler.
+The functional stream/range/frame claims described here are conditional on
+return.
+\end{boundarybox}
+
+\noindent\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.48\textwidth}X}
+\toprule
+Question & Status in these files \\
+\midrule
+Are all 256 returned target words below $q$? & Proved when the destination region fits. \\
+Are bytes outside the target block unchanged? & Proved, under the same premise. \\
+Is the finite consumer counter monotone and at most 256? & Proved, conditional on return. \\
+Does the extracted Keccak-f transition and finite SHAKE128 path match the checked model? & Yes, through the exact finite-stream theorems. \\
+Do the buffers form the intended finite XOF stream? & Yes, for the prelude and successive blocks covered by the leaf-stream contracts. \\
+Do the actual whole leaves terminate under \code{uniform_progress_prefix} and the exact bounds? & Yes, with probability one. \\
+Are coefficients uniform or independent? & Not proved. \\
+Does rejection sampling terminate for every seed and nonce? & No universal progress certificate is proved. \\
+Do the fixed mode-2 uniform callers terminate under bundled certificates? &
+Yes, in the separate parent refinement.  The full mode-2 parent is not proved
+lossless. \\
+Is the leaf equivalent to an ideal sampler? & Not proved. \\
+Are seed offsets in bounds and nonces unique? & Not proved. \\
+Are physical memory accesses safe and destinations separated? & Not represented by these value-array Hoare theorems. \\
+Is constant-time or speculative-execution security established? & Not proved by range and frame properties. \\
+Is a HAETAE security-game advantage bounded? & Not addressed. \\
+\bottomrule
+\end{tabularx}
+
+In particular, the capacity premise constrains the output base, not the seed
+offset.  The theorems also do not prove that different callers use distinct
+nonces or that the low-16-bit nonce encoding provides the paper's intended
+domain separation.  Those are caller-composition and sampler-semantics
+obligations.
+
+\section{Translation Back to the EasyCrypt Files}
+
+The three principal artifacts are:
+\begin{center}
+\footnotesize
+\code{easycrypt/extract/keygen-sampler-callers/KeygenSamplerCallersTarget.ec}\\
+\code{easycrypt/spec/KeygenUniformXofLeafSpec.ec}\\
+\code{easycrypt/refinement/TargetKeygenUniformXofLeaf.ec}
+\end{center}
+
+The generated target contains the programs.  The authored specification
+contains only mathematical predicates and their array lemmas.  The authored
+refinement applies those predicates to the generated programs.
+
+\begin{center}
+\small
+\begin{tabularx}{0.98\textwidth}{>{\raggedright\arraybackslash}p{0.37\textwidth}
+                                  >{\raggedright\arraybackslash}p{0.33\textwidth}X}
+\toprule
+Mathematical object & EasyCrypt name & Source lines \\
+\midrule
+$q=64513$, $n=256$ & \code{uniform_q_i}, \code{uniform_poly_words_i} & 9--10 \\
+Finite endpoint and progress certificate & \code{uniform_sufficient_prefix}, \code{uniform_progress_prefix} & 25--52 \\
+Polynomial byte interval & \code{in_poly_bytes} & 67 \\
+$\Frame_{2048}$, $\Frame_{8192}$ & \code{frame8192}, \code{frame32768} & 70--82 \\
+$\Prefix_{2048}$, $\Prefix_{8192}$ & \code{bounded_prefix8192}, \code{bounded_prefix32768} & 84--92 \\
+Frame algebra and one-word frame step & \code{frame*_refl}, \code{frame*_trans}, \code{frame*_set32} & 94--143 \\
+Equation~\eqref{eq:no-wrap} & \code{base_counter_no_wrap*} & 150--169 \\
+Machine-indexed frame step & \code{frame*_set32_word} & 170--207 \\
+Prefix initialization and extension & \code{bounded_prefix*_zero}, \code{bounded_prefix*_succ}, \code{bounded_prefix*_set32_word} & 144--147; 208--291 \\
+Certificate helper facts & \code{uniform_progress_prefix_*} & 462--510 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Here an asterisk denotes the separate 8192-byte and 32768-byte versions; it
+is explanatory notation, not part of an EasyCrypt identifier.
+
+\begin{center}
+\small
+\begin{tabularx}{0.98\textwidth}{>{\raggedright\arraybackslash}p{0.38\textwidth}
+                                  >{\raggedright\arraybackslash}p{0.36\textwidth}X}
+\toprule
+Statement in this document & EasyCrypt lemmas & Refinement lines \\
+\midrule
+Theorem~\ref{thm:counter} & \code{consume2048_counter}, \code{consume8192_counter} & 218; 246 \\
+Theorem~\ref{thm:consumer-frame} & \code{consume2048_frame}, \code{consume8192_frame} & 274; 324 \\
+Theorem~\ref{thm:consumer-range} & \code{consume2048_range}, \code{consume8192_range} & 374; 429 \\
+Unconditional finite-consumer termination & \code{uniform_consume2048_ll}, \code{uniform_consume8192_ll} & 1960; 2000 \\
+Exact finite whole-leaf streams & \code{uniform2048_leaf_stream}, \code{uniform8192_leaf_stream} & 2040; 2704 \\
+Theorem~\ref{thm:leaf-range} & \code{uniform2048_leaf_range}, \code{uniform8192_leaf_range} & 2687; 3351 \\
+Theorem~\ref{thm:leaf-frame} & \code{uniform2048_leaf_frame}, \code{uniform8192_leaf_frame} & 3368; 3403 \\
+Certificate-conditioned whole-leaf termination & \code{uniform2048_leaf_progress_ll}, \code{uniform8192_leaf_progress_ll} & 3438; 4047 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The generated-code correspondence is:
+\begin{center}
+\small
+\begin{tabularx}{0.98\textwidth}{>{\raggedright\arraybackslash}p{0.55\textwidth}X}
+\toprule
+Generated procedure or code block & Target lines \\
+\midrule
+SHAKE128 squeeze of 168 bytes & 657--689 \\
+8192-slot finite consumer, \code{__poly_uniform_consume} & 789--837 \\
+Seed-and-nonce initializer, \code{__kp_shake128_init_seedbuf} & 838--891 \\
+2048-slot finite consumer, \code{__kp_poly_uniform_consume_2048} & 946--991 \\
+8192-slot whole leaf, \code{_kp_poly_uniform_at_seedbuf_8192} & 1079--1159 \\
+2048-slot whole leaf, \code{_kp_poly_uniform_at_seedbuf_2048} & 1160--1242 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{Replaying the Machine-Checked Evidence}
+
+From the \code{haetae-ref-easycrypt/} directory, run
+\begin{center}
+\code{./scripts/verify-keygen-sampler-callers-proof.sh}
+\end{center}
+This gate checks pinned sources and extraction drift, compiles the generated
+target and the sampler specification/refinement manifest with
+\code{-no-eco}, and scans the authored theories for proof holes and axiom
+declarations.  It covers additional sampler-caller theories as well as the
+uniform-XOF pair discussed here.
+
+Build this document with two \LaTeX{} passes:
+\begin{quote}
+\begin{verbatim}
+cd haetae-ref-easycrypt/latex
+mkdir -p build
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenUniformXofLeaf.tex
+pdflatex -interaction=nonstopmode -halt-on-error \
+  -output-directory=build TargetKeygenUniformXofLeaf.tex
+\end{verbatim}
+\end{quote}
+The PDF is written to
+\code{build/TargetKeygenUniformXofLeaf.pdf}.
+
+\section*{Conclusion}
+
+The acceptance guard makes every stored candidate a canonical residue below
+$q$, while the base-plus-counter index confines writes to one 256-word block.
+The current proof also follows the exact finite SHAKE128 stream through both
+whole leaves.  Their bounded consumers terminate unconditionally, and the
+actual leaves terminate with probability one under their explicit deterministic
+progress certificates.  Universal certificate existence, caller totality, and
+the probabilistic uniformity/independence bridge remain separate obligations
+for a complete HAETAE security argument; the fixed mode-2 callers and
+proof-only first-attempt prefix now have certificate-conditioned totality.
+
+\end{document}

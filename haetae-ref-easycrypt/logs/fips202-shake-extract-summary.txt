@@ -1,0 +1,22 @@
+HAETAE target FIPS202/SHAKE extraction verification
+Date (UTC): 2026-07-13T07:43:56Z
+Source: ../haetae-ref-jasmin/jasmin/fips202.jazz
+Dependency: ../haetae-ref-jasmin/jasmin/keccak.jinc
+Functions: fips202_shake128_jazz fips202_shake256_jazz
+Extraction model: barray
+FIPS202 source SHA-256: 415e7047659af83803475bf8da0c8458350c95c32d84b60761730f0b64b9c4bb
+Keccak dependency SHA-256: 32f8054b77282ab8e9a469117d7e28afb728bb5948ab2d3a6a7da56e2030a735
+Toolchain: manifests/toolchain.md
+
+PASS: target FIPS202/SHAKE extraction has zero regeneration drift (8 files)
+PASS compile Array24.ec
+PASS compile Array25.ec
+PASS compile Array5.ec
+PASS compile BArray192.ec
+PASS compile BArray200.ec
+PASS compile BArray40.ec
+PASS compile Fips202ShakeTarget.ec
+PASS compile WArray192.ec
+PASS proof-boundary scan
+2b42dacecafbdefd7baad2d2431b62a2c45297bb4ffe5558028448a4681c26ac  /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/easycrypt/extract/fips202/Fips202ShakeTarget.ec
+RESULT: PASS compiled=8 total=8 mode=-no-eco

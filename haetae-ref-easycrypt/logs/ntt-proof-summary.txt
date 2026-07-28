@@ -1,0 +1,18 @@
+HAETAE target NTT mathematical refinement verification
+Date (UTC): 2026-07-28T06:15:54Z
+Command: ./scripts/verify-ntt-proof.sh
+Toolchain: easycrypt=/home/hacker-code-j/.opam/easycrypt-5.2/bin/easycrypt; Why3 platform, version 1.8.0; max-provers=1
+Actual target: easycrypt/extract/ntt/HpolyTarget.ec
+Authored refinement: easycrypt/refinement/TargetNTTRefinement.ec
+Project NTT loop support: easycrypt/support/RefJasminNTTLoop.ec
+Imported NTT dependency directory: /home/hacker-code-j/Desktop/2026/HAETAE/kpqc-sig-haetae-jasmin-easycrypt/haetae-ref-easycrypt/../haetae-ntt-verify/easycrypt-ct
+
+PASS canonical source hash check
+PASS: target NTT extraction has zero regeneration drift (10 files)
+PASS imported proof support hash check (18 files)
+PASS byte-identical generated representations (3 files)
+PASS compile refinement/TargetNTTRefinement.ec attempts=1
+PASS proof-hole scan (no admit/abort proof commands)
+PASS authored axiom declaration scan (no declarations)
+RESULT: PASS compiled=1 total=1 mode=-no-eco
+Exit status: 0
