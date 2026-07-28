@@ -345,6 +345,12 @@ multiplication decodes to
 `KeygenM23SingularBoundary` names the initialization, butterfly,
 squared-magnitude, accumulator, and finish range obligations needed before
 that local result can be lifted through the FFT.
+`KeygenM23SingularIntegerSemantics` proves the corresponding local
+word-to-integer decoders for initialization, both complex-product terms, all
+four scalar butterfly outputs, squared magnitude, and one accumulator update,
+including the frame on every other entry.  These lemmas remain conditional on
+the named range premises and do not constitute an eight-stage safe-trace
+theorem.
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -355,8 +361,23 @@ fixed-weight score `256`. `KeygenM23SingularZeroFinish` additionally proves
 that the actual selector and finish pipeline returns `120` from a zero
 256-word accumulator, including after its clear operation. This is not an
 assertion that the preceding FFT accumulation stays zero. The detailed
-boundary and the remaining sound bridge are in
+`KeygenM23SingularTieRegression` further proves an already-selected equal-value
+finish vector for which the implementation score `375000` satisfies the
+machine guard while the paper fixed-weight score `800000` exceeds it.  It does
+not assert FFT reachability.  The implementation rule is retained for
+compatibility; if such a tie is reachable, changing the rule may alter a
+retry-selected key pair and requires a coordinated specification and vector
+update.  The detailed boundary and the remaining sound bridge are in
 [`15-target-keygen-singular-numeric-boundary.md`](15-target-keygen-singular-numeric-boundary.md).
+
+`KeygenM23ComplexReal` supplies the transparent real-pair complex algebra,
+squared norm, and coordinate-error laws needed by a later FFT recurrence.
+`KeygenM23FFTTableCertificate` proves that the actual extracted permutation
+table is `bsrev 8` at all 256 indices and that all 512 signed root coordinates
+lie in `[-65536,65536]`.  These are structural/range facts, not a primitive
+root, ideal-coordinate rounding, DFT schedule, or global error theorem.  The
+scaffold and compatibility decision are summarized in
+[`16-target-keygen-singular-analytic-scaffold.md`](16-target-keygen-singular-analytic-scaffold.md).
 
 ### Actual parent with an immutable first-attempt trace
 
@@ -421,12 +442,12 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 26 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 30 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=26 total=26 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=30 total=30 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -438,8 +459,9 @@ scans. That run includes the bound-18 inverse theorems used above.
 The verified milestone reaches exact word-level finalization, canonical
 reduction, the abstract HAETAE coefficient decomposition, and exact
 machine-word semantics plus totality for the actual fixed-mode singular/FFT
-call. It also includes the conditional Q16 decoder, explicit range contracts,
-and the exact tied-zero finish discrepancy. It relates the actual
+call. It also includes the conditional Q16 decoder, local signed-integer
+kernel decoders, explicit range contracts, the exact tied-zero finish
+discrepancy, and a guard-crossing equal-value finish regression. It relates the actual
 fixed-parameter `_keypair_full_m23` result to
 a peeled first-attempt mirror and proves exact semantic facts about that
 mirror's immutable first trace. It does **not** establish:

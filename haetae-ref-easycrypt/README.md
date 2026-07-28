@@ -35,7 +35,14 @@ boundary proves the exact Q16 multiplication decoder under its signed-fit
 premise, names the remaining overflow obligations, and proves that a zero
 256-word accumulator produces score `120` through the implementation's actual
 selector and finish pipeline rather than the paper's fixed-weight score
-`256`. A fixed-mode relational
+`256`. A new analytic scaffold adds a transparent real-pair complex arithmetic
+library, exact bit-reversal and signed root-table range facts for the extracted
+constants, local signed-integer decoders for the Q16 butterfly and accumulator
+kernels, and an already-selected equal-value finish regression whose
+implementation and paper scores fall on opposite sides of the mode-2 guard.
+Those results remain conditional/local: they do not prove the root table's
+ideal coordinates, an eight-stage safe trace, a DFT identity, or global error
+and non-overflow. A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
 packed key arrays, and records that evaluator result together with the exact
@@ -437,7 +444,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 26 authored
+hashes. Its current summary passes all 30 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -452,8 +459,14 @@ with that evaluator, prove the exact unsigned-bound characterization, preserve
 equality of the eventual packed outputs, and retain the residual retry loop
 plus both packing calls. The numerical boundary additionally proves the local
 Q16 decoder under explicit fit premises, records the signed range obligations,
-and checks the tied-zero selector-and-finish implementation score `120`
-against the paper's fixed-weight score `256`.
+decodes the local scalar butterfly and accumulator kernels, checks the
+tied-zero selector-and-finish implementation score `120` against the paper's
+fixed-weight score `256`, and proves a separate equal-value finish regression
+with implementation score `375000` and paper score `800000` around the
+machine bound `611098`. The extracted constants also have exact 8-bit
+bit-reversal contents and signed Q16 coordinate bounds, and a transparent
+real-pair complex theory supplies the algebra and coordinate-error laws for
+the later analytic proof.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
@@ -466,6 +479,8 @@ correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
 and
 [`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
+The incremental analytic surface and compatibility decision are recorded in
+[`docs/16-target-keygen-singular-analytic-scaffold.md`](docs/16-target-keygen-singular-analytic-scaffold.md).
 
 ## Baseline inputs
 

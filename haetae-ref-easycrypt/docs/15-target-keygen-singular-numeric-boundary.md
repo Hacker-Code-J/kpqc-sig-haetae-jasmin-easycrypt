@@ -63,6 +63,20 @@ obligations:
 These predicates are intentionally explicit.  Exact word totality does not
 imply that signed fixed-point decoding is valid.
 
+`easycrypt/spec/KeygenM23SingularIntegerSemantics.ec` discharges the local
+word-to-integer step once those premises are supplied.  Its compiled lemmas
+decode:
+
+- a rounded Q16 multiplication and an initialization product;
+- both rounded complex-product terms and all four scalar butterfly outputs;
+- one squared-magnitude expression;
+- one pointwise accumulator update; and
+- the frame of every other accumulator entry.
+
+These are local kernel lemmas.  They do not yet lift the array-indexed
+butterfly through eight stages or prove that the safety premises hold on an
+actual trace.
+
 ## Checked tie discrepancy
 
 The implementation does not assign weight 24 to exactly one fifth-ranked
@@ -90,14 +104,42 @@ the same result after the evaluator's actual clear operation. These theorems
 still make no claim that the five FFT accumulation passes leave the array
 zero.
 
-The finish logic therefore prevents an unconditional correspondence theorem
-between `mode2_singular_word` and the paper statistic without an explicit tie
-premise or resolution. A correspondence theorem must either:
+`easycrypt/spec/KeygenM23SingularTieRegression.ec` gives a separate
+finish-stage guard regression.  For five already-selected equal values it
+proves:
 
-1. assume a unique selected minimum;
-2. expose a multiplicity-dependent tie deficit; or
-3. follow a corrected implementation that applies the remainder adjustment
-   exactly once.
+```text
+implementation score = 375000
+paper fixed-weight score = 800000
+375000 <= 611098 < 800000
+```
+
+This demonstrates that the two policies can disagree on the mode-2 guard.
+The theorem deliberately does not assert that its selected entries are
+reachable from the preceding FFT and selector.
+
+The C reference, Jasmin source, and extracted evaluator all implement the same
+multiplicity-sensitive rule.  An unretained, one-off diagnostic over the
+retained 100-case KAT corpora observed no retained-minimum tie in modes 2, 3,
+or 5.  In the same diagnostic, a disposable mode-2 reference variant that
+assigned the remainder exactly once left all 100 response cases
+byte-identical; the response-file SHA-256 remained
+`8414c29dc5d24b548b748dfc4208796619877a7e2e7605da978a8875fa36951b`.
+Only the retained case counts and current response-file hash are reproducible
+from this workspace; the diagnostic itself is coverage evidence, not a proof
+that ties are unreachable.  Because a reachable guard-changing tie could alter
+the retry counter and therefore the generated key pair, the verified
+implementation behavior is retained here.  Changing it requires a coordinated
+algorithm/specification decision and refreshed compatibility vectors.
+
+The finish logic therefore prevents an unconditional correspondence theorem
+between `mode2_singular_word` and the paper statistic.  A future
+correspondence theorem must:
+
+1. preserve the current rule and expose its multiplicity-dependent tie
+   deficit, or assume a unique selected minimum; or
+2. follow a deliberately versioned implementation change that applies the
+   remainder adjustment exactly once.
 
 ## Range boundary
 
@@ -126,6 +168,19 @@ theorem needs one of:
 Machine acceptance cannot be used retrospectively to prove that earlier
 wrapped arithmetic was safe.
 
+## Analytic scaffold
+
+`easycrypt/spec/KeygenM23ComplexReal.ec` now supplies transparent real-pair
+complex arithmetic, conjugation, squared-norm, scaling, and coordinatewise
+error propagation.  `easycrypt/spec/KeygenM23FFTTableCertificate.ec` proves
+that the extracted 256-entry permutation table is exactly `bsrev 8` and that
+all 512 extracted signed root coordinates lie in `[-65536,65536]`.
+
+Those facts remove representation-level preliminaries, but they are not yet
+the analytic root-table certificate named below.  In particular, no theorem
+identifies an extracted coordinate with a rounded ideal root, constructs a
+primitive 512th root, or proves the odd-root DFT schedule.
+
 ## Sound next theorem
 
 With the current implementation, the strongest honest bridge has the shape
@@ -140,8 +195,9 @@ absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
 Relating that decoded-table score to the paper quantity additionally requires
-an axiom-free complex/odd-root DFT development, a certificate for every
-rounded root-table coordinate, and an explicit resolution of the tie defect.
+a primitive-root/odd-root DFT development over the checked complex scaffold,
+an ideal-coordinate rounding certificate for every root-table entry, and an
+explicit multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 
 Outer key-generation termination is a later probabilistic theorem.  The

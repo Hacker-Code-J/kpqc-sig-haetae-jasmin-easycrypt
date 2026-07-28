@@ -1,6 +1,6 @@
 # HAETAE Jasmin–EasyCrypt Verification Plan
 
-- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, a conditional Q16 decoder plus explicit numerical range contracts and a checked finish-tie discrepancy, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; root-table/real-spectral meaning and global error/non-overflow for the machine FFT and score, tie-policy resolution, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
+- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, conditional local Q16/integer kernel decoders, explicit numerical range contracts, extracted bit-reversal/root-coordinate bounds, a real-pair complex algebra scaffold, checked finish-tie discrepancies, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; ideal root-table/DFT meaning and global error/non-overflow for the machine FFT and score, a versioned tie-policy decision, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
 - **Implementation under verification:** `../haetae-ref-jasmin/`
@@ -105,20 +105,33 @@ claims.
   tied-minimum rule versus `256` under the paper's fixed weights;
   `KeygenM23SingularZeroFinish` carries the zero invariant through the actual
   selector and finish pipeline and obtains the same implementation score.
+  `KeygenM23SingularIntegerSemantics` decodes the local initialization,
+  scalar butterfly, squared-magnitude, and accumulator kernels under those
+  explicit range premises. `KeygenM23ComplexReal` provides transparent
+  real-pair complex algebra, norm, and coordinate-error laws without a
+  project-authored axiom. `KeygenM23FFTTableCertificate` proves that the
+  extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
+  coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
+  proves an already-selected equal-value finish case with scores `375000` and
+  `800000` on opposite sides of the `611098` guard; it does not prove FFT
+  reachability. The current multiplicity-sensitive implementation rule is
+  preserved because, if such a tie is reachable, changing its rejection
+  decision may change a retry-selected key pair.
   This is
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
-  termination, the root-table/real-spectral interpretation or global
-  error/non-overflow of the FFT and score, a resolution of the tie policy, or
+  termination, the ideal-root/real-spectral interpretation or global
+  error/non-overflow of the FFT and score, a versioned tie-policy change, or
   packing correctness. The gate checks source and support hashes,
   extraction drift, fresh `-no-eco`
   compilation of the current manifest, and hole/axiom/debug scans.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  certified root-table and real/spectral interpretation plus global
-  error/non-overflow facts for the exact singular-word evaluator, an explicit
-  tie-policy resolution, proof of acceptance and outer-retry termination,
+  ideal-coordinate certification and a real/spectral DFT interpretation plus
+  global error/non-overflow facts for the exact singular-word evaluator, an
+  explicit versioned tie-policy decision, proof of acceptance and
+  outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and
   safety. Universal certificate existence, rejection distributions,
   public-API key generation, modes 3 and 5, signing, verification, and
