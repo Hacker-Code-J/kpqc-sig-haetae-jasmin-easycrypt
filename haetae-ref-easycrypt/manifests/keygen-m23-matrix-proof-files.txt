@@ -5,6 +5,9 @@ spec/KeygenM23FinalizeSemantics.ec
 spec/KeygenM23FinalizeArraySemantics.ec
 spec/KeygenM23FinalizeHAETAEBridge.ec
 spec/KeygenM23SingularSpec.ec
+spec/KeygenM23FixedPointSemantics.ec
+spec/KeygenM23SingularBoundary.ec
+spec/KeygenM23SingularZeroFinish.ec
 spec/KeygenM23SingularFFTSpec.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec

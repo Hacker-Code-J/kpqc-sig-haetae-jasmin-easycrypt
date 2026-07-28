@@ -336,6 +336,28 @@ fixed-point FFT equals a real or complex DFT, establish numerical error or
 non-overflow bounds, identify the returned word with the paper's intended
 singular-value quantity, or prove that the bound is satisfied.
 
+### Fixed-point and finish-stage numerical boundary
+
+`KeygenM23FixedPointSemantics` proves that the extracted signed Q16
+multiplication decodes to
+`(x * y + 32768) %/ 65536` whenever the rounded result fits a signed
+32-bit word, together with its exact half-unit rounding-error interval.
+`KeygenM23SingularBoundary` names the initialization, butterfly,
+squared-magnitude, accumulator, and finish range obligations needed before
+that local result can be lifted through the FFT.
+
+The same boundary theory exposes a semantic discrepancy in the finish logic:
+the implementation gives the remainder weight `24` to every selected entry
+tied at the minimum, whereas the paper's fixed allocation gives `24` to one
+entry and `58` to the other four. `zero_tie_finish_discrepancy` checks the
+already-selected five-zero case exactly: implementation score `120`, paper
+fixed-weight score `256`. `KeygenM23SingularZeroFinish` additionally proves
+that the actual selector and finish pipeline returns `120` from a zero
+256-word accumulator, including after its clear operation. This is not an
+assertion that the preceding FFT accumulation stays zero. The detailed
+boundary and the remaining sound bridge are in
+[`15-target-keygen-singular-numeric-boundary.md`](15-target-keygen-singular-numeric-boundary.md).
+
 ### Actual parent with an immutable first-attempt trace
 
 `easycrypt/refinement/TargetKeygenM23FullFirstAttempt.ec` defines
@@ -399,14 +421,14 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 23 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 26 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=23 total=23 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=26 total=26 mode=-no-eco` with exit status 0.
 
-The standalone NTT gate at `2026-07-23T20:40:27Z` separately passed source and
+The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
 identity checks, fresh `TargetNTTRefinement.ec` compilation, and hole/axiom
 scans. That run includes the bound-18 inverse theorems used above.
@@ -416,15 +438,18 @@ scans. That run includes the bound-18 inverse theorems used above.
 The verified milestone reaches exact word-level finalization, canonical
 reduction, the abstract HAETAE coefficient decomposition, and exact
 machine-word semantics plus totality for the actual fixed-mode singular/FFT
-call. It also relates the actual fixed-parameter `_keypair_full_m23` result to
+call. It also includes the conditional Q16 decoder, explicit range contracts,
+and the exact tied-zero finish discrepancy. It relates the actual
+fixed-parameter `_keypair_full_m23` result to
 a peeled first-attempt mirror and proves exact semantic facts about that
 mirror's immutable first trace. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- an analytic real/complex or spectral interpretation for the exact
-  `_singular_full` evaluator, numerical FFT error bounds, a non-overflow/range
-  theorem, or identity with the paper's intended singular-value quantity;
+- a root-table/real-complex DFT interpretation for the exact
+  `_singular_full` evaluator, global numerical FFT error bounds, a
+  non-overflow/range theorem for all accumulations, a resolution of the finish
+  tie policy, or identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the
   security model;

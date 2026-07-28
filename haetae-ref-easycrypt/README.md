@@ -30,7 +30,12 @@ coefficient decomposition, and totality, and composes these after the checked
 sampler in a proof-only observer. The actual fixed-parameter `_singular_full`
 now has an exact `W32`/`W64` evaluator and a totality theorem covering the
 bit-reversal initialization, all eight FFT stages, five squared-magnitude
-accumulations, and the five-entry finish computation. A fixed-mode relational
+accumulations, and the five-entry finish computation. A separate numerical
+boundary proves the exact Q16 multiplication decoder under its signed-fit
+premise, names the remaining overflow obligations, and proves that a zero
+256-word accumulator produces score `120` through the implementation's actual
+selector and finish pipeline rather than the paper's fixed-weight score
+`256`. A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
 packed key arrays, and records that evaluator result together with the exact
@@ -192,6 +197,8 @@ Current limitations are recorded in
 [`docs/02-existing-proof-audit.md`](docs/02-existing-proof-audit.md). The
 security dependency chain is detailed in
 [`docs/03-security-premise-audit.md`](docs/03-security-premise-audit.md).
+The singular numerical boundary is detailed in
+[`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
 
 The full roadmap is in [`PLAN.md`](PLAN.md).
 
@@ -430,7 +437,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 23 authored
+hashes. Its current summary passes all 26 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -443,17 +450,22 @@ an exact word evaluator and totality theorem, then peel the first actual
 `_keypair_full_m23` iteration into a result-carried mirror, identify its score
 with that evaluator, prove the exact unsigned-bound characterization, preserve
 equality of the eventual packed outputs, and retain the residual retry loop
-plus both packing calls.
+plus both packing calls. The numerical boundary additionally proves the local
+Q16 decoder under explicit fit premises, records the signed range obligations,
+and checks the tied-zero selector-and-finish implementation score `120`
+against the paper's fixed-weight score `256`.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-an analytic real/spectral interpretation or error bound for the machine FFT
-and score, first-attempt acceptance, residual-loop termination, packing
+the root-table/complex DFT correspondence, global FFT error or accumulator
+non-overflow, first-attempt acceptance, residual-loop termination, packing
 semantics, pointer aliasing or separation safety, or full key-generation
 correctness. See
-[`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md).
+[`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
+and
+[`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
 
 ## Baseline inputs
 

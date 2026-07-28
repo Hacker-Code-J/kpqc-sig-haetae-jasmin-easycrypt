@@ -1,6 +1,6 @@
 # HAETAE Jasmin–EasyCrypt Verification Plan
 
-- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; analytic real/spectral meaning for the machine FFT and score, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
+- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, a conditional Q16 decoder plus explicit numerical range contracts and a checked finish-tie discrepancy, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; root-table/real-spectral meaning and global error/non-overflow for the machine FFT and score, tie-policy resolution, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
 - **Implementation under verification:** `../haetae-ref-jasmin/`
@@ -98,17 +98,27 @@ claims.
   accumulated machine squared magnitudes, and the five-entry finish logic; a
   separate theorem proves probability-one termination for the fixed
   `(3, 2, 5, 58, 24)` call. The trace guard is equivalent to
-  `W64.to_uint(score) <= 611098`. This is partial correctness: it neither
+  `W64.to_uint(score) <= 611098`. `KeygenM23FixedPointSemantics` proves the
+  exact local Q16 decoder and rounding interval under a signed-fit premise;
+  `KeygenM23SingularBoundary` records the remaining range obligations and
+  proves that five selected zeros score `120` under the implementation's
+  tied-minimum rule versus `256` under the paper's fixed weights;
+  `KeygenM23SingularZeroFinish` carries the zero invariant through the actual
+  selector and finish pipeline and obtains the same implementation score.
+  This is
+  partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
-  termination, an analytic real/spectral interpretation of the FFT and score,
-  or packing correctness. The gate checks source and support hashes,
+  termination, the root-table/real-spectral interpretation or global
+  error/non-overflow of the FFT and score, a resolution of the tie policy, or
+  packing correctness. The gate checks source and support hashes,
   extraction drift, fresh `-no-eco`
   compilation of the current manifest, and hole/axiom/debug scans.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  analytic real/spectral interpretation and error/range facts for the exact
-  singular-word evaluator, proof of acceptance and outer-retry termination,
+  certified root-table and real/spectral interpretation plus global
+  error/non-overflow facts for the exact singular-word evaluator, an explicit
+  tie-policy resolution, proof of acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and
   safety. Universal certificate existence, rejection distributions,
   public-API key generation, modes 3 and 5, signing, verification, and
