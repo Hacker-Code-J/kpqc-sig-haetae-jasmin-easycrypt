@@ -68,18 +68,26 @@ axiom or proof-hole command is used.
 
 ## Deliberate boundary
 
-The target table is now related to the exact root schedule, but the rounded
-machine evaluator is not yet related to `ideal_fft256`. The next sound bridge
-must:
+The target table is now related to the exact root schedule. The follow-on
+`KeygenM23SingularFFTInitBridge` consumes that result and closes the complete
+decoded initialization permutation, signed raw-product safety under
+coefficient magnitude at most two, and a whole-vector `1/65536` error bound
+against the exact bit-reversed twisted input.
 
-1. define a decoded array-level trace for initialization and all eight FFT
-   stages;
-2. prove the signed-fit and nonoverflow premises for that trace and the five
+The rounded butterfly stages are not yet related to `ideal_fft256`. The next
+sound bridge must:
+
+1. prove a decoded and framed butterfly theorem and lift it through all eight
+   FFT stages;
+2. prove the signed-fit and nonoverflow premises for those stages and the five
    squared-magnitude passes;
 3. propagate the certified root and local multiplication errors to a global
    bound against `ideal_fft256`; and
 4. carry that bound through accumulation, selection, and the retained
    multiplicity-sensitive finish rule before relating rejection decisions.
+
+The completed initialization endpoint is detailed in
+[`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
 
 ## Verification
 

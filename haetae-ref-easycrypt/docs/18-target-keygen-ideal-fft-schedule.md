@@ -66,10 +66,11 @@ extracted-root-coordinate rounding dependency.
 
 This milestone does not prove that:
 
-- `KeygenM23SingularFFTSpec` or the extracted Jasmin evaluator equals
-  `ideal_fft256`;
-- every machine multiplication, butterfly, squared magnitude, or accumulator
-  stays within its signed range;
+- the complete `KeygenM23SingularFFTSpec` or extracted Jasmin evaluator is
+  related to `ideal_fft256` beyond the separately proved initialization
+  endpoint;
+- every rounded butterfly, squared magnitude, or accumulator stays within its
+  signed range;
 - the eight rounded stages have a stated global error bound; or
 - the machine score or rejection guard agrees with an ideal score or guard.
 
@@ -87,8 +88,8 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. define and prove the signed-fit and nonoverflow conditions for the complete
-   eight-stage machine trace and all five squared-magnitude passes;
+1. extend the proved initialization safety and error invariant through the
+   complete eight-stage machine trace and all five squared-magnitude passes;
 2. propagate the certified root-coordinate and local multiplication errors
    from that safe trace to
    `ideal_fft256`;
@@ -99,6 +100,8 @@ The remaining analytic chain is:
 
 The root-table milestone is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
+The decoded initialization milestone is detailed in
+[`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
 
 ## Verification
 

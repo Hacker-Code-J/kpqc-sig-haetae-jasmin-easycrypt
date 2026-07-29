@@ -84,13 +84,16 @@ computes `dft256`, and its twisted-input form computes `odd_dft256`.
 `KeygenM23RootTableTargetBridge` now close the table dependency: every
 extracted root coordinate is the unique nearest Q16 encoding of the
 corresponding exact `ideal_root j` coordinate, with strict error below
-`1/131072`. The exact-word machine evaluator is still not identified with the
-ideal transform.
+`1/131072`. `KeygenM23SingularFFTInitBridge` now closes the complete decoded
+initialization permutation, its signed-product safety for coefficient
+magnitude at most two, and its `1/65536` whole-vector ideal-input error. The
+rounded butterfly stages are still not identified with the ideal transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. lift the local decoder lemmas through an explicit eight-stage safe trace
-   and all five squared-magnitude passes;
+1. extend the proved decoded initialization invariant through a framed
+   rounded-butterfly theorem, an explicit eight-stage safe trace, and all five
+   squared-magnitude passes;
 2. propagate the certified coordinate and local multiplication errors through
    the FFT, accumulation, selection, and the current multiplicity-sensitive
    finish rule; and
@@ -98,6 +101,8 @@ The strongest sound next correspondence has the following dependency order:
 
 The certificate construction and target endpoint are detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
+The decoded initialization endpoint is detailed in
+[`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
 
 Coefficient bounds alone cannot prove the squared-magnitude accumulators safe:
 the numerical boundary already gives a valid high-energy example.  A complete

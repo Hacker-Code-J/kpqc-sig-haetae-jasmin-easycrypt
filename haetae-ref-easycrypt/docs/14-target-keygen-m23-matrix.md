@@ -454,12 +454,12 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 35 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 36 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=35 total=35 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=36 total=36 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -484,9 +484,10 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- that the fixed-point radix-2/bit-reversal machine schedule using the
-  now-certified rounded root table implements that ideal DFT for the exact
-  `_singular_full` evaluator, global numerical FFT error bounds, a
+- that the rounded butterfly stages of the fixed-point radix-2 machine
+  schedule implement that ideal DFT for the exact `_singular_full` evaluator,
+  beyond the now-proved initialization/bit-reversal endpoint; global numerical
+  FFT error bounds, a
   non-overflow/range theorem for all accumulations, a resolution of the finish
   tie policy, or identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete

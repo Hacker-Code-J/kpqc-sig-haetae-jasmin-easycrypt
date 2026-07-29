@@ -185,10 +185,15 @@ all 512 extracted signed root coordinates lie in `[-65536,65536]`.
 `KeygenM23RootTableTargetBridge` further prove that each of those extracted
 coordinates is the unique nearest Q16 encoding of the corresponding exact
 `ideal_root j` coordinate, with strict error below `1/131072`.
+`KeygenM23SingularFFTInitBridge` lifts these facts through the complete
+initialization fold: under coefficient magnitude at most two, all raw products
+fit signed `W32`, every destination and frame is exact, and the initialized
+vector is within `1/65536` coordinatewise of the exact bit-reversed twisted
+input.
 
 Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
-representation-level preliminaries. No theorem yet identifies the rounded
-fixed-point machine evaluator with the proved exact-complex schedule.
+initialization-level preliminaries. No theorem yet identifies the rounded
+butterfly stages with the proved exact-complex schedule.
 
 ## Sound next theorem
 
@@ -203,13 +208,15 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires a safe
-decoded-machine-trace and error relation that consumes the checked
-root-coordinate bound and exact schedule, plus an explicit
+Relating that decoded-table score to the ideal quantity now requires extending
+the checked initialization invariant through a safe decoded butterfly trace
+and the exact schedule, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
+The initialization endpoint is detailed in
+[`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

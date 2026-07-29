@@ -1,6 +1,6 @@
 # HAETAE Jasmin–EasyCrypt Verification Plan
 
-- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, conditional local Q16/integer kernel decoders, explicit numerical range contracts, extracted bit-reversal/root-coordinate bounds, a real-pair complex algebra scaffold, a constructive 512th root with a checked dyadic primitivity criterion and abstract odd-root DFT/twist identity, a proof that the pure exact-complex bit-reversed eight-stage schedule computes `dft256` and its twisted input computes `odd_dft256`, a strict unique-nearest Q16 certificate for all 256 extracted root pairs, checked finish-tie discrepancies, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; the decoded fixed-point machine-to-ideal-schedule bridge, global error/non-overflow for the machine FFT and score, a versioned tie-policy decision, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
+- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, conditional local Q16/integer kernel decoders, explicit numerical range contracts, extracted bit-reversal/root-coordinate bounds, a real-pair complex algebra scaffold, a constructive 512th root with a checked dyadic primitivity criterion and abstract odd-root DFT/twist identity, a proof that the pure exact-complex bit-reversed eight-stage schedule computes `dft256` and its twisted input computes `odd_dft256`, a strict unique-nearest Q16 certificate for all 256 extracted root pairs, a complete decoded initialization/bit-reversal bridge with signed-product safety and a `1/65536` ideal-input error bound for coefficient magnitude at most two, checked finish-tie discrepancies, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; the rounded butterfly/eight-stage machine-to-ideal bridge, global error/nonoverflow for the complete machine FFT and score, a versioned tie-policy decision, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
 - **Implementation under verification:** `../haetae-ref-jasmin/`
@@ -119,8 +119,13 @@ claims.
   `KeygenM23RootTableRounding`, and `KeygenM23RootTableTargetBridge` prove
   that all 256 extracted root pairs are the unique nearest Q16 encodings of
   the corresponding `ideal_root` coordinates, with strict coordinate error
-  below `1/131072`. The fixed-point machine evaluator is not yet identified
-  with that schedule.
+  below `1/131072`. `KeygenM23SingularFFTInitBridge` then decodes all 256
+  complex-cell updates (512 word stores) in the initialization fold, proves
+  every raw initialization product signed-safe under coefficient magnitude at
+  most two, frames all other bit-reversed cells at each step, and gives
+  whole-vector error at most `1/65536` against the exact bit-reversed twisted
+  input. The rounded butterfly stages are not yet identified with the ideal
+  schedule.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -132,17 +137,18 @@ claims.
   This is
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
-  termination, the fixed-point machine-to-ideal schedule bridge, global
-  error/non-overflow of the FFT and score, a versioned
+  termination, the rounded butterfly/eight-stage machine-to-ideal schedule
+  bridge, global error/nonoverflow of the complete FFT and score, a versioned
   tie-policy change, or packing correctness. The gate checks source and
   support hashes, extraction drift, fresh `-no-eco`
   compilation of the current manifest, and hole/axiom/debug scans.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  a safe decoded-machine-trace relation using the certified root coordinates
-  and proved ideal schedule plus global error/non-overflow facts for the exact
-  singular-word evaluator, an explicit versioned tie-policy decision, proof of
+  a decoded and framed safe-butterfly trace extending the proved initialization
+  invariant through the exact ideal schedule, plus global error/nonoverflow
+  facts for the exact singular-word evaluator, an explicit versioned
+  tie-policy decision, proof of
   acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and
   safety. Universal certificate existence, rejection distributions,

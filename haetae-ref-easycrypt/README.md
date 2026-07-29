@@ -49,9 +49,13 @@ defined `dft256`, and that twisting its input computes `odd_dft256`.
 Three checked certificate theories now prove that every signed coordinate in
 the extracted `jfft_roots` table is the unique nearest Q16 encoding of the
 corresponding exact `ideal_root j` coordinate, with strict error below
-`1/131072`. The proof still does not identify the fixed-point machine
-evaluator with the exact schedule, establish an eight-stage safe trace, or
-prove global error and non-overflow. A fixed-mode relational
+`1/131072`. A decoded initialization bridge now proves all 256 complex-cell
+updates (512 word stores) and frames, discharges their signed products under
+coefficient magnitude at most two, and bounds the initialized vector within
+`1/65536` of the exact bit-reversed twisted input. The proof still does not
+identify the rounded butterfly stages with the exact schedule, establish an
+eight-stage safe trace, or prove global FFT/accumulator error and nonoverflow.
+A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
 packed key arrays, and records that evaluator result together with the exact
@@ -453,7 +457,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 35 authored
+hashes. Its current summary passes all 36 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -480,14 +484,17 @@ exact-complex bit-reversed eight-stage schedule computes `dft256`, and that
 the twisted-input schedule computes `odd_dft256`. The extracted-root
 certificate additionally proves all 256 actual root pairs have the unique
 nearest Q16 coordinates of that exact schedule, with strict per-coordinate
-error below `1/131072`.
+error below `1/131072`. The decoded initializer theorem additionally proves
+the complete target write permutation, initialization signed safety under the
+explicit coefficient bound two, and a whole-vector `1/65536` error bound
+against the ideal bit-reversed twisted input.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the fixed-point machine-schedule correspondence to the ideal DFT, global FFT
-error or accumulator non-overflow, first-attempt
+the rounded butterfly/eight-stage machine-schedule correspondence to the ideal
+DFT, global FFT error or accumulator nonoverflow, first-attempt
 acceptance, residual-loop termination, packing semantics, pointer aliasing or
 separation safety, or full key-generation correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
@@ -501,6 +508,8 @@ the exact-complex schedule theorem is detailed in
 [`docs/18-target-keygen-ideal-fft-schedule.md`](docs/18-target-keygen-ideal-fft-schedule.md);
 and the extracted-table rounding certificate is detailed in
 [`docs/19-target-keygen-root-table-rounding.md`](docs/19-target-keygen-root-table-rounding.md).
+The decoded initialization and ideal-input error bridge is detailed in
+[`docs/20-target-keygen-fft-initialization-bridge.md`](docs/20-target-keygen-fft-initialization-bridge.md).
 
 ## Baseline inputs
 

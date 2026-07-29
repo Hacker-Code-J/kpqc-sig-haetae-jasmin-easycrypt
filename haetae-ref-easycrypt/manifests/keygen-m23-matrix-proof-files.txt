@@ -18,6 +18,7 @@ spec/KeygenM23SingularTieRegression.ec
 spec/KeygenM23SingularFFTSpec.ec
 spec/KeygenM23SingularIntegerSemantics.ec
 spec/KeygenM23FFTTableCertificate.ec
+spec/KeygenM23SingularFFTInitBridge.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec
