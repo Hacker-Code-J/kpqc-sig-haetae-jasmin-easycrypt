@@ -375,9 +375,17 @@ squared norm, and coordinate-error laws needed by a later FFT recurrence.
 `KeygenM23FFTTableCertificate` proves that the actual extracted permutation
 table is `bsrev 8` at all 256 indices and that all 512 signed root coordinates
 lie in `[-65536,65536]`.  These are structural/range facts, not a primitive
-root, ideal-coordinate rounding, DFT schedule, or global error theorem.  The
-scaffold and compatibility decision are summarized in
-[`16-target-keygen-singular-analytic-scaffold.md`](16-target-keygen-singular-analytic-scaffold.md).
+root, ideal-coordinate rounding, machine DFT schedule, or global error
+theorem. `KeygenM23IdealRootDFT` separately constructs the exact
+lower-half-plane root and proves the odd-root coefficient-twist identity.
+`KeygenM23IdealFFTSchedule` proves that a pure exact-complex bit-reversed
+eight-stage schedule computes `dft256`, and that its twisted-input form
+computes `odd_dft256`. Neither ideal theory identifies the rounded table or
+fixed-point evaluator with that schedule. The scaffold and compatibility
+decision are summarized in
+[`16-target-keygen-singular-analytic-scaffold.md`](16-target-keygen-singular-analytic-scaffold.md);
+the schedule theorem is detailed in
+[`18-target-keygen-ideal-fft-schedule.md`](18-target-keygen-ideal-fft-schedule.md).
 
 ### Actual parent with an immutable first-attempt trace
 
@@ -442,12 +450,12 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 31 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 32 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=31 total=31 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=32 total=32 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -466,15 +474,17 @@ fixed-parameter `_keypair_full_m23` result to
 a peeled first-attempt mirror and proves exact semantic facts about that
 mirror's immutable first trace. The analytic surface also constructs the
 lower-half-plane 512th root, checks its dyadic primitivity criterion, defines
-the abstract odd-root DFT, and proves its coefficient-twist identity. It does
-**not** establish:
+the abstract odd-root DFT, proves its coefficient-twist identity, and proves
+that the pure exact-complex bit-reversed eight-stage schedule computes that
+DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- that the rounded root table and radix-2/bit-reversal schedule implement that
-  ideal DFT for the exact `_singular_full` evaluator, global numerical FFT error bounds, a
-  non-overflow/range theorem for all accumulations, a resolution of the finish
-  tie policy, or identity with the paper's intended singular-value quantity;
+- that the rounded root table and fixed-point radix-2/bit-reversal machine
+  schedule implement that ideal DFT for the exact `_singular_full` evaluator,
+  global numerical FFT error bounds, a non-overflow/range theorem for all
+  accumulations, a resolution of the finish tie policy, or identity with the
+  paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the
   security model;

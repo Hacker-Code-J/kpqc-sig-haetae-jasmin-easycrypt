@@ -65,14 +65,19 @@ to the initialization twist `omega512^j` followed by the ordinary 256-point
 DFT kernel `(omega512^2)^(k*j)`.  The exported `odd_dft256_twist` theorem is
 stated for `0 <= k`; its finite sum supplies `0 <= j < 256`.  This establishes
 the ideal algebraic factorization that the C and Jasmin schedule is intended
-to realize; it does not yet establish that machine correspondence.
+to realize; it does not establish that machine correspondence.
 
 ## Deliberate boundary
 
-This milestone does not yet prove that:
+The follow-on `KeygenM23IdealFFTSchedule` theory now proves that a pure
+exact-complex, bit-reversed, eight-stage radix-2 schedule computes `dft256`,
+and that its twisted-input form computes `odd_dft256`. Neither theory proves
+that the rounded machine evaluator is that ideal schedule.
+
+The remaining boundary is that no theorem yet proves:
 
 - an extracted Q16 coordinate is the rounded coordinate of `ideal_root j`;
-- the exact radix-2 array schedule and bit reversal compute the ideal DFT;
+- the extracted or exact-word machine evaluator equals `ideal_fft256`;
 - machine multiplications stay in their signed ranges;
 - accumulated fixed-point error stays within a stated bound; or
 - the machine rejection guard agrees with the ideal guard.
@@ -86,14 +91,16 @@ separate inputs to the next rounding proof.
 
 The remaining analytic chain is:
 
-1. prove the ideal radix-2 and bit-reversal schedule identity;
-2. certify every extracted root coordinate as the intended Q16 rounding, with
+1. certify every extracted root coordinate as the intended Q16 rounding, with
    a coordinate error bound;
-3. lift the local integer decoders through the eight-stage safe trace and all
+2. lift the local integer decoders through the eight-stage safe trace and all
    five squared-magnitude passes;
-4. propagate error through accumulation, selection, and the retained
+3. propagate error through accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
-5. relate acceptance only outside the resulting error band.
+4. relate acceptance only outside the resulting error band.
+
+The exact schedule proof is detailed in
+[`18-target-keygen-ideal-fft-schedule.md`](18-target-keygen-ideal-fft-schedule.md).
 
 ## Verification
 

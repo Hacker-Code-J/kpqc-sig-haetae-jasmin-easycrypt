@@ -75,23 +75,23 @@ rather than an incidental proof patch.
 
 ## Remaining analytic chain
 
-`KeygenM23IdealRootDFT` now closes the first dependency: it constructs the
-lower-half-plane 512th root, checks its dyadic primitivity criterion, defines
-the ideal odd-root DFT, and checks the algebraic coefficient-twist identity.
-It deliberately does not identify the machine schedule or rounded table with
-that transform.
+`KeygenM23IdealRootDFT` constructs the lower-half-plane 512th root, checks its
+dyadic primitivity criterion, defines the ideal odd-root DFT, and checks the
+algebraic coefficient-twist identity. `KeygenM23IdealFFTSchedule` now closes
+the next ideal dependency: its bit-reversed eight-stage exact-complex schedule
+computes `dft256`, and its twisted-input form computes `odd_dft256`. These
+theories deliberately do not identify the rounded table or exact-word machine
+evaluator with that transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. prove that the ideal radix-2 schedule and bit reversal compute the defined
-   odd-root DFT;
-2. prove that every extracted root coordinate is the intended Q16 rounding,
+1. prove that every extracted root coordinate is the intended Q16 rounding,
    with a coordinate error bound;
-3. lift the local decoder lemmas through an explicit eight-stage safe trace
+2. lift the local decoder lemmas through an explicit eight-stage safe trace
    and all five squared-magnitude passes;
-4. propagate the coordinate errors through the FFT, accumulation, selection,
+3. propagate the coordinate errors through the FFT, accumulation, selection,
    and the current multiplicity-sensitive finish rule; and
-5. relate acceptance only outside the resulting numerical error band.
+4. relate acceptance only outside the resulting numerical error band.
 
 Coefficient bounds alone cannot prove the squared-magnitude accumulators safe:
 the numerical boundary already gives a valid high-energy example.  A complete

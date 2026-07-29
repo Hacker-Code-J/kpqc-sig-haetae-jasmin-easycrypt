@@ -175,16 +175,18 @@ complex arithmetic, conjugation, squared-norm, scaling, and coordinatewise
 error propagation. `easycrypt/spec/KeygenM23IdealRootDFT.ec` constructively
 selects the lower-half-plane 512th root, checks its dyadic primitivity
 criterion, defines the abstract odd-root DFT, and proves its coefficient-twist
-identity.
+identity. `easycrypt/spec/KeygenM23IdealFFTSchedule.ec` proves that the pure
+exact-complex bit-reversed eight-stage schedule computes `dft256`, and that
+the same schedule on the twisted input computes `odd_dft256`.
 `easycrypt/spec/KeygenM23FFTTableCertificate.ec` proves
 that the extracted 256-entry permutation table is exactly `bsrev 8` and that
 all 512 extracted signed root coordinates lie in `[-65536,65536]`.
 
-Those facts remove the exact-root and representation-level preliminaries, but
-they are not yet the analytic root-table certificate named below. In
-particular, no theorem identifies an extracted coordinate with a rounded ideal
-root or proves that the machine radix-2 and bit-reversal schedule computes the
-defined odd-root DFT.
+Those facts remove the exact-root, ideal-schedule, and representation-level
+preliminaries, but they are not yet the analytic root-table certificate named
+below. In particular, no theorem identifies an extracted coordinate with a
+rounded ideal root or identifies the rounded fixed-point machine evaluator
+with the proved exact-complex schedule.
 
 ## Sound next theorem
 
@@ -200,8 +202,8 @@ absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
 Relating that decoded-table score to the paper quantity additionally requires
-the machine-schedule identity for the checked ideal odd-root DFT, an
-ideal-coordinate rounding certificate for every root-table entry, and an
+an ideal-coordinate rounding certificate for every root-table entry, a safe
+decoded-machine-trace and error relation to the checked ideal schedule, and an
 explicit multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 

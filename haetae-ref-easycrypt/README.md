@@ -43,10 +43,12 @@ implementation and paper scores fall on opposite sides of the mode-2 guard.
 The analytic layer now also constructs a lower-half-plane 512th root from
 proved real square roots, checks its dyadic primitivity criterion, defines the
 abstract 256-point odd-root DFT, and proves its coefficient-twist identity
-without a project-authored axiom.
-It still does not identify the rounded root table or radix-2/bit-reversal
-machine schedule with that ideal transform, establish an eight-stage safe
-trace, or prove global error and non-overflow. A fixed-mode relational
+without a project-authored axiom. A pure exact-complex schedule theorem now
+proves that bit reversal followed by all eight radix-2 stages computes the
+defined `dft256`, and that twisting its input computes `odd_dft256`.
+It still does not identify the rounded root table or fixed-point machine
+evaluator with that exact schedule, establish an eight-stage safe trace, or
+prove global error and non-overflow. A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
 packed key arrays, and records that evaluator result together with the exact
@@ -448,7 +450,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 31 authored
+hashes. Its current summary passes all 32 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -470,23 +472,27 @@ with implementation score `375000` and paper score `800000` around the
 machine bound `611098`. The extracted constants also have exact 8-bit
 bit-reversal contents and signed Q16 coordinate bounds, and a transparent
 real-pair complex theory supplies the algebra and coordinate-error laws for
-the later analytic proof.
+the later analytic proof. The ideal layer separately proves that the pure
+exact-complex bit-reversed eight-stage schedule computes `dft256`, and that
+the twisted-input schedule computes `odd_dft256`.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the root-table/complex DFT correspondence, global FFT error or accumulator
-non-overflow, first-attempt acceptance, residual-loop termination, packing
-semantics, pointer aliasing or separation safety, or full key-generation
-correctness. See
+the rounded root-table and fixed-point machine-schedule correspondence to the
+ideal DFT, global FFT error or accumulator non-overflow, first-attempt
+acceptance, residual-loop termination, packing semantics, pointer aliasing or
+separation safety, or full key-generation correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
 and
 [`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
 The incremental analytic surface and compatibility decision are recorded in
 [`docs/16-target-keygen-singular-analytic-scaffold.md`](docs/16-target-keygen-singular-analytic-scaffold.md);
 the constructive root and ideal transform milestone is detailed in
-[`docs/17-target-keygen-ideal-root-dft.md`](docs/17-target-keygen-ideal-root-dft.md).
+[`docs/17-target-keygen-ideal-root-dft.md`](docs/17-target-keygen-ideal-root-dft.md);
+the exact-complex schedule theorem is detailed in
+[`docs/18-target-keygen-ideal-fft-schedule.md`](docs/18-target-keygen-ideal-fft-schedule.md).
 
 ## Baseline inputs
 
