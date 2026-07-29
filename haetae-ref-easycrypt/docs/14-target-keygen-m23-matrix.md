@@ -442,12 +442,12 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 30 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 31 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=30 total=30 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=31 total=31 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -464,12 +464,15 @@ kernel decoders, explicit range contracts, the exact tied-zero finish
 discrepancy, and a guard-crossing equal-value finish regression. It relates the actual
 fixed-parameter `_keypair_full_m23` result to
 a peeled first-attempt mirror and proves exact semantic facts about that
-mirror's immutable first trace. It does **not** establish:
+mirror's immutable first trace. The analytic surface also constructs the
+lower-half-plane 512th root, checks its dyadic primitivity criterion, defines
+the abstract odd-root DFT, and proves its coefficient-twist identity. It does
+**not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- a root-table/real-complex DFT interpretation for the exact
-  `_singular_full` evaluator, global numerical FFT error bounds, a
+- that the rounded root table and radix-2/bit-reversal schedule implement that
+  ideal DFT for the exact `_singular_full` evaluator, global numerical FFT error bounds, a
   non-overflow/range theorem for all accumulations, a resolution of the finish
   tie policy, or identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete

@@ -40,9 +40,13 @@ library, exact bit-reversal and signed root-table range facts for the extracted
 constants, local signed-integer decoders for the Q16 butterfly and accumulator
 kernels, and an already-selected equal-value finish regression whose
 implementation and paper scores fall on opposite sides of the mode-2 guard.
-Those results remain conditional/local: they do not prove the root table's
-ideal coordinates, an eight-stage safe trace, a DFT identity, or global error
-and non-overflow. A fixed-mode relational
+The analytic layer now also constructs a lower-half-plane 512th root from
+proved real square roots, checks its dyadic primitivity criterion, defines the
+abstract 256-point odd-root DFT, and proves its coefficient-twist identity
+without a project-authored axiom.
+It still does not identify the rounded root table or radix-2/bit-reversal
+machine schedule with that ideal transform, establish an eight-stage safe
+trace, or prove global error and non-overflow. A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
 packed key arrays, and records that evaluator result together with the exact
@@ -444,7 +448,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 30 authored
+hashes. Its current summary passes all 31 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -480,7 +484,9 @@ correctness. See
 and
 [`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
 The incremental analytic surface and compatibility decision are recorded in
-[`docs/16-target-keygen-singular-analytic-scaffold.md`](docs/16-target-keygen-singular-analytic-scaffold.md).
+[`docs/16-target-keygen-singular-analytic-scaffold.md`](docs/16-target-keygen-singular-analytic-scaffold.md);
+the constructive root and ideal transform milestone is detailed in
+[`docs/17-target-keygen-ideal-root-dft.md`](docs/17-target-keygen-ideal-root-dft.md).
 
 ## Baseline inputs
 

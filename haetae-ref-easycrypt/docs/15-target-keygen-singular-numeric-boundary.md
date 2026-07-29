@@ -172,14 +172,19 @@ wrapped arithmetic was safe.
 
 `easycrypt/spec/KeygenM23ComplexReal.ec` now supplies transparent real-pair
 complex arithmetic, conjugation, squared-norm, scaling, and coordinatewise
-error propagation.  `easycrypt/spec/KeygenM23FFTTableCertificate.ec` proves
+error propagation. `easycrypt/spec/KeygenM23IdealRootDFT.ec` constructively
+selects the lower-half-plane 512th root, checks its dyadic primitivity
+criterion, defines the abstract odd-root DFT, and proves its coefficient-twist
+identity.
+`easycrypt/spec/KeygenM23FFTTableCertificate.ec` proves
 that the extracted 256-entry permutation table is exactly `bsrev 8` and that
 all 512 extracted signed root coordinates lie in `[-65536,65536]`.
 
-Those facts remove representation-level preliminaries, but they are not yet
-the analytic root-table certificate named below.  In particular, no theorem
-identifies an extracted coordinate with a rounded ideal root, constructs a
-primitive 512th root, or proves the odd-root DFT schedule.
+Those facts remove the exact-root and representation-level preliminaries, but
+they are not yet the analytic root-table certificate named below. In
+particular, no theorem identifies an extracted coordinate with a rounded ideal
+root or proves that the machine radix-2 and bit-reversal schedule computes the
+defined odd-root DFT.
 
 ## Sound next theorem
 
@@ -195,8 +200,8 @@ absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
 Relating that decoded-table score to the paper quantity additionally requires
-a primitive-root/odd-root DFT development over the checked complex scaffold,
-an ideal-coordinate rounding certificate for every root-table entry, and an
+the machine-schedule identity for the checked ideal odd-root DFT, an
+ideal-coordinate rounding certificate for every root-table entry, and an
 explicit multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 
