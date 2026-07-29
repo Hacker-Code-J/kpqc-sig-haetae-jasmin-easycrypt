@@ -76,14 +76,15 @@ root-table certificate now proves that every extracted coordinate is the
 unique nearest Q16 encoding of the corresponding `ideal_root j` coordinate.
 The subsequent initialization bridge now proves the decoded target
 initialization and its error against the exact bit-reversed twisted input.
-None of these theories yet proves that the rounded butterfly stages implement
-the ideal schedule.
+The subsequent one-butterfly bridge proves exact stores, decoded outputs,
+frames, and local Q16 error for one safe kernel. None of these theories yet
+proves that the rounded butterfly stage folds implement the ideal schedule.
 
 The remaining boundary is that no theorem yet proves:
 
 - the complete extracted or exact-word machine evaluator is related to
-  `ideal_fft256` beyond initialization;
-- rounded butterfly multiplications stay in their signed ranges;
+  `ideal_fft256` beyond initialization and one local kernel;
+- all scheduled rounded butterfly multiplications stay in their signed ranges;
 - accumulated fixed-point error stays within a stated bound; or
 - the machine rejection guard agrees with the ideal guard.
 
@@ -96,9 +97,9 @@ than asserting exact complex equality.
 
 The remaining analytic chain is:
 
-1. lift the local integer decoders from the proved initialization endpoint
-   through the eight-stage safe butterfly trace and all five
-   squared-magnitude passes;
+1. lift the proved initialization and one-butterfly endpoints through the
+   `k`, block, stage, and eight-round safe trace and all five squared-magnitude
+   passes;
 2. propagate the certified coordinate and local rounding errors through the
    FFT, accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
@@ -110,6 +111,8 @@ and the extracted-table certificate is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 The decoded initialization milestone is detailed in
 [`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
+The local butterfly milestone is detailed in
+[`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 
 ## Verification
 

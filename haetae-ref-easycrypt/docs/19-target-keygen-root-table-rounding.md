@@ -73,12 +73,15 @@ The target table is now related to the exact root schedule. The follow-on
 decoded initialization permutation, signed raw-product safety under
 coefficient magnitude at most two, and a whole-vector `1/65536` error bound
 against the exact bit-reversed twisted input.
+`KeygenM23SingularFFTButterflyBridge` additionally decodes one valid
+distinct-index rounded butterfly, frames every other cell, and bounds local
+Q16 arithmetic error by `1/65536` against the exact decoded-root butterfly.
 
 The rounded butterfly stages are not yet related to `ideal_fft256`. The next
 sound bridge must:
 
-1. prove a decoded and framed butterfly theorem and lift it through all eight
-   FFT stages;
+1. lift the proved decoded and framed butterfly theorem through all eight FFT
+   stages;
 2. prove the signed-fit and nonoverflow premises for those stages and the five
    squared-magnitude passes;
 3. propagate the certified root and local multiplication errors to a global
@@ -88,6 +91,8 @@ sound bridge must:
 
 The completed initialization endpoint is detailed in
 [`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
+The local butterfly endpoint is detailed in
+[`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 
 ## Verification
 

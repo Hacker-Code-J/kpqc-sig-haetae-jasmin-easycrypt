@@ -349,8 +349,12 @@ that local result can be lifted through the FFT.
 word-to-integer decoders for initialization, both complex-product terms, all
 four scalar butterfly outputs, squared magnitude, and one accumulator update,
 including the frame on every other entry.  These lemmas remain conditional on
-the named range premises and do not constitute an eight-stage safe-trace
-theorem.
+the named range premises. `KeygenM23SingularFFTButterflyBridge` additionally
+lifts the butterfly decoder through one valid array update: it identifies all
+four stores and both decoded destinations, frames every other complex cell,
+and proves `1/65536` local Q16 error against the exact decoded-root butterfly
+under `fft_butterfly_safe_at`. These results do not constitute an eight-stage
+safe-trace theorem.
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -454,12 +458,12 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 36 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 37 authored manifest entries,
   including `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=36 total=36 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=37 total=37 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -484,10 +488,10 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- that the rounded butterfly stages of the fixed-point radix-2 machine
-  schedule implement that ideal DFT for the exact `_singular_full` evaluator,
-  beyond the now-proved initialization/bit-reversal endpoint; global numerical
-  FFT error bounds, a
+- that the rounded butterfly block/stage/eight-round folds of the fixed-point
+  radix-2 machine implement that ideal DFT for the exact `_singular_full`
+  evaluator, beyond the now-proved initialization and one-kernel endpoints;
+  global numerical FFT error bounds, a
   non-overflow/range theorem for all accumulations, a resolution of the finish
   tie policy, or identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete

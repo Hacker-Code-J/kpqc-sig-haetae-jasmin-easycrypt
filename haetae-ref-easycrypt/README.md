@@ -52,9 +52,12 @@ corresponding exact `ideal_root j` coordinate, with strict error below
 `1/131072`. A decoded initialization bridge now proves all 256 complex-cell
 updates (512 word stores) and frames, discharges their signed products under
 coefficient magnitude at most two, and bounds the initialized vector within
-`1/65536` of the exact bit-reversed twisted input. The proof still does not
-identify the rounded butterfly stages with the exact schedule, establish an
-eight-stage safe trace, or prove global FFT/accumulator error and nonoverflow.
+`1/65536` of the exact bit-reversed twisted input. A one-butterfly bridge now
+identifies all four target stores, both decoded destinations, and every framed
+cell, and proves `1/65536` local rounding error under the explicit signed-safe
+contract. The proof still does not lift that kernel through the block/stage
+folds, establish an eight-stage safe trace, or prove global FFT/accumulator
+error and nonoverflow.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -457,7 +460,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 36 authored
+hashes. Its current summary passes all 37 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -487,14 +490,18 @@ nearest Q16 coordinates of that exact schedule, with strict per-coordinate
 error below `1/131072`. The decoded initializer theorem additionally proves
 the complete target write permutation, initialization signed safety under the
 explicit coefficient bound two, and a whole-vector `1/65536` error bound
-against the ideal bit-reversed twisted input.
+against the ideal bit-reversed twisted input. The local butterfly theorem
+identifies its four word stores and two decoded outputs, frames the other 254
+cells, and bounds its Q16 arithmetic rounding by `1/65536` against the exact
+decoded-root complex butterfly whenever `fft_butterfly_safe_at` holds.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the rounded butterfly/eight-stage machine-schedule correspondence to the ideal
-DFT, global FFT error or accumulator nonoverflow, first-attempt
+the butterfly block/stage/eight-round machine-schedule correspondence to the
+ideal DFT or schedule-wide safety, global FFT error or accumulator
+nonoverflow, first-attempt
 acceptance, residual-loop termination, packing semantics, pointer aliasing or
 separation safety, or full key-generation correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
@@ -510,6 +517,8 @@ and the extracted-table rounding certificate is detailed in
 [`docs/19-target-keygen-root-table-rounding.md`](docs/19-target-keygen-root-table-rounding.md).
 The decoded initialization and ideal-input error bridge is detailed in
 [`docs/20-target-keygen-fft-initialization-bridge.md`](docs/20-target-keygen-fft-initialization-bridge.md).
+The exact one-butterfly and local rounding bridge is detailed in
+[`docs/21-target-keygen-fft-butterfly-bridge.md`](docs/21-target-keygen-fft-butterfly-bridge.md).
 
 ## Baseline inputs
 

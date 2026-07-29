@@ -73,9 +73,13 @@ decode:
 - one pointwise accumulator update; and
 - the frame of every other accumulator entry.
 
-These are local kernel lemmas.  They do not yet lift the array-indexed
-butterfly through eight stages or prove that the safety premises hold on an
-actual trace.
+`KeygenM23SingularFFTButterflyBridge` now lifts the butterfly portion through
+exactly one valid, distinct-index array update: all four stored words and both
+decoded destinations are identified, every other complex cell is framed, and
+the local decoded arithmetic is within `1/65536` of the exact decoded-root
+complex butterfly. This result remains conditional on
+`fft_butterfly_safe_at`; it does not lift through the schedule folds or prove
+that the safety premise holds on an actual trace.
 
 ## Checked tie discrepancy
 
@@ -189,11 +193,13 @@ coordinates is the unique nearest Q16 encoding of the corresponding exact
 initialization fold: under coefficient magnitude at most two, all raw products
 fit signed `W32`, every destination and frame is exact, and the initialized
 vector is within `1/65536` coordinatewise of the exact bit-reversed twisted
-input.
+input. `KeygenM23SingularFFTButterflyBridge` then supplies the exact
+array-level one-butterfly update and local `1/65536` rounding endpoint under
+its explicit signed-safety premise.
 
 Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
-initialization-level preliminaries. No theorem yet identifies the rounded
-butterfly stages with the proved exact-complex schedule.
+initialization and single-kernel preliminaries. No theorem yet identifies the
+rounded butterfly stage folds with the proved exact-complex schedule.
 
 ## Sound next theorem
 
@@ -208,15 +214,18 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires extending
-the checked initialization invariant through a safe decoded butterfly trace
-and the exact schedule, plus an explicit
+Relating that decoded-table score to the ideal quantity now requires lifting
+the checked initialization and one-butterfly invariants through the `k`,
+block, stage, and eight-round folds with a safe decoded trace and the exact
+schedule, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 The initialization endpoint is detailed in
 [`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
+The one-butterfly endpoint is detailed in
+[`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

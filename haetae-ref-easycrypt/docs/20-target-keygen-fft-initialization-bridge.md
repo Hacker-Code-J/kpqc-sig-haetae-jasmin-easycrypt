@@ -8,8 +8,10 @@ meaning. It covers all 256 complex-cell updates (512 word stores) performed by
 magnitude at most two, and relates the initialized target array to the
 bit-reversed ideal twisted input.
 
-It does not yet cover a rounded butterfly, any of the eight FFT stages,
-squared-magnitude accumulation, selection, finish, or rejection.
+This initialization milestone does not cover the rounded butterfly or any of
+the eight FFT stages, squared-magnitude accumulation, selection, finish, or
+rejection. The follow-on one-butterfly result is documented in
+[`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 
 ## Decoded surface
 
@@ -97,16 +99,15 @@ table is rounded.
 
 The remaining FFT bridge must:
 
-1. prove a decoded and framed four-output theorem for one safe rounded
-   butterfly;
-2. lift it through the `k`, block, stage, and eight-round folds while proving
+1. lift the now-proved decoded and framed one-butterfly theorem through the
+   `k`, block, stage, and eight-round folds while proving
    the carried `(m, md2, stride)` parameters match `ideal_stage`;
-3. discharge the eight-stage signed-fit predicates for coefficient magnitude
+2. discharge the eight-stage signed-fit predicates for coefficient magnitude
    at most two and propagate a global coordinate-error bound to
    `ideal_fft256`; and
-4. separately address squared-magnitude and five-pass accumulator safety.
+3. separately address squared-magnitude and five-pass accumulator safety.
 
-The fourth item cannot be derived from coefficient bounds alone: the
+The third item cannot be derived from coefficient bounds alone: the
 high-energy example documented in
 [`15-target-keygen-singular-numeric-boundary.md`](15-target-keygen-singular-numeric-boundary.md)
 already exceeds the nonnegative signed-Q16 accumulator capacity. Any later
