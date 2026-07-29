@@ -79,19 +79,25 @@ rather than an incidental proof patch.
 dyadic primitivity criterion, defines the ideal odd-root DFT, and checks the
 algebraic coefficient-twist identity. `KeygenM23IdealFFTSchedule` now closes
 the next ideal dependency: its bit-reversed eight-stage exact-complex schedule
-computes `dft256`, and its twisted-input form computes `odd_dft256`. These
-theories deliberately do not identify the rounded table or exact-word machine
-evaluator with that transform.
+computes `dft256`, and its twisted-input form computes `odd_dft256`.
+`KeygenM23RootGeneratorCertificate`, `KeygenM23RootTableRounding`, and
+`KeygenM23RootTableTargetBridge` now close the table dependency: every
+extracted root coordinate is the unique nearest Q16 encoding of the
+corresponding exact `ideal_root j` coordinate, with strict error below
+`1/131072`. The exact-word machine evaluator is still not identified with the
+ideal transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. prove that every extracted root coordinate is the intended Q16 rounding,
-   with a coordinate error bound;
-2. lift the local decoder lemmas through an explicit eight-stage safe trace
+1. lift the local decoder lemmas through an explicit eight-stage safe trace
    and all five squared-magnitude passes;
-3. propagate the coordinate errors through the FFT, accumulation, selection,
-   and the current multiplicity-sensitive finish rule; and
-4. relate acceptance only outside the resulting numerical error band.
+2. propagate the certified coordinate and local multiplication errors through
+   the FFT, accumulation, selection, and the current multiplicity-sensitive
+   finish rule; and
+3. relate acceptance only outside the resulting numerical error band.
+
+The certificate construction and target endpoint are detailed in
+[`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 
 Coefficient bounds alone cannot prove the squared-magnitude accumulators safe:
 the numerical boundary already gives a valid high-energy example.  A complete

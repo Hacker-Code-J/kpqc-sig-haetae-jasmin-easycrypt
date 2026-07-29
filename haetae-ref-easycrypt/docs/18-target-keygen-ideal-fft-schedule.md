@@ -59,14 +59,13 @@ ideal_odd_fft256_correct:
 ```
 
 This closes the ideal algebraic schedule dependency. It does not close the
-machine correspondence.
+machine correspondence. A separate follow-on certificate now closes the
+extracted-root-coordinate rounding dependency.
 
 ## Deliberate boundary
 
 This milestone does not prove that:
 
-- an extracted signed Q16 root coordinate is the intended rounding of an
-  `ideal_root` coordinate;
 - `KeygenM23SingularFFTSpec` or the extracted Jasmin evaluator equals
   `ideal_fft256`;
 - every machine multiplication, butterfly, squared magnitude, or accumulator
@@ -78,20 +77,28 @@ In particular, exact equality between the rounded fixed-point evaluator and
 `dft256` is not asserted. The future bridge must relate them with explicit
 rounding, safety, and error predicates.
 
+`KeygenM23RootGeneratorCertificate`, `KeygenM23RootTableRounding`, and
+`KeygenM23RootTableTargetBridge` now prove that every extracted signed
+coordinate is the unique nearest Q16 encoding of `ideal_root j`, with strict
+error below `1/131072`. That table theorem supplies the twiddle-error premise
+for the future machine bridge; it is not itself an array-level FFT theorem.
+
 ## Next dependency
 
 The remaining analytic chain is:
 
-1. certify every extracted root coordinate as the intended Q16 rounding, with
-   a coordinate error bound;
-2. define and prove the signed-fit and nonoverflow conditions for the complete
+1. define and prove the signed-fit and nonoverflow conditions for the complete
    eight-stage machine trace and all five squared-magnitude passes;
-3. propagate the local rounding errors from that safe trace to
+2. propagate the certified root-coordinate and local multiplication errors
+   from that safe trace to
    `ideal_fft256`;
-4. carry the error through accumulation, selection, and the retained
+3. carry the error through accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
-5. relate the machine and ideal rejection decisions only outside the resulting
+4. relate the machine and ideal rejection decisions only outside the resulting
    error band.
+
+The root-table milestone is detailed in
+[`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 
 ## Verification
 

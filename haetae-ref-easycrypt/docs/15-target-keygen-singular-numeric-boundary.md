@@ -181,12 +181,14 @@ the same schedule on the twisted input computes `odd_dft256`.
 `easycrypt/spec/KeygenM23FFTTableCertificate.ec` proves
 that the extracted 256-entry permutation table is exactly `bsrev 8` and that
 all 512 extracted signed root coordinates lie in `[-65536,65536]`.
+`KeygenM23RootGeneratorCertificate`, `KeygenM23RootTableRounding`, and
+`KeygenM23RootTableTargetBridge` further prove that each of those extracted
+coordinates is the unique nearest Q16 encoding of the corresponding exact
+`ideal_root j` coordinate, with strict error below `1/131072`.
 
-Those facts remove the exact-root, ideal-schedule, and representation-level
-preliminaries, but they are not yet the analytic root-table certificate named
-below. In particular, no theorem identifies an extracted coordinate with a
-rounded ideal root or identifies the rounded fixed-point machine evaluator
-with the proved exact-complex schedule.
+Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
+representation-level preliminaries. No theorem yet identifies the rounded
+fixed-point machine evaluator with the proved exact-complex schedule.
 
 ## Sound next theorem
 
@@ -201,11 +203,13 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the paper quantity additionally requires
-an ideal-coordinate rounding certificate for every root-table entry, a safe
-decoded-machine-trace and error relation to the checked ideal schedule, and an
-explicit multiplicity-sensitive finish statement or versioned policy change.
+Relating that decoded-table score to the ideal quantity now requires a safe
+decoded-machine-trace and error relation that consumes the checked
+root-coordinate bound and exact schedule, plus an explicit
+multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
+The completed table certificate is detailed in
+[`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

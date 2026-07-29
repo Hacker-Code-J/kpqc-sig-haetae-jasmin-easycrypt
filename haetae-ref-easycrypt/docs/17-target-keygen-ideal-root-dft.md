@@ -71,36 +71,39 @@ to realize; it does not establish that machine correspondence.
 
 The follow-on `KeygenM23IdealFFTSchedule` theory now proves that a pure
 exact-complex, bit-reversed, eight-stage radix-2 schedule computes `dft256`,
-and that its twisted-input form computes `odd_dft256`. Neither theory proves
-that the rounded machine evaluator is that ideal schedule.
+and that its twisted-input form computes `odd_dft256`. The subsequent
+root-table certificate now proves that every extracted coordinate is the
+unique nearest Q16 encoding of the corresponding `ideal_root j` coordinate.
+None of these theories proves that the rounded machine evaluator is the ideal
+schedule.
 
 The remaining boundary is that no theorem yet proves:
 
-- an extracted Q16 coordinate is the rounded coordinate of `ideal_root j`;
 - the extracted or exact-word machine evaluator equals `ideal_fft256`;
 - machine multiplications stay in their signed ranges;
 - accumulated fixed-point error stays within a stated bound; or
 - the machine rejection guard agrees with the ideal guard.
 
 In particular, the extracted table cannot itself serve as the exact root:
-rounding makes its nontrivial entries only approximately unit norm.  The
-existing table certificate and this exact construction are intentionally
-separate inputs to the next rounding proof.
+rounding makes its nontrivial entries only approximately unit norm. The new
+certificate relates the table to that root by strict coordinate error rather
+than asserting exact complex equality.
 
 ## Next dependency
 
 The remaining analytic chain is:
 
-1. certify every extracted root coordinate as the intended Q16 rounding, with
-   a coordinate error bound;
-2. lift the local integer decoders through the eight-stage safe trace and all
+1. lift the local integer decoders through the eight-stage safe trace and all
    five squared-magnitude passes;
-3. propagate error through accumulation, selection, and the retained
+2. propagate the certified coordinate and local rounding errors through the
+   FFT, accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
-4. relate acceptance only outside the resulting error band.
+3. relate acceptance only outside the resulting error band.
 
 The exact schedule proof is detailed in
-[`18-target-keygen-ideal-fft-schedule.md`](18-target-keygen-ideal-fft-schedule.md).
+[`18-target-keygen-ideal-fft-schedule.md`](18-target-keygen-ideal-fft-schedule.md),
+and the extracted-table certificate is detailed in
+[`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
 
 ## Verification
 

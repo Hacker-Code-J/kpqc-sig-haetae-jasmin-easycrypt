@@ -8,6 +8,9 @@ spec/KeygenM23SingularSpec.ec
 spec/KeygenM23ComplexReal.ec
 spec/KeygenM23IdealRootDFT.ec
 spec/KeygenM23IdealFFTSchedule.ec
+spec/KeygenM23RootGeneratorCertificate.ec
+spec/KeygenM23RootTableRounding.ec
+spec/KeygenM23RootTableTargetBridge.ec
 spec/KeygenM23FixedPointSemantics.ec
 spec/KeygenM23SingularBoundary.ec
 spec/KeygenM23SingularZeroFinish.ec
