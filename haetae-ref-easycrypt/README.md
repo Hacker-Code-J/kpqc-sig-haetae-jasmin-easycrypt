@@ -55,7 +55,10 @@ coefficient magnitude at most two, and bounds the initialized vector within
 `1/65536` of the exact bit-reversed twisted input. A one-butterfly bridge now
 identifies all four target stores, both decoded destinations, and every framed
 cell, and proves `1/65536` local rounding error under the explicit signed-safe
-contract. The proof still does not lift that kernel through the block/stage
+contract. An exact `k`-prefix bridge lifts those destination and frame facts
+through any valid inner-loop prefix under safety premises evaluated on each
+evolving pre-step machine state. Its observer deliberately retains the rounded
+Q16 butterfly surface. The proof still does not lift through the block/stage
 folds, establish an eight-stage safe trace, or prove global FFT/accumulator
 error and nonoverflow.
 A fixed-mode relational
@@ -460,7 +463,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 37 authored
+hashes. Its current summary passes all 38 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -494,6 +497,11 @@ against the ideal bit-reversed twisted input. The local butterfly theorem
 identifies its four word stores and two decoded outputs, frames the other 254
 cells, and bounds its Q16 arithmetic rounding by `1/65536` against the exact
 decoded-root complex butterfly whenever `fft_butterfly_safe_at` holds.
+The `k`-prefix theorem then proves exact pointwise decoded equality for every
+valid inner-loop prefix: processed destinations expose the rounded result from
+their exact pre-step prefix state, and every untouched cell retains its original
+decoded value. Its safety premise is explicit and remains to be discharged on
+the reachable stage trace.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
@@ -519,6 +527,8 @@ The decoded initialization and ideal-input error bridge is detailed in
 [`docs/20-target-keygen-fft-initialization-bridge.md`](docs/20-target-keygen-fft-initialization-bridge.md).
 The exact one-butterfly and local rounding bridge is detailed in
 [`docs/21-target-keygen-fft-butterfly-bridge.md`](docs/21-target-keygen-fft-butterfly-bridge.md).
+The exact evolving-state inner-prefix bridge is detailed in
+[`docs/22-target-keygen-fft-k-prefix-bridge.md`](docs/22-target-keygen-fft-k-prefix-bridge.md).
 
 ## Baseline inputs
 

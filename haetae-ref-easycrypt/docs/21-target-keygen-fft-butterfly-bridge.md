@@ -79,18 +79,19 @@ same theorem.
 
 ## Deliberate boundary
 
-The next FFT bridge must:
+The `k`-prefix composition step is now closed by
+[`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md),
+using these two destination theorems and the 254-cell frame. The next FFT bridge
+must:
 
-1. prove the `k`-prefix invariant using the two destination theorems and the
-   254-cell frame;
-2. lift that invariant through block prefixes, one stage, and all eight
-   rounds while identifying `(m, md2, stride)` with `ideal_stage`;
-3. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
-   propagate root-table, incoming-vector, and local rounding errors to a
-   global bound against `ideal_fft256`; and
-4. separately address squared-magnitude and five-pass accumulator safety.
+1. lift that invariant through block prefixes, one stage, and all eight rounds
+   while identifying `(m, md2, stride)` with `ideal_stage`;
+2. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
+   propagate root-table, incoming-vector, and local rounding errors to a global
+   bound against `ideal_fft256`; and
+3. separately address squared-magnitude and five-pass accumulator safety.
 
-The fourth item cannot follow from coefficient bounds alone. The high-energy
+The third item cannot follow from coefficient bounds alone. The high-energy
 example in
 [`15-target-keygen-singular-numeric-boundary.md`](15-target-keygen-singular-numeric-boundary.md)
 already exceeds the nonnegative signed-Q16 accumulator capacity.

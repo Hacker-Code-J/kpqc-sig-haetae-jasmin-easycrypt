@@ -20,6 +20,7 @@ spec/KeygenM23SingularIntegerSemantics.ec
 spec/KeygenM23FFTTableCertificate.ec
 spec/KeygenM23SingularFFTInitBridge.ec
 spec/KeygenM23SingularFFTButterflyBridge.ec
+spec/KeygenM23SingularFFTKPrefixBridge.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec

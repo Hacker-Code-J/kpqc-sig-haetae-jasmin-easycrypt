@@ -68,7 +68,7 @@ This milestone does not prove that:
 
 - the complete `KeygenM23SingularFFTSpec` or extracted Jasmin evaluator is
   related to `ideal_fft256` beyond the separately proved initialization and
-  one-butterfly endpoints;
+  rounded inner-prefix endpoints;
 - every scheduled rounded butterfly, squared magnitude, or accumulator stays
   within its signed range;
 - the eight rounded stages have a stated global error bound; or
@@ -88,9 +88,9 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. extend the proved initialization and one-butterfly safety/error invariants
-   through the complete eight-stage machine trace and all five
-   squared-magnitude passes;
+1. extend the proved initialization, one-butterfly, and exact inner-prefix
+   invariants through the block, stage, and complete eight-stage machine trace
+   and all five squared-magnitude passes;
 2. propagate the certified root-coordinate and local multiplication errors
    from that safe trace to
    `ideal_fft256`;
@@ -105,6 +105,8 @@ The decoded initialization milestone is detailed in
 [`20-target-keygen-fft-initialization-bridge.md`](20-target-keygen-fft-initialization-bridge.md).
 The local butterfly milestone is detailed in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
+The exact evolving-state inner-prefix milestone is detailed in
+[`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
 
 ## Verification
 

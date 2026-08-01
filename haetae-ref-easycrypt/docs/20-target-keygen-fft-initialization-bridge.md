@@ -12,6 +12,8 @@ This initialization milestone does not cover the rounded butterfly or any of
 the eight FFT stages, squared-magnitude accumulation, selection, finish, or
 rejection. The follow-on one-butterfly result is documented in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
+Its exact evolving-state inner-prefix composition is documented in
+[`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
 
 ## Decoded surface
 
@@ -97,10 +99,12 @@ table is rounded.
 
 ## Deliberate boundary
 
+The exact inner `k`-prefix composition is now closed by
+[`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
 The remaining FFT bridge must:
 
-1. lift the now-proved decoded and framed one-butterfly theorem through the
-   `k`, block, stage, and eight-round folds while proving
+1. lift the now-proved decoded and framed inner-prefix theorem through the
+   block, stage, and eight-round folds while proving
    the carried `(m, md2, stride)` parameters match `ideal_stage`;
 2. discharge the eight-stage signed-fit predicates for coefficient magnitude
    at most two and propagate a global coordinate-error bound to
