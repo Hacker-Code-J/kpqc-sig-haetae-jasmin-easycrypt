@@ -99,8 +99,8 @@ than asserting exact complex equality.
 
 The remaining analytic chain is:
 
-1. lift the proved initialization, one-butterfly, and block-prefix endpoints
-   through the stage and eight-round safe trace and all five squared-magnitude
+1. compose the proved initialization, one-butterfly, block-prefix, and stage
+   endpoints through the eight-round safe trace and all five squared-magnitude
    passes;
 2. propagate the certified coordinate and local rounding errors through the
    FFT, accumulation, selection, and the retained

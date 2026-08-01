@@ -9,8 +9,8 @@ current block is evaluated from the exact rounded machine state produced by all
 earlier blocks.
 
 The result remains conditional on signed safety for every executed butterfly.
-It is an exact rounded-machine block-prefix theorem. It is not a stage theorem
-and does not approximate the ideal FFT schedule.
+It is an exact rounded-machine block-prefix theorem. It is not the stage
+bridge and does not approximate the ideal FFT schedule.
 
 ## Executed-index schedule repair
 
@@ -85,9 +85,10 @@ This milestone closes only arbitrary complete block prefixes. It does not:
 4. prove squared-magnitude or accumulator safety and nonoverflow; or
 5. establish score, acceptance, retry, packing, or modes 3/5 semantics.
 
-The next FFT bridge should specialize the block-prefix theorem to each
-reachable stage schedule, then compose all eight stages while keeping the
-signed-safety premise and numerical-error recurrence explicit.
+The [stage bridge](24-target-keygen-fft-stage-bridge.md) now specializes the
+block-prefix theorem to each reachable stage schedule. The next FFT bridge
+should compose all eight stages while
+keeping the signed-safety premise and numerical-error recurrence explicit.
 
 ## Verification
 

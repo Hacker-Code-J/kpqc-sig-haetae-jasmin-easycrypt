@@ -60,9 +60,12 @@ through any valid inner-loop prefix under safety premises evaluated on each
 evolving pre-step machine state. Its observer deliberately retains the rounded
 Q16 butterfly surface. An exact block-prefix bridge now composes complete inner
 loops through any valid block prefix under safety evaluated on each exact
-evolving pre-block state. The proof still does not lift through a complete
-stage, establish an eight-stage safe trace, or prove global FFT/accumulator
-error and nonoverflow.
+evolving pre-block state. `KeygenM23SingularFFTStageBridge` now lifts that
+block-prefix theorem to the eight reachable stage schedules with owner-block
+decoded semantics and full 256-cell coverage under explicit exact
+pre-block safety. The proof still does not compose the eight rounds,
+establish an eight-stage safe trace, or prove global FFT/accumulator error
+and nonoverflow.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -465,7 +468,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 39 authored
+hashes. Its current summary passes all 40 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -513,8 +516,8 @@ On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the butterfly stage/eight-round machine-schedule correspondence to the
-ideal DFT or schedule-wide safety, global FFT error or accumulator
+the eight-round machine-schedule correspondence to the ideal DFT or
+schedule-wide safety, global FFT error or accumulator
 nonoverflow, first-attempt
 acceptance, residual-loop termination, packing semantics, pointer aliasing or
 separation safety, or full key-generation correctness. See
@@ -537,6 +540,8 @@ The exact evolving-state inner-prefix bridge is detailed in
 [`docs/22-target-keygen-fft-k-prefix-bridge.md`](docs/22-target-keygen-fft-k-prefix-bridge.md).
 The exact evolving-state block-prefix bridge is detailed in
 [`docs/23-target-keygen-fft-block-prefix-bridge.md`](docs/23-target-keygen-fft-block-prefix-bridge.md).
+The exact stage bridge is detailed in
+[`docs/24-target-keygen-fft-stage-bridge.md`](docs/24-target-keygen-fft-stage-bridge.md).
 
 ## Baseline inputs
 

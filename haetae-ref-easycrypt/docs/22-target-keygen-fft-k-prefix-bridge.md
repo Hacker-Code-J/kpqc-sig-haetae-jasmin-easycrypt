@@ -73,16 +73,18 @@ This milestone closes only the inner `k`-prefix composition step. It does not:
 1. discharge `fft_k_prefix_safe` for reachable initialized states;
 2. turn the rounded prefix observer into a global error bound against the exact
    complex schedule;
-3. lift the result through a complete stage or all eight FFT rounds; or
+3. lift the result through all eight FFT rounds; or
 4. establish squared-magnitude, accumulator, score, acceptance, or packing
    semantics.
 
 The arbitrary block-prefix composition is now closed by
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
-The next FFT bridge must specialize it to each complete stage, identify the
-extracted `(m, md2, stride)` schedule with `ideal_stage`, and carry the
-root-table, incoming-state, and per-butterfly rounding errors while proving the
-required signed-fit bounds.
+The stage bridge now specializes it to each reachable outer stage schedule;
+see [`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
+The next FFT bridge must compose all eight stages, identify the extracted
+`(m, md2, stride)` schedule with `ideal_stage`, and carry the root-table,
+incoming-state, and per-butterfly rounding errors while proving the required
+signed-fit bounds.
 
 ## Verification
 

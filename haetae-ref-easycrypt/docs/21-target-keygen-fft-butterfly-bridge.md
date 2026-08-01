@@ -84,9 +84,11 @@ The `k`-prefix composition step is now closed by
 using these two destination theorems and the 254-cell frame. The complete
 block-prefix composition is now closed by
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
+The complete reachable-stage endpoint is now closed by
+[`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
 The next FFT bridge must:
 
-1. lift that invariant through one stage and all eight rounds while identifying
+1. compose that stage endpoint through all eight rounds while identifying
    `(m, md2, stride)` with `ideal_stage`;
 2. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
    propagate root-table, incoming-vector, and local rounding errors to a global

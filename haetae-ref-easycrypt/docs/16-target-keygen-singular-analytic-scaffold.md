@@ -94,13 +94,15 @@ error against the decoded-root complex butterfly. The subsequent
 `KeygenM23SingularFFTKPrefixBridge` composes those exact destination and frame
 facts through any valid inner prefix on the rounded evolving machine state.
 `KeygenM23SingularFFTBlockPrefixBridge` then composes complete inner loops
-through any valid block prefix on the exact evolving pre-block states. The
-stage fold is still not identified with the ideal transform.
+through any valid block prefix on the exact evolving pre-block states.
+`KeygenM23SingularFFTStageBridge` closes the exact owner-block endpoint for
+each reachable complete stage. That stage endpoint is still not identified
+with the ideal transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. lift the proved initialization, framed one-butterfly, and block-prefix
-   endpoint through the stage and eight-round folds, an explicit safe trace,
+1. compose the proved initialization, framed one-butterfly, block-prefix, and
+   stage endpoints through the eight-round folds, an explicit safe trace,
    and all five squared-magnitude passes;
 2. propagate the certified coordinate and local multiplication errors through
    the FFT, accumulation, selection, and the current multiplicity-sensitive

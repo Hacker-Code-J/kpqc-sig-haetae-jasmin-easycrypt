@@ -88,8 +88,8 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. extend the proved initialization, one-butterfly, and exact block-prefix
-   invariants through the stage and complete eight-stage machine trace and all
+1. extend the proved initialization, one-butterfly, block-prefix, and exact
+   complete-stage endpoints through the eight-stage machine trace and all
    five squared-magnitude passes;
 2. propagate the certified root-coordinate and local multiplication errors
    from that safe trace to
