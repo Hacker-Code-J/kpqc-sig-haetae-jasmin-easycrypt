@@ -392,6 +392,17 @@ rewrite /Fq.bw32 /Fq.SignedReductions.R /Fq.q /=.
 smt().
 qed.
 
+lemma fqmul_product_bound_16_26 a b :
+  Fq.bw32 a 16 =>
+  Fq.bw32 b 26 =>
+  - Fq.SignedReductions.R %/ 2 * Fq.q <=
+    W32.to_sint a * W32.to_sint b <
+    Fq.SignedReductions.R %/ 2 * Fq.q.
+proof.
+rewrite /Fq.bw32 /Fq.SignedReductions.R /Fq.q /=.
+smt().
+qed.
+
 lemma jzetas_bound16 i :
   1 <= i < 256 =>
   Fq.bw32 (BArray1024.get32 Hpoly_loop.jzetas i) 16.
@@ -1037,14 +1048,14 @@ op inv_len_ok (len : int) : bool =
   len = 256.
 
 op inv_stage_bound (len : int) : int =
-  if len = 1 then 16 else
-  if len = 2 then 17 else
-  if len = 4 then 18 else
-  if len = 8 then 19 else
-  if len = 16 then 20 else
-  if len = 32 then 21 else
-  if len = 64 then 22 else
-  if len = 128 then 23 else 24.
+  if len = 1 then 18 else
+  if len = 2 then 19 else
+  if len = 4 then 20 else
+  if len = 8 then 21 else
+  if len = 16 then 22 else
+  if len = 32 then 23 else
+  if len = 64 then 24 else
+  if len = 128 then 25 else 26.
 
 op inv_zbase (len : int) : int =
   if len = 1 then 0 else
@@ -1066,7 +1077,7 @@ op inv_inner_bound (sz len start j i : int) : int =
 
 lemma inv_stage_bound_range len :
   inv_len_ok len =>
-  0 <= inv_stage_bound len <= 24.
+  0 <= inv_stage_bound len <= 26.
 proof. by rewrite /inv_len_ok /inv_stage_bound; smt(). qed.
 
 lemma inv_stage_bound_pos len :
@@ -1082,6 +1093,11 @@ proof. by move=> h; have := inv_stage_bound_range len h; smt(). qed.
 lemma inv_stage_bound_ge16 len :
   inv_len_ok len =>
   16 <= inv_stage_bound len.
+proof. by rewrite /inv_len_ok /inv_stage_bound; smt(). qed.
+
+lemma inv_stage_bound_ge18 len :
+  inv_len_ok len =>
+  18 <= inv_stage_bound len.
 proof. by rewrite /inv_len_ok /inv_stage_bound; smt(). qed.
 
 lemma inv_stage_next len :
@@ -1538,19 +1554,19 @@ have hzbw := jzetas_inv_bound16 zc _.
 have hdiff :=
   inverse_twiddle_product_bound_from_inner
     rp len start j hbd hlenok hlenlt hjrange hj hjlen.
-have hstage : 0 <= inv_stage_bound len + 1 <= 24.
+have hstage : 0 <= inv_stage_bound len + 1 <= 26.
 + rewrite /inv_len_ok /inv_stage_bound in hlenok.
   by smt().
-have hdiff24 :
+have hdiff26 :
   Fq.bw32
-    (BArray1024.get32 rp j - BArray1024.get32 rp (j + len)) 24.
+    (BArray1024.get32 rp j - BArray1024.get32 rp (j + len)) 26.
 + exact (NTT_Fq.bw32_weaken
     (BArray1024.get32 rp j - BArray1024.get32 rp (j + len))
-    (inv_stage_bound len + 1) 24 hstage hdiff).
-exact (fqmul_product_bound_16_24
+    (inv_stage_bound len + 1) 26 hstage hdiff).
+exact (fqmul_product_bound_16_26
   (BArray1024.get32 Hpoly_loop.jzetas_inv zc)
   (BArray1024.get32 rp j - BArray1024.get32 rp (j + len))
-  hzbw hdiff24).
+  hzbw hdiff26).
 qed.
 
 lemma inverse_butterfly_step_full
@@ -1628,7 +1644,7 @@ op final_mont_array (p : coeff Array256.t) (j : int) : coeff Array256.t =
   Array256.init (fun i => if 0 <= i < j then p.[i] * NTT_Fq.R else p.[i]).
 
 op final_bound (j i : int) : int =
-  if 0 <= i < j then 16 else 24.
+  if 0 <= i < j then 16 else 26.
 
 lemma final_mont_array_start p :
   final_mont_array p 0 = p.
@@ -1680,7 +1696,7 @@ by smt().
 qed.
 
 lemma final_bound_start i :
-  final_bound 0 i = 24.
+  final_bound 0 i = 26.
 proof. by rewrite /final_bound; smt(). qed.
 
 lemma final_bound_next_unchanged j k :
@@ -1741,11 +1757,11 @@ proof.
 move=> hbd hj.
 have hzbw := jzetas_inv_bound16 255 _.
 + by smt().
-have hraw : Fq.bw32 (BArray1024.get32 rp j) 24.
+have hraw : Fq.bw32 (BArray1024.get32 rp j) 26.
 + have hjmem : j \in range 0 256 by rewrite mem_range; smt().
   have := hbd j hjmem.
   by rewrite /final_bound; smt().
-exact (fqmul_product_bound_16_24
+exact (fqmul_product_bound_16_26
   (BArray1024.get32 Hpoly_loop.jzetas_inv 255)
   (BArray1024.get32 rp j) hzbw hraw).
 qed.
@@ -2100,9 +2116,9 @@ split.
   by smt().
 qed.
 
-equiv poly_invntt_core_ref :
+equiv poly_invntt_core_ref18 :
   Hpoly_loop.M._poly_invntt ~ NTT_Fq.NTT.invntt :
-  NTT_Fq.poly_repr_bound rp{1} r{2} 16 /\
+  NTT_Fq.poly_repr_bound rp{1} r{2} 18 /\
   zetas_inv{2} = NTT_Fq.zetas_inv
   ==> NTT_Fq.poly_repr_bound res{1} (NTT_Fq.array256_mont res{2}) 16.
 proof.
@@ -2579,11 +2595,11 @@ move=> &1 &2 /=.
 move=> [hpre hzetas2].
 split.
 + split.
-  + exact (NTT_Fq.poly_repr_bound_repr rp{1} r{2} 16 hpre).
+  + exact (NTT_Fq.poly_repr_bound_repr rp{1} r{2} 18 hpre).
   split.
   + rewrite /inv_stage_bound.
-    exact (barray256_bound_by_const rp{1} 16
-             (NTT_Fq.poly_repr_bound_bound rp{1} r{2} 16 hpre)).
+    exact (barray256_bound_by_const rp{1} 18
+             (NTT_Fq.poly_repr_bound_bound rp{1} r{2} 18 hpre)).
   by rewrite /inv_len_ok /inv_zbase.
 move=> rpL zetaspL zcL lenL rR zetasInvR zcR lenR ho.
 move: ho => [hreprL ho].
@@ -2606,7 +2622,7 @@ split.
     move=> htmp.
     rewrite final_bound_start.
     exact (NTT_Fq.bw32_weaken
-      _ (inv_stage_bound rpL) 24 hstage_rng htmp).
+      _ (inv_stage_bound rpL) 26 hstage_rng htmp).
 by smt().
 move=> jL rpF jR rF hnotjL hnotjR hf.
 move: hf => [hreprF hf].
@@ -2624,6 +2640,24 @@ have htmp := hbdF i hi.
 move: htmp.
 rewrite hj_exit /final_bound.
 by move: hi; rewrite mem_range; smt().
+qed.
+
+equiv poly_invntt_core_ref :
+  Hpoly_loop.M._poly_invntt ~ NTT_Fq.NTT.invntt :
+  NTT_Fq.poly_repr_bound rp{1} r{2} 16 /\
+  zetas_inv{2} = NTT_Fq.zetas_inv
+  ==> NTT_Fq.poly_repr_bound res{1} (NTT_Fq.array256_mont res{2}) 16.
+proof.
+conseq poly_invntt_core_ref18.
+move=> &1 &2 /= [hpre hzetas].
+have h1618 : 0 <= 16 <= 18 by smt().
+split.
++ split.
+  + exact (NTT_Fq.poly_repr_bound_repr rp{1} r{2} 16 hpre).
+  exact
+    (NTT_Fq.barray256_bound_weaken rp{1} 16 18
+      h1618 (NTT_Fq.poly_repr_bound_bound rp{1} r{2} 16 hpre)).
+exact hzetas.
 qed.
 
 end RefJasminNTT.
