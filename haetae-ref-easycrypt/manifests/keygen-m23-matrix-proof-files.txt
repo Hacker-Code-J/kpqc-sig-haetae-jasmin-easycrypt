@@ -21,6 +21,7 @@ spec/KeygenM23FFTTableCertificate.ec
 spec/KeygenM23SingularFFTInitBridge.ec
 spec/KeygenM23SingularFFTButterflyBridge.ec
 spec/KeygenM23SingularFFTKPrefixBridge.ec
+spec/KeygenM23SingularFFTBlockPrefixBridge.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec

@@ -99,9 +99,9 @@ than asserting exact complex equality.
 
 The remaining analytic chain is:
 
-1. lift the proved initialization, one-butterfly, and inner-prefix endpoints
-   through the block, stage, and eight-round safe trace and all five
-   squared-magnitude passes;
+1. lift the proved initialization, one-butterfly, and block-prefix endpoints
+   through the stage and eight-round safe trace and all five squared-magnitude
+   passes;
 2. propagate the certified coordinate and local rounding errors through the
    FFT, accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
@@ -117,6 +117,8 @@ The local butterfly milestone is detailed in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 The exact evolving-state inner-prefix milestone is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
+The exact evolving-state block-prefix milestone is detailed in
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 
 ## Verification
 

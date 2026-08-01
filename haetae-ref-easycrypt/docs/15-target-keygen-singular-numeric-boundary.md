@@ -80,9 +80,11 @@ the local decoded arithmetic is within `1/65536` of the exact decoded-root
 complex butterfly. This result remains conditional on
 `fft_butterfly_safe_at`. `KeygenM23SingularFFTKPrefixBridge` now composes its
 exact rounded destination and frame semantics through an arbitrary valid inner
-prefix with safety evaluated on every evolving pre-step state. It does not lift
-through block, stage, or eight-round folds or prove that the safety premise
-holds on an actual trace.
+prefix with safety evaluated on every evolving pre-step state.
+`KeygenM23SingularFFTBlockPrefixBridge` composes complete inner loops through
+an arbitrary valid block prefix with safety evaluated on every exact pre-block
+state. Neither theorem lifts through a complete stage or all eight rounds or
+proves that the safety premise holds on an actual trace.
 
 ## Checked tie discrepancy
 
@@ -200,7 +202,9 @@ input. `KeygenM23SingularFFTButterflyBridge` then supplies the exact
 array-level one-butterfly update and local `1/65536` rounding endpoint under
 its explicit signed-safety premise. `KeygenM23SingularFFTKPrefixBridge` composes
 that exact rounded meaning through every valid inner prefix under explicit
-evolving-state safety.
+evolving-state safety. `KeygenM23SingularFFTBlockPrefixBridge` further composes
+complete inner loops through every valid block prefix on exact evolving
+pre-block states.
 
 Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
 initialization and single-kernel preliminaries. No theorem yet identifies the
@@ -220,8 +224,8 @@ absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
 Relating that decoded-table score to the ideal quantity now requires lifting
-the checked initialization, one-butterfly, and inner-prefix invariants through
-the block, stage, and eight-round folds with a safe decoded trace and the exact
+the checked initialization, one-butterfly, and block-prefix invariant through
+the stage and eight-round folds with a safe decoded trace and the exact
 schedule, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
@@ -233,6 +237,8 @@ The one-butterfly endpoint is detailed in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 The exact evolving-state inner-prefix endpoint is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
+The exact evolving-state block-prefix endpoint is detailed in
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

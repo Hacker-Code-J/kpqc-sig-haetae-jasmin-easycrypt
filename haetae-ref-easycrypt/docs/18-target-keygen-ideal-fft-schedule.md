@@ -88,9 +88,9 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. extend the proved initialization, one-butterfly, and exact inner-prefix
-   invariants through the block, stage, and complete eight-stage machine trace
-   and all five squared-magnitude passes;
+1. extend the proved initialization, one-butterfly, and exact block-prefix
+   invariants through the stage and complete eight-stage machine trace and all
+   five squared-magnitude passes;
 2. propagate the certified root-coordinate and local multiplication errors
    from that safe trace to
    `ideal_fft256`;
@@ -107,6 +107,8 @@ The local butterfly milestone is detailed in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 The exact evolving-state inner-prefix milestone is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
+The exact evolving-state block-prefix milestone is detailed in
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 
 ## Verification
 

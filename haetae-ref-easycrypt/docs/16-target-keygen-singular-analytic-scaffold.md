@@ -93,13 +93,15 @@ safety predicate, every other cell framed, and `1/65536` local arithmetic
 error against the decoded-root complex butterfly. The subsequent
 `KeygenM23SingularFFTKPrefixBridge` composes those exact destination and frame
 facts through any valid inner prefix on the rounded evolving machine state.
-The block and stage folds are still not identified with the ideal transform.
+`KeygenM23SingularFFTBlockPrefixBridge` then composes complete inner loops
+through any valid block prefix on the exact evolving pre-block states. The
+stage fold is still not identified with the ideal transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. lift the proved initialization, framed one-butterfly, and inner-prefix
-   endpoints through the block, stage, and eight-round folds, an explicit safe
-   trace, and all five squared-magnitude passes;
+1. lift the proved initialization, framed one-butterfly, and block-prefix
+   endpoint through the stage and eight-round folds, an explicit safe trace,
+   and all five squared-magnitude passes;
 2. propagate the certified coordinate and local multiplication errors through
    the FFT, accumulation, selection, and the current multiplicity-sensitive
    finish rule; and
@@ -113,6 +115,8 @@ The decoded one-butterfly endpoint is detailed in
 [`21-target-keygen-fft-butterfly-bridge.md`](21-target-keygen-fft-butterfly-bridge.md).
 The exact evolving-state inner-prefix endpoint is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
+The exact evolving-state block-prefix endpoint is detailed in
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 
 Coefficient bounds alone cannot prove the squared-magnitude accumulators safe:
 the numerical boundary already gives a valid high-energy example.  A complete

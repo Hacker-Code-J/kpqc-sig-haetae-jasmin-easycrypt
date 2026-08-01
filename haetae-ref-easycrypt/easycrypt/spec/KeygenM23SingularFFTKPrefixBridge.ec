@@ -30,7 +30,8 @@ op fft_k_schedule_wf (n md2 stride : W64.t) (processed : int) : bool =
   0 <= processed /\
   processed <= W64.to_uint md2 /\
   W64.to_uint n + W64.to_uint md2 + processed <= 256 /\
-  processed * W64.to_uint stride < 256.
+  (forall k, 0 <= k < processed =>
+    k * W64.to_uint stride < 256).
 
 op fft_k_prefix_safe
     (data roots : BArray2048.t) (n md2 stride : W64.t)
@@ -71,38 +72,16 @@ lemma fft_k_schedule_wf_prev
   fft_k_schedule_wf n md2 stride processed.
 proof.
 rewrite /fft_k_schedule_wf.
-move=> hp0 [_ [hmd2 [hdata htwid]]].
-have hlinear :
-  0 <= processed /\
-  processed <= W64.to_uint md2 /\
-  W64.to_uint n + W64.to_uint md2 + processed <= 256.
-+ clear htwid.
-  smt().
-have hstride : 0 <= W64.to_uint stride.
-+ clear htwid.
-  smt(W64.to_uint_cmp).
-have hsucc : processed <= processed + 1.
-+ clear htwid.
-  smt().
-have hproduct :
-  processed * W64.to_uint stride <=
-  (processed + 1) * W64.to_uint stride.
-+ apply (IntOrder.ler_wpmul2r (W64.to_uint stride) hstride).
-  exact hsucc.
-have hproduct_bound : processed * W64.to_uint stride < 256.
-+ exact
-    (IntOrder.ler_lt_trans
-      ((processed + 1) * W64.to_uint stride)
-      (processed * W64.to_uint stride)
-      256 hproduct htwid).
-move: hlinear => [hp0_linear [hpmd2 hpdata]].
+move=> hp0 [_ [hpmd2 [hpdata htwid]]].
 split.
 + exact hp0.
 split.
-+ exact hpmd2.
++ smt().
 split.
-+ exact hpdata.
-exact hproduct_bound.
++ smt().
+move=> k hk.
+apply htwid.
+smt().
 qed.
 
 lemma fft_k_prefix_safe_prev
@@ -152,22 +131,12 @@ lemma fft_k_twid_index_bounds
 proof.
 rewrite /fft_k_schedule_wf /fft_k_twid_index.
 move=> [_ [_ [_ htwid]]] [hk0 hkprocessed].
-have hstride : 0 <= W64.to_uint stride.
-+ clear htwid hk0 hkprocessed.
-  smt(W64.to_uint_cmp).
-have hproduct0 : 0 <= k * W64.to_uint stride.
-+ exact (IntOrder.mulr_ge0 k (W64.to_uint stride) hk0 hstride).
-have hproduct :
-  k * W64.to_uint stride <= processed * W64.to_uint stride.
-+ apply (IntOrder.ler_wpmul2r (W64.to_uint stride) hstride).
-  exact (IntOrder.ltrW k processed hkprocessed).
-have hproduct_bound : k * W64.to_uint stride < 256.
-+ exact
-    (IntOrder.ler_lt_trans
-      (processed * W64.to_uint stride)
-      (k * W64.to_uint stride)
-      256 hproduct htwid).
-clear htwid hk0 hkprocessed hstride hproduct.
+have hk : 0 <= k < processed by smt().
+have htwidk := htwid k hk.
+have hstride : 0 <= W64.to_uint stride by smt(W64.to_uint_cmp).
+have hproduct0 : 0 <= k * W64.to_uint stride by
+  exact (IntOrder.mulr_ge0 k (W64.to_uint stride) hk0 hstride).
+clear htwid hstride.
 smt().
 qed.
 

@@ -101,10 +101,12 @@ table is rounded.
 
 The exact inner `k`-prefix composition is now closed by
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
+The complete block-prefix composition is now closed by
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 The remaining FFT bridge must:
 
-1. lift the now-proved decoded and framed inner-prefix theorem through the
-   block, stage, and eight-round folds while proving
+1. lift the now-proved decoded and framed block-prefix theorem through the
+   stage and eight-round folds while proving
    the carried `(m, md2, stride)` parameters match `ideal_stage`;
 2. discharge the eight-stage signed-fit predicates for coefficient magnitude
    at most two and propagate a global coordinate-error bound to

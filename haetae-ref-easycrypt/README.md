@@ -58,8 +58,10 @@ cell, and proves `1/65536` local rounding error under the explicit signed-safe
 contract. An exact `k`-prefix bridge lifts those destination and frame facts
 through any valid inner-loop prefix under safety premises evaluated on each
 evolving pre-step machine state. Its observer deliberately retains the rounded
-Q16 butterfly surface. The proof still does not lift through the block/stage
-folds, establish an eight-stage safe trace, or prove global FFT/accumulator
+Q16 butterfly surface. An exact block-prefix bridge now composes complete inner
+loops through any valid block prefix under safety evaluated on each exact
+evolving pre-block state. The proof still does not lift through a complete
+stage, establish an eight-stage safe trace, or prove global FFT/accumulator
 error and nonoverflow.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
@@ -463,7 +465,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 38 authored
+hashes. Its current summary passes all 39 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -501,13 +503,17 @@ The `k`-prefix theorem then proves exact pointwise decoded equality for every
 valid inner-loop prefix: processed destinations expose the rounded result from
 their exact pre-step prefix state, and every untouched cell retains its original
 decoded value. Its safety premise is explicit and remains to be discharged on
-the reachable stage trace.
+the reachable stage trace. The block-prefix theorem composes complete inner
+loops over any valid block prefix using a folded observer evaluated on each
+exact evolving pre-block state. Its first-stage schedule certificate also
+checks the reachable `m = 2`, `md2 = 1`, `stride = 256` case without bounding
+the first unexecuted twiddle.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the butterfly block/stage/eight-round machine-schedule correspondence to the
+the butterfly stage/eight-round machine-schedule correspondence to the
 ideal DFT or schedule-wide safety, global FFT error or accumulator
 nonoverflow, first-attempt
 acceptance, residual-loop termination, packing semantics, pointer aliasing or
@@ -529,6 +535,8 @@ The exact one-butterfly and local rounding bridge is detailed in
 [`docs/21-target-keygen-fft-butterfly-bridge.md`](docs/21-target-keygen-fft-butterfly-bridge.md).
 The exact evolving-state inner-prefix bridge is detailed in
 [`docs/22-target-keygen-fft-k-prefix-bridge.md`](docs/22-target-keygen-fft-k-prefix-bridge.md).
+The exact evolving-state block-prefix bridge is detailed in
+[`docs/23-target-keygen-fft-block-prefix-bridge.md`](docs/23-target-keygen-fft-block-prefix-bridge.md).
 
 ## Baseline inputs
 

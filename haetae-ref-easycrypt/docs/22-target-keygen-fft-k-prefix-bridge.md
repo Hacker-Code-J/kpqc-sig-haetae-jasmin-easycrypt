@@ -22,10 +22,14 @@ schedule projections
 - `fft_k_twid_index stride k = k * to_uint(stride)`.
 
 `fft_k_schedule_wf` requires a nonnegative prefix no longer than `md2`, keeps
-both destination ranges within the 256 complex cells, and bounds the twiddle
-prefix within the 256-entry root table. The accompanying lemmas prove the three
-index bounds, destination distinctness, and the exact correspondence between
-the extracted `W64` schedule arithmetic and these integer indices.
+both destination ranges within the 256 complex cells, and bounds every executed
+`k * stride` twiddle within the 256-entry root table. The quantified
+executed-index condition deliberately excludes the first unexecuted twiddle.
+This matters at the reachable first stage: `md2 = 1` and `stride = 256`, so the
+only executed root index is `0`, while the old prefix-end condition incorrectly
+required `256 < 256`. The accompanying lemmas prove the three index bounds,
+destination distinctness, and the exact correspondence between the extracted
+`W64` schedule arithmetic and these integer indices.
 
 `fft_k_prefix_safe` quantifies `fft_butterfly_safe_at` over every `k` before the
 prefix endpoint. Crucially, each premise is evaluated on
@@ -69,15 +73,16 @@ This milestone closes only the inner `k`-prefix composition step. It does not:
 1. discharge `fft_k_prefix_safe` for reachable initialized states;
 2. turn the rounded prefix observer into a global error bound against the exact
    complex schedule;
-3. lift the result through block prefixes, a complete stage, or all eight FFT
-   rounds; or
+3. lift the result through a complete stage or all eight FFT rounds; or
 4. establish squared-magnitude, accumulator, score, acceptance, or packing
    semantics.
 
-The next FFT bridge must compose this theorem through the block and stage folds,
-identify the extracted `(m, md2, stride)` schedule with `ideal_stage`, and carry
-the root-table, incoming-state, and per-butterfly rounding errors while proving
-the required signed-fit bounds.
+The arbitrary block-prefix composition is now closed by
+[`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
+The next FFT bridge must specialize it to each complete stage, identify the
+extracted `(m, md2, stride)` schedule with `ideal_stage`, and carry the
+root-table, incoming-state, and per-butterfly rounding errors while proving the
+required signed-fit bounds.
 
 ## Verification
 
