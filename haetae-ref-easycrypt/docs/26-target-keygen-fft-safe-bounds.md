@@ -62,6 +62,23 @@ subtractions. The final bound `859963392` is strictly below `2^31`.
 raw bound. `actual_fft_full_decode_bound2` then exposes the exact decoded
 eight-round machine observer without retaining a separate safety premise.
 
+## Actual first-attempt reachability
+
+`TargetKeygenM23SingularFFTInputBounds` connects the generic coefficient
+premise to the sampler/finalizer state exposed by the peeled first attempt of
+the actual mode-2 parent. Slots zero through two read the three sampled `s1`
+polynomials, whose coefficients lie in `[-1,1]`. Slots three and four read the
+two finalized `s2` polynomials. Each finalized coefficient is a sampled
+`[-1,1]` value minus a verified low decomposition term in `[-1,1]`, so it lies
+in `[-2,2]`.
+
+`mode2_fft_inputs_bound2_of_mode2_sampler_finalize` proves the combined
+five-slice predicate. `TargetKeygenM23FullFirstAttempt` threads it into the
+immutable snapshot and exports schedule-safety and final-word-bound
+corollaries for every valid slot and arbitrary scratch input. The arbitrary
+scratch quantification matches `_singular_full`'s threaded workspace; the FFT
+initializer overwrites the active cells before each schedule.
+
 ## Global-error target
 
 The remaining error proof is organized around the explicit budget sequence
@@ -79,9 +96,10 @@ yet a theorem about the complete machine output.
 
 ## Deliberate boundary
 
-The input coefficient predicate is a theorem premise; its connection to every
-actual key-generation slice is still required before this result can be used
-unconditionally in the parent procedure.
+The input coefficient predicate remains a premise of the reusable generic FFT
+theories. Its connection to all five slices is now discharged for the exposed
+actual first attempt, but no theorem in this milestone records equivalent
+sampler/finalizer facts for each later residual-loop attempt.
 
 The final FFT word bound proves signed storage and butterfly nonoverflow only.
 It is intentionally not used to claim `fft_sqabs_safe` or
@@ -95,8 +113,8 @@ The remaining work is therefore:
 
 1. prove the stage-local owner/index alignment and multiplication-perturbation
    theorem that realizes the recorded global error recurrence;
-2. thread the coefficient predicate from the actual sampler/finalizer state;
-3. establish squared-magnitude and five-pass accumulator safety; and
+2. establish squared-magnitude and five-pass accumulator safety;
+3. lift the input facts to later retry attempts; and
 4. connect the resulting score to acceptance and retry semantics.
 
 ## Verification
@@ -108,5 +126,7 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The retained gate compiles every manifest entry with `-no-eco` and then runs
-the proof-hole, authored-axiom, and debug-command scans.
+The retained gate compiles all 47 manifest entries with `-no-eco`, including
+the first-attempt input bridge, and then runs the proof-hole, authored-axiom,
+and debug-command scans. The target-level details are in
+[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md).

@@ -1,6 +1,16 @@
 # HAETAE Jasmin–EasyCrypt Verification Plan
 
-- **Status:** In progress — Phase 1 complete; Phase 2 now includes exact-target NTT correctness through inverse bound 18, algebraic semantics and totality for the actual fixed-mode `_kp_m23_matrix`, canonical signed-18-bit reduction and pointwise HAETAE coefficient-decomposition semantics for the actual mode-2 finalizer, an exact machine-word evaluator and totality theorem for the actual fixed-mode `_singular_full`, conditional local Q16/integer kernel decoders, explicit numerical range contracts, extracted bit-reversal/root-coordinate bounds, a real-pair complex algebra scaffold, a constructive 512th root with a checked dyadic primitivity criterion and abstract odd-root DFT/twist identity, a proof that the pure exact-complex bit-reversed eight-stage schedule computes `dft256` and its twisted input computes `odd_dft256`, a strict unique-nearest Q16 certificate for all 256 extracted root pairs, a complete decoded initialization/bit-reversal bridge with signed-product safety and a `1/65536` ideal-input error bound for coefficient magnitude at most two, a decoded one-butterfly bridge with exact four-store/frame semantics and `1/65536` local rounding error under the explicit safety contract, exact evolving-state `k`-prefix, block-prefix, stage, and full eight-round schedule decoders, coefficient-bounded schedule-wide signed safety with a final raw bound of `859963392`, an explicit FFT endpoint error budget of `44833/65536` plus compiled round-0 and final endpoint wrappers, checked finish-tie discrepancies, and packed-output equivalence between the actual fixed-mode `_keypair_full_m23` and a result-carried mirror that exposes its first attempt; the owner-stage global-error lift, coefficient-bound reachability, squared-magnitude/accumulator nonoverflow, a versioned tie-policy decision, acceptance and retry termination, packing semantics, and the NTT/matrix-to-security-model multiplication bridge remain open
+- **Status:** In progress — Phase 1 complete. Phase 2 includes exact-target
+  mode-2 matrix arithmetic and finalization, exact machine-word semantics and
+  totality for fixed-mode `_singular_full`, the constructive ideal FFT and
+  extracted-root certificates, exact rounded-machine prefix/stage/schedule
+  decoders, and coefficient-bounded eight-round signed safety through raw
+  bound `859963392`. The immutable first-attempt trace now derives that input
+  bound for all three `s1` and two finalized-`s2` slices. The owner-stage
+  global-error lift, squared-magnitude/accumulator nonoverflow, retry-attempt
+  lifting, tie-policy decision, acceptance and retry termination, packing
+  semantics, and NTT/matrix-to-security-model multiplication bridge remain
+  open.
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
 - **Implementation under verification:** `../haetae-ref-jasmin/`
@@ -139,8 +149,12 @@ claims.
   `KeygenM23SingularFFTScheduleBridge` composes those stage endpoints across
   the eight executing rounds on the decoded machine surface. The raw-word
   bound theories now discharge coefficient-bounded schedule safety and prove
-  final signed storage; coefficient-bound reachability, identification with
-  the exact ideal schedule, and global numerical error remain open.
+  final signed storage. `TargetKeygenM23SingularFFTInputBounds` derives the
+  coefficient premise for the three sampled `s1` and two finalized-`s2`
+  slices in the immutable first-attempt trace, so every valid first-attempt
+  slot has schedule safety and the final `859963392` raw bound for arbitrary
+  scratch input. Retry-attempt lifting, identification with the exact ideal
+  schedule, and global numerical error remain open.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -153,8 +167,8 @@ claims.
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
   termination, the rounded-machine-to-ideal owner-stage relation,
-  coefficient-bound reachability, global error for the complete FFT beyond the
-  recorded endpoint budget, or
+  retry-attempt coefficient-bound propagation, global error for the complete
+  FFT beyond the recorded endpoint budget, or
   squared-magnitude/accumulator nonoverflow for the score, a
   versioned tie-policy change, or packing correctness.
   The gate

@@ -43,4 +43,5 @@ refinement/TargetKeygenM23SingularHelpers.ec
 refinement/TargetKeygenM23SingularTotality.ec
 refinement/TargetKeygenM23SingularFFT.ec
 refinement/TargetKeygenM23Singular.ec
+refinement/TargetKeygenM23SingularFFTInputBounds.ec
 refinement/TargetKeygenM23FullFirstAttempt.ec

@@ -21,7 +21,11 @@ require import
   TargetKeygenM23FinalizeComposition
   TargetKeygenM23Singular.
 
-theory KeygenM23SingularFFTCoefficientReachability.
+theory TargetKeygenM23SingularFFTInputBounds.
+
+(* Connect the sampler/finalizer facts exposed by the target refinement to the
+   coefficient-bound premise used by the generic FFT safety theories.  The
+   result is intentionally parameterized by the threaded scratch array. *)
 
 op mode2_fft_inputs_bound2
     (s1 s2 : BArray8192.t) : bool =
@@ -310,4 +314,4 @@ exact
     bp0 bp s2 hsampler hfinal).
 qed.
 
-end KeygenM23SingularFFTCoefficientReachability.
+end TargetKeygenM23SingularFFTInputBounds.

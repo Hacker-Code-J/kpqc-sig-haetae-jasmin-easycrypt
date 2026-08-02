@@ -4,7 +4,7 @@ from Jasmin require import JModel_x86.
 
 import SLH64.
 
-require import BArray32 BArray128 BArray2080 BArray2752
+require import BArray32 BArray128 BArray2048 BArray2080 BArray2752
                BArray8192 BArray32768 SBArray128_32
                KeygenMode2ParentTarget
                KeygenSamplerCallersSpec KeygenM23MatrixSpec
@@ -12,10 +12,16 @@ require import BArray32 BArray128 BArray2080 BArray2752
                KeygenM23FinalizeArraySemantics
                KeygenM23FinalizeHAETAEBridge
                KeygenM23SingularFFTSpec
+               KeygenM23SingularFFTBounds
+               KeygenM23SingularFFTScheduleBounds
+               KeygenM23SingularFFTGlobalTrace
                TargetKeygenMode2ParentComposition
                TargetKeygenM23FinalizeComposition
                TargetKeygenM23FinalizeSemanticComposition
-               TargetKeygenM23Singular.
+               TargetKeygenM23Singular
+               TargetKeygenM23SingularFFTInputBounds.
+
+import TargetKeygenM23SingularFFTInputBounds.
 
 theory TargetKeygenM23FullFirstAttempt.
 
@@ -187,18 +193,28 @@ op first_attempt_trace_guard
     FirstAttemptTrace _ _ _ _ _ _ _ _ _ _ _ sv bound _ =>
       ! (bound \ult sv).
 
+op first_attempt_trace_fft_inputs_bound2
+    (trace : first_attempt_trace) : bool =
+  with trace =
+    FirstAttemptTrace _ _ _ _ s1 _ _ _ _ final_s2 _ _ _ _ =>
+      mode2_fft_inputs_bound2 s1 final_s2.
+
+(* The immutable first-attempt snapshot closes the input premise for each of
+   the three s1 and two finalized-s2 slices.  These corollaries do not describe
+   later retry attempts or the squared-magnitude accumulator. *)
+
 lemma mode2_singular_reject_zeroE (sv : W64.t) :
   ((if W64.of_int 611098 \ult sv then W64.one else W64.zero) =
      W64.zero) <=>
   W64.to_uint sv <= 611098.
 proof.
+have hone : W64.one <> W64.zero by
+  rewrite W64.to_uint_eq W64.to_uint1 W64.to_uint0.
 case (W64.of_int 611098 \ult sv) => hcmp.
 + move: (TargetKeygenM23Singular.mode2_singular_guardE sv).
-  rewrite hcmp /= /W64.one /W64.zero.
-  smt(W64.of_uintK).
+  by rewrite hcmp /= hone.
 + move: (TargetKeygenM23Singular.mode2_singular_guardE sv).
-  rewrite hcmp /=.
-  smt().
+  by rewrite hcmp /=.
 qed.
 
 lemma first_attempt_snapshot_score_guardE
@@ -237,6 +253,84 @@ move=> [hsampler [hm23 [hfinal [harray [hhaetae
   [hscore [hcounter [hbound [hreject haccept]]]]]]]]].
 rewrite hbound.
 exact (TargetKeygenM23Singular.mode2_singular_guardE sv).
+qed.
+
+lemma first_attempt_snapshot_fft_inputs_bound2
+    (seed0 : BArray32.t) (trace : first_attempt_trace) :
+  first_attempt_snapshot_facts seed0 trace =>
+  first_attempt_trace_fft_inputs_bound2 trace.
+proof.
+case: trace =>
+  accepted seedbuf mat avec s1 sampled_s2 pre_bp s1hat
+  final_bp final_s2 counter sv bound reject.
+rewrite /first_attempt_snapshot_facts
+        /first_attempt_trace_fft_inputs_bound2 /=.
+move=> [hsampler [_ [_ [harray _]]]].
+exact
+  (mode2_fft_inputs_bound2_of_mode2_sampler_finalize
+    seedbuf mat avec s1 sampled_s2 counter
+    witness witness witness witness seed0
+    pre_bp final_bp final_s2 hsampler harray).
+qed.
+
+lemma first_attempt_snapshot_fft_slot_schedule_safe
+    (seed0 : BArray32.t)
+    accepted seedbuf mat avec s1 sampled_s2
+    pre_bp s1hat final_bp final_s2
+    counter sv bound reject
+    (data : BArray2048.t) (slot : int) :
+  first_attempt_snapshot_facts seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) =>
+  0 <= slot < KeygenM23SingularFFTSpec.mode2_slice_count_i =>
+  KeygenM23SingularFFTGlobalTrace.actual_fft_schedule_safe
+    data (KeygenM23SingularFFTSpec.mode2_slice s1 final_s2 slot).
+proof.
+move=> hsnapshot hslot.
+have hinputs :=
+  first_attempt_snapshot_fft_inputs_bound2 seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) hsnapshot.
+rewrite /first_attempt_trace_fft_inputs_bound2 in hinputs.
+exact
+  (mode2_fft_slot_schedule_safe
+    data s1 final_s2 slot hinputs hslot).
+qed.
+
+lemma first_attempt_snapshot_fft_slot_full_word_bound2
+    (seed0 : BArray32.t)
+    accepted seedbuf mat avec s1 sampled_s2
+    pre_bp s1hat final_bp final_s2
+    counter sv bound reject
+    (data : BArray2048.t) (slot : int) :
+  first_attempt_snapshot_facts seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) =>
+  0 <= slot < KeygenM23SingularFFTSpec.mode2_slice_count_i =>
+  KeygenM23SingularFFTBounds.fft_word_bound
+    (KeygenM23SingularFFTSpec.fft_full
+      (KeygenM23SingularFFTScheduleBounds.actual_fft_init_data_bound2
+        data (KeygenM23SingularFFTSpec.mode2_slice s1 final_s2 slot))
+      KeygenMode2ParentTarget.jfft_roots)
+    859963392.
+proof.
+move=> hsnapshot hslot.
+have hinputs :=
+  first_attempt_snapshot_fft_inputs_bound2 seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) hsnapshot.
+rewrite /first_attempt_trace_fft_inputs_bound2 in hinputs.
+exact
+  (mode2_fft_slot_full_word_bound2
+    data s1 final_s2 slot hinputs hslot).
 qed.
 
 lemma mode2_full_first_attempt_equiv :
@@ -485,6 +579,23 @@ ecall
 auto.
 auto => />;
   rewrite /first_attempt_snapshot_facts /SLH64.protect_64.
+qed.
+
+lemma mode2_full_first_attempt_fft_inputs_bound2_correct
+    (seed0 : BArray32.t) :
+  hoare [
+    Mode2FullFirstAttempt.run :
+    seedp = seed0
+    ==>
+    first_attempt_snapshot_facts seed0 res.`2 /\
+    first_attempt_trace_fft_inputs_bound2 res.`2].
+proof.
+conseq (mode2_full_first_attempt_snapshot_correct seed0).
+move=> &hr hpre result hsnapshot.
+split; first exact hsnapshot.
+exact
+  (first_attempt_snapshot_fft_inputs_bound2
+    seed0 result.`2 hsnapshot).
 qed.
 
 lemma mode2_full_first_attempt_score_guard_correct

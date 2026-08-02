@@ -85,8 +85,11 @@ prefix with safety evaluated on every evolving pre-step state.
 an arbitrary valid block prefix with safety evaluated on every exact pre-block
 state. `KeygenM23SingularFFTStageBridge` closes the exact owner-block endpoint
 for each reachable complete stage. `KeygenM23SingularFFTScheduleBridge`
-composes all eight rounds under explicit per-stage safety, but does not prove
-that the safety premise holds on an actual trace.
+composes all eight rounds under explicit per-stage safety. The later bound
+theories discharge those premises under coefficient magnitude at most two,
+and `TargetKeygenM23SingularFFTInputBounds` now derives that premise for every
+slice in the exposed actual first attempt. Later retry attempts are not traced
+by that theorem.
 
 ## Checked tie discrepancy
 
@@ -155,11 +158,14 @@ correspondence theorem must:
 ## Range boundary
 
 The verified coefficient facts give stored `s1` coefficients in `[-1, 1]` and
-adjusted `s2` coefficients in `[-2, 2]`. The later FFT bound theories compile
-the conservative calculation: under coefficient bound two the eight rounded
-stages remain signed-safe and finish with raw coordinate bound `859963392`.
-The same coefficient bounds cannot establish safe squared-magnitude
-accumulation.
+adjusted `s2` coefficients in `[-2, 2]`. The reachability bridge proves these
+bounds at the actual slice offsets: slots zero through two read sampled `s1`,
+while slots three and four read finalized `s2 = sampled_s2 - vk_low`, with
+both terms individually in `[-1,1]`. The first-attempt trace therefore meets
+the coefficient-two premise for all five slots. The FFT bound theories then
+prove that all eight rounded stages remain signed-safe and finish with raw
+coordinate bound `859963392`. The same coefficient bounds cannot establish
+safe squared-magnitude accumulation.
 
 At the first odd root, an all-one degree-255 polynomial has ideal squared
 magnitude
@@ -219,7 +225,7 @@ With the current implementation, the strongest honest bridge has the shape
 
 ```text
 root-table certificate
-and coefficient-bounded FFT/butterfly safe trace
+and first-attempt FFT/butterfly safe trace
 and squared-magnitude/accumulator safe trace
 and finish safe trace
 imply
@@ -241,6 +247,8 @@ The exact evolving-state inner-prefix endpoint is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
 The exact evolving-state block-prefix endpoint is detailed in
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
+The actual five-slice first-attempt input bridge is detailed in
+[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of
