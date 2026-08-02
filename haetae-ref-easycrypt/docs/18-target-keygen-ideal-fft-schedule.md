@@ -58,26 +58,21 @@ ideal_odd_fft256_correct:
   ideal_fft256 (twist256 input) k = odd_dft256 input k
 ```
 
-This closes the ideal algebraic schedule dependency. It does not close the
-machine correspondence. A separate follow-on certificate now closes the
-extracted-root-coordinate rounding dependency.
+This closes the ideal algebraic schedule dependency. The subsequent
+machine-to-ideal error certificate also closes the rounded owner-stage
+correspondence, with an explicit coordinate error rather than exact equality.
 
 ## Deliberate boundary
 
 This milestone does not prove that:
 
-- the complete `KeygenM23SingularFFTSpec` or extracted Jasmin evaluator is
-  related to `ideal_fft256` beyond the separately proved initialization and
-  rounded inner-prefix endpoints;
 - squared magnitude or accumulator stays within its signed range;
-- the eight rounded stages have a stated global error bound; or
 - the machine score or rejection guard agrees with an ideal score or guard.
 
 In particular, exact equality between the rounded fixed-point evaluator and
-`dft256` is not asserted. The later raw-word theories now prove scheduled
-butterfly safety under coefficient bound two; the future bridge must still
-relate the rounded owner-stage observer to this ideal schedule with an
-explicit global error theorem.
+`dft256` is not asserted. The later raw-word and error-trace theories prove
+scheduled butterfly safety under coefficient bound two and relate every
+first-attempt output coordinate to `odd_dft256` within `44833/65536`.
 
 `KeygenM23RootGeneratorCertificate`, `KeygenM23RootTableRounding`, and
 `KeygenM23RootTableTargetBridge` now prove that every extracted signed
@@ -87,16 +82,15 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 ## Next dependency
 
+The coefficient premise, rounded owner-stage trace, and machine-to-ideal
+coordinate error are complete; see
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 The remaining analytic chain is:
 
-1. prove the coefficient premise for actual slices and connect the now-safe
-   eight-stage machine trace to the ideal schedule;
-2. propagate the certified root-coordinate and local multiplication errors
-   through the owner-stage observer to
-   `ideal_fft256`;
-3. carry the error through accumulation, selection, and the retained
+1. carry the error through squared magnitude, accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
-4. relate the machine and ideal rejection decisions only outside the resulting
+2. extend the input and numerical trace to later attempts and relate the
+   machine and ideal rejection decisions only outside the resulting
    error band.
 
 The root-table milestone is detailed in
@@ -109,6 +103,8 @@ The exact evolving-state inner-prefix milestone is detailed in
 [`22-target-keygen-fft-k-prefix-bridge.md`](22-target-keygen-fft-k-prefix-bridge.md).
 The exact evolving-state block-prefix milestone is detailed in
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
+The completed rounded machine-to-ideal endpoint is detailed in
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
 ## Verification
 

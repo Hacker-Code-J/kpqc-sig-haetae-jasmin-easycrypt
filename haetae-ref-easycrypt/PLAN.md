@@ -6,9 +6,10 @@
   extracted-root certificates, exact rounded-machine prefix/stage/schedule
   decoders, and coefficient-bounded eight-round signed safety through raw
   bound `859963392`. The immutable first-attempt trace now derives that input
-  bound for all three `s1` and two finalized-`s2` slices. The owner-stage
-  global-error lift, squared-magnitude/accumulator nonoverflow, retry-attempt
-  lifting, tie-policy decision, acceptance and retry termination, packing
+  bound for all three `s1` and two finalized-`s2` slices, and the checked
+  owner-stage recurrence gives each slot a coordinatewise `44833/65536`
+  endpoint against `odd_dft256`. Squared-magnitude/accumulator nonoverflow,
+  retry-attempt lifting, tie-policy decision, acceptance and retry termination, packing
   semantics, and NTT/matrix-to-security-model multiplication bridge remain
   open.
 - **Created:** 2026-07-13
@@ -152,9 +153,9 @@ claims.
   final signed storage. `TargetKeygenM23SingularFFTInputBounds` derives the
   coefficient premise for the three sampled `s1` and two finalized-`s2`
   slices in the immutable first-attempt trace, so every valid first-attempt
-  slot has schedule safety and the final `859963392` raw bound for arbitrary
-  scratch input. Retry-attempt lifting, identification with the exact ideal
-  schedule, and global numerical error remain open.
+  slot has schedule safety, the final `859963392` raw bound, and the
+  coordinatewise `44833/65536` error endpoint against the exact ideal schedule
+  for arbitrary scratch input. Retry-attempt lifting remains open.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -166,9 +167,7 @@ claims.
   This is
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
-  termination, the rounded-machine-to-ideal owner-stage relation,
-  retry-attempt coefficient-bound propagation, global error for the complete
-  FFT beyond the recorded endpoint budget, or
+  termination, retry-attempt coefficient-bound/error propagation, or
   squared-magnitude/accumulator nonoverflow for the score, a
   versioned tie-policy change, or packing correctness.
   The gate
@@ -178,8 +177,8 @@ claims.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  the owner-stage rounded-machine-to-ideal global error lift and accumulator
-  nonoverflow facts for the exact singular-word evaluator, an explicit versioned
+  squared-magnitude and accumulator nonoverflow facts for the exact
+  singular-word evaluator, an explicit versioned
   tie-policy decision, proof of
   acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and

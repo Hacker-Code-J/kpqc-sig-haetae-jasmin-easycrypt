@@ -63,8 +63,10 @@ This stage-bridge milestone itself does not:
 The companion schedule bridge composes the eight stage proofs into the full
 `fft_full` trace. `KeygenM23SingularFFTStageBounds` and
 `KeygenM23SingularFFTScheduleBounds` subsequently discharge stage and schedule
-safety under coefficient bound two. The remaining FFT bridge work is the
-owner-stage global-error lift and the sharper accumulator/finish range trace.
+safety under coefficient bound two. `KeygenM23SingularFFTStageErrorBridge`
+and the later error trace subsequently close the owner-stage global-error
+lift. The sharper accumulator/finish range trace remains open; see
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
 ## Verification
 

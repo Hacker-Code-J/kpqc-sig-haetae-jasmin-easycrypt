@@ -90,8 +90,9 @@ block-prefix theorem to each reachable stage schedule. The
 [schedule bridge](25-target-keygen-fft-schedule-bridge.md) composes all eight
 stages while keeping the signed-safety premise explicit. The later
 [safe-bounds milestone](26-target-keygen-fft-safe-bounds.md) discharges that
-premise under coefficient bound two. The remaining FFT work is the
-owner-stage numerical-error lift and accumulator safety.
+premise under coefficient bound two. The later
+[error-trace milestone](28-target-keygen-fft-error-trace.md) closes the
+owner-stage numerical-error lift; accumulator safety remains open.
 
 ## Verification
 

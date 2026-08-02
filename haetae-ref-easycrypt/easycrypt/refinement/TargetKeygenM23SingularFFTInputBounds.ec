@@ -12,14 +12,24 @@ require import
   KeygenM23FinalizeSemantics
   KeygenM23FinalizeArraySemantics
   KeygenM23SingularSpec
+  KeygenM23ComplexReal
+  KeygenM23IdealRootDFT
   KeygenM23SingularFFTSpec
   KeygenM23SingularFFTInitBridge
   KeygenM23SingularFFTBounds
   KeygenM23SingularFFTScheduleBounds
   KeygenM23SingularFFTGlobalTrace
+  KeygenM23SingularFFTErrorTrace
   KeygenMode2ParentTarget
   TargetKeygenM23FinalizeComposition
   TargetKeygenM23Singular.
+
+import
+  KeygenM23ComplexReal
+  KeygenM23IdealRootDFT
+  KeygenM23SingularFFTInitBridge
+  KeygenM23SingularFFTGlobalTrace
+  KeygenM23SingularFFTErrorTrace.
 
 theory TargetKeygenM23SingularFFTInputBounds.
 
@@ -256,6 +266,31 @@ exact
     (hbound slot hslot)).
 qed.
 
+lemma mode2_fft_slot_full_odd_dft256_close_bound2
+    (data : BArray2048.t)
+    (s1 s2 : BArray8192.t) (slot j : int) :
+  mode2_fft_inputs_bound2 s1 s2 =>
+  0 <= slot < KeygenM23SingularFFTSpec.mode2_slice_count_i =>
+  0 <= j < 256 =>
+  cclose (44833%r / 65536%r)
+    (fft_decode_at
+      (KeygenM23SingularFFTSpec.fft_full
+        (actual_fft_init_data data
+          (KeygenM23SingularFFTSpec.mode2_slice s1 s2 slot))
+        KeygenMode2ParentTarget.jfft_roots)
+      j)
+    (odd_dft256
+      (fft_coefficient_vector
+        (KeygenM23SingularFFTSpec.mode2_slice s1 s2 slot))
+      j).
+proof.
+move=> hbound hslot hj.
+exact
+  (actual_fft_full_odd_dft256_close_bound2
+    data (KeygenM23SingularFFTSpec.mode2_slice s1 s2 slot)
+    j hj (hbound slot hslot)).
+qed.
+
 lemma mode2_sampler_finalize_fft_slot_schedule_safe
     (data : BArray2048.t)
     (seedbuf : BArray128.t)
@@ -308,6 +343,43 @@ lemma mode2_sampler_finalize_fft_slot_full_word_bound2
 proof.
 move=> hsampler hfinal hslot.
 apply mode2_fft_slot_full_word_bound2 => //.
+exact
+  (mode2_fft_inputs_bound2_of_mode2_sampler_finalize
+    seedbuf mat avec s1 s2p0 counter mat0 avec0 s10 s20 raw_seed0
+    bp0 bp s2 hsampler hfinal).
+qed.
+
+lemma mode2_sampler_finalize_fft_slot_full_odd_dft256_close_bound2
+    (data : BArray2048.t)
+    (seedbuf : BArray128.t)
+    (mat : BArray32768.t)
+    (avec s1 s2p0 : BArray8192.t)
+    (counter : W64.t)
+    (mat0 : BArray32768.t)
+    (avec0 s10 s20 : BArray8192.t)
+    (raw_seed0 : BArray32.t)
+    (bp0 bp s2 : BArray8192.t)
+    (slot j : int) :
+  TargetKeygenM23FinalizeComposition.mode2_sampler_facts
+    seedbuf mat avec s1 s2p0 counter mat0 avec0 s10 s20 raw_seed0 =>
+  KeygenM23FinalizeArraySemantics.finalize_semantic_output
+    bp0 s2p0 avec bp s2 =>
+  0 <= slot < KeygenM23SingularFFTSpec.mode2_slice_count_i =>
+  0 <= j < 256 =>
+  cclose (44833%r / 65536%r)
+    (fft_decode_at
+      (KeygenM23SingularFFTSpec.fft_full
+        (actual_fft_init_data data
+          (KeygenM23SingularFFTSpec.mode2_slice s1 s2 slot))
+        KeygenMode2ParentTarget.jfft_roots)
+      j)
+    (odd_dft256
+      (fft_coefficient_vector
+        (KeygenM23SingularFFTSpec.mode2_slice s1 s2 slot))
+      j).
+proof.
+move=> hsampler hfinal hslot hj.
+apply mode2_fft_slot_full_odd_dft256_close_bound2 => //.
 exact
   (mode2_fft_inputs_bound2_of_mode2_sampler_finalize
     seedbuf mat avec s1 s2p0 counter mat0 avec0 s10 s20 raw_seed0

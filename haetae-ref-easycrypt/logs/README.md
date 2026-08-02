@@ -38,10 +38,10 @@ schedule semantics, first-attempt five-slice coefficient reachability, and
 proof-only sampler-to-finalizer composition writes
 `keygen-m23-matrix-proof-summary.txt`. Its retained title is “HAETAE mode-2
 key-generation matrix, finalization, and singular-word proof verification”.
-The `2026-08-02T07:57:49Z` run records the canonical source hash; zero drift for
+The `2026-08-02T10:57:58Z` run records the canonical source hash; zero drift for
 the 32-file/56-procedure parent, 25-file/31-procedure sampler-caller, and
 10-file target-NTT extractions; the project-owned NTT loop support and 18
-imported dependency hashes; 47/47 fresh `-no-eco` compilations; and clean
+imported dependency hashes; 48/48 fresh `-no-eco` compilations; and clean
 proof-hole, authored-axiom, and
 debug-command scans. The individual compilation, hash, drift, scan, and
 Why3-server logs are under `keygen-m23-matrix-proof/`.

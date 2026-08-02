@@ -1,5 +1,5 @@
 HAETAE mode-2 key-generation matrix, finalization, and singular-word proof verification
-Date (UTC): 2026-08-02T07:57:49Z
+Date (UTC): 2026-08-02T10:57:58Z
 Command: ./scripts/verify-keygen-m23-matrix-proof.sh
 Toolchain: easycrypt=/home/hacker-code-j/.opam/easycrypt-5.2/bin/easycrypt; Why3 platform, version 1.8.0; max-provers=1
 Actual target: easycrypt/extract/keygen-mode2-parent/KeygenMode2ParentTarget.ec
@@ -42,6 +42,7 @@ PASS compile spec/KeygenM23SingularFFTBounds.ec
 PASS compile spec/KeygenM23SingularFFTStageBounds.ec
 PASS compile spec/KeygenM23SingularFFTScheduleBounds.ec
 PASS compile spec/KeygenM23SingularFFTGlobalTrace.ec
+PASS compile spec/KeygenM23SingularFFTStageErrorBridge.ec
 PASS compile spec/KeygenM23SingularFFTErrorTrace.ec
 PASS compile refinement/TargetKeygenM23Matrix.ec
 PASS compile refinement/TargetKeygenM23WideSupport.ec
@@ -62,5 +63,5 @@ PASS compile refinement/TargetKeygenM23FullFirstAttempt.ec
 PASS proof-hole scan (no admit/abort proof commands)
 PASS authored axiom declaration scan (no declarations)
 PASS debug command scan (no print goal/all commands)
-RESULT: PASS compiled=47 total=47 mode=-no-eco
+RESULT: PASS compiled=48 total=48 mode=-no-eco
 Exit status: 0

@@ -355,9 +355,12 @@ four stores and both decoded destinations, frames every other complex cell,
 and proves `1/65536` local Q16 error against the exact decoded-root butterfly
 under `fft_butterfly_safe_at`. The subsequent raw-word invariant composes this
 contract through all eight stages under coefficient bound two and proves the
-final signed coordinate bound `859963392`, while the later endpoint wrapper
-records the target budget `44833/65536`; they do not yet prove the owner-stage
-global error or accumulator trace.
+final signed coordinate bound `859963392`. The stage-error bridge now composes
+root-table, input, and local rounding perturbations through all eight rounds
+and proves the coordinatewise `44833/65536` endpoint against `odd_dft256`;
+the squared-magnitude and accumulator trace remains open. The recurrence and
+endpoint are detailed in
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -452,7 +455,9 @@ valid slot and arbitrary threaded FFT scratch input,
 `first_attempt_snapshot_fft_slot_schedule_safe` discharges the eight-round
 butterfly-safety schedule and
 `first_attempt_snapshot_fft_slot_full_word_bound2` gives the final raw
-coordinate bound `859963392`. These theorems describe the exposed first
+coordinate bound `859963392`, while
+`first_attempt_snapshot_fft_slot_full_odd_dft256_close_bound2` gives the
+`44833/65536` ideal endpoint. These theorems describe the exposed first
 attempt only; they do not add semantic snapshots for later residual-loop
 attempts or establish squared-magnitude/accumulator safety.
 
@@ -473,14 +478,15 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 47 authored manifest entries,
-  including `KeygenM23SingularFFTScheduleBounds.ec`,
+- successful fresh `-no-eco` compilation of all 48 authored manifest entries,
+  including `KeygenM23SingularFFTStageErrorBridge.ec`,
+  `KeygenM23SingularFFTScheduleBounds.ec`,
   `TargetKeygenM23SingularFFTInputBounds.ec`, and
   `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=47 total=47 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=48 total=48 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -507,13 +513,9 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- that the rounded fixed-point machine implements that ideal DFT for the
-  exact `_singular_full` evaluator, beyond the now-proved initialization,
-  one-kernel, exact evolving-state inner-prefix, block-prefix, stage, and
-  schedule bridges, coefficient-bounded signed FFT safety, and actual
-  first-attempt input reachability; the owner-stage
-  global numerical FFT error lift, a non-overflow/range theorem for all
-  accumulations, a resolution of the finish tie policy, or
+- a non-overflow/range theorem for all squared-magnitude and five-pass
+  accumulations after the now-proved first-attempt `44833/65536`
+  machine-to-ideal FFT endpoint, a resolution of the finish tie policy, or
   identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the

@@ -216,8 +216,10 @@ complete inner loops through every valid block prefix on exact evolving
 pre-block states.
 
 Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
-initialization and single-kernel preliminaries. No theorem yet identifies the
-rounded butterfly stage folds with the proved exact-complex schedule.
+initialization and single-kernel preliminaries. The subsequent owner-stage
+error bridge now carries those local facts through all eight rounded stages
+and relates every first-attempt FFT output coordinate to the exact-complex
+schedule within `44833/65536`.
 
 ## Sound next theorem
 
@@ -232,9 +234,9 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires proving
-the owner-stage lift of the checked error recurrence against the exact-complex
-schedule, plus an explicit
+Relating that decoded-table score to the ideal quantity now requires carrying
+the checked coordinate error through squared magnitude and the accumulator,
+including their signed-safety obligations, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
@@ -249,6 +251,8 @@ The exact evolving-state block-prefix endpoint is detailed in
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 The actual five-slice first-attempt input bridge is detailed in
 [`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md).
+The eight-stage machine-to-ideal error endpoint is detailed in
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

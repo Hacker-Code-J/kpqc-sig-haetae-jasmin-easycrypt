@@ -84,9 +84,10 @@ The schedule bridge now composes all eight stages under explicit safety; see
 [`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md).
 The later [safe-bounds milestone](26-target-keygen-fft-safe-bounds.md)
 discharges that safety contract under coefficient bound two.
-The remaining FFT work must identify the composed rounded recurrence with
-`ideal_stage` and carry the root-table, incoming-state, and per-butterfly
-rounding errors.
+The later [error-trace milestone](28-target-keygen-fft-error-trace.md)
+identifies the composed rounded recurrence with `ideal_stage` and carries the
+root-table, incoming-state, and per-butterfly rounding errors through all eight
+rounds. Squared-magnitude and accumulator safety remain open.
 
 ## Verification
 

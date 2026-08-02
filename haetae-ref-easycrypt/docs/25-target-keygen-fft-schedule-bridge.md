@@ -73,10 +73,11 @@ composed raw signed-coordinate bound is `859963392 < 2^31` after round eight.
 This later result is documented in
 [`26-target-keygen-fft-safe-bounds.md`](26-target-keygen-fft-safe-bounds.md).
 
-Equality with the ideal exact-complex schedule, the complete global numerical
-error theorem, accumulator nonoverflow, finish semantics, packing semantics,
-and outer retry or acceptance results remain outside this schedule-bridge
-milestone.
+The later [error-trace milestone](28-target-keygen-fft-error-trace.md) closes
+the coordinatewise relation to the ideal exact-complex schedule with endpoint
+`44833/65536`. Accumulator nonoverflow, finish/score semantics, packing
+semantics, and outer retry or acceptance results remain outside this
+schedule-bridge milestone.
 
 ## Verification
 

@@ -11,17 +11,27 @@ require import BArray32 BArray128 BArray2048 BArray2080 BArray2752
                KeygenM23FinalizeSpec
                KeygenM23FinalizeArraySemantics
                KeygenM23FinalizeHAETAEBridge
+               KeygenM23ComplexReal
+               KeygenM23IdealRootDFT
                KeygenM23SingularFFTSpec
+               KeygenM23SingularFFTInitBridge
                KeygenM23SingularFFTBounds
                KeygenM23SingularFFTScheduleBounds
                KeygenM23SingularFFTGlobalTrace
+               KeygenM23SingularFFTErrorTrace
                TargetKeygenMode2ParentComposition
                TargetKeygenM23FinalizeComposition
                TargetKeygenM23FinalizeSemanticComposition
                TargetKeygenM23Singular
                TargetKeygenM23SingularFFTInputBounds.
 
-import TargetKeygenM23SingularFFTInputBounds.
+import
+  KeygenM23ComplexReal
+  KeygenM23IdealRootDFT
+  KeygenM23SingularFFTInitBridge
+  KeygenM23SingularFFTGlobalTrace
+  KeygenM23SingularFFTErrorTrace
+  TargetKeygenM23SingularFFTInputBounds.
 
 theory TargetKeygenM23FullFirstAttempt.
 
@@ -331,6 +341,46 @@ rewrite /first_attempt_trace_fft_inputs_bound2 in hinputs.
 exact
   (mode2_fft_slot_full_word_bound2
     data s1 final_s2 slot hinputs hslot).
+qed.
+
+lemma first_attempt_snapshot_fft_slot_full_odd_dft256_close_bound2
+    (seed0 : BArray32.t)
+    accepted seedbuf mat avec s1 sampled_s2
+    pre_bp s1hat final_bp final_s2
+    counter sv bound reject
+    (data : BArray2048.t) (slot j : int) :
+  first_attempt_snapshot_facts seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) =>
+  0 <= slot < KeygenM23SingularFFTSpec.mode2_slice_count_i =>
+  0 <= j < 256 =>
+  cclose (44833%r / 65536%r)
+    (fft_decode_at
+      (KeygenM23SingularFFTSpec.fft_full
+        (actual_fft_init_data data
+          (KeygenM23SingularFFTSpec.mode2_slice
+            s1 final_s2 slot))
+        KeygenMode2ParentTarget.jfft_roots)
+      j)
+    (odd_dft256
+      (fft_coefficient_vector
+        (KeygenM23SingularFFTSpec.mode2_slice
+          s1 final_s2 slot))
+      j).
+proof.
+move=> hsnapshot hslot hj.
+have hinputs :=
+  first_attempt_snapshot_fft_inputs_bound2 seed0
+    (FirstAttemptTrace
+      accepted seedbuf mat avec s1 sampled_s2
+      pre_bp s1hat final_bp final_s2
+      counter sv bound reject) hsnapshot.
+rewrite /first_attempt_trace_fft_inputs_bound2 in hinputs.
+exact
+  (mode2_fft_slot_full_odd_dft256_close_bound2
+    data s1 final_s2 slot j hinputs hslot hj).
 qed.
 
 lemma mode2_full_first_attempt_equiv :

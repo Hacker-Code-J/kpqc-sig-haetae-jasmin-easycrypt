@@ -7,7 +7,7 @@ eight-stage FFT under the explicit input contract
 `fft_coefficient_bound xp 2`. It proves safety for the actual extracted root
 table and every reachable schedule prefix from round zero through round eight.
 
-The proof is split across five checked theories:
+The proof and error lift are split across six checked theories:
 
 - `KeygenM23SingularFFTBounds` defines the raw signed-Q16 word invariant and
   proves initializer, root-table, butterfly, and inner-prefix bounds;
@@ -17,9 +17,11 @@ The proof is split across five checked theories:
   specializes the result to the actual root and bit-reversal tables;
 - `KeygenM23SingularFFTGlobalTrace` removes the former safety premise from the
   full decoded endpoint whenever the coefficient bound holds; and
-- `KeygenM23SingularFFTErrorTrace` records the explicit endpoint budget and
-  the round-0/final wrappers that any future rounded-machine-to-ideal proof
-  must discharge.
+- `KeygenM23SingularFFTStageErrorBridge` proves the root/input perturbation
+  bound for either owner lane and normalizes every coordinate to its unique
+  butterfly owner; and
+- `KeygenM23SingularFFTErrorTrace` composes that stage theorem through all
+  eight prefixes and exposes the explicit odd-DFT endpoint.
 
 ## Raw signed-Q16 invariant
 
@@ -79,20 +81,29 @@ corollaries for every valid slot and arbitrary scratch input. The arbitrary
 scratch quantification matches `_singular_full`'s threaded workspace; the FFT
 initializer overwrites the active cells before each schedule.
 
-## Global-error target
+## Checked global-error lift
 
-The remaining error proof is organized around the explicit budget sequence
-with base `1/65536` and endpoint `44833/65536`.
+The checked error proof uses an explicit budget sequence with base `1/65536`
+and endpoint `44833/65536`.
 
-`KeygenM23SingularFFTErrorTrace` fixes that endpoint budget, reuses the
-already-proved round-0 initializer fact, and compiles the final reduction from
-any future `actual_fft_schedule_trace ... fft_trace_eps` theorem to the target
-`odd_dft256` endpoint.
+For round `r`, the stage recurrence is
 
-What is still missing is the owner-stage rounded-machine-to-ideal lift that
-realizes the intermediate recurrence against `ideal_stage`. Accordingly,
-`44833/65536` is a recorded target budget and compiled endpoint wrapper, not
-yet a theorem about the complete machine output.
+```text
+eps(r + 1) = 3 * eps(r) + (2 * 3^r + 1) / 65536.
+```
+
+`KeygenM23SingularFFTStageErrorBridge` accounts separately for local product
+rounding, the certified root-table error, and perturbation of the odd input.
+It proves both butterfly lanes, reduces an arbitrary output coordinate to its
+unique block and lane, and obtains the recurrence above without introducing a
+spurious product of the root and input errors.
+
+`actual_fft_schedule_explicit_trace_bound2` then proves the complete prefix
+trace by induction. `actual_fft_full_odd_dft256_close_bound2` specializes the
+round-eight result to `odd_dft256`, with coordinatewise error at most
+`44833/65536` for every coefficient-bounded input. The target bridge exports
+the same theorem for every valid first-attempt slice. See
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
 ## Deliberate boundary
 
@@ -111,11 +122,9 @@ implementation arithmetic design.
 
 The remaining work is therefore:
 
-1. prove the stage-local owner/index alignment and multiplication-perturbation
-   theorem that realizes the recorded global error recurrence;
-2. establish squared-magnitude and five-pass accumulator safety;
-3. lift the input facts to later retry attempts; and
-4. connect the resulting score to acceptance and retry semantics.
+1. establish squared-magnitude and five-pass accumulator safety;
+2. lift the input and error facts to later retry attempts; and
+3. connect the resulting score to acceptance and retry semantics.
 
 ## Verification
 
@@ -126,7 +135,8 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The retained gate compiles all 47 manifest entries with `-no-eco`, including
-the first-attempt input bridge, and then runs the proof-hole, authored-axiom,
-and debug-command scans. The target-level details are in
-[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md).
+The retained gate compiles all 48 manifest entries with `-no-eco`, including
+the stage-error and first-attempt input bridges, and then runs the proof-hole,
+authored-axiom, and debug-command scans. The target-level details are in
+[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md)
+and [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).

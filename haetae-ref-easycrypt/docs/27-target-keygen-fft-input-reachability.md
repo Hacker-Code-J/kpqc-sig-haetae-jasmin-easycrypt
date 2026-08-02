@@ -39,8 +39,10 @@ and covers every one of the 256 coefficients in each slot.
 `mode2_fft_inputs_bound2 s1 final_s2`. The direct corollaries then establish,
 for every valid slot and every threaded scratch array:
 
-- `actual_fft_schedule_safe data (mode2_slice s1 final_s2 slot)`; and
-- the final `fft_word_bound` of `859963392` after all eight rounds.
+- `actual_fft_schedule_safe data (mode2_slice s1 final_s2 slot)`;
+- the final `fft_word_bound` of `859963392` after all eight rounds; and
+- coordinatewise closeness of the rounded endpoint to `odd_dft256` with
+  error at most `44833/65536`.
 
 The arbitrary scratch parameter matters because `_singular_full` threads one
 FFT workspace through all five slice calls; the initializer overwrites the
@@ -52,7 +54,9 @@ active FFT cells before the schedule begins.
 
 - `first_attempt_snapshot_fft_inputs_bound2` for the immutable trace;
 - `first_attempt_snapshot_fft_slot_schedule_safe` for every valid slot;
-- `first_attempt_snapshot_fft_slot_full_word_bound2` for the raw endpoint; and
+- `first_attempt_snapshot_fft_slot_full_word_bound2` for the raw endpoint;
+- `first_attempt_snapshot_fft_slot_full_odd_dft256_close_bound2` for the
+  checked machine-to-ideal endpoint; and
 - `mode2_full_first_attempt_fft_inputs_bound2_correct`, a Hoare theorem that
   retains the existing snapshot facts and adds the five-slice predicate.
 
@@ -65,7 +69,6 @@ the actual peeled first attempt.
 The result does not prove:
 
 - the same facts for a rejected attempt executed by the residual retry loop;
-- the owner-stage rounded-machine-to-ideal error recurrence;
 - squared-magnitude or five-pass accumulator nonoverflow;
 - analytic correspondence of the machine score with the paper statistic;
 - first-attempt acceptance or retry termination; or
@@ -84,5 +87,7 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The gate compiles the reachability bridge before the first-attempt target
-theory with `-no-eco`, then runs the proof-hole, authored-axiom, and debug scan.
+The gate compiles the reachability bridge and its error endpoint before the
+first-attempt target theory with `-no-eco`, then runs the proof-hole,
+authored-axiom, and debug scan. The generic error proof is detailed in
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
