@@ -82,9 +82,11 @@ The stage bridge now specializes it to each reachable outer stage schedule;
 see [`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
 The schedule bridge now composes all eight stages under explicit safety; see
 [`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md).
+The later [safe-bounds milestone](26-target-keygen-fft-safe-bounds.md)
+discharges that safety contract under coefficient bound two.
 The remaining FFT work must identify the composed rounded recurrence with
 `ideal_stage` and carry the root-table, incoming-state, and per-butterfly
-rounding errors while proving the required signed-fit bounds.
+rounding errors.
 
 ## Verification
 

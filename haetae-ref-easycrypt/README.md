@@ -65,9 +65,12 @@ block-prefix theorem to the eight reachable stage schedules with owner-block
 decoded semantics and full 256-cell coverage under explicit exact
 pre-block safety. `KeygenM23SingularFFTScheduleBridge` now composes those
 stage endpoints through the full eight-round machine fold on the decoded
-surface. The proof still does not establish an eight-stage safe trace, prove
-global FFT/accumulator error and nonoverflow, or identify the decoded machine
-fold with the ideal exact-complex schedule.
+surface. A raw signed-Q16 invariant now additionally discharges every
+scheduled butterfly-safety premise under coefficient bound two, proves the
+actual root table safe, and bounds the final FFT coordinates by
+`859963392 < 2^31`. The checked global-error recurrence has endpoint
+`44833/65536`, but its owner-stage lift remains open; squared-magnitude and
+accumulator safety also remain open.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -470,7 +473,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 41 authored
+hashes. Its current summary passes all 46 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -507,8 +510,8 @@ decoded-root complex butterfly whenever `fft_butterfly_safe_at` holds.
 The `k`-prefix theorem then proves exact pointwise decoded equality for every
 valid inner-loop prefix: processed destinations expose the rounded result from
 their exact pre-step prefix state, and every untouched cell retains its original
-decoded value. Its safety premise is explicit and remains to be discharged on
-the reachable stage trace. The block-prefix theorem composes complete inner
+decoded value. The later raw-word bound theories discharge its safety premise
+for every coefficient-bounded reachable stage. The block-prefix theorem composes complete inner
 loops over any valid block prefix using a folded observer evaluated on each
 exact evolving pre-block state. Its first-stage schedule certificate also
 checks the reachable `m = 2`, `md2 = 1`, `stride = 256` case without bounding
@@ -520,8 +523,9 @@ EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
 the ideal DFT correspondence for the exact `_singular_full` evaluator beyond
 the now-proved initialization, one-kernel, exact evolving-state inner-prefix,
-block-prefix, stage, and schedule bridges; schedule-wide safety, global FFT
-error or accumulator nonoverflow, first-attempt acceptance, residual-loop
+block-prefix, stage, and schedule bridges, coefficient-bounded schedule
+safety, and the recorded `44833/65536` endpoint error budget; the owner-stage
+global FFT error lift or accumulator nonoverflow, first-attempt acceptance, residual-loop
 termination, packing semantics, pointer aliasing or separation safety, or full
 key-generation correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
@@ -547,6 +551,8 @@ The exact stage bridge is detailed in
 [`docs/24-target-keygen-fft-stage-bridge.md`](docs/24-target-keygen-fft-stage-bridge.md).
 The exact schedule bridge is detailed in
 [`docs/25-target-keygen-fft-schedule-bridge.md`](docs/25-target-keygen-fft-schedule-bridge.md).
+The coefficient-bounded schedule-safety and raw-word invariant is detailed in
+[`docs/26-target-keygen-fft-safe-bounds.md`](docs/26-target-keygen-fft-safe-bounds.md).
 
 ## Baseline inputs
 

@@ -24,6 +24,11 @@ spec/KeygenM23SingularFFTKPrefixBridge.ec
 spec/KeygenM23SingularFFTBlockPrefixBridge.ec
 spec/KeygenM23SingularFFTStageBridge.ec
 spec/KeygenM23SingularFFTScheduleBridge.ec
+spec/KeygenM23SingularFFTBounds.ec
+spec/KeygenM23SingularFFTStageBounds.ec
+spec/KeygenM23SingularFFTScheduleBounds.ec
+spec/KeygenM23SingularFFTGlobalTrace.ec
+spec/KeygenM23SingularFFTErrorTrace.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec

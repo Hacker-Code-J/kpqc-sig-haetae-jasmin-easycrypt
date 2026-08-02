@@ -30,7 +30,7 @@ Status vocabulary:
 | OBL-REJECTION | Bounded structural sampler versus exact rejection-loop distribution | TO_PROVE | Termination/losslessness and accepted-distribution/statistical-distance results compile. |
 | OBL-FORK | Plumbing extractor versus exact bimodal self-target Module-SIS relation | TO_PROVE | Two-transcript extraction theorem with exact relation and norm bound compiles. |
 | OBL-FIPS202 | Structural Keccak/FIPS202 model versus target Jasmin byte/memory behavior | TO_PROVE | Extracted SHAKE procedures refine concrete padding, absorb, squeeze, and encoding semantics. |
-| OBL-FFT-SAFE-TRACE | Conditional exact eight-round rounded FFT semantics versus safety discharge and the ideal/global-error trace | TO_PROVE | Discharge every scheduled `fft_butterfly_safe_at` premise and prove the ideal-schedule relation, global error, and nonoverflow before using the score. |
+| OBL-FFT-SAFE-TRACE | Coefficient-bounded safe rounded FFT versus the remaining ideal/global-error and accumulator trace | TO_PROVE | The scheduled `fft_butterfly_safe_at` premises and signed FFT word bounds are discharged under `fft_coefficient_bound xp 2`, and the recurrence through endpoint budget `44833/65536` is checked. Prove that predicate for actual slices, lift the budget through the owner-stage observer against the ideal schedule, and establish squared-magnitude/accumulator nonoverflow before using the score. |
 | OBL-COMPOSE | Paper security theorem versus extracted public Jasmin APIs | TO_PROVE | Mode-2/3/5 implementation-security composition theorems compile. |
 
 These obligations are grounded in

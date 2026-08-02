@@ -64,13 +64,19 @@ The proof surface consists of:
 - `fft_full_decode`, which specializes the proof to the full `fft_full`
   evaluator.
 
-## Deliberate boundary
+## Subsequent safety lift
 
-This milestone does not discharge `fft_schedule_prefix_safe` on reachable
-traces. It does not prove equality with the ideal exact-complex schedule. It
-also does not establish global numerical FFT error or accumulator
-nonoverflow, finish semantics, packing semantics, or any outer retry or
-acceptance result.
+`KeygenM23SingularFFTScheduleBounds` now discharges
+`fft_schedule_prefix_safe` for every prefix under
+`fft_coefficient_bound xp 2`, using the actual extracted root table. The
+composed raw signed-coordinate bound is `859963392 < 2^31` after round eight.
+This later result is documented in
+[`26-target-keygen-fft-safe-bounds.md`](26-target-keygen-fft-safe-bounds.md).
+
+Equality with the ideal exact-complex schedule, the complete global numerical
+error theorem, accumulator nonoverflow, finish semantics, packing semantics,
+and outer retry or acceptance results remain outside this schedule-bridge
+milestone.
 
 ## Verification
 
@@ -81,6 +87,7 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The retained `2026-08-02T01:20:20Z` run passed all 41 authored manifest
-entries with `-no-eco`, followed by clean proof-hole, authored-axiom, and
+The current retained run is recorded in
+`logs/keygen-m23-matrix-proof-summary.txt`; it compiles every authored manifest
+entry with `-no-eco`, followed by the proof-hole, authored-axiom, and
 debug-command scans.

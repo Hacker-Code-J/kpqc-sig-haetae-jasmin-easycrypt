@@ -353,8 +353,11 @@ the named range premises. `KeygenM23SingularFFTButterflyBridge` additionally
 lifts the butterfly decoder through one valid array update: it identifies all
 four stores and both decoded destinations, frames every other complex cell,
 and proves `1/65536` local Q16 error against the exact decoded-root butterfly
-under `fft_butterfly_safe_at`. These results do not constitute an eight-stage
-safe-trace theorem.
+under `fft_butterfly_safe_at`. The subsequent raw-word invariant composes this
+contract through all eight stages under coefficient bound two and proves the
+final signed coordinate bound `859963392`, while the later endpoint wrapper
+records the target budget `44833/65536`; they do not yet prove the owner-stage
+global error or accumulator trace.
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -458,8 +461,8 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 41 authored manifest entries,
-  including `KeygenM23SingularFFTScheduleBridge.ec` and
+- successful fresh `-no-eco` compilation of all 46 authored manifest entries,
+  including `KeygenM23SingularFFTScheduleBounds.ec` and
   `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
@@ -492,8 +495,9 @@ DFT. It does **not** establish:
 - that the rounded fixed-point machine implements that ideal DFT for the
   exact `_singular_full` evaluator, beyond the now-proved initialization,
   one-kernel, exact evolving-state inner-prefix, block-prefix, stage, and
-  schedule bridges; global numerical FFT error bounds, a non-overflow/range
-  theorem for all accumulations, a resolution of the finish tie policy, or
+  schedule bridges and coefficient-bounded signed FFT safety; the owner-stage
+  global numerical FFT error lift, a non-overflow/range theorem for all
+  accumulations, a resolution of the finish tie policy, or
   identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the

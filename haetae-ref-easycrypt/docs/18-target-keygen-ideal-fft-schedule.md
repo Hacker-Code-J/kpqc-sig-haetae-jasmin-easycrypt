@@ -69,14 +69,15 @@ This milestone does not prove that:
 - the complete `KeygenM23SingularFFTSpec` or extracted Jasmin evaluator is
   related to `ideal_fft256` beyond the separately proved initialization and
   rounded inner-prefix endpoints;
-- every scheduled rounded butterfly, squared magnitude, or accumulator stays
-  within its signed range;
+- squared magnitude or accumulator stays within its signed range;
 - the eight rounded stages have a stated global error bound; or
 - the machine score or rejection guard agrees with an ideal score or guard.
 
 In particular, exact equality between the rounded fixed-point evaluator and
-`dft256` is not asserted. The future bridge must relate them with explicit
-rounding, safety, and error predicates.
+`dft256` is not asserted. The later raw-word theories now prove scheduled
+butterfly safety under coefficient bound two; the future bridge must still
+relate the rounded owner-stage observer to this ideal schedule with an
+explicit global error theorem.
 
 `KeygenM23RootGeneratorCertificate`, `KeygenM23RootTableRounding`, and
 `KeygenM23RootTableTargetBridge` now prove that every extracted signed
@@ -88,11 +89,10 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. discharge the explicit safety contract on the now-composed eight-stage
-   machine trace and connect it to the ideal schedule through all five
-   squared-magnitude passes;
+1. prove the coefficient premise for actual slices and connect the now-safe
+   eight-stage machine trace to the ideal schedule;
 2. propagate the certified root-coordinate and local multiplication errors
-   from that safe trace to
+   through the owner-stage observer to
    `ideal_fft256`;
 3. carry the error through accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and

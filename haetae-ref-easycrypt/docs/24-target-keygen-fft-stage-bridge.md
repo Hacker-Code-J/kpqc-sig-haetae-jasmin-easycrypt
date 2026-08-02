@@ -52,17 +52,19 @@ Supporting lemmas `fft_stage_schedule_r1` through `fft_stage_schedule_r8`,
 `fft_stage_decode_at_owner`, `fft_stage_decode_at_suffix`, and
 `fft_blocks_prefix_decode_at_stage` organize the proof.
 
-## Deliberate boundary
+## Subsequent safety lift
 
-This milestone does not:
+This stage-bridge milestone itself does not:
 
 1. discharge `fft_stage_safe` on reachable traces;
 2. prove global FFT error or accumulator nonoverflow; or
 3. establish equality with the ideal exact-complex schedule.
 
-The companion schedule bridge now composes the eight stage proofs into the
-full `fft_full` trace. The remaining FFT bridge work is to carry the safety
-and error obligations through the accumulator and finish logic.
+The companion schedule bridge composes the eight stage proofs into the full
+`fft_full` trace. `KeygenM23SingularFFTStageBounds` and
+`KeygenM23SingularFFTScheduleBounds` subsequently discharge stage and schedule
+safety under coefficient bound two. The remaining FFT bridge work is the
+owner-stage global-error lift and the sharper accumulator/finish range trace.
 
 ## Verification
 

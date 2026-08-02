@@ -155,10 +155,11 @@ correspondence theorem must:
 ## Range boundary
 
 The verified coefficient facts give stored `s1` coefficients in `[-1, 1]` and
-adjusted `s2` coefficients in `[-2, 2]`.  A conservative magnitude calculation
-indicates that initialization and the eight butterfly stages can stay in
-signed range, but no compiled global range theorem is claimed here. The same
-coefficient bounds cannot establish safe squared-magnitude accumulation.
+adjusted `s2` coefficients in `[-2, 2]`. The later FFT bound theories compile
+the conservative calculation: under coefficient bound two the eight rounded
+stages remain signed-safe and finish with raw coordinate bound `859963392`.
+The same coefficient bounds cannot establish safe squared-magnitude
+accumulation.
 
 At the first odd root, an all-one degree-255 polynomial has ideal squared
 magnitude
@@ -218,16 +219,16 @@ With the current implementation, the strongest honest bridge has the shape
 
 ```text
 root-table certificate
-and FFT/butterfly safe trace
+and coefficient-bounded FFT/butterfly safe trace
 and squared-magnitude/accumulator safe trace
 and finish safe trace
 imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires
-discharging the composed schedule's safe decoded trace and proving its global
-error against the exact-complex schedule, plus an explicit
+Relating that decoded-table score to the ideal quantity now requires proving
+the owner-stage lift of the checked error recurrence against the exact-complex
+schedule, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in

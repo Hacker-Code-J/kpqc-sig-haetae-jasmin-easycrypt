@@ -1,5 +1,5 @@
 HAETAE mode-2 key-generation matrix, finalization, and singular-word proof verification
-Date (UTC): 2026-08-02T01:20:20Z
+Date (UTC): 2026-08-02T05:19:19Z
 Command: ./scripts/verify-keygen-m23-matrix-proof.sh
 Toolchain: easycrypt=/home/hacker-code-j/.opam/easycrypt-5.2/bin/easycrypt; Why3 platform, version 1.8.0; max-provers=1
 Actual target: easycrypt/extract/keygen-mode2-parent/KeygenMode2ParentTarget.ec
@@ -38,6 +38,41 @@ PASS compile spec/KeygenM23SingularFFTKPrefixBridge.ec
 PASS compile spec/KeygenM23SingularFFTBlockPrefixBridge.ec
 PASS compile spec/KeygenM23SingularFFTStageBridge.ec
 PASS compile spec/KeygenM23SingularFFTScheduleBridge.ec
+PASS compile spec/KeygenM23RootTableTargetBridge.ec
+PASS compile spec/KeygenM23SingularFFTBounds.ec
+PASS compile spec/KeygenM23SingularFFTStageBounds.ec
+PASS compile spec/KeygenM23FixedPointSemantics.ec
+PASS compile spec/KeygenM23SingularBoundary.ec
+PASS compile spec/KeygenM23SingularFFTScheduleBounds.ec
+PASS compile spec/KeygenM23SingularZeroFinish.ec
+PASS compile spec/KeygenM23SingularFFTGlobalTrace.ec
+PASS compile spec/KeygenM23SingularTieRegression.ec
+PASS compile spec/KeygenM23SingularFFTSpec.ec
+PASS compile spec/KeygenM23SingularFFTErrorTrace.ec
+PASS compile spec/KeygenM23SingularIntegerSemantics.ec
+PASS compile spec/KeygenM23FFTTableCertificate.ec
+PASS compile refinement/TargetKeygenM23Matrix.ec
+PASS compile refinement/TargetKeygenM23WideSupport.ec
+PASS compile spec/KeygenM23SingularFFTInitBridge.ec
+PASS compile refinement/TargetKeygenM23WideNTT.ec
+PASS compile spec/KeygenM23SingularFFTButterflyBridge.ec
+PASS compile spec/KeygenM23SingularFFTKPrefixBridge.ec
+PASS compile refinement/TargetKeygenM23Pointwise.ec
+PASS compile spec/KeygenM23SingularFFTBlockPrefixBridge.ec
+PASS compile spec/KeygenM23SingularFFTStageBridge.ec
+PASS compile refinement/TargetKeygenM23WideInvNTT.ec
+PASS compile refinement/TargetKeygenM23Arithmetic.ec
+PASS compile refinement/TargetKeygenM23ParentComposition.ec
+PASS compile spec/KeygenM23SingularFFTScheduleBridge.ec
+PASS compile refinement/TargetKeygenM23Finalize.ec
+PASS compile refinement/TargetKeygenM23FinalizeComposition.ec
+PASS compile refinement/TargetKeygenM23FinalizeSemanticComposition.ec
+PASS compile spec/KeygenM23SingularFFTBounds.ec
+PASS compile spec/KeygenM23SingularFFTStageBounds.ec
+PASS compile spec/KeygenM23SingularFFTScheduleBounds.ec
+PASS compile spec/KeygenM23SingularFFTGlobalTrace.ec
+PASS compile refinement/TargetKeygenM23SingularHelpers.ec
+PASS compile spec/KeygenM23SingularFFTErrorTrace.ec
 PASS compile refinement/TargetKeygenM23Matrix.ec
 PASS compile refinement/TargetKeygenM23WideSupport.ec
 PASS compile refinement/TargetKeygenM23WideNTT.ec
@@ -48,13 +83,13 @@ PASS compile refinement/TargetKeygenM23ParentComposition.ec
 PASS compile refinement/TargetKeygenM23Finalize.ec
 PASS compile refinement/TargetKeygenM23FinalizeComposition.ec
 PASS compile refinement/TargetKeygenM23FinalizeSemanticComposition.ec
-PASS compile refinement/TargetKeygenM23SingularHelpers.ec
 PASS compile refinement/TargetKeygenM23SingularTotality.ec
+PASS compile refinement/TargetKeygenM23SingularHelpers.ec
 PASS compile refinement/TargetKeygenM23SingularFFT.ec
 PASS compile refinement/TargetKeygenM23Singular.ec
 PASS compile refinement/TargetKeygenM23FullFirstAttempt.ec
 PASS proof-hole scan (no admit/abort proof commands)
 PASS authored axiom declaration scan (no declarations)
 PASS debug command scan (no print goal/all commands)
-RESULT: PASS compiled=41 total=41 mode=-no-eco
+RESULT: PASS compiled=46 total=46 mode=-no-eco
 Exit status: 0

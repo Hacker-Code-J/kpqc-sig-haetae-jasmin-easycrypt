@@ -88,15 +88,16 @@ The complete reachable-stage endpoint is now closed by
 [`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
 The exact eight-round composition is now closed by
 [`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md).
+The coefficient-bounded safety contracts are now discharged by
+[`26-target-keygen-fft-safe-bounds.md`](26-target-keygen-fft-safe-bounds.md).
 The next FFT bridge must:
 
-1. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
-   propagate root-table, incoming-vector, and local rounding errors to a global
+1. propagate root-table, incoming-vector, and local rounding errors to a global
    bound against `ideal_fft256` while identifying the composed recurrence with
    `ideal_stage`; and
 2. separately address squared-magnitude and five-pass accumulator safety.
 
-The third item cannot follow from coefficient bounds alone. The high-energy
+The second item cannot follow from coefficient bounds alone. The high-energy
 example in
 [`15-target-keygen-singular-numeric-boundary.md`](15-target-keygen-singular-numeric-boundary.md)
 already exceeds the nonnegative signed-Q16 accumulator capacity.

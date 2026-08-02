@@ -88,8 +88,10 @@ This milestone closes only arbitrary complete block prefixes. It does not:
 The [stage bridge](24-target-keygen-fft-stage-bridge.md) now specializes the
 block-prefix theorem to each reachable stage schedule. The
 [schedule bridge](25-target-keygen-fft-schedule-bridge.md) composes all eight
-stages while keeping the signed-safety premise explicit. The remaining FFT
-work must discharge that premise and prove the numerical-error recurrence.
+stages while keeping the signed-safety premise explicit. The later
+[safe-bounds milestone](26-target-keygen-fft-safe-bounds.md) discharges that
+premise under coefficient bound two. The remaining FFT work is the
+owner-stage numerical-error lift and accumulator safety.
 
 ## Verification
 
