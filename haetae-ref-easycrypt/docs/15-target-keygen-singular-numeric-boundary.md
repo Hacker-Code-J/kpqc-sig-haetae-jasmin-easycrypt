@@ -84,8 +84,9 @@ prefix with safety evaluated on every evolving pre-step state.
 `KeygenM23SingularFFTBlockPrefixBridge` composes complete inner loops through
 an arbitrary valid block prefix with safety evaluated on every exact pre-block
 state. `KeygenM23SingularFFTStageBridge` closes the exact owner-block endpoint
-for each reachable complete stage. None of these theorems composes all eight
-rounds or proves that the safety premise holds on an actual trace.
+for each reachable complete stage. `KeygenM23SingularFFTScheduleBridge`
+composes all eight rounds under explicit per-stage safety, but does not prove
+that the safety premise holds on an actual trace.
 
 ## Checked tie discrepancy
 
@@ -224,10 +225,9 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires composing
-the checked initialization, one-butterfly, block-prefix, and stage endpoints
-through the eight-round folds with a safe decoded trace and the exact
-schedule, plus an explicit
+Relating that decoded-table score to the ideal quantity now requires
+discharging the composed schedule's safe decoded trace and proving its global
+error against the exact-complex schedule, plus an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in

@@ -88,9 +88,9 @@ for the future machine bridge; it is not itself an array-level FFT theorem.
 
 The remaining analytic chain is:
 
-1. extend the proved initialization, one-butterfly, block-prefix, and exact
-   complete-stage endpoints through the eight-stage machine trace and all
-   five squared-magnitude passes;
+1. discharge the explicit safety contract on the now-composed eight-stage
+   machine trace and connect it to the ideal schedule through all five
+   squared-magnitude passes;
 2. propagate the certified root-coordinate and local multiplication errors
    from that safe trace to
    `ideal_fft256`;

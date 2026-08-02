@@ -458,13 +458,13 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 40 authored manifest entries,
-  including `KeygenM23SingularFFTStageBridge.ec` and
+- successful fresh `-no-eco` compilation of all 41 authored manifest entries,
+  including `KeygenM23SingularFFTScheduleBridge.ec` and
   `TargetKeygenM23FullFirstAttempt.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=40 total=40 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=41 total=41 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -489,13 +489,12 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- that the rounded eight-round schedule of the fixed-point
-  radix-2 machine implement that ideal DFT for the exact `_singular_full`
-  evaluator, beyond the now-proved initialization, one-kernel, exact
-  evolving-state inner-prefix, block-prefix, and complete-stage endpoints;
-  global numerical FFT error bounds, a
-  non-overflow/range theorem for all accumulations, a resolution of the finish
-  tie policy, or identity with the paper's intended singular-value quantity;
+- that the rounded fixed-point machine implements that ideal DFT for the
+  exact `_singular_full` evaluator, beyond the now-proved initialization,
+  one-kernel, exact evolving-state inner-prefix, block-prefix, stage, and
+  schedule bridges; global numerical FFT error bounds, a non-overflow/range
+  theorem for all accumulations, a resolution of the finish tie policy, or
+  identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the
   security model;

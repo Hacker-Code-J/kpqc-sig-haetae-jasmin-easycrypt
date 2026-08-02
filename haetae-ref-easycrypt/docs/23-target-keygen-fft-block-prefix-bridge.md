@@ -81,14 +81,15 @@ This milestone closes only arbitrary complete block prefixes. It does not:
 
 1. discharge `fft_blocks_prefix_safe` on the reachable machine trace;
 2. identify a complete `fft_stage` with `ideal_stage`;
-3. compose all eight rounded stages or prove a global FFT error bound;
+3. prove a global FFT error bound;
 4. prove squared-magnitude or accumulator safety and nonoverflow; or
 5. establish score, acceptance, retry, packing, or modes 3/5 semantics.
 
 The [stage bridge](24-target-keygen-fft-stage-bridge.md) now specializes the
-block-prefix theorem to each reachable stage schedule. The next FFT bridge
-should compose all eight stages while
-keeping the signed-safety premise and numerical-error recurrence explicit.
+block-prefix theorem to each reachable stage schedule. The
+[schedule bridge](25-target-keygen-fft-schedule-bridge.md) composes all eight
+stages while keeping the signed-safety premise explicit. The remaining FFT
+work must discharge that premise and prove the numerical-error recurrence.
 
 ## Verification
 

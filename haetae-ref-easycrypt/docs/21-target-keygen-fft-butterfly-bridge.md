@@ -86,14 +86,15 @@ block-prefix composition is now closed by
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 The complete reachable-stage endpoint is now closed by
 [`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
+The exact eight-round composition is now closed by
+[`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md).
 The next FFT bridge must:
 
-1. compose that stage endpoint through all eight rounds while identifying
-   `(m, md2, stride)` with `ideal_stage`;
-2. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
+1. discharge `fft_butterfly_safe_at` for every reachable scheduled call and
    propagate root-table, incoming-vector, and local rounding errors to a global
-   bound against `ideal_fft256`; and
-3. separately address squared-magnitude and five-pass accumulator safety.
+   bound against `ideal_fft256` while identifying the composed recurrence with
+   `ideal_stage`; and
+2. separately address squared-magnitude and five-pass accumulator safety.
 
 The third item cannot follow from coefficient bounds alone. The high-energy
 example in

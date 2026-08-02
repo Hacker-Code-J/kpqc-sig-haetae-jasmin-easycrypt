@@ -101,9 +101,9 @@ with the ideal transform.
 
 The strongest sound next correspondence has the following dependency order:
 
-1. compose the proved initialization, framed one-butterfly, block-prefix, and
-   stage endpoints through the eight-round folds, an explicit safe trace,
-   and all five squared-magnitude passes;
+1. discharge the explicit safety contract on the now-composed eight-round
+   machine trace and connect it to the ideal schedule through all five
+   squared-magnitude passes;
 2. propagate the certified coordinate and local multiplication errors through
    the FFT, accumulation, selection, and the current multiplicity-sensitive
    finish rule; and

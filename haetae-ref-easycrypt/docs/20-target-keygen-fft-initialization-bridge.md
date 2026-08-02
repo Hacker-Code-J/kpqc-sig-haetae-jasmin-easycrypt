@@ -105,14 +105,15 @@ The complete block-prefix composition is now closed by
 [`23-target-keygen-fft-block-prefix-bridge.md`](23-target-keygen-fft-block-prefix-bridge.md).
 The complete reachable-stage endpoint is now closed by
 [`24-target-keygen-fft-stage-bridge.md`](24-target-keygen-fft-stage-bridge.md).
+The exact eight-round composition is now closed by
+[`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md).
 The remaining FFT bridge must:
 
-1. compose the now-proved decoded stage endpoint through the eight-round folds
-   while proving
-   the carried `(m, md2, stride)` parameters match `ideal_stage`;
-2. discharge the eight-stage signed-fit predicates for coefficient magnitude
+1. discharge the eight-stage signed-fit predicates for coefficient magnitude
    at most two and propagate a global coordinate-error bound to
    `ideal_fft256`; and
+2. identify the composed rounded observer with the corresponding
+   `ideal_stage` recurrence; and
 3. separately address squared-magnitude and five-pass accumulator safety.
 
 The third item cannot be derived from coefficient bounds alone: the

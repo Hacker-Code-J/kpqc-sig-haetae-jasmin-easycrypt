@@ -63,9 +63,11 @@ loops through any valid block prefix under safety evaluated on each exact
 evolving pre-block state. `KeygenM23SingularFFTStageBridge` now lifts that
 block-prefix theorem to the eight reachable stage schedules with owner-block
 decoded semantics and full 256-cell coverage under explicit exact
-pre-block safety. The proof still does not compose the eight rounds,
-establish an eight-stage safe trace, or prove global FFT/accumulator error
-and nonoverflow.
+pre-block safety. `KeygenM23SingularFFTScheduleBridge` now composes those
+stage endpoints through the full eight-round machine fold on the decoded
+surface. The proof still does not establish an eight-stage safe trace, prove
+global FFT/accumulator error and nonoverflow, or identify the decoded machine
+fold with the ideal exact-complex schedule.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -468,7 +470,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 40 authored
+hashes. Its current summary passes all 41 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -516,11 +518,12 @@ On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the eight-round machine-schedule correspondence to the ideal DFT or
-schedule-wide safety, global FFT error or accumulator
-nonoverflow, first-attempt
-acceptance, residual-loop termination, packing semantics, pointer aliasing or
-separation safety, or full key-generation correctness. See
+the ideal DFT correspondence for the exact `_singular_full` evaluator beyond
+the now-proved initialization, one-kernel, exact evolving-state inner-prefix,
+block-prefix, stage, and schedule bridges; schedule-wide safety, global FFT
+error or accumulator nonoverflow, first-attempt acceptance, residual-loop
+termination, packing semantics, pointer aliasing or separation safety, or full
+key-generation correctness. See
 [`docs/14-target-keygen-m23-matrix.md`](docs/14-target-keygen-m23-matrix.md)
 and
 [`docs/15-target-keygen-singular-numeric-boundary.md`](docs/15-target-keygen-singular-numeric-boundary.md).
@@ -542,6 +545,8 @@ The exact evolving-state block-prefix bridge is detailed in
 [`docs/23-target-keygen-fft-block-prefix-bridge.md`](docs/23-target-keygen-fft-block-prefix-bridge.md).
 The exact stage bridge is detailed in
 [`docs/24-target-keygen-fft-stage-bridge.md`](docs/24-target-keygen-fft-stage-bridge.md).
+The exact schedule bridge is detailed in
+[`docs/25-target-keygen-fft-schedule-bridge.md`](docs/25-target-keygen-fft-schedule-bridge.md).
 
 ## Baseline inputs
 

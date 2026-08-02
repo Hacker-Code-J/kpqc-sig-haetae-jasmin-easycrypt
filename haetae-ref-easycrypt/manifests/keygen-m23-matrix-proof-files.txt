@@ -23,6 +23,7 @@ spec/KeygenM23SingularFFTButterflyBridge.ec
 spec/KeygenM23SingularFFTKPrefixBridge.ec
 spec/KeygenM23SingularFFTBlockPrefixBridge.ec
 spec/KeygenM23SingularFFTStageBridge.ec
+spec/KeygenM23SingularFFTScheduleBridge.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec

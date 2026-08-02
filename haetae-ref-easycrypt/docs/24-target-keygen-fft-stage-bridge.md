@@ -28,7 +28,9 @@ final machine array decodes to an owner-block observer that:
 
 The terminal `(512, 256, 1)` round is excluded. `fft_stage_reachable_params`
 names only the eight executing schedules, and the actual schedule prefix stops
-after stage 8.
+after stage 8. The companion schedule bridge in
+[`25-target-keygen-fft-schedule-bridge.md`](25-target-keygen-fft-schedule-bridge.md)
+now composes these stage endpoints through the full eight-round fold.
 
 ## Exact stage surface
 
@@ -55,12 +57,12 @@ Supporting lemmas `fft_stage_schedule_r1` through `fft_stage_schedule_r8`,
 This milestone does not:
 
 1. discharge `fft_stage_safe` on reachable traces;
-2. compose the eight stages into the full `fft_full` trace;
-3. prove global FFT error or accumulator nonoverflow; or
-4. establish equality with the ideal exact-complex schedule.
+2. prove global FFT error or accumulator nonoverflow; or
+3. establish equality with the ideal exact-complex schedule.
 
-The remaining FFT bridge should compose the eight stage proofs and then carry
-the error and safety obligations through the accumulator and finish logic.
+The companion schedule bridge now composes the eight stage proofs into the
+full `fft_full` trace. The remaining FFT bridge work is to carry the safety
+and error obligations through the accumulator and finish logic.
 
 ## Verification
 

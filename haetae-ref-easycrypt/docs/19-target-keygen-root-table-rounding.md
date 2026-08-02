@@ -80,13 +80,12 @@ Q16 arithmetic error by `1/65536` against the exact decoded-root butterfly.
 The rounded butterfly stages are not yet related to `ideal_fft256`. The next
 sound bridge must:
 
-1. lift the proved decoded and framed butterfly theorem through all eight FFT
-   stages;
-2. prove the signed-fit and nonoverflow premises for those stages and the five
+1. use the now-composed exact eight-stage observer to prove the signed-fit and
+   nonoverflow premises for those stages and the five
    squared-magnitude passes;
-3. propagate the certified root and local multiplication errors to a global
+2. propagate the certified root and local multiplication errors to a global
    bound against `ideal_fft256`; and
-4. carry that bound through accumulation, selection, and the retained
+3. carry that bound through accumulation, selection, and the retained
    multiplicity-sensitive finish rule before relating rejection decisions.
 
 The completed initialization endpoint is detailed in

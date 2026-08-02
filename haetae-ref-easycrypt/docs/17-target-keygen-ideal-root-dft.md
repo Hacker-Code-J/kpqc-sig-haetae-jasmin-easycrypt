@@ -99,9 +99,9 @@ than asserting exact complex equality.
 
 The remaining analytic chain is:
 
-1. compose the proved initialization, one-butterfly, block-prefix, and stage
-   endpoints through the eight-round safe trace and all five squared-magnitude
-   passes;
+1. discharge the explicit safety contract on the now-composed eight-round
+   machine trace and connect it to the ideal schedule through all five
+   squared-magnitude passes;
 2. propagate the certified coordinate and local rounding errors through the
    FFT, accumulation, selection, and the retained
    multiplicity-sensitive finish rule; and
