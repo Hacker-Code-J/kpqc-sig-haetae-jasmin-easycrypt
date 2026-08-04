@@ -10,8 +10,9 @@
   owner-stage recurrence gives each slot a coordinatewise `44833/65536`
   endpoint against `odd_dft256`. A decoded squared-magnitude and five-slice
   accumulator theorem now propagates that endpoint to ideal complex energy,
-  conditional on the exact evolving signed-safe `W32` trace. Discharging that
-  trace, retry-attempt lifting, tie-policy decision, acceptance and retry
+  and a conservative ideal headroom trace now implies the exact evolving
+  signed-safe `W32` trace. Bounding the probability of headroom failure,
+  retry-attempt lifting, tie-policy decision, acceptance and retry
   termination, packing semantics, and the NTT/matrix-to-security-model
   multiplication bridge remain open.
 - **Created:** 2026-07-13
@@ -160,9 +161,12 @@ claims.
   for arbitrary scratch input. `KeygenM23SingularFFTAccumulatorBridge` proves
   the local `1/65536` squared-magnitude decode error and folds the resulting
   ideal-energy error through all five accumulator updates;
-  `TargetKeygenM23FirstAttemptAccumulator` discharges the input premise while
-  retaining the evolving accumulator-safety trace. Retry-attempt lifting and
-  discharge of that trace remain open.
+  `KeygenM23SingularFFTAccumulatorSafety` proves that conservative ideal
+  prefix-energy and coordinate margins imply the evolving accumulator-safety
+  trace. `TargetKeygenM23FirstAttemptAccumulator` discharges the input premise
+  and exports safety plus the energy-error endpoint outside the headroom
+  failure event. Retry-attempt lifting and a probability bound for that event
+  remain open.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -175,8 +179,7 @@ claims.
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
   termination, retry-attempt coefficient-bound/error propagation, or
-  the signed-safe accumulator trace needed to make the conditional energy
-  theorem unconditional, a
+  a probability bound for the conservative accumulator headroom event, a
   versioned tie-policy change, or packing correctness.
   The gate
   checks source and
@@ -185,8 +188,8 @@ claims.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  a discharge or quantified bad-event account for the signed `W32`
-  squared-magnitude and accumulator trace, an explicit versioned
+  a quantified probability bound for the ideal-side accumulator headroom
+  failure event and its retry-attempt lifting, an explicit versioned
   tie-policy decision, proof of
   acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and

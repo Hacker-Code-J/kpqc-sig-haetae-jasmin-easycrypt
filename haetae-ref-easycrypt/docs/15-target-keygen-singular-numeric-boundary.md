@@ -176,11 +176,11 @@ magnitude
 
 Three such `s1` polynomials alone have ideal energy around `79683`, exceeding
 the nonnegative signed-Q16 capacity below `32768`.  Therefore pointwise
-coefficient bounds cannot discharge the accumulator contract.  A later
-theorem needs one of:
+coefficient bounds cannot discharge the accumulator contract. The checked
+headroom theorem now supplies a conservative sufficient spectral condition.
+Closing the probabilistic path still needs one of:
 
-- a proved spectral safe-trace condition;
-- a quantified bad-event probability for unsafe traces; or
+- a quantified probability bound for failure of that headroom condition; or
 - widened implementation arithmetic.
 
 Machine acceptance cannot be used retrospectively to prove that earlier
@@ -222,7 +222,10 @@ and relates every first-attempt FFT output coordinate to the exact-complex
 schedule within `44833/65536`. The accumulator bridge now carries this error
 through decoded squared magnitude and every prefix of the five-slice running
 sum. It keeps the signed-safety premise explicit because the coefficient
-bounds above cannot discharge it.
+bounds above cannot discharge it. `KeygenM23SingularFFTAccumulatorSafety`
+then proves that an ideal prefix-energy margin and a `127` decoded-coordinate
+cap imply the exact evolving machine-safe trace. The first-attempt wrapper
+uses that theorem outside an explicit conservative headroom failure event.
 
 ## Sound next theorem
 
@@ -231,17 +234,17 @@ With the current implementation, the strongest honest bridge has the shape
 ```text
 root-table certificate
 and first-attempt FFT/butterfly safe trace
-and squared-magnitude/accumulator safe trace
+and no accumulator headroom failure
 and finish safe trace
 imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
 The checked coordinate error is now carried through squared magnitude and the
-five-pass accumulator under their evolving signed-safety obligation. Relating
-that conditional energy endpoint to the final score still requires discharge
-or probabilistic accounting of the safe trace, finish-range facts, and an
-explicit multiplicity-sensitive finish statement or versioned policy change.
+five-pass accumulator outside the ideal headroom failure event. Relating that
+conditional energy endpoint to the final score still requires probabilistic
+accounting of that event, finish-range facts, and an explicit
+multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
@@ -259,6 +262,8 @@ The eight-stage machine-to-ideal error endpoint is detailed in
 [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 The conditional squared-magnitude and accumulator lift is detailed in
 [`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
+The ideal-headroom-to-machine-safety theorem is detailed in
+[`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

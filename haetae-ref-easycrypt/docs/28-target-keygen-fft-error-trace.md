@@ -82,17 +82,19 @@ wrapper `first_attempt_snapshot_fft_slot_full_odd_dft256_close_bound2`.
 `TargetKeygenM23FirstAttemptAccumulator` then exports
 `first_attempt_snapshot_accumulator_error`. The snapshot discharges all five
 coefficient bounds; the theorem retains `first_attempt_trace_accumulator_safe`
-for the actual evolving `W32` updates.
+for the actual evolving `W32` updates. The subsequent accumulator-safety
+theory proves that a conservative ideal headroom trace implies this machine
+trace, and the wrapper exports the error bound outside the corresponding
+headroom failure event.
 
 ## Deliberate boundary
 
 The FFT endpoint is coordinatewise. It must not be converted into an
-accumulator safety claim by squaring the coarse raw word bound. The conditional
-accumulator bridge keeps that missing contract explicit. Remaining work
-includes:
+accumulator safety claim by squaring the coarse raw word bound. The checked
+headroom theorem instead uses a `127` decoded-coordinate cap plus ideal prefix
+energy margins. Remaining work includes:
 
-1. discharge or quantified failure analysis of squared-magnitude and
-   five-pass accumulator nonoverflow;
+1. a probability bound for the conservative headroom failure event;
 2. a score-level comparison with the intended singular statistic;
 3. propagation of the input and error facts to later retry attempts; and
 4. acceptance and outer-loop termination.
@@ -106,7 +108,8 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The gate compiles all 50 authored manifest entries with `-no-eco`, including
+The gate compiles all 51 authored manifest entries with `-no-eco`, including
 the stage-error bridge, global error trace, conditional accumulator bridge,
-target slice endpoint, and first-attempt wrappers, before running the
+accumulator-headroom safety theorem, target slice endpoint, and first-attempt
+wrappers, before running the
 proof-hole, authored-axiom, and debug scans.

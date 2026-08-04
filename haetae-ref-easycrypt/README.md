@@ -78,8 +78,11 @@ endpoint error at most `44833/65536`; the same endpoint is exported for every
 actual first-attempt slot. The decoded squared-magnitude bridge now adds its
 exact `1/65536` local rounding budget, lifts the FFT error to ideal complex
 energy, and threads the resulting pointwise error across all five actual
-first-attempt slices. This endpoint is conditional on an explicit signed-safe
-`W32` accumulator trace; discharging that trace remains open.
+first-attempt slices. A conservative ideal headroom trace now implies the
+exact signed-safe `W32` accumulator trace: the prefix energy stays within the
+proved error margins and each ideal FFT coordinate plus endpoint error is at
+most `127`. The first-attempt endpoint therefore holds outside an explicit
+headroom failure event. No probability bound for that event is claimed.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -483,7 +486,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 50 authored
+hashes. Its current summary passes all 51 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -538,14 +541,16 @@ proves that each decoded accumulator coordinate after all five passes stays
 within the folded ideal energy budget, including the local `1/65536`
 squared-magnitude rounding term, provided every exact evolving `W32` update
 satisfies `fft_accumulate_safe`. The first-attempt wrapper discharges the five
-input bounds and deliberately retains only that signed-safe trace premise.
+input bounds. Its new headroom wrapper proves the exact safe trace, and hence
+the same energy-error endpoint, whenever the conservative ideal headroom event
+does not fail.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-the signed-safe five-pass accumulator trace needed to make the new conditional
-energy-error endpoint unconditional, score
+a probability bound for the conservative accumulator headroom failure event
+or its retry-attempt lifting, score
 correspondence, first-attempt acceptance, residual-loop semantics or
 termination, packing semantics, pointer aliasing or separation safety, or full
 key-generation correctness. See
@@ -581,6 +586,8 @@ The rounded-machine-to-ideal stage recurrence and full endpoint are detailed in
 The conditional decoded squared-magnitude and five-slice accumulator error
 trace is detailed in
 [`docs/29-target-keygen-fft-accumulator-trace.md`](docs/29-target-keygen-fft-accumulator-trace.md).
+The ideal-headroom-to-exact-machine-safety theorem is detailed in
+[`docs/30-target-keygen-fft-accumulator-headroom.md`](docs/30-target-keygen-fft-accumulator-headroom.md).
 
 ## Baseline inputs
 

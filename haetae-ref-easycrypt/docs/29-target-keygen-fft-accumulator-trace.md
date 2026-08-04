@@ -57,6 +57,12 @@ for the three `s1` and two finalized-`s2` inputs. It retains
 is deliberate: the bridge is a decode-and-propagate theorem, not a proof that
 the accumulator cannot overflow.
 
+The subsequent headroom theory proves that a conservative ideal-energy and
+coordinate-margin trace implies this exact machine-safe trace. Its
+first-attempt wrapper therefore derives the same error endpoint outside an
+explicit ideal-side headroom failure event; see
+[`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md).
+
 ## Deliberate boundary
 
 The current coefficient facts are not strong enough to imply safety. The
@@ -64,10 +70,11 @@ documented all-one pressure case already shows why: one odd-root ideal squared
 magnitude is about `26561`, so three such `s1` slices reach about `79683`,
 which is above the decoded signed-Q16 nonnegative ceiling `32768`.
 
-So the accumulator contract must stay explicit until a sharper spectral
-safe-trace theorem, a quantified bad-event argument, or a widened accumulator
-implementation is introduced. This milestone therefore records the boundary
-cleanly and keeps the safety premise visible.
+The generic accumulator bridge therefore keeps the machine contract explicit.
+The later headroom theorem provides a sufficient ideal-side condition, but no
+current sampler theorem bounds the probability that this conservative
+condition fails. Headroom failure is not claimed to be equivalent to actual
+overflow.
 
 ## Verification
 
@@ -80,4 +87,6 @@ Both are part of `manifests/keygen-m23-matrix-proof-files.txt` and are checked
 by `./scripts/verify-keygen-m23-matrix-proof.sh` with fresh `-no-eco`
 compilation plus the existing proof-hole, authored-axiom, and debug-command
 scans. No axiom was added. The safe-trace premise remains registered as
-`OBL-FFT-SAFE-TRACE` rather than being hidden as an assumption.
+`OBL-FFT-SAFE-TRACE` rather than being hidden as an assumption; its refined
+open boundary is the probability of the headroom event and its retry-attempt
+lifting.
