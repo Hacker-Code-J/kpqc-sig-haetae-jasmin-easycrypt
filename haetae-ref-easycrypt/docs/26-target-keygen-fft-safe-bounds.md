@@ -124,13 +124,16 @@ It is intentionally not used to claim `fft_sqabs_safe` or
 for the nonnegative signed-32 accumulator contract. The new conditional error
 bridge therefore keeps the exact evolving safety trace visible. The subsequent
 headroom theory proves that a conservative ideal-energy trace and decoded
-coordinate cap imply that machine trace. Closing the unconditional score path
-still requires a probability bound for headroom failure or a wider
-implementation arithmetic design.
+coordinate cap imply that machine trace. The probability schema now reduces
+headroom failure to four uniform per-site marginal bounds over 1536 prefix and
+1280 coordinate sites, but does not supply the actual keygen distribution or
+numeric tails. Closing the unconditional score path still requires those
+instantiations or a wider implementation arithmetic design.
 
 The remaining work is therefore:
 
-1. quantify failure of the conservative five-pass accumulator headroom event;
+1. prove the first-attempt keygen law and instantiate the four local headroom
+   tails;
 2. lift the input and error facts to later retry attempts; and
 3. connect the resulting score to acceptance and retry semantics.
 
@@ -143,12 +146,13 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The retained gate compiles all 51 manifest entries with `-no-eco`, including
+The retained gate compiles all 53 manifest entries with `-no-eco`, including
 the stage-error, accumulator, and first-attempt input bridges, and then runs
 the proof-hole, authored-axiom, and debug-command scans. The target-level
 details are in
 [`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md),
 [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md),
 [`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md),
+[`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md),
 and
-[`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md).
+[`31-target-keygen-fft-accumulator-probability.md`](31-target-keygen-fft-accumulator-probability.md).

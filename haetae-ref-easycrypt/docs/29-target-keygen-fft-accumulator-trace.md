@@ -72,21 +72,26 @@ which is above the decoded signed-Q16 nonnegative ceiling `32768`.
 
 The generic accumulator bridge therefore keeps the machine contract explicit.
 The later headroom theorem provides a sufficient ideal-side condition, but no
-current sampler theorem bounds the probability that this conservative
-condition fails. Headroom failure is not claimed to be equivalent to actual
-overflow.
+current sampler theorem supplies numeric tails for this conservative
+condition. The follow-up probability schema reduces its failure measure to
+four uniform per-site marginal bounds over 1536 prefix and 1280 coordinate
+sites without independence; see
+[`31-target-keygen-fft-accumulator-probability.md`](31-target-keygen-fft-accumulator-probability.md).
+Headroom failure is not claimed to be equivalent to actual overflow.
 
 ## Verification
 
 The proof artifacts are:
 
-- `easycrypt/spec/KeygenM23SingularFFTAccumulatorBridge.ec`; and
-- `easycrypt/refinement/TargetKeygenM23FirstAttemptAccumulator.ec`.
+- `easycrypt/spec/KeygenM23SingularFFTAccumulatorBridge.ec`;
+- `easycrypt/refinement/TargetKeygenM23FirstAttemptAccumulator.ec`;
+- `easycrypt/spec/KeygenM23SingularFFTAccumulatorProbability.ec`; and
+- `easycrypt/refinement/TargetKeygenM23FirstAttemptAccumulatorProbability.ec`.
 
-Both are part of `manifests/keygen-m23-matrix-proof-files.txt` and are checked
+All four are part of `manifests/keygen-m23-matrix-proof-files.txt` and are checked
 by `./scripts/verify-keygen-m23-matrix-proof.sh` with fresh `-no-eco`
 compilation plus the existing proof-hole, authored-axiom, and debug-command
 scans. No axiom was added. The safe-trace premise remains registered as
 `OBL-FFT-SAFE-TRACE` rather than being hidden as an assumption; its refined
-open boundary is the probability of the headroom event and its retry-attempt
-lifting.
+open boundary is the actual keygen distribution, numeric local tail
+instantiation, and retry-attempt lifting.

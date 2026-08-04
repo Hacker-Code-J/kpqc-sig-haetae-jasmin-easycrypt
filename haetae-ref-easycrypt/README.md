@@ -82,7 +82,15 @@ first-attempt slices. A conservative ideal headroom trace now implies the
 exact signed-safe `W32` accumulator trace: the prefix energy stays within the
 proved error margins and each ideal FFT coordinate plus endpoint error is at
 most `127`. The first-attempt endpoint therefore holds outside an explicit
-headroom failure event. No probability bound for that event is claimed.
+headroom failure event. An axiom-free probability layer now covers that event
+by 1536 prefix endpoints and 1280 FFT-coordinate sites and proves, for any
+input distribution, the split union bound
+`1536 * (delta_lower + delta_upper) + 1280 * (delta_real + delta_imag)`.
+Its first-attempt projection also proves
+that headroom failure measure dominates snapshot accumulator-safety and
+energy-error failures. No actual keygen distribution or numeric marginal tail
+bound is claimed.
+
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -486,7 +494,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 51 authored
+hashes. Its current summary passes all 53 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -543,14 +551,17 @@ squared-magnitude rounding term, provided every exact evolving `W32` update
 satisfies `fft_accumulate_safe`. The first-attempt wrapper discharges the five
 input bounds. Its new headroom wrapper proves the exact safe trace, and hence
 the same energy-error endpoint, whenever the conservative ideal headroom event
-does not fail.
+does not fail. The probability wrapper projects arbitrary first-attempt-trace
+distributions to the two accumulator arrays, applies the finite split union
+bound, and proves that unsafe-trace and energy-error failure measures under the
+snapshot facts are bounded by headroom failure.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-a probability bound for the conservative accumulator headroom failure event
-or its retry-attempt lifting, score
+a checked first-attempt keygen distribution or numeric instantiation of the
+four local accumulator tail bounds, their retry-attempt lifting, score
 correspondence, first-attempt acceptance, residual-loop semantics or
 termination, packing semantics, pointer aliasing or separation safety, or full
 key-generation correctness. See
@@ -588,6 +599,9 @@ trace is detailed in
 [`docs/29-target-keygen-fft-accumulator-trace.md`](docs/29-target-keygen-fft-accumulator-trace.md).
 The ideal-headroom-to-exact-machine-safety theorem is detailed in
 [`docs/30-target-keygen-fft-accumulator-headroom.md`](docs/30-target-keygen-fft-accumulator-headroom.md).
+The finite headroom-event union bound and first-attempt measure projection are
+detailed in
+[`docs/31-target-keygen-fft-accumulator-probability.md`](docs/31-target-keygen-fft-accumulator-probability.md).
 
 ## Baseline inputs
 

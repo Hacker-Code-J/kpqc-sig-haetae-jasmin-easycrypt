@@ -5,9 +5,11 @@
 This milestone replaces the bare first-attempt machine-safe-trace premise with
 a conservative condition stated over the ideal odd-root FFT outputs and the
 already-proved numerical error budgets. It covers all five accumulator passes
-of the exposed first attempt. It does not assign a probability to headroom
-failure, cover later retry attempts, identify the final score with the paper's
-singular statistic, or prove acceptance or termination.
+of the exposed first attempt. This deterministic theory does not assign a
+probability to headroom failure; the follow-up probability theory gives a
+distribution-parametric union bound but no numeric keygen tail. Neither theory
+covers later retry attempts, identifies the final score with the paper's
+singular statistic, or proves acceptance or termination.
 
 The checked theory is
 `easycrypt/spec/KeygenM23SingularFFTAccumulatorSafety.ec`. The target wrapper
@@ -73,23 +75,38 @@ Consequently, outside this ideal-side failure event, the existing decoded
 five-slice energy-error theorem no longer needs a separately supplied machine
 safe-trace premise.
 
-## Remaining probability boundary
+## Probability reduction and remaining boundary
 
 The current target sampler proofs provide exact finite-stream, range, frame,
 and progress-certificate results. They do not provide a distribution or tail
-bound for the odd-root DFT energies used in the headroom condition. Therefore
-this milestone proves no probability bound for
-`mode2_accumulator_headroom_bad_event`.
+bound for the odd-root DFT energies used in the headroom condition.
 
-Closing that boundary requires a sampler-distribution theorem strong enough
-to bound the ideal spectral prefix energies and coordinate maxima, followed by
-lifting the same facts to every retry attempt. The tie-sensitive finish rule,
-score correspondence, acceptance, retry termination, and packing remain
-separate obligations.
+`KeygenM23SingularFFTAccumulatorProbability` nevertheless gives the event an
+axiom-free finite reduction. For any input distribution, it covers the global
+bad event by 1536 prefix endpoints and 1280 FFT-coordinate sites and proves
+
+```text
+mu bad <= 1536 * (delta_lower + delta_upper)
+          + 1280 * (delta_real + delta_imag)
+```
+
+under four uniform per-site marginal bounds and without independence.
+`TargetKeygenM23FirstAttemptAccumulatorProbability` transports the theorem
+through the immutable first-attempt trace with `dmap` and proves that, within
+the snapshot facts, unsafe-trace and energy-error failures are measure-bounded
+by headroom failure. See
+[`31-target-keygen-fft-accumulator-probability.md`](31-target-keygen-fft-accumulator-probability.md).
+
+Closing the numeric boundary requires a sampler-distribution theorem strong
+enough to instantiate those four local spectral tails, followed by lifting the
+same facts to every retry attempt. The tie-sensitive finish rule, score
+correspondence, acceptance, retry termination, and packing remain separate
+obligations.
 
 ## Verification
 
-Both proof files are entries in
+The deterministic safety, generic probability, and two target wrapper files
+are entries in
 `manifests/keygen-m23-matrix-proof-files.txt` and are checked by:
 
 ```sh
@@ -98,6 +115,6 @@ cd haetae-ref-easycrypt
 ```
 
 The gate performs fresh `-no-eco` compilation and the existing proof-hole,
-authored-axiom, and debug-command scans. No axiom or final assumption is added;
-the missing headroom-event probability remains recorded under
-`OBL-FFT-SAFE-TRACE`.
+authored-axiom, and debug-command scans. No axiom or numeric probability
+assumption is added; the missing keygen distribution, local tail
+instantiations, and retry lift remain recorded under `OBL-FFT-SAFE-TRACE`.

@@ -11,9 +11,13 @@
   endpoint against `odd_dft256`. A decoded squared-magnitude and five-slice
   accumulator theorem now propagates that endpoint to ideal complex energy,
   and a conservative ideal headroom trace now implies the exact evolving
-  signed-safe `W32` trace. Bounding the probability of headroom failure,
-  retry-attempt lifting, tie-policy decision, acceptance and retry
-  termination, packing semantics, and the NTT/matrix-to-security-model
+  signed-safe `W32` trace. A distribution-parametric finite union bound now
+  reduces headroom failure to four uniform per-site marginal tails across
+  1536 prefix and 1280 coordinate sites and transports the result to the
+  immutable first-attempt trace. Defining the actual keygen distribution and
+  instantiating numeric tails, retry-attempt lifting, tie-policy decision,
+  acceptance, retry termination, packing semantics, and the
+  NTT/matrix-to-security-model
   multiplication bridge remain open.
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
@@ -165,8 +169,12 @@ claims.
   prefix-energy and coordinate margins imply the evolving accumulator-safety
   trace. `TargetKeygenM23FirstAttemptAccumulator` discharges the input premise
   and exports safety plus the energy-error endpoint outside the headroom
-  failure event. Retry-attempt lifting and a probability bound for that event
-  remain open.
+  failure event. `KeygenM23SingularFFTAccumulatorProbability` proves the split
+  finite union bound without independence, and
+  `TargetKeygenM23FirstAttemptAccumulatorProbability` transports it through
+  `dmap` while showing that headroom failure dominates snapshot unsafe and
+  energy-error failures. The actual keygen law, numeric local tail bounds, and
+  retry-attempt lifting remain open.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -179,8 +187,9 @@ claims.
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
   termination, retry-attempt coefficient-bound/error propagation, or
-  a probability bound for the conservative accumulator headroom event, a
-  versioned tie-policy change, or packing correctness.
+  an actual keygen distribution with a numeric instantiation of the
+  conservative accumulator headroom tail schema, a versioned tie-policy
+  change, or packing correctness.
   The gate
   checks source and
   support hashes, extraction drift, fresh `-no-eco`
@@ -188,8 +197,9 @@ claims.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  a quantified probability bound for the ideal-side accumulator headroom
-  failure event and its retry-attempt lifting, an explicit versioned
+  a checked first-attempt keygen distribution plus four instantiated local
+  tails for the ideal-side accumulator headroom failure event and their
+  retry-attempt lifting, an explicit versioned
   tie-policy decision, proof of
   acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and

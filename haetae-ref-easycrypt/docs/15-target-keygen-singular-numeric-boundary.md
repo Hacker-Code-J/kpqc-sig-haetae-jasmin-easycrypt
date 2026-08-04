@@ -178,9 +178,12 @@ Three such `s1` polynomials alone have ideal energy around `79683`, exceeding
 the nonnegative signed-Q16 capacity below `32768`.  Therefore pointwise
 coefficient bounds cannot discharge the accumulator contract. The checked
 headroom theorem now supplies a conservative sufficient spectral condition.
-Closing the probabilistic path still needs one of:
+The follow-up probability schema reduces failure of that condition to four
+uniform per-site marginal tails across 1536 prefix endpoints and 1280 FFT
+coordinate sites, without assuming independence. Closing the numeric path
+still needs one of:
 
-- a quantified probability bound for failure of that headroom condition; or
+- a checked keygen distribution and numeric bounds for those local tails; or
 - widened implementation arithmetic.
 
 Machine acceptance cannot be used retrospectively to prove that earlier
@@ -242,8 +245,9 @@ absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 
 The checked coordinate error is now carried through squared magnitude and the
 five-pass accumulator outside the ideal headroom failure event. Relating that
-conditional energy endpoint to the final score still requires probabilistic
-accounting of that event, finish-range facts, and an explicit
+conditional energy endpoint to the final score still requires numeric
+instantiation of the local-tail schema and retry accounting, finish-range
+facts, and an explicit
 multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
@@ -264,6 +268,8 @@ The conditional squared-magnitude and accumulator lift is detailed in
 [`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
 The ideal-headroom-to-machine-safety theorem is detailed in
 [`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md).
+The finite probability reduction is detailed in
+[`31-target-keygen-fft-accumulator-probability.md`](31-target-keygen-fft-accumulator-probability.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

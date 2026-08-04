@@ -362,12 +362,17 @@ the accumulator bridge now converts that endpoint into a decoded ideal-energy
 error recurrence, conditional on the exact evolving `fft_accumulate_safe`
 trace. The accumulator-safety theory now proves that a conservative ideal
 prefix-energy and coordinate-headroom trace implies that exact machine trace;
-it does not bound the probability of headroom failure. The FFT recurrence is detailed in
+the follow-up probability theory reduces headroom failure to four uniform
+per-site marginal tails over 1536 prefix and 1280 coordinate sites, but does
+not instantiate those tails from a keygen distribution. The FFT recurrence is
+detailed in
 [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md),
 and the conditional accumulator lift is detailed in
 [`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
 The headroom discharge is detailed in
 [`30-target-keygen-fft-accumulator-headroom.md`](30-target-keygen-fft-accumulator-headroom.md).
+The probability schema is detailed in
+[`31-target-keygen-fft-accumulator-probability.md`](31-target-keygen-fft-accumulator-probability.md).
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -470,9 +475,12 @@ five-slice decoded energy-error endpoint, retaining an explicit
 `first_attempt_trace_accumulator_safe` premise. The new
 `first_attempt_snapshot_accumulator_error_outside_headroom_bad` derives that
 endpoint from absence of the conservative ideal headroom failure event.
-These theorems describe the exposed first attempt only; they do not add
-semantic snapshots for later residual-loop attempts or quantify the headroom
-event.
+The probability wrapper projects arbitrary first-attempt-trace distributions
+onto `(s1, final_s2)`, exports the finite split union bound, and proves that
+headroom-bad measure dominates snapshot unsafe and energy-error failure
+measures. These theorems describe the exposed first attempt only; they do not
+define its actual keygen law, instantiate numeric marginal tails, or add
+semantic snapshots for later residual-loop attempts.
 
 ## Verification
 
@@ -491,18 +499,20 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 51 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 53 authored manifest entries,
   including `KeygenM23SingularFFTStageErrorBridge.ec`,
   `KeygenM23SingularFFTAccumulatorBridge.ec`,
   `KeygenM23SingularFFTAccumulatorSafety.ec`,
+  `KeygenM23SingularFFTAccumulatorProbability.ec`,
   `KeygenM23SingularFFTScheduleBounds.ec`,
   `TargetKeygenM23SingularFFTInputBounds.ec`,
-  `TargetKeygenM23FullFirstAttempt.ec`, and
-  `TargetKeygenM23FirstAttemptAccumulator.ec`; and
+  `TargetKeygenM23FullFirstAttempt.ec`,
+  `TargetKeygenM23FirstAttemptAccumulator.ec`, and
+  `TargetKeygenM23FirstAttemptAccumulatorProbability.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=51 total=51 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=53 total=53 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -529,8 +539,9 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- a probability bound for the conservative ideal headroom failure event and
-  its retry-attempt lifting, a resolution of the finish tie policy, or identity
+- a checked first-attempt keygen distribution and numeric instantiation of the
+  four local headroom tails, their retry-attempt lifting, a resolution of the
+  finish tie policy, or identity
   with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the

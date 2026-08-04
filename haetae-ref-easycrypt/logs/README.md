@@ -37,13 +37,14 @@ one-butterfly, inner-prefix, block-prefix, complete-stage, and eight-round
 schedule semantics, first-attempt five-slice coefficient reachability,
 conditional decoded squared-magnitude/accumulator energy propagation,
 ideal-headroom discharge of the exact evolving accumulator safety trace, and
-proof-only sampler-to-finalizer composition writes
+the finite local-tail union-bound schema plus first-attempt measure projection,
+and proof-only sampler-to-finalizer composition writes
 `keygen-m23-matrix-proof-summary.txt`. Its retained title is “HAETAE mode-2
 key-generation matrix, finalization, and singular-word proof verification”.
-The `2026-08-04T11:58:39Z` run records the canonical source hash; zero drift for
+The `2026-08-04T13:59:34Z` run records the canonical source hash; zero drift for
 the 32-file/56-procedure parent, 25-file/31-procedure sampler-caller, and
 10-file target-NTT extractions; the project-owned NTT loop support and 18
-imported dependency hashes; 51/51 fresh `-no-eco` compilations; and clean
+imported dependency hashes; 53/53 fresh `-no-eco` compilations; and clean
 proof-hole, authored-axiom, and
 debug-command scans. The individual compilation, hash, drift, scan, and
 Why3-server logs are under `keygen-m23-matrix-proof/`.

@@ -85,7 +85,9 @@ coefficient bounds; the theorem retains `first_attempt_trace_accumulator_safe`
 for the actual evolving `W32` updates. The subsequent accumulator-safety
 theory proves that a conservative ideal headroom trace implies this machine
 trace, and the wrapper exports the error bound outside the corresponding
-headroom failure event.
+headroom failure event. The follow-up probability wrapper projects arbitrary
+first-attempt-trace distributions onto the two accumulator arrays and applies
+the finite split union bound.
 
 ## Deliberate boundary
 
@@ -94,7 +96,8 @@ accumulator safety claim by squaring the coarse raw word bound. The checked
 headroom theorem instead uses a `127` decoded-coordinate cap plus ideal prefix
 energy margins. Remaining work includes:
 
-1. a probability bound for the conservative headroom failure event;
+1. a checked first-attempt keygen distribution and numeric instantiation of
+   the four local headroom tails;
 2. a score-level comparison with the intended singular statistic;
 3. propagation of the input and error facts to later retry attempts; and
 4. acceptance and outer-loop termination.
@@ -108,8 +111,8 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The gate compiles all 51 authored manifest entries with `-no-eco`, including
+The gate compiles all 53 authored manifest entries with `-no-eco`, including
 the stage-error bridge, global error trace, conditional accumulator bridge,
 accumulator-headroom safety theorem, target slice endpoint, and first-attempt
-wrappers, before running the
+probability wrappers, before running the
 proof-hole, authored-axiom, and debug scans.
