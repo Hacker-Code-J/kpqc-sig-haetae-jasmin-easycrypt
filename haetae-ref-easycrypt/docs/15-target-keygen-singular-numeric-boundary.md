@@ -219,7 +219,10 @@ Those facts remove the exact-root, ideal-schedule, root-table-rounding, and
 initialization and single-kernel preliminaries. The subsequent owner-stage
 error bridge now carries those local facts through all eight rounded stages
 and relates every first-attempt FFT output coordinate to the exact-complex
-schedule within `44833/65536`.
+schedule within `44833/65536`. The accumulator bridge now carries this error
+through decoded squared magnitude and every prefix of the five-slice running
+sum. It keeps the signed-safety premise explicit because the coefficient
+bounds above cannot discharge it.
 
 ## Sound next theorem
 
@@ -234,10 +237,11 @@ imply
 absolute(machine score - tie-sensitive decoded-table score) <= error bound.
 ```
 
-Relating that decoded-table score to the ideal quantity now requires carrying
-the checked coordinate error through squared magnitude and the accumulator,
-including their signed-safety obligations, plus an explicit
-multiplicity-sensitive finish statement or versioned policy change.
+The checked coordinate error is now carried through squared magnitude and the
+five-pass accumulator under their evolving signed-safety obligation. Relating
+that conditional energy endpoint to the final score still requires discharge
+or probabilistic accounting of the safe trace, finish-range facts, and an
+explicit multiplicity-sensitive finish statement or versioned policy change.
 Acceptance can then be related only outside the proved numerical error band.
 The completed table certificate is detailed in
 [`19-target-keygen-root-table-rounding.md`](19-target-keygen-root-table-rounding.md).
@@ -253,6 +257,8 @@ The actual five-slice first-attempt input bridge is detailed in
 [`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md).
 The eight-stage machine-to-ideal error endpoint is detailed in
 [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
+The conditional squared-magnitude and accumulator lift is detailed in
+[`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
 
 Outer key-generation termination is a later probabilistic theorem.  The
 paper's reported `0.1` acceptance rate is empirical and is not a proof of

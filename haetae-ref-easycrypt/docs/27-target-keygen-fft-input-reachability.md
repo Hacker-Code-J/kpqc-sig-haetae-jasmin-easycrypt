@@ -64,12 +64,17 @@ This is stronger than assuming `fft_coefficient_bound xp 2` at an isolated FFT
 call: the premise is derived from the sampler and finalizer facts carried by
 the actual peeled first attempt.
 
+`TargetKeygenM23FirstAttemptAccumulator` reuses this snapshot theorem to
+discharge the same input premise for the conditional decoded five-slice
+energy-error endpoint. It deliberately does not discharge the separate
+signed-safe accumulator trace.
+
 ## Deliberate boundary
 
 The result does not prove:
 
 - the same facts for a rejected attempt executed by the residual retry loop;
-- squared-magnitude or five-pass accumulator nonoverflow;
+- unconditional squared-magnitude or five-pass accumulator nonoverflow;
 - analytic correspondence of the machine score with the paper statistic;
 - first-attempt acceptance or retry termination; or
 - packing or public-key-generation correctness.
@@ -90,4 +95,6 @@ cd haetae-ref-easycrypt
 The gate compiles the reachability bridge and its error endpoint before the
 first-attempt target theory with `-no-eco`, then runs the proof-hole,
 authored-axiom, and debug scan. The generic error proof is detailed in
-[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md),
+and its conditional accumulator lift is detailed in
+[`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).

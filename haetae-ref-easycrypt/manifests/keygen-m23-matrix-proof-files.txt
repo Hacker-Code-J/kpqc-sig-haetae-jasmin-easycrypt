@@ -30,6 +30,7 @@ spec/KeygenM23SingularFFTScheduleBounds.ec
 spec/KeygenM23SingularFFTGlobalTrace.ec
 spec/KeygenM23SingularFFTStageErrorBridge.ec
 spec/KeygenM23SingularFFTErrorTrace.ec
+spec/KeygenM23SingularFFTAccumulatorBridge.ec
 refinement/TargetKeygenM23Matrix.ec
 refinement/TargetKeygenM23WideSupport.ec
 refinement/TargetKeygenM23WideNTT.ec
@@ -46,3 +47,4 @@ refinement/TargetKeygenM23SingularFFT.ec
 refinement/TargetKeygenM23Singular.ec
 refinement/TargetKeygenM23SingularFFTInputBounds.ec
 refinement/TargetKeygenM23FullFirstAttempt.ec
+refinement/TargetKeygenM23FirstAttemptAccumulator.ec

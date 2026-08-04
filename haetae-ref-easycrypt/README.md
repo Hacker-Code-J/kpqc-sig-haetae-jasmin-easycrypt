@@ -75,8 +75,11 @@ available for every actual first-attempt slot and arbitrary threaded scratch
 input. The owner-stage perturbation theorem now composes that rounded schedule
 against the exact ideal schedule through all eight rounds, with coordinatewise
 endpoint error at most `44833/65536`; the same endpoint is exported for every
-actual first-attempt slot. Squared-magnitude and accumulator safety remain
-open.
+actual first-attempt slot. The decoded squared-magnitude bridge now adds its
+exact `1/65536` local rounding budget, lifts the FFT error to ideal complex
+energy, and threads the resulting pointwise error across all five actual
+first-attempt slices. This endpoint is conditional on an explicit signed-safe
+`W32` accumulator trace; discharging that trace remains open.
 A fixed-mode relational
 theorem peels the mandatory first iteration of the actual
 `_keypair_full_m23` into a result-carried mirror, proves equality of the final
@@ -480,7 +483,7 @@ cd haetae-ref-easycrypt
 This gate checks the pinned sources; zero drift for the actual-parent,
 sampler-caller, and target-NTT extractions; the project-owned NTT loop support;
 and the 17 remaining imported NTT support
-hashes. Its current summary passes all 48 authored
+hashes. Its current summary passes all 50 authored
 theories with `-no-eco` and the proof-hole, authored-axiom, and debug-command
 scans. The theorem surface covers the exact copy and frames, active-prefix
 scratch independence, the actual fixed `(2, 3)` helper's NTT and exact
@@ -530,14 +533,19 @@ and therefore lies in `[-2,2]`. This discharges schedule safety and yields the
 scratch input. The stage-error bridge additionally propagates initializer,
 root-table, input, and per-product rounding errors through all eight rounds;
 the resulting decoded endpoint is within `44833/65536` per coordinate of the
-exact `odd_dft256` for each of those five slots.
+exact `odd_dft256` for each of those five slots. The accumulator bridge then
+proves that each decoded accumulator coordinate after all five passes stays
+within the folded ideal energy budget, including the local `1/65536`
+squared-magnitude rounding term, provided every exact evolving `W32` update
+satisfies `fft_accumulate_safe`. The first-attempt wrapper discharges the five
+input bounds and deliberately retains only that signed-safe trace premise.
 
 On the reachable 512-word path, the gate additionally proves the exact
 `freeze_word` sequence is canonical reduction modulo `q` and the word-level
 EGen operations equal the abstract HAETAE coefficient low/high decomposition.
 It does not prove the remaining NTT-to-security-model multiplication bridge,
-squared-magnitude or five-pass accumulator nonoverflow after the now-proved
-`44833/65536` first-attempt machine-to-ideal FFT endpoint, score
+the signed-safe five-pass accumulator trace needed to make the new conditional
+energy-error endpoint unconditional, score
 correspondence, first-attempt acceptance, residual-loop semantics or
 termination, packing semantics, pointer aliasing or separation safety, or full
 key-generation correctness. See
@@ -570,6 +578,9 @@ The actual first-attempt five-slice reachability bridge is detailed in
 [`docs/27-target-keygen-fft-input-reachability.md`](docs/27-target-keygen-fft-input-reachability.md).
 The rounded-machine-to-ideal stage recurrence and full endpoint are detailed in
 [`docs/28-target-keygen-fft-error-trace.md`](docs/28-target-keygen-fft-error-trace.md).
+The conditional decoded squared-magnitude and five-slice accumulator error
+trace is detailed in
+[`docs/29-target-keygen-fft-accumulator-trace.md`](docs/29-target-keygen-fft-accumulator-trace.md).
 
 ## Baseline inputs
 

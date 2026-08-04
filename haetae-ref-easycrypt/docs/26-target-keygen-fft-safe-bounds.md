@@ -105,6 +105,12 @@ round-eight result to `odd_dft256`, with coordinatewise error at most
 the same theorem for every valid first-attempt slice. See
 [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
 
+`KeygenM23SingularFFTAccumulatorBridge` uses this endpoint to bound decoded
+squared magnitude and every prefix of the five-pass ideal-energy sum. Its
+first-attempt wrapper discharges the coefficient premise but retains the
+evolving `fft_accumulate_safe` trace. See
+[`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
+
 ## Deliberate boundary
 
 The input coefficient predicate remains a premise of the reusable generic FFT
@@ -115,14 +121,15 @@ sampler/finalizer facts for each later residual-loop attempt.
 The final FFT word bound proves signed storage and butterfly nonoverflow only.
 It is intentionally not used to claim `fft_sqabs_safe` or
 `fft_accumulate_safe`: squaring the coarse coordinate bound is far too large
-for the nonnegative signed-32 accumulator contract. Closing the score path
-requires a sharper pointwise spectral-energy bound across the three `s1` and
-two adjusted-`s2` slices, a quantified unsafe-trace event, or a wider
-implementation arithmetic design.
+for the nonnegative signed-32 accumulator contract. The new conditional error
+bridge therefore keeps the exact evolving safety trace visible. Closing the
+unconditional score path requires a sharper spectral safe-trace theorem, a
+quantified unsafe-trace event, or a wider implementation arithmetic design.
 
 The remaining work is therefore:
 
-1. establish squared-magnitude and five-pass accumulator safety;
+1. discharge or quantify failure of squared-magnitude and five-pass
+   accumulator safety;
 2. lift the input and error facts to later retry attempts; and
 3. connect the resulting score to acceptance and retry semantics.
 
@@ -135,8 +142,10 @@ cd haetae-ref-easycrypt
 ./scripts/verify-keygen-m23-matrix-proof.sh
 ```
 
-The retained gate compiles all 48 manifest entries with `-no-eco`, including
-the stage-error and first-attempt input bridges, and then runs the proof-hole,
-authored-axiom, and debug-command scans. The target-level details are in
-[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md)
-and [`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
+The retained gate compiles all 50 manifest entries with `-no-eco`, including
+the stage-error, accumulator, and first-attempt input bridges, and then runs
+the proof-hole, authored-axiom, and debug-command scans. The target-level
+details are in
+[`27-target-keygen-fft-input-reachability.md`](27-target-keygen-fft-input-reachability.md),
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md),
+and [`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).

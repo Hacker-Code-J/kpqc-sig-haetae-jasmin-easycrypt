@@ -358,9 +358,12 @@ contract through all eight stages under coefficient bound two and proves the
 final signed coordinate bound `859963392`. The stage-error bridge now composes
 root-table, input, and local rounding perturbations through all eight rounds
 and proves the coordinatewise `44833/65536` endpoint against `odd_dft256`;
-the squared-magnitude and accumulator trace remains open. The recurrence and
-endpoint are detailed in
-[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md).
+the accumulator bridge now converts that endpoint into a decoded ideal-energy
+error recurrence, conditional on the exact evolving `fft_accumulate_safe`
+trace. The FFT recurrence is detailed in
+[`28-target-keygen-fft-error-trace.md`](28-target-keygen-fft-error-trace.md),
+and the conditional accumulator lift is detailed in
+[`29-target-keygen-fft-accumulator-trace.md`](29-target-keygen-fft-accumulator-trace.md).
 
 The same boundary theory exposes a semantic discrepancy in the finish logic:
 the implementation gives the remainder weight `24` to every selected entry
@@ -457,9 +460,12 @@ butterfly-safety schedule and
 `first_attempt_snapshot_fft_slot_full_word_bound2` gives the final raw
 coordinate bound `859963392`, while
 `first_attempt_snapshot_fft_slot_full_odd_dft256_close_bound2` gives the
-`44833/65536` ideal endpoint. These theorems describe the exposed first
-attempt only; they do not add semantic snapshots for later residual-loop
-attempts or establish squared-magnitude/accumulator safety.
+`44833/65536` ideal endpoint.
+`first_attempt_snapshot_accumulator_error` further gives the pointwise
+five-slice decoded energy-error endpoint, retaining an explicit
+`first_attempt_trace_accumulator_safe` premise. These theorems describe the
+exposed first attempt only; they do not add semantic snapshots for later
+residual-loop attempts or discharge accumulator safety.
 
 ## Verification
 
@@ -478,15 +484,17 @@ The matrix, finalization, and first-attempt gate checks:
   NTT extraction;
 - a matching hash manifest for the project-owned NTT loop support and the 17
   imported NTT dependency theories;
-- successful fresh `-no-eco` compilation of all 48 authored manifest entries,
+- successful fresh `-no-eco` compilation of all 50 authored manifest entries,
   including `KeygenM23SingularFFTStageErrorBridge.ec`,
+  `KeygenM23SingularFFTAccumulatorBridge.ec`,
   `KeygenM23SingularFFTScheduleBounds.ec`,
-  `TargetKeygenM23SingularFFTInputBounds.ec`, and
-  `TargetKeygenM23FullFirstAttempt.ec`; and
+  `TargetKeygenM23SingularFFTInputBounds.ec`,
+  `TargetKeygenM23FullFirstAttempt.ec`, and
+  `TargetKeygenM23FirstAttemptAccumulator.ec`; and
 - clean proof-hole, authored-axiom, and leftover debug-command scans.
 
 A successful current run reports
-`RESULT: PASS compiled=48 total=48 mode=-no-eco` with exit status 0.
+`RESULT: PASS compiled=50 total=50 mode=-no-eco` with exit status 0.
 
 The standalone NTT gate at `2026-07-28T06:15:54Z` separately passed source and
 support hashes, zero target-extraction drift, three generated-representation
@@ -513,10 +521,10 @@ DFT. It does **not** establish:
 
 - that the first attempt is accepted, semantics for rejected attempts, or
   termination or losslessness of the residual outer retry loop;
-- a non-overflow/range theorem for all squared-magnitude and five-pass
-  accumulations after the now-proved first-attempt `44833/65536`
-  machine-to-ideal FFT endpoint, a resolution of the finish tie policy, or
-  identity with the paper's intended singular-value quantity;
+- a discharge or quantified bad-event account for the signed-safe
+  squared-magnitude and five-pass accumulator trace retained by the new
+  conditional energy-error endpoint, a resolution of the finish tie policy,
+  or identity with the paper's intended singular-value quantity;
 - equality between the target NTT/matrix representation and the complete
   list-based multiplication and key-generation equations used by the
   security model;

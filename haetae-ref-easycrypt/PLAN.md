@@ -8,10 +8,12 @@
   bound `859963392`. The immutable first-attempt trace now derives that input
   bound for all three `s1` and two finalized-`s2` slices, and the checked
   owner-stage recurrence gives each slot a coordinatewise `44833/65536`
-  endpoint against `odd_dft256`. Squared-magnitude/accumulator nonoverflow,
-  retry-attempt lifting, tie-policy decision, acceptance and retry termination, packing
-  semantics, and NTT/matrix-to-security-model multiplication bridge remain
-  open.
+  endpoint against `odd_dft256`. A decoded squared-magnitude and five-slice
+  accumulator theorem now propagates that endpoint to ideal complex energy,
+  conditional on the exact evolving signed-safe `W32` trace. Discharging that
+  trace, retry-attempt lifting, tie-policy decision, acceptance and retry
+  termination, packing semantics, and the NTT/matrix-to-security-model
+  multiplication bridge remain open.
 - **Created:** 2026-07-13
 - **Project root:** `haetae-ref-easycrypt/`
 - **Implementation under verification:** `../haetae-ref-jasmin/`
@@ -155,7 +157,12 @@ claims.
   slices in the immutable first-attempt trace, so every valid first-attempt
   slot has schedule safety, the final `859963392` raw bound, and the
   coordinatewise `44833/65536` error endpoint against the exact ideal schedule
-  for arbitrary scratch input. Retry-attempt lifting remains open.
+  for arbitrary scratch input. `KeygenM23SingularFFTAccumulatorBridge` proves
+  the local `1/65536` squared-magnitude decode error and folds the resulting
+  ideal-energy error through all five accumulator updates;
+  `TargetKeygenM23FirstAttemptAccumulator` discharges the input premise while
+  retaining the evolving accumulator-safety trace. Retry-attempt lifting and
+  discharge of that trace remain open.
   `KeygenM23FFTTableCertificate` proves that the
   extracted `jfft_brv8` table is exactly `bsrev 8` and that all signed root
   coordinates lie in `[-65536,65536]`. `KeygenM23SingularTieRegression`
@@ -168,7 +175,8 @@ claims.
   partial correctness: it neither
   proves that the first attempt accepts nor establishes outer-loop
   termination, retry-attempt coefficient-bound/error propagation, or
-  squared-magnitude/accumulator nonoverflow for the score, a
+  the signed-safe accumulator trace needed to make the conditional energy
+  theorem unconditional, a
   versioned tie-policy change, or packing correctness.
   The gate
   checks source and
@@ -177,8 +185,8 @@ claims.
 - **P3 remains open:** strengthen the fixed-mode packed-output/first-attempt
   result into a complete semantic refinement. The next path includes the
   NTT/matrix-to-list bridge for the security model's polynomial multiplication,
-  squared-magnitude and accumulator nonoverflow facts for the exact
-  singular-word evaluator, an explicit versioned
+  a discharge or quantified bad-event account for the signed `W32`
+  squared-magnitude and accumulator trace, an explicit versioned
   tie-policy decision, proof of
   acceptance and outer-retry termination,
   packing semantics, and pointer aliasing, separation, representation, and

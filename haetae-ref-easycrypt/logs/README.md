@@ -34,14 +34,15 @@ logs, proof-hole scan, axiom scan, and Why3-server log are under
 The gate covering actual mode-2 matrix arithmetic, exact word-level
 finalization, totality, root-table rounding, exact rounded FFT initialization,
 one-butterfly, inner-prefix, block-prefix, complete-stage, and eight-round
-schedule semantics, first-attempt five-slice coefficient reachability, and
+schedule semantics, first-attempt five-slice coefficient reachability,
+conditional decoded squared-magnitude/accumulator energy propagation, and
 proof-only sampler-to-finalizer composition writes
 `keygen-m23-matrix-proof-summary.txt`. Its retained title is “HAETAE mode-2
 key-generation matrix, finalization, and singular-word proof verification”.
-The `2026-08-02T10:57:58Z` run records the canonical source hash; zero drift for
+The `2026-08-04T10:29:28Z` run records the canonical source hash; zero drift for
 the 32-file/56-procedure parent, 25-file/31-procedure sampler-caller, and
 10-file target-NTT extractions; the project-owned NTT loop support and 18
-imported dependency hashes; 48/48 fresh `-no-eco` compilations; and clean
+imported dependency hashes; 50/50 fresh `-no-eco` compilations; and clean
 proof-hole, authored-axiom, and
 debug-command scans. The individual compilation, hash, drift, scan, and
 Why3-server logs are under `keygen-m23-matrix-proof/`.
