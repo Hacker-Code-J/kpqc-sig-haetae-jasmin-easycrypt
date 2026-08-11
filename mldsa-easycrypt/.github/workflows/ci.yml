@@ -1,0 +1,164 @@
+name: Check EasyCrypt security proofs
+
+on:
+  push:
+  pull_request:
+
+env:
+  ERCJOBS: '2'
+  OCAML_COMPILER_VERSION: '5.3.0'
+  CVC5_VERSION: '1.3.3'
+  Z3_VERSION: '4.15.8'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: false
+
+    - uses: ./.github/actions/setup-codeberg-ssh
+      with:
+        ssh-private-key: ${{ secrets.SSH_MLDSA_PRIVATE_KEY }}
+        known-hosts: ${{ secrets.CODEBERG_KNOWN_HOSTS }}
+
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+
+    - name: Set up OCaml
+      uses: ocaml/setup-ocaml@v3
+      with:
+        ocaml-compiler: ${{ env.OCAML_COMPILER_VERSION }}
+        opam-disable-sandboxing: true
+
+    - name: Compute submodule key
+      id: submods
+      run: echo "rev=$(git submodule status --recursive | sha256sum | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+    - name: Restore opam cache
+      id: opam-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.opam
+          _opam
+        key: opam-${{ runner.os }}-${{ env.OCAML_COMPILER_VERSION }}-${{ steps.submods.outputs.rev }}
+
+    - name: Restore SMT solver cache
+      id: smt-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/bin
+        key: smt-solvers-${{ runner.os }}-z3-${{ env.Z3_VERSION }}-cvc5-${{ env.CVC5_VERSION }}
+
+    - name: Pin Jasmin from submodules
+      if: steps.opam-cache.outputs.cache-hit != 'true'
+      run: opam pin add -ny jasmin submodules/jasmin-compiler
+
+    - name: Pin EasyCrypt from submodules
+      if: steps.opam-cache.outputs.cache-hit != 'true'
+      run: opam pin add -ny easycrypt submodules/easycrypt
+
+    - name: Install Jasmin & EasyCrypt
+      if: steps.opam-cache.outputs.cache-hit != 'true'
+      run: opam install -y jasmin easycrypt
+
+    - name: Clean opam switch
+      if: steps.opam-cache.outputs.cache-hit != 'true'
+      run: opam clean -rsc
+
+    - name: Validate toolchain in opam root
+      run: |
+        opam exec -- which jasminc
+        opam exec -- which easycrypt
+
+    - name: Download SMT CVC5
+      if: steps.smt-cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/install-release-binary
+      with:
+        url: https://github.com/cvc5/cvc5/releases/download/cvc5-${{ env.CVC5_VERSION }}/cvc5-Linux-x86_64-static.zip
+        binary-name: cvc5
+
+    - name: Download Z3
+      if: steps.smt-cache.outputs.cache-hit != 'true'
+      uses: ./.github/actions/install-release-binary
+      with:
+        url: https://github.com/Z3Prover/z3/releases/download/z3-${{ env.Z3_VERSION }}/z3-${{ env.Z3_VERSION }}-x64-glibc-2.39.zip
+        binary-name: z3
+
+    - name: Validate SMT solvers
+      run: |
+        "$HOME/bin/z3" --version
+        "$HOME/bin/cvc5" --version
+
+    - name: Archive opam state (root + external switch)
+      run: |
+        tar -I "gzip --fast" -cf opam-root.tar.gz -C "$HOME" .opam
+        tar -I "gzip --fast" -cf opam-switch.tar.gz _opam
+
+    - name: Upload opam state
+      uses: actions/upload-artifact@v4
+      with:
+        name: opam-state-ocaml-${{ env.OCAML_COMPILER_VERSION }}
+        path: |
+          opam-root.tar.gz
+          opam-switch.tar.gz
+        compression-level: 0
+        retention-days: 1
+
+  build:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+
+      - uses: ./.github/actions/setup-codeberg-ssh
+        with:
+          ssh-private-key: ${{ secrets.SSH_MLDSA_PRIVATE_KEY }}
+          known-hosts: ${{ secrets.CODEBERG_KNOWN_HOSTS }}
+
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+
+      - name: Set up OCaml
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: ${{ env.OCAML_COMPILER_VERSION }}
+          opam-disable-sandboxing: true
+
+      - name: Download opam state
+        uses: actions/download-artifact@v4
+        with:
+          name: opam-state-ocaml-${{ env.OCAML_COMPILER_VERSION }}
+
+      - name: Restore SMT solver cache
+        uses: actions/cache@v4
+        with:
+          path: ~/bin
+          key: smt-solvers-${{ runner.os }}-z3-${{ env.Z3_VERSION }}-cvc5-${{ env.CVC5_VERSION }}
+
+      - name: Restore opam state
+        run: |
+          rm -rf "$HOME"/.opam
+          tar -xf opam-root.tar.gz -C "$HOME"
+          tar -xf opam-switch.tar.gz
+          rm -f opam-root.tar.gz opam-switch.tar.gz
+
+      - name: Validate restored toolchain
+        run: |
+          opam exec -- which jasminc
+          opam exec -- which easycrypt
+          "$HOME/bin/z3" --version
+          "$HOME/bin/cvc5" --version
+
+      - name: Configure Why3 for EasyCrypt
+        run: |
+          PATH="$HOME/bin:$PATH" opam exec -- easycrypt why3config
+          test -f "$HOME/.config/easycrypt/why3.conf"
+
+      - name: Check proofs
+        run: PATH="$HOME/bin:$PATH" opam exec -- make check

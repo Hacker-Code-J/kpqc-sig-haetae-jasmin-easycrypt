@@ -1,0 +1,241 @@
+\section{표현 사상(representation map)과 프로그램 논리(program logic)의 번역 사전}
+\label{sec:representation-logic}
+
+\subsection{배열과 메모리는 서로 다른 대상이다}
+
+EasyCrypt 추출물에는 고정 길이 배열과 전역 메모리가 함께 등장한다. 개념적으로
+\[
+  \Bytes=\{0,1,\ldots,255\},\qquad
+  \mathsf{BArray}_N\simeq\Bytes^N
+\]
+이고, 전역 메모리는 64비트 주소를 갖는 함수(function)처럼 읽을 수 있다.
+\[
+  \Mem\simeq (\ZZ/2^{64}\ZZ)\longrightarrow\Bytes.
+\]
+실제 모델에는 load/store 연산과 word 표현이 있으므로 단순한 set-theoretic
+함수보다 구조가 많지만, 구간 등식(interval equality)을 읽는 데에는 이 관점이
+충분하다.
+
+로컬 배열의 \(i\)번째 원소와 메모리 base 주소 뒤 \(i\)번째 바이트가 같다는
+관계(relation)는
+\[
+  \forall,0\le i<n,\qquad
+  a_i=\Mem(\mathit{base}+i)
+\]
+꼴이다. \sourcepath{Mode2KeyMemoryBridge.ec}와
+\sourcepath{ApiKeyMemoryBridge.ec}는 이 관계를 실제 importer/exporter 절차에
+연결한다. 배열 등식만 증명해 두고 public pointer에 대한 결론을 말할 수 없는
+이유가 여기에 있다.
+
+\begin{definition}[구간 제한(interval restriction)과 region equality]
+주소구간 \(U=[b,b+n)\)에 대해
+\(m\restrict_U\)를 그 구간의 바이트 함수라 하자. 두 메모리의 국소 관계는
+\[
+  \operatorname{RegionEq}(m_1,m_2;b_1,b_2,n)
+  \Longleftrightarrow
+  \forall,0\le i<n,
+  m_1(b_1+i)=m_2(b_2+i)
+\]
+로 읽는다. base 주소가 같을 필요도, 구간 밖 메모리가 같을 필요도 없다.
+\end{definition}
+
+Week~6의 region-local \(\mu\) 정리(theorem)는 전체 메모리 등식 대신 key, pre, message
+구간의 이 관계만 요구한다. 이것은 hash 절차가 실제로 읽는 부분에 맞춘
+최소 관계다.
+
+\subsection{주소의 두 표현과 정준 범위(canonical range)}
+
+raw ABI는 정수 주소를 쓰는 부분과 \(W64\) word 주소를 쓰는 부분을 모두
+포함한다. 사상(map)
+\[
+  \ZZ\xrightarrow{\;\operatorname{of\_int}\;}\ZZ/2^{64}\ZZ
+  \xrightarrow{\;\operatorname{to\_uint}\;}[0,2^{64})\cap\ZZ
+\]
+은 모든 정수(integer)에서 항등(identity)이 아니다. wraparound를 제외한
+정준 범위(canonical range)에서만
+\(\operatorname{to\_uint}(\operatorname{of\_int}(a))=a\)다.
+
+따라서 \claimid{OBL-API-ADDRESS-BINDING}의 \statusproved 는 메모리 안전성
+전체가 아니라 두 주소 표현이 같은 바이트를 가리킨다는 제한된 bridge다.
+valid region과 no-wrap 전제는 정리(theorem)의 정의역(domain)을 나타내며, 제거할 수 있는
+구현 세부사항이 아니다.
+
+\subsection{절차는 전역 함수(total function)가 아니라 부분적 상태전이(partial state transition)다}
+
+결정론적 절차 \(f\)를 상태공간(state space) \(X\)에서 \(Y\)로 가는
+사상(map)으로 쓰고 싶지만, 재시도나 무한 루프 가능성이 있으면 자연스러운
+대상은 부분함수(partial function)
+\[
+  f:X\rightharpoonup Y
+\]
+또는 종료하는 실행만 포함하는 관계(relation)다. Hoare 명제(proposition)
+\[
+  \{P\}\ f\ \{Q\}
+\]
+는 이 문서에서 다음처럼 읽는다.
+\[
+  \forall x\in X,\quad
+  P(x)\land f(x)\downarrow
+  \Longrightarrow Q(x,f(x)).
+\]
+여기서 \(f(x)\downarrow\)는 실행이 반환한다는 뜻이다. 이 명제(proposition)만으로
+\(f(x)\downarrow\)를 증명하지 않는다.
+
+\begin{translation}[Hoare 정리(theorem)]
+\identifier{hoare [P : pre ==> post]}는 ``pre가 정의하는 부분공간(subspace)에서
+실제 절차가 종료할 때 그 그래프(graph)가 post 부분집합(subset)에 포함된다''로
+읽는다. KeyGen
+접두부 정리(theorem)와 codec round trip은 이 형태다.
+\end{translation}
+
+두 프로그램 \(f_1,f_2\)의 관계적 정리(relational theorem)는
+\[
+  \operatorname{equiv}[f_1\sim f_2:P\Longrightarrow Q]
+\]
+형태로 나타난다. 두 초기 상태가 \(P\)로 관련되면 두 종료 실행의 결과 상태가
+\(Q\)로 관련된다는 pRHL 명제(proposition)다. 좌우 상태의 변수에는 EasyCrypt 표기
+\(x\{1\}\), \(x\{2\}\)가 붙는다.
+
+\begin{translation}[관계적 정리(relational theorem)]
+pRHL 정리(theorem)는 보통 ``두 상태기계의 시뮬레이션(simulation)'' 또는 ``관측량에
+대한 쌍대시뮬레이션(bisimulation) 조각''으로 읽을 수 있다. 다만 현재 파일이
+한 방향의 결과 관계만 증명한다면 완전한 bisimulation이라는 용어를 쓰지
+않는다.
+\end{translation}
+
+\subsection{정제(refinement)는 가환사각형(commutative square)이다}
+
+추상 연산(abstract operation) \(F\), 실제 절차 \(f\), 입력·출력
+표현사상(representation map) \(e_X,e_Y\)가 있을 때
+전형적인 목표는
+\[
+\begin{array}{ccc}
+X & \xrightarrow{F} & Y\\
+\downarrow e_X & & \downarrow e_Y\\
+X_{\mathrm{bytes}} & \xrightarrow{f} & Y_{\mathrm{bytes}}
+\end{array}
+\qquad
+e_Y\circ F=f\circ e_X
+\]
+이다. 실제 저장소에서는 한 번에 이 전체 사각형을 닫기보다 다음처럼 잘게
+분해한다.
+
+\begin{enumerate}
+  \item 순수 배열 불변식(invariant) 또는 정수 항등식(integer identity);
+  \item 추출된 leaf 절차에 대한 Hoare 정리(theorem);
+  \item generated wrapper가 leaf와 같은 결과를 준다는 exact adapter;
+  \item raw API의 importer/exporter와 주소 bridge;
+  \item 실제 caller의 분기와 메모리 frame;
+  \item 최상위 기능·확률·보안 합성.
+\end{enumerate}
+
+각 단계는 서로 다른 상태공간(state space)을 사용한다. 따라서 아래 단계의
+정리(theorem)가 위 단계의
+전제를 실제로 산출하는지 확인하지 않으면 합성할 수 없다.
+
+\subsection{프레임(frame)은 쓰기 지지집합(write support)에 대한 정리(theorem)다}
+
+절차가 메모리 구간 \(W\)만 쓴다고 할 때 frame 성질은 보통
+\[
+  a\notin W\Longrightarrow m_{\mathrm{after}}(a)=m_{\mathrm{before}}(a)
+\]
+또는 관심 구간 \(U\)가 \(W\)와 서로소(disjoint)라는 전제 아래
+\[
+  m_{\mathrm{after}}\restrict_U=m_{\mathrm{before}}\restrict_U
+\]
+로 표현된다. Week~6의 실제 Sign output frame은 1474바이트 signature 쓰기와
+8바이트 signature-length 쓰기가 분리된 VK/SK/pre/message 구간을 보존함을
+보인다. 이 성질이 없으면 Sign 뒤 Verify에서 같은 key/message를 읽는다고
+합법적으로 말할 수 없다.
+
+\begin{analogy}
+frame rule은 함수의 지지집합(support)이 \(W\)에 들어간다는
+명제(proposition)와 비슷하다.
+관심 대상이 \(U\)에 제한되어 있고 \(U\cap W=\varnothing\)이면
+제한사상(restriction map) 아래 변화가 보이지 않는다. 실제 증명은 support나
+sheaf 용어 대신 byte load/store의 점별 등식(pointwise equality)을
+사용한다.
+\end{analogy}
+
+\subsection{정준성(canonicality)은 대표자(representative) 선택이다}
+
+codec 정리(theorem)에는 다음 세 종류의 전제가 반복된다.
+
+\begin{itemize}
+  \item challenge word가 정확히 \(0\) 또는 \(1\)이다;
+  \item signed low coefficient가 지정된 byte 범위에 있다;
+  \item HBZ coefficient가 \([-6,7)\)에 있다.
+\end{itemize}
+
+이들은 decode가 encode의 왼쪽 역(left inverse)이 되도록 하는 대표자 조건이다.
+일반적으로
+encode는 더 큰 word 공간에서 바이트 공간으로 가며 정보를 버릴 수 있으므로,
+전 정의역에서 단사(injective)일 필요가 없다. 정준 부분집합(canonical subset)
+\(C\)에서
+\[
+  \Decode\circ\Encode\restrict_C=\operatorname{id}_C
+\]
+를 증명하는 것이 정확한 목표다. 여기서 오른쪽은 항등사상(identity map)이다.
+또한 출력 배열의 사용하지 않는 tail이
+보존되는지, padding이 유일한지, parser가 실패하지 않는지는 별도 frame과
+canonical parsing 정리(theorem)다.
+
+\subsection{exact trace와 ghost observation}
+
+실제 raw caller는 hash 호출 전후에도 많은 계산을 수행한다. 분석을 위해
+프로젝트는 실제 결과와 최종 메모리를 보존하면서 중간 값
+\(\mathit{observed\_mu}\), 분기 도달 여부 \(\mathit{tail\_reached}\), 실제 hash
+descriptor 입력을 ghost field에 기록하는 trace 모듈을 둔다.
+
+exact trace 정리(theorem)는 대략
+\[
+  \obs(\text{actual execution})=
+  \obs(\text{instrumented trace})
+\]
+를 실제 반환값과 메모리까지 포함해 증명한다. 그러나 ghost field를 정의했다고
+그 값의 수학적 관계가 자동으로 생기지는 않는다. 특히 서로 다른 두 완료된
+trace의 \(\mathit{observed\_mu}\) 등식은 반환값 수준의 pRHL 정리(theorem)를 trace
+사후상태로 운반하는 별도 product/replay 논리를 요구한다.
+
+\subsection{``zero-loss''의 정확한 범위}
+
+결정론적인 두 generated 절차가 관련 입력에서 같은 관측값을 만든다는 pRHL
+정리(theorem)가 있으면 그 \emph{국소 seam}의 통계적 손실(statistical loss)을 0으로
+둘 수 있다. 현재
+\[
+  \delta_{\mu,\mathrm{raw\_top}}=0
+\]
+라고 요약할 수 있는 이유가 이것이다. 그러나 다음 승격은 허용되지 않는다.
+\[
+  \delta_{\mu,\mathrm{raw\_top}}=0
+  \nRightarrow
+  \delta_{\mathrm{Sign}}=
+  \delta_{\mathrm{Verify}}=
+  \delta_{\mathrm{Encoding}}=0.
+\]
+더 큰 \(\delta\)에는 sampler 분포(distribution), rejection/termination, 전체 codec, 실제 API
+composition, challenge의 나머지 입력 등이 모두 들어간다.
+
+\subsection{EasyCrypt 정리(theorem) 하나를 수학 문장으로 읽는 예}
+
+\sourcepath{ExactMuTopControl.ec}의
+\theoremname{sign_verify_generated_raw_mu_prefix}는 실제 generated 절차
+\identifier{_sf_mu_rawpre}와 \identifier{__verify_hash_mu}를 직접 비교한다.
+그 전제(premise)를 수학적으로 묶으면 다음과 같다.
+
+\begin{enumerate}
+  \item 두 실행이 같은 global-memory 관계(relation)와 같은 pre/message
+        descriptor를 갖는다.
+  \item Sign의 local secret-key 배열 첫 992바이트와 Verify의 memory key region이
+        같다.
+  \item 주소구간은 canonical하며 wraparound가 없다.
+  \item Verify의 prelength는 실제 raw branch를 선택한다.
+\end{enumerate}
+
+결론은
+\[
+  \take_{32}(\operatorname{return}_{\mathrm{Sign}})
+  =\operatorname{return}_{\mathrm{Verify}}
+\]
+이다. 이 문장에서 ``실제 generated'', ``반환값'', ``raw branch'', ``32바이트
+접두부'' 중 하나라도 빼면 정리(theorem)를 강하게 잘못 읽게 된다.

@@ -1,0 +1,34 @@
+\section{Next Work}
+
+\paragraph{Week 3 selection.}
+The packed prefix closed, while the parent raw call-site \(\mu\)-hash claim is
+still partial. The decision rule therefore selects another focused
+SHAKE/control/memory sprint:
+\begin{enumerate}
+  \item prove an exact refinement between
+  \procname{\_sf\_mu\_rawpre}, the raw branch of
+  \procname{\_\_verify\_hash\_mu}, and the compiled raw wrappers;
+  \item lift the constructed 992-byte relation through actual Sign/Verify
+  callers and public memory contracts; and
+  \item rerun extraction hashes, fresh EasyCrypt compilation, non-vacuity
+  checks, baselines, and the LaTeX build.
+\end{enumerate}
+
+\paragraph{Go/no-go.}
+This is a \emph{go} for the narrow control-flow and memory-lifting work. It is
+a \emph{no-go} for widening the claimed public-API refinement or paper-level
+EUF-CMA result. Highbits/LSB packing and full challenge-call equivalence begin
+only after \claimid{OBL-MU-TOPLEVEL-CONTROL} closes.
+
+\paragraph{Minimum next theorem.}
+The next nontrivial deliverable must show that an actual terminating raw
+generated Sign/Verify call establishes the already-proved wrapper pre/post
+relation. It must expose branch and memory premises and must not introduce a
+SHAKE or implementation-semantic axiom.
+
+\paragraph{Longer path.}
+After the exact raw call site closes, the order is public-context encoding,
+highbits/LSB equality, full challenge/ROM query equivalence, then the broader
+Sign/Verify arithmetic and security-distribution obligations. KeyGen
+termination, FFT/TieMin, sampler/rejection distributions, and forking remain
+separate workstreams.

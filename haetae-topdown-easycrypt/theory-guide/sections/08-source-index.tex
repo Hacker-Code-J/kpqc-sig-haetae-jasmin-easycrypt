@@ -1,0 +1,550 @@
+\section{정리와 소스 인덱스}
+\label{sec:source-index}
+
+\begingroup
+\footnotesize
+\renewcommand{\arraystretch}{1.08}
+\begin{longtable}{L{0.29\textwidth}L{0.31\textwidth}L{0.32\textwidth}}
+\caption{본문의 핵심 선언을 찾기 위한 안정적 인덱스}\label{tab:source-index}\\
+\toprule
+선언 또는 주장 & 파일 & 읽을 때 확인할 내용 \\
+\midrule
+\endfirsthead
+\toprule
+선언 또는 주장 & 파일 & 읽을 때 확인할 내용 \\
+\midrule
+\endhead
+\identifier{FC_KeyGen}, \identifier{FC_Sign}, \identifier{FC_Verify} &
+\sourcepath{easycrypt/specs/TopLevelGoals.ec} & 구현/논문 분포와 검증함수의
+최상위 명세 등식 \\
+\identifier{ImplementationSecurity}\newline\identifier{Composition} &
+\sourcepath{easycrypt/specs/TopLevelGoals.ec} & \cref{eq:implementation-bound}의
+추상 손실 예산 \\
+\identifier{implementation_security_obligations} &
+\sourcepath{easycrypt/security/}\newline
+\sourcepath{ImplementationSecurity}\newline\sourcepath{Goals.ec} & 숨기지 않은
+구현 보안 의무들의 conjunction \\
+\identifier{cryptographic_bounds_well_formed} &
+\sourcepath{easycrypt/security/SecurityAssumptions.ec} & MLWE, BST-MSIS, ROM
+가정 인터페이스 \\
+\identifier{vk_prefix_eq} &
+\sourcepath{easycrypt/refinement/keygen/PackedKeyPrefix.ec} &
+\cref{def:vk-prefix}의 배열 수준 정의 \\
+\identifier{pack_sk_m23_mode2_vk_prefix} &
+\sourcepath{easycrypt/refinement/keygen/}\newline
+\sourcepath{ExtractedPackedKey}\newline\sourcepath{Prefix.ec} & 실제 생성된
+packer의 992-byte prefix 부분정확성 \\
+\identifier{keypair_internal_mode2_return_prefix} &
+\sourcepath{easycrypt/refinement/keygen/}\newline
+\sourcepath{ExtractedPackedKey}\newline\sourcepath{Prefix.ec} & 실제 내부
+mode-2 KeyGen 반환값으로의 lift \\
+\identifier{imported_mode2_full_first_attempt_equiv} &
+\sourcepath{easycrypt/refinement/keygen/}\newline
+\sourcepath{ExistingFirstAttempt}\newline\sourcepath{Adapter.ec} & 기존
+first-attempt 정리의 전제를 강화하지 않는 import-only 연결 \\
+\identifier{keygen_prefix_memory_relation_is_constructible} &
+\sourcepath{easycrypt/support/Mode2KeyMemoryBridge.ec} & 저장된 VK로부터
+메모리 prefix를 구성하는 역사적 local witness \\
+\identifier{keygen_export_vk_mode2_prefix},\newline
+\identifier{keygen_export_sk_mode2_prefix} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ApiKeyMemoryBridge.ec} & 실제 KeyGen exporter의 992/1408-byte
+memory 접두부 부분정확성 \\
+\identifier{sign_import_mode2_sk_prefix},\newline
+\identifier{verify_import_mode2_vk_prefix} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ApiKeyMemoryBridge.ec} & 실제 Sign/Verify importer의 로컬 992-byte
+접두부 부분정확성 \\
+\identifier{exported_mode2_regions_agree},\newline
+\identifier{imported_sign_sk_reaches_mu_memory} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ApiKeyMemoryBridge.ec} & export/import 접두부에서 raw \(\mu\) memory
+전제로 가는 순수 adapter; caller 합성은 별도 \\
+\identifier{canonical_ui64_address_roundtrip},\newline
+\identifier{mode2_vk_region_bridge} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiAddressBridge.ec} & raw 정수 주소와 \identifier{W64} 주소의
+canonical 왕복 및 구간 바인딩 \\
+\identifier{keypair_raw_api_exact_}\newline
+\identifier{export_trace} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiKeygenExport}\newline\sourcepath{Composition.ec} & 실제 raw KeyGen과 두 copy를
+포함한 export trace 사이의 정확한 메모리/결과 동치 \\
+\identifier{keypair_raw_api_exports_}\newline
+\identifier{matching_prefixes} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiKeygenSequential}\newline\sourcepath{Export.ec} & 실제 raw KeyGen 순차 export 뒤
+외부 VK/SK 접두부 일치 \\
+\identifier{sign_raw_api_exact_mu_trace},\newline
+\identifier{sign_raw_api_trace_binds_hash_inputs} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiCallerMuTrace.ec} & 실제 raw Sign과 trace의 정확한 관계 및
+hash 입력 관찰값 \\
+\identifier{raw_api_region_reaches_mu_zero_loss} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiMuReachability.ec} & constructed store 없이 external prefix와
+Sign import를 \identifier{sk_memory_prefix}로 연결 \\
+\identifier{verify_raw_api_exact_mu_trace},\newline
+\identifier{verify_cryptolab_exact_mu_trace} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiVerifyMuTrace.ec} & 모든 early-reject/tail 분기에서 실제
+Verify 결과와 memory를 보존하는 trace \\
+\identifier{verify_raw_api_actual_accept_}\newline
+\identifier{binds_hash_inputs} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiVerifyAcceptTrace.ec} & 실제 성공한 Verify의 tail 도달 및
+VK/pre/message hash 입력 바인딩 \\
+\identifier{raw_api_accepting_execution_}\newline
+\identifier{hash_mu_zero_loss} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiAcceptedMu}\newline\sourcepath{Composition.ec} & accepted trace 사실로 실제 생성
+hash-call \(\mu\) prefix를 인스턴스화 \\
+\identifier{raw_api_accepting_execution_}\newline
+\identifier{generated_challenge_suffix_zero_loss} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiAcceptedMu}\newline\sourcepath{Composition.ec} & accepted trace 전제에서 위치-64
+generated suffix helper 결과 일치 \\
+\identifier{sign_output_copy_exact_}\newline
+\identifier{and_frames_reused},\newline
+\identifier{sign_raw_api_frames_reused_regions} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiSignOutputFrame.ec} & 실제 signature/siglen 출력과 actual raw
+Sign caller가 분리된 VK/SK/pre/message 구간을 보존 \\
+\identifier{sign_verify_generated_raw_}\newline
+\identifier{mu_prefix_regionwise} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RegionLocalMuEquivalence.ec},\newline
+\sourcepath{RegionLocalMuTop.ec} & 전체 memory 등식 없이 실제 생성 hash를
+VK/pre/message read region별로 비교 \\
+\identifier{raw_sign_then_verify_actual_}\newline
+\identifier{exact_trace},\newline
+\identifier{sign_then_verify_accept_}\newline
+\identifier{binds_observed_inputs} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{RawApiDirectObservedMu.ec} & 실제 Sign→Verify sequence와 trace의
+결과/memory 동치 및 accepted descriptor 사후조건; stored \(\mu\) 등식은 없음 \\
+\identifier{sign_verify_raw_mu_top_wrappers_prefix} &
+\sourcepath{easycrypt/refinement/composition/ExtractedMuHashPrefix.ec} & 생성
+helper chain의 wrapper-level \(\mu_{32}\) prefix \\
+\identifier{sf_mu_rawpre_refines_raw_top} &
+\sourcepath{easycrypt/refinement/composition/ExactMuTopControl.ec} & 실제 Sign
+raw top과 wrapper의 정확한 관계 \\
+\identifier{verify_hash_mu_raw_refines_raw_top} &
+\sourcepath{easycrypt/refinement/composition/ExactMuTopControl.ec} & 실제 Verify
+raw branch와 wrapper의 정확한 관계 \\
+\identifier{sign_verify_generated_raw_mu_prefix} &
+\sourcepath{easycrypt/refinement/composition/ExactMuTopControl.ec} & 실제 생성된
+Sign/Verify 절차 사이의 \(\mu_{32}\) prefix \\
+\identifier{sign_verify_mu32_absorb_from_pos64} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ExtractedChallenge}\newline\sourcepath{Absorb.ec} & 위치
+64에서 실제 \(\mu_{32}\) absorb helper의 결과 일치 \\
+\identifier{generated_raw_mu_preconditions_from_keygen_prefix} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ExactMode2RawMu}\newline\sourcepath{Composition.ec} &
+KeyGen prefix에서 raw theorem 전제의 구체적 witness \\
+\identifier{generated_raw_mu_to_challenge_suffix_zero_loss} &
+\sourcepath{easycrypt/refinement/composition/}\newline
+\sourcepath{ExactMode2RawMu}\newline\sourcepath{Composition.ec} & 현재
+raw generated-top 국소 seam의 zero-loss 합성 정리 \\
+\identifier{challenge_input_eq_components} &
+\sourcepath{easycrypt/refinement/composition/TranscriptBytes.ec} & highbits, LSB,
+\(\mu\)가 각각 같을 때 전체 list transcript가 같다는 congruence \\
+\identifier{canonical_challenge},\newline
+\identifier{canonical_signed_low},\newline
+\identifier{prefix_codec_preconditions_}\newline
+\identifier{satisfiable} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2SignaturePrefixCodec.ec} & prefix round trip의 canonical
+challenge/signed-low 전제와 all-zero 비공허성 witness \\
+\identifier{pack_sig_prefix_mode2_layout},\newline
+\identifier{unpack_sig_prefix_mode2_layout} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2SignaturePrefixPack.ec},\newline
+\sourcepath{Mode2SignaturePrefixUnpack.ec} & 실제 생성 prefix pack/unpack의
+32-byte challenge 및 1024-byte low 배치와 unpack low-tail frame \\
+\identifier{pack_unpack_sig_prefix_}\newline
+\identifier{mode2_roundtrip} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2SignaturePrefix}\newline
+\sourcepath{RoundTrip.ec} & 두 실제 생성 절차의 canonical
+mode-2 prefix round trip 부분정확성 \\
+\identifier{canonical_hbz_mode2},\newline
+\identifier{canonical_hbz_mode2_satisfiable} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzCodecSpec.ec} & mode-2 \(1024\)-계수 범위, leaf prefix/frame
+술어와 all-zero canonical witness \\
+\identifier{encode_hb_z1_prepare_}\newline
+\identifier{mode2_correct},\newline
+\identifier{decode_hb_z1_apply_}\newline
+\identifier{mode2_correct} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzPrepare.ec},\newline
+\sourcepath{Mode2HbzApply.ec} & 실제 prepare/apply leaf의 exact symbol mapping,
+bad word, coefficient 복원 및 bounded tail frame \\
+\identifier{encode_prepare_decode_}\newline
+\identifier{apply_mode2_inverse} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzLeafRoundTrip.ec} & 두 actual leaf wrapper의 순차 합성으로
+첫 1024개 HBZ coefficient 복원 \\
+\identifier{pack_target_encode_hb_z1_}\newline
+\identifier{full_exact_focused},\newline
+\identifier{unpack_target_decode_hb_z1_}\newline
+\identifier{full_exact_focused} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzActualBoundary.ec} & focused/full 및 signature pack/unpack
+추출 경로가 같은 실제 HBZ full procedure를 노출함 \\
+\identifier{mode2_hbz_table_certificate},\newline
+\identifier{hbz_fast_step_matches_math} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzTableCertificate.ec} & 13-symbol interval/table field와
+reciprocal quotient/overflow certificate \\
+\identifier{actual_mode2_hbz_}\newline
+\identifier{tables_certified} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2HbzSymbolWords}\newline
+\sourcepath{Generated.ec} & literal actual esyms/dsyms/symbol
+arrays가 table certificate를 만족한다는 재생성 가능 정리 \\
+\identifier{pure_rans_step_inverse},\newline
+\identifier{hbz_fast_step_decode_inverse} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansCore.ec} & 순수 quotient/slot inverse와 concrete reciprocal
+fast-step inverse; normalization byte 및 actual loop는 제외 \\
+\identifier{renorm_bytes_readback},\newline
+\identifier{encode_trace_state_bounds},\newline
+\identifier{valid_rans_trace_canonical} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansByteStack.ec} & 0/1/2-byte normalization, \(xs/cuts/bytes\)
+trace, little-endian state와 canonical state-bound 정리 \\
+\identifier{encoder_two_byte_}\newline
+\identifier{decoder_order},\newline
+\identifier{cursor_two_decrements_}\newline
+\identifier{no_underflow} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansNormalization.ec} & actual W32 shift/truncate와 decoder
+shift/or의 정수 의미 및 W64 backward-cursor 안전성 \\
+\identifier{copy_encoded_suffix_correct} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansSuffixCopy.ec} & 실제
+\identifier{__copy_encoded_suffix}의 pointwise slice equality와 unused-tail frame \\
+\identifier{actual_rans_encode_}\newline
+\identifier{mode2_control},\newline
+\identifier{actual_rans_decode_}\newline
+\identifier{mode2_control} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncodeRefinement.ec},\newline
+\sourcepath{Mode2RansDecodeRefinement.ec} & 실제 생성 반복문(actual generated
+loop)의 구체적 mode-2 입력/제어(concrete input/control)와
+\(bad\in\{0,1\}\). 이 제어 정리와 별도로 인코더 추적
+정제(encoder trace refinement)는 Week~11에, 디코더 추적
+정제(decoder trace refinement)는 Week~12에 각각 닫힘 \\
+\identifier{actual_rans_harness_}\newline
+\identifier{branches_on_encoder_result} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansActualInverse.ec} & 실제 인코더--복사--디코더
+(encoder--copy--decoder) 호출, 실제 결과의 실패/성공 분기(actual-result
+failure/success branch)와 디코더 입력 필드(decoder input field) 초기화; 기존
+제어 정리 자체는 역함수(inverse)가 아니며 Week~13 의미 정리는 아래에 별도 \\
+\identifier{symbol_list_of_array},\newline
+\identifier{symbol_suffix},\newline
+\identifier{encode_trace_suffix_extension} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansArrayListBridge.ec} & 실제 배열의 앞 1024기호를 목록과
+접미부로 연결하고 구간/프레임 연산 및 한 기호 추적 점화식을 증명 \\
+\identifier{actual_mode2_encoder_}\newline
+\identifier{word_step_correct} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderWordStep.ec} & 실제 mode-2 표, W32/W64 역수 곱과
+이동/편향 단어가 순수 빠른 인코더 단계와 같다는 단어 수준 정리 \\
+\identifier{generated_mode2_encoder_}\newline
+\identifier{word_step_unfold},\newline
+\identifier{generated_outer_word_}\newline
+\identifier{update_matches} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderGenerated}\allowbreak\sourcepath{WordStep.ec} &
+생성 표 필드 적재, 역수 상위 곱, 이동 사다리, 보수(complement), 편향과 실제
+외부 단어 갱신을 기존 빠른 단계에 연결하는 검증된 Week~11 다리 \\
+\identifier{normalization_len_cases},\newline
+\identifier{inner_progress_segment_step} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoder}\allowbreak\sourcepath{InnerProgress.ec} & 순수 정규화 길이 0/1/2, 반복
+나눗셈과 정확한 낮은 바이트 접미부 및 한 단계 구간 보존 \\
+\identifier{encoder_inner_phase_inv},\newline
+\identifier{encoder_inner_segment_inv},\newline
+\identifier{encoder_inner_segment_step} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderTrace.ec} & 실제 생성 내부 반복문에 쓰는 보수적
+\(0..4\) 위상, 바이트 구간과 접두부 프레임 술어 및 실제 저장 단계 \\
+\identifier{actual_w32_le_bytes_serialize},\newline
+\identifier{actual_encoder_final_state_}\newline
+\identifier{serialization} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoder}\allowbreak\sourcepath{Serialization.ec} & 네 실제 패턴 \identifier{set8}의
+리틀엔디언 직렬화, 외부/접두부 프레임과 성공 크기 산술 잎 정리 \\
+\identifier{actual_store_w32_le_}\newline
+\identifier{prepend_trace_bytes} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoder}\newline
+\sourcepath{SerializationComposition.ec} &
+직렬화된 최종 상태를 순수 꼬리 앞에 붙이고 초기 배열에 대한 구간/프레임을
+보존하는 합성 정리; Week~11 최종화 정리에서 실제 네 저장과 함께 사용됨 \\
+\identifier{actual_rans_encode_inner_}\newline
+\identifier{no_underflow},\newline
+\identifier{actual_rans_encode_success_}\newline
+\identifier{size_bound} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoder}\allowbreak\sourcepath{ActualInner.ec} & 실제 생성 \identifier{_rans_encode}의
+내부 바이트/프레임 불변식과 실패 또는 안전 오프셋 사후조건; 성공 시 크기
+\(4..1024\)의 직접 Hoare 부분정확성 \\
+\identifier{encoder_inner_tail_inv},\newline
+\identifier{encoder_outer_tail_}\newline
+\identifier{advance_success} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderTail}\allowbreak\sourcepath{Invariant.ec} & 순수 꼬리를
+함께 운반하는 내부/외부 불변식의 초기화, 실제 내부 진행, 정확한 0/1/2바이트
+종료와 한 기호 전이를 제공하는 검증된 Week~11 층 \\
+\identifier{encoder_outer_tail_}\newline
+\identifier{finalize_success} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoder}\allowbreak\sourcepath{Finalization.ec} & 순수 최종
+상태 직렬화와 누적
+정규화 접미부를 결합하고 정확한 길이 및 접두부 프레임을 도출하는 최종화 정리 \\
+\identifier{generated_encoder_outer_}\newline
+\identifier{finalize_success} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderGenerated}\allowbreak\sourcepath{Finalization.ec} &
+생성된 오프셋 단어와 실제 네 리틀엔디언 저장을 순수 최종화 정리에 연결하는
+검증된 다리 \\
+\identifier{encoder_trace_post},\newline
+\identifier{encoder_generated_success_}\newline
+\identifier{outer_post},\newline
+\identifier{actual_rans_encode_trace_closure} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderActual}\allowbreak\sourcepath{TraceClosure.ec} & 실제
+\identifier{RansEncodeTarget.M._rans_encode}를 직접 열어 실패 또는 성공 시 정확한
+전체 접미부, 길이, 오프셋과 프레임을 증명하는 Week~11 핵심 Hoare 정리 \\
+\identifier{actual_rans_encode_}\newline
+\identifier{trace_refinement} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansEncoderOuter}\allowbreak\sourcepath{Refinement.ec} & 핵심
+폐쇄 정리를 실제 반환 튜플과 \identifier{trace_bytes} 식으로 펼친 성공 조건부
+부분정확성 따름정리 \\
+\identifier{decoder_state_at},\newline
+\identifier{decoder_cursor},\newline
+\identifier{decoder_cursor_final} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{Cursor.ec},\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{CursorSteps.ec} & 순수 추적의 디코더 상태, 구간,
+시작/한 단계/최종 커서와 각 구간 읽기가 전체 크기보다 앞선다는 Week~12 경계
+정리 \\
+\identifier{actual_mode2_decoder_}\newline
+\identifier{word_update_correct},\newline
+\identifier{generated_decoder_symbol_}\newline
+\identifier{expected} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{WordStep.ec},\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{ActualWord.ec},\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{GeneratedStep.ec} & 실제
+\identifier{symbol_words}/\identifier{dsyms_words} 조회와 W32/W64 갱신을
+수학적 디코더 단어 단계와 예상 기호에 연결 \\
+\identifier{decoder_replay_guard_exact},\newline
+\identifier{decoder_inner_trace_step},\newline
+\identifier{decoder_outer_trace_exit_}\newline
+\identifier{components} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{Normalization.ec},\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{ActualTrace.ec} & 0/1/2바이트 부분 재생, 실제
+내부/외부 반복 불변식, 정확한 소비 커서, \(x=2^{23}\), 출력 접두부와 꼬리
+프레임 \\
+\identifier{actual_rans_decode_}\newline
+\identifier{trace_refinement} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansDecoder}\allowbreak\sourcepath{TopHoare.ec} & 실제 생성
+\identifier{RansDecodeTarget.M._rans_decode}를 직접 열어 정확 추적 입력에서
+\(bad=0\), 정확한 소비 크기, 1024기호 복원과 출력 꼬리 보존을 증명하는
+Week~12 Hoare 부분정확성 \\
+\identifier{copied_suffix_is_exact_trace},\newline
+\identifier{segment_matches_implies_}\newline
+\identifier{exact_decoder_segment_input},\newline
+\identifier{actual_decoder_input_from_}\newline
+\identifier{configured_trace},\newline
+\identifier{encoder_success_size_word_bridge} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansCore}\allowbreak\sourcepath{CompositionBridge.ec} & 실제
+인코더 구간과 복사 slice에서 디코더의 전역/점별 정확 추적 입력을 구성하고,
+실제 상태 저장과 W64 크기 무랩을 연결하는 Week~13 어댑터 \\
+\identifier{actual_rans_encode_copy_}\newline
+\identifier{decode_inverse} &
+\sourcepath{easycrypt/refinement/sign/}\newline
+\sourcepath{Mode2RansCoreActualInverse.ec} &
+\identifier{Mode2RansActualHarness.run} 안에서 실제 인코더 실패 시 디코더
+미실행/초기 상태 보존과 성공 시 실제 복사, 디코더 \(bad=0\), 정확한 소비,
+1024기호 복원 및 꼬리 프레임을 합성하는 Week~13 성공 조건부 Hoare 부분정확성 \\
+\claim{CLAIM_LEDGER} & \sourcepath{CLAIM_LEDGER.md} & 현재 상태의 운영상 단일
+기준(source of truth) \\
+\claim{THEOREM_GRAPH} & \sourcepath{THEOREM_GRAPH.md} & 부모 보안 목표에서 현재
+seam까지의 의존성 \\
+\claim{PRODUCT_REPLAY_}\newline\claim{DECISION} &
+\sourcepath{PRODUCT_REPLAY_}\newline\sourcepath{DECISION.md} &
+stored \identifier{observed_mu} transport를 동결한 의미론 근거와 거부한 접근 \\
+\claim{SIGNATURE_CODEC_}\newline\claim{OBLIGATIONS} &
+\sourcepath{SIGNATURE_CODEC_}\newline\sourcepath{OBLIGATIONS.md} & 실제 1474-byte layout, prefix
+증명과 suffix/rANS 의무 \\
+\claim{MODE2_HBZ_CODEC_}\newline\claim{OBLIGATIONS} &
+\sourcepath{MODE2_HBZ_CODEC_}\newline\sourcepath{OBLIGATIONS.md} & Week~8 HBZ
+leaf/table부터 Week~9 byte-stack/copy/harness까지의 상태와 success boundary \\
+\claim{RANS_PROOF_DESIGN} & \sourcepath{RANS_PROOF_DESIGN.md} & reverse
+normalization-byte stack과 actual loop refinement의 분해 및 거부한 monolithic
+접근 \\
+\claim{RANS_BYTE_STACK_}\newline\claim{INVARIANT} &
+\sourcepath{RANS_BYTE_STACK_}\newline\sourcepath{INVARIANT.md} & canonical
+\(xs/cuts/bytes\) 의미, byte order, 두 intended actual loop invariant와 비공허성
+경계 \\
+\claim{RANS_ENCODER_}\newline\claim{INVARIANT} &
+\sourcepath{RANS_ENCODER_}\newline\sourcepath{INVARIANT.md} & Week~10 실제
+인코더의 접미부 인덱스 관례와 Week~11 꼬리 인식 불변식, 생성 단어 갱신,
+최종 직렬화 및 실제 전체 접미부 폐쇄 \\
+\claim{RANS_DECODER_}\newline\claim{INVARIANT} &
+\sourcepath{RANS_DECODER_}\newline\sourcepath{INVARIANT.md} & Week~12 참조
+상태/커서, 외부 기호 접두부와 꼬리 프레임, 내부 0/1/2바이트 재생 불변식,
+초기 파싱과 실제 최종 검사 경계 \\
+\claim{WEEK7_REPORT} & \sourcepath{WEEK7_REPORT.md} & FREEZE-A/GO-B 결정과 Week~8
+직전 30-target 역사적 baseline \\
+\claim{WEEK8_REPORT} & \sourcepath{WEEK8_REPORT.md} & \identifier{CONTINUE-RANS}
+판정, HBZ leaf/table/single-step과 Week~9 직전 38-target 역사적 경계 \\
+\claim{WEEK9_REPORT} & \sourcepath{WEEK9_REPORT.md} & 바이트 스택, 실제 접미부
+복사와 결합 제어, 두 열린 외부 반복문 정제 및 44대상 역사적 경계 \\
+\claim{WEEK10_REPORT} & \sourcepath{WEEK10_REPORT.md} & 배열/목록 및 단어 연결,
+실제 내부 바이트/프레임, 직렬화 잎, 성공 시 크기와 50대상
+\identifier{CONTINUE-ENCODER} 경계 \\
+\claim{Week 11 encoder trace note} &
+\sourcepath{latex/sections/}\newline
+\sourcepath{27-week11-rans-encoder-}\newline
+\sourcepath{trace-closure.tex} & 꼬리 인식
+불변식, 생성 단어 단계, 최종 직렬화와 실제 외부 접미부 폐쇄를 설명하고 남은
+성공 증인/디코더 경계를 구분한 연구 노트 \\
+\claim{WEEK11_REPORT} & \sourcepath{WEEK11_REPORT.md} &
+\identifier{OBL-RANS-ENCODE-REFINEMENT}의 성공 조건부 부분정확성 폐쇄,
+57대상 통과, \identifier{GO-ENCODER} 판정과 Week~12 단일 디코더 의무 \\
+\claim{Week 12 디코더 정제 메모(decoder refinement note)} &
+\sourcepath{latex/sections/}\newline
+\sourcepath{28-week12-rans-decoder-}\newline
+\sourcepath{refinement.tex} & 실제 디코더의 정확 추적 입력, 커서/표/재생
+불변식, 실제 최종 거절 검사와 남은 결합 간선을 설명한 연구 노트 \\
+\claim{WEEK12_REPORT} & \sourcepath{WEEK12_REPORT.md} &
+\identifier{OBL-RANS-DECODE-REFINEMENT}의 정확 추적 부분정확성 폐쇄,
+65대상 통과, \identifier{GO-DECODER} 판정과 Week~13 단일 결합 의무 \\
+\claim{Week 13 rANS 핵심 합성 메모(core composition note)} &
+\sourcepath{latex/sections/}\newline
+\sourcepath{29-week13-rans-core-}\newline
+\sourcepath{composition.tex} & 복사 추적, 점별 디코더 읽기, W64 크기 연결과
+실제 결합 모듈의 실패/성공 의미 합성을 설명한 연구 노트 \\
+\claim{WEEK13_REPORT} & \sourcepath{WEEK13_REPORT.md} &
+\identifier{OBL-RANS-CORE-INVERSE}의 성공 조건부 부분정확성 폐쇄, 67대상 통과,
+\identifier{GO-CORE} 판정과 Week~14 실제 전체 HBZ 래퍼 의무 \\
+\claim{Week 13 독립 검증 기록(independent verifier)} &
+\sourcepath{logs/week13-}\newline
+\sourcepath{independent-verifier.md} & 최종 정리의 실제 세 절차 호출,
+비순환 사전조건, 실패/성공 사후조건과 67대상 완료 로그를 별도로 대조한 판정 \\
+\claim{Focused extraction manifest} & \sourcepath{manifests/focused-extraction.md} &
+Jasmin root, 생성 파일, hash, 작성 정리 및 focused HBZ body identity의 대응 \\
+\claim{Generated certificate manifest} &
+\sourcepath{manifests/generated-certificates.sha256} & 512-word actual HBZ symbol
+certificate generator/output의 pinned hash \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{기호 및 약어}
+
+\begin{description}[style=nextline,leftmargin=3.1cm]
+  \item[기능정확성(functional correctness, FC)] 구현의 결과 또는 분포가 논문
+  명세와 일치한다는 목표.
+  \item[원시/내부(raw/internal)] 문맥 길이 인코딩을 쓰지 않는 내부 메시지 경로.
+  Verify에서는 \identifier{prelen}의 값이 \(2^{63}\)보다 작을 때 실제 원시
+  분기를 선택한다.
+  \item[승인 경로(accepted path)] 실제 Verify 반환값이 0인 실행. 현재 정리는 이 사건이
+  \identifier{tail_reached}를 함의함을 증명하지만, 임의 서명이나 정당한 Sign
+  출력이 승인 경로에 속한다고 주장하지 않는다.
+  \item[정확 추적(exact trace)] 실제 절차와 최종 메모리/반환값이 같은 작성
+  거울 프로그램(authored mirror). 유령(ghost) 관찰값은 실제 제어흐름이 해당
+  지점에 도달한 경우에만 의미가 있다.
+  \item[구간 국소(region-local)] 전체 메모리 등식 대신 절차가 실제 읽는 주소 구간의
+  바이트 등식만을 요구하는 관계. 다른 주소의 차이는 결과에 영향을 주지 않는다.
+  \item[생성/재전달 경계(product/replay boundary)] 생성 해시의 관계적 반환값
+  정리를 이미 완료된 순차 추적의 저장된 유령 결과로 운반하는 미해결 의미론 간선. 현재는
+  명시적으로 \statusdeferred 이다.
+  \item[서명 접두부(signature prefix)] 1474바이트 mode-2 서명의 첫 1056바이트.
+  32바이트 도전값 비트와 1024바이트 하위 계수를 담으며 접미부 메타데이터,
+  rANS 적재량과 패딩은 포함하지 않는다.
+  \item[HBZ] 서명 접미부에 rANS로 압축되는 \(1024\)개의 하이비트 계수 층.
+  mode-2 정준 범위는 \([-6,7)\)이고 준비 잎이 13기호 알파벳
+  \(0,\ldots,12\)로 옮긴다.
+  \item[rANS 단계(rANS step)] 빈도 구간(frequency interval)을 이용해 상태와
+  기호를 가역적으로 갱신하는 산술 단계. 순수/역수 단일 단계와 이를 잇는
+  정규화 읽기/상태 범위 추적을 다루며, 별도의 Week~11/12 정리가 각각 실제
+  인코더와 디코더 외부 반복문을 연결한다.
+  \item[정규화 바이트 스택(normalization-byte stack)] 인코더가 기호를 역순으로
+  처리하며 뒤쪽 커서로 내보낸 바이트열을 디코더가 앞에서부터 소비하는 관계.
+  순수 \(xs/cuts/bytes\) 의미와 단어 산술은 닫혔고, 실제 인코더 내부 쓰기까지
+  포함한 누적 외부 접미부 연결은 Week~11에, 정확한 입력 아래 실제 디코더의
+  정방향 소비(forward consumption)는 Week~12에 닫혔다. 두 정리를 실제 복사
+  호출과 순차 합성하는 간선은 Week~13에 닫혔다.
+  \item[배열/목록 연결(array/list bridge)] 실제 배열의 앞 1024기호를 순수 목록과
+  그 접미부에 연결하고, 구간 일치와 프레임 연산을 제공하는 Week~10 층.
+  \item[구간 일치(segment match)] 배열의 지정 오프셋부터 순수 바이트 목록이
+  점별로 저장되어 있다는 술어 \identifier{segment_matches}.
+  \item[접두부 프레임(prefix frame)] 지정 오프셋보다 낮은 배열 바이트가 실행
+  전후에 바뀌지 않았다는 술어 \identifier{prefix_frame}.
+  \item[실제 내부 반복문(actual inner loop)] 생성된 \identifier{_rans_encode}의
+  정규화 반복문. Week~10의 보수적 \(0..4\) 위상 정리에 더해 Week~11 꼬리
+  인식 불변식은 실제 가드에서 정확한 정규화 길이 \(0/1/2\)를 도출하고 외부
+  누적 추적과 동일시한다.
+  \item[꼬리 인식 불변식(tail-aware invariant)] 현재 기호의 정규화 바이트뿐
+  아니라 이미 존재하는 순수 추적 꼬리까지 \identifier{segment_matches}에 함께
+  넣어 내부 반복 뒤 외부 한 기호 점화식을 복원하는 검증된 Week~11 불변식.
+  \item[정확 추적 디코더 입력(exact-trace decoder input)] 정준 1024기호에서
+  계산한 \identifier{trace_bytes}, 크기, 상태 필드, 실제 디코더 표와 모든
+  정규화 바이트 읽기를 하나의 함수적 표현 계약으로 묶는 Week~12 술어. 성공,
+  출력 등식이나 사후상태를 전제로 포함하지 않는다.
+  \item[부분 재생 불변식(partial replay invariant)] 한 디코더 기호 구간에서
+  이미 소비한 바이트 수 \(k\), 커서와 축소 상태를
+  \identifier{decoder_replay_prefix}에 연결하는 내부 불변식. 실제 가드는
+  \(k<|\mathsf{segment}|\)와 같고 구간 길이는 0, 1 또는 2다.
+  \item[실제 rANS 결합(actual rANS harness)] 실제 인코더 반환 \(bad\)가 0일
+  때만 실제 접미부 복사와 디코더를 실행하는 단항 합성. 기존 결합 정리는 분기와
+  디코더 입력 필드만 증명한다. Week~13의 별도 의미 정리는 복사된 구간을
+  정확 추적 입력으로 운반하여 실패 시 미실행과 성공 시 1024기호 왕복을 같은
+  결합 안에서 증명한다.
+  \item[성공 조건부(success-conditioned)] 정준 입력만으로 고정 버퍼의 인코딩 성공을
+  가정하지 않고, 실제 \(\mathsf{size}=0\) 실패 또는 0이 아닌 성공 결론을
+  명시하는 정리 형태.
+  \item[생성 절차(generated procedure)] 고정된 Jasmin 소스에서
+  \identifier{jasmin2ec}로 생성한 EasyCrypt 절차.
+  \item[래퍼(wrapper)] 증명 정렬을 위해 작성한 국소 모듈. 현재의 중심 정리는
+  래퍼가 아니라 실제 생성 절차를 결론 표면에 둔다.
+  \item[무손실(zero loss)] 해당 결정론적 이음매의 두 실행이 정확히 같은 결과를
+  내므로 별도의 통계 거리 항이 없다는 뜻. 전체 API 손실이 0이라는 뜻은
+  아니다.
+  \item[도달 가능성 증인(reachability witness)] 관계 정리의 전제가 모순이 아니고 앞선 절차의
+  반환값으로부터 구체적으로 구성됨을 보이는 정리.
+  \item[TCB] 신뢰 기반. 현재는 EasyCrypt/Why3/증명기와 Jasmin
+  번역기, 고정 소스 및 호스트 검증 도구를 포함한다.
+\end{description}
+
+\begin{takeaway}{현재 연구 전선}
+승인된 Sign/Verify 추적의 \identifier{observed_mu} 직접 비교는 필요한 전제가
+부족해서가 아니라 pRHL 해시 반환값을 완료된 추적의 유령 필드로 옮기는
+생성/재전달 규칙이 없어 논문 경계로 동결되었다. 기능 경로에서는 Week~11의
+실제 인코더 성공 접미부 정제에 이어 Week~12가 실제 디코더의 초기 파싱, 표
+조회, 0/1/2바이트 재생과 외부/내부 반복문을 직접 닫았다. 정확한
+\identifier{trace_bytes} 입력에서 종료한 실제 디코더는 \(bad=0\), 정확한 소비
+크기, 1024기호 복원과 출력 꼬리 프레임을 만족한다. Week~13은 실제 인코더의
+\identifier{segment_matches}와 복사 보조절차의 \identifier{slice_eq}를 그
+점별 입력으로 운반해 실제 핵심 역함수를 성공 조건부 부분정확성으로 닫았다.
+67개 작성 대상 전체 검증이 통과했고 최신 판정은 \identifier{GO-CORE}다. 다음
+단일 의무는 이 핵심 역함수와 prepare/apply 역함수를 production 전체 HBZ
+래퍼에서 합성하는 것이다. 실제 성공 증인과 종료, h 역함수, 크기 메타데이터와
+영 패딩도 남아 있다. 문맥, highbits/LSB, 확률분포와 게임 기반 보안은 여전히
+별도 의무다.
+\end{takeaway}

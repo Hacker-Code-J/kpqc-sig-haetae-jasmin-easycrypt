@@ -1,0 +1,58 @@
+/**************************************************************************** 
+
+   DEPENDENCIES:
+   =============
+
+  The loading of this file depends on the following context:
+
+ 1) "select_nobmi1.jinc" or "select_bmi1.jinc"
+
+*****************************************************************************/
+
+require "keccakf1600.jinc"
+
+/*
+   STATE INIT
+   ==========
+*/
+#[safety =
+   { ensures = is_arr_init(st,0,200) }
+]
+inline fn __state_init_ref
+( reg mut ptr u64[25] st
+) -> reg ptr u64[25]
+{
+  reg ui64 i;
+  reg u64 z64;
+  z64 = 0;
+  i = 0;
+  while (i < 25) {
+    st[(uint) i] = z64;
+    i += 1; 
+  }
+  return st;
+}
+
+/*
+   ADD RATE BIT
+   ============
+*/
+#[safety =
+   { requires = is_arr_init(st,0,200) && 0 < _RATE8 && _RATE8 <= 200
+   , ensures = is_arr_init(st,0,200) }
+]
+inline fn __addratebit_ref
+( reg mut ptr u64[25] st
+, inline int _RATE8
+) -> reg ptr u64[25]
+{
+/*  reg u64 t64;
+  t64 = 1;
+  t64 <<= (8*_RATE8-1) % 64; // obs: should be 63 for all admissible rates!
+  t64 ^= st[(_RATE8-1)/8];
+  st[(_RATE8-1)/8] = t64;
+*/
+  st.[:u8 _RATE8-1] ^= 0x80;
+  return st;
+}
+

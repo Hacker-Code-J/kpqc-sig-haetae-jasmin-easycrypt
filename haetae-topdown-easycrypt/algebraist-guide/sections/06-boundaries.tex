@@ -1,0 +1,277 @@
+\section{열린 경계와 과장 금지선}
+\label{sec:boundaries}
+
+\subsection{가장 좁지만 중요한 의미론(semantics) 간극(gap): product/replay}
+
+현재 raw \(\mu\) 선에는 다음 두 사실이 각각 존재한다.
+
+\begin{enumerate}
+  \item 실제 generated Sign/Verify hash 호출의 \emph{반환값}은 관련 입력에서
+        같은 32바이트 접두부를 갖는다;
+  \item 실제 Sign 후 Verify 전체 실행은 ghost trace와 exact하게 대응하고,
+        trace는 각 hash 결과를 \identifier{observed_mu}에 저장한다.
+\end{enumerate}
+
+원하는 결론은 accepted Verify 사후상태(post-state)에서
+\[
+\begin{aligned}
+  \mathit{VerifyResult}=0\Longrightarrow
+  \operatorname{MuPrefix}_{32}(&
+    \mathit{SignTrace.observed\_mu},\\[-0.3em]
+    &\mathit{VerifyTrace.observed\_mu})
+\end{aligned}
+\]
+이다. 수학적으로는 1과 2를 합치면 자명해 보이지만, 현재 program-logic
+표면에서는 두 명제(proposition)의 변수(variable)가 같은 시점에 존재하지 않는다.
+
+\begin{center}
+\begin{tikzpicture}[node distance=8mm]
+  \node[provennode] (returns) {hash-call 시점의\\두 반환값 pRHL 관계};
+  \node[partialnode, below=of returns] (stored) {완료된 두 trace의\\stored observation 관계};
+  \node[provennode, left=12mm of stored] (signcont) {Sign의 잔여 실행\\signature core};
+  \node[provennode, right=12mm of stored] (verifycont) {Verify의 잔여 실행\\challenge와 mismatch};
+  \draw[openarrow] (returns) -- node[right,align=left]{product/replay\\운송 부재} (stored);
+  \draw[flowarrow] (returns) -- (signcont);
+  \draw[flowarrow] (returns) -- (verifycont);
+\end{tikzpicture}
+\end{center}
+
+hash-call의 pRHL goal에는 \(res\{1\},res\{2\}\)가 있지만 전체 trace가 끝난
+unary post-state에는 이 지역 반환변수가 사라진다. 반대로 hash-call 지점에서
+pRHL 정리(theorem)를 적용하면 Sign과 Verify의 서로 다른 잔여 continuation을 처리해야
+한다. Sign 쪽 continuation을 일방적으로 버리려면 아직 없는 losslessness 또는
+적절한 product rule이 필요하다.
+
+\begin{openobligation}[\claimid{OBL-MU-PRODUCT-REPLAY}]
+반환값 수준의 region-local pRHL 정리(theorem)를 이미 완료된 sequential trace의 stored
+observation 관계(relation)로 운반하는 sound rule 또는 증명 구조가 필요하다.
+\end{openobligation}
+
+이 의무는 Week~7에 \statusdeferred / explicit paper boundary로 동결되었다
+\cite{product-replay}. 다음 접근은 의도적으로 거부되었다.
+
+\begin{itemize}
+  \item observation equality를 전제로 가정하여 결론을 재진술하기;
+  \item SHAKE locality axiom을 새로 추가하기;
+  \item 또 다른 caller/observation wrapper로 theorem surface를 계속 넓히기;
+  \item termination 근거 없이 Sign continuation을 버리기.
+\end{itemize}
+
+따라서 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)은 현재 주장하지 않는다.
+이것은 byte-locality 정리(theorem)가 부족해서가 아니라 프로그램 논리의 운송 화살표가
+없어서 생긴 의미론 간극이다.
+
+\subsection{accepted-path와 legitimate-signature correctness는 다른 방향이다}
+
+실제 Verify에 대해 증명된 방향은
+\[
+  \operatorname{Accept}\Longrightarrow\operatorname{TailReached}
+  \Longrightarrow\operatorname{HashInputsBound}
+\]
+이다. 이는 이미 accept한 실행을 분석하는 security-facing lane이다.
+
+기능정확성에 필요한 방향은
+\[
+  \sigma\leftarrow\operatorname{Sign}(sk,M)
+  \Longrightarrow
+  \operatorname{Verify}(vk,M,\sigma)=\operatorname{Accept}
+\]
+이다. 이를 위해서는 Sign이 만든 서명이 unpack/norm/hint/challenge gate를 모두
+통과한다는 사실이 필요하다. 첫 방향의 정리(theorem)를 둘째 방향으로 뒤집을 수 없다.
+
+\begin{openobligation}[\claimid{OBL-SIGN-OUTPUT-TAIL-REACH}]
+실제 Sign output이 실제 Verify의 early-reject tree를 통과해 tail에 도달함을
+증명해야 한다. 현재 signature prefix inverse만 닫혔고 full suffix, norm,
+hint, arithmetic correctness가 남아 있다.
+\end{openobligation}
+
+\claimid{OBL-SIGN-VERIFY-CORRECTNESS}는 이 의무와 나머지 산술·challenge
+정확성에 막혀 \statusblocked 다.
+
+\subsection{full signature codec에서 남은 표현론}
+
+prefix의 단면--수축(section--retraction)을 full codec으로 확장하려면 적어도
+다음 사각형(square)을
+닫아야 한다.
+
+\begin{itemize}
+  \item 두 size-delta metadata byte가 pack/unpack에서 같은 크기를 나타냄;
+  \item HBZ rANS actual full wrapper가 성공 조건 아래 역함수(inverse function)임;
+  \item 두 번째 \(h\) suffix codec의 encode/decode;
+  \item trailing zero padding의 정준성(canonicality)과 parser의 zero gate;
+  \item packer/unpacker가 목표 밖 배열 tail을 보존함;
+  \item 실제 Sign이 canonical 입력과 성공 buffer bound를 산출함.
+\end{itemize}
+
+따라서
+\claimid{OBL-SIG-PREFIX-CODEC}은 제한된 의미에서 \statusproved 지만,
+\claimid{OBL-SIG-FULL-CODEC-MODE2}는 \statusblocked 다. prefix inverse와 full
+inverse를 같은 명제(proposition)로 부르면 안 된다.
+
+\subsection{대수(algebra)·수치(numerics)·확률(probability) 층(layer)에 남은 의무}
+
+현재 활발한 전선은 production full-HBZ wrapper지만, 전체 구현 refinement에는
+다음 독립적인 의무들이
+남는다.
+
+\begin{description}[leftmargin=39mm,style=nextline]
+  \item[public-key algebra/NTT]
+    \(R_q\)-모듈(module) 계산, NTT 표현, public-key 관계가 실제 구현과 일치함.
+  \item[sampler distribution]
+    uniform/small/hyperball sampler와 실제 random tape의 출력분포(output
+    distribution)가 논문 분포(distribution)와 일치하거나 명시적 거리
+    상계(distance bound)를 가짐.
+  \item[rejection과 종료]
+    KeyGen/Sign retry가 종료하고, 수락 분포(accepted distribution)와 retry loss가
+    계산됨.
+  \item[highbits/LSB]
+    실제 coefficient decomposition, rounding, packing이 논문의
+    정수 분해(integer decomposition)와
+    일치하며 challenge 양쪽 입력이 같음.
+  \item[FIPS202 transcript]
+    모든 domain separator, 길이, absorb 순서, squeeze 길이가 고정 명세와
+    byte-for-byte 일치함.
+  \item[FFT tie policy]
+    fixed-point FFT와 경계 동률 처리까지 analytic predicate와 연결됨.
+  \item[two-transcript extraction]
+    실제 byte-level challenge와 accepted signature instance를 paper/ROM reduction의
+    두 transcript 추출에 연결함.
+\end{description}
+
+\sourcepath{ImplementationSecurityGoals.ec}는 이 항목들을
+\identifier{obl_*} operation으로 열거한다. 이 파일이 컴파일된다는 것은
+목표의 이름과 합성 인터페이스가 well-formed하다는 뜻이지 각 boolean이
+참임을 증명했다는 뜻이 아니다.
+
+\subsection{최상위 기능정확성은 아직 명세다}
+
+\sourcepath{TopLevelGoals.ec}는
+\begin{align*}
+  \mathsf{FC}_{\mathrm{KG}}
+    &:\quad \mathsf{JKeyGen}_2=\mathsf{PaperKeyGen}_2,\\
+  \mathsf{FC}_{\mathrm{Sign}}
+    &:\quad \forall sk,M,
+      \mathsf{JSign}_2(sk,M)=\mathsf{PaperSign}_2(sk,M),\\
+  \mathsf{FC}_{\mathrm{Verify}}
+    &:\quad \forall vk,M,\sigma,
+      \mathsf{JVerify}_2(vk,M,\sigma)
+      =\mathsf{PaperVerify}_2(vk,M,\sigma)
+\end{align*}
+를 boolean specification으로 둔다. 여기서 Sign/KeyGen의 등식(equality)은
+확률분포(probability distribution)의 등식(equality in distribution)을 포함한다.
+현재의 prefix, memory, transcript, codec 정리(theorem)는 이 목표에
+필요한 결정론적 하위 사각형이지만 전체 등식 자체는 아니다.
+
+\subsection{보안 합성식은 아직 조건부 인터페이스다}
+
+구현과 논문 스킴 사이의 목표는
+\[
+  \Adv^{\mathrm{euf\mbox{-}cma}}_{\mathrm{Jasmin}}
+  \le
+  \Adv^{\mathrm{euf\mbox{-}cma}}_{\mathrm{paper}}
+  +\delta_{\mathrm{KeyGen}}
+  +q_{\mathrm{Sign}}\delta_{\mathrm{Sign}}
+  +\delta_{\mathrm{Verify}}
+  +\delta_{\mathrm{Encoding}}
+\]
+의 모양이다. 현재 파일은 손실 변수(loss variable)를 선언하고
+부등식(inequality)의 interface를 정의하지만,
+각 \(\delta\)를 모두 닫아 최종 정리(theorem)로 합성하지 않았다.
+
+논문 수준 reduction interface는 다시 MLWE, BST-MSIS, ROM 및 rejection/fork
+오차로 내려간다. \sourcepath{SecurityAssumptions.ec}는 최종적으로 남길 수 있는
+암호학적 인터페이스를 MLWE, BST-MSIS, ROM 세 종류로 제한한다. 하지만 구체적
+게임 instance와 매개변수화된 reduction이 구현의 정확한 byte-level scheme에
+연결되었다는 뜻은 아니다.
+
+\begin{caution}[선언 종류의 구분]
+연산(operation), 가정(assumption), 정리(theorem)는 서로 다르다.
+\identifier{op obl_sampler_distribution : bool.}처럼 본문 없이 선언된 operation은
+목표를 표현하는 추상 기호(abstract symbol)다. 그것을 참이라고 가정하는 axiom과 동일하지
+않고, 그것을 참이라고 증명한 theorem도 아니다. 프로젝트의 검증 스크립트는
+authored axiom과 proof hole을 별도로 금지·검색한다.
+\end{caution}
+
+\subsection{신뢰 경계와 범위 밖 항목}
+
+현재 증거 사슬은 다음을 신뢰하거나 고정한다.
+
+\begin{itemize}
+  \item SHA-256가 기록된 46쪽 HAETAE 명세 PDF \cite{haetae-spec};
+  \item pinned \sourcepath{haetae-ref-jasmin/} 구현과 focused extraction
+        \cite{pinned-jasmin};
+  \item EasyCrypt kernel, Jasmin model, 호출된 SMT prover와 build toolchain;
+  \item source hash와 generated extraction/certificate manifest.
+\end{itemize}
+
+다음은 이 sprint의 결론에 포함되지 않는다.
+
+\begin{itemize}
+  \item mode~2 이외의 parameter set;
+  \item 물리적 side channel, fault, RNG 품질;
+  \item memory safety나 constant-time이 EUF-CMA에서 자동으로 따라온다는 주장;
+  \item 실제 하드웨어/컴파일러 전체의 end-to-end correctness;
+  \item full KeyGen, Sign, Verify 또는 구현 EUF-CMA가 완료되었다는 주장.
+\end{itemize}
+
+\subsection{현재 주장 행렬}
+
+\begin{longtable}{@{}L{47mm} L{27mm} L{70mm}@{}}
+\toprule
+주장 & 상태 & 정확한 경계 \\
+\midrule
+\endfirsthead
+\toprule
+주장 & 상태 & 정확한 경계 \\
+\midrule
+\endhead
+packed SK의 VK prefix & \statusproved &
+실제 generated packer/Internal KeyGen의 반환 시 첫 992바이트 \\
+raw \(\mu\) generated seam & \statusproved &
+raw branch, 관련 key/pre/message region에서 64-to-32 prefix \\
+position-64 challenge suffix & \statusproved &
+동일 초기 state/position에서 32-byte absorb \\
+actual API key copy/address/frame & \statusproved &
+각 명명된 valid/canonical/disjoint 계약 아래 \\
+accepted Verify tail/input binding & \statusproved &
+accept \(\Rightarrow\) tail/hash inputs 방향 \\
+stored observed \(\mu\) equality & \statuspartial &
+product/replay transport 부재 \\
+signature prefix inverse & \statusproved &
+canonical challenge/low, 앞 1056바이트 \\
+HBZ leaf inverse & \statusproved &
+앞 1024 coefficient, rANS 제외 \\
+actual rANS table와 pure step & \statusproved &
+concrete 13-symbol table, 명시된 state range \\
+pure normalization byte trace & \statusproved &
+canonical symbol list, actual loop 아님 \\
+actual array/list·word-step bridge & \statusproved &
+1024-symbol suffix 점화식(recurrence), literal table word 등식(equality) \\
+actual final serialization leaf & \statusproved &
+네 번의 실제 store와 누적 trace의 little-endian 직렬화(serialization) 합성 \\
+actual encoder success size & \statusproved &
+반환한다면 실패이거나 \(0\le off\le1020\), \(4\le1024-off\le1024\) \\
+actual inner normalization & \statusproved &
+byte segment·frame·no-underflow와 정확한 순수 \(0..2\) exit \\
+actual encoder trace refinement & \statusproved &
+성공 조건부 부분정확성(success-conditioned partial correctness)의 전체 suffix 등식(equality) \\
+actual decoder trace refinement & \statusproved &
+exact-trace 부분정확성(partial correctness), 1024-symbol 등식(equality), 정확한 byte 소비와 tail frame \\
+actual rANS harness control & \statusproved &
+실제 호출 순서와 성공/실패 분기만 완료 \\
+actual rANS core inverse & \statusproved &
+actual encoder/copy/decoder의 성공 조건부 부분정확성(success-conditioned partial correctness) \\
+actual encoder success witness & \statuspartial &
+concrete all-6 입력의 \(bad=0\) 도달성과 encoder/decoder 종료성 부재 \\
+production full-HBZ wrapper inverse & \statuspartial &
+prepare/apply와 core는 증명됨; success-conditioned wrapper size/frame 합성 미완 \\
+full signature codec & \statusblocked &
+HBZ wrapper 뒤에도 \(h\), metadata, padding과 residual frame 잔여 \\
+Sign output tail reach & \statuspartial &
+prefix만 닫힘; norm/hint/arithmetic 잔여 \\
+FC-KeyGen/Sign/Verify & \statusspecified / \statuspartial &
+하위 결정론적 seam만 일부 증명 \\
+구현 EUF-CMA & \statusspecified &
+loss와 paper reduction 연결 미완 \\
+\bottomrule
+\end{longtable}

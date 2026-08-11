@@ -1,0 +1,65 @@
+\section{Week 5: Verify accept tail and input binding}
+
+This week makes the accepted Verify boundary explicit instead of assuming it.
+The compiled trace lemmas show the early-reject tree:
+
+\begin{verbatim}
+siglen <> 1474
+  -> immediate reject
+siglen = 1474
+  -> unpack bad flag -> reject before tail
+  -> norm rejection  -> reject before tail
+  -> tail_reached and hash-input binding
+     -> challenge mismatch -> reject after tail
+     -> challenge match    -> accept
+\end{verbatim}
+
+The accepted-path trace lemmas are:
+\begin{itemize}
+  \item \theoryname{verify_full_m23_trace_accept_implies_tail_reached};
+  \item \theoryname{verify_raw_api_trace_accept_implies_tail_reached};
+  \item \theoryname{verify_cryptolab_trace_accept_implies_tail_reached}.
+\end{itemize}
+
+The corresponding binding lemmas are:
+\begin{itemize}
+  \item \theoryname{verify_tail_trace_binds_hash_inputs};
+  \item \theoryname{verify_full_m23_trace_accept_binds_hash_inputs};
+  \item \theoryname{verify_full_mode2_trace_accept_binds_hash_inputs};
+  \item \theoryname{verify_internal_mode2_trace_accept_binds_hash_inputs};
+  \item \theoryname{verify_raw_api_trace_accept_binds_hash_inputs};
+  \item \theoryname{verify_cryptolab_trace_accept_binds_hash_inputs}.
+\end{itemize}
+
+The actual caller lift is
+\theoryname{actual_raw_verify_accept_binds_hash_inputs}.
+It proves that an accepted raw Verify execution reaches the tail and binds the
+descriptor inputs exactly:
+\[
+\begin{aligned}
+  vku &= vku_0, & preu &= preu_0, & prelen &= prelen_0,\\
+  mu  &= mu_0,  & mlen &= mlen_0, & siglen &= 1474.
+\end{aligned}
+\]
+
+This is the boundary that separates accepted-path reasoning from public
+Verify correctness.  It proves reachability and input binding, not that every
+legitimate Sign output is accepted.
+
+\claimid{OBL-SIGN-OUTPUT-TAIL-REACH} is therefore the next long-term gate:
+the report now has the exact early-reject tree, but it still needs a theorem
+that a legitimate Sign output survives the unpacking and norm gates.  Final
+challenge matching belongs to the separate full
+Sign/Verify correctness obligation.
+
+The pinned Verify source is:
+\begin{quote}
+\path{haetae-ref-jasmin/jasmin/verify.jazz}
+\end{quote}
+Its SHA-256 and the raw generated-target SHA-256 are, respectively:
+\begin{verbatim}
+789f36e71ab7784cc37de50ceb04f8d59276f3d1a721acdc64a0be0299f18b06
+b745f8919f2ce8c2ff80e63a2330da6cdcc6cad414f341fe90081b886825142b
+\end{verbatim}
+Fresh checking uses \path{manifests/proof-targets.txt} through
+\path{scripts/verify-all.sh}.

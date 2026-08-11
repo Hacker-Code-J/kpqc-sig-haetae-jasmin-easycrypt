@@ -1,0 +1,64 @@
+\section{Week 4: raw ABI extraction and address correspondence}
+
+This chapter is a research-development record, not a completed public-API
+correctness proof.  The Week~4 question is whether external buffers used by
+the three raw/internal ABI procedures supply the memory premise of the already
+proved generated mu theorem without constructing an artificial
+\texttt{stores mem 0} witness.
+
+\subsection{Actual extraction roots}
+
+The focused roots are
+\procname{cryptolab_haetae_mode2_keypair_internal},
+\procname{cryptolab_haetae_mode2_signature_internal}, and
+\procname{cryptolab_haetae_mode2_verify_internal}.  Their source hashes are,
+respectively,
+\texttt{8b2ddac28621...b783e01},
+\texttt{fd58271f3ada...ac31}, and
+\texttt{789f36e71ab7...8b06}.  Fresh extraction produced target hashes
+\texttt{70716a5cf03d...4565},
+\texttt{5f632a19c7db...f02f}, and
+\texttt{b745f8919f2c...142b}.  The exact hashes and commands are operationally
+pinned in \pathname{manifests/generated-extractions.sha256} and
+\pathname{manifests/focused-extraction.md}.
+
+The closure is intentionally caller-rooted: KeyGen contains the two external
+exporters, Sign contains the SK importer and \procname{_sf_mu_rawpre}, and
+Verify contains the raw wrapper, internal verifier,
+\procname{_sign_verify_tail_m23}, and \procname{__verify_hash_mu}.
+\theoryname{RawApiMuReachability.raw_sign_hash_extraction_identity} and
+\theoryname{raw_verify_hash_extraction_identity} prove exact pRHL equivalence
+between the raw-ABI and earlier focused hash extractions.  Procedure names and
+source provenance alone are therefore not used as an interchange rule.
+
+\subsection{The int/word boundary}
+
+\claimid{OBL-API-ADDRESS-BINDING} uses the definitions
+\[
+  \mathsf{canonical\_ui64\_address}(a)
+    \eqdef 0 \leq a < 2^{64},
+  \qquad
+  \mathsf{canonical\_region}(a,n)
+    \eqdef 0 \leq a \land 0 \leq n \land a+n \leq 2^{64}.
+\]
+The central compiled statement is
+\[
+  \mathsf{canonical\_ui64\_address}(a)
+  \Longrightarrow
+  \operatorname{to\_uint}(\operatorname{of\_int}(a))=a.
+\]
+Theorems
+\theoryname{canonical_region_valid_region_int} and
+\theoryname{canonical_region_valid_region_w64} transport one region contract
+to the two generated calling conventions.  The mode-2 specializations fix
+$n\in\{992,1408,1474\}$.  All premises are explicit: modular reduction is not
+silently ignored outside the canonical range.  The claim is \status{proved},
+while actual C/Jasmin allocation and memory safety remain runtime contracts.
+
+\subsection{Non-vacuity}
+
+The earlier adjacent-region witness provides disjoint valid VK and SK ranges,
+the new address bridge gives concrete canonical instances, and
+\theoryname{stable_region_refl} proves that the stability contract has a
+model.  These witnesses show satisfiability only; they do not replace actual
+caller reachability.

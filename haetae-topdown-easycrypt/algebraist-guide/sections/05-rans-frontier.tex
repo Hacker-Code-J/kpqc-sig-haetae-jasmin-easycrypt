@@ -1,0 +1,394 @@
+\section{현재 전선: HBZ/rANS를 유한 동역학계(finite dynamical system)로 읽기}
+\label{sec:rans-frontier}
+
+\subsection{왜 production full-HBZ wrapper가 지금의 단일 gate인가}
+
+signature prefix의 역함수(inverse function), HBZ coefficient--symbol leaf,
+그리고 actual encoder가 정준 기호열(canonical symbol stream)을 순수 byte
+trace로 보내는 간선(edge), exact trace를 actual decoder가 정준 기호열로
+되돌리는 간선(edge), actual copy를 사이에 둔 core 합성(composition)은 각각
+닫혔다. \CurrentGate 는 세 actual generated 절차의 성공 조건부
+역함수(inverse function)가 컴파일되었다는 판정이다. full signature codec으로
+가는 현재 단일 우선순위는 \CurrentPriority 이다
+\cite{week13-report,rans-core-composition}.
+
+rANS 자체의 정수 산술(integer arithmetic)은 복잡하지 않다. 어려움은 encoder가
+symbol을 뒤에서부터
+읽고 byte buffer cursor를 감소시키는 반면, decoder는 복사된 buffer를 앞에서부터
+읽는다는 구현 방향성에 있다. 순수 역함수 정리(pure inverse-function theorem)를
+실제 두 중첩 loop의 state와 결합하는 불변식(invariant)이 핵심이다. Week~11은
+reverse encoder 쪽 결합을, Week~12는 forward decoder 쪽 결합을, Week~13은
+두 정리(theorem) 사이의 actual copy와 전제 운송(premise transport)을 완료했다.
+이제 남은 간극(gap)은 이 core 정리(theorem)를 production
+\identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full}의
+prepare/apply·frame·size 의미론(semantics)과 합성하는 wrapper 경계다.
+
+\subsection{13-symbol 분할(partition)}
+
+HBZ 정준 계수(canonical coefficient) \(h_i\in[-6,7)\)를
+\(s_i=h_i+6\)으로 옮기면 alphabet은
+\[
+  \Sigma=\{0,1,\ldots,12\}
+\]
+이다. rANS scale을 \(M=1024\)라 하고 각 symbol의 누적 시작점과
+빈도(frequency)를
+\[
+\begin{aligned}
+(c_s)_{s=0}^{12}
+  &=(0,1,2,3,8,66,312,710,957,1016,1021,1022,1023),\\
+(f_s)_{s=0}^{12}
+  &=(1,1,1,5,58,246,398,247,59,5,1,1,1)
+\end{aligned}
+\]
+로 둔다. certificate는
+\[
+  f_s>0,\qquad \sum_{s=0}^{12}f_s=M,\qquad
+  [c_s,c_s+f_s)\text{가 }[0,M)\text{를 분할함}
+\]
+을 보인다.
+
+이 분할은 residue slot \(y\bmod M\)에서 symbol을 유일하게 복원하는
+유한 분할(finite partition)이다. 실제 encoder/decoder의 packed tables가 정확히
+이 \(c_s,f_s\)와
+symbol lookup을 나타낸다는 사실도 generated literal arrays에 대해 인증된다.
+
+\subsection{순수 단계는 유클리드 나눗셈(Euclidean division)의
+역함수(inverse function)다}
+
+고정 기호(fixed symbol) \(s\)에 대해
+\begin{align*}
+  E_s(x)
+    &=\left\lfloor\frac{x}{f_s}\right\rfloor M
+      +c_s+(x\bmod f_s),\\
+  D_s(y)
+    &=\left\lfloor\frac{y}{M}\right\rfloor f_s
+      +(y\bmod M)-c_s
+\end{align*}
+로 둔다. 유클리드 나눗셈(Euclidean division)
+\(x=f_s\lfloor x/f_s\rfloor+(x\bmod f_s)\)와
+\(0\le x\bmod f_s<f_s\)에서 즉시
+\[
+  D_s(E_s(x))=x
+\]
+를 기대할 수 있다. EasyCrypt의
+\theoremname{pure_rans_step_quotient},
+\theoremname{pure_rans_step_slot},
+\theoremname{pure_rans_step_inverse}가 이 계산을 분리해 증명한다.
+
+실제 encoder는 나눗셈 대신 table의 reciprocal, shift, bias를 사용하는 fast
+formula를 쓴다. 별도 certificate는
+\[
+  1\le x<x_{\max}(s),\qquad
+  x_{\max}(s)=2^{21}f_s
+\]
+에서 fast quotient가 유클리드 몫(Euclidean quotient)과 같고, 따라서 fast step도
+\(D_s\)에 의해 역산됨을 보인다. 이것은 단순히 ``표 값이 맞아 보인다''는
+계산 검사가 아니라 실제 word field의 정수 의미를 연결한 정리(theorem)다.
+
+\begin{verified}[순수 및 fast step]
+정준 기호(canonical symbol) \(0\le s<13\)과 명시된 상태 범위(state range)에서
+\[
+  D_s(E_s(x))=x,\qquad
+  D_s(E^{\mathrm{fast}}_s(x))=x
+\]
+가 컴파일된다. 전제 \(s=0,x=1\)의 concrete witness도 있어 정리(theorem)는 공허하지
+않다.
+\end{verified}
+
+\subsection{정규화 바이트(normalization byte)는 잃어버린 몫(quotient)의
+좌표(coordinate)다}
+
+state가 \(x_{\max}(s)\)보다 크면 fast step을 적용하기 전에 byte radix
+\(B=256\)로 0, 1, 2회 나누어 state를 줄인다. 순수 정의는
+\[
+  \ell_s(x)\in\{0,1,2\},\qquad
+  r_s(x)=\left\lfloor\frac{x}{B^{\ell_s(x)}}\right\rfloor
+\]
+이고, 나눌 때 버린 낮은 byte들을 decoder가 읽을 순서의 list
+\(\beta_s(x)\)로 보존한다.
+
+핵심 readback 명제(proposition)는
+\[
+  \operatorname{ReadBytes}(r_s(x),\beta_s(x))=x.
+\]
+한 byte일 때는 \(x=B\lfloor x/B\rfloor+(x\bmod B)\)이고, 두 byte일 때는
+이 항등식(identity)을 두 번 적용한다. 실제 encoder는 낮은 byte를 먼저 쓰면서 cursor를
+감소시키므로 최종 forward segment에서 두 byte의 순서는
+\([\mathsf{high},\mathsf{low}]\)다. 이 방향 전환을 놓치면 순수 정리(theorem)는 맞아도
+actual decoder와 맞지 않는다.
+
+\sourcepath{Mode2RansNormalization.ec}는 실제 \(W32\) shift/truncate/or와
+\(W64\) cursor decrement가 이 정수 연산과 같은 의미를 갖는다는
+leaf 정리(theorem)를
+제공한다.
+
+\subsection{전체 symbol list의 순수 trace}
+
+symbol list를 \(s_0,\ldots,s_{n-1}\), \(n=1024\)라 하고 마지막 state를
+\(x_n=L=2^{23}\)로 둔다. encoder가 뒤에서 앞으로 진행하도록
+\[
+\begin{aligned}
+  \ell_j&=\ell_{s_j}(x_{j+1}),\\
+  r_j&=\left\lfloor x_{j+1}/256^{\ell_j}\right\rfloor,\\
+  x_j&=E^{\mathrm{fast}}_{s_j}(r_j),\\
+  \beta_j&=\beta_{s_j}(x_{j+1})
+\end{aligned}
+\]
+로 재귀적으로(recursively) 정의한다. decoder-facing byte string은
+\[
+  \mathcal B=\operatorname{LE32}(x_0)
+    \Vert\beta_0\Vert\cdots\Vert\beta_{n-1}
+\]
+이다. cursor cut은
+\[
+  c_0=4,\qquad c_{j+1}=c_j+|\beta_j|
+\]
+로 둔다.
+
+프로젝트의 이름 \(xs/cuts/bytes\)는 각각
+\((x_0,\ldots,x_n)\), \((c_0,\ldots,c_n)\), \(\mathcal B\)를 가리킨다. 이 세
+대상은 \sourcepath{Mode2RansByteStack.ec}에 정의되어 있다. 그 파일의
+\identifier{valid_rans_trace}는 임의의 witness를 전제로 받지 않고 canonical
+symbol list로부터 이들을 직접 구성한다.
+
+\begin{verified}[트레이스(trace)의 귀납적 역산(inductive inversion)]
+canonical list에 대해
+\[
+  2^{23}\le x_j<2^{31}
+\]
+가 모든 \(j\)에서 성립한다. 또한 \(x_j\)의 residue slot은 \(s_j\)를 선택하고,
+\(D_{s_j}(x_j)=r_j\)이며, \(\beta_j\)를 읽으면 \(x_{j+1}\)가 복원된다.
+\end{verified}
+
+따라서 순수 decoder의 리스트 수준 귀납증명(list-level inductive proof)에 필요한
+수학적 내용은 준비되어 있다. actual encoder state가 이 trace 좌표를
+나타낸다는 refinement는 Week~11에, actual decoder state가 같은 좌표를
+순방향(forward)으로 소비한다는 refinement는 Week~12에 닫혔다.
+
+\subsection{Week 10에서 감사된 여섯 encoder 타깃}
+
+Week~10은 필요한 바깥 루프 불변식(outer-loop invariant)을 서로 다른 운송
+문제로 분해한 다음 \WeekTenTargetCount 개 파일을 authored target manifest에
+편입했다. 여섯 파일은 모두 \identifier{-no-eco}로 fresh compile되지만, 각
+국소 명제(local proposition)의 완료와 부모 refinement의 완료는 구분해야 한다.
+
+\begin{itemize}
+  \item \sourcepath{Mode2RansArrayListBridge.ec}: actual byte array의 symbol
+        stream을 순수 list와 suffix로 옮기고, segment 일치와 prefix frame을
+        표현한다. 배열(array)--리스트(list) 다리와 한 기호 trace
+        점화식(recurrence)은 \statusproved 다.
+  \item \sourcepath{Mode2RansEncoderWordStep.ec}: packed reciprocal, shift,
+        complement를 쓰는 실제 word 식을 순수 fast step의 정수 의미와
+        연결한다. literal mode~2 table에 대한 word-level 등식(equality)은
+        \statusproved 다.
+  \item \sourcepath{Mode2RansEncoderInnerProgress.ec}: normalization 내부
+        loop의 순수한 0/1/2회 진행을 state, cursor, 이미 쓴 byte segment로
+        좌표화한다. 이 순수 보조정리(pure lemma)는 \statusproved 다.
+  \item \sourcepath{Mode2RansEncoderSerialization.ec}: 마지막 \(W32\) state의
+        little-endian 네 바이트, 바깥 구간 frame, 성공 시 size 산술을 분리한다.
+        이 leaf 명제(leaf proposition)는 \statusproved 다.
+  \item \sourcepath{Mode2RansEncoderTrace.ec}: actual
+        내부 loop가 사용하는 유한 phase, byte prepend, segment, prefix frame,
+        no-wrap 보조정리(lemma)를 제공한다.
+  \item \sourcepath{Mode2RansEncoderActualInner.ec}: 실제 generated
+        \identifier{_rans_encode} 내부 loop에 위 불변식(invariant)을 설치하고,
+        별도 실제 Hoare 정리(theorem)로 성공 offset과 size 범위(range)를
+        산출한다.
+\end{itemize}
+
+\begin{caution}[Week 10의 국소 \statusproved 와 당시 부모 \statuspartial]
+Week~10 기준선에서 위 파일들은 보조정리(lemma)와 국소 실제
+부분정확성(actual partial correctness)만 인증했다. 당시에는 전체 actual suffix와
+순수 \identifier{trace_bytes}의 등식(equality)이 없어
+\claimid{OBL-RANS-ENCODE-REFINEMENT}가 \statuspartial 이었다. 바로 그 부모
+간선(edge)을 Week~11의 다음 절이 닫는다. 성공 분기(success branch)의
+도달가능성(reachability)과 종료성(termination)은 여전히 인증하지 않는다.
+\end{caution}
+
+\subsection{Week 11에서 닫힌 actual encoder 불변식(invariant)}
+
+실제 reverse encoder의 바깥 루프 index를 \(i\), 현재 word state를 \(x\), 뒤에서
+감소하는 buffer cursor를 \(off\), buffer를 \(enc\)라 하자. 순수 trace
+\[
+  T_i=\operatorname{EncodeTrace}
+       (\operatorname{SymbolSuffix}(symbols_0,i))=(x_i,b_i)
+\]
+를 두면 성공 가지의 live 불변식(live invariant)은 다음 다섯 조건이다
+\cite{rans-encoder-invariant}.
+\[
+\begin{gathered}
+  0\le i\le1024,\qquad x=x_i,\qquad off+|b_i|=1024,\\
+  \operatorname{SegmentMatches}(enc,off,b_i),\qquad
+  \operatorname{PrefixFrame}(enc_0,enc,off),\qquad 4\le off.
+\end{gathered}
+\]
+
+Week~11에는 \WeekElevenTargetCount 개 타깃이 더해졌다. tail-aware inner
+불변식(invariant)은 최초 배열 \(enc_0\)와
+\(\operatorname{EncodeTrace}(tail).bytes\)를 actual byte write 전후에 보존하고,
+실제 guard 종료에서 정확한 \(0..2\) 정규화 길이(normalization length)를
+회복한다. generated word-step 보조정리(lemma)는 실제 table load와 protect
+erase 뒤의 word update를 순수 fast step과 같게 만들고, 마지막 네 generated
+store는 직렬화된 상태(serialized state)를 누적 suffix 앞에 붙인다.
+
+그 결과 실제 절차의 성공 사후조건(success postcondition)은
+\[
+\begin{gathered}
+  \operatorname{SegmentMatches}
+  \bigl(enc',off',\operatorname{TraceBytes}
+  (\operatorname{SymbolList}(symbols_0))\bigr),\\
+  off'+\left|\operatorname{TraceBytes}
+  (\operatorname{SymbolList}(symbols_0))\right|=1024,\\
+  \operatorname{PrefixFrame}(enc_0,enc',off')
+\end{gathered}
+\]
+로 컴파일되었다.
+
+\begin{verified}[\claimid{OBL-RANS-ENCODE-REFINEMENT}]
+\theoremname{actual_rans_encode_trace_closure}는 실제 generated
+\identifier{_rans_encode}가 반환한다면 실패하거나, 성공 시 위 세 관계(relation),
+offset/size 범위(range), \(bad=0\)을 모두 보인다.
+\theoremname{actual_rans_encode_trace_refinement}는 전체 반환
+접미부(returned suffix) 등식(equality)을 부모 refinement 표면에 명시적으로
+노출한다. 성공은 전제가 아니라 actual 반환값에 따른 결론의 한 가지(branch)다.
+\end{verified}
+
+\begin{caution}[부분정확성(partial correctness)의 한계]
+이 정리(theorem)는 actual encoder의 종료성(termination), 성공
+도달가능성(success reachability), all-6 symbol 성공 증인(success witness)을
+보이지 않는다. 따라서 \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는
+\statuspartial 이다.
+\end{caution}
+
+\subsection{Week 12에서 닫힌 actual decoder 불변식(invariant)}
+
+Week~12는 actual forward decoder index를 \(i\), state를 \(x\), 읽기 cursor를
+\(off_d\)라 할 때 다음 불변식(invariant)을 generated outer/inner loop에 직접
+설치했다 \cite{week12-report,rans-decoder-invariant}.
+
+\begin{enumerate}
+  \item 이미 출력한 symbol prefix가 \(s_0,\ldots,s_{i-1}\)와 같다;
+  \item 현재 state가 \(x_i\)이고 현재 cursor가 \(c_i\)다;
+  \item table lookup이 \(s_i\)를 선택하고, normalization segment를 정확히
+        \([c_i,c_{i+1})\)에서 읽는다;
+  \item 출력 배열의 아직 쓰지 않은 tail에 대한 frame이 유지된다;
+  \item 종료 시 \(x=2^{23}\), \(off_d=size\), \(bad=0\)이다.
+\end{enumerate}
+
+역사적 \theoremname{actual_rans_decode_mode2_control}은 실제 tables/state fields와
+\(bad\in\{0,1\}\)만 고정했다. 새 입력 술어(input predicate)
+\identifier{actual_mode2_decoder_trace_input}은 expected symbol array, exact
+\identifier{trace_bytes}, 모든 normalization read의 pointwise relation, state
+fields \((1024,encoded\_size,13)\), 실제 generated tables를 한데 묶는다.
+
+\begin{verified}[\claimid{OBL-RANS-DECODE-REFINEMENT}]
+\theoremname{actual_rans_decode_trace_refinement}는 실제 generated
+\identifier{_rans_decode}를 직접 열어 위 exact-trace 입력 아래 모든 1024개
+symbol을 복원하고, \(off=encoded\_size\), \(bad=0\), decoded tail frame을
+결론낸다. \theoremname{decoder_outer_trace_exit_components}는 내부적으로
+\(x=2^{23}\)을 유도하여 actual final-state reject도 통과시킨다.
+\end{verified}
+
+이 정리(theorem)는 Hoare 부분정확성(Hoare partial correctness)이므로 decoder
+종료성(termination)을 보이지 않는다. exact-trace 입력은 비순환적
+(non-circular)이며, Week~13은 actual harness가 그 입력을 산출한다는 별도 합성
+정리(composition theorem)를 추가했다.
+
+\subsection{Week 13에서 닫힌 actual harness core 합성(composition)}
+
+\sourcepath{Mode2RansActualInverse.ec}의 harness는 추상 조립도가 아니라 세 실제
+generated 절차를 다음 순서로 호출한다. 같은 파일의 정리(theorem)는 이 호출의
+control만 닫고, Week~13의 의미론적 closure는
+\sourcepath{Mode2RansCoreActualInverse.ec}에 따로 있다.
+\[
+\mathsf{RansEncode}
+\longrightarrow
+\mathsf{CopyEncodedSuffix}
+\longrightarrow
+\mathsf{RansDecode}.
+\]
+단, encoder가 \(bad=0\)을 반환한 경우에만 뒤의 두 호출을 실행한다.
+
+기존 harness control 결론은
+\[
+\begin{aligned}
+  &\mathit{encoderBad}\in\{0,1\},\\
+  &\mathit{decoderRan}\Longleftrightarrow\mathit{encoderBad}=0,\\
+  &\mathit{decoderRan}\Longrightarrow
+    (count,size,m)=(1024,\mathit{encodedSize},13)
+\end{aligned}
+\]
+이다. Week~13의 \sourcepath{Mode2RansCoreCompositionBridge.ec}는 encoder
+\identifier{segment_matches}와 copy \identifier{slice_eq}를 copied buffer의
+exact trace로 합성하고, 이를 decoder의 pointwise read와 configured state 입력
+술어(input predicate)로 운송한다. 특히 modular (W64) 뺄셈을 정수 뺄셈(integer
+subtraction)으로 몰래 바꾸지 않고 actual success bound에서 no-wrap을 유도한다.
+
+\begin{verified}[\claimid{OBL-RANS-CORE-INVERSE}]
+\theoremname{actual_rans_encode_copy_decode_inverse}는 actual encoder 성공을
+전제로 받지 않는다. 실패 시 actual copy와 decoder가 실행되지 않고 초기 decoded
+array/state가 보존된다. 성공 시 다음 의미론적 결론(semantic conclusion)이 같은
+harness 정리(theorem)의 사후조건(postcondition)에 들어간다.
+\[
+  \mathit{decoderBad}=0,\quad
+  off_{\mathrm{final}}=size,\quad
+  decoded[0..1024)=symbols[0..1024).
+\]
+decoder 하위 증명은 내부 종료 상태(internal exit state)
+\(x=2^{23}\)도 유도하지만 harness ABI는 이를 공개하지 않는다. decoded tail
+\([1024,2048)\)은 frame으로 보존된다. 이 결과는 성공 조건부
+부분정확성(success-conditioned partial correctness)이다.
+\end{verified}
+
+실제 success branch가 도달 가능하다는 EasyCrypt witness도 아직 없다. pure
+trace의 concrete witness, canonical all-zero precondition witness 또는 decoder
+state의 size-4 witness는 concrete all-6 입력에서 actual encoder가
+\(bad=0\)을 반환한다는 success witness를 대신하지 않는다.
+
+\subsection{full HBZ wrapper의 올바른 목표 모양}
+
+actual encoder는 실패를 표현할 수 있으므로, canonical \(h\)만으로 무조건적인
+round trip을 선언해서는 안 된다. 현재 필요한 부모 명제(parent proposition)는 적어도
+\[
+  size=0\quad\lor\quad
+  \bigl(size\ne0\land bad=0\land
+        decoded[0..1024)=h[0..1024)\bigr)
+\]
+처럼 failure branch를 드러내야 한다. nonzero size bounds와 buffer frames도
+함께 필요하다.
+
+\begin{openobligation}[\claimid{OBL-SIG-HBZ-ENCODE-DECODE}]
+actual \identifier{_encode_hb_z1_full}과 \identifier{_decode_hb_z1_full}을 직접
+열고, 이미 증명된 prepare/apply 역함수(inverse function)와 actual rANS core
+정리(theorem)를 wrapper-level size/frame에 맞춰 합성해야 한다. 이 정리(theorem)가
+컴파일되기 전에는 두 번째 (h) codec으로 이동하지 않는다.
+\end{openobligation}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{Y L{31mm}}
+\toprule
+rANS 층(layer) & 상태 \\
+\midrule
+13-symbol interval/frequency와 actual table certificate & \statusproved \\
+pure quotient/slot/fast-step inverse & \statusproved \\
+0/1/2-byte normalization과 W32/W64 leaf semantics & \statusproved \\
+canonical \(xs/cuts/bytes\) trace와 state bounds & \statusproved \\
+actual array/list suffix와 word-step bridge & \statusproved \\
+actual 네-byte 최종 serialization 합성 & \statusproved \\
+actual encoder 성공 offset/size 범위 & \statusproved\ (부분정확성(partial correctness)) \\
+actual 내부 normalization byte/frame/no-underflow &
+\statusproved\ (tail-aware exact \(0..2\) exit) \\
+actual encoded suffix copy와 tail frame & \statusproved \\
+actual encoder--copy--decoder branch control & \statusproved\ (control만) \\
+actual encoder가 pure trace 전체를 산출함 &
+\statusproved\ (성공 조건부 부분정확성(success-conditioned partial correctness)) \\
+actual decoder가 exact trace를 소비함 &
+\statusproved\ (1024-symbol 복원, exact consumption, tail frame) \\
+actual encoder--copy--decoder core inverse &
+\statusproved\ (성공 조건부 부분정확성(success-conditioned partial correctness)) \\
+actual encoder success witness &
+\statuspartial\ (success reachability와 termination 부재) \\
+full HBZ encode/decode & \statuspartial\ (production wrapper 합성 미완) \\
+\bottomrule
+\end{tabularx}
+\end{center}

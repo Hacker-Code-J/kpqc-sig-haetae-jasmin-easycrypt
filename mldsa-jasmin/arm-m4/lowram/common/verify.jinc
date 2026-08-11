@@ -1,0 +1,224 @@
+/*************************************************
+ * Description: Verifies signature.
+ *
+ * Arguments:   - uint8_t *m: pointer to input signature
+ *              - size_t siglen: length of signature
+ *              - const uint8_t *m: pointer to message
+ *              - size_t mlen: length of message
+ *              - const uint8_t *ctx: pointer to context string
+ *              - size_t ctxlen: length of context string
+ *              - const uint8_t *pk: pointer to bit-packed public key
+ *
+ * Returns 0 if signature could be verified correctly and -1 otherwise
+ **************************************************/
+inline fn __verify_internal(
+        reg ptr u8[SIGNATURE_SIZE] signature,
+        reg ptr u32[2] ctx_m,
+        reg ptr u32[2] ctxlen_mlen,
+        reg ptr u8[VERIFICATION_KEY_SIZE] verification_key
+) -> reg u32 {
+    reg u32 status;
+
+    stack u32[N] polynomial;
+
+    // union {
+    //     uint8_t w1_packed[POLYW1_PACKEDBYTES];
+    //     uint8_t wcomp[COMPRESSED_W_ELEMENT_SIZE];
+    // };
+    stack u8[COMPRESSED_W_ELEMENT_SIZE_WITH_PADDING] compressed_w_element;
+    reg ptr u8[POLYW1_PACKEDBYTES] w1_element_packed;
+
+    stack u8[COMPRESSED_CHALLENGE_SIZE] compressed_challenge;
+
+    reg u32 ctxlen m mlen ctx t pos;
+
+    stack u32[25*2] state_256;
+    reg ptr u32[25*2] ptr_to_xof_state;
+
+    // union {
+    //    uint8_t hint_ones[OMEGA];
+    //    shake128incctx s128;
+    //    uint8_t crh_byte_hash[CRHBYTES];
+    // };
+    stack u32[25*2] space_for_1600_bytes;
+    reg ptr u8[MAX_ONES_IN_HINT] hint;
+
+    inline int i column_number row_number;
+
+    reg u32 nonce;
+    reg u32 number_of_hints;
+    reg u32 observed expected;
+    reg u32 j;
+
+    ctxlen = ctxlen_mlen[0];
+
+    if (ctxlen <= 255) {
+        #spill(ctxlen_mlen, ctx_m, ctxlen, verification_key, signature);
+
+        ptr_to_xof_state = state_256;
+
+        #unspill(verification_key);
+        ptr_to_xof_state = _hash_verification_key(ptr_to_xof_state, verification_key);
+
+        #unspill(ctxlen_mlen);
+        ptr_to_xof_state = __add_message_prefix(ptr_to_xof_state, ctxlen_mlen[0], VERIFICATION_KEY_HASH_SIZE);
+        ptr_to_xof_state = __add_zero_after_add(ptr_to_xof_state, VERIFICATION_KEY_HASH_SIZE + 2);
+        pos = VERIFICATION_KEY_HASH_SIZE + 2;
+
+        #unspill(ctx_m);
+        ctx = ctx_m[0];
+        #spill(ctx_m);
+
+        #unspill(ctxlen);
+        ptr_to_xof_state, pos = _shake256_inc_absorb_mem_naive(ptr_to_xof_state, pos, ctx, ctxlen);
+
+        #unspill(ctxlen_mlen);
+        mlen = ctxlen_mlen[1];
+
+        #unspill(ctx_m);
+        m = ctx_m[1];
+        ptr_to_xof_state, pos = _shake256_inc_absorb_mem_naive(ptr_to_xof_state, pos, m, mlen);
+        ptr_to_xof_state = _shake256_add_block_end(ptr_to_xof_state, pos);
+        ptr_to_xof_state = _keccakf1600_ref(ptr_to_xof_state);
+        for i = 0 to CRHBYTES/4 {
+            t = ptr_to_xof_state[i];
+            space_for_1600_bytes[:u32 i] = t;
+        }
+
+        #unspill(signature);
+        ptr_to_xof_state, polynomial = _poly_generate_challenge(ptr_to_xof_state, polynomial, signature[0 : COMMITMENT_HASH_SIZE]);
+
+        compressed_challenge = _poly_compress_challenge(compressed_challenge, polynomial);
+
+        ptr_to_xof_state = __add_crh(ptr_to_xof_state, space_for_1600_bytes.[:u8 0 : CRHBYTES]);
+        ptr_to_xof_state = __add_zero_after_add(ptr_to_xof_state, CRHBYTES);
+        pos = CRHBYTES;
+        #spill(pos);
+
+        state_256 = ptr_to_xof_state;
+
+        status = 0;
+        #spill(status);
+
+        for row_number = 0 to K {
+            #unspill(status);
+            if (status == 0) {
+                #unspill(signature);
+
+                // Here |polynomial| is an element of the signer response 'z'
+                polynomial = _polyz_unpack(polynomial, signature[COMMITMENT_HASH_SIZE : POLYZ_PACKEDBYTES]);
+
+                j = iGAMMA1 - BETA;
+                status = _poly_check_norm(polynomial, j);
+
+                #spill(status);
+                if (status == 0) {
+                    polynomial = _poly_ntt(polynomial);
+                    compressed_w_element = __zero_compressed_w_element(compressed_w_element);
+
+                    ptr_to_xof_state = space_for_1600_bytes;
+                    nonce = __or_lsl(0, row_number, 8);
+
+                    #unspill(verification_key);
+                    compressed_w_element, ptr_to_xof_state = _poly_compute_A_times_polynomial(compressed_w_element, ptr_to_xof_state, verification_key[0 : SEEDBYTES], nonce, polynomial);
+
+                    space_for_1600_bytes = ptr_to_xof_state;
+
+                    for column_number = 1 to L {
+                        #unspill(status);
+                        if (status == 0) {
+                            // Here |polynomial| is an element of the signer response 'z'
+                            #unspill(signature);
+                            polynomial = _polyz_unpack(polynomial, signature[COMMITMENT_HASH_SIZE + (column_number * POLYZ_PACKEDBYTES) : POLYZ_PACKEDBYTES]);
+                            j = iGAMMA1 - BETA;
+
+                            status = _poly_check_norm(polynomial, j);
+
+                            #spill(status);
+                            if (status == 0) {
+                                polynomial = _poly_ntt(polynomial);
+
+                                ptr_to_xof_state = space_for_1600_bytes;
+                                nonce = __or_lsl(column_number, row_number, 8);
+
+                                #unspill(verification_key);
+                                compressed_w_element, ptr_to_xof_state = _poly_compute_A_times_polynomial(compressed_w_element, ptr_to_xof_state, verification_key[0 : SEEDBYTES], nonce, polynomial);
+
+                                space_for_1600_bytes = ptr_to_xof_state;
+                            }
+                        }
+                    }
+
+                    #unspill(status);
+                    if (status == 0) {
+                        #unspill(verification_key);
+
+                        // Here |polynomial| is an element of w1
+                        polynomial = _poly_decompress_w_element(polynomial, compressed_w_element);
+                        polynomial = _poly_invntt_tomont(polynomial);
+                        polynomial = _poly_reduce(polynomial);
+                        polynomial = _poly_caddq(polynomial);
+                        compressed_w_element = _poly_compress_w_element(compressed_w_element, polynomial);
+
+                        // Here |polynomial| is an element of t1
+                        polynomial = _poly_schoolbook_multiply_t1_by_challenge(polynomial, verification_key[SEEDBYTES + (row_number * POLYT1_PACKEDBYTES) : POLYT1_PACKEDBYTES], compressed_challenge);
+
+                        polynomial = _poly_subtract_from_compressed_w_element(polynomial, compressed_w_element);
+                        polynomial = _poly_reduce(polynomial);
+                        polynomial = _poly_caddq(polynomial);
+
+                        hint = space_for_1600_bytes.[:u8 0 : MAX_ONES_IN_HINT];
+                        #unspill(signature);
+                        j = row_number;
+                        hint, number_of_hints, status = _unpack_hint_at_index(hint, j, signature[COMMITMENT_HASH_SIZE + PACKED_SIGNER_RESPONSE_SIZE : HINT_ENCODED_SIZE]);
+                        space_for_1600_bytes.[:u8 0 : MAX_ONES_IN_HINT] = hint;
+
+                        #spill(status);
+                        if (status == 0) {
+                            #declassify(polynomial);
+                            polynomial = _poly_use_hint(polynomial, space_for_1600_bytes.[:u8 0 : MAX_ONES_IN_HINT], number_of_hints);
+
+                            w1_element_packed = compressed_w_element[0 : POLYW1_PACKEDBYTES];
+                            w1_element_packed = _polyw1_pack(w1_element_packed, polynomial);
+
+                            ptr_to_xof_state = state_256;
+                            #unspill(pos);
+                            ptr_to_xof_state, pos = _shake256_absorb_w1_element(ptr_to_xof_state, pos, w1_element_packed);
+                            #spill(pos);
+                            state_256 = ptr_to_xof_state;
+
+                            compressed_w_element[0 : POLYW1_PACKEDBYTES] = w1_element_packed;
+                        }
+                    }
+                }
+            }
+        }
+
+        #unspill(pos, status);
+        if (status == 0) {
+            ptr_to_xof_state = state_256;
+            ptr_to_xof_state = _shake256_add_block_end(ptr_to_xof_state, pos);
+            ptr_to_xof_state = _keccakf1600_ref(ptr_to_xof_state);
+
+            #unspill(signature);
+            j = 0;
+            status = 0;
+            while (j < COMMITMENT_HASH_SIZE) {
+                observed = signature.[:u32 j];
+                expected = ptr_to_xof_state.[:u32 j];
+                #declassify(expected);
+
+                observed ^= expected;
+                status |= observed;
+
+                j += 4;
+            }
+        }
+    }
+
+    if (status != 0) {
+        status = -1;
+    }
+
+    return status;
+}

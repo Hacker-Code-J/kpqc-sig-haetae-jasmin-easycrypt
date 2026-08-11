@@ -1,0 +1,181 @@
+\section{Week 10: Encoder-Only rANS Refinement}
+
+Week~10 targets \claimid{OBL-RANS-ENCODE-REFINEMENT} and does not modify the
+actual decoder proof surface.  The generated target is
+\procname{RansEncodeTarget.M._rans_encode}; its regenerated SHA-256 is
+\texttt{3184367f5d41196b\ldots e22cebc5}.  The outcome is
+\status{continue-encoder}: actual inner-loop byte semantics and the actual
+success-size range compile, but the whole returned suffix has not yet been
+identified with the pure trace.
+
+\subsection*{BArray/list bridge and suffix recurrence}
+
+For an actual \procname{BArray2048} input $a$, the Week~10 view is
+\[
+  \mathsf{symbols}(a)
+    = [\mathsf{uint}(a[0]),\ldots,\mathsf{uint}(a[1023])],
+  \qquad
+  \mathsf{suffix}(a,i)=\mathsf{drop}(i,\mathsf{symbols}(a)).
+\]
+The compiled bridge proves
+\[
+  |\mathsf{symbols}(a)|=1024,
+  \quad \mathsf{suffix}(a,1024)=[],
+  \quad \mathsf{suffix}(a,i)=\mathsf{uint}(a[i])::
+    \mathsf{suffix}(a,i+1).
+\]
+It also defines the pointwise predicates
+\begin{align*}
+ \mathsf{segment\_matches}(A,p,b)
+ &\Longleftrightarrow
+   \forall k<|b|:\ \mathsf{uint}(A[p+k])=b[k],\\
+ \mathsf{prefix\_frame}(A_0,A_1,p)
+ &\Longleftrightarrow
+   \forall k<p:\ A_1[k]=A_0[k].
+\end{align*}
+The set/prepend, concatenation, frame, and W64 no-wrap lemmas are all checked
+by EasyCrypt; the proof does not enumerate 1024 entries.
+
+The pure one-symbol recurrence is
+\begin{align*}
+ \mathsf{encode\_trace}(s::t).\mathsf{state}
+   &=\mathsf{fastStep}(\mathsf{normalize}(
+       \mathsf{encode\_trace}(t).\mathsf{state},s),s),\\
+ \mathsf{encode\_trace}(s::t).\mathsf{bytes}
+   &=\mathsf{normBytes}(
+       \mathsf{encode\_trace}(t).\mathsf{state},s)
+       \mathbin{++}\mathsf{encode\_trace}(t).\mathsf{bytes}.
+\end{align*}
+
+\subsection*{Concrete word-level update}
+
+\theoryname{Mode2RansEncoderWordStep} models the exact generated update:
+four table fields at index $4s$, the reciprocal W64 product and high 32 bits,
+the variable shift ladder, complement multiplication, bias, and W32 addition.
+The compiled theorem is
+\[
+  0\le s<13\ \land\ 1\le\mathsf{uint}(x)<x_{\max}(s)
+  \Longrightarrow
+  \mathsf{actualWordStep}(x,s)
+  =\mathsf{W32}(\mathsf{fastStep}(\mathsf{uint}(x),s)).
+\]
+The concrete table certificate discharges the lookup, reciprocal quotient,
+packed-field, overflow, and signed/unsigned obligations.  This is a word-level
+theorem, not yet the outer generated-loop refinement.
+
+\subsection*{Actual inner normalization invariant}
+
+The generated normalization body is
+\[
+  off\leftarrow off-1;\qquad
+  encp[off]\leftarrow\mathsf{truncate8}(x);\qquad
+  x\leftarrow x\mathbin{\texttt{>>}}8.
+\]
+The direct Hoare proof in \theoryname{Mode2RansEncoderActualInner} over
+\procname{_rans_encode} installs a phase witness
+$(x_0,off_0,k)$ satisfying
+\begin{align*}
+ 0\le k\le4,\qquad
+ \mathsf{uint}(off)&=off_0-k,\\
+ \mathsf{uint}(x)&=\mathsf{phaseState}(\mathsf{uint}(x_0),k),\\
+ \mathsf{segment\_matches}(encp,off_0-k,
+   &\mathsf{phaseWritten}(\mathsf{uint}(x_0),k)),\\
+ \mathsf{prefix\_frame}(before,encp,off_0-k)&.
+\end{align*}
+\path{encoder_inner_segment_step} proves the actual store prepends the exact
+low byte in decoder address order and preserves the frame.  The W64 decrement
+is justified before every iteration rather than left to automation.
+
+The bound $k\le4$ is conservative: it follows from W32 finiteness and positive
+$x_{\max}$.  The pure trace separately proves the sharper mode-2
+$k\in\{0,1,2\}$.  The current actual invariant does not yet bind $x_0$ to the
+tail trace, so the two facts cannot yet be identified.  Consequently
+\claimid{OBL-RANS-ACTUAL-INNER-NORMALIZE} is \status{partial}, although its
+actual byte-write/frame step is proved.
+
+\subsection*{Required outer invariant and failure transition}
+
+On the live branch the target invariant is
+\begin{align*}
+ 0&\le i\le1024,\\
+ \mathsf{uint}(x)&=
+   \mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{state},\\
+ \mathsf{uint}(off)+
+ |\mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{bytes}|
+   &=1024,\\
+ \mathsf{segment\_matches}(encp,\mathsf{uint}(off),
+   \mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{bytes})&,
+ \qquad
+ \mathsf{prefix\_frame}(enc_0,encp,\mathsf{uint}(off)).
+\end{align*}
+The actual program sets $bad=1$ when $off<4$.  The failure branch therefore
+does not retain the live trace equality; subsequent control forces $i=0$ and
+skips final-state serialization.  Encoder success is never assumed.
+
+The first remaining edge is a tail-aware inner invariant:
+\[
+ \mathsf{segment\_matches}\bigl(
+   encp,off_0-k,
+   \mathsf{phaseWritten}(x_0,k)\mathbin{++}
+   \mathsf{encode\_trace}(tail).\mathsf{bytes}\bigr).
+\]
+It must show that guard-false implies $k$ equals the pure normalization length;
+only then can the word-step theorem and suffix recurrence rebuild the outer
+invariant.
+
+\subsection*{Final state serialization and success size}
+
+The four final \procname{set8} operations compile independently as
+\[
+  \mathsf{serialize32\_le}(\mathsf{uint}(x)),
+\]
+with exact inside-byte equality and frame outside the four positions.  Their
+intended composition is
+\[
+ \mathsf{serialize32\_le}(x)\mathbin{++}
+ \mathsf{encode\_trace}(\mathsf{symbols}(a)).\mathsf{bytes}
+ =\mathsf{trace\_bytes}(\mathsf{symbols}(a)).
+\]
+
+The direct generated-procedure theorem
+\path{actual_rans_encode_success_size_bound} preserves the disjunction
+\[
+ bad\ne0\quad\lor\quad
+ \bigl(bad=0\land0\le off\le1020\land
+   4\le1024-off\le1024\bigr).
+\]
+This is Hoare partial correctness. It neither proves local encoder
+losslessness nor supplies an actual success witness.
+
+\subsection*{Status, non-vacuity, and rejected tactics}
+
+The array/list, word-step, pure progress, serialization, canonical-symbol, and
+size premises have compiled witnesses.  No theorem proves that the all-6
+symbol input terminates with $bad=0$, so
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} remains \status{partial}.  Local
+fixed-count encoder losslessness is distinct from Sign rejection-loop
+losslessness.
+
+\begin{center}
+\begin{tabular}{l l}
+\toprule
+Evidence & Status \\
+\midrule
+BArray/list and suffix recurrence & \status{proved} \\
+Concrete encoder word step & \status{proved} (word level) \\
+Actual inner byte/frame transition & \status{proved} \\
+Exact actual 0/1/2 inner exit & \status{partial} \\
+Final LE serialization & \status{proved} (leaf) \\
+Actual success size range & \status{proved} (partial correctness) \\
+Whole actual suffix equals pure trace & \status{partial} \\
+Actual success witness & \status{partial} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A monolithic \texttt{inline; sim}, direct encoder/decoder lockstep, an
+arbitrary replay buffer, success or trace equality as a precondition, and
+1024-step concrete unrolling were rejected.  The next gate is only the
+tail-aware actual inner exit and one outer semantic transition.  Decoder
+semantics, full HBZ composition, and wider security claims remain out of
+scope.

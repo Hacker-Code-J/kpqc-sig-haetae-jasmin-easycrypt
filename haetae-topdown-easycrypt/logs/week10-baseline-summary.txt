@@ -1,0 +1,18 @@
+Week 10 pre-edit baseline
+Date: 2026-08-08 (Asia/Seoul)
+Command: ./haetae-topdown-easycrypt/scripts/verify-all.sh
+Result: PASS
+Authored EasyCrypt targets: 44
+Cache mode: -no-eco
+Focused HBZ/rANS extraction: PASS
+Concrete table certificate regeneration/hash: PASS
+Selected baseline verification: PASS
+LaTeX research notes build: PASS
+Read-only source roots unchanged: PASS
+
+The rolling baseline output before Week 10 edits reported:
+
+  RESULT PASS authored-targets=44 cache=-no-eco
+
+This snapshot records the Week 9 aggregate state before the five Week 10
+encoder theories were added.

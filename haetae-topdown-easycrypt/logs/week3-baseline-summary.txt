@@ -1,0 +1,28 @@
+Week 3 pre-change baseline
+Date: 2026-08-05 (Asia/Seoul)
+Command: ./haetae-topdown-easycrypt/scripts/verify-all.sh
+
+PASS source drift
+PASS proof-hole scan
+PASS proof target manifest
+PASS authored axiom scan
+PASS debug/temporary declaration scan
+PASS focused transcript extraction
+PASS focused mu-hash extraction
+PASS focused packer extraction
+PASS focused extraction regeneration drift
+PASS fresh compile easycrypt/refinement/composition/ExtractedChallengeAbsorb.ec
+PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/Mode2MuChallengeComposition.ec
+PASS fresh compile easycrypt/refinement/composition/TranscriptBytes.ec
+PASS fresh compile easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
+PASS fresh compile easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
+PASS fresh compile easycrypt/refinement/keygen/PackedKeyPrefix.ec
+PASS fresh compile easycrypt/security/ImplementationSecurityGoals.ec
+PASS fresh compile easycrypt/security/SecurityAssumptions.ec
+PASS fresh compile easycrypt/specs/TopLevelGoals.ec
+PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
+PASS baseline verification
+PASS LaTeX research notes build
+PASS read-only roots unchanged after verification
+RESULT PASS authored-targets=11 cache=-no-eco

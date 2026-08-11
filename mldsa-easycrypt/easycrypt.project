@@ -1,0 +1,31 @@
+[general]
+provers = CVC5
+provers = Z3
+
+spec = proofs/eclib/specs/avx2.spec
+
+rdirs = proofs
+idirs = proofs/eclib
+
+rdirs = Jasmin:submodules/jasmin-compiler/eclib
+
+idirs = Spec:proofs/specs
+idirs = Spec:proofs/specs/properties
+
+idirs = JazzEC:proofs/arrays
+idirs = JazzEC:proofs/xarrays
+idirs = JazzEC:proofs/xwords
+idirs = JazzEC:proofs/x86-64/avx2/ml_dsa_65/common/arithmetic
+rdirs = JazzEC:proofs/x86-64/avx2/ml_dsa_65
+
+idirs = Keccak:submodules/formosa-mldsa/formosa-keccak/proof/amd64/common
+idirs = Keccak:submodules/formosa-mldsa/formosa-keccak/proof/amd64/ref
+idirs = Keccak:submodules/formosa-mldsa/formosa-keccak/proof/amd64/avx2
+
+idirs = JazzEC:submodules/formosa-mldsa/formosa-keccak/proof/amd64/extracted
+idirs = JazzEC:submodules/formosa-mldsa/formosa-keccak/proof/amd64/common
+idirs = JazzEC:submodules/formosa-mldsa/formosa-keccak/submodules/crypto-specs/arrays
+
+idirs = CryptoSpecs:submodules/formosa-mldsa/formosa-keccak/submodules/crypto-specs/arrays
+idirs = CryptoSpecs:submodules/formosa-mldsa/formosa-keccak/submodules/crypto-specs/common
+rdirs = CryptoSpecs:submodules/formosa-mldsa/formosa-keccak/submodules/crypto-specs/fips202

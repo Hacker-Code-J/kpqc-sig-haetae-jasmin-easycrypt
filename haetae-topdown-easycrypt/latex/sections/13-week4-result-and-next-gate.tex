@@ -1,0 +1,64 @@
+\section{Week 4 result and next gate}
+
+\subsection{Stores-free theorem}
+
+\theoryname{raw_api_key_memory_reaches_mu_zero_loss} has the exact premises
+\[
+\begin{split}
+  &\mathsf{canonical\_ui64\_address}(vku),\\
+  &\mathsf{imported\_prefix}(sk_{\rm local},mem,sku,992),\\
+  &\forall i\in[0,992).\;mem[sku+i]=mem[vku+i],
+\end{split}
+\]
+and concludes both the int/word address equality and
+\[
+  \mathsf{sk\_memory\_prefix}
+    (sk_{\rm local},mem,\operatorname{of\_int}(vku)).
+\]
+The theorem contains no \texttt{stores mem 0} construction.  Together with
+the Week~3 generated theorem, these premises are sufficient for
+\[
+  \take_{32}(\mu_{\rm sign}^{64})=\mu_{\rm verify}^{32}
+\]
+and then equal position-64 challenge suffixes.  They have not yet been shown
+to arise from the complete actual caller chain.
+
+\subsection{Claim decision}
+
+The operational ledger records:
+\[
+\begin{array}{ll}
+\claimid{OBL-API-ADDRESS-BINDING} & \status{proved},\\
+\claimid{OBL-API-KEYGEN-EXPORT-CALLER} & \status{partial},\\
+\claimid{OBL-API-SIGN-MU-REACHABILITY} & \status{proved}~\text{(exact trace)},\\
+\claimid{OBL-API-VERIFY-MU-REACHABILITY} & \status{partial},\\
+\claimid{OBL-API-KEY-MEMORY-RAW} & \status{partial}.
+\end{array}
+\]
+It would therefore be unsound to record
+\(\delta_{\mu,\mathrm{raw\ API}}=0\).  The valid statement remains
+\(\delta_{\mu,\mathrm{raw\ top}}=0\), below caller reachability.  No full
+Sign, Verify, encoding, or EUF--CMA delta is inferred.
+
+\subsection{Verification and failed decompositions}
+
+Every Week~4 theory is a manifested fresh \texttt{-no-eco} target.  The
+integrated verifier regenerates all three raw caller targets, checks their
+hashes, scans proof holes and axioms, rejects a constructed Week~4 stores
+witness, checks read-only source drift, runs selected baselines, and builds
+these notes without undefined references or citations.
+
+Rejected proof decompositions were (i) the large direct KeyGen caller
+postcondition after repeated \texttt{auto}/\texttt{wp} stalls and (ii) an
+unconditional Verify public lift after direct \texttt{sim}, explicit-call, and
+trace-state attempts exposed the early-return gates.  Neither failure was
+hidden behind an axiom.
+
+\subsection{Week 5 gate}
+
+Week~5 remains on actual caller reachability.  The minimal next obligations
+are a smaller KeyGen export postcondition boundary and a Verify tail-reach
+trace/predicate tied to Sign-produced canonical signatures.  Highbits/LSB and
+the full challenge call remain out of scope until both edges compile.  A
+second failure should trigger redesign of the unified extraction or trace
+instrumentation, not another helper-only wrapper.

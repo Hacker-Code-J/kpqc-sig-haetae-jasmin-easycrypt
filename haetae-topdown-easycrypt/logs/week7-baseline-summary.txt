@@ -1,0 +1,45 @@
+PASS source drift
+PASS proof-hole scan
+PASS proof target manifest
+PASS authored axiom scan
+PASS debug/temporary declaration scan
+PASS generated top control and reachability source checks
+PASS Week4/5 raw API bridge theorem surface scan
+PASS Week6 actual frame, locality, and trace-boundary source checks
+PASS actual API copy-helper reachability source checks
+PASS focused transcript extraction
+PASS focused mu-hash extraction
+PASS focused packer extraction
+PASS focused API key-memory extraction
+PASS focused raw API caller extraction
+PASS focused extraction regeneration drift
+PASS fresh compile easycrypt/refinement/composition/ExtractedChallengeAbsorb.ec
+PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/ApiKeyMemoryBridge.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMode2RawMuComposition.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMuTopControl.ec
+PASS fresh compile easycrypt/refinement/composition/Mode2MuChallengeComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiSignOutputFrame.ec
+PASS fresh compile easycrypt/refinement/composition/RegionLocalMuEquivalence.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiAddressBridge.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiAcceptedMuComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiCallerMuTrace.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiDirectObservedMu.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiKeygenExportComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiKeygenSequentialExport.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiMuReachability.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiVerifyMuTrace.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec
+PASS fresh compile easycrypt/refinement/composition/RegionLocalMuTop.ec
+PASS fresh compile easycrypt/refinement/composition/TranscriptBytes.ec
+PASS fresh compile easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
+PASS fresh compile easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
+PASS fresh compile easycrypt/refinement/keygen/PackedKeyPrefix.ec
+PASS fresh compile easycrypt/security/ImplementationSecurityGoals.ec
+PASS fresh compile easycrypt/security/SecurityAssumptions.ec
+PASS fresh compile easycrypt/specs/TopLevelGoals.ec
+PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
+PASS baseline verification
+PASS LaTeX research notes build
+PASS read-only roots unchanged after verification
+RESULT PASS authored-targets=26 cache=-no-eco

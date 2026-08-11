@@ -1,0 +1,66 @@
+\section{Week 6: region-local mu equivalence}
+
+\subsection{Why whole-memory equality is wrong}
+
+The Sign hash runs before signature publication, whereas the Verify hash runs
+after the 1474-byte signature and 8-byte length writes. Thus the two global
+memories are generally unequal even when every hash input byte is preserved.
+The correct relation is
+\[
+  \mathsf{region\_eq}(M_1,M_2,b,n)
+  \eqdef
+  \forall i\in[0,n),\;M_1[b+i]=M_2[b+i].
+\]
+
+The Week 6 data flow is:
+\[
+\begin{array}{c}
+ M_{KG}\;\xrightarrow{\text{SK import}}\;\mathsf{SignMu}^{64}\\
+ \quad\searrow\;\text{signature publication}\;\to M_{after\,Sign}\\
+ \qquad\quad\text{preserved VK/pre/message}\;\to\mathsf{VerifyMu}^{32}.
+\end{array}
+\]
+
+\subsection{Generated procedure theorem}
+
+Theory \path{RegionLocalMuEquivalence.ec} proves locality of the actual
+generated pre/message absorb loops, including the load-index and W64 tail
+invariants. Key absorption is separate: Sign reads the local packed SK array,
+while Verify reads the external VK bytes.
+
+The final theorem
+\begin{quote}
+\small
+\path{RegionLocalMuTop.sign_verify_generated_raw_mu_prefix_regionwise}
+\end{quote}
+has the actual generated procedures
+\procname{_sf_mu_rawpre} and \procname{__verify_hash_mu} on its two sides. Its
+premises expose mode-2 lengths, \texttt{raw\_prelen}, non-wrapping pre/message
+regions, the local-SK/external-VK 992-byte prefix, and byte equality only on
+the two address ranges read by the hash. Its conclusion is
+\[
+  \take_{32}(\mu_{\mathrm{Sign}}^{64})
+  = \mu_{\mathrm{Verify}}^{32}.
+\]
+
+No SHAKE prefix or ``outside writes do not matter'' axiom is used. Init,
+Keccak permutation, finalize, and both squeeze procedures are the pinned
+generated programs. The generated focused hashes remain
+\noindent\path{SignMuHashTarget.ec}:
+\begin{verbatim}
+c2232e64adf71ee54763f51e11862938c8caa5ca278af30e4c83756091e83aa7
+\end{verbatim}
+\noindent\path{VerifyMuHashTarget.ec}:
+\begin{verbatim}
+fcee969af0b567447c6c9b9c53e29245375ec2bfd54ae11afecdf0a6ebc0ebb7
+\end{verbatim}
+
+\subsection{Address subtlety}
+
+The predicate \texttt{canonical\_region(a,n)} allows the empty boundary case
+\(a=2^{64},n=0\). It therefore cannot by itself justify
+\(\operatorname{to\_uint}(\operatorname{of\_int}(a))=a\). The caller bridge
+keeps \path{canonical_ui64_address} premises for each address or length
+whose exact round trip is used. This prevents a silent modular-wrap premise.
+
+Status: \status{PROVED} for mode-2 raw/internal hashing.

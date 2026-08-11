@@ -1,0 +1,84 @@
+\section{Week 5: accepted API composition}
+
+The accepted-path composition closes two more adapters without claiming the
+full caller theorem.
+
+\subsection{Accepted hash-call adapter}
+
+\theoryname{RawApiAcceptedMuComposition.raw_api_accepting_execution_hash_mu_zero_loss}
+is the compiled accepted-path adapter from actual caller observations to the
+generated hash-call theorem.  It reuses:
+
+\begin{itemize}
+  \item the actual Sign trace observations;
+  \item the actual accepted Verify trace observations;
+  \item the imported-prefix and external-key-prefix premises; and
+  \item the canonical raw/pre-message region premises.
+\end{itemize}
+
+Its conclusion is
+\[
+  \mathsf{mu32\_prefix}(\mathsf{res}_1,\mathsf{res}_2),
+\]
+where the two results are the actual generated Sign and Verify hash-call
+procedures.  The theorem does \emph{not} claim equality of the two trace
+modules' stored \texttt{observed\_mu} fields.  That direct equality remains
+open, and the report therefore does not record
+\(\delta_{\mu,\mathrm{raw\_api\_accept}} = 0\).
+
+\subsection{Generated helper suffix adapter}
+
+In theory \path{RawApiAcceptedMuComposition}, lemma
+\begin{quote}
+\small
+\path{raw_api_accepting_execution_generated_challenge_suffix_zero_loss}
+\end{quote}
+extends the accepted-path adapter to the generated Sign/Verify challenge
+suffix helpers.  The theorem is still below the public caller boundary: it
+requires the actual accepted-path trace premises plus
+\texttt{challenge\_pos = 64}, and it concludes exact equality of the
+generated helper results.
+
+\subsection{Diagram and boundary}
+
+\begin{center}
+\small
+\begin{tabular}{p{0.26\linewidth}p{0.30\linewidth}p{0.34\linewidth}}
+\toprule
+Stage & Status & Boundary note \\
+\midrule
+Actual KeyGen sequential export & PROVED & Sequential export is closed for the real caller. \\
+Actual Sign caller trace & PROVED & Exact trace exists, but the sign-output frame/stability theorem is missing. \\
+Accepted Verify tail/input binding & PROVED & The accepted path reaches the tail and exposes the exact descriptor inputs. \\
+Accepted hash-call adapter & PROVED & Actual caller observations instantiate the generated hash-call theorem. \\
+Generated helper suffix adapter & PROVED & Accepted trace premises instantiate the position-64 helper composition. \\
+Direct actual-caller mu equality & OPEN & The trace modules are not yet connected by a direct stored-mu equality. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{verbatim}
+Actual Sign trace + actual accepted Verify trace
+  -> accepted hash-call adapter PROVED
+  -> generated helper suffix adapter PROVED
+  -> direct actual-caller stored-mu equality OPEN
+\end{verbatim}
+
+The implication for the claim ledger is clear:
+\claimid{OBL-API-KEY-MEMORY-RAW-ACCEPT} remains partial, and
+\claimid{OBL-SIGN-VERIFY-CORRECTNESS} stays blocked until the Sign-output
+tail-reach and correctness obligations are discharged.
+
+The theorem boundary also explains the remaining gap: the accepted-path
+composition does not synthesize a \texttt{stores} witness, and it does not
+reach the full public Sign/Verify challenge call.  It only closes the
+accepted-path adapter and the helper-level suffix composition.
+
+The Sign and Verify Jasmin sources are pinned respectively at SHA-256:
+\begin{verbatim}
+fd58271f3ada888dfcef4bcf89027c986cc91464a7cb8446b6de11e40037ac31
+789f36e71ab7784cc37de50ceb04f8d59276f3d1a721acdc64a0be0299f18b06
+\end{verbatim}
+Both the accepted hash adapter and helper suffix adapter are fresh-checked by
+\path{scripts/verify-all.sh}.  No theorem in this section uses an authored
+SHAKE axiom or a constructed \texttt{stores mem 0} witness.

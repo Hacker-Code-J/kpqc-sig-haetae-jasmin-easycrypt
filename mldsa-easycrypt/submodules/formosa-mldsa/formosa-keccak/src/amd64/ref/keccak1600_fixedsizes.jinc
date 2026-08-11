@@ -1,0 +1,190 @@
+/**************************************************************************** 
+
+   DEPENDENCIES:
+   =============
+
+  The loading of this file depends on the following context:
+
+ 1) "select_nobmi1.jinc" or "select_bmi1.jinc"
+
+*****************************************************************************/
+
+require "keccak1600.jinc"
+from Keccak require "common/subreadwrite_imem.jinc"
+
+
+/*
+ *  REMARK: the remaining of this file is expected to be kept in sync. with its array version's
+ *  counterpart ("keccak1600_fixedsizes_ASIZE.jinc")
+ *
+ */
+
+
+/*
+   INCREMENTAL ARRAY ABSORB
+   ========================
+*/
+#[safety =
+   { requires = 0 <= _TRAILB && _TRAILB < 256 && 0<=_LEN && _LEN <= 200 && is_mem_init((64u) buf,_LEN) && is_arr_init(st,0,7*32) && 0<= AT && AT < 200
+   , res = { final_st, final_AT, final_buf }
+   , ensures = is_arr_init(final_st,0,7*32) && final_AT == AT + _LEN + (_TRAILB != 0 ? 1 : 0) && final_buf == buf + _LEN
+   }
+ ]
+inline fn __addstate_m_ref
+( reg mut ptr u64[25] st
+, inline int AT /* bytes (0 <= AT < 200) */
+, reg ui64 buf
+, inline int _LEN
+, inline int _TRAILB
+) -> reg ptr u64[25] /* st */
+   , inline int      /* AT */
+   , reg ui64        /* buf */
+{
+  inline int AT8;
+  reg ui64 at;
+  reg u64 w;
+
+  // fill first word...
+  AT8 = AT;
+  AT = 8*(AT/8);
+  if ( AT8%8 != 0 ) {
+    buf, _LEN, _TRAILB, AT8, w = __m_ilen_read_upto8_at(buf, _LEN, _TRAILB, AT, AT8);
+    st[AT/8] ^= w;
+    AT = AT8;
+  }
+
+  // add complete words
+  at = AT/8;
+  while ( at < AT/8 + _LEN/8 ) {
+    w = [:u64 (64u) buf];
+    buf += 8;
+    st[at] ^= w;
+    at += 1;
+  }
+
+  // add last word...
+  AT += 8*(_LEN/8);
+  _LEN = _LEN%8;
+  if ( 0 < _LEN || _TRAILB%256!= 0 ) {
+    buf, _LEN, _TRAILB, AT, w = __m_ilen_read_upto8_at(buf, _LEN, _TRAILB, AT, AT);
+    st[at] ^= w;
+  }
+
+  return st, AT, buf;
+}
+
+#[safety =
+   { requires = 0 <= _TRAILB && _TRAILB < 256 && 0<=_LEN && 0<_RATE8 && _RATE8< 200 && 
+                is_mem_init((64u) buf,_LEN) && is_arr_init(st,0,7*32) && 0<= AT && AT < 200
+   , res = { final_st, final_AT, final_buf }
+   , ensures = is_arr_init(final_st,0,7*32) && final_AT == AT + _LEN + (_TRAILB != 0 ? 1 : 0)
+   }
+ ]
+inline fn __absorb_m_ref
+( reg mut ptr u64[25] st
+, inline int AT
+, reg ui64 buf
+, inline int _LEN
+, inline int _TRAILB /* closes state if !=0 (i.e. adds trailbyte and padding) */
+, inline int _RATE8
+) -> reg ptr u64[25] /* st */
+   , inline int      /* AT */
+   , reg ui64        /* buf */
+{
+  reg ui64 i;
+  inline int ITERS;
+
+  if ( AT+_LEN >= _RATE8 ) { // more than one block...
+    st, _, buf = __addstate_m_ref(st, AT, buf, _RATE8-AT, 0);
+    _LEN = _LEN - (_RATE8-AT);
+    AT = 0;
+    () = #spill(buf);
+    st = _keccakf1600_ref(st);
+    () = #unspill(buf);
+    ITERS = _LEN/_RATE8;
+    i = 0;
+    while ( i < ITERS ) {
+      st, _, buf = __addstate_m_ref(st, 0, buf, _RATE8, 0);
+      () = #spill(buf,i);
+      st = _keccakf1600_ref(st);
+      () = #unspill(buf,i);
+      i += 1;
+    }
+    _LEN = _LEN % _RATE8;
+  }
+  st, AT, buf = __addstate_m_ref(st, AT, buf, _LEN, _TRAILB);
+  if (_TRAILB!=0) { st = __addratebit_ref(st, _RATE8); }
+
+  return st, AT, buf;
+}
+
+
+/*
+   ONE-SHOT (FIXED-SIZE) MEMORY SQUEEZE
+   ====================================
+*/
+#[safety =
+   { requires = 0<= _LEN && _LEN <= 200 && is_mem_init((64u) buf,_LEN) && is_arr_init(st,0,7*32)
+   , res = { final_buf }
+   , ensures = final_buf == buf + _LEN
+   }
+ ]
+inline fn __dumpstate_m_ref
+( reg ui64 buf
+, inline int _LEN
+, reg const ptr u64[25] st
+) -> reg ui64     /* buf */
+{ 
+  reg ui64 i;
+  reg u64 t;
+
+  i = 0;
+  while (i < _LEN/8) {
+    t = st[i];
+    [:u64 (64u) buf] = t;
+    buf += 8;
+    i += 1;
+  }
+  if (0 < _LEN%8) {
+    t = st[i];
+    buf, _ = __m_ilen_write_upto8( buf, _LEN%8, t);
+  }
+
+  return buf;
+}
+
+#[safety =
+   { requires = 0<= _LEN && 0< _RATE8 && _RATE8 < 200 && is_mem_init((64u) buf,_LEN) && is_arr_init(st,0,32*7)
+   , ensures = is_arr_init(st,0,32*7)
+   }
+ ]
+inline fn __squeeze_m_ref
+( reg mut ptr u64[25] st
+, reg ui64 buf
+, inline int _LEN
+, inline int _RATE8
+) -> reg ptr u64[25] /* st */
+   , reg ui64        /* buf */
+{
+  reg ui64 i;
+
+  i = 0;
+  while (i < _LEN/_RATE8) {
+    () = #spill(buf,i);
+    st = _keccakf1600_ref(st);
+    () = #unspill(buf,i);
+    buf = __dumpstate_m_ref(buf, _RATE8, st);
+    i += 1;
+  }
+  if (0 < _LEN%_RATE8) {
+    () = #spill(buf);
+    st = _keccakf1600_ref(st);
+    () = #unspill(buf);
+    buf = __dumpstate_m_ref(buf, _LEN%_RATE8, st);
+  }
+
+  return st, buf;
+}
+
+
+

@@ -1,0 +1,21 @@
+Week 8 pre-edit baseline (2026-08-07, Asia/Seoul)
+
+Command:
+  ./haetae-topdown-easycrypt/scripts/verify-all.sh
+
+Result:
+  PASS source drift
+  PASS proof-hole scan
+  PASS proof target manifest
+  PASS authored axiom scan
+  PASS debug/temporary declaration scan
+  PASS all focused extractions and regeneration drift
+  PASS all 30 authored EasyCrypt targets with -no-eco
+  PASS selected baseline verification
+  PASS LaTeX research notes build
+  PASS read-only roots unchanged after verification
+  RESULT PASS authored-targets=30 cache=-no-eco
+
+The complete per-target transcript was the then-current
+logs/verify-all-summary.txt.  This compact immutable checkpoint records the
+pre-Week-8 state before adding HBZ extraction or proof targets.

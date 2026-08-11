@@ -1,0 +1,15 @@
+Week 9 pre-edit baseline
+Date: 2026-08-08 (Asia/Seoul)
+Command: ./haetae-topdown-easycrypt/scripts/verify-all.sh
+Result: PASS
+Authored EasyCrypt targets: 38
+Cache mode: -no-eco
+Focused HBZ/rANS extraction: PASS
+Concrete table certificate regeneration/hash: PASS
+Selected baseline verification: PASS
+LaTeX research notes build: PASS
+Read-only source roots unchanged: PASS
+
+The complete command output at baseline time was written by verify-all.sh to
+logs/verify-all-summary.txt.  This file preserves the pre-edit Week 9 result
+because later aggregate verification overwrites that rolling summary.

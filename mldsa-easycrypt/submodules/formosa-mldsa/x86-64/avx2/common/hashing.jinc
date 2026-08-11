@@ -1,0 +1,197 @@
+inline
+fn shake256_init_state() -> reg u256[7]
+{
+    reg u256[7] state = __state_init_avx2();
+    return state;
+}
+
+inline
+fn shake256_permute(reg u256[7] state) -> reg u256[7]
+{
+    state = _keccakf1600_avx2(state);
+    return state;
+}
+
+inline
+fn squeeze_128_bytes(reg ptr u8[128] array, reg u256[7] state) -> reg ptr u8[128]
+{
+    reg ui64 offset;
+    offset = 0;
+    array, _ = A128::__dumpstate_avx2(array, offset, 128, state);
+    return array;
+}
+
+// Absorbs 32 bytes of seed followed by 2 bytes (extra) with SHAKE256 padding.
+// Used by key generation to absorb (randomness || rows || cols).
+inline
+fn shake256_absorb_34(
+    reg ptr u8[32] seed,
+    reg ptr u8[2] extra
+) -> reg u256[7]
+{
+    reg u256[7] state = shake256_init_state();
+    state, _ = A32::__absorb_avx2(state, 0, seed, UNFINISHED, SHAKE256_RATE);
+    state, _ = A2::__absorb_avx2(state, 32, extra, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    return state;
+}
+
+inline
+fn shake256_absorb_66(
+    reg ptr u8[64] rho_prime,
+    reg u16 domain_separator
+) -> reg u256[7]
+{
+    stack u8[2] ds;
+    reg u256[7] state = shake256_init_state();
+    state, _ = A64::__absorb_avx2(state, 0, rho_prime, UNFINISHED, SHAKE256_RATE);
+    ds[:u16 0] = domain_separator;
+    state, _ = A2::__absorb_avx2(state, 64, ds, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    return state;
+}
+
+inline
+fn shake256_absorb_128(
+    reg ptr u8[128] block
+) -> reg u256[7]
+{
+    reg u256[7] state = shake256_init_state();
+    state, _ = A128::__absorb_avx2(state, 0, block, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    return state;
+}
+
+inline
+fn shake256_absorb_commitment_hash(
+    reg ptr u8[COMMITMENT_HASH_SIZE] hash
+) -> reg u256[7]
+{
+    reg u256[7] state = shake256_init_state();
+    state, _ = A_COMMITMENT_HASH::__absorb_avx2(state, 0, hash, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    return state;
+}
+
+inline
+fn shake256_add_rate_bit(reg u256[7] st) -> reg u256[7]
+{
+    st = __addratebit_avx2(st, R136);
+    return st;
+}
+
+inline
+fn shake256_squeeze_block(
+    reg ptr u8[SHAKE256_RATE] block,
+    reg u256[7] state
+) -> reg ptr u8[SHAKE256_RATE]
+{
+    reg ui64 offset;
+    offset = 0;
+    block, _ = A136::__dumpstate_avx2(block, offset, SHAKE256_RATE, state);
+    return block;
+}
+
+inline
+fn squeeze_64_bytes(reg ptr u8[64] array, reg u256[7] state) -> reg ptr u8[64] {
+    reg ui64 offset;
+    offset = 0;
+    array, _ = A64::__dumpstate_avx2(array, offset, 64, state);
+    return array;
+}
+
+inline
+fn squeeze_commitment_hash_bytes(reg ptr u8[COMMITMENT_HASH_SIZE] array, reg u256[7] state) -> reg ptr u8[COMMITMENT_HASH_SIZE] {
+    reg ui64 offset;
+    offset = 0;
+    array, _ = A_COMMITMENT_HASH::__dumpstate_avx2(array, offset, COMMITMENT_HASH_SIZE, state);
+    return array;
+}
+
+inline
+fn __derive_message_representative(
+    reg ptr u8[VERIFICATION_KEY_HASH_SIZE] verification_key_hash,
+    #[spill_to_mmx] reg ui64 context_pointer,
+    #[spill_to_mmx] reg ui64 context_size,
+    #[spill_to_mmx] reg ui64 message_pointer,
+    #[spill_to_mmx] reg ui64 message_size
+) -> stack u8[MESSAGE_REPRESENTATIVE_SIZE]
+{
+    stack u8[MESSAGE_REPRESENTATIVE_SIZE] message_representative;
+    stack keccak_updstate state;
+    stack u8[66] prefix;
+
+    reg u256 copied_32_bytes;
+    reg ui64 buf len;
+    reg ui8 rate64;
+    reg u8 trailb;
+
+    // Build the fixed 66-byte prefix: vk_hash || 0 || context_size.
+    // VERIFICATION_KEY_HASH_SIZE is always 64.
+    copied_32_bytes = verification_key_hash.[:u256 0];
+    prefix.[:u256 0] = copied_32_bytes;
+    copied_32_bytes = verification_key_hash.[:u256 32];
+    prefix.[:u256 32] = copied_32_bytes;
+    prefix[:u8 64] = 0;
+    prefix[:u8 65] = (8u) (64u) context_size;
+
+    () = #spill(context_pointer, context_size, message_pointer, message_size);
+
+    // Initialize SHAKE256 streaming state: rate = 136 = 17*8 bytes, trail byte = 0x1f.
+    rate64 = 17;
+    trailb = SHAKE;
+    state = _init_updstate_avx2(state, rate64, trailb);
+
+    // One-shot absorb of the fixed-size prefix.
+    len = 66;
+    state = A66::_update_updstate_avx2(state, prefix, len);
+
+    // Absorb context (variable-length, accessed via memory pointer).
+    () = #unspill(context_pointer, context_size);
+    buf = context_pointer;
+    len = context_size;
+    state = _absorb_m_updstate_avx2(state, buf, len);
+
+    // Absorb message (variable-length, accessed via memory pointer).
+    () = #unspill(message_pointer, message_size);
+    buf = message_pointer;
+    len = message_size;
+    state = _absorb_m_updstate_avx2(state, buf, len);
+
+    // Finalize the SHAKE256 stream, then permute and squeeze MESSAGE_REPRESENTATIVE_SIZE = 64 bytes.
+    state = _finish_updstate_avx2(state);
+    len = 64;
+    state, message_representative = A64::_squeeze_updstate_avx2(state, message_representative, len);
+
+    return message_representative;
+}
+
+inline
+fn hash_verification_key(
+    #[spill_to_mmx] reg ptr u8[VERIFICATION_KEY_HASH_SIZE] verification_key_hash,
+    #[spill_to_mmx] reg ptr u8[VERIFICATION_KEY_SIZE] verification_key
+) -> reg ptr u8[VERIFICATION_KEY_HASH_SIZE]
+{
+    reg u256[7] state;
+    state = shake256_init_state();
+    state, _ = A_VERIFICATION_KEY::__absorb_avx2(state, 0, verification_key, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    verification_key_hash = squeeze_64_bytes(verification_key_hash, state);
+    return verification_key_hash;
+}
+
+inline
+fn __derive_commitment_hash(
+    reg ptr u8[64] message_representative,
+    #[spill_to_mmx] reg ptr u8[ENCODED_COMMITMENT_SIZE] encoded_commitment
+) -> stack u8[COMMITMENT_HASH_SIZE]
+{
+    stack u8[COMMITMENT_HASH_SIZE] commitment_hash;
+    reg u256[7] state;
+    state = shake256_init_state();
+    state, _ = A64::__absorb_avx2(state, 0, message_representative, UNFINISHED, SHAKE256_RATE);
+    state, _ = A_ENCODED_COMMITMENT::__absorb_avx2(state, 64, encoded_commitment, SHAKE, SHAKE256_RATE);
+    state = shake256_permute(state);
+    commitment_hash = squeeze_commitment_hash_bytes(commitment_hash, state);
+    return commitment_hash;
+}

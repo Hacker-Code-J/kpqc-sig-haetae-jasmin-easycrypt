@@ -1,0 +1,21 @@
+Week 4 pre-change baseline
+Date: 2026-08-05 Asia/Seoul
+Command: ./haetae-topdown-easycrypt/scripts/verify-all.sh
+
+PASS source drift
+PASS proof-hole scan
+PASS proof target manifest
+PASS authored axiom scan
+PASS debug/temporary declaration scan
+PASS generated top control and reachability source checks
+PASS actual API copy-helper reachability source checks
+PASS focused transcript extraction
+PASS focused mu-hash extraction
+PASS focused packer extraction
+PASS focused API key-memory extraction
+PASS focused extraction regeneration drift
+PASS fresh compilation of all 14 authored EasyCrypt targets (-no-eco)
+PASS baseline verification (20 selected baselines, read-only=true)
+PASS LaTeX research notes build
+PASS read-only roots unchanged after verification
+RESULT PASS authored-targets=14 cache=-no-eco

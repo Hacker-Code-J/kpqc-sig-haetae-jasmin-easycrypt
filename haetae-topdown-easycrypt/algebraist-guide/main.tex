@@ -1,0 +1,78 @@
+\documentclass[11pt,a4paper]{article}
+\input{preamble}
+\input{status}
+
+\title{\textbf{HAETAE-2 구현 검증의 대수적 지도}\\[0.4em]
+  \Large 순수 대수학자와 대수기하학자를 위한 동반 안내서}
+\author{HAETAE top-down EasyCrypt 작업 문서}
+\date{상태 기준: \SnapshotDate\ (\SnapshotWeek)}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+HAETAE-2는
+\(R_q=\ZZ_q[X]/(X^{256}+1)\) 위의 모듈 격자 서명(module-lattice
+signature)이다. 그러나 이 저장소에서 실제로 증명하는 대상은 환(ring) 자체에
+머물지 않는다. 논문의 원소(element)와 모듈 사상(module map)을 정준
+바이트열(canonical byte string)로 표현하고, 그 바이트열을 유한
+메모리(finite memory)에 배치한 뒤, 실제 생성된
+Jasmin 절차가 그 표현을 보존하거나 역산한다는 사실까지 내려간다. 이 문서는
+그 과정을 ``대수적 대상(algebraic object)--표현 사상(representation
+map)--상태기계(state machine) refinement''의 세 층으로
+재구성한다.
+
+최신 감사 기준선인 스냅샷 시점에는 \AuthoredTargetCount 개 authored
+EasyCrypt 타깃이 manifest에 들어가 aggregate \identifier{-no-eco} fresh compile을
+통과했다. Week~10의 rANS encoder 타깃 \WeekTenTargetCount 개에 이어
+Week~11의 encoder closure 타깃 \WeekElevenTargetCount 개, Week~12의 decoder
+semantic-refinement 타깃 \WeekTwelveTargetCount 개, Week~13의 actual core
+composition 타깃 \WeekThirteenTargetCount 개가 추가되었다.
+닫힌 핵심은 비밀키의
+992바이트 검증키 접두부,
+raw/internal Sign--Verify의 32바이트 \(\mu\) 일치, challenge suffix 흡수,
+서명 prefix round trip, HBZ 계수(coefficient)--기호(symbol) leaf
+역함수(inverse function), 실제 13-symbol rANS 표의
+certificate, 순수 rANS 단계와 byte-stack 정리(theorem), 실제 suffix copy,
+encoder--decoder harness의 제어, 그리고 actual encoder 성공 출력 전체와 순수
+\(\operatorname{TraceBytes}(\operatorname{SymbolList}(symbols_0))\) 사이의 정확한
+등식(equality), exact trace에서 1024개 기호(symbol)를 복원하는 actual decoder
+정제(refinement), 그리고 두 정리(theorem)와 actual suffix copy를
+\identifier{Mode2RansActualHarness.run}에서 합성한 core 역함수(inverse function)다.
+마지막 정리(theorem)는 encoder 성공을 전제로 요구하지 않고, 실패 시 decoder를
+실행하지 않는 가지(branch)와 성공 시 1024개 기호(symbol)를 복원하는 가지를 함께
+보이는 성공 조건부 부분정확성(success-conditioned partial correctness)이다.
+반면 실제 encoder 성공 증인(success witness), encoder/decoder 종료성(termination),
+production full-HBZ wrapper, 전체 suffix codec, 완료된 API trace의 저장
+\(\mu\)를 연결하는 product/replay 운송, 전체 기능정확성과 구현 수준 보안은
+열려 있다. 따라서 이 문서는 완성 증명을 선언하지 않고, 정확히 어디까지
+commuting diagram이 닫혔는지를 표시한다.
+\end{abstract}
+
+\begin{takeaway}{한 문장 요약}
+현재 성과는 환(ring) 위의 전체 서명 스킴(signature scheme)을 이미 검증했다는
+뜻이 아니라, 그 스킴의 몇몇 결정론적 표현 사각형(representation square)이
+실제 생성 코드까지 가환(commute)함을 증명했고, 다음 핵심
+gate가 \CurrentPriority\ 임을 뜻한다. \CurrentGate 는 encoder와 decoder의
+개별 간선(edge)에 이어 actual suffix copy를 통한 core 가환사각형(commutative
+square)까지 닫혔다는 판정이다. production full-HBZ wrapper나 전체 codec이
+완료됐다는 판정은 아니다.
+\end{takeaway}
+
+\tableofcontents
+\clearpage
+
+\input{sections/01-reading-contract}
+\input{sections/02-algebraic-object}
+\input{sections/03-representation-and-logic}
+\input{sections/04-proved-spine}
+\input{sections/05-rans-frontier}
+\input{sections/06-boundaries}
+\input{sections/07-roadmap}
+\appendix
+\input{sections/08-source-index}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

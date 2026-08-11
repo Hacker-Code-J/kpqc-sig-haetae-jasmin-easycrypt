@@ -1,0 +1,118 @@
+\section{Week 3 API Memory Reachability}
+\label{sec:week3-api-memory}
+
+\paragraph{Research question and claim.}
+The strong secondary question is whether the packed-key relation used in the
+HAETAE KeyGen/Sign algorithms (official PDF, Figure~8) survives the actual
+Jasmin export/import loops.  The whole claim is tracked as
+\claimid{OBL-API-KEY-MEMORY-RAW}:
+\[
+  \mathsf{KeyGen.local}\;(vk,sk)
+  \Longrightarrow
+  \mathsf{memory}[vku,vku+992)=vk
+  \land
+  \mathsf{memory}[sku,sku+1408)=sk
+  \Longrightarrow
+  \prefix_{992}(sk_{\mathrm{Sign}})=vk_{\mathrm{Verify}}.
+\]
+
+\paragraph{Pinned implementation and extraction.}
+Theory \theoryname{ApiKeyMemoryBridge} opens the generated procedures
+\procname{__kp_api_copy_2080_to_addr} and
+\procname{__kp_api_copy_2752_to_addr} from \pathname{keypair.jazz}, plus the
+Sign and Verify copies of \procname{_api_copy_raw_to_2752_prefix}.  The source
+SHA-256 values are \texttt{8b2ddac2...3e01} for KeyGen,
+\texttt{fd58271f...ac31} for Sign, \texttt{789f36e7...b06} for Verify, and
+\texttt{4d04b8e7...a8a0} for their shared \pathname{api.jinc}.  Regenerated
+theory hashes are recorded in
+\pathname{manifests/generated-extractions.sha256}; regeneration is part of
+the main verifier.
+
+\paragraph{Compiled generated-helper theorems.}
+The following actual procedure-level results fresh-compile:
+\begin{itemize}
+  \item \theoryname{keygen_export_vk_mode2_prefix}: under
+        \theoryname{valid_region_w64} and length 992, the VK exporter writes
+        every byte in the external interval to the corresponding local VK
+        byte;
+  \item \theoryname{keygen_export_sk_mode2_prefix}: the analogous statement
+        for all 1408 mode-2 SK bytes;
+  \item \theoryname{keygen_export_sk_mode2_prefix_frames_vk}: under the
+        explicit minimal \theoryname{disjoint_regions} premise, the same
+        actual SK exporter also preserves a previously established 992-byte
+        VK memory prefix;
+  \item \theoryname{sign_import_mode2_sk_prefix}: under
+        \theoryname{valid_region_int} and length 1408, the actual Sign
+        importer returns a local array whose first 992 bytes equal memory;
+  \item \theoryname{verify_import_mode2_vk_prefix}: the actual Verify
+        importer returns the 992-byte VK prefix; and
+  \item \theoryname{sign_verify_api_importer_same_inputs}: identical memory,
+        source, and length inputs produce identical results for the two
+        generated importer copies.
+\end{itemize}
+These are Hoare partial-correctness or exact equivalence statements.  They do
+not assume or conclude public API termination beyond the finite extracted
+loops, nor do they manufacture a desired memory with an existential store.
+
+\paragraph{Proof strategy and loop invariant.}
+Each exporter invariant records the processed counter interval and a
+\theoryname{mem2080_prefix} or \theoryname{mem2752_prefix} relation.  The
+no-wrap premise justifies converting the generated word addition into integer
+address addition.  Each importer first proves equality for indices below its
+requested length, then shows the zero-fill tail cannot modify indices below
+992.  This last frame fact is essential for Sign, whose mode-2 SK length is
+1408 although the downstream hash reads only its 992-byte VK prefix.
+
+\paragraph{Adapters into the mu theorem.}
+The pure, compiled lemmas
+\theoryname{exported_mode2_regions_agree},
+\theoryname{imported_prefixes_agree}, and
+\theoryname{imported_sign_sk_reaches_mu_memory} compose the packed-key prefix
+with the helper postconditions and obtain exactly
+\theoryname{ExtractedMuHashPrefix.sk_memory_prefix}.  Thus the dependency
+graph has reached
+\[
+  \prefix_{992}(sk)=vk
+  \rightarrow \mathsf{actual\ exports}
+  \rightarrow \mathsf{actual\ imports}
+  \rightarrow \mathsf{sk\_memory\_prefix},
+\]
+but the arrows are not yet a single sequential public-call theorem.
+
+\paragraph{Address-model difference and aliasing.}
+The generated KeyGen exporters retain \texttt{W64.t} addresses.  In contrast,
+the selected Sign/Verify helper parameters originate as Jasmin \texttt{ui64}
+but are emitted by \texttt{jasmin2ec} as mathematical \texttt{int}.  The
+theory therefore keeps \theoryname{valid_region_w64} and
+\theoryname{valid_region_int} distinct; no axiom equates their addresses.
+Concrete zero/adjacent addresses witness both predicates and
+\theoryname{disjoint_regions}, so the contracts are satisfiable.
+
+Separation is correctness-critical when the later SK export must preserve the
+earlier VK export.  It is not required merely to compare two isolated,
+read-only importer calls.  A stronger all-buffer separation policy would be a
+proof convenience and has not been adopted.  Time-dependent aliasing at the
+unextracted public callers remains unanalyzed.
+
+\paragraph{Failed boundary and next minimum obligation.}
+The first attempt to concatenate the two exporters in a proof-only pair
+wrapper became unstable at the intermediate global-memory ghost binding.
+Replacing that wrapper with a stronger postcondition on the actual SK
+exporter succeeded: the compiled frame theorem retains the earlier VK
+predicate bytewise.  What remains cannot be solved by that local frame alone.
+The word and integer pointers still cannot be identified syntactically, and
+adding such an identification as an axiom was rejected.  The next minimum
+theorem must compose the two actual exporter calls at their real caller, bind
+\(\mathsf{to\_uint}(sku),\mathsf{to\_uint}(vku)\) to the two importer integer
+addresses, and carry the resulting memory through the public call sequence.
+
+\paragraph{Verification and status.}
+The focused extraction script and
+\texttt{easycrypt compile -script -no-eco} compile all results above; the
+combined command is \pathname{scripts/verify-all.sh}.  The generated helper
+claims are \status{PROVED} as partial correctness.  The final run reports 14
+authored targets compiled with \texttt{-no-eco}, 20 selected baselines, a
+successful notes build, and unchanged read-only roots.  The whole
+\claimid{OBL-API-KEY-MEMORY-RAW} is \status{PARTIAL}, with the exact residual
+being actual-caller export composition, address binding, and public-call
+orchestration.

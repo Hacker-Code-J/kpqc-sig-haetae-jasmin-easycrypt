@@ -1,0 +1,113 @@
+fn _pack_hint_element(
+    reg ptr u8[HINT_ENCODED_SIZE] hint_encoded,
+    reg ptr u32[N] hint_element,
+    reg u32 hints_written,
+    reg u32 element_number
+) -> reg ptr u8[HINT_ENCODED_SIZE],
+     reg u32
+{
+    reg u32 i;
+    reg u32 hint;
+    reg u32 index;
+
+    i = 0;
+    while (i < N) {
+        hint = hint_element[i];
+        if (hint != 0) {
+            hint_encoded[hints_written] = i;
+            hints_written += 1;
+        }
+
+        i += 1;
+    }
+
+    index = MAX_ONES_IN_HINT;
+    index += element_number;
+    hint_encoded[index] = hints_written;
+
+    return hint_encoded, hints_written;
+}
+
+fn _unpack_hint_at_index(
+    reg ptr u8[MAX_ONES_IN_HINT] decoded,
+    reg u32 index,
+    reg ptr u8[HINT_ENCODED_SIZE] encoded
+) -> reg ptr u8[MAX_ONES_IN_HINT],
+     reg u32, /* Number of hints */
+     reg u32 /* Indicate if hint is ill-formed */
+{
+    reg u32 previous_true_hints = 0;
+    reg u32 current_true_hints;
+    reg u32 hint_at_j hint_at_j_minus_one;
+
+    reg u32 ill_formed_hint = 0;
+    reg u32 j;
+    reg u32 encoded_index;
+    reg u32 number_of_hints = 0;
+
+    reg u32 done;
+    reg bool out_of_bounds;
+
+    if (index > 0) {
+        encoded_index = MAX_ONES_IN_HINT - 1;
+        encoded_index += index;
+        previous_true_hints = (32u)encoded[encoded_index];
+    }
+
+    encoded_index = MAX_ONES_IN_HINT;
+    encoded_index += index;
+    current_true_hints = (32u)encoded[encoded_index];
+    if (current_true_hints < previous_true_hints) {
+        ill_formed_hint = 1;
+    } else {
+        if (current_true_hints > MAX_ONES_IN_HINT) {
+            ill_formed_hint = 1;
+        } else {
+            j = previous_true_hints;
+
+            while {
+                out_of_bounds = j >= current_true_hints;
+                done = ill_formed_hint;
+                done = 1 if (out_of_bounds);
+            } (done == 0) {
+                // Coefficients are ordered for strong unforgeability
+                hint_at_j = (32u)encoded[j];
+
+                if (j > previous_true_hints) {
+                    encoded_index = j;
+                    encoded_index -= 1;
+                    hint_at_j_minus_one = (32u)encoded[encoded_index];
+
+                    if (hint_at_j <= hint_at_j_minus_one) {
+                        ill_formed_hint = 1;
+                    }
+                }
+
+                if (ill_formed_hint == 0) {
+                    decoded[number_of_hints] = hint_at_j;
+                    number_of_hints += 1;
+                }
+
+                j += 1;
+            }
+        }
+    }
+
+    /* Extra indices are zero for strong unforgeability */
+    previous_true_hints = (32u)encoded[MAX_ONES_IN_HINT + (K - 1)];
+    j = previous_true_hints;
+    while {
+        out_of_bounds = j >= MAX_ONES_IN_HINT;
+        done = ill_formed_hint;
+        done = 1 if (out_of_bounds);
+    } (done == 0) {
+        hint_at_j = (32u)encoded[j];
+
+        if(hint_at_j != 0) {
+            ill_formed_hint = 1;
+        }
+        j += 1;
+    }
+
+    return decoded, number_of_hints, ill_formed_hint;
+}

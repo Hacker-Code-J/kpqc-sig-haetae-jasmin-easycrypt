@@ -1,0 +1,225 @@
+\section{Week 9: rANS Byte Stack and Actual Core Boundary}
+
+Week~9 has one target, \claimid{OBL-RANS-CORE-INVERSE}.  The sprint does not
+reprove the Week~8 coefficient leaves, table certificate, pure step inverse,
+or full-procedure extraction identity.  It fixes a common trace for the
+reverse encoder and forward decoder, proves the normalization arithmetic and
+the actual suffix copy, and places the three actual generated calls in one
+unary harness.  The two generated outer-loop refinements remain open, so the
+result is \status{continue-rans}, not a completed inverse.
+
+\subsection*{Pinned actual procedures and hashes}
+
+The proof uses the Week~8 focused targets without a second extraction:
+
+\begin{center}
+\begin{tabular}{l l}
+\toprule
+Generated target & SHA-256 prefix \\
+\midrule
+\path{RansEncodeTarget.ec} & \texttt{3184367f5d41196b} \\
+\path{RansDecodeTarget.ec} & \texttt{2659860ffe3dff9d} \\
+\path{HbzFullEncodeTarget.ec} & \texttt{6c085864d31a3cb4} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The source hashes remain \texttt{c2caff5b\ldots e1f4e9} for
+\path{hpoly.jazz} and \texttt{e800d1d9\ldots b5cbd} for
+\path{encoding.jazz}. The generated procedures are:
+\begin{itemize}
+\item \path{RansEncodeTarget.M._rans_encode};
+\item \path{HbzFullEncodeTarget.M.__copy_encoded_suffix};
+\item \path{RansDecodeTarget.M._rans_decode}.
+\end{itemize}
+Extraction regeneration and exact generated hashes are checked before proof
+compilation.
+
+\subsection*{Reverse/forward state correspondence}
+
+For symbols $s_0,\ldots,s_{n-1}$, $n=1024$, the boundary-state convention is
+\[
+\begin{aligned}
+  x_n&=2^{23},\\
+  x_0&=\text{the decoder's serialized initial state},\\
+  \text{state after decoding }k\text{ symbols}&=x_k.
+\end{aligned}
+\]
+The encoder processes $j=n-1,\ldots,0$. At step $j$ it normalizes $x_{j+1}$,
+applies the fast concrete-table step, and obtains $x_j$. The decoder processes
+$k=0,\ldots,n-1$, selects $s_k$, applies the inverse arithmetic step, and
+consumes the byte segment that reconstructs $x_{k+1}$.
+
+Cursor boundaries use
+\[
+  c_0=4,\qquad
+  [c_k,c_{k+1})=\text{normalization bytes for symbol }s_k,\qquad
+  c_n=\mathsf{size}.
+\]
+The first four bytes are $\mathsf{serialize32\_le}(x_0)$. In EasyCrypt these
+objects are \path{trace_states}, \path{trace_segments}, \path{trace_cuts},
+and \path{trace_bytes}; \path{valid_rans_trace} merely packages their defining
+equalities and is not an implementation assumption.
+
+\subsection*{Normalization-byte stack and byte order}
+
+For the mode-2 table,
+\[
+  2^{23}\leq x<2^{31},\qquad
+  x_{\max}(s)=2^{21}f_s\geq2^{21}.
+\]
+Thus the chosen pure normalization emits zero, one, or two bytes. If
+$x=2^{16}q+256h+\ell$, two encoder iterations write $\ell$ first and $h$
+second while moving the cursor backward. The final decoder-order segment is
+therefore $[h,\ell]$, and
+\[
+  q\xrightarrow{h}256q+h\xrightarrow{\ell}2^{16}q+256h+\ell=x.
+\]
+
+The compiled leaf results are separated as follows.
+\begin{itemize}
+  \item \path{renorm_bytes_readback} proves the list-level equation;
+  \item \path{encoder_shift8_uint} and \path{encoder_low_byte_uint} identify
+    actual W32 shift/truncate with division/remainder; and
+  \item \path{decoder_append_encoder_byte} proves the one-byte W32 inverse;
+    and
+  \item \path{encoder_two_byte_decoder_order} proves the two-byte W32 inverse.
+\end{itemize}
+The W64 cursor lemmas prove decrement safety under their stated bounds.
+
+The pure state invariant is also compiled:
+\[
+  2^{23}\leq x_{j+1}<2^{31}
+  \Longrightarrow
+  2^{23}\leq x_j<2^{31}.
+\]
+It uses the Week~8 concrete reciprocal-step theorem after proving the reduced
+state lies in $[1,x_{\max}(s))$.
+
+\subsection*{Encoder and decoder loop invariants}
+
+The intended actual encoder outer invariant at counter $i$ is
+\[
+\begin{aligned}
+  0&\leq i\leq1024,\\
+  x&=\mathsf{encode\_trace}(s_i,\ldots,s_{1023}).\mathsf{state},\\
+  \mathsf{encp}[off,1024)
+    &=\mathsf{traceBytesWithoutState}(s_i,\ldots,s_{1023}),\\
+  off+\lvert\mathsf{traceBytesWithoutState}\rvert&=1024.
+\end{aligned}
+\]
+The inner invariant must additionally relate zero, one, or two actual shifts
+and backward stores to the corresponding prefix of the pure normalization
+segment. On a live iteration it must retain enough cursor space for the final
+four-byte state and frame all unwritten bytes.
+
+The intended actual decoder invariant is
+\[
+\begin{aligned}
+  0&\leq i\leq1024,\\
+  \mathsf{symsp}[0,i)&=(s_0,\ldots,s_{i-1}),\\
+  x&=x_i,\qquad off=c_i,\qquad bad=0,\\
+  \mathsf{bufp}[c_i,\mathsf{size})&=\text{the remaining trace suffix}.
+\end{aligned}
+\]
+At exit it should imply $x=2^{23}$, $off=\mathsf{size}$, exact symbol recovery,
+decoder success, and the output-array frame. Neither actual outer invariant is
+yet compiled.
+
+\subsection*{Actual suffix-copy refinement}
+
+The previous quantified-exit residual is closed. The generated-procedure
+theorem is
+\begin{center}
+  \path{copy_encoded_suffix_correct}.
+\end{center}
+Its premises are
+\[
+  0\leq off_0,\quad0\leq n,\quad off_0+n\leq2048
+\]
+and concludes
+\[
+\begin{aligned}
+  \forall j\in[0,n):\quad
+    out_{\mathrm{after}}[j]&=enc_{\mathrm{before}}[off_0+j],\\
+  \forall j\in[n,2048):\quad
+    out_{\mathrm{after}}[j]&=out_{\mathrm{before}}[j].
+\end{aligned}
+\]
+The proof opens the actual copy loop. It does not construct a desired decoder
+buffer. Deriving its bounds from the actual encoder-success branch remains in
+the encoder refinement.
+
+\subsection*{Success/failure disjunction and actual harness}
+
+The actual encoder and decoder each have a direct control theorem fixing the
+concrete mode-2 tables and parameters and proving the published bad word is in
+$\{0,1\}$. These are implementation theorems, but their conclusion is control
+only rather than trace refinement.
+
+The unary \path{Mode2RansActualHarness.run} executes
+\[
+\procname{_rans_encode}
+\longrightarrow
+\begin{cases}
+  bad\neq0 &: \mathsf{decoder\_ran}=\mathsf{false},\\
+  bad=0 &: \procname{__copy_encoded_suffix}(off,1024-off)\\
+        &\quad\longrightarrow
+          \procname{_rans_decode}(1024,1024-off,13).
+\end{cases}
+\]
+The theorem \path{actual_rans_harness_branches_on_encoder_result} proves the
+branch equivalence and exact decoder input fields. Encoder success is obtained
+from the actual return value rather than assumed. It does not conclude decoder
+success or symbol equality.
+
+The desired final disjunction remains
+\[
+\begin{aligned}
+  bad_{enc}\neq0\quad\lor\quad\bigl(&
+    decoded[0,1024)=symbols[0,1024)\\
+    &\land x_{final}=2^{23}
+     \land off_{final}=\mathsf{size}
+     \land \mathsf{frames}\bigr).
+\end{aligned}
+\]
+
+\subsection*{Non-vacuity and exact proof status}
+
+The pure symbol/state premises and the decoder-state construction have
+compiled witnesses. No EasyCrypt theorem yet proves that the all-6 symbol
+array makes the actual encoder return success with
+$4\leq\mathsf{size}\leq1024$. Hence
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} remains \status{partial}; runtime
+execution is not used as a theorem.
+
+\begin{center}
+\begin{tabular}{l l l}
+\toprule
+Obligation & Status & Boundary \\
+\midrule
+Normalization byte inverse & \status{proved} & pure/word leaf \\
+State-bound preservation & \status{proved} & pure trace \\
+Actual suffix copy & \status{proved} & generated procedure \\
+Actual harness control & \status{proved} & three actual calls, no inverse \\
+Actual encoder refinement & \status{partial} & trace postcondition open \\
+Actual decoder refinement & \status{partial} & trace consumption open \\
+Actual core inverse & \status{partial} & no round-trip conclusion \\
+Actual success witness & \status{partial} & no compiled witness \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Failed tactics and next gate}
+
+A weak outer-loop invariant can prove $bad\in\{0,1\}$ and can preserve every
+early/failure branch. It cannot synthesize the array/list byte-stack relation.
+Direct encoder/decoder lockstep was rejected because their directions and
+inner-loop counts differ. A constructed decoder buffer, external
+\path{valid_rans_trace} premise, decoder-success premise, 1024-step generated
+unrolling, and monolithic \texttt{inline; sim} are also rejected.
+
+The single Week~10 gate is the actual encoder outer-loop invariant linking
+$(i,x,off,encp)$ to the suffix of the pure trace and deriving the success-size
+bounds. Only after it compiles should the actual decoder-consumption invariant
+be completed. The $h$ codec and security widening remain out of scope.

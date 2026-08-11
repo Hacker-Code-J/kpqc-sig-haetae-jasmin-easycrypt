@@ -1,0 +1,705 @@
+\section{정리(theorem)와 소스 인덱스}
+\label{sec:source-index}
+
+이 부록은 본문의 수학 문장을 실제 저장소 선언으로 되돌아가기 위한 지도다.
+줄 번호는 편집 때 바뀌므로 파일 경로와 정리 식별자(theorem identifier)를
+기준으로 한다. 최종
+판정은 항상 해당 EasyCrypt 선언의 전제와 최신
+\sourcepath{CLAIM_LEDGER.md}를 함께 읽어야 한다.
+
+\subsection{상태와 범위 문서}
+
+\begin{longtable}{L{56mm} L{91mm}}
+\toprule
+경로 & 역할 \\
+\midrule
+\endfirsthead
+\toprule
+경로 & 역할 \\
+\midrule
+\endhead
+\sourcepath{PROJECT_SCOPE.md} & mode~2 범위, 고정 명세, trust boundary,
+완료로 주장하지 않는 항목 \\
+\sourcepath{CLAIM_LEDGER.md} & claim ID별 운영상 source of truth; status,
+실제 Jasmin target, EasyCrypt evidence, 남은 전제 \\
+\sourcepath{THEOREM_GRAPH.md} & 최상위 보안 목표에서 leaf 정리(theorem)까지의 의존성 DAG \\
+\sourcepath{ASSUMPTIONS.md} & 최종 가정, 구현 계약, non-vacuity,
+과장 금지 정책 \\
+\sourcepath{PRODUCT_REPLAY_DECISION.md} & stored \(\mu\) product/replay gap의
+의미론 분석과 동결 결정 \\
+\sourcepath{SIGNATURE_CODEC_OBLIGATIONS.md} & mode~2 signature layout와 staged
+codec 의무 \\
+\sourcepath{RANS_PROOF_DESIGN.md} & rANS 증명 분해와 설계 선택 \\
+\sourcepath{RANS_BYTE_STACK_INVARIANT.md} & reverse encoder와 forward decoder를
+잇는 \(xs/cuts/bytes\) invariant \\
+\sourcepath{WEEK9_REPORT.md} & 순수 byte stack과 actual control 경계의 역사적
+Week~9 기준선 \\
+\sourcepath{RANS_ENCODER_INVARIANT.md} & actual encoder 바깥 루프 불변식(outer-loop
+invariant), Week~10 설계 경계와 Week~11 actual trace closure \\
+\sourcepath{WEEK10_REPORT.md} & 역사적 \identifier{CONTINUE-ENCODER} 판정과
+50-target 검증 결과 \\
+\sourcepath{WEEK11_REPORT.md} & 역사적 \identifier{GO-ENCODER} 판정과
+57-target 검증 결과, actual encoder trace closure \\
+\sourcepath{RANS_DECODER_INVARIANT.md} & actual decoder의 순수 state/cursor/segment
+좌표(coordinates), outer/inner 불변식(invariants), exact-trace 경계 \\
+\sourcepath{WEEK12_REPORT.md} & 역사적 \identifier{GO-DECODER} 판정,
+65-target 검증 결과와 actual decoder refinement \\
+\sourcepath{RANS_CORE_COMPOSITION.md} & encoder segment, actual copy slice,
+decoder pointwise read와 configured state 사이의 Week~13 운송 구조 \\
+\sourcepath{MODE2_HBZ_CODEC_OBLIGATIONS.md} & HBZ leaf, rANS core, production wrapper
+의무의 최신 층별 상태 \\
+\sourcepath{WEEK13_REPORT.md} & 현재 \identifier{GO-CORE} 판정,
+67-target 검증 결과, actual core inverse와 full-HBZ wrapper 단일 우선순위 \\
+\bottomrule
+\end{longtable}
+
+\subsection{packed key와 memory bridge}
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/keygen/PackedKeyPrefix.ec} &
+\theoremname{vk_prefix_eq_set_after};
+\theoremname{copied_prefix_step};
+\theoremname{copied_prefix_complete} &
+접두부 동치관계(equivalence relation)의 순수 배열 invariant \\
+\sourcepath{easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec} &
+\theoremname{pack_vec_eta_to_prefix_frame};
+\theoremname{pack_vec2_eta_to_prefix_frame};
+\theoremname{pack_sk_m23_mode2_vk_prefix} &
+actual packer의 접두부와 이후 쓰기 frame \\
+같은 파일 &
+\theoremname{keypair_full_m23_mode2_return_prefix};
+\theoremname{keypair_internal_mode2_return_prefix} &
+generated internal KeyGen 반환까지 lift \\
+\sourcepath{easycrypt/support/Mode2KeyMemoryBridge.ec} &
+\theoremname{keygen_prefix_reaches_mu_memory} &
+로컬 배열 prefix를 global-memory load 관계로 번역 \\
+\sourcepath{easycrypt/refinement/composition/ApiKeyMemoryBridge.ec} &
+\theoremname{keygen_export_vk_mode2_prefix};
+\theoremname{keygen_export_sk_mode2_prefix};
+\theoremname{sign_import_mode2_sk_prefix};
+\theoremname{verify_import_mode2_vk_prefix} &
+actual copy helper의 export/import 계약 \\
+같은 파일 &
+\theoremname{keygen_export_sk_mode2_prefix_frames_vk};
+\theoremname{sign_verify_api_importer_same_inputs} &
+disjoint frame과 Sign/Verify 입력 연결 \\
+\sourcepath{easycrypt/refinement/composition/RawApiAddressBridge.ec} &
+\theoremname{canonical_ui64_address_roundtrip};
+\theoremname{mode2_vk_region_bridge};
+\theoremname{mode2_sk_region_bridge};
+\theoremname{mode2_sig_region_bridge} &
+canonical integer/\(W64\) 주소 대응 \\
+\sourcepath{easycrypt/refinement/composition/RawApiKeygen}\allowbreak
+\sourcepath{SequentialExport.ec} &
+\theoremname{keypair_raw_api_trace_exports_matching_prefixes};
+\theoremname{keypair_raw_api_exports_matching_prefixes} &
+실제 raw KeyGen caller의 순차 외부 export \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{\texorpdfstring{\(\mu\)}{mu}, challenge, actual API trace}
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/composition/ExtractedMuHashPrefix.ec} &
+\theoremname{sign_sk_verify_vk_absorb_mode2};
+\theoremname{sign_verify_final_squeeze_mu32_prefix};
+\theoremname{sign_verify_raw_mu_top_wrappers_prefix} &
+actual generated helper chain의 key/hash/squeeze 관계 \\
+\sourcepath{easycrypt/refinement/composition/ExactMuTopControl.ec} &
+\theoremname{raw_prelen_shr63_zero};
+\theoremname{raw_prelen_branch_guard} &
+실제 Verify 분기의 raw path 선택 \\
+같은 파일 &
+\theoremname{sf_mu_rawpre_refines_raw_top};
+\theoremname{verify_hash_mu_raw_refines_raw_top};
+\theoremname{sign_verify_generated_raw_mu_prefix} &
+actual generated top 절차의 64-to-32 \(\mu\) relation \\
+\sourcepath{easycrypt/refinement/composition/ExactMode2RawMuComposition.ec} &
+\theoremname{generated_raw_mu_preconditions_from_keygen_prefix};
+\theoremname{generated_raw_mu_to_challenge_suffix_zero_loss} &
+KeyGen prefix에서 실제 position-64 challenge absorb까지 \\
+\sourcepath{easycrypt/refinement/composition/RegionLocalMuEquivalence.ec} &
+\theoremname{region_eq_head};
+\theoremname{region_eq_tail};
+\theoremname{sign_verify_raw_mu_top_wrappers_prefix_regionwise} &
+whole-memory equality를 read-region equality로 약화 \\
+\sourcepath{easycrypt/refinement/composition/RegionLocalMuTop.ec} &
+\theoremname{sign_verify_generated_raw_mu_prefix_regionwise} &
+region-local relation을 actual generated top 절차로 lift \\
+\sourcepath{easycrypt/refinement/composition/RawApiSignOutputFrame.ec} &
+\theoremname{sign_output_copy_exact_and_frames_reused};
+\theoremname{sign_raw_api_frames_reused_regions} &
+actual Sign output과 siglen store의 frame \\
+\sourcepath{easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec} &
+\theoremname{verify_cryptolab_actual_accept_implies_trace_tail_reached};
+\theoremname{verify_cryptolab_actual_accept_binds_hash_inputs} &
+accept \(\Rightarrow\) tail과 실제 hash input binding \\
+\sourcepath{easycrypt/refinement/composition/RawApiDirectObservedMu.ec} &
+\theoremname{raw_sign_then_verify_actual_exact_trace};
+\theoremname{sign_then_verify_trace_accept_implies_tail_reached};
+\theoremname{sign_then_verify_accept_binds_observed_inputs} &
+actual sequential Sign--Verify와 ghost trace의 exactness \\
+같은 파일 &
+직접 stored \identifier{observed_mu} relation 없음 &
+\claimid{OBL-DIRECT-OBSERVED-MU}가 \statuspartial 인 정확한 위치 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{signature prefix와 HBZ leaf}
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/sign/Mode2SignaturePrefixCodec.ec} &
+\theoremname{canonical_challenge};
+\theoremname{canonical_signed_low};
+\theoremname{prefix_codec_preconditions_satisfiable} &
+정준 대표자(canonical representative) 조건과 non-vacuity \\
+\sourcepath{easycrypt/refinement/sign/Mode2SignaturePrefixPack.ec} &
+\theoremname{pack_sig_prefix_mode2_layout} &
+actual pack loop의 challenge/low byte layout \\
+\sourcepath{easycrypt/refinement/sign/Mode2SignaturePrefixUnpack.ec} &
+\theoremname{unpack_sig_prefix_mode2_layout} &
+actual unpack loop의 decode layout와 tail frame \\
+\sourcepath{easycrypt/refinement/sign/Mode2SignaturePrefix}\allowbreak
+\sourcepath{RoundTrip.ec} &
+\theoremname{pack_unpack_sig_prefix_mode2_roundtrip} &
+canonical prefix에서 actual decode-after-encode \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzCodecSpec.ec} &
+\theoremname{canonical_hbz_mode2};
+\theoremname{prepared_hbz_prefix};
+\theoremname{decoded_hbz_prefix} &
+HBZ canonical domain과 계수(coefficient)/기호(symbol) 관계(relation) \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzPrepare.ec} &
+\theoremname{encode_hb_z1_prepare_mode2_correct} &
+actual \(h_i\mapsto h_i+6\) leaf \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzApply.ec} &
+\theoremname{decode_hb_z1_apply_mode2_correct} &
+actual \(s_i\mapsto s_i-6\) leaf \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzLeafRoundTrip.ec} &
+\theoremname{encode_prepare_decode_apply_mode2_inverse} &
+앞 1024 coefficient의 actual leaf 역함수(inverse function)와 frame \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzActualBoundary.ec} &
+\theoremname{pack_target_encode_hb_z1_full_exact_focused};
+\theoremname{unpack_target_decode_hb_z1_full_exact_focused} &
+focused extraction과 full signature extraction의 실제 procedure identity \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{rANS table, 순수 trace, actual boundary}
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/sign/Mode2HbzTableCertificate.ec} &
+\theoremname{hbz_frequency_positive};
+\theoremname{hbz_frequency_sum};
+\theoremname{hbz_intervals_cover_scale};
+\theoremname{mode2_hbz_pack_unpack_tables_identical} &
+13-symbol 분할(partition)과 pack/unpack table 호환성(compatibility) \\
+같은 파일 &
+\theoremname{hbz_reciprocal_exact};
+\theoremname{hbz_fast_step_matches_math} &
+actual reciprocal fast quotient의 정수 의미 \\
+\sourcepath{easycrypt/refinement/sign/Mode2HbzSymbolWords}\allowbreak
+\sourcepath{Generated.ec} &
+\theoremname{actual_mode2_hbz_tables_certified} &
+generated literal arrays가 certificate를 만족 \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansCore.ec} &
+\theoremname{pure_rans_step_inverse};
+\theoremname{hbz_fast_step_decode_inverse};
+\theoremname{hbz_fast_step_preconditions_satisfiable} &
+순수/fast 단일 단계 역함수(inverse function)와 witness \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansNormalization.ec} &
+\theoremname{encoder_shift8_uint};
+\theoremname{encoder_low_byte_uint};
+\theoremname{decoder_append_encoder_byte};
+\theoremname{encoder_two_byte_decoder_order} &
+actual \(W32/W64\) normalization leaf와 byte 순서 \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansByteStack.ec} &
+\theoremname{renorm_bytes_readback};
+\theoremname{serialize32_parse_inverse};
+\theoremname{encode_trace_state_bounds};
+\theoremname{trace_head_normalization_readback};
+\theoremname{valid_rans_trace_canonical} &
+canonical \(xs/cuts/bytes\) trace와 귀납적(inductive) readback \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansSuffixCopy.ec} &
+\theoremname{copy_encoded_suffix_correct} &
+actual suffix slice copy와 output tail frame \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansEncodeRefinement.ec} &
+\theoremname{actual_rans_encode_mode2_control} &
+actual table/count/\(bad\) control의 역사적 경계; Week~11 부모 closure는 아래 표 \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansDecodeRefinement.ec} &
+\theoremname{actual_rans_decode_mode2_control};
+\theoremname{mode2_decode_state_satisfiable} &
+actual decode control과 제한된 state witness의 역사적 경계; Week~12 부모 정리(theorem)는 아래 표 \\
+\sourcepath{easycrypt/refinement/sign/Mode2RansActualInverse.ec} &
+\theoremname{actual_rans_harness_branches_on_encoder_result};
+\identifier{actual_core_success_result} &
+세 actual 호출의 control 경계; Week~13 semantic inverse는 아래 표 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Week 10 actual encoder 타깃.}
+아래 \WeekTenTargetCount 개 파일은 모두 authored target manifest에 있고
+\identifier{-no-eco}로 fresh compile된다. 상태는 각 명명된 명제(proposition)의
+범위다. Week~10 당시에는 부모 encoder trace refinement가 아직 없었고,
+Week~11의 다음 표가 이 국소 결과를 실제 절차(actual procedure)까지 합성한다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2Rans}\allowbreak
+\sourcepath{ArrayListBridge.ec} &
+\theoremname{symbol_suffix_cons};
+\theoremname{segment_matches_prepend_set};
+\theoremname{encode_trace_suffix_extension} &
+array/list suffix, segment match, prefix frame, 한 기호 trace 점화식(recurrence) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{WordStep.ec} &
+\theoremname{actual_mode2_encoder_word_step_correct};
+\theoremname{encoder_word_step_preconditions_satisfiable} &
+literal reciprocal/shift/bias/complement actual word 식과 순수 fast step의
+등식(equality) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{InnerProgress.ec} &
+\theoremname{normalization_len_cases};
+\theoremname{inner_progress_segment_step} &
+순수 0/1/2 normalization state/cursor/byte-segment progress \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{Serialization.ec} &
+\theoremname{actual_w32_le_bytes_serialize};
+\theoremname{actual_encoder_final_state_serialization};
+\theoremname{actual_store_w32_le_prefix_frame} &
+최종 \(W32\) little-endian 네 store와 frame의 leaf 명제(leaf proposition) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{Trace.ec} &
+\theoremname{encoder_inner_phase_step};
+\theoremname{encoder_inner_segment_step} &
+actual inner loop에서 재사용하는 finite phase, byte prepend, segment/frame 보존 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{ActualInner.ec} &
+\theoremname{actual_rans_encode_inner_no_underflow};
+\theoremname{actual_rans_encode_success_size_bound} &
+generated \identifier{_rans_encode}의 실제 nested-loop invariant와 성공
+offset/size 부분정확성(partial correctness) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Week 11 actual encoder closure 타깃.}
+아래 \WeekElevenTargetCount 개 파일 역시 authored target manifest에 있고
+\identifier{-no-eco}로 fresh compile된다. 앞 표의 운송 보조정리(transport
+lemmas)를 tail-aware 불변식(invariant), generated word update, final serialization,
+실제 \identifier{_rans_encode}의 성공 사후조건(success postcondition)으로
+결합한다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{GeneratedWordStep.ec} &
+\theoremname{generated_loaded_nested_word_update};
+\theoremname{generated_outer_word_update_matches} &
+generated table load와 nested word 식을 순수 fast step에 잇는 보조정리(lemmas) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{SerializationComposition.ec} &
+\theoremname{actual_store_w32_le_prepend_trace};
+\theoremname{actual_store_w32_le_prepend_trace_bytes} &
+최종 상태(state)의 네 바이트(byte)를 normalization trace 앞에 합성 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{TailInvariant.ec} &
+\theoremname{encoder_inner_tail_exit_exact};
+\theoremname{encoder_outer_tail_advance_success} &
+0/1/2-byte 안쪽 종료와 한 기호(symbol) 바깥 전이를 보존하는
+tail-aware 불변식(invariant) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{Finalization.ec} &
+\theoremname{encoder_outer_tail_finalize_success} &
+바깥 반복(outer iteration) 종료 상태에서 final-store trace를 구성 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{GeneratedFinalization.ec} &
+\theoremname{generated_encoder_outer_finalize_success} &
+generated offset 계산과 final-store를 순수 trace 결론에 연결 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{ActualTraceClosure.ec} &
+\theoremname{encoder_generated_success_outer_post};
+\theoremname{actual_rans_encode_trace_closure} &
+실제 \identifier{_rans_encode}의 성공 suffix와 정준 trace의 정확한 등식(equality) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansEncoder}\allowbreak
+\sourcepath{OuterRefinement.ec} &
+\theoremname{actual_rans_encode_trace_refinement} &
+성공 offset/size/frame을 펼쳐 제시하는 성공 조건부 부분정당성(success-conditioned
+partial correctness) 따름정리(corollary) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Week 12 actual decoder semantic-refinement 타깃.}
+아래 \WeekTwelveTargetCount 개 파일도 authored target manifest에서
+\identifier{-no-eco}로 fresh compile된다. exact trace의 순수 좌표(coordinates),
+구체적 table/word 산술(arithmetic), 0/1/2-byte replay, actual outer/inner loop,
+generated top Hoare 정리(theorem)를 층별로 분리한다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{Cursor.ec} &
+\identifier{decoder_state_at};
+\identifier{decoder_cursor};
+\theoremname{decoder_parse32_from_trace} &
+순수 trace의 state/cursor/segment 좌표(coordinates)와 초기 LE32 parse \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{WordStep.ec} &
+\theoremname{actual_mode2_decoder_lookup_symbol};
+\theoremname{actual_mode2_decoder_step_correct} &
+concrete \identifier{symbol_words} lookup과 수학적 decoder step \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{Normalization.ec} &
+\theoremname{decoder_replay_complete};
+\theoremname{decoder_replay_guard_exact};
+\theoremname{decoder_replay_word_step} &
+normalization segment의 exact 0/1/2-byte replay와 guard \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{ActualWord.ec} &
+\theoremname{actual_mode2_decoder_word_update_correct} &
+actual \(W32/W64\) word update와 \identifier{hbz_math_decode_step}의 등식(equality) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{GeneratedStep.ec} &
+\theoremname{generated_decoder_symbol_expected};
+\theoremname{generated_decoder_word_update_matches} &
+generated table loads의 expected symbol 선택과 word-step 운송(transport) \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{CursorSteps.ec} &
+\theoremname{decoder_cursor_step};
+\theoremname{decoder_cursor_final} &
+pure trace cut의 한 단계 점화식(recurrence)과 exact final consumption \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{ActualTrace.ec} &
+\identifier{actual_mode2_decoder_trace_input};
+\identifier{decoder_outer_trace_live};
+\theoremname{decoder_outer_trace_exit_components} &
+actual outer/inner 불변식(invariants), \(x=2^{23}\), exact cursor와 output frame \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansDecoder}\allowbreak
+\sourcepath{TopHoare.ec} &
+\theoremname{actual_rans_decode_trace_refinement} &
+actual generated \identifier{_rans_decode}의 exact-trace 부분정확성(partial correctness) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Week 13 actual core composition 타깃.}
+아래 \WeekThirteenTargetCount 개 파일은 Week~11 encoder 정리(theorem), Week~12
+decoder 정리(theorem), actual copy 정리(theorem)를 한 unary harness에 합성하며
+\identifier{-no-eco}로 fresh compile된다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansCore}\allowbreak
+\sourcepath{CompositionBridge.ec} &
+\theoremname{copied_suffix_is_exact_trace};
+\theoremname{trace_bytes_trace_segment_nth};
+\theoremname{segment_matches_implies_exact_decoder_segment_input};
+\theoremname{segment_matches_implies_decoder_word_reads} &
+encoder suffix와 actual copy를 global trace, local segment, decoder pointwise/W64
+read 전제로 운송하는 비순환적 bridge 보조정리(bridge lemmas) \\
+같은 파일 &
+\theoremname{actual_decoder_input_from_copied_trace};
+\theoremname{configured_decoder_state_fields};
+\theoremname{actual_decoder_input_from_configured_trace};
+\theoremname{encoder_success_size_word_bridge};
+\theoremname{core_composition_preconditions_satisfiable} &
+copied trace, configured state와 no-wrap size를 Week~12 decoder 입력 술어로 묶고
+canonical all-zero 입력으로 semantic precondition의 일관성만 확인 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2RansCore}\allowbreak
+\sourcepath{ActualInverse.ec} &
+\theoremname{actual_rans_encode_copy_decode_inverse} &
+세 actual generated 절차의 실패/성공 합(disjunction)과 1024-symbol round trip을
+한 harness에서 보이는 성공 조건부 부분정확성(success-conditioned partial correctness) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\begin{caution}[닫힌 core 정리(theorem)와 남은 production 경계]
+actual encoder 성공 suffix, actual suffix copy, actual decoder exact trace는
+\theoremname{actual_rans_encode_copy_decode_inverse} 안에서 합성되었다. 그러나 이
+Hoare 정리(theorem)는 실제 성공 증인(success witness), encoder/decoder
+종료성(termination), production full-HBZ wrapper 역함수(inverse function)를
+주지 않는다.
+\end{caution}
+
+\subsection{최상위 목표와 가정 표면}
+
+\begin{longtable}{L{58mm} L{89mm}}
+\toprule
+파일 & 읽는 법 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 읽는 법 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/specs/TopLevelGoals.ec} &
+\identifier{FC_KeyGen}, \identifier{FC_Sign}, \identifier{FC_Verify},
+\identifier{ImplementationSecurityComposition},
+\identifier{PaperSecurityReduction}은 목표 specification이다. \\
+\sourcepath{easycrypt/security/ImplementationSecurity}\allowbreak
+\sourcepath{Goals.ec} &
+\identifier{obl_*}는 가정으로 숨기지 않을 구현 의무 목록이다. 파일 컴파일은
+각 의무의 참을 뜻하지 않는다. \\
+\sourcepath{easycrypt/security/SecurityAssumptions.ec} &
+최종 theorem에 남길 수 있는 MLWE, BST-MSIS, ROM interface와 nonnegative bound의
+well-formedness다. concrete reduction 연결은 별도다. \\
+\bottomrule
+\end{longtable}
+
+\section{기호와 용어 사전}
+\label{sec:glossary}
+
+\begin{longtable}{L{37mm} L{110mm}}
+\toprule
+용어 & 이 문서에서의 뜻 \\
+\midrule
+\endfirsthead
+\toprule
+용어 & 이 문서에서의 뜻 \\
+\midrule
+\endhead
+명제(proposition) & 참 또는 거짓을 판정할 수 있는 수학적 진술(mathematical
+statement); 이 문서에서는 정리(theorem)의 전제와 결론을 기술하는 문장도 포함함 \\
+정리(theorem) & 전제(premise)와 허용된 추론 규칙(inference rule)으로 증명된
+명제(proposition); EasyCrypt에서는 명명된 선언과 그 proof term을 함께 확인함 \\
+보조정리(lemma) & 더 큰 정리(theorem)의 증명에 사용하는 중간
+명제(intermediate proposition) \\
+환(ring) & 덧셈(addition)과 곱셈(multiplication)이 정의되고 환 공리(ring axioms)를
+만족하는 대수적 구조(algebraic structure) \\
+몫환(quotient ring) & 환을 아이디얼(ideal)에 의한 동치관계로 나눈 환; 여기서는
+주로 \(R_q=\mathbb Z_q[X]/(X^n+1)\) \\
+모듈(module) & 환 위의 벡터공간(vector space)에 해당하는 구조; 계수의 스칼라가
+체(field)가 아니라 환일 수 있음 \\
+사상(map) & 한 대상의 원소를 다른 대상의 원소로 보내는 규칙; 문맥에 따라
+함수(function)나 절차가 유도하는 의미론적 대응을 가리킴 \\
+동형사상(isomorphism) & 역함수(inverse function)를 가지며 해당 구조를 보존하는
+사상(map) \\
+동치관계(equivalence relation) & 반사성(reflexivity), 대칭성(symmetry),
+추이성(transitivity)을 만족하는 관계(relation) \\
+몫집합(quotient set) & 동치관계(equivalence relation)의 동치류(equivalence class)를
+원소로 하는 집합(set) \\
+가환도식(commutative diagram) & 같은 시작점과 끝점을 잇는 서로 다른 사상 합성이
+같아지는 도식(diagram) \\
+부분함수(partial function) & 정의역(domain)의 모든 점이 아니라 지정된 부분에서만
+값이 정의되는 함수(function) \\
+불변식(invariant) & 반복이나 상태전이(state transition) 전후에 계속 보존되는
+명제(proposition) \\
+전단사(bijection) & 단사(injection)이면서 전사(surjection)인 함수(function) \\
+mode~2 & \(n=256,(k,\ell)=(2,4),q=64513,\eta=1,\tau=58\)인 고정 parameter set \\
+generated procedure & pinned Jasmin source에서 \identifier{jasmin2ec}로 추출된
+실제 EasyCrypt procedure \\
+focused extraction & 특정 호출·table만 좁게 재추출한 target; full extraction과
+procedure identity를 별도 증명·hash로 확인함 \\
+pure lemma & generated procedure 호출 없이 정수, list, 배열 연산만 다루는
+정리(theorem) \\
+leaf theorem & 큰 절차의 한 작은 변환 또는 word 연산을 직접 여는 정리(theorem) \\
+wrapper/adapter & 이미 증명된 작은 표면과 actual generated top call을 연결하는
+절차 또는 관계 정리(relational theorem) \\
+raw/internal & public context 포장 이전의 고정 raw branch와 내부 mode~2 entry \\
+public/cryptolab caller & 외부 pointer, length, copy, early-return을 포함한 실제 API 층 \\
+Hoare partial correctness & 절차가 반환한다면 사후조건이 성립함; 종료성은 별도 \\
+pRHL / \identifier{equiv} & 두 프로그램의 관련 초기상태와 관련 종료상태를
+연결하는 확률적 관계 Hoare logic 표면 \\
+exact trace & 실제 결과·최종 메모리를 보존하면서 ghost observation을 노출하는
+instrumented 절차와의 등가 \\
+frame & 목표 밖 배열/메모리 구간이 실행 전후 동일하다는 정리(theorem) \\
+정준성(canonicality) & encode/decode가 역이 되도록 선택한
+word/계수(coefficient)의 대표자(representative) 조건 \\
+prefix & 배열 전체가 아니라 \([0,n)\) 제한에 대한 점별 등식 \\
+region-local & 전체 메모리 등식 대신 실제 read footprint 구간만 비교함 \\
+tail reached & Verify의 early-reject들을 지나 실제 tail/hash/challenge 경로에
+도달했다는 ghost control 사실 \\
+\identifier{bad} & actual codec의 성공/실패 word; 보통 0은 성공, 1은 실패지만
+각 정리(theorem)의 branch 조건을 확인해야 함 \\
+non-vacuity & 전제 또는 성공 branch를 만족하는 concrete state/execution이 실제로
+존재한다는 증거 \\
+zero-loss & 명시된 국소 relational seam의 deterministic/statistical loss가 0임;
+상위 \(\delta\) 전체가 0이라는 뜻이 아님 \\
+\identifier{-no-eco} & EasyCrypt cache reuse 없이 authored target을 fresh compile하는
+검증 옵션 \\
+\bottomrule
+\end{longtable}
+
+\section{재현과 독해 경로}
+\label{sec:reproduction}
+
+\subsection{이 안내서만 빌드하기}
+
+저장소 루트에서:
+\begin{verbatim}
+sh haetae-topdown-easycrypt/algebraist-guide/build.sh
+\end{verbatim}
+성공하면 \sourcepath{haetae-topdown-easycrypt/algebraist-guide/main.pdf}가
+생성된다. 스크립트는 source-of-truth 파일의 존재와 undefined
+reference/citation, 그리고 \AuthoredTargetCount 개 snapshot과 proof-target
+manifest 수의 일치를 확인한다. PDF 빌드는 EasyCrypt 정리(theorem)를 재검증하지
+않는다.
+
+\subsection{전체 증명 파이프라인}
+
+저장소 루트에서:
+\begin{verbatim}
+./haetae-topdown-easycrypt/scripts/verify-all.sh
+\end{verbatim}
+파이프라인은 pinned source drift, focused extraction, generated certificate hash,
+authored target manifest, \identifier{-no-eco} compile, proof hole/axiom/debug scan,
+selected baseline, 기존 연구노트 LaTeX를 검사한다. \SnapshotWeek\ 기록상 authored
+target 수는 \AuthoredTargetCount 이지만, 재현 시점의 실제 출력이 항상 우선한다.
+
+\begin{verified}[문서 작성 시점의 aggregate 결과]
+\sourcepath{WEEK13_REPORT.md}와 최신 aggregate log에 기록된 전체 실행은
+\identifier{RESULT} \identifier{PASS}, \identifier{authored-targets=67},
+\identifier{cache=-no-eco}다. Week~10의 여섯 파일, Week~11의 일곱 encoder 파일,
+Week~12의 여덟 decoder 파일, Week~13의 두 core-composition 파일이 manifest completeness,
+proof-hole/axiom/debug scan과 fresh compile 대상에 포함된다. 이 PASS는 명명된
+타깃들의 컴파일과 감사(audit)를 뜻하며,
+상위 \statuspartial 또는 \statusblocked 주장을 완료로 승격하지 않는다.
+\end{verified}
+
+\subsection{30분 독해 경로}
+
+\begin{enumerate}
+  \item \sourcepath{PROJECT_SCOPE.md}의 in/out-of-scope를 읽는다.
+  \item \sourcepath{CLAIM_LEDGER.md}에서
+        \claimid{KG-PREFIX-RETURN},
+        \claimid{OBL-DIRECT-OBSERVED-MU},
+        \claimid{OBL-RANS-ENCODE-REFINEMENT},
+        \claimid{OBL-RANS-DECODE-REFINEMENT},
+        \claimid{OBL-RANS-CORE-INVERSE},
+        \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} 여섯 행을 비교한다.
+  \item 본문의 \cref{sec:algebraic-object,sec:rans-frontier,sec:boundaries}를 읽는다.
+  \item \sourcepath{WEEK13_REPORT.md}와
+        \sourcepath{Mode2RansCoreActualInverse.ec}에서 failure/success
+        사후조건(postconditions)과 아직 없는 full-HBZ wrapper 결론을 구분한다.
+\end{enumerate}
+
+\subsection{증명 참여 전 반나절 경로}
+
+\begin{enumerate}
+  \item \sourcepath{RANS_BYTE_STACK_INVARIANT.md}\newline
+        \sourcepath{Mode2RansByteStack.ec}의 순수 trace를 대응시킨다.
+  \item \sourcepath{RANS_ENCODER_INVARIANT.md}\newline
+        tail-aware 바깥/안쪽 루프 불변식(outer/inner-loop invariant)의 항을 읽는다.
+  \item \sourcepath{Mode2RansEncoderActualTraceClosure.ec}\newline
+        실제 procedure를 여는 closure 정리(theorem)의 성공/실패 분기와
+        loop invariant를 대조한다.
+  \item \sourcepath{Mode2RansEncoderOuterRefinement.ec}\newline
+        성공 suffix, offset/size, prefix frame을 펼친 따름정리(corollary)를 읽는다.
+  \item \sourcepath{RANS_DECODER_INVARIANT.md}\newline
+        순수 state/cursor/segment 좌표(coordinates)와 actual outer/inner
+        불변식(invariants)을 대응시킨다.
+  \item \sourcepath{Mode2RansDecoderActualTrace.ec}\newline
+        exact 입력 술어(input predicate), loop exit의 \(x=2^{23}\), 공개된
+        사후조건(postcondition)을 읽는다.
+  \item \sourcepath{Mode2RansDecoderTopHoare.ec}\newline
+        실제 generated decoder를 직접 여는 정리(theorem)를 확인한다.
+  \item \sourcepath{Mode2RansCoreCompositionBridge.ec}에서 encoder/copy 결론을
+        decoder 입력 술어(input predicate)로 운송하는 bridge를 읽는다.
+  \item \sourcepath{Mode2RansCoreActualInverse.ec}에서 세 actual 호출의
+        성공 조건부 역함수(inverse function)를 읽고, production full-HBZ wrapper에
+        남은 size/frame 간극(gap)을 적는다.
+  \item 변경 전에 전체 verifier의 baseline을 보존한다.
+\end{enumerate}
+
+\begin{takeaway}{마지막 판독 규칙}
+정리 이름(theorem name)이나 파일명이 아니라 명제(proposition)의 실제 procedure
+surface, 전제,
+사후조건을 읽는다. ``pure inverse'', ``actual control'', ``actual refinement'',
+``full parent''는 서로 다른 네 주장이다.
+\end{takeaway}

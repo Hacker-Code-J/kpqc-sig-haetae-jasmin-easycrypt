@@ -1,0 +1,76 @@
+\section{Week 3 Results and Next Gate}
+\label{sec:week3-results}
+
+\paragraph{Exact Week 3 result.}
+Week~3 closes the first generated top-level seam:
+\[
+  \prefix_{992}(sk)=vk
+  \Rightarrow
+  \mathsf{equal\_hash\_inputs}
+  \Rightarrow
+  \take_{32}(\mu_{\mathsf{sign}}^{64})
+  =
+  \mu_{\mathsf{verify}}^{32}
+  \Rightarrow
+  \mathsf{equal\_challenge\_suffix}.
+\]
+The important difference from Week~2 is that the central theorem is now stated
+directly over the actual generated
+\procname{\_sf\_mu\_rawpre} and \procname{\_\_verify\_hash\_mu} procedures.
+
+\paragraph{Security-facing boundary.}
+Theory \theoryname{ExactMode2RawMuComposition} then proves
+\theoryname{generated\_raw\_mu\_to\_challenge\_suffix\_zero\_loss}, which
+invokes the actual generated raw hash procedures before the actual generated
+mu32 challenge absorb procedures. Therefore
+\[
+  \delta_{\mu,\mathrm{raw\_top}} = 0.
+\]
+This bound is intentionally local. It does not imply:
+\begin{itemize}
+  \item \(\delta_{\mathsf{Sign}} = 0\);
+  \item \(\delta_{\mathsf{Verify}} = 0\);
+  \item \(\delta_{\mathsf{Encoding}} = 0\); or
+  \item any statement about the public-context path.
+\end{itemize}
+
+\paragraph{Secondary procedure-level progress.}
+The actual generated VK/SK exporters and Sign/Verify raw importers now have
+compiled prefix theorems in \theoryname{ApiKeyMemoryBridge}.  Their local
+adapters reach the same \theoryname{sk_memory_prefix} predicate consumed by
+the generated mu theorem, and the actual SK exporter has a compiled
+disjoint-write frame preserving a prior VK region.  This is stronger than the
+prior constructed-memory witness, but it is not yet a public-call proof.
+
+\paragraph{Remaining named obligations.}
+The next technical gate is not another wrapper theorem. It is the exact
+public-memory/copy reachability chain under
+\claimid{OBL-API-KEY-MEMORY-RAW}: actual-caller composition of the two
+exports, the \texttt{W64.t}-to-\texttt{int} caller binding, and call-site
+ownership/alias orchestration. After that, the next cryptographic refinement
+work is:
+\begin{itemize}
+  \item exact highbits/LSB packed-byte equality;
+  \item full challenge-call equivalence;
+  \item byte-faithful FIPS202/ROM transcript correspondence.
+\end{itemize}
+
+\paragraph{Failed approach retained as evidence.}
+The rejected monolithic \texttt{inline; sim} strategy remains important
+negative evidence. The difficulty was not the helper semantics, which were
+already proved, but the generated top-level control schedule and branch/tail
+alignment. This justifies the exact-to-wrapper decomposition as a method choice
+rather than a convenience shortcut.
+
+\paragraph{Go / no-go rule.}
+The evidence-based Week~4 gate is:
+\begin{itemize}
+  \item if the composed public copy-helper chain closes, proceed to highbits/LSB and
+        the full challenge-call equivalence;
+  \item because Week~3 closes the raw top-level seam and individual copy
+        helpers but not their public composition, remain focused on API
+        caller/address/alias reachability;
+  \item if the exact generated top theorem were to regress, stop widening the
+        proof surface and redesign the program-equivalence boundary instead of
+        adding more wrappers.
+\end{itemize}

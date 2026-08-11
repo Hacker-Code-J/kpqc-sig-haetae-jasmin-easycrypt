@@ -1,0 +1,397 @@
+\section{명제를 읽기 위한 형식 언어(EasyCrypt)}
+\label{sec:formal-language}
+
+\subsection{핵심 술어와 관계}
+
+\begin{definition}[패킹된 키(packed-key) 접두부]
+\label{def:vk-prefix}
+\[
+  \operatorname{VKPrefix}_{n}(sk,vk)
+  \;\Longleftrightarrow\;
+  \forall i\;(0\le i<n\Rightarrow sk[i]=vk[i]).
+\]
+코드의 \identifier{vk_prefix_eq}와 같으며, mode~2에서는 \(n=992\)이다.
+\end{definition}
+
+\begin{definition}[외부 키(key) 영역의 접두부 일치]
+\label{def:external-prefix}
+\[
+  \operatorname{ExternalKeyPrefix}(mem,sku,vku)
+  \Longleftrightarrow
+  \forall i\in[0,992),\;
+  \operatorname{load8}(mem,sku+i)=\operatorname{load8}(mem,vku+i).
+\]
+코드의 \identifier{external_key_prefix_match}이며, 실제 raw KeyGen이 서로 다른
+외부 SK/VK 주소에 내보낸 첫 992바이트를 비교한다.
+\end{definition}
+
+\begin{definition}[메모리에서의 접두부]
+\label{def:mem-prefix}
+\[
+  \operatorname{SKMemPrefix}(sk,mem,b)
+  \;\Longleftrightarrow\;
+  \forall i\in[0,992),\;
+  sk[i]=\operatorname{load8}(mem,\operatorname{uint}(b)+i).
+\]
+이 술어는 Sign의 로컬 \identifier{BArray2752}와 Verify의 raw-memory 읽기를
+한 관계식 안에서 비교한다.
+\end{definition}
+
+\begin{definition}[정준 주소 구간(canonical address range)]
+\label{def:canonical-region}
+정수 주소 \(a\)와 길이 \(n\)에 대해
+\[
+\begin{aligned}
+  \operatorname{CanonicalAddress}(a)
+    &\Longleftrightarrow 0\le a<2^{64},\\
+  \operatorname{CanonicalRegion}(a,n)
+    &\Longleftrightarrow
+      0\le a\;\land\;0\le n\;\land\;a+n\le 2^{64}.
+\end{aligned}
+\]
+첫 전제는 원시 응용 이진 인터페이스(raw application binary interface, raw
+ABI)의 정수 주소가 \identifier{W64.of_int}와
+\identifier{W64.to_uint}를 왕복하게 하고, 둘째는 주소 구간의 모듈러
+순환(wraparound)을 배제한다. 길이가 0이면 \(a=2^{64}\)도 둘째 식만으로는
+허용되므로, 실제
+왕복 정리는 필요한 주소와 길이에 \identifier{canonical_ui64_address}를
+별도로 요구한다. 이것은 물리적 메모리 안전성 증명이 아니라 호출 계약이다.
+\end{definition}
+
+\begin{definition}[메모리 구간 등식]
+\label{def:region-eq}
+\[
+  \operatorname{RegionEq}(m_1,m_2,b,n)
+  \Longleftrightarrow
+  \forall i\in[0,\operatorname{uint}(n)),\;
+  \operatorname{load8}(m_1,\operatorname{uint}(b)+i)
+  =\operatorname{load8}(m_2,\operatorname{uint}(b)+i).
+\]
+코드의 \identifier{region_eq}다. Week~6의 hash 정리는 전체 memory 등식 대신
+VK, pre, message에서 실제로 읽는 구간의 이 관계만 요구한다.
+\end{definition}
+
+\begin{definition}[정준 서명 접두부(canonical signature prefix) 입력]
+\label{def:signature-prefix-canonical}
+\identifier{canonical_challenge}는 256개 challenge word가 각각 정확히 0 또는
+1임을 뜻한다. \identifier{canonical_signed_low}는 1024개 low word 각각이
+자신의 하위 바이트를 부호확장한 값이고 signed 정수로 \([-128,128)\)에 있음을
+뜻한다. 실제 prefix round trip은 이 두 전제 아래 성립한다.
+\end{definition}
+
+\begin{definition}[정준 mode-2 HBZ와 잎 프레임(leaf frame)]
+\label{def:canonical-hbz}
+용량 \(2048\)의 32비트 계수 배열 \(h\)에 대해
+\[
+  \operatorname{CanonicalHBZ}_2(h)
+  \Longleftrightarrow
+  \forall i\in[0,1024),\;-6\le\operatorname{sint}(h[i])<7.
+\]
+코드의 \identifier{canonical_hbz_mode2}다.
+\identifier{prepared_hbz_prefix}는 첫 \(n\)개 symbol byte가
+\(\operatorname{sint}(h[i])+6\)임을, \identifier{decoded_hbz_prefix}는 첫
+\(n\)개 복원 계수가 원본과 같음을 뜻한다. \identifier{byte_tail_frame}과
+\identifier{coeff_tail_frame}은 각각 \([1024,2048)\)이 leaf 실행 전후에
+변하지 않음을 기록한다.
+\end{definition}
+
+\begin{definition}[mode-2 HBZ 표 인증서(table certificate)]
+\label{def:hbz-table-certificate}
+\identifier{mode2_hbz_table_certificate}는 다음 세 사실의 conjunction이다.
+\begin{enumerate}
+  \item 13개 symbol의 실제 encoder table 네 field가 명세식과 같다.
+  \item 실제 decoder word가 각 interval의 start/frequency를 정확히 담는다.
+  \item 실제 512개의 packed symbol word가 1024개 slot 각각을 유일한
+        interval symbol에 연결한다.
+\end{enumerate}
+\identifier{actual_mode2_hbz_tables_certified}는 pack/unpack 추출물의 literal
+배열에 이 술어를 적용한 정리다. certificate를 생성한 외부 스크립트 자체를
+가정하는 것이 아니라, 생성된 모든 EasyCrypt 등식을 kernel이 다시 검사한다.
+\end{definition}
+
+\begin{definition}[정준 rANS 바이트 추적(canonical rANS byte trace)]
+\label{def:rans-byte-trace}
+정준 기호 목록(canonical symbol list) \(s=(s_0,\ldots,s_{1023})\)에 대해
+\identifier{encode_trace}는 \(x_{1024}=2^{23}\)에서 기호(symbol)를 역순으로
+처리해 경계 상태(boundary state) \((x_j)_{j=0}^{1024}\)와 디코더 순서 바이트
+구간(decoder-order byte segment) \((\beta_j)_{j=0}^{1023}\)를 결정한다. 커서
+절단값(cursor cut)과 전체 바이트열(byte sequence)은
+\[
+  c_0=4,\qquad c_{j+1}=c_j+|\beta_j|,
+  \qquad
+  B=\operatorname{serialize32\_le}(x_0)
+      \Vert\beta_0\Vert\cdots\Vert\beta_{1023}
+\]
+이다. 코드의 \identifier{valid_rans_trace}(s,xs,cuts,bytes)는 단지
+\identifier{trace_states}, \identifier{trace_cuts}, \identifier{trace_bytes}로
+계산한 이 세 객체와 인자가 같다는 논리곱(conjunction)이다. 외부 추적(external
+trace)의 존재나 디코더 성공(decoder success)을 가정하는 술어가 아니며,
+\identifier{valid_rans_trace_canonical}이 정준 구성(canonical construction)을
+증명한다.
+\end{definition}
+
+\begin{definition}[배열/목록 연결과 구간 프레임(array/list bridge and segment frame)]
+\label{def:rans-array-list-bridge}
+용량 2048의 바이트 배열 \(a\)에 대해
+\identifier{symbol_list_of_array}(a)는 앞 1024개 원소의 정수 목록이고,
+\identifier{symbol_suffix}(a,i)는 그 목록에서 앞 \(i\)개를 버린 접미부다.
+\identifier{segment_matches}(a,p,bs)는
+\[
+  0\le p\;\land\;p+|bs|\le2048\;\land\;
+  \forall k\in[0,|bs|),\quad
+  \operatorname{uint}(a[p+k])=bs[k]
+\]
+를 뜻한다. \identifier{prefix_frame}(before,after,p)는 모든 \(k<p\)에서 두
+배열의 \(k\)번째 바이트가 같다는 뜻이다. Week~10의 컴파일된 정리는
+\[
+\begin{aligned}
+  \mathsf{symbol\_suffix}(a,1024)&=[],\\
+  \mathsf{symbol\_suffix}(a,i)
+    &=\operatorname{uint}(a[i])::\mathsf{symbol\_suffix}(a,i+1)
+\end{aligned}
+\]
+와 구간의 이어 붙이기, 앞쪽 한 바이트 쓰기, 프레임 축소 규칙을 제공한다.
+\end{definition}
+
+\begin{definition}[실제 인코더 내부 단계 불변식(actual encoder inner-step invariant)]
+\label{def:rans-actual-inner}
+\identifier{encoder_inner_phase_inv}와
+\identifier{encoder_inner_segment_inv}는 생성된
+\identifier{_rans_encode}의 내부 정규화 반복문을 직접 연다. 진입 상태
+\((x_0,off_0)\)와 단계 \(k\)가 존재하여
+\[
+\begin{gathered}
+  4\le off_0\le1024,\qquad 0\le k\le4,
+  \qquad 1\le\operatorname{uint}(x_{\max}),\\
+  \operatorname{uint}(off)=off_0-k,\qquad
+  \operatorname{uint}(x)=\mathsf{encoder\_phase\_state}(x_0,k),\\
+  \mathsf{segment\_matches}
+    (encp,off_0-k,\mathsf{encoder\_phase\_written}(x_0,k))
+\end{gathered}
+\]
+이고 해당 내부 호출의 진입 배열보다 낮은 접두부가 보존된다는 뜻이다. 이는
+Week~10의 보수적 국소 술어로서 실제 한 바이트 저장과 W64 커서 안전성을
+검증한다. Week~11의 더 강한 꼬리 인식 술어가 외부 누적과 정확한 0/1/2바이트
+길이를 추가한다.
+\end{definition}
+
+\begin{definition}[꼬리 인식 내부 불변식(tail-aware inner invariant)]
+\label{def:rans-tail-aware-inner}
+Week~11의 \identifier{encoder_inner_tail_inv}는 정확한 순수 정규화 길이
+\(\ell=\mathsf{mode2\_normalization\_len}(x_0,s)\)와 이미 존재하는 순수
+기호 꼬리 \(tail\)의 인코딩 추적을 함께 둔다. 핵심 구간 조건은
+\[
+  \mathsf{segment\_matches}\bigl(
+    encp,off_0-k,
+    \mathsf{inner\_written\_suffix}(x_0,s,k)\mathbin{++}
+      \mathsf{encode\_trace}(tail).\mathsf{bytes}
+  \bigr)
+\]
+이고 \(0\le k\le\ell\), 커서 등식, 상태 등식과 접두부 프레임을 함께
+요구한다. 실제 가드(actual guard)의 진행과 종료에서 이 술어가 보존되고 정확한
+\(k=\ell\le2\)가 도출된다. 이어 외부 한 기호 점화식과 최종 저장 합성에 사용되어
+실제 외부 절차의 전체 성공 사후조건을 닫는다.
+\end{definition}
+
+\begin{verified}[실제 인코더의 성공 조건부 전체 접미부]
+\label{thm:rans-encoder-suffix}
+\identifier{actual_rans_encode_trace_closure}는 실제 생성
+\identifier{_rans_encode}를 직접 열고, 반환 \(bad\ne0\)이거나 \(bad=0\)일 때
+\[
+  \mathsf{segment\_matches}
+  (encp',\operatorname{uint}(off'),
+   \mathsf{trace\_bytes}(\mathsf{symbol\_list\_of\_array}(symbols_0)))
+\]
+와 \(off'+|\mathsf{trace\_bytes}|=1024\), 성공 크기 범위 및
+\identifier{prefix_frame}이 모두 성립함을 증명한다. 성공은 사전조건이 아니다.
+그러나 Hoare 부분정확성이므로 종료와 성공 도달은 별도 의무다.
+\end{verified}
+
+\begin{definition}[실제 디코더 정확 추적 입력(actual decoder exact-trace input)]
+\label{def:rans-decoder-exact-input}
+\identifier{actual_mode2_decoder_trace_input}(a,b,st,n)은 예상 기호 배열 \(a\),
+인코딩 버퍼 \(b\), 초기 상태 \(st\)와 논리적 크기 \(n\) 사이의 함수적 표현
+계약이다. 핵심은
+\[
+\begin{gathered}
+  \mathsf{mode2\_hbz\_symbol\_stream}(a),\qquad
+  n=|\mathsf{trace\_bytes}(\mathsf{symbol\_list\_of\_array}(a))|,\\
+  4\le n\le1024,\qquad
+  \mathsf{segment\_matches}(b,0,\mathsf{trace\_bytes}(\cdots)),\\
+  (st[0],st[1],st[2])=(1024,n,13)
+\end{gathered}
+\]
+와 모든 정규화 구간에 대한 점별 읽기 등식이다. 실제 mode-2
+\identifier{symbol_words}와 \identifier{dsyms_words} 배열은 최상위 Hoare
+정리의 별도 바인딩으로 고정된다. 이 술어는 \(bad=0\), 출력 배열 등식 또는
+사후상태를 전제로 넣지 않는다.
+\end{definition}
+
+\begin{definition}[디코더 외부/내부 추적 불변식(decoder outer/inner trace invariant)]
+\label{def:rans-decoder-trace-invariants}
+\identifier{decoder_outer_trace_live}는 반복 번호 \(i\)에서 실제 상태와 커서를
+\[
+  x=\mathsf{decoder\_state\_at}(s,i),\qquad
+  \operatorname{uint}(off)=\mathsf{decoder\_cursor}(s,i)
+\]
+에 묶고, \(decoded[0..i)\)의 예상 기호 일치와
+\(decoded[i..2048)\)의 입력 배열 프레임을 함께 유지한다.
+\identifier{decoder_inner_trace_live}는 한 기호의 단어 갱신 뒤
+\[
+\begin{aligned}
+  k&=\operatorname{uint}(off)-\mathsf{decoder\_cursor}(s,i),\\
+  x&=\mathsf{decoder\_replay\_prefix}
+       (\mathsf{decoder\_state\_at}(s,i+1),s_i,k)
+\end{aligned}
+\]
+를 두고 \(0\le k\le|\mathsf{decoder\_segment\_at}(s,i)|\)를 유지한다. 생성
+가드는 정확히 \(k<|\mathsf{segment}|\)와 일치하며 구간 길이는 0, 1 또는
+2바이트다. 따라서 각 실제 읽기는 한 바이트 소비 전이이거나 다음 외부 경계로
+가는 무소비(no-consume) 종료다.
+\end{definition}
+
+\begin{verified}[실제 디코더의 정확 추적 복원]
+\label{thm:rans-decoder-trace-refinement}
+\identifier{actual_rans_decode_trace_refinement}는
+\cref{def:rans-decoder-exact-input}과 실제 두 표의 바인딩 아래 실제 생성
+\identifier{RansDecodeTarget.M._rans_decode}를 직접 연다. 모든 종료 실행에서
+\[
+  bad'=0,\qquad off'=n,\qquad
+  decoded'[0..1024)=a[0..1024)
+\]
+이고 \([1024,2048)\) 출력 꼬리가 초기 배열과 같다. 외부 반복 출구의 내부
+\(x=2^{23}\)는 마지막 실제 거절 검사를 배제하지만 ABI 사후조건에는 나타나지
+않는다. 이는 정확 추적 Hoare 부분정확성이며 종료나 실제 인코더 성공 증명은
+아니다.
+\end{verified}
+
+\begin{definition}[실제 rANS 결합 제어(actual rANS harness control)]
+\label{def:rans-actual-harness}
+\identifier{Mode2RansActualHarness.run}은 실제
+\identifier{_rans_encode}를 호출한 뒤 반환된 \(bad\)가 0일 때만 실제
+\identifier{__copy_encoded_suffix}와 \identifier{_rans_decode}를 호출한다.
+디코더 상태의 입력 필드는 그 성공 분기에서 정확히
+\((\mathsf{count},\mathsf{size},m)=(1024,\mathsf{encoded\_size},13)\)이다.
+현재 결합 제어 정리는
+\[
+  bad_{\mathrm{enc}}\in\{0,1\},\qquad
+  \mathsf{decoder\_ran}\Longleftrightarrow bad_{\mathrm{enc}}=0
+\]
+과 이 필드 초기화만 결론낸다. 이 제어 정리 자체는 역함수가 아니다. Week~13의
+별도 의미 정리는 \cref{thm:rans-encoder-suffix}와
+\cref{thm:rans-decoder-trace-refinement}, 실제 복사 정리를 이 모듈 안에서
+순차 호출해 다음 결론을 닫는다.
+\end{definition}
+
+\begin{verified}[실제 인코더--복사--디코더 핵심 역함수]
+\label{thm:rans-core-actual-inverse}
+\identifier{actual_rans_encode_copy_decode_inverse}는 초기 인자 바인딩과
+\identifier{mode2_hbz_symbol_stream}만을 전제로 한다. 종료한 실행에서 실제
+인코더가 실패하면 디코더는 실행되지 않고 초기 디코더 배열/상태가 보존된다.
+실제 인코더가 성공하면 복사된 버퍼가 정확한 \identifier{trace_bytes} 입력이
+되고, 디코더는
+\[
+  bad_{\mathrm{dec}}=0,\qquad
+  off_{\mathrm{dec}}=\mathsf{encoded\_size},\qquad
+  decoded[0..1024)=symbols[0..1024)
+\]
+를 만족하며 \([1024,2048)\) 꼬리를 보존한다. 인코더 성공, 복사 구간 등식,
+디코더 성공이나 출력 등식은 사전조건이 아니다. 이 정리는 Hoare
+부분정확성이므로 성공 도달과 두 반복문의 종료는 별도 의무다.
+\end{verified}
+
+\begin{boundary}[성공 조건부(success-conditioned) HBZ]
+\label{bdry:hbz-success}
+\(\operatorname{CanonicalHBZ}_2(h)\)는 prepare leaf가 성공함을 보장하지만 고정
+1024바이트 rANS workspace의 actual full encoder가 nonzero size를 반환함을
+보장하지 않는다. 따라서 full round trip에서 encoder success나 decoder success를
+독립된 사전조건으로 가정하면 비공허성이 사라진다. 실제 return의
+\(\mathsf{size}=0\) branch를 결론에 남기거나, actual successful witness를 별도로
+증명해야 한다.
+\end{boundary}
+
+\begin{definition}[\(\mu\) 접두부]
+\label{def:mu-prefix}
+Sign이 만드는 64바이트 배열을 \(\mu_S^{64}\), Verify가 만드는 32바이트
+배열을 \(\mu_V^{32}\)라 하면
+\[
+  \operatorname{MuPrefix}_{32}(\mu_S^{64},\mu_V^{32})
+  \;\Longleftrightarrow\;
+  \forall i\in[0,32),\;\mu_S^{64}[i]=\mu_V^{32}[i].
+\]
+즉 \(\take_{32}(\mu_S^{64})=\mu_V^{32}\)이다.
+\end{definition}
+
+\begin{definition}[원시 분기(raw branch)와 유효 구간]
+\label{def:raw-region}
+64비트 word \(p,\ell\)에 대해 코드의 두 술어는
+\[
+  \operatorname{RawPreLen}(\ell)
+    \Longleftrightarrow 0\le\operatorname{uint}(\ell)<2^{63},
+  \qquad
+  \operatorname{ValidRegion}(p,\ell)
+    \Longleftrightarrow
+    \operatorname{uint}(p)+\operatorname{uint}(\ell)\le 2^{64}
+\]
+이다. 첫 식은 Verify가 \identifier{prelen >> 63}으로 고르는 실제 분기에서
+raw branch를 선택하게 하고, 둘째 식은 주소 덧셈의 wraparound를 배제한다.
+\end{definition}
+
+\subsection{Hoare 명제와 관계적 동치}
+
+EasyCrypt의
+\[
+  \operatorname{hoare}[P:\Phi\Longrightarrow\Psi]
+\]
+는 \(P\)가 종료한다는 명제가 아니다. \(\Phi\)에서 시작하여 \textbf{종료한}
+모든 실행이 \(\Psi\)를 만족한다는 부분정확성 명제다. 따라서 KeyGen의 retry
+loop가 lossless인지, 거의 확실히 종료하는지, 논문과 같은 분포를 내는지는 별도
+정리가 필요하다.
+
+관계적 명제
+\[
+  \operatorname{equiv}[P\sim Q:\Phi\Longrightarrow\Psi]
+\]
+는 두 실행 상태의 사전관계 \(\Phi\)에서 시작한 \(P,Q\)의 결과가 사후관계
+\(\Psi\)를 만족함을 뜻한다. 본 작업의 hash 정리는 SHAKE를 추상 함수로
+치환하지 않고, 양쪽의 생성된 absorb/finalize/Keccak/squeeze 절차를 이
+관계 논리로 직접 비교한다.
+
+\subsection{정확 추적(exact trace)과 승인 꼬리(accepted tail)}
+
+새로운 raw API 정리의 trace module은 실제 절차의 제어흐름을 복사하면서
+\identifier{observed_mu}, pointer, length, \identifier{tail_reached} 같은 ghost
+관찰값만 추가한다. exact equivalence는 실제 절차와 trace가 최종
+\identifier{Glob.mem}과 반환값을 같게 만든다는 뜻이지, 모든 실행이 hash
+tail에 도달한다는 뜻은 아니다.
+
+Verify는 서명 길이, unpack, norm 등의 검사를 통과하기 전에 거절할 수 있다.
+현재 정리는 이 분기를 숨기지 않고
+\[
+  \operatorname{VerifyAccept}\Longrightarrow\operatorname{TailReached}
+\]
+를 증명한 뒤, 성공한 실행에서만 실제 \identifier{__verify_hash_mu}에 전달된
+VK/pre/message 주소와 길이를 관찰값에 연결한다. 이는 ``임의의 서명이 tail에
+도달한다''는 주장과 구별해야 한다.
+
+exact trace가 실제 절차와 같은 결과를 보존한다고 해서 trace 내부 hash 호출의
+반환값과 종료 후 ghost 필드가 자동으로 관계 정리에 들어오는 것은 아니다.
+현재 남은 \claim{OBL-MU-PRODUCT-REPLAY}는 두 completed sequential trace의
+\identifier{observed_mu}를 기존 pRHL hash-return 정리에 연결하는 규칙이다.
+EasyCrypt의 단순한 \identifier{sim}, \identifier{seq}, \identifier{byequiv}만으로
+서로 다른 residual continuation을 제거할 수 없어 이 간선은
+\statusdeferred 로 명시되었다.
+
+\subsection{배열 크기와 논리적 길이}
+
+추출된 이론은 여러 파라미터 집합을 담을 수 있는 고정 배열
+\identifier{BArray2080}, \identifier{BArray2752},
+\identifier{BArray2948}을 사용한다. 이것은 mode-2의 논리적 길이가 각각
+2080, 2752, 2948이라는 뜻이 아니다. 실제 mode-2 API 길이는 검증키 992,
+비밀키 1408, 서명 1474바이트이고, 현재 정리는 그중 첫 992바이트의 관계를
+추적한다. 서명 codec 쪽에서는 별도로 challenge 32바이트와 low 1024바이트,
+즉 서명의 첫 1056바이트 배치와 round trip을 추적한다. HBZ leaf 쪽의
+\identifier{BArray8192}는 2048개의 32비트 계수를, symbol
+\identifier{BArray2048}은 2048바이트를 담지만 mode-2 논리적 count는 1024다.
+따라서 Week~8 frame 정리는 두 배열의 \([1024,2048)\) tail 보존을 별도로
+명시한다.

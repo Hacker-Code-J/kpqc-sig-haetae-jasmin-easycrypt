@@ -1,0 +1,102 @@
+\documentclass[11pt,a4paper]{article}
+\input{preamble}
+
+\title{\textbf{HAETAE-2 Jasmin 구현 검증}\\[0.4em]
+  \Large 수학자와 암호이론가를 위한 현재 증명 전선}
+\author{HAETAE top-down EasyCrypt 작업 문서}
+\date{상태 기준: 2026년 8월 10일}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+이 문서는 HAETAE-2의 논문 명세, Jasmin 구현, EasyCrypt 증명 사이에서 현재
+실제로 연결된 부분을 수학적 명제로 재구성한다. 핵심 성과는 모든 종료하는
+내부 KeyGen 실행이 반환하는 비밀키의 첫 992바이트가 검증키와 같다는
+부분정확성 정리와, 이 불변식으로부터 Sign과 Verify의 실제 생성 절차가
+원시/내부(raw/internal) 경로에서 같은 32바이트 메시지 다이제스트 접두부를
+만들고 같은 도전값 접미부(challenge suffix) 상태에 도달한다는 관계적
+정리이다. 이 국소 경계에서는 통계적 손실이 0이다. 실제 원시 KeyGen 호출자의
+순차 VK/SK 내보내기, 정수/64비트 주소 바인딩, Sign/Verify의 정확 추적(exact
+trace), 성공한 Verify의 꼬리 구간(tail) 도달 및 해시 입력 바인딩도 검증되었다.
+실제 Sign 출력의 프레임 조건(frame condition), 구간 국소(region-local) 해시
+동치, 실제 Sign 다음 Verify의 순차 추적까지 닫혔다. 다만 완료된 추적의
+\(\mu\)를 운반하는 생성/재전달(product/replay) 간선은 명시적 논문 경계로
+동결되어 있다.
+
+서명 기능 경로에서는 정준(canonical) 입력 아래 1056바이트 접두부 코덱의
+왕복(round trip), HBZ 준비/적용(prepare/apply), 실제 표 인증서(table
+certificate), 순수 rANS 단계와 정규화 바이트 스택(normalization-byte stack),
+실제 접미부 복사와 검증 결합 모듈(harness)의 제어를 증명했다. Week~10은 배열과
+목록의 접미부 연결, 실제 W32/W64 단어 단계, 생성된 내부 정규화 반복문의
+바이트/프레임 보존과 커서 무언더플로, 최종 4바이트 직렬화의 잎 정리, 그리고
+실제 \identifier{_rans_encode}의 성공 시 크기 범위
+\(4\le 1024-\mathsf{off}\le1024\)를 추가했다. Week~11은 꼬리 인식
+불변식(tail-aware invariant), 생성 단어 단계 연결(generated word-step bridge),
+한 기호 외부 전이와 최종 직렬화 합성(serialization composition)을 실제 생성
+절차 안에 설치했다. 그 결과 종료한 실제 \identifier{_rans_encode}가 실패를
+반환하거나, 성공 시 전체 반환 접미부가 순수 \identifier{trace_bytes}와 같고
+오프셋--길이 등식 및 초기 접두부 프레임을 만족한다는 성공 조건부 부분정확성
+(success-conditioned partial correctness) 정리가 컴파일된다. Week~12는 실제
+생성 \identifier{_rans_decode}의 초기 4바이트 파싱, 구체적 표 조회와 단어
+갱신, 0/1/2바이트 정규화 재생(normalization replay), 외부/내부 반복 불변식과
+최종 거절 검사를 직접 닫았다. 그 결과 정확한 \identifier{trace_bytes} 입력을
+받아 종료한 실행이 1024개 기호를 복원하고, 정확한 크기를 소비하며, 출력 꼬리를
+보존하고 \(bad=0\)을 반환한다는 정확 추적 부분정확성(exact-trace partial
+correctness)이 컴파일된다. Week~13은 실제 인코더의 접미부와 실제 복사의
+점별 구간 등식을 디코더의 정확 추적 입력으로 운반하고, 동일한 결합 모듈에서
+실패 시 디코더 미실행과 성공 시 1024기호 복원을 함께 증명했다. 67개 작성 검증
+대상(authored proof target)의 전체 검증도 통과했으며 운영 판정은 rANS 핵심
+역함수 관문 통과를 뜻하는 \identifier{GO-CORE}다. 다만 실제 성공
+증인(success witness), 인코더/디코더 종료와 실제 전체 HBZ 래퍼 합성은 여전히
+열려 있다.
+따라서
+\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
+\(\delta_{\mathrm{Encoding}}=0\)은 아직 주장할 수 없다. 접미부 코덱,
+문맥, 하이비트(highbits)/LSB, 전체 도전값, 재시도 분포와 구현 수준 EUF-CMA도 열려
+있다. 이 문서는 이 경계를 분리해 읽기 위한 전용 안내서이다.
+\end{abstract}
+
+\begin{takeaway}{한 문장 요약}
+현재 증명은
+\[
+  \prefix_{992}(sk)=vk
+  \Rightarrow
+  \take_{32}(\mu_{\mathrm{Sign}}^{64})=\mu_{\mathrm{Verify}}^{32}
+  \Rightarrow
+  \text{도전값 접미부 상태 일치}
+\]
+를 실제 생성된 원시/내부 절차에 대해 닫았고, 실제 원시 API의 내보내기, 정확
+추적, Sign 출력 프레임 및 구간 국소 메모리 연결까지 올라갔다. 기능 경로는
+실제 서명 접두부 코덱에 이어 HBZ 준비/적용, 실제 표 인증서와 순수 rANS 단계,
+공통 정규화 바이트 추적, 실제 접미부 복사와 3회 호출 결합의 제어를 닫았다.
+Week~10에는 실제 인코더 내부 쓰기 의미와 성공 시 크기 범위까지 추가되었다.
+Week~11은 순수 꼬리를 보존하는 정확한 내부 불변식, 생성 단어 갱신, 외부 반복과
+마지막 네 저장을 합성하여 실제 인코더의 성공 접미부 정제를 닫았다. Week~12는
+같은 순수 추적을 실제 디코더가 앞에서부터 소비하여 원래 기호, 정확한 소비
+크기와 출력 꼬리 프레임을 복원함을 닫았다. Week~13은 실제
+인코더--복사--디코더 세 절차를 직접 호출하는 결합 모듈에서 실패/성공 분기와
+성공 시 전체 기호 복원을 합성했다. 다만 완료된 추적의 저장된 \(\mu\)를
+연결하는 생성/재전달 정리는 \statusdeferred 이고, 실제 인코더 성공,
+인코더/디코더 종료, 실제 전체 HBZ/h 접미부 및 Verify 관문이 남아 있다. 따라서
+API/인코딩 무손실(zero loss)과
+EUF-CMA로의 승격은 아직 허용되지 않는다.
+\end{takeaway}
+
+\tableofcontents
+\clearpage
+
+\input{sections/01-orientation}
+\input{sections/02-mathematical-target}
+\input{sections/03-formal-language}
+\input{sections/04-proved-chain}
+\input{sections/05-security-boundary}
+\input{sections/06-open-obligations}
+\input{sections/07-trust-and-reproduction}
+\appendix
+\input{sections/08-source-index}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,74 @@
+\section{Composition and Security Boundary}
+\label{sec:week2-composition}
+
+\paragraph{Target chain.}
+The first seam is:
+\[
+\prefix_{992}(sk)=vk
+\Rightarrow \mathsf{equal\_hash\_inputs}
+\Rightarrow \take_{32}(\mu_{\mathsf{sign}}^{64})
+             =\mu_{\mathsf{verify}}^{32}
+\Rightarrow \mathsf{equal\_challenge\_suffix}.
+\]
+
+\paragraph{Reachability from KeyGen.}
+\theoryname{keygen\_prefix\_reaches\_mu\_memory} consumes the actual
+\theoryname{vk\_prefix\_eq} returned by the generated KeyGen theorem and
+constructs
+\[
+  mem'=\mathsf{stores}\bigl(mem,\mathsf{to\_uint}(base),
+        \take_{992}(\mathsf{to\_list}(vk))\bigr).
+\]
+It proves the exact \theoryname{sk\_memory\_prefix} premise required by the mu
+hash theorem. The independent lemma
+\theoryname{mode2\_base\_zero\_no\_wrap} proves that \(base=0\) satisfies the
+992-byte address-range condition. Together these are a concrete
+non-vacuity/reachability argument, not an existential witness over unrelated
+mu arrays.
+
+\paragraph{Security-facing composition theorem.}
+\theoryname{raw\_mu\_to\_challenge\_suffix\_zero\_loss} compares two composed
+programs:
+\[
+\begin{split}
+ &\mathsf{SignRawMuTop};\
+   \procname{\_\_sign\_challenge\_shake256\_absorb\_mu32},\\
+ &\mathsf{VerifyRawMuTop};\
+   \procname{\_\_verify\_shake256\_absorb\_mu32}.
+\end{split}
+\]
+In addition to the raw mu premises of Section~\ref{sec:week2-mu}, it requires
+equal initial challenge states/pointers and position 64. Its postcondition is
+equality of the returned challenge state and position. The proof composes
+\theoryname{sign\_verify\_raw\_mu\_top\_wrappers\_prefix} with the Week~1
+theorem
+\theoryname{sign\_verify\_mu32\_absorb\_from\_pos64}.
+
+\paragraph{List-level adapter.}
+\theoryname{challenge\_input\_eq\_after\_raw\_mu} reuses
+\theoryname{challenge\_input\_eq\_from\_mu\_prefix}; together with
+\theoryname{challenge\_input\_eq\_components}, this gives equality of the list
+transcript whenever highbits and LSB components are also equal.
+
+\paragraph{Local loss.}
+For the proved wrapper/helper seam,
+\[
+  \delta_\mu=0.
+\]
+This is deterministic equivalence, so no statistical bad event is introduced
+at this seam. The statement is deliberately not promoted to
+\(\delta_{\mathsf{Sign}}=0\), \(\delta_{\mathsf{Verify}}=0\), or
+\(\delta_{\mathsf{Encoding}}=0\). Exact generated top-level control,
+highbits/LSB packing, the full challenge call, public memory contracts, and
+paper-ROM correspondence remain open.
+
+\paragraph{Top-down graph position.}
+This theorem sits below the exact public APIs and above the Week~1 mu32 absorb
+lemma. Closing \claimid{OBL-MU-TOPLEVEL-CONTROL} will make the relation an
+actual raw call-site theorem; closing \claimid{OBL-HIGH-LSB-PACK} will then
+permit the complete challenge-input relation.
+
+\paragraph{Verification and status.}
+\claimid{MU-CHAL-COMPOSITION} is \status{PROVED} for the local raw wrappers.
+The target fresh-compiles with \texttt{-no-eco}; its concrete address witness
+and memory-construction lemmas compile in the same theory.

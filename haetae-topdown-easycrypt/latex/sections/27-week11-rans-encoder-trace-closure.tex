@@ -1,0 +1,184 @@
+\section{Week 11: Actual Encoder Trace Closure}
+
+Week~11 closes \claimid{OBL-RANS-ENCODE-REFINEMENT} as
+\status{proved, success-conditioned partial correctness}.  The decisive
+theorem opens the actual generated
+\procname{RansEncodeTarget.M._rans_encode}; it is not a wrapper or a pure-only
+encoder theorem.  Decoder refinement, the core inverse, and the full HBZ
+wrapper remain \status{partial}.
+
+\subsection*{Why the Week 10 local invariant was insufficient}
+
+The Week~10 predicate remembered an arbitrary array snapshot immediately
+before one normalization loop.  It could prove a local store and frame, but
+lost the normalization bytes written by earlier outer iterations.  The actual
+encoder needs the continuation-aware relation
+\[
+  \mathsf{segment\_matches}\bigl(
+    encp,off_0-k,
+    \mathsf{innerWritten}(x_0,s,k)
+      \mathbin{++}
+    \mathsf{encodeTrace}(tail).\mathsf{bytes}
+  \bigr).
+\]
+Week~11 therefore replaces the arbitrary snapshot with predicates relative to
+the initial encoder array and the exact pure tail of the actual symbol array.
+
+\subsection*{Tail-aware inner invariant and exact exit}
+
+For outer index $j$, let
+\[
+  tail=\mathsf{symbolSuffix}(symbols_0,j+1),\qquad
+  x_0=\mathsf{encodeTrace}(tail).\mathsf{state}.
+\]
+The compiled \procname{encoder_inner_tail_inv} carries
+\[
+  0\le k\le total\le2,
+  \quad x=\mathsf{innerStateAfter}(x_0,k),
+  \quad off=off_0-k,
+\]
+the concatenated byte segment above, and
+\(
+  \mathsf{prefixFrame}(enc_0,encp,off_0-k)
+\).
+Each actual generated decrement, \texttt{set8}, and right shift preserves this
+predicate.  At guard exit,
+\procname{encoder_inner_tail_exit_exact} uses the actual
+\(x_{\max}\le x\) guard and the mode-2 normalization bound to prove
+\[
+  k=\mathsf{mode2NormalizationLen}(x_0,s),
+\]
+so the written list is exactly
+\(\mathsf{mode2NormalizationBytes}(x_0,s)\).
+
+\subsection*{Actual table-load and word-step bridge}
+
+The generated weakest-precondition exposes literal loads for \(x_{\max}\),
+reciprocal frequency, bias, packed complement/frequency, and shift.  The
+theorem family in
+\theoryname{Mode2RansEncoderGeneratedWordStep} proves those loads, the
+high-half W64 product, the nested shift ladder, and the two W32 additions equal
+the certified pure update:
+\[
+  \mathsf{generatedUpdate}(x,s)
+  =\mathsf{W32.ofInt}\bigl(\mathsf{hbzFastEncodeStep}(\mathsf{uint}(x),s)\bigr).
+\]
+The proof discharges the thirteen concrete symbol cases once in that theory.
+Erased declassification and \texttt{protect} calls are handled according to
+the extracted semantics; they introduce no new assumption.
+
+\subsection*{One-symbol transition and failure branch}
+
+The compiled success transition combines
+\begin{align*}
+  \mathsf{encodeTrace}(s::tail).\mathsf{state}
+    &=\mathsf{fastStep}(\mathsf{normalize}(x_0,s),s),\\
+  \mathsf{encodeTrace}(s::tail).\mathsf{bytes}
+    &=\mathsf{normBytes}(x_0,s)
+      \mathbin{++}\mathsf{encodeTrace}(tail).\mathsf{bytes}
+\end{align*}
+with the actual inner exit, word update, cursor arithmetic and prefix frame.
+It reconstructs the complete outer live invariant for index $j$.
+
+If the actual body finds $off<4$, it writes $bad=1$.  The loop invariant
+then deliberately stops requiring a trace equality.  The final theorem retains
+this genuine failure disjunct instead of assuming encoder success.
+
+\subsection*{Whole outer-loop closure}
+
+The live outer invariant is
+\begin{align*}
+  0 &\le i\le1024,\\
+  \mathsf{uint}(x)
+    &=\mathsf{encodeTrace}(\mathsf{symbolSuffix}(symbols_0,i)).\mathsf{state},\\
+  \mathsf{uint}(off)
+    +|\mathsf{encodeTrace}(\mathsf{symbolSuffix}(symbols_0,i)).\mathsf{bytes}|
+    &=1024,
+\end{align*}
+together with exact segment matching, an initial-array prefix frame, and
+\(4\le\mathsf{uint}(off)\).  It initializes at $i=1024$ with state
+$2^{23}$, empty trace, and cursor 1024.  A live outer-loop exit implies
+$i=0$, so the accumulated suffix belongs to
+\(
+  \mathsf{symbolListOfArray}(symbols_0)
+\).
+
+\subsection*{Final serialization prepend}
+
+The generated procedure subtracts four from $off$ and performs four
+little-endian byte stores.  The compiled finalization theorem turns their
+weakest-precondition expression into
+\[
+  \mathsf{serialize32LE}(\mathsf{uint}(x))
+    \mathbin{++}
+  \mathsf{encodeTrace}(\mathsf{symbolListOfArray}(symbols_0)).\mathsf{bytes}
+  =
+  \mathsf{traceBytes}(\mathsf{symbolListOfArray}(symbols_0)).
+\]
+It simultaneously preserves the initial prefix below the returned offset.
+
+\subsection*{Compiled generated-procedure theorem}
+
+The exact precondition of
+\procname{actual_rans_encode_trace_closure} is
+\begin{itemize}
+  \item initial encoder, state and symbol arrays are named snapshots;
+  \item the concrete mode-2 HBZ encoder table is used;
+  \item (count=1024); and
+  \item the actual symbol array satisfies the mode-2 canonical stream
+        predicate.
+\end{itemize}
+Its postcondition is
+\[
+ bad\ne0\;\lor\;
+ \left(
+ \begin{array}{l}
+ bad=0\ \land\ 0\le off\le1020\ \land\ 4\le1024-off\le1024,\\
+ \mathsf{segmentMatches}
+   (encp,off,\mathsf{traceBytes}(\mathsf{symbolListOfArray}(symbols_0))),\\
+ off+|\mathsf{traceBytes}(\mathsf{symbolListOfArray}(symbols_0))|=1024,\\
+ \mathsf{prefixFrame}(enc_0,encp,off)
+ \end{array}
+ \right).
+\]
+The corollary
+\procname{actual_rans_encode_trace_refinement} exposes this full suffix result
+without an existential trace and without success in the precondition.  Both
+theories fresh-compile with \texttt{-no-eco}.
+
+\subsection*{Rejected tactics and proof decomposition}
+
+A one-shot \texttt{inline; sim} was not retried: reverse outer iteration and a
+variable-length inner loop do not preserve the needed pure continuation
+automatically.  Expanding the generated reciprocal shift ladder inside the
+outer proof created an unmanageable expression; the dedicated generated-word
+theorem was rewritten instead.  The initial W64 cursor was normalized under
+its canonical range explicitly.  No observation wrapper, procedure copy,
+arbitrary trace witness, success premise, authored axiom, or 1024-fold
+unrolling was added.
+
+\subsection*{Partial correctness, non-vacuity, and next gate}
+
+The theorem is a Hoare partial-correctness result: every terminating execution
+satisfies the displayed failure/success disjunction.  It does not prove local
+encoder losslessness, termination, or a terminating all-6 success witness.
+Thus \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} stays \status{partial}.
+
+\begin{center}
+\begin{tabular}{l l}
+\toprule
+Claim & Week 11 status \\
+\midrule
+\claimid{OBL-RANS-ACTUAL-INNER-NORMALIZE} & \status{proved} \\
+\claimid{OBL-RANS-ENCODE-REFINEMENT} & \status{proved/partial correctness} \\
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & \status{partial} \\
+\claimid{OBL-RANS-DECODE-REFINEMENT} & \status{partial} \\
+\claimid{OBL-RANS-CORE-INVERSE} & \status{partial} \\
+\claimid{OBL-SIG-HBZ-ENCODE-DECODE} & \status{partial} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+No decoder success, HBZ round trip, canonical parse, encoding delta, or
+security result is claimed.  The Week~12 decision is \status{GO-ENCODER}: the
+single next obligation is the actual generated decoder trace refinement.

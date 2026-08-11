@@ -1,0 +1,3 @@
+from Keccak require "common/subreadwrite_imem.jinc"
+from Keccak require "avx2/keccak1600.jinc"
+from Keccak require "avx2/keccak1600_updstate.jinc"

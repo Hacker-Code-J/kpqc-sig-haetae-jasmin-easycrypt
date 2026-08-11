@@ -1,0 +1,91 @@
+\documentclass[11pt,a4paper]{article}
+\input{macros}
+
+\title{HAETAE Top-Down EasyCrypt\\Research Development Notes}
+\author{Codex Week 1--14 Sprint Record}
+\date{August 10, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+These notes are research development notes, not a completed paper. They record
+the top-down proof architecture, the exact theorem statements attempted during
+the first fourteen sprints, the compiled EasyCrypt evidence, and the remaining
+named obligations that still block a public-API EUF-CMA theorem for the pinned
+HAETAE Jasmin implementation. Week~1 and Week~2 entries are retained as
+retrospective research records; Week~3 adds the exact generated raw-top mu
+control closure and procedure-level API copy-helper evidence. Week~4 records
+the raw ABI caller extraction, canonical address bridge, stores-free memory
+adapter, and the actual-caller residuals that keep the parent claim partial.
+Week~5 closes the sequential KeyGen export and accepted Verify control/input
+binding while retaining direct caller-observed mu equality and cross-call
+memory framing as explicit residuals. Week~6 closes the actual Sign output
+frame and region-local generated mu relation, adds an exact sequential
+Sign/Verify trace, and isolates the still-open product/replay step needed for
+direct equality of the traces' stored mu observations. Week~7 time-boxes that
+replay step into an explicit paper-boundary decision and shifts the main effort
+to mode-2 signature codec functional correctness, including a compiled actual
+prefix pack/unpack round trip. Week~8 closes the actual HBZ coefficient leaf
+inverse, concrete mode-2 table certificate, and focused/full extraction
+identity for the HBZ wrappers. Week~9 adds a common normalization-byte trace,
+closes the actual suffix-copy procedure, and constructs a unary harness using
+the actual encoder, copy, and decoder, while retaining both generated-loop
+trace refinements as explicit gates to the full core inverse.
+Week~10 isolates the encoder, proves the actual nested normalization byte/frame
+transition and actual success-size range, and records the still-open
+tail-aware outer trace relation without beginning decoder semantics.
+Week~11 replaces the local inner snapshot with an initial-array and pure-tail
+relation, connects generated table loads and final stores, and closes the
+actual encoder's success-conditioned full-suffix trace refinement.
+Week~12 closes the exact-trace semantic refinement of the actual generated
+decoder, including symbol recovery, exact byte consumption, final-state
+checking, and the output-tail frame, while leaving actual harness composition
+and termination as explicit downstream obligations.
+Week~13 composes the actual encoder, suffix-copy helper, and decoder in one
+unary harness, deriving the decoder's pointwise trace reads from the actual
+encoder/copy post-state and closing the rANS core inverse as
+success-conditioned partial correctness.
+Week~14 lifts the completed leaf and rANS results through exact internal
+procedure boundaries, proves the actual full encoder and decoder wrappers,
+composes their visible zero-size failure and nonzero success branches, and
+formally transfers the result to the SignaturePack/Unpack extraction boundary.
+\end{abstract}
+
+\tableofcontents
+
+\input{sections/01-scope-and-proof-architecture}
+\input{sections/02-week1-transcript-seam}
+\input{sections/03-week2-packed-key-prefix}
+\input{sections/04-week2-mu-hash-prefix}
+\input{sections/05-composition-and-security-boundary}
+\input{sections/06-failed-approaches-and-open-obligations}
+\input{sections/07-next-work}
+\input{sections/08-week3-generated-mu-control}
+\input{sections/09-week3-api-memory-reachability}
+\input{sections/10-week3-results-and-next-gate}
+\input{sections/11-week4-raw-abi-and-address}
+\input{sections/12-week4-caller-memory-timeline}
+\input{sections/13-week4-result-and-next-gate}
+\input{sections/14-week5-keygen-sequential-export}
+\input{sections/15-week5-verify-accept-tail}
+\input{sections/16-week5-accepted-api-composition}
+\input{sections/17-week6-sign-output-frame}
+\input{sections/18-week6-region-local-mu}
+\input{sections/19-week6-direct-api-mu}
+\input{sections/20-six-week-checkpoint}
+\input{sections/21-week7-product-replay}
+\input{sections/22-week7-signature-codec}
+\input{sections/23-week7-next-gate}
+\input{sections/24-week8-hbz-rans}
+\input{sections/25-week9-rans-byte-stack}
+\input{sections/26-week10-rans-encoder}
+\input{sections/27-week11-rans-encoder-trace-closure}
+\input{sections/28-week12-rans-decoder-refinement}
+\input{sections/29-week13-rans-core-composition}
+\input{sections/30-week14-hbz-full-wrapper-composition}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

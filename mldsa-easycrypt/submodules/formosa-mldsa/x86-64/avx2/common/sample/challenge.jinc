@@ -1,0 +1,70 @@
+namespace sample {
+    inline
+    fn __initialize_xof(
+        reg ptr u8[COMMITMENT_HASH_SIZE] commitment_hash
+    ) -> reg u256[7] {
+        reg u256[7] state = shake256_absorb_commitment_hash(commitment_hash);
+        return state;
+    }
+
+    inline
+    fn __challenge(
+        #[spill_to_mmx] reg ptr u32[COEFFICIENTS_IN_POLYNOMIAL] output_challenge,
+        reg ptr u8[COMMITMENT_HASH_SIZE] seed
+    ) -> reg ptr u32[COEFFICIENTS_IN_POLYNOMIAL]
+    {
+        reg u256[7] state;
+        stack u8[136] xof_block;
+        reg u256 zeros_256 = #set0_256();
+
+        reg u64 i;
+        reg u64 sample_at;
+        reg u64 signs xof_offset;
+        reg u32 coefficient shift;
+
+        state = __initialize_xof(seed);
+        xof_block = shake256_squeeze_block(xof_block, state);
+
+        signs = xof_block.[:u64 0];
+        xof_offset = 8;
+
+        i = 0;
+        while(i < BYTES_PER_UNCOMPRESSED_POLYNOMIAL) {
+            output_challenge.[:u256 i] = zeros_256;
+            i += 32;
+        }
+
+        i = COEFFICIENTS_IN_POLYNOMIAL - ONES_IN_VERIFIER_CHALLENGE;
+        while(i < COEFFICIENTS_IN_POLYNOMIAL) {
+            while {
+                if(xof_offset >= SHAKE256_RATE) {
+                    state = shake256_permute(state);
+                    xof_block = shake256_squeeze_block(xof_block, state);
+                    xof_offset = 0;
+                }
+                #[declassify] sample_at = (64u) xof_block[xof_offset];
+
+                xof_offset += 1;
+            } (sample_at > i)
+
+            coefficient = output_challenge[sample_at];
+            output_challenge[i] = coefficient;
+
+            // output_challenge[sample_at] = 1 - 2 * (signs & 1);
+            shift = (32u)signs;
+            shift &= 1;
+            shift <<= 1;
+
+            coefficient = 1;
+            coefficient -= shift;
+
+            output_challenge[sample_at] = coefficient;
+
+            signs >>= 1;
+
+            i += 1;
+        }
+
+        return output_challenge;
+    }
+}

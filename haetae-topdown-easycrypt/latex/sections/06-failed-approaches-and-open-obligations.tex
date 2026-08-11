@@ -1,0 +1,55 @@
+\section{Failed Approaches and Open Obligations}
+
+\paragraph{Rejected or failed approaches.}
+\begin{itemize}
+  \item An abstract SHAKE64/SHAKE32 prefix axiom was rejected because it would
+  hide permutation, padding/finalize, output byte order, and the two generated
+  squeeze loops.
+  \item The Week~1 satisfiable mu-array witness was not treated as call-site
+  reachability. Week~2 instead derives the key/memory premise from a returned
+  generated KeyGen pair.
+  \item A direct \texttt{inline; sim} proof between
+  \procname{\_sf\_mu\_rawpre} and
+  \procname{\_\_verify\_hash\_mu} stalled on generated local/control
+  scheduling, raw-branch selection, argument binding, and pointer-protection
+  goals. Week~2 retained the strongest complete generated-helper theorem and
+  named the residual \claimid{OBL-MU-TOPLEVEL-CONTROL}; Week~3 closed it with
+  two exact-to-wrapper adapters and a transitivity proof.
+  \item The raw and public-context paths were not merged because their branch
+  conditions and encoded pre strings differ.
+  \item KeyGen termination was not placed in the prefix theorem's premise.
+  Doing so would obscure partial correctness versus losslessness.
+\end{itemize}
+
+\paragraph{Open implementation obligations.}
+\begin{itemize}
+  \item \claimid{OBL-API-KEY-MEMORY-RAW}: sequential export framing,
+  word/integer caller address binding, heap ownership, and harmful aliasing.
+  \item \claimid{OBL-MU32-HASH-CONTEXT}: high-bit branch and
+  \(ctxlen\mathbin{\|}ctx\) encoding.
+  \item \claimid{OBL-HIGH-LSB-PACK}: identical pre-mu challenge bytes.
+  \item \claimid{OBL-FIPS202-TRANSCRIPT}: paper-level domain, padding,
+  endianness, and ROM-query adapter.
+  \item \claimid{OBL-KG-TERMINATION}: retry losslessness, separately from the
+  proved prefix property.
+\end{itemize}
+
+\paragraph{Open cryptographic and numerical obligations.}
+The accepted signing distribution, challenge support/cardinality/min-entropy,
+two-transcript extraction, exact MLWE/BST-MSIS handoffs, fixed-point FFT tail,
+and TieMin policy remain outside this seam. They were not advanced merely
+because deterministic helper equivalence now compiles.
+
+\paragraph{Known spec/implementation differences.}
+The paper uses structured key and transcript objects. Sign reads the VK from
+a packed \texttt{BArray2752} prefix, while Verify reads it through raw memory;
+Sign emits 64 mu bytes wordwise, while Verify emits 32 bytes bytewise; and
+public context is encoded through a separate branch. Week~3 proves the raw
+generated top relation and isolated API copy helpers, but not their whole
+public-call composition or the paper model.
+
+\paragraph{Non-vacuity conclusion.}
+All new implementation premises are either explicit or constructible. No new
+implementation axiom exists. The raw top-control obligation is now compiled;
+the remaining API-memory obligation names the concrete sequential frame and
+caller-binding steps rather than quantifying them away.

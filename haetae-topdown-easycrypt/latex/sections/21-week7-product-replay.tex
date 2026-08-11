@@ -1,0 +1,67 @@
+\section{Week 7: Product/Replay Feasibility Gate}
+
+Week~7 treated \texttt{OBL-MU-PRODUCT-REPLAY} as a bounded feasibility gate,
+not as a lane to expand indefinitely. The success criterion was strict:
+the theorem surface had to contain the actual generated procedures
+\path{SignMuHashTarget.M._sf_mu_rawpre} and
+\path{VerifyMuHashTarget.M.__verify_hash_mu}, and the post-state values
+stored in the actual trace modules had to be related directly.
+
+The desired surface remained:
+\[
+  \mathsf{VerifyAccept}
+  \Longrightarrow
+  \mu32\_prefix(\mu^{64}_{\mathrm{sign,obs}},
+                 \mu^{32}_{\mathrm{verify,obs}}).
+\]
+The two symbols denote these post-state fields:
+\begin{itemize}
+\item Sign observation: \path{SignRawApiMuTrace.observed_mu};
+\item Verify observation: \path{VerifyCryptolabMuTrace.observed_mu}.
+\end{itemize}
+
+The compiled prerequisites from Weeks~5--6 remain valid:
+\begin{itemize}
+\item actual generated returned-value hash equality on the raw branch,
+\item exact actual-to-trace preservation for the sequential Sign$\rightarrow$Verify
+trace, and
+\item accepted Verify control and actual hash-input binding.
+\end{itemize}
+
+The missing step is a semantic transport:
+\[
+  \text{return-value pRHL theorem}
+  \Longrightarrow
+  \text{stored post-state observation equality.}
+\]
+
+The obstruction is not another memory-frame lemma. It is the gap between two
+already completed trace executions and the returned values of the actual
+generated hash calls embedded inside their residual continuations. The Sign and
+Verify continuations are different, and Week~7 deliberately refused four
+unsound escapes:
+\begin{itemize}
+\item adding another caller/observation wrapper,
+\item assuming observation equality as a precondition,
+\item adding a SHAKE locality axiom, or
+\item discarding the unmatched Sign continuation without the still-open
+losslessness obligations.
+\end{itemize}
+
+Concretely, the compiled pRHL goal names
+\texttt{res\{1\}} and \texttt{res\{2\}} returned by the two generated hash
+procedures. The unary sequential post-state names only the two module fields
+\texttt{observed\_mu}. After both trace calls return, the local hash-return
+variables are no longer in scope. Applying the pRHL theorem earlier leaves the
+unequal residual continuations; one-sided \texttt{seq} elimination requires
+the unproved Sign losslessness result. Thus the failed prototype is a program
+logic surface mismatch, not an SMT arithmetic failure. Direct \texttt{sim},
+\texttt{seq}, and consequence were not retried through another wrapper.
+
+Accordingly, the Week~7 decision is:
+\begin{itemize}
+\item \texttt{OBL-MU-PRODUCT-REPLAY}: \textbf{DEFERRED},
+\item paper boundary: \textbf{explicit},
+\item \texttt{OBL-DIRECT-OBSERVED-MU}: remains \textbf{PARTIAL},
+\item no claim of $\delta_{\mu,\mathrm{raw\_api\_accept}} = 0$.
+\end{itemize}

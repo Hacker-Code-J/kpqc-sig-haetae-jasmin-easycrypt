@@ -1,0 +1,228 @@
+\section{남은 증명 의무와 권장 진행 순서}
+\label{sec:open-obligations}
+
+\subsection{Week~5/6이 닫은 실제 API 경계}
+
+Week~5는 실제 caller의 control과 입력을, Week~6은 cross-call memory 조건을
+다음 범위에서 닫았다.
+
+\begin{itemize}
+  \item \identifier{RawApiAddressBridge}가 canonical 정수 주소와
+        \identifier{W64} 주소의 왕복을 증명한다.
+  \item \identifier{keypair_raw_api_exports_matching_prefixes}가 실제 raw KeyGen의
+        두 순차 export 뒤 외부 VK/SK의 첫 992바이트 일치를 증명한다.
+  \item exact Sign/Verify trace, \(accept\Rightarrow tail\), accepted hash-input
+        binding이 실제 caller의 control과 hash 인자를 노출한다.
+  \item 실제 Sign의 signature/siglen 출력은 명시적으로 분리된 VK/SK/pre/message
+        구간을 보존하고 KeyGen의 외부 key prefix를 유지한다.
+  \item 실제 생성 hash는 전체 memory 등식 대신 VK/pre/message read region의
+        바이트 등식만으로 비교된다.
+  \item 실제 raw Sign 다음 cryptolab Verify의 실행과 두 trace의 순차 실행은
+        결과와 최종 memory까지 정확히 대응한다.
+\end{itemize}
+
+\identifier{raw_api_region_reaches_mu_zero_loss}는 이 실제 external-memory 사실과
+Sign import를 \identifier{sk_memory_prefix}로 바꾼다. 이 경로는
+\cref{thm:memory-witness}의 constructed \identifier{stores}를 사용하지 않는다.
+
+\subsection{동결된 보안 관문(gate): 저장 \texorpdfstring{\(\mu\)}{mu}의 생성/재전달(product/replay)}
+
+이전의 \claim{OBL-API-KEY-MEMORY-RAW}는 구현의 early-reject 제어흐름보다 강한
+무조건 명제였기 때문에 Week~5에서 분해되었다. Week~6 이후 직접 잔여 의무는
+다음 하나의 의미론 간선으로 좁혀졌다.
+
+\begin{obligation}[\claim{OBL-DIRECT-OBSERVED-MU}]
+실제 raw Sign trace와 성공한 cryptolab Verify trace의 순차 실행 뒤
+\[
+  \operatorname{MuPrefix}_{32}
+  (\mu_{S,\mathrm{trace}},\mu_{V,\mathrm{trace}})
+\]
+를 직접 결론으로 얻는다. 여기서 두 항은 각각
+\identifier{SignRawApiMuTrace.observed_mu}와
+\identifier{VerifyCryptolabMuTrace.observed_mu}다. 생성 hash return의 pRHL
+정리를 이미 완료된 두 trace의 ghost field에 운반할 정당한 product/replay
+규칙이 필요하다.
+\end{obligation}
+
+\cref{thm:sign-output-frame}과 \cref{thm:region-local-mu}, actual sequential trace는
+frame, locality, control 및 input binding을 이미 공급한다. 하지만 Sign hash 뒤
+signing continuation과 Verify hash 뒤 challenge/compare continuation이 서로
+달라, 열린 signing losslessness 없이 한쪽 continuation을 버릴 수 없다. Week~7은
+추가 observation wrapper, 목표를 반복하는 precondition, SHAKE locality axiom을
+거부하고 \claim{OBL-MU-PRODUCT-REPLAY}를 \statusdeferred 인 명시적 paper
+boundary로 동결했다. 따라서 이 lane에서
+\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)을 기록하지 않으며 같은 seam에
+wrapper를 더 쌓지 않는다.
+
+\subsection{최근 닫힌 관문과 현재 진행 관문: 실제 rANS 핵심에서 전체 HBZ로}
+
+Week~7--11은 정준 서명 접두부, HBZ 잎/표, 순수 바이트 추적, 실제 접미부 복사와
+결합 제어, 그리고 실제 인코더의 성공 접미부 정제를 차례로 닫았다. Week~12는
+\claim{OBL-RANS-DECODE-REFINEMENT}를 정확 추적 부분정확성으로 닫았다. Week~13은
+이 세 결과를 \identifier{Mode2RansActualHarness.run} 안에서 합성해
+\claim{OBL-RANS-CORE-INVERSE}를 성공 조건부 Hoare 부분정확성으로 닫았다.
+
+\identifier{actual_rans_encode_copy_decode_inverse}의 전제는 초기 인자
+바인딩과 \identifier{mode2_hbz_symbol_stream}뿐이다. 인코더가 실제로 실패하면
+복사와 디코더를 실행하지 않고 초기 디코더 배열/상태를 유지한다. 인코더가
+성공하면 실제 복사 구간에서 Week~12의 정확 추적 입력 전체를 구성하여
+\[
+\begin{aligned}
+  bad_{\mathrm{dec}}&=0,&
+  off_{\mathrm{dec}}&=\mathsf{encoded\_size},\\
+  decoded[0..1024)&=expected[0..1024),&
+  decoded[1024..2048)&=decoded_0[1024..2048)
+\end{aligned}
+\]
+을 얻는다. 복사된 추적, 디코더 점별 읽기, 디코더 성공과 출력 등식은
+사전조건이 아니다. \identifier{encoder_success_size_word_bridge}도 실제 성공
+범위에서 W64 크기 뺄셈의 무랩을 도출하므로 임의의 정수 버퍼 증인을 두지
+않는다.
+
+이 결과는 세 실제 생성 절차를 직접 호출하는 증명 작성 결합 모듈에 대한
+정리다. production \identifier{_encode_hb_z1_full}과
+\identifier{_decode_hb_z1_full} 자체의 합성, 인코더/디코더 종료 또는 성공 분기
+도달을 증명하지 않는다.
+
+\begin{obligation}[\claim{OBL-SIG-HBZ-ENCODE-DECODE}]
+이미 증명된 실제 prepare/apply 역함수와 실제 rANS 핵심 역함수를 production
+전체 HBZ 래퍼 경계에서 성공 조건부로 합성한다. 래퍼의 반환 크기, 실패 분기,
+encoder/copied/decoded 배열 사이의 프레임과 실제 coefficient 결과를 함께
+운반해야 한다. 별도로 \claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 모든 기호가
+6인 정준 입력에서 실제 성공 분기의 도달 가능성을 EasyCrypt 안에서 보여야
+한다.
+\end{obligation}
+
+최신 판정은 \identifier{GO-CORE}이고 위 전체 HBZ 래퍼 합성이 Week~14의 단일
+구현 간선이다. 이 경계가 컴파일되기 전에는 힌트(hint) \(h\), 두 크기 차이,
+정준 영 패딩과 전체 1474바이트 코덱으로 확장하지 않는다.
+
+\subsection{분리된 기능정확성 경로}
+
+\claim{OBL-SIGN-OUTPUT-TAIL-REACH}는 정당한 Sign 출력이 Verify의 unpack/norm
+early-reject gate를 통과한다는 \statuspartial 의무다. signature prefix inverse는
+닫혔지만 전체 suffix와 이후 gate는 열려 있다. 이는 성공한 Verify에
+대해 tail 도달을 증명한 \cref{thm:verify-accept-tail}의 역이나 귀결이 아니다.
+full pack/unpack inverse, norm, hint, response 및 산술 정확성이 필요하다. 이를
+전체 challenge equality와 결합한 \claim{OBL-SIGN-VERIFY-CORRECTNESS}는 현재
+\statusblocked 이다. 이 기능 경로를 accepted-forgery 보안 경로의 숨은 전제로
+넣지 않는다.
+
+\subsection{그 다음 관문: 문맥(context)과 전체 도전값 전사(challenge transcript)}
+
+raw/internal 경로와 public-context 경로는 구현에서 실제로 다르다. Sign은
+\identifier{_sf_prepare_pre_raw}와 \identifier{_sf_mu_preptr}를 사용하고,
+Verify는 \identifier{prelen}의 최상위 비트로 context branch를 고른다. 다음을
+보여야 한다.
+
+\begin{enumerate}
+  \item \(ctxlen\le255\)와 길이 인코딩의 정확성;
+  \item 양쪽이 정확히 \(ctxlen\text{-byte}\Vert ctx\)를 같은 순서로 흡수함;
+  \item caller memory가 두 절차의 pointer/length 전제를 공급함.
+\end{enumerate}
+
+그 다음 \claim{OBL-HIGH-LSB-PACK}은 Sign과 Verify가 만드는
+\(\operatorname{HighBits}_h,\operatorname{LSB}\)의 packed bytes가 같음을
+보여야 한다. 이 결과를 기존 \identifier{challenge_input_eq_components}와
+합성하면 전체 challenge 입력 리스트가 같아진다. 이후에야 FIPS202
+domain/padding/squeeze와 binary challenge sampler를 포함한 실제 full call을
+paper ROM query에 연결할 수 있다.
+
+\subsection{그 이후의 기능 및 확률적 의무}
+
+\begin{longtable}{L{0.28\textwidth}L{0.18\textwidth}L{0.46\textwidth}}
+\caption{현재 명명된 주요 미해결 의무}\label{tab:open-obligations}\\
+\toprule
+의무 & 성격 & 필요한 결과 \\
+\midrule
+\endfirsthead
+\toprule
+의무 & 성격 & 필요한 결과 \\
+\midrule
+\endhead
+\claim{OBL-API-KEY-MEMORY-RAW-ACCEPT} & API/관계 & 승인된 Sign/Verify 추적
+(accepted Sign/Verify trace)의 직접 저장 \(\mu_{32}\) 등식; 프레임/국소성/제어는
+이미 증명됨 \\
+\claim{OBL-DIRECT-OBSERVED-MU} & API/관계 & 실제 순차 추적 사후상태(actual
+sequential-trace post-state)의 \identifier{observed_mu} 접두부 결론 \\
+\claim{OBL-MU-PRODUCT-REPLAY} & 의미론/\statusdeferred & 생성 해시 반환값
+(generated hash return)의 pRHL 정리를 완료된 추적 유령 필드(completed-trace
+ghost field)로 옮기는 정당한 규칙 \\
+\claim{OBL-SIG-PREFIX-FRAME} & 인코딩(encoding) & 패킹 서명 꼬리(pack signature
+tail)와 도전값 출력 꼬리(challenge-output tail)의 보존; 언패킹 하위 꼬리(unpack
+low tail)는 증명됨 \\
+\claim{OBL-RANS-DECODE-REFINEMENT} & 인코딩(encoding);\newline\statusproved &
+정확한 실제 추적, 상태 필드와 mode-2 표 아래 실제 디코더의 \(bad=0\), 정확한
+소비 크기(consumed size), 1024기호 일치(symbol equality)와 출력 꼬리
+프레임(frame); 종료는 별도 \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & 인코딩(encoding);\newline\statuspartial &
+모든 기호가 6인 입력의 실제 인코더가 종료하여 \(bad=0\)을 반환한다는 증인;
+성공 시 크기 범위는
+그 뒤 기존 정리에서 따라옴 \\
+\claim{OBL-RANS-CORE-INVERSE} & 인코딩(encoding);\newline\statusproved & 실제
+인코더 실패 분기를 보존하고, 성공 시 실제 복사 구간을 디코더의 정확 추적
+입력으로 운반해 \(bad=0\), 정확한 소비, 1024기호 복원과 꼬리 프레임을 얻는
+성공 조건부 부분정확성; 종료/성공 도달은 별도 \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & 인코딩(encoding);\newline\statuspartial &
+prepare/apply 역함수와 실제 rANS 핵심 역함수를 production 전체 HBZ 래퍼에서
+합성하고 프레임/크기 및 실제 성공 증인을 공급 \\
+\claim{OBL-SIG-H-ENCODE-DECODE} & 인코딩(encoding);\newline\statusspecified & HBZ
+부모(parent)가 닫힌 뒤 시작할 실제 힌트 코덱 역함수(hint codec inverse) \\
+\claim{OBL-SIG-SUFFIX-METADATA},\newline
+\claim{OBL-SIG-SUFFIX-PADDING} & 인코딩(encoding) & 크기 차이 왕복(size-delta
+round trip)과 1474바이트 정준 영 패딩(canonical zero padding) \\
+\claim{OBL-SIG-FULL-CODEC-MODE2} & 인코딩(encoding) & 접두부(prefix)와 전체
+접미부(suffix)를 합친 실제 패킹/언패킹 역함수(actual pack/unpack inverse),
+실패 표시(bad flag)의 성공과 정준 구문 분석(canonical parse) \\
+\claim{OBL-SIGN-OUTPUT-TAIL-REACH} & 기능정확성 & 정당한 Sign 출력의 전체
+패킹/언패킹(full pack/unpack) 및 노름/힌트 관문(norm/hint gate) 통과 \\
+\claim{OBL-SIGN-VERIFY-CORRECTNESS} & 기능정확성 & 응답(response), 힌트(hint),
+산술식과 전체 도전값을 포함한 정당한 서명의 승인(accept) \\
+\claim{OBL-KG-TERMINATION}, \claim{OBL-KG-DIST} & 확률/종료 & 재시도 반복문
+(retry loop)의 무손실성(losslessness) 또는 종료, 실제 KeyGen 출력분포, 특이성
+거부(singular rejection) 효과 \\
+\claim{OBL-FFT-TAIL}, TieMin & 수치해석 & 고정소수점 FFT 오차의 나쁜 사건
+(bad event) 확률과 동률 최솟값(tied minimum) 정책의 차이 \\
+\claim{OBL-SIGN-ACCEPTED-DIST} & 확률분포 & 초구 표본기(hyperball sampler),
+거부(rejection), 승인 출력(accepted output)이 논문 분포와 일치하거나 명시적
+통계손실을 가짐 \\
+\claim{OBL-VERIFY-EVENT} & 대수/프로그램 & Jasmin의 최종 승인 비트(accept bit)가
+논문의 노름(norm), 힌트, 방정식, 도전값 조건과 동치 \\
+\claim{OBL-CHALLENGE} & 조합론/확률 & 도전값 지지집합(challenge support),
+기수(cardinality), 점 확률(point probability), 최소 엔트로피(min-entropy) \\
+\claim{OBL-FORK} & 암호 환원 & 두 새 전사(fresh transcript)에서 정확한
+BST-MSIS 인스턴스(instance)를 추출 \\
+\claim{OBL-SIGROM-ADAPTER} & 게임 기반 보안 & 바이트 수준 공용 API를 정확한
+\identifier{Sig_ROM.Scheme} 및 질의 계수(query accounting)에 인스턴스화 \\
+\bottomrule
+\end{longtable}
+
+\subsection{의존성에 따른 작업 순서}
+
+현재 코드와 가장 잘 맞는 순서는 다음과 같다.
+
+\begin{enumerate}
+  \item 생성/재전달 경로는 현재 논문 경계로 유지하고 같은 호출자 이음매에
+        관찰 래퍼를 더하지 않는다.
+  \item Week~13에서 닫힌 실제 rANS 핵심 역함수를 prepare/apply 역함수와
+        production 전체 HBZ 래퍼에 합성한다. 세 하위 절차의 반복 불변식은
+        다시 증명하지 않는다.
+  \item 래퍼 수준 크기/프레임 및 실제 성공 증인을 공급해
+        \claim{OBL-SIG-HBZ-ENCODE-DECODE}를 닫은 뒤 같은 rANS 불변식을 h 코덱에
+        재사용한다.
+  \item 크기 메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
+        꼬리 프레임(pack/challenge tail frame)을 합성해 전체 1474바이트
+        코덱(codec)과 정준 구문 분석(canonical parse)을 닫는다.
+  \item 노름/힌트(norm/hint), 응답(response)과 산술 정확성을 결합하여
+        \claim{OBL-SIGN-OUTPUT-TAIL-REACH}와 정당한 Sign/Verify 정확성
+        (legitimate Sign/Verify correctness)을 닫는다.
+  \item 별도의 보안 경로에서 공용 문맥(public-context) \(\mu\),
+        highbits/LSB와 전체 도전값 호출(challenge call)을 합성한다.
+  \item KeyGen/Sign의 확률분포와 종료 손실을 정량화하고 바이트 충실 ROM 스킴
+        (byte-faithful ROM scheme)을 논문의 분포/포킹(distribution/forking)
+        의무와 결합한다.
+\end{enumerate}
+
+이 순서는 넓은 보안 명제를 먼저 선언하고 하위 전제를 나중에 채우는 방식이
+아니라, 이미 컴파일되는 가장 가까운 seam에서 바깥 경계로 한 단계씩 올라가는
+방식이다.

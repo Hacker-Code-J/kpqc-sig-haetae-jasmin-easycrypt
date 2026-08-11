@@ -1,0 +1,158 @@
+\usepackage{fontspec}
+\usepackage{xetexko}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{unicode-math}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+\setmathfont{TeX Gyre Pagella Math}
+\setmainhangulfont{Noto Serif CJK KR}
+\setsanshangulfont{Noto Sans CJK KR}
+\setmonohangulfont{Noto Sans Mono CJK KR}[Scale=MatchLowercase]
+
+\definecolor{provedcolor}{HTML}{176B45}
+\definecolor{partialcolor}{HTML}{9A6700}
+\definecolor{specifiedcolor}{HTML}{315E9E}
+\definecolor{blockedcolor}{HTML}{A43A3A}
+\definecolor{deferredcolor}{HTML}{6B4FA1}
+\definecolor{ink}{HTML}{1E293B}
+\definecolor{softgray}{HTML}{F3F4F6}
+\definecolor{analogycolor}{HTML}{0F766E}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=specifiedcolor,
+  citecolor=provedcolor,
+  urlcolor=specifiedcolor,
+  pdftitle={HAETAE-2 구현 검증의 대수적 지도},
+  pdfsubject={순수 대수학자와 대수기하학자를 위한 HAETAE top-down EasyCrypt 안내서},
+  pdfauthor={HAETAE top-down EasyCrypt project}
+}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.28em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=2.3em,itemsep=0.28em,topsep=0.4em}
+\renewcommand{\arraystretch}{1.18}
+\renewcommand{\contentsname}{목차}
+\renewcommand{\figurename}{그림}
+\renewcommand{\tablename}{표}
+\renewcommand{\refname}{참고문헌}
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.18em}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{정의}[section]
+\newtheorem{translation}[definition]{번역 원리}
+\newtheorem{verified}[definition]{검증된 명제(verified proposition)}
+\newtheorem{openobligation}[definition]{미해결 의무}
+\newtheorem{caution}[definition]{주의}
+\newtheorem{question}[definition]{참여 질문}
+
+\crefname{definition}{정의}{정의}
+\crefname{translation}{번역 원리}{번역 원리}
+\crefname{verified}{검증된 명제(verified proposition)}{검증된 명제(verified propositions)}
+\crefname{openobligation}{미해결 의무}{미해결 의무}
+\crefname{caution}{주의}{주의}
+\crefname{question}{참여 질문}{참여 질문}
+
+\newcommand{\identifier}[1]{\nolinkurl{#1}}
+\newcommand{\sourcepath}[1]{\nolinkurl{#1}}
+% EasyCrypt declarations are long and underscore-heavy.  Use the same
+% proportional font as the surrounding text so long identifiers can wrap
+% without consuming table width like typewriter text.
+\newcommand{\theoremname}[1]{{\begingroup\urlstyle{same}\nolinkurl{#1}\endgroup}}
+\newcommand{\claimid}[1]{\textsf{\textbf{\detokenize{#1}}}}
+\newcommand{\statusproved}{\textcolor{provedcolor}{\textsf{\textbf{PROVED}}}}
+\newcommand{\statuspartial}{\textcolor{partialcolor}{\textsf{\textbf{PARTIAL}}}}
+\newcommand{\statusspecified}{\textcolor{specifiedcolor}{\textsf{\textbf{SPECIFIED}}}}
+\newcommand{\statusblocked}{\textcolor{blockedcolor}{\textsf{\textbf{BLOCKED}}}}
+\newcommand{\statusdeferred}{\textcolor{deferredcolor}{\textsf{\textbf{DEFERRED}}}}
+
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\FF}{\mathbb{F}}
+\newcommand{\BB}{\mathbb{B}}
+\newcommand{\Rq}{R_q}
+\newcommand{\Bytes}{\mathsf{Byte}}
+\newcommand{\Mem}{\mathsf{Mem}}
+\newcommand{\take}{\mathop{\mathrm{take}}}
+\newcommand{\prefix}{\mathop{\mathrm{prefix}}}
+\newcommand{\restrict}{\mathord{\upharpoonright}}
+\newcommand{\Encode}{\mathop{\mathrm{Enc}}}
+\newcommand{\Decode}{\mathop{\mathrm{Dec}}}
+\newcommand{\obs}{\mathop{\mathrm{obs}}}
+\newcommand{\Adv}{\mathop{\mathrm{Adv}}}
+
+\newenvironment{takeaway}[1]
+  {\begin{quote}\color{ink}\noindent\textbf{#1}\par\smallskip}
+  {\end{quote}}
+
+\newenvironment{analogy}
+  {\begin{quote}\color{analogycolor}\noindent\textbf{비유(형식화된 정리(theorem) 아님).}\par\smallskip}
+  {\end{quote}}
+
+\tikzset{
+  layernode/.style={
+    draw=specifiedcolor,
+    rounded corners=2pt,
+    fill=specifiedcolor!6,
+    align=center,
+    minimum height=11mm,
+    text width=35mm,
+    inner sep=4pt
+  },
+  provennode/.style={
+    draw=provedcolor,
+    rounded corners=2pt,
+    fill=provedcolor!7,
+    align=center,
+    minimum height=11mm,
+    text width=38mm,
+    inner sep=4pt
+  },
+  partialnode/.style={
+    draw=partialcolor,
+    dashed,
+    rounded corners=2pt,
+    fill=partialcolor!7,
+    align=center,
+    minimum height=11mm,
+    text width=38mm,
+    inner sep=4pt
+  },
+  blockednode/.style={
+    draw=blockedcolor,
+    dashed,
+    rounded corners=2pt,
+    fill=blockedcolor!5,
+    align=center,
+    minimum height=11mm,
+    text width=38mm,
+    inner sep=4pt
+  },
+  deferrednode/.style={
+    draw=deferredcolor,
+    densely dotted,
+    rounded corners=2pt,
+    fill=deferredcolor!6,
+    align=center,
+    minimum height=11mm,
+    text width=38mm,
+    inner sep=4pt
+  },
+  flowarrow/.style={-{Latex[length=2.2mm]},thick,draw=ink},
+  openarrow/.style={-{Latex[length=2.2mm]},thick,dashed,draw=partialcolor}
+}

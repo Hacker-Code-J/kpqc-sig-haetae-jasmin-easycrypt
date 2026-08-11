@@ -1,0 +1,803 @@
+\section{현재 닫힌 증명 사슬}
+\label{sec:proved-chain}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=4mm]
+  \node[chainnode] (kg) {종료한 내부 KeyGen\\\(\prefix_{992}(sk)=vk\)};
+  \node[chainnode,right=of kg] (mem) {구성된 Verify 메모리\\\(\operatorname{SKMemPrefix}\)};
+  \node[chainnode,right=of mem] (mu) {실제 raw \(\mu\) 절차\\\(\take_{32}(\mu_S^{64})=\mu_V^{32}\)};
+  \node[chainnode,right=of mu] (chal) {실제 \(\mu_{32}\) absorb\\challenge suffix 상태 일치};
+  \draw[chainarrow] (kg) -- (mem);
+  \draw[chainarrow] (mem) -- (mu);
+  \draw[chainarrow] (mu) -- (chal);
+  \node[provennode,below=12mm of kg] (apihelper) {실제 raw API\\export/trace/frame \statusproved};
+  \node[provennode,right=7mm of apihelper] (apicomp) {region-local \(\mu\)와\\exact sequence \statusproved};
+  \node[partialnode,below=12mm of apicomp] (direct) {stored \(\mu\) 운반\\product/replay\\\statuspartial\\\statusdeferred};
+  \node[opennode,below=12mm of chal] (full) {highbits/LSB와 전체 challenge\\\statusblocked};
+  \draw[chainarrow,draw=provedcolor] (kg) -- (apihelper);
+  \draw[chainarrow,draw=provedcolor] (apihelper) -- (apicomp);
+  \draw[chainarrow,dashed,draw=partialcolor] (apicomp) -- (direct);
+  \draw[chainarrow,dashed,draw=blockedcolor] (chal) -- (full);
+\end{tikzpicture}
+\caption{검증된 raw/internal 사슬(위)과 Week~6/7 API 의미론 경계(아래). 이
+보안 경계는 Week~8--9에도 그대로 유지된다.}
+\label{fig:proof-chain}
+\end{figure}
+
+\subsection{1단계: KeyGen이 반환하는 패킹된 키(packed-key) 접두부}
+
+Jasmin \identifier{_pack_sk_m23}는 먼저 \identifier{vkp[0..vkbytes)}를
+\identifier{skp}에 복사한다. mode~2에서 \identifier{vkbytes=992}이고, 이후
+쓰기는 다음 배치를 따른다.
+\[
+\underbrace{[0,992)}_{vk}
+\;\Vert\;
+\underbrace{[992,1184)}_{3\cdot64\text{ 바이트 }\eta\text{ 벡터}}
+\;\Vert\;
+\underbrace{[1184,1376)}_{2\cdot96\text{ 바이트 }\eta_2\text{ 벡터}}
+\;\Vert\;
+\underbrace{[1376,1408)}_{32\text{ 바이트 키}}.
+\]
+\identifier{pack_vec_eta_to_prefix_frame}와
+\identifier{pack_vec2_eta_to_prefix_frame}는 뒤쪽 쓰기가 \([0,992)\)를 바꾸지
+않음을 증명한다.
+
+\begin{verified}[생성된 패커(packer)의 접두부]
+\label{thm:packer-prefix}
+\identifier{pack_sk_m23_mode2_vk_prefix}는 mode-2 상수 아래 실제 생성된
+\identifier{_pack_sk_m23}가 종료하면
+\[
+  \operatorname{VKPrefix}_{992}(res,vk_0)
+\]
+임을 증명한다. 이 결과는
+\identifier{keypair_full_m23_mode2_return_prefix}와
+\identifier{keypair_internal_mode2_return_prefix}를 통해 실제 생성된
+\identifier{_keypair_full_m23} 및
+\identifier{crypto_sign_keypair_internal_mode2_jazz}의 반환값까지 올라간다.
+\end{verified}
+
+이 정리는 KeyGen의 모든 retry 시도 내부를 분포적으로 분석하지 않아도 성립한다.
+어떤 시도에서 종료하든 마지막 packer 호출이 같은 접두부를 만들기 때문이다.
+정확히 그 이유로 정리는 강한 반환값 불변식이지만 여전히 부분정확성이다.
+
+\subsection{2단계: 로컬 배열에서 Verify 메모리로}
+
+\identifier{Mode2KeyMemoryBridge.stored_vk_buffer_at}는 기존 메모리 위에
+검증키의 첫 992바이트를 \identifier{stores}로 기록한 구체적 메모리를 만든다.
+\identifier{keygen_prefix_memory_relation_is_constructible}는
+\cref{def:vk-prefix}를 사용해 그 메모리가 \cref{def:mem-prefix}를 만족함을
+보인다. 이를 \identifier{keygen_prefix_reaches_mu_memory}가 hash 정리의 정확한
+술어로 바꾼다.
+
+\begin{verified}[원시 해시(raw hash) 전제의 비공허성]
+\label{thm:memory-witness}
+\identifier{generated_raw_mu_preconditions_from_keygen_prefix}는
+\(base=0\), \(prelen=0\), 그리고 저장된 검증키 메모리를 택해 no-wrap,
+raw-branch, valid-region, \identifier{sk_memory_prefix} 전제를 동시에 만족시키는
+구체적 witness를 구성한다.
+\end{verified}
+
+이 결과는 전제가 모순이 아니며 내부 KeyGen 반환값에서 도달 가능함을 보인다.
+이 witness는 작성한 \identifier{stores} 연산으로 구성된 역사적 로컬 증거다.
+Week~5의 API-level 정리는 이 witness를 사용하지 않고 실제 caller memory와
+생성된 copy 절차만으로 같은 관계에 도달한다.
+
+\subsection{3단계: 복사 보조절차(copy helper)에서 실제 원시 KeyGen 호출자까지}
+
+\sourcepath{easycrypt/refinement/composition/ApiKeyMemoryBridge.ec}는 focused
+extraction한 실제 생성 절차들을 직접 대상으로 삼는다. KeyGen의
+\identifier{__kp_api_copy_2080_to_addr}와
+\identifier{__kp_api_copy_2752_to_addr}, Sign과 Verify의
+\identifier{_api_copy_raw_to_2752_prefix}가 그 대상이다.
+
+\begin{verified}[개별 API 복사 보조절차의 접두부 보존]
+\label{thm:api-copy-prefix}
+\identifier{keygen_export_vk_mode2_prefix}와
+\identifier{keygen_export_sk_mode2_prefix}는 종료한 실제 KeyGen exporter가
+각각 992바이트 VK와 1408바이트 SK를 raw memory에 기록함을 증명한다.
+\identifier{keygen_export_sk_mode2_prefix_frames_vk}는 최소
+\identifier{disjoint_regions} 전제 아래 실제 SK exporter가 기존 VK 접두부를
+보존함까지 증명한다.
+\identifier{sign_import_mode2_sk_prefix}와
+\identifier{verify_import_mode2_vk_prefix}는 유효한 입력 영역에서 실제
+importer가 각각 1408바이트와 992바이트를 읽고, 두 로컬 배열의 첫 992바이트가
+원래 memory와 일치함을 증명한다. 또한
+\identifier{sign_verify_api_importer_same_inputs}는 같은 입력에서 두 importer의
+반환값과 memory가 같음을 보인다.
+\end{verified}
+
+순수 adapter 정리 \identifier{exported_mode2_regions_agree},
+\identifier{imported_prefixes_agree},
+\identifier{imported_sign_sk_reaches_mu_memory}는 export된 두 영역의 접두부
+일치에서 Sign/Verify 로컬 접두부 일치와 raw \(\mu\) memory 전제로 넘어가는
+논리적 다리를 제공한다.
+
+\sourcepath{RawApiAddressBridge.ec}의
+\identifier{canonical_ui64_address_roundtrip}과
+\identifier{mode2_vk_region_bridge}, \identifier{mode2_sk_region_bridge}는
+canonical 정수 주소가 \identifier{W64.of_int}와
+\identifier{W64.to_uint}를 거쳐도 같고 양쪽 유효 구간 술어를 만족함을
+증명한다. 따라서 이전의 exporter/importer 주소 표현 차이는 명시적 canonical
+구간 계약 아래 닫혔다.
+
+\sourcepath{RawApiKeygenExportComposition.ec}의
+\identifier{keypair_raw_api_exact_export_trace}는 실제 raw KeyGen caller와
+두 copy를 명시한 trace가 최종 memory와 반환값까지 같음을 먼저 고정한다.
+
+\begin{verified}[실제 원시 KeyGen의 순차 외부 내보내기(export)]
+\label{thm:raw-keygen-export}
+\identifier{keypair_raw_api_exports_matching_prefixes}는 실제 생성된
+\identifier{cryptolab_haetae_mode2_keypair_internal}을 연다. 32바이트 seed 읽기,
+992바이트 VK와 1408바이트 SK의 canonical 구간, 두 출력의 분리를 전제로 하는
+모든 종료 실행에서 반환값이 0이고
+\[
+  \operatorname{ExternalKeyPrefix}(mem_{\mathrm{out}},sku,vku)
+\]
+임을 증명한다. 즉 실제 caller에서 먼저 내보낸 VK가 뒤의 SK export에도
+보존되고, 두 외부 buffer의 첫 992바이트가 점별로 같다.
+\end{verified}
+
+이는 helper 사실을 한 caller postcondition으로 합성한 진전이지만 여전히
+부분정확성이다. KeyGen retry의 종료는 증명하지 않으며, canonical/valid region은
+물리적 메모리 안전성을 대신하지 않는 호출 계약이다.
+
+\subsection{4단계: Sign/Verify의 실제 원시(raw) \texorpdfstring{\(\mu\)}{mu} 절차}
+
+\sourcepath{easycrypt/refinement/composition/ExtractedMuHashPrefix.ec}는 다음 생성
+helper를 단계별로 비교한다.
+
+\begin{itemize}
+  \item Sign의 packed-SK absorb와 Verify의 raw VK-memory absorb;
+  \item 같은 pre/message 주소와 길이에 대한 두 raw absorb;
+  \item Keccak state 초기화, permutation, finalize;
+  \item Sign의 64바이트 squeeze와 Verify의 32바이트 squeeze의 앞 32바이트.
+\end{itemize}
+
+그 결과 \identifier{sign_verify_raw_mu_top_wrappers_prefix}가 로컬 wrapper 수준의
+\cref{def:mu-prefix}를 증명한다. Week~3의 중요한 진전은 wrapper를 결론 표면에서
+제거한 것이다.
+
+\begin{verified}[실제 생성된 원시 \(\mu\) 절차의 관계]
+\label{thm:generated-mu}
+\identifier{sign_verify_generated_raw_mu_prefix}의 양쪽 절차는 각각 실제 생성된
+\identifier{Sign._sf_mu_rawpre}와
+\identifier{Verify.__verify_hash_mu}이다. 같은 pre/message 주소와 길이,
+\identifier{RawPreLen}, 두 \identifier{ValidRegion}, 992바이트
+\identifier{SKMemPrefix}, 주소 no-wrap 아래에서
+\[
+  \operatorname{MuPrefix}_{32}(res_S,res_V)
+\]
+를 증명한다.
+\end{verified}
+
+Sign 쪽은 \identifier{sf_mu_rawpre_refines_raw_top}, Verify 쪽은
+\identifier{verify_hash_mu_raw_refines_raw_top}으로 wrapper에 정확히 연결한 뒤
+중간 정리를 관계적 추이성으로 합성한다. Verify의 raw branch는 별도 flag를
+가정하지 않는다. \identifier{raw_prelen_shr63_zero}가 실제
+\identifier{prelen >> 63} 계산이 0임을 증명하여 해당 분기를 선택한다.
+
+\subsection{5단계: 도전값 접미부(challenge suffix)의 동일성}
+
+Sign challenge transcript는 64바이트의 highbits/LSB 부분 다음에
+\(\take_{32}(\mu_S^{64})\)를 흡수하고, Verify도 같은 위치에서
+\(\mu_V^{32}\)를 흡수한다. 현재 정리는 앞 64바이트 자체가 같다는 것을 아직
+증명하지 않고, 같은 challenge state와 위치 64에서 시작한다는 전제를 둔다.
+
+\begin{verified}[생성된 원시 \(\mu\)→도전값 합성]
+\label{thm:challenge-suffix}
+\identifier{generated_raw_mu_to_challenge_suffix_zero_loss}는
+실제 \identifier{_sf_mu_rawpre}와 실제
+\identifier{__verify_hash_mu}를 각각 실행한 뒤, 실제 Sign/Verify
+\(\mu_{32}\) absorb helper를 실행하는 두 합성 프로그램을 비교한다.
+\cref{thm:generated-mu}의 전제와 초기 challenge 위치 64 아래에서 반환된
+challenge state와 position이 정확히 같다.
+\end{verified}
+
+\identifier{TranscriptBytes.challenge_input_eq_components}는 나중에 highbits와
+LSB 바이트까지 같음을 얻으면 전체 입력 리스트가 같아진다는 순수 리스트
+보조정리를 제공한다. 따라서 현재 결과와 다음 미해결 의무의 접합면이 명확하다.
+
+\subsection{6단계: 실제 원시 Sign/Verify 호출자의 정확 추적(exact trace)}
+
+\sourcepath{RawApiCallerMuTrace.ec}는 실제
+\identifier{cryptolab_haetae_mode2_signature_internal}과 ghost 관찰값을 추가한
+Sign trace를 정확히 비교한다. \identifier{sign_raw_api_exact_mu_trace}는 최종
+memory와 반환값을 보존하고,
+\identifier{sign_raw_api_trace_imports_mode2_sk}와
+\identifier{sign_raw_api_trace_binds_hash_inputs}는 import된 992바이트 접두부와
+실제 pre/message pointer 및 길이를 기록한다.
+
+Verify 쪽 \sourcepath{RawApiVerifyMuTrace.ec}는 full M23, mode~2, internal,
+raw, cryptolab wrapper를 각각 trace에 정확히 연결한다. 중요한 점은 Verify가
+hash 전에 거절할 수 있다는 것이다.
+
+\begin{verified}[Verify 성공은 실제 해시 꼬리(hash tail)에 도달한다]
+\label{thm:verify-accept-tail}
+\identifier{verify_raw_api_actual_accept_implies_trace_tail_reached}와
+\identifier{verify_cryptolab_actual_accept_implies_trace_tail_reached}는 실제
+반환값이 0인 경우 trace의 \identifier{tail_reached}가 참임을 증명한다.
+\identifier{verify_raw_api_actual_accept_binds_hash_inputs}와 cryptolab 대응
+정리는 그 성공 경로에서 실제 \identifier{__verify_hash_mu}에 들어간
+VK/pre/message pointer와 길이를 caller 인자에 묶는다.
+\end{verified}
+
+이것은 임의 서명의 tail 도달이나 정당한 Sign 출력의 accept를 증명한 것이
+아니다. 거절 실행에는 hash 도달이 필요 없고, 정당한 출력의 tail 도달은 별도
+기능정확성 의무다.
+
+\subsection{7단계: 승인 경로 생성 어댑터(accepted-path generated adapter)와 남은 간극}
+
+\sourcepath{RawApiMuReachability.ec}의
+\identifier{raw_api_region_reaches_mu_zero_loss}는 실제 external prefix,
+Sign import, canonical VK 구간에서 \cref{def:mem-prefix}를 구성한다. 여기에는
+인위적인 \identifier{stores mem 0} witness가 없다.
+
+\begin{verified}[승인 추적이 생성 해시/접미부 정리를 인스턴스화함]
+\label{thm:accepted-api-adapter}
+\identifier{raw_api_accepting_execution_hash_mu_zero_loss}는 Sign trace와 성공한
+Verify trace가 공급하는 관찰값 아래 실제 생성
+\identifier{_sf_mu_rawpre}와 \identifier{__verify_hash_mu}의 결과에
+\(\operatorname{MuPrefix}_{32}\)가 성립함을 증명한다.
+\identifier{raw_api_accepting_execution_generated_challenge_suffix_zero_loss}는
+같은 전제와 challenge 위치 64에서 실제 생성 suffix helper 결과까지 같게 만든다.
+\end{verified}
+
+그러나 이 두 정리의 프로그램 표면은 trace module 자체가 아니라 생성 hash와
+suffix helper다. Week~6은 아래와 같이 Sign-output frame과 region-local memory
+관계를 닫았지만, completed trace의 저장 결과로 관계를 운반하는 별도 의미론
+간선은 여전히 필요하다.
+
+\subsection{8단계: Sign 출력 프레임(Sign-output frame)과 구간 국소 순차 추적(region-local sequential trace)}
+
+\sourcepath{RawApiSignOutputFrame.ec}는 실제 출력 copy와 raw Sign caller를 연다.
+\identifier{sign_output_copy_exact_and_frames_reused}는 1474바이트 signature
+접두부를 정확히 쓰면서 그 바깥 바이트를 frame하고,
+\identifier{sign_raw_api_frames_reused_regions}는 실제
+\identifier{cryptolab_haetae_mode2_signature_internal}까지 이를 올린다.
+
+\begin{verified}[실제 Sign 출력의 재사용 구간 프레임]
+\label{thm:sign-output-frame}
+유효한 signature/siglen 출력 구간이 VK, SK, pre, message 구간과 명시적으로
+분리되어 있으면, 모든 종료 실행에서 Sign 결과는 0이고 VK 992바이트, SK
+1408바이트, pre/message 구간은 보존되며 siglen에는 1474가 기록된다.
+\identifier{sign_raw_api_preserves_external_key_prefix}는 KeyGen이 만든
+\identifier{ExternalKeyPrefix}까지 실제 Sign 호출 뒤로 운반한다. 이
+disjointness 계약에는 구체적 witness가 있지만 signing loop의 종료는 결론이
+아니다.
+\end{verified}
+
+\sourcepath{RegionLocalMuEquivalence.ec}와
+\sourcepath{RegionLocalMuTop.ec}는 전체 memory 등식 요구를 제거한다.
+
+\begin{verified}[실제 생성 해시의 구간 국소 동치]
+\label{thm:region-local-mu}
+\identifier{sign_verify_generated_raw_mu_prefix_regionwise}는 실제
+\identifier{_sf_mu_rawpre}와 \identifier{__verify_hash_mu}를 비교한다. mode-2
+SK/VK 접두부 관계, raw branch와 canonical/no-wrap 구간, 그리고 pre/message
+read region의 \cref{def:region-eq}만으로
+\(\operatorname{MuPrefix}_{32}(res_S,res_V)\)를 증명한다. 서로 관련 없는
+memory 바이트가 같을 필요는 없다.
+\end{verified}
+
+마지막으로 \sourcepath{RawApiDirectObservedMu.ec}의
+\identifier{raw_sign_then_verify_actual_exact_trace}는 실제 raw Sign 다음 실제
+cryptolab Verify를 실행하는 프로그램과 두 trace의 순차 실행이 양쪽 결과와
+최종 memory를 보존함을 증명한다.
+\identifier{sign_then_verify_trace_accept_implies_tail_reached}와
+\identifier{sign_then_verify_accept_binds_observed_inputs}는 성공한 Verify의
+tail 도달과 두 hash descriptor를 사후조건으로 제공한다.
+
+이제 frame, byte locality, exact sequence, accept control과 입력 바인딩은 모두
+컴파일된다. 남은 \claim{OBL-DIRECT-OBSERVED-MU}는 그럼에도
+\identifier{SignRawApiMuTrace.observed_mu}와
+\identifier{VerifyCryptolabMuTrace.observed_mu}를 직접 비교하지 못한다. 기존
+pRHL hash-return 정리를 서로 다른 residual continuation을 가진 completed
+trace의 ghost 결과로 옮기는 \claim{OBL-MU-PRODUCT-REPLAY}가 필요하며, Week~7은
+새 axiom이나 wrapper widening 없이 이를 만들지 못해 \statusdeferred 로
+동결했다. 따라서 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)은 여전히
+기록하지 않는다.
+
+\subsection{9단계: 실제 mode-2 서명 접두부 코덱(signature prefix codec)}
+
+Week~7의 기능정확성 경로는 실제 추출된
+\identifier{_pack_sig_prefix}와 \identifier{_unpack_sig_prefix}를 대상으로
+전환했다. \sourcepath{Mode2SignaturePrefixPack.ec}의
+\identifier{pack_sig_prefix_mode2_layout}은 256 challenge bit가 앞 32바이트에,
+1024 low coefficient의 하위 signed byte가 다음 1024바이트에 놓임을 증명한다.
+\sourcepath{Mode2SignaturePrefixUnpack.ec}의
+\identifier{unpack_sig_prefix_mode2_layout}은 그 배치를 역으로 읽고 사용하지
+않는 low-array \([1024,2048)\)를 보존한다.
+\sourcepath{Mode2SignaturePrefixRoundTrip.ec}는 두 절차를 순서대로 호출하는
+actual-procedure harness를 둔다.
+
+\begin{verified}[서명 접두부 코덱]
+\label{thm:signature-prefix-codec}
+정리 \identifier{pack_unpack_sig_prefix_mode2_roundtrip}은 두 실제 생성 절차를
+순서대로 호출한다. \cref{def:signature-prefix-canonical} 아래에서 decoded
+challenge 256개와 mode-2 low 1024개가 입력과 같고, decoded low의 나머지
+1024개 word가 보존됨을 증명한다. all-zero 배열이 전제의 비공허성을 보인다.
+\end{verified}
+
+이는 1056바이트 prefix의 Hoare 부분정확성이다. 1056 이후의 size metadata,
+hbz/h rANS payload, canonical zero padding, pack output tail과 challenge-array
+tail frame은 포함하지 않으며, 전체 1474바이트 codec이나
+\(\delta_{\mathrm{Encoding}}=0\)을 결론내리지 않는다.
+
+\subsection{10단계: 실제 HBZ 잎(leaf), 표 인증서(table certificate)와 순수 rANS 단계}
+
+Week~8은 \claim{OBL-SIG-HBZ-ENCODE-DECODE}를 한 번에 inlining하지 않고
+coefficient/symbol leaf, table, rANS core, full wrapper의 네 층으로 분해했다.
+\sourcepath{Mode2HbzCodecSpec.ec}는 mode-2 상수
+\[
+  \mathsf{count}=1024,\qquad m=13,\qquad \mathsf{offset}=6,\qquad
+  \mathsf{scale}=2^{10},\qquad L=2^{23}
+\]
+와 \cref{def:canonical-hbz}의 술어를 고정한다.
+
+\begin{verified}[실제 HBZ 준비/적용(prepare/apply) 잎 역함수]
+\label{thm:hbz-leaf-inverse}
+\identifier{encode_hb_z1_prepare_mode2_correct}는 실제
+\identifier{encode_hb_z1_prepare_jazz}가 canonical 계수 \(h_i\in[-6,7)\)를
+symbol \(h_i+6\)으로 만들고 bad word를 0으로 두며 symbol tail을 보존함을
+증명한다. \identifier{decode_hb_z1_apply_mode2_correct}는 실제 apply 절차가 같은
+symbol에서 원래 32비트 계수를 복원하고 coefficient tail을 보존함을 증명한다.
+두 actual wrapper를 순서대로 실행하는
+\identifier{encode_prepare_decode_apply_mode2_inverse}는 첫 1024개 계수의 정확한
+복원을 결론낸다. all-zero HBZ 배열이 canonical 전제의 비공허성을 보인다.
+\end{verified}
+
+이 정리는 prepare/apply의 local inverse이며 rANS buffer, encoder size, full
+wrapper는 프로그램 표면에 없다. 별도의
+\sourcepath{Mode2HbzActualBoundary.ec}는 focused Week~8 extraction과 Week~7의
+signature pack/unpack extraction 안에 있는 실제
+\identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full} body가 같은
+procedure임을 exact equivalence로 고정한다. 따라서 leaf 정리와 전체 packer가
+서로 다른 코드 복사본을 가리키는 문제는 없지만, procedure identity 자체가
+inverse를 주지는 않는다.
+
+\begin{verified}[실제 표 인증서와 순수 rANS 역함수]
+\label{thm:hbz-rans-step}
+\sourcepath{Mode2HbzTableCertificate.ec}는 13개 빈도가 양수이고 합이 1024이며
+interval이 \([0,1024)\)를 분할함을 보인다. reciprocal multiply/high-half/shift와
+bias로 계산한 actual fast encoder 식이 허용 상태 범위에서 수학적
+\(E_s\)와 같고 32/64비트 overflow가 없음을 증명한다.
+\sourcepath{Mode2HbzSymbolWordsGenerated.ec}의
+\identifier{actual_mode2_hbz_tables_certified}는 실제 pack/unpack의 literal
+encoder/decoder/symbol 배열에 \cref{def:hbz-table-certificate}를 적용한다.
+마지막으로 \sourcepath{Mode2RansCore.ec}의
+\identifier{pure_rans_step_inverse}와
+\identifier{hbz_fast_step_decode_inverse}는
+\[
+  D_s(E_s(x))=x,\qquad
+  0\le s<13,\quad 1\le x<\mathsf{hbz\_xmax}(s)
+\]
+를 증명한다. \(s=0,x=1\)이 fast-step 전제의 구체적 witness다.
+\end{verified}
+
+\subsection{11단계: rANS 바이트 스택(byte stack), 실제 접미부 복사와 결합 제어(control harness)}
+
+Week~9은 인코더와 디코더를 곧바로 동기 진행(lockstep)시키지 않고
+\cref{def:rans-byte-trace}의 공통 \(xs/cuts/bytes\) 의미를 먼저 고정했다.
+
+\begin{verified}[순수 정규화 추적(normalization trace)과 단어 산술]
+\label{thm:rans-byte-stack}
+\sourcepath{Mode2RansByteStack.ec}의 \identifier{renorm_len_le2}와
+\identifier{renorm_reduced_bounds}는 \(2^{23}\le x<2^{31}\)에서 각 기호가
+0, 1, 2바이트만 방출하고 축소 상태가
+\(1\le r<\mathsf{hbz\_xmax}(s)\)임을 보인다.
+\identifier{renorm_bytes_readback}은 디코더 순서 구간을 다시 읽으면
+정규화 전 상태를 얻음을, \identifier{serialize32_parse_inverse}는 첫
+4바이트 리틀엔디언 상태의 왕복을 증명한다.
+\identifier{normalized_fast_step_state_bounds}와
+\identifier{encode_trace_state_bounds}는 정준 추적의 모든 경계 상태가
+\([2^{23},2^{31})\)에 머묾을 보이고,
+\identifier{valid_rans_trace_canonical}은 추적 객체가 정의로부터 구성됨을
+증명한다. 별도의 \sourcepath{Mode2RansNormalization.ec}는 실제 W32 이동,
+하위 바이트 절단, 디코더 이동/논리합 및 W64 커서 감소를 같은 정수식에
+연결한다. 특히 \identifier{encoder_two_byte_decoder_order}는 역방향 저장이
+만드는 순방향 구간이 \([\mathsf{high},\mathsf{low}]\)임을 검증한다.
+\end{verified}
+
+이 정리들은 실제 생성 인코더/디코더를 호출하지 않는 순수/단어 잎이다.
+따라서 \identifier{valid_rans_trace}를 실제 출력의 사전조건으로 넣거나
+디코더 성공을 가정하는 근거로 사용하지 않는다.
+
+\begin{verified}[실제 접미부 복사와 인코더 결과 분기]
+\label{thm:rans-actual-control}
+\identifier{copy_encoded_suffix_correct}는 실제
+\identifier{__copy_encoded_suffix}에 대해
+\[
+  0\le off_0,\quad 0\le n,\quad off_0+n\le2048
+\]
+이면 \(0\le j<n\)에서 \(out[j]=enc[off_0+j]\)이고 \([n,2048)\)의 기존
+\(out\) 꼬리가 보존됨을 증명한다. 구성된 디코더 버퍼를 쓰지 않고 실제 복사
+반복문을 연 Hoare 부분정확성 정리다.
+
+\identifier{actual_rans_encode_mode2_control}과
+\identifier{actual_rans_decode_mode2_control} 중 인코더 정리는 구체적
+mode-2 표/개수와 정준 기호열을 고정하되 초기 상태는 임의로
+두고, 디코더 정리는 구체적 표와 \identifier{mode2_decode_state} 입력을
+고정한다. 두 정리는 각각 반환 \(bad\in\{0,1\}\)만 보인다. 이어
+\cref{def:rans-actual-harness}의
+\identifier{actual_rans_harness_branches_on_encoder_result}는 실제
+인코더--복사--디코더 순서, 실패 시 디코더 미실행, 성공 분기의 정확한
+디코더 입력 필드를 증명한다. 이 결론에는 추적 등식, 디코더 성공이나
+기호 왕복이 없다.
+\end{verified}
+
+Week~9 종료 시 정확한 상태는 다음과 같다.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
+\toprule
+의무 & 상태 \\
+\midrule
+HBZ 준비/적용, 잎 역함수와 유계 꼬리 프레임 & \statusproved \\
+집중/전체 실제 절차 경계 & \statusproved \\
+실제 13기호 표 인증서 & \statusproved \\
+순수 및 역수 빠른 단일 단계 역함수 & \statusproved \\
+순수 정규화 바이트 역함수와 상태 범위 & \statusproved \\
+실제 접미부 복사의 점별/프레임 정리 & \statusproved \\
+실제 인코더--복사--디코더 결합 제어 & \statusproved \\
+실제 인코더 외부 반복문 추적 정제 & \statuspartial \\
+실제 디코더 추적 소비 정제 & \statuspartial \\
+실제 rANS 핵심 역함수와 성공 증인 & \statuspartial \\
+성공 조건부 전체 HBZ 역함수 & \statuspartial \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+실제 인코더는 기호를 역순으로 처리하면서 정규화 바이트를 뒤쪽 커서에 쌓고,
+디코더는 이를 앞에서부터 소비한다. Week~9에는 이 역방향 스택/순방향 소비
+관계를 실제 \((i,x,off,buffer)\)와 순수 \((x_j,c_j,B)\) 사이에 세우는 두 외부
+불변식이 없었다. 따라서 \cref{bdry:hbz-success}에 따라 정준 HBZ만으로 인코더
+성공을 가정하지 않았고, \claim{OBL-SIG-HBZ-ENCODE-DECODE}는
+\statuspartial 이었다. 이 표와 \identifier{CONTINUE-RANS}는 Week~9 종료
+시점의 역사적 판정이다.
+
+\subsection{12단계: 실제 인코더 내부 의미와 성공 시 크기}
+
+Week~10은 디코더로 이동하지 않고 실제 인코더 경계를 더 세분화했다.
+\sourcepath{Mode2RansArrayList}\allowbreak\sourcepath{Bridge.ec}는
+\cref{def:rans-array-list-bridge}의 배열/목록 접미부와 구간/프레임 연산을
+정의하고, 1024번째 접미부 기저식, 한 원소 점화식, 정준성, 이어 붙이기와
+한 기호 \identifier{encode_trace} 점화식을 증명한다.
+
+\begin{verified}[배열/목록 접미부와 실제 단어 단계]
+\label{thm:rans-array-word-bridge}
+\identifier{encode_trace_}\allowbreak\identifier{suffix_extension}은 배열의 \(i\)번째 기호와
+\(i+1\)번째 접미부에서 한 기호 추적을 구성한다.
+\sourcepath{Mode2RansEncoder}\allowbreak\sourcepath{WordStep.ec}의
+\identifier{actual_mode2_encoder_}\allowbreak\identifier{word_step_correct}는
+\[
+  0\le s<13,\quad
+  1\le\operatorname{uint}(x)<\mathsf{hbz\_xmax}(s)
+\]
+에서 실제 mode-2 표의 역수 곱, 이동과 편향으로 계산한 W32 결과가 순수
+\identifier{hbz_fast_encode_step}의 W32 표현과 같음을 증명한다. 이것은
+\claim{OBL-RANS-ENCODER-WORD-STEP}의 단어 수준 정리이며, 그 자체로 생성된 외부
+반복문의 Hoare 정리는 아니다.
+\end{verified}
+
+\sourcepath{Mode2RansEncoderInnerProgress.ec}는 순수 정규화 길이가 0, 1, 2임과
+매 단계의 나눗셈/바이트 추가를 증명한다. 실제 생성 반복문의 재사용 술어는
+\sourcepath{Mode2RansEncoderTrace.ec}에 있고, 직접 Hoare 증명은
+\sourcepath{Mode2RansEncoderActualInner.ec}에 있다.
+
+\begin{verified}[실제 생성 내부 반복문의 바이트/프레임 단계]
+\label{thm:rans-actual-inner}
+\identifier{actual_rans_encode_inner_no_underflow}는 실제
+\identifier{RansEncodeTarget.M._rans_encode}를 열어
+\cref{def:rans-actual-inner}의 국소 단계 불변식을 유지한다. 실제 전이는
+\[
+  off\gets off-1;\qquad encp[off]\gets\operatorname{low8}(x);
+  \qquad x\gets x\mathbin{\mathtt{>>}}8
+\]
+이며, 쓴 바이트 구간과 더 낮은 접두부 프레임을 보존하고 W64 감소가
+언더플로하지 않음을 검증한다. 절차의 반환 사후조건은
+\[
+  bad'\ne0\quad\lor\quad(bad'=0\land\operatorname{uint}(off')\le1020)
+\]
+이다. 현재 위상 범위 \(0\le k\le4\)는 보수적이다. 실제 위상을 순수 0/1/2
+정규화 바이트와 동일시하고, 내부 호출 전 배열을 누적 외부 추적에 연결하는
+부분은 \claim{OBL-RANS-ACTUAL-INNER-NORMALIZE}에 \statuspartial 로 남는다.
+\end{verified}
+
+\begin{verified}[최종 직렬화 잎과 실제 성공 시 크기]
+\label{thm:rans-encoder-success-size}
+\sourcepath{Mode2RansEncoderSerialization.ec}는 네 번의 실제 패턴
+\identifier{set8} 쓰기가 \identifier{serialize32_le}와 같고 배열 밖 및 앞쪽
+프레임을 보존함을 증명한다. 이는 직렬화 잎 정리이며 아직 생성 절차의 전체
+사후조건으로 합성되지 않았다.
+
+별도로 \identifier{actual_rans_encode_success_size_bound}는 실제
+\identifier{_rans_encode}의 실패 분기를 유지하면서 성공 시
+\[
+  0\le\operatorname{uint}(off')\le1020,\qquad
+  4\le1024-\operatorname{uint}(off')\le1024
+\]
+를 증명한다. 이는 \claim{OBL-RANS-ENCODER-SUCCESS-SIZE}의 실제 절차
+부분정확성이다. 성공의 도달 가능성이나 종료를 증명하지 않는다.
+\end{verified}
+
+Week~10 종료 시의 정확한 상태는 다음과 같다.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
+\toprule
+의무 & 상태 \\
+\midrule
+\claim{OBL-RANS-ARRAY-LIST-BRIDGE} & \statusproved \\
+\claim{OBL-RANS-ENCODER-WORD-STEP} & \statusproved\ (단어 수준) \\
+\claim{OBL-RANS-ACTUAL-INNER-NORMALIZE} & \statuspartial \\
+\claim{OBL-RANS-FINAL-SERIALIZATION} & \statusproved\ (잎 정리) \\
+\claim{OBL-RANS-ENCODER-SUCCESS-SIZE} & \statusproved\ (실제 부분정확성) \\
+\claim{OBL-RANS-ENCODE-REFINEMENT} & \statuspartial \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & \statuspartial \\
+\claim{OBL-RANS-DECODE-REFINEMENT}과 핵심 역함수 & \statuspartial \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & \statuspartial \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+남은 인코더 사후조건은 실제 반환 접미부가
+\identifier{symbol_list_of_array(symbols0)}에 적용한
+\identifier{trace_bytes}와 점별로 같고, 그
+길이와 반환 오프셋의 합이 1024이며, 쓰지 않은 접두부가 프레임됨을 한꺼번에
+말해야 한다. 이를 위해 외부 불변식에 \(0\le i\le1024\), 접미부 추적의 상태,
+오프셋-길이 등식, \identifier{segment_matches}, \identifier{prefix_frame}을 함께
+유지해야 한다. 한 외부 반복의 실제 표 읽기/보호/역수 이동 제어를 이미 증명된
+내부 바이트 단계와 단어 단계에 연결하고, 마지막 네 저장을 누적 접미부와
+합성하는 간선이 Week~10에는 없었다.
+
+따라서 Week~10의 역사적 판정은 \identifier{CONTINUE-ENCODER}였고, Week~11은
+이 단일 간선만을 대상으로 삼았다.
+
+\subsection{13단계: Week~11 실제 인코더 추적 폐쇄}
+
+Week~11은 Week~10의 국소 내부 불변식에 순수 기호 꼬리(pure symbol tail)의
+추적을 직접 붙인 다음 정확한 불변식을 설치했다. 편의를 위해
+\[
+\begin{aligned}
+ \ell&:=\operatorname{mode2\_normalization\_len}(x_0,s),\\
+ W_k&:=\operatorname{inner\_written\_suffix}(x_0,s,k),&
+ B_t&:=\operatorname{encode\_trace}(tail).\mathsf{bytes}
+\end{aligned}
+\]
+라 쓰면 핵심 형태는 다음과 같다.
+\[
+\begin{aligned}
+ I_{\mathrm{tail}}(k) \equiv{}&
+ 0\le k\le \ell\\
+ &\land\;\operatorname{segment\_matches}\!\left(
+   encp,off_0-k,W_k\mathbin{++}B_t\right)\\
+ &\land\;\operatorname{prefix\_frame}(enc_0,encp,off_0-k).
+\end{aligned}
+\]
+실제 가드가 거짓이 되는 지점에서
+\(k=\operatorname{mode2\_normalization\_len}(x_0,s)\le2\)가 도출된다. 생성
+표의 \(x_{\max}\), 역수, 편향, 패킹된 보수/이동값과 이동 사다리는 한 번의
+전용 단어 연결을 거쳐 순수 빠른 단계와 같아진다.
+
+Week~11 파일의 역할은 다음과 같다. 아래 파일명에는 공통 접두부
+\sourcepath{Mode2RansEncoder}를 붙여 읽는다.
+\begin{itemize}
+  \item \sourcepath{TailInvariant.ec}: 불변식의 초기화, 한
+        바이트 진행, 정확한 종료와 외부 한 기호 성공 전이;
+  \item \sourcepath{GeneratedWordStep.ec}: 생성 표 읽기와 단어 갱신의 연결;
+  \item \sourcepath{SerializationComposition.ec},
+        \sourcepath{Finalization.ec},
+        \sourcepath{GeneratedFinalization.ec}: 직렬화된 상태를
+        누적 추적 앞에 붙이는 실제 최종 저장 합성;
+  \item \sourcepath{ActualTraceClosure.ec}: 실제 내부/외부 반복과 최종 저장을
+        직접 여는 Hoare 정리;
+  \item \sourcepath{OuterRefinement.ec}: 전체 성공 접미부를 펼쳐 쓴 최종
+        따름정리(corollary).
+\end{itemize}
+
+\begin{verified}[실제 인코더의 정확한 성공 접미부]
+\label{thm:actual-encoder-trace-closure}
+\identifier{actual_rans_encode_trace_closure}는 실제 생성
+\identifier{RansEncodeTarget.M._rans_encode}를 직접 열어 다음 실패/성공
+사후조건을 증명한다. 아래에서
+\[
+ B_0:=\operatorname{trace\_bytes}
+   (\operatorname{symbol\_list\_of\_array}(symbols_0))
+\]
+로 둔다.
+\[
+\begin{aligned}
+ bad'\ne0\quad\lor\quad\bigl(bad'=0
+ &\land 0\le off'\le1020
+ \land 4\le1024-off'\le1024\\
+ &\land\operatorname{segment\_matches}
+   (encp',off',B_0)\\
+ &\land off'+|B_0|=1024\\
+ &\land\operatorname{prefix\_frame}(enc_0,encp',off')\bigr).
+\end{aligned}
+\]
+성공은 사전조건이 아니며 추적은 실제 입력 기호 배열에서 정준적으로 계산된다.
+\identifier{actual_rans_encode_trace_refinement}가 같은 결론을 펼쳐 쓴 최종
+따름정리다. 두 정리는 57대상 \identifier{-no-eco} 전체 검증에서 컴파일됐다.
+\end{verified}
+
+Week~11 종료 상태는 다음과 같다.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
+\toprule
+의무 & 상태 \\
+\midrule
+\claim{OBL-RANS-ACTUAL-INNER-NORMALIZE} & \statusproved \\
+\claim{OBL-RANS-FINAL-SERIALIZATION} & \statusproved\ (실제 합성) \\
+\claim{OBL-RANS-ENCODE-REFINEMENT} & \statusproved\ (성공 조건부 부분정확성) \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & \statuspartial \\
+\claim{OBL-RANS-DECODE-REFINEMENT} & \statuspartial \\
+\claim{OBL-RANS-CORE-INVERSE} & \statuspartial \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & \statuspartial \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+Week~11 종료 판정은 \identifier{GO-ENCODER}였다. 이는 인코더 정제 간선이
+닫혀 Week~12가 실제 디코더 추적 정제로 이동할 수 있다는 뜻이지, 인코더
+종료나 성공 분기 도달, 디코더 성공, HBZ 왕복 또는 인코딩 무손실이
+증명됐다는 뜻은 아니었다.
+
+\subsection{14단계: Week~12 실제 디코더 의미 정제}
+
+Week~12는 순수 추적의 존재를 디코더 성공으로 취급하지 않고, 실제 생성
+\identifier{RansDecodeTarget.M._rans_decode}의 두 반복문을 직접 열었다. 파일명은
+공통 접두부 \sourcepath{Mode2RansDecoder}를 붙여 읽는다.
+\begin{itemize}
+  \item \sourcepath{Cursor.ec}, \sourcepath{CursorSteps.ec}: 참조 상태,
+        구간과 커서의 시작/한 단계/최종 경계 및 읽기 범위;
+  \item \sourcepath{WordStep.ec}, \sourcepath{ActualWord.ec},
+        \sourcepath{GeneratedStep.ec}: 구체적 \identifier{symbol_words} 조회,
+        \identifier{dsyms_words} 필드와 실제 W32/W64 갱신을 수학적 디코더
+        단계에 연결;
+  \item \sourcepath{Normalization.ec}: 부분 바이트 재생과 0/1/2바이트
+        가드의 정확성;
+  \item \sourcepath{ActualTrace.ec}: 실제 외부/내부 반복 불변식, 초기 파싱,
+        한 기호 전이와 정확한 출구;
+  \item \sourcepath{TopHoare.ec}: 실제 생성 절차를 직접 대상으로 하는 최상위
+        Hoare 정리.
+\end{itemize}
+
+예상 기호 목록 \(s\)에 대한 참조 경계는
+\[
+\begin{gathered}
+ c_0=4,\qquad c_{i+1}=c_i+|\beta_i|,\qquad
+ c_{1024}=|\mathsf{trace\_bytes}(s)|,\\
+ x_0=\operatorname{ParseLE32}(\mathsf{trace\_bytes}(s)[0..4)),\qquad
+ x_{1024}=2^{23}.
+\end{gathered}
+\]
+\identifier{generated_decoder_parse32_from_trace}가 첫 식의 실제 4바이트
+파싱을 연결하고, 생성 표 정리들은 \(x_i\bmod1024\)가 선택한 기호와 환원
+상태를 수학적 단계에 맞춘다. 내부 불변식은
+\[
+ k=\operatorname{uint}(off)-c_i,\qquad
+ x=\mathsf{decoder\_replay\_prefix}(x_{i+1},s_i,k)
+\]
+를 유지한다. 생성 가드는 \(k<|\beta_i|\)와 같고
+\(|\beta_i|\le2\)이므로 실제 반복은 정확히 0, 1 또는 2바이트를 소비한다.
+
+\begin{verified}[실제 디코더의 정확 추적 부분정확성]
+\label{thm:actual-decoder-trace-closure}
+\identifier{actual_rans_decode_trace_refinement}의 사전조건은 정준
+1024기호 배열, 그 배열에서 계산한 정확한 \identifier{trace_bytes}, 크기
+\(4\le n\le1024\), 상태 필드 \((1024,n,13)\), 실제 mode-2 두 디코더 표와
+점별 추적 읽기 관계다. 성공이나 출력 등식은 사전조건에 없다. 모든 종료
+실행의 사후조건은
+\[
+\begin{aligned}
+  bad'&=0,& off'&=n,\\
+  decoded'[0..1024)&=expected[0..1024),&
+  decoded'[1024..2048)&=decoded_0[1024..2048)
+\end{aligned}
+\]
+이다. 내부 출구의 \(x=2^{23}\)은 실제 최종 거절 검사를 닫는 데 사용되지만
+반환 ABI에는 노출되지 않는다. 이 정리는 실제 생성 절차를 직접 대상으로 하며
+래퍼나 순수 디코더 정리가 아니다.
+\end{verified}
+
+Week~12 종료 상태는 다음과 같다.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
+\toprule
+의무 & 상태 \\
+\midrule
+디코더 커서/표/단어 단계 연결 & \statusproved \\
+\claim{OBL-RANS-DEC-NORMALIZE} & \statusproved\ (실제 반복문 연결) \\
+\claim{OBL-RANS-DECODE-REFINEMENT} & \statusproved\ (정확 추적 부분정확성) \\
+\claim{OBL-RANS-CORE-INVERSE} & \statuspartial \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & \statuspartial \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & \statuspartial \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+65대상 \identifier{-no-eco} 전체 검증이 통과했고 Week~12 당시 판정은
+\identifier{GO-DECODER}다. Week~13의 단일 간선은 실제
+\identifier{Mode2RansActualHarness.run} 안에서 인코더의
+\identifier{segment_matches}와 복사 보조절차의 \identifier{slice_eq}를
+디코더의 점별 정확 추적 입력으로 운반하는 합성이다. 이 결합, 실제 인코더
+성공 도달, 두 반복문의 종료, 전체 HBZ 래퍼와 인코딩 무손실은 Week~12
+정리에서 따라오지 않는다.
+
+\subsection{15단계: Week~13 실제 rANS 핵심 역함수 합성}
+
+Week~13은 Week~12의 마지막 미연결 간선을 두 작성 이론으로 닫았다.
+\sourcepath{Mode2RansCore}\allowbreak\sourcepath{CompositionBridge.ec}는 다음
+사후조건 어댑터를 제공한다.
+
+\begin{itemize}
+  \item \identifier{copied_suffix_is_exact_trace}: 실제 인코더의
+        \identifier{segment_matches}와 실제 복사의 \identifier{slice_eq}에서
+        복사 버퍼 오프셋 0의 정확 추적을 도출한다.
+  \item \identifier{segment_matches_implies_exact_}\allowbreak
+        \identifier{decoder_segment_input}: 전역 추적 구간을 각 정규화 구간의
+        점별 디코더 읽기로 펼친다.
+  \item \identifier{actual_decoder_input_from_}\allowbreak
+        \identifier{configured_trace}: 실제 세 상태 저장과 복사된 추적으로
+        Week~12의 전체 디코더 입력 술어를 구성한다.
+  \item \identifier{encoder_success_size_word_bridge}: 실제 성공 오프셋 범위로
+        \identifier{W64} 뺄셈의 무랩(no-wrap)과 정수 추적 크기 등식을
+        증명한다.
+\end{itemize}
+
+\begin{verified}[세 실제 절차의 성공 조건부 핵심 역함수]
+\label{thm:actual-rans-core-inverse}
+\sourcepath{Mode2RansCoreActualInverse.ec}의
+\identifier{actual_rans_encode_copy_decode_inverse}는
+\identifier{Mode2RansActualHarness.run}을 직접 대상으로 한다. 사전조건은 여섯
+초기 인자의 바인딩과 정준 \identifier{mode2_hbz_symbol_stream}뿐이며 인코더
+성공을 요구하지 않는다. 모든 종료 실행에서 다음 두 분기 중 하나가 성립한다.
+\[
+\begin{aligned}
+  bad_{\mathrm{enc}}\ne0&\;\Longrightarrow\;
+    \neg\mathsf{decoder\_ran}\land
+    decoded'=decoded_0\land state'=state_0,\\
+  bad_{\mathrm{enc}}=0&\;\Longrightarrow\;
+    \mathsf{decoder\_ran}\land bad_{\mathrm{dec}}=0
+    \land off_{\mathrm{dec}}=\mathsf{encoded\_size}\\
+  &\hspace{7.2em}\land\;
+    decoded'[0..1024)=symbols[0..1024).
+\end{aligned}
+\]
+성공 분기는 디코더 입력 필드 \((1024,\mathsf{encoded\_size},13)\), 출력
+\([1024,2048)\) 꼬리 프레임, 실제 인코더의 정확한 접미부와 초기 접두부
+프레임도 보존한다. 따라서 복사된 추적이나 디코더 결과를 전제로 되풀이하는
+순환 가정은 없다.
+\end{verified}
+
+이 정리의 전제는 정준 all-zero 기호 배열로 만족 가능하지만, 결론이 실제
+인코더의 실패/성공 분기이므로 성공 분기의 도달 가능성은 따라오지 않는다.
+또한 결합 모듈은 세 고정 생성 절차를 직접 호출하는 증명 작성 harness이며,
+production \identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full}
+래퍼 자체는 아니다.
+
+Week~13 완료 상태는 다음과 같다.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
+\toprule
+의무 & 상태 \\
+\midrule
+복사 추적/점별 디코더 입력/W64 크기 어댑터 & \statusproved \\
+\claim{OBL-RANS-CORE-INVERSE} & \statusproved\ (성공 조건부 부분정확성) \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & \statuspartial \\
+인코더/디코더 종료 & \statuspartial \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & \statuspartial\ (실제 전체 래퍼 합성) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+67대상 \identifier{-no-eco} 전체 검증과 독립 정리 표면 검사가 통과했고 최신
+판정은 \identifier{GO-CORE}다. Week~14의 단일 구현 간선은 이미 닫힌
+prepare/apply 역함수와 이 핵심 역함수를 실제 전체 HBZ 래퍼 경계에서
+성공 조건부로 합성하는 것이다. 실제 성공 증인, 종료, h 코덱, 전체 1474바이트
+코덱과 인코딩 무손실은 Week~13 정리에서 따라오지 않는다.

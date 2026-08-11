@@ -1,0 +1,6 @@
+PASS security fresh targets=16
+PASS NTT target refinement
+PASS FIPS202 generated extraction target
+PASS KeyGen mode-2 parent composition
+PASS KeyGen M23 first-attempt head
+RESULT PASS selected-baselines=20 read-only=true

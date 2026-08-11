@@ -1,0 +1,116 @@
+\section{Week 7: Mode-2 Signature Codec}
+
+The main Week~7 lane moved to mode-2 signature serialization. The actual
+standalone wrappers \texttt{pack\_sig\_mode2\_full\_jazz} and
+\texttt{unpack\_sig\_mode2\_full\_jazz} were regenerated and pinned by hash.
+Their reachable closures contain the actual prefix, full, and rANS helper
+procedures used below.
+
+\subsection*{Audited parameters and 1474-byte layout}
+
+The extracted wrapper calls agree on:
+\[
+\begin{array}{l}
+\mathsf{sigbytes}=1474,\;
+\mathsf{lcount}=4,\;
+\mathsf{hb\_count}=1024,\;
+\mathsf{hb\_m}=13,\;
+\mathsf{hb\_offset}=6,\\
+\mathsf{h\_count}=512,\;
+\mathsf{h\_m}=13,\;
+\mathsf{h\_offset}=239,\\
+\mathsf{base\_hb}=132,\;
+\mathsf{base\_h}=7,\;
+\mathsf{payload\_limit}=416.
+\end{array}
+\]
+
+The byte structure recovered from the actual extracted code is:
+\begin{center}
+\begin{tabular}{r l}
+$[0,32)$ & 256 challenge bits, packed within 32 bytes \\
+$[32,1056)$ & 1024 signed low-coefficient bytes \\
+$[1056,1058)$ & hb/h encoded-size deltas \\
+$[1058,1058+\mathsf{hbsize})$ & hbz encoded payload \\
+following bytes & h encoded payload \\
+through byte 1473 & canonical zero padding
+\end{tabular}
+\end{center}
+The arithmetic boundary is $1056+2+416=1474$. The unpacker additionally
+checks nonzero size values, the two base-offset ranges, their total against
+416, and zero trailing bytes.
+
+\subsection*{Actual prefix procedures}
+
+The authored theory first proves two procedure-level layout theorems. The
+packer theorem opens \texttt{\_pack\_sig\_prefix} and establishes the
+challenge-bit and 1024-byte low layouts. The unpacker theorem opens
+\texttt{\_unpack\_sig\_prefix} and establishes the inverse bit extraction and
+signed-byte extension. Its postcondition also preserves low-array words
+$[1024,2048)$.
+
+The sequential harness calls the two actual generated procedures:
+\begin{verbatim}
+sig <@ Pack._pack_sig_prefix(sig, cp, low, W64.of_int 4,
+                             W64.of_int 1474);
+(decoded_cp, decoded_low) <@
+  Unpack._unpack_sig_prefix(decoded_cp, decoded_low, sig,
+                            W64.of_int 4);
+\end{verbatim}
+
+The fresh-compiled theorem is
+\path{pack_unpack_sig_prefix_mode2_roundtrip}. Its exact semantic
+statement is:
+\[
+\begin{split}
+ &\mathsf{canonical\_challenge}(cp)\;\land\;
+   \mathsf{canonical\_signed\_low}(low)\\
+ &\quad\Longrightarrow
+   \mathsf{challenge\_prefix\_eq}(decoded\_cp,cp)\;\land\\
+ &\qquad\qquad
+   \mathsf{low\_mode2\_eq}(decoded\_low,low)\;\land\;
+   \mathsf{low\_tail\_frame}(initial\_low,decoded\_low).
+\end{split}
+\]
+
+Here challenge words are exactly zero or one. A canonical low word has signed
+value in $[-128,128)$ and equals the arithmetic sign extension of its low
+byte. The theorem is Hoare partial correctness; it does not assert signing
+loop termination. The compiled
+\path{prefix_codec_preconditions_satisfiable} lemma supplies all-zero
+arrays, establishing non-vacuity.
+
+\subsection*{Proof strategy and failed decomposition}
+
+The pack proof uses three invariants: zero-fill progress, bit-by-bit assembly
+of each challenge byte, and the low-byte store cursor. The unpack proof uses a
+nested byte/bit invariant for challenge recovery and a signed-extension
+invariant for low coefficients. The initial composition attempt fixed the
+signature to an external logical parameter. It failed because the local
+program variable returned by the preceding pack call could not instantiate
+that pure parameter in a \texttt{call} tactic. Generalizing the unpack theorem
+to predicates over its current \texttt{sigp} argument closed the composition;
+repeating the fixed-array or abstract-function approach should be avoided.
+
+An attempted monolithic pack tail-frame proof was not retained. The compiled
+boundary proves the unpack low-array tail, while the pack signature-array
+$[1474,2948)$ frame and challenge-output tail remain
+\texttt{OBL-SIG-PREFIX-FRAME}. The standalone codec procedures do not write
+global memory.
+
+\subsection*{Suffix obligations and security boundary}
+
+The actual metadata and zero-padding gates are audited but do not yet have
+procedure theorems. Both rANS pairs remain open:
+\begin{itemize}
+\item \path{_encode_hb_z1_full} with \path{_decode_hb_z1_full};
+\item \path{_encode_h_full} with \path{_decode_h_full}.
+\end{itemize}
+
+The prefix result is security-relevant. Deterministic canonical parsing
+removes one source of signature ambiguity and malleability. It supplies one
+input to the adapter between implementation acceptance and the paper forgery
+event. It does not make the full encoding loss zero: suffix ambiguity,
+malformed rejection, norm, hint, arithmetic, and challenge consistency remain
+open. Consequently neither Sign-output tail reach nor full Verify correctness
+follows from this chapter.

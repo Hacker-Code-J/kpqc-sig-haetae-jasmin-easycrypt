@@ -1,0 +1,256 @@
+fn shake256_add_rate_bit(reg u256[7] st) -> reg u256[7]
+{
+    reg u256 t256;
+    reg u128 t128;
+
+    reg u64 t64;
+
+    t64 = 1;
+    t64 <<= (8*SHAKE256_RATE - 1) % 64;
+
+    t128 = (128u)t64;
+    t256 = #set0_256();
+    t256 = #VINSERTI128(t256, t128, 0);
+
+    st[3] ^= t256;
+    return st;
+}
+
+fn shake256_absorb_block(
+    reg u256[7] state,
+    reg ptr u8[SHAKE256_RATE] block
+) -> reg u256[7]
+{
+    reg u64 t64;
+    reg u256 r0, r1, r2, r3, r4, r5, r6;
+    reg u128 t128_0, t128_1;
+
+    t64 = block.[:u64 0];
+    t128_0 = (128u) t64;
+    r0 = #VPBROADCAST_4u64(t128_0);
+    state[0] ^= r0;
+
+    r1 = block.[:u256 8];
+    state[1] ^= r1;
+
+    t64 = block.[:u64 40];
+    t128_1 = (128u) t64;
+
+    r3 = block.[:u256 48];
+
+    t64 = block.[:u64 80];
+    t128_0 = (128u) t64;
+
+    r4 = block.[:u256 88];
+
+    t64 = block.[:u64 120];
+    t128_1 = #VPINSR_2u64(t128_1, t64, 1);
+
+    t64 = block.[:u64 128];
+    r5 = (256u)#VMOV_64(t64);
+
+    t64 = 0;
+    t128_0 = #VPINSR_2u64(t128_0, t64, 1);
+    r2 = (2u128)[t128_1, t128_0];
+    state[2] ^= r2;
+
+    r6 = #set0_256();
+    state = __addstate_r3456_avx2(state, r3, r4, r5, r6);
+
+    state = _keccakf1600_avx2(state);
+
+    return state;
+}
+
+fn shake256_squeeze_block(
+    reg ptr u8[SHAKE256_RATE] block,
+    reg u256[7] state
+) -> reg ptr u8[SHAKE256_RATE]
+{
+    reg u256 t256_0 t256_1 t256_2 t256_3 t256_4;
+    reg u128 t128_0 t128_1;
+
+    // [ 0, 0 ]
+    t128_0 = (128u) state[0];
+    block.[:u64 0] = t128_0;
+    // [ 1, 2, 3, 4 ]
+    block.[:u256 1*8] = state[1];
+
+    // [ 16, 7, 8, 19 ]
+    t256_0 = #VPBLEND_8u32(state[3], state[4], (8u1)[1,1,1,1,0,0,0,0]);
+    // [ 11, 22, 23, 14 ]
+    t256_1 = #VPBLEND_8u32(state[4], state[3], (8u1)[1,1,1,1,0,0,0,0]);
+    // [ 21, 17, 18, 24 ]
+    t256_2 = #VPBLEND_8u32(state[5], state[6], (8u1)[1,1,1,1,0,0,0,0]);
+    // [ 6, 12, 13, 9 ]
+    t256_3 = #VPBLEND_8u32(state[6], state[5], (8u1)[1,1,1,1,0,0,0,0]);
+
+    // [ 5, 15 ]
+    //  state[2] = TTT[0];
+    t128_1 = #VEXTRACTI128(state[2], 1);
+    block.[:u64 40] = t128_1;
+
+    // [ 6, 7, 8, 9 ]
+    t256_4 = #VPBLEND_8u32(t256_0, t256_3, (8u1)[1,1,0,0,0,0,1,1]);
+    block.[:u256 48] = t256_4;
+
+    // [ 10, 20 ]
+    t128_0 = (128u) state[2];
+    block.[:u64 80] = t128_0;
+
+    // [ 11, 12, 13, 14 ]
+    t256_4 = #VPBLEND_8u32(t256_3, t256_1, (8u1)[1,1,0,0,0,0,1,1]);
+    block.[:u256 88] = t256_4;
+
+    // [ 15 ]
+    block.[:u64 120] = #VPEXTR_64(t128_1, 1);
+
+    // [ 16, 17, 18, 19 ]
+    t256_4 = #VPBLEND_8u32(t256_2, t256_0, (8u1)[1,1,0,0,0,0,1,1]);
+    t128_0 = (128u)t256_4;
+    block.[:u64 128] = t128_0;
+
+    return block;
+}
+
+fn squeeze_64_bytes(reg ptr u8[64] array, reg u256[7] state) -> reg ptr u8[64] {
+    reg u128 t128;
+    reg u256 t256;
+
+    // state[0] = [0, 0, 0, 0]
+    t128 = (128u)state[0];
+    array.[:u64 0] = t128;
+    // [ 1, 2, 3, 4 ]
+    array.[:u256 8] = state[1];
+
+    // state[2] = [10, 20, 5, 15]
+    // state[3] = [16, 7, 8, 19]
+    // state[6] = [6, 12, 13, 9]
+    // t256 should contain [ 6, 7, 8, 9 ]
+    t256 = #VPBLEND_8u32(state[6], state[3], 0b0_0_0_0_1_1_0_0);
+
+    // We first need to get 8 bytes from state[2][2]
+    t128 = #VEXTRACTI128(state[2], 1);
+    array.[:u64 40] = t128;
+
+    // We need 16 more bytes from t256
+    t128 = (128u)t256;
+    array.[:u128 48] = t128;
+
+    return array;
+}
+
+inline
+fn __shake256_consider_permute(reg ptr u64[25] state, reg u64 offset) -> reg ptr u64[25], reg u64 {
+    if (offset >= SHAKE256_RATE) {
+        state = _keccakf1600_ref1(state);
+        offset = 0;
+    }
+    return state, offset;
+}
+
+inline
+fn __derive_message_representative(
+    reg ptr u8[VERIFICATION_KEY_HASH_SIZE] verification_key_hash,
+    #[spill_to_mmx] reg ptr u64[2] context_message_pointers,
+    #[spill_to_mmx] reg ptr u64[2] context_message_sizes
+) -> stack u8[MESSAGE_REPRESENTATIVE_SIZE]
+{
+    stack u8[MESSAGE_REPRESENTATIVE_SIZE] message_representative;
+
+    stack u64[25] state;
+
+    reg u8 byte;
+    reg u64 state_offset;
+
+    reg u64 context context_size context_offset;
+    reg u64 message message_size message_offset;
+
+    reg u256 copied_32_bytes;
+
+    #spill(context_message_pointers, context_message_sizes);
+
+    // Absorb ...
+
+    state = __keccak_init_ref1(state);
+
+    // VERIFICATION_KEY_HASH_SIZE is always 64.
+    copied_32_bytes = verification_key_hash.[:u256 0];
+    state.[:u256 0] = copied_32_bytes;
+
+    copied_32_bytes = verification_key_hash.[:u256 32];
+    state.[:u256 32] = copied_32_bytes;
+
+    context_offset = 0;
+
+    #unspill(context_message_pointers);
+    context = context_message_pointers[0];
+
+    #unspill(context_message_sizes);
+    context_size = context_message_sizes[0];
+
+    // We first need to absorb `0 || context_size` before absorbing the context.
+    state.[:u8 64] = 0;
+    state.[:u8 65] = context_size;
+
+    state_offset = 66;
+
+    while(context_offset < context_size) {
+        if (state_offset >= SHAKE256_RATE) {
+            #spill(context, context_offset, context_size);
+            state = _keccakf1600_ref1(state);
+            #unspill(context, context_offset, context_size);
+
+            state_offset = 0;
+        }
+
+        byte = [:u8 context + context_offset];
+        context_offset += 1;
+
+        state[:u8 state_offset] ^= byte;
+        state_offset += 1;
+    }
+
+    message_offset = 0;
+
+    #unspill(context_message_pointers);
+    message = context_message_pointers[1];
+
+    #unspill(context_message_sizes);
+    message_size = context_message_sizes[1];
+
+    while(message_offset < message_size) {
+        if (state_offset >= SHAKE256_RATE) {
+            #spill(message, message_offset, message_size);
+            state = _keccakf1600_ref1(state);
+            #unspill(message, message_offset, message_size);
+
+            state_offset = 0;
+        }
+
+        byte = [:u8 message + message_offset];
+        message_offset += 1;
+
+        state[:u8 state_offset] ^= byte;
+        state_offset += 1;
+    }
+
+    // Absorb separator byte
+    state, state_offset = __shake256_consider_permute(state, state_offset);
+    state[:u8 state_offset] ^= 0x1f;
+
+    // Finish
+    state, _ = __shake256_consider_permute(state, state_offset);
+    state[:u8 SHAKE256_RATE-1] ^= 0x80;
+
+    state = _keccakf1600_ref1(state);
+
+    // MESSAGE_REPRESENTATIVE_SIZE is always 64.
+    copied_32_bytes = state.[:u256 0];
+    message_representative.[:u256 0] = copied_32_bytes;
+
+    copied_32_bytes = state.[:u256 32];
+    message_representative.[:u256 32] = copied_32_bytes;
+
+    return message_representative;
+}

@@ -1,0 +1,134 @@
+\section{문서의 독자, 범위, 상태 언어}
+\label{sec:orientation}
+
+\subsection{무엇을 읽기 쉽게 만들려는가}
+
+이 작업공간의 기존 \sourcepath{latex/} 문서는 주차별 연구개발 기록이다.
+반면 이 문서는 수학자와 암호이론가가 다음 세 질문에 바로 답할 수 있도록
+정리 순서를 바꾼다.
+
+\begin{enumerate}
+  \item 논문 속 어떤 수학적 등식이 구현의 어떤 바이트 불변식으로 내려오는가?
+  \item 현재 EasyCrypt가 실제로 검증한 가장 강한 정리는 무엇이며, 그 전제는
+        무엇인가?
+  \item 그 정리가 전체 기능정확성이나 EUF-CMA 정리가 되려면 무엇이 더
+        필요한가?
+\end{enumerate}
+
+본문의 사실 우선순위는 실제 EasyCrypt 선언, \sourcepath{CLAIM_LEDGER.md},
+추출 매니페스트, 최신 주차별 보고서 순이다. 주차별 문서의 앞부분은 해당
+시점의 역사적 스냅샷이므로 현재 상태 판정에는 다음 자료를 우선한다.
+
+\begin{itemize}[leftmargin=1.5em,itemsep=0.1em,topsep=0.3em]
+  \raggedright
+  \item \sourcepath{WEEK13_REPORT.md}, Week~13 연구 메모
+        \sourcepath{latex/sections/}\allowbreak
+        \sourcepath{29-week13-rans-core-}\allowbreak\sourcepath{composition.tex},
+        독립 검증 기록 \sourcepath{logs/week13-}\allowbreak
+        \sourcepath{independent-verifier.md};
+  \item \sourcepath{PRODUCT_REPLAY_}\allowbreak\sourcepath{DECISION.md},
+        \sourcepath{SIGNATURE_CODEC_}\allowbreak\sourcepath{OBLIGATIONS.md},
+        \sourcepath{MODE2_HBZ_CODEC_}\allowbreak\sourcepath{OBLIGATIONS.md};
+  \item \sourcepath{RANS_PROOF_}\allowbreak\sourcepath{DESIGN.md},
+        \sourcepath{RANS_BYTE_STACK_}\allowbreak\sourcepath{INVARIANT.md},
+        \sourcepath{RANS_ENCODER_}\allowbreak\sourcepath{INVARIANT.md},
+        \sourcepath{RANS_DECODER_}\allowbreak\sourcepath{INVARIANT.md}와 운영 문서.
+\end{itemize}
+
+줄 번호는 편집에 따라 변하므로 본문은 파일 경로와 선언 이름을 안정적인
+식별자로 쓴다.
+
+\subsection{한글(영어) 병기 원칙}
+
+이 문서는 수학자와 암호이론가가 구현 용어를 원문과 대응시킬 수 있도록 다음
+규칙을 사용한다.
+
+\begin{enumerate}
+  \item 기술 용어가 처음 나올 때는 한글을 먼저 쓰고 영어 원어를 괄호에 둔다.
+        예를 들어 정제(refinement), 불변식(invariant), 추적(trace), 프레임
+        조건(frame condition), 접두부(prefix), 접미부(suffix)처럼 쓴다.
+  \item 같은 문맥에서 반복할 때는 한글을 우선한다. 다만 코드와 직접 대조하는
+        문장에서는 이미 병기한 영어를 다시 쓸 수 있다.
+  \item EasyCrypt의 정리명, 절차명, 주장 식별자, 파일명과 코드 조각은 정확한
+        검색을 위해 번역하지 않는다. \identifier{rANS}, \identifier{HBZ},
+        \identifier{W32}, \identifier{W64}, \identifier{EUF-CMA} 같은 표준 약어도
+        그대로 둔다.
+  \item ``actual''은 실제 생성 절차를 뜻할 때 ``실제(actual)'', ``canonical''은
+        ``정준(canonical)'', ``success-conditioned''는
+        ``성공 조건부(success-conditioned)''로 처음 병기한다.
+\end{enumerate}
+
+\subsection{상태 용어}
+
+\begin{description}[style=nextline,leftmargin=2.7cm]
+  \item[\statusproved]
+    표시된 전제 아래의 EasyCrypt 정리가 새 캐시 없이 컴파일된다. 부모 목표의
+    전제가 모두 닫혔다는 뜻은 아니다.
+  \item[\statuspartial]
+    부모 목표에 필요한 진짜 하위 정리는 있으나, 부모 목표 전체에는 미해결
+    전제나 호출 경계가 남아 있다.
+  \item[\statusspecified]
+    목표의 타입과 논리식은 컴파일되지만 이를 증명하는 정리는 아직 없다.
+  \item[\statusblocked]
+    필요한 추출, 메모리 의미론, 확률분포, 수치오차, 또는 암호학적 환원이
+    구체적으로 빠져 있어 다음 합성을 진행할 수 없다.
+  \item[\statusdeferred]
+    필요한 간극은 정확히 식별됐지만 현재 허용된 증명 규칙과 범위에서는 닫히지
+    않아 명시적 논문 경계로 동결했다. 증명되었거나 불필요하다는 뜻이 아니다.
+\end{description}
+
+\begin{boundary}[\texttt{PROVED}의 해석]
+이 문서에서 \statusproved 는 항상 ``표시된 전제를 만족하는 실행에 대한 해당
+정리가 검증되었다''는 뜻이다. 특히 Hoare 부분정확성 정리의 \statusproved 는
+종료, losslessness, 출력분포의 일치를 함의하지 않는다.
+\end{boundary}
+
+\subsection{스냅샷과 대상}
+
+\begin{table}[ht]
+\centering
+\caption{이 문서가 고정하는 검증 경계}
+\label{tab:snapshot}
+\begin{tabularx}{\textwidth}{L{0.27\textwidth}Y}
+\toprule
+항목 & 고정된 대상 \\
+\midrule
+논문 명세 & \sourcepath{CryptoLab_HAETAE.pdf}, 46쪽, 2026-02-04 생성,
+SHA-256 \\
+& \identifier{80d28b3af9af2a27dba0eb4746f9b575}\newline
+\identifier{5e05cb9a86bb6596f45fda06c605f3f6}
+\cite{haetae-spec} \\
+파라미터 집합 & HAETAE-2만: \(n=256\), \((k,\ell)=(2,4)\),
+\(q=64513\), \(\eta=1\), \(\tau=58\) \\
+구현 & 고정된 \sourcepath{haetae-ref-jasmin/} 소스와
+\identifier{jasmin2ec} 생성물 \cite{haetae-jasmin} \\
+작성 증명 & \sourcepath{haetae-topdown-easycrypt/easycrypt/} 아래 매니페스트된
+67개 EasyCrypt 대상의 완전 검증 기준선 \\
+최신 판정 & \identifier{GO-CORE}; 실제 인코더와 디코더 정제 및 실제
+인코더--복사--디코더 핵심 역함수는 성공 조건부 Hoare 부분정확성으로
+\statusproved, 다음 관문은 실제 전체 HBZ 래퍼 합성 \\
+재사용 증명 & 고정된 KeyGen, NTT, sampler, singularity, FFT 결과를 원래 전제
+그대로 가져오는 import-only 어댑터 \cite{haetae-easycrypt} \\
+제외 범위 & 다른 파라미터 집합, 물리적 부채널, fault, RNG 품질, 그리고
+EUF-CMA로부터 자동으로 따라오지 않는 메모리 안전성 및 SCT \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{boundary}[67대상 검증의 해석]
+\sourcepath{WEEK13_REPORT.md}가 기록한 Week~13 완료 실행의 종료 표식은
+\texttt{RESULT PASS authored-targets=67 cache=-no-eco}다. 이는 매니페스트,
+추출 재생성, 증명 구멍/공리(proof-hole/axiom) 검사, 67개 대상의 새 컴파일,
+기준선과 주차별 LaTeX 빌드가 통과했다는 뜻이다. 실행 중 덮어쓰는
+\sourcepath{logs/verify-all-summary.txt}는 마지막 \texttt{RESULT PASS}가
+있을 때만 완료 증거다. Hoare 정리의 \statusproved 는 여전히 실제 절차의
+종료나 성공 분기 도달 가능성을 뜻하지 않는다.
+\end{boundary}
+
+\begin{takeaway}{이 문서가 주장하지 않는 것}
+완전한 KeyGen 분포 일치, 전체 Sign/Verify 기능정확성, 공용 문맥 추적
+(public-context transcript) 일치, 승인된 원시 API 추적의 직접 \(\mu\) 등식,
+전체 1474바이트 서명 코덱, 실제 rANS 인코더의 성공 도달, 인코더/디코더 종료,
+실제 전체 HBZ 래퍼의 결합 왕복, 인코딩 무손실, 또는
+Jasmin 구현의 종단간 EUF-CMA 보안은 아직 증명되었다고 주장하지 않는다.
+\end{takeaway}

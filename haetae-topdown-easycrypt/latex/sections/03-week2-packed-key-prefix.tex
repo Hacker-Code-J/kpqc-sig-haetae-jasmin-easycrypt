@@ -1,0 +1,81 @@
+\section{Week 2 Packed-Key Prefix}
+\label{sec:week2-pack}
+
+\paragraph{Research question and claim.}
+\claimid{KG-PREFIX-CALL} asks whether the actual generated mode-2 packer and
+KeyGen caller establish
+\[
+  \prefix_{992}(sk)=vk.
+\]
+The corresponding paper algorithm is KeyGen in Figure~8 of the pinned
+specification \cite{haetae-pdf}. The implementation source is
+\pathname{keypair.jazz}, SHA-256
+\texttt{8b2ddac2862122d1c9d58767cbc5caa2caad39c8f41fa8096d66ffa77b783e01}.
+
+\paragraph{Procedures and generated source.}
+The proof opens the generated procedures
+\procname{\_pack\_sk\_m23}, \procname{\_pack\_vec\_eta\_to}, and
+\procname{\_pack\_vec2\_eta\_to}. It then lifts their result through
+\procname{\_keypair\_full\_m23} and
+\procname{crypto\_sign\_keypair\_internal\_mode2\_jazz}.
+The imported parent extraction has SHA-256
+\texttt{248f8157e348e3f294665d12573a58ee58e860884356bfe82324fda64de5d0b4}.
+The independently regenerated packer-focused target has SHA-256
+\texttt{7062715ca8fe449f15632c315cafdb316bddad6c39d01fe1f2da51104db6931c}.
+
+\paragraph{Compiled statements.}
+Theory \theoryname{ExtractedPackedKeyPrefix} contains:
+\begin{verbatim}
+hoare [Parent._pack_sk_m23 :
+  vkp = vk0 /\ vkbytes = W64.of_int 992 /\
+  mcount = W64.of_int 3 /\ kcount = W64.of_int 2
+  ==> vk_prefix_eq res vk0 992]
+\end{verbatim}
+under theorem name
+\theoryname{pack\_sk\_m23\_mode2\_vk\_prefix}. It also proves:
+\begin{verbatim}
+hoare [Parent._keypair_full_m23 :
+  k = 2 /\ m = 3 /\ vkbytes = 992
+  ==> vk_prefix_eq res.`2 res.`1 992]
+\end{verbatim}
+as \theoryname{keypair\_full\_m23\_mode2\_return\_prefix}, followed by an
+unconditional mode-2 internal-entry lift
+\theoryname{keypair\_internal\_mode2\_return\_prefix}.
+
+\paragraph{Proof strategy and invariant.}
+The initial copy loop maintains
+\[
+  \mathsf{copied\_prefix}(skp,vk_0,\mathsf{to\_uint}(i)).
+\]
+The later-write frame is split rather than assumed:
+\begin{itemize}
+  \item \theoryname{pack\_vec\_eta\_to\_prefix\_frame} proves that the
+  \(3\cdot64\) byte eta-vector region beginning at offset 992 preserves the
+  prefix;
+  \item \theoryname{pack\_vec2\_eta\_to\_prefix\_frame} does the same for the
+  \(2\cdot96\) byte eta2 region; and
+  \item \theoryname{mode2\_key\_index\_after\_prefix} proves that the final
+  32-byte key write also begins after the prefix.
+\end{itemize}
+
+\paragraph{Reachability and non-vacuity.}
+This is a Hoare partial-correctness result. It has no hidden termination
+premise: every execution that returns satisfies the prefix relation.
+Losslessness of the retry loop, the probability of termination, and the output
+distribution remain separate obligations. The returned relation is consumed
+constructively in
+\theoryname{Mode2MuChallengeComposition.keygen\_prefix\_reaches\_mu\_memory};
+it is not merely witnessed by arbitrary arrays.
+
+\paragraph{Spec/implementation difference.}
+The paper presents structured keys, whereas the Jasmin code lays the packed VK
+at the beginning of a 2752-byte SK and appends eta vectors and a 32-byte key.
+The theorem validates this concrete layout relation only; it does not yet prove
+canonical parsing or equality to the paper's full key distribution.
+
+\paragraph{Verification and status.}
+\claimid{KG-PREFIX-CALL} is \status{PROVED} as partial correctness. The target
+fresh-compiles with \texttt{-no-eco}; packer regeneration and its output hash
+are checked by \pathname{scripts/verify-all.sh}. The next minimum KeyGen
+obligations are \claimid{OBL-KG-TERMINATION} and the public-memory lift, not
+another array-prefix lemma.

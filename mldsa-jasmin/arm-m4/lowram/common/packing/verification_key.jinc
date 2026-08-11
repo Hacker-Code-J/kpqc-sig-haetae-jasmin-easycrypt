@@ -1,0 +1,17 @@
+inline fn __pack_t1_element_in_verification_key(
+    reg ptr u8[VERIFICATION_KEY_SIZE] verification_key,
+    reg ptr u32[N] t1_element,
+    inline int INDEX
+) -> reg ptr u8[VERIFICATION_KEY_SIZE]
+{
+    inline int START_OF_T1_PACKED = SEEDBYTES;
+    inline int STARTING_INDEX = START_OF_T1_PACKED + (INDEX * POLYT1_PACKEDBYTES);
+
+    verification_key[STARTING_INDEX : POLYT1_PACKEDBYTES] =
+        _polyt1_pack(
+            verification_key[STARTING_INDEX : POLYT1_PACKEDBYTES],
+            t1_element
+        );
+
+    return verification_key;
+}

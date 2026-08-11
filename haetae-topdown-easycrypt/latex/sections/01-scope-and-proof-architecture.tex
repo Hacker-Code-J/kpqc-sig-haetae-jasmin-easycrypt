@@ -1,0 +1,36 @@
+\section{Scope and Proof Architecture}
+
+These notes cover HAETAE mode 2 only. The official specification source is the
+pinned PDF artifact \cite{haetae-pdf}. The implementation target is the pinned
+Jasmin source tree \cite{haetae-jasmin}. Existing EasyCrypt artifacts are
+reused only through explicit imports with premise preservation
+\cite{haetae-ref-easycrypt}.
+
+The top-down structure used in this workspace is:
+\[
+\prefix_{992}(sk) = vk
+\Rightarrow \mathsf{equal\_hash\_inputs}
+\Rightarrow \take_{32}(\mu_{\mathsf{sign}}^{64}) = \mu_{\mathsf{verify}}^{32}
+\Rightarrow \mathsf{equal\_challenge\_suffix}.
+\]
+
+The Week 1 and Week 2 seams are intentionally narrower than full API
+correctness. The work records exact theorem statements, premises, and blocked
+obligations instead of hiding them behind new axioms.
+
+\paragraph{Current theorem-graph position.}
+\begin{itemize}
+  \item \claimid{KG-PREFIX-CALL}: \status{PROVED} as generated-procedure
+  partial correctness; retry termination remains separate.
+  \item \claimid{MU32-HASH-RAW-HELPERS}: \status{PROVED} through the actual
+  generated absorb, Keccak, finalize, and squeeze helpers.
+  \item \claimid{MU32-HASH}: \status{PARTIAL} until the exact generated
+  top-level control adapter is proved.
+  \item \claimid{MU-CHAL-COMPOSITION}: \status{PROVED} with local
+  $\delta_\mu=0$ for the explicit raw wrappers and challenge suffix.
+\end{itemize}
+
+\paragraph{Week 1 note status.}
+Section~\ref{sec:week1-retro} is a retrospective reconstruction from the Week 1
+artifacts already checked in this workspace. It is not a contemporaneous lab
+notebook.

@@ -1,0 +1,258 @@
+\section{의존성에 따른 다음 작업과 참여 지점}
+\label{sec:roadmap}
+
+\subsection{현재 단일 우선순위}
+
+\SnapshotWeek{}의 판정은 \CurrentGate 다. 첫 의무는
+\begin{quote}
+\CurrentPriority
+\end{quote}
+이다. \CurrentGate 는 actual encoder, suffix copy, exact-trace decoder가 한
+harness의 성공 조건부 core 역함수(inverse function)로 컴파일되었다는 뜻이다.
+actual 성공 도달성(success reachability), 종료성(termination), production
+full-HBZ wrapper가 증명되었다는 뜻은 아니다. 위 wrapper 합성(composition)이
+컴파일되기 전에는 \(h\) codec으로 이동하지 않는다.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[node distance=6mm]
+  \node[provennode] (enc) {1. actual encoder\\trace refinement};
+  \node[provennode, below=of enc] (dec) {2. actual decoder\\exact-trace refinement};
+  \node[provennode, below=of dec] (core) {3. actual harness inverse\\composition};
+  \node[partialnode, below=of core] (hbz) {4. production full-HBZ\\wrapper (현재)};
+  \node[blockednode, below=of hbz] (sig) {5. success witness, \(h\) suffix,\\metadata와 padding};
+  \node[blockednode, below=of sig] (func) {6. Sign output tail reach와\\Sign--Verify correctness};
+  \draw[flowarrow] (enc) -- (dec);
+  \draw[flowarrow] (dec) -- (core);
+  \draw[openarrow] (core) -- (hbz);
+  \draw[openarrow] (hbz) -- (sig);
+  \draw[openarrow] (sig) -- (func);
+\end{tikzpicture}
+\caption{codec 기능정확성 선의 권장 순서. Week~11, Week~12, Week~13에 앞의 세
+간선(edges)이 차례로 닫혔다.}
+\label{fig:next-order}
+\end{figure}
+
+\subsection{1단계 완료: encoder}
+
+\claimid{OBL-RANS-ENCODE-REFINEMENT}는 실제
+\identifier{_rans_encode}를 여는
+\theoremname{actual_rans_encode_trace_closure}와 그 확장된 따름정리(corollary)
+\theoremname{actual_rans_encode_trace_refinement}로 닫혔다. 성공 분기(success
+branch)의 사후조건(postcondition)은 다음을 동시에 준다.
+
+\begin{itemize}
+  \item actual output suffix가 canonical symbol list의
+        \identifier{trace_bytes}와 점별로 같음;
+  \item 바깥 반복(outer iteration)마다 actual word state가 suffix의 순수
+        \identifier{encode_trace} state와 같음;
+  \item actual \(off\)와 trace byte 길이가
+        \(off+|\operatorname{TraceBytes}|=1024\)를 만족함;
+  \item 이미 증명된 final 4-byte state 직렬화(serialization)를 normalization
+        suffix 앞에 합성하여 segment 순서를 확정함;
+  \item 쓰지 않은 접두부(unwritten prefix)의 frame을 유지함;
+  \item 실패 branch를 숨기지 않음.
+\end{itemize}
+
+Week~10의 array/list suffix 점화식(recurrence), actual reciprocal word step,
+내부 byte/frame/no-underflow, final serialization leaf와 성공 offset/size 범위는
+Week~11의 tail-aware 바깥/안쪽 불변식(outer/inner invariant), generated table
+load--protect--word-update 보조정리(lemma), final-store 합성(composition)에
+연결되었다. 따라서 임의의 valid trace나 새 증인 버퍼(witness buffer)가 아니라
+실제 반환 버퍼의 suffix가 정준 trace 바이트(canonical trace bytes)와 일치한다.
+
+다만 이는 Hoare 부분정당성(Hoare partial correctness)이다. 실제 실행이 성공
+분기(success branch)에 도달한다는 성공 증인(success witness)과 종료성(termination)은
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}에 남아 있다.
+
+\subsection{2단계 완료: decoder}
+
+\claimid{OBL-RANS-DECODE-REFINEMENT}는 실제
+\identifier{_rans_decode}를 여는
+\theoremname{actual_rans_decode_trace_refinement}로 닫혔다. exact-trace 입력
+관계(input relation) 아래 다음이 귀납법(induction)으로 증명되었다.
+
+\begin{itemize}
+  \item iteration \(i\)에서 decoded prefix가 원래 symbol prefix와 같음;
+  \item state/cursor가 pure \(x_i,c_i\)와 같음;
+  \item actual table lookup이 구간 분할(interval partition)의 유일한 \(s_i\)를 선택함;
+  \item nested normalization loop가 \(\beta_i\)를 정확한 순서로 소비함;
+  \item 내부 loop 종료에서 \(state=2^{23}\)을 유도하고, 반환값에서
+        \(off=size\), \(bad=0\)을 결론냄;
+  \item decoded tail frame.
+\end{itemize}
+
+encoder와 decoder를 직접 lockstep으로 묶는 방법은 reverse/forward 방향과
+중간 buffer copy 때문에 proof surface가 커진다. 이미 구성된 순수 trace를
+공통 매개체로 삼아 두 refinement를 독립적으로 검증했다. 단, 이 decoder
+정리(theorem)는 입력 trace를 전제로 받는 Hoare 부분정당성(Hoare partial
+correctness)이며 종료성(termination)을 주지 않는다.
+
+\subsection{3단계 완료: actual harness inverse}
+
+\claimid{OBL-RANS-CORE-INVERSE}는
+\sourcepath{Mode2RansCoreActualInverse.ec}의
+\theoremname{actual_rans_encode_copy_decode_inverse}로 닫혔다. 이 정리(theorem)는
+\sourcepath{Mode2RansActualInverse.ec}에 정의된 actual harness를 직접 대상으로
+삼아 다음 의미론적 결론을 낸다. 두 파일명은 각각 ``harness 정의/control''과
+``Week~13 semantic inverse''를 가리키며, 후자는 전자의 control-only 정리(theorem)를
+의미론적 결과로 잘못 읽지 않도록 별도 증명된 것이다.
+
+\begin{itemize}
+  \item encoder 실패 분기(failure branch)를 숨기지 않고 decoder를 실행하지 않음;
+  \item encoder 성공 suffix의 \identifier{segment_matches}를 actual copy의
+        \identifier{slice_eq}에 합성함;
+  \item copy된 buffer에서 decoder의 pointwise exact-read 전제를 산출함;
+  \item actual decoder 반환에서 \(bad=0\), exact consumption, 1024-symbol
+        등식(equality), tail frame을 얻음;
+  \item 임의의 trace, 새 증인 버퍼(witness buffer), encoder 성공을 외부 전제로
+        넣지 않음.
+\end{itemize}
+
+이 정리(theorem)는 성공 조건부 부분정확성(success-conditioned partial
+correctness)이다. canonical all-zero array는 전제의 비공허성(non-vacuity)을
+보이지만, encoder 성공의 존재나 전체 실행의 종료성(termination)을 자동으로
+주지 않는다. 성공 도달성은
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}의 별도 의무다.
+
+\subsection{4단계 현재 완료 기준: production full-HBZ wrapper}
+
+\claimid{OBL-SIG-HBZ-ENCODE-DECODE}를 닫으려면 actual
+\identifier{_encode_hb_z1_full}과 \identifier{_decode_hb_z1_full}을 직접 여는
+정리(theorem)가 적어도 다음을 결론내야 한다.
+
+\begin{itemize}
+  \item canonical HBZ coefficient를 actual prepare가 정준 기호열(canonical
+        symbol stream)로 옮김;
+  \item actual rANS core 정리(theorem)의 실패/성공 분기를 그대로 보존함;
+  \item 성공 시 actual apply가 복원된 symbol을 원래 coefficient로 되돌림;
+  \item wrapper-level size, state, 입력/출력 tail frame을 연결함;
+  \item actual success witness나 decoder 결과를 외부 전제로 다시 요구하지 않음.
+\end{itemize}
+
+이 단계 역시 우선 성공 조건부 부분정확성(success-conditioned partial
+correctness)으로 닫을 수 있다. 실제 성공 가지의 도달가능성(reachability)과
+종료성(termination)은 별도 정리(theorem)다.
+
+\subsection{5--6단계: 작은 부모부터 닫기}
+
+production full-HBZ wrapper 합성(composition)이 컴파일되면 다음 순서가 자연스럽다.
+
+\begin{enumerate}
+  \item 적어도 하나의 canonical input에 대해 actual encoder success witness를
+        구성해 성공 branch의 non-vacuity를 보인다;
+  \item 두 번째 \(h\) suffix codec을 같은 leaf--table--loop--wrapper 층으로
+        분석한다;
+  \item metadata와 padding을 연결해 full signature pack/unpack inverse를 얻는다;
+  \item Sign의 실제 출력이 canonical codec·norm·hint·arithmetic 전제를
+        산출함을 보이고 Verify tail reach로 연결한다.
+\end{enumerate}
+
+각 부모를 닫을 때 자식 정리(child theorem)의 전제가 실제 앞 절차의 결론에서
+나오는지를
+확인해야 한다. external precondition으로 다시 요구하면 합성이 아니라 조건부
+재진술이 된다.
+
+\subsection{동결된 product/replay 선은 별도로 다룬다}
+
+codec 선과 독립적으로 \claimid{OBL-MU-PRODUCT-REPLAY}는 explicit paper
+boundary로 남아 있다. 재개하려면 wrapper 추가가 아니라 다음 중 하나가 필요하다.
+
+\begin{itemize}
+  \item hash 반환값을 ghost observation에 저장하는 시점까지 보존하는 sound
+        relational sequencing lemma;
+  \item 두 continuation을 함께 처리하는 product program과 그 semantics;
+  \item Sign continuation의 losslessness/termination을 먼저 증명한 뒤 사용할 수
+        있는 정당한 one-sided elimination;
+  \item hash-time snapshot을 trace가 보존하도록 하는 최소 instrumentation 변경과
+        그 actual-to-trace exactness 재증명.
+\end{itemize}
+
+어느 선택도 단순한 byte lemma가 아니다. program logic 설계와 theorem surface
+trade-off를 먼저 검토해야 한다.
+
+\subsection{순수 대수학자가 바로 기여할 수 있는 문제}
+
+\begin{question}[rANS를 제한된 전단사(restricted bijection)로 패키징하기]
+집합(set)
+\[
+  \mathcal X_s=\{x:2^{23}\le x<2^{31}\},\qquad
+  \mathcal N_s=\{r:1\le r<x_{\max}(s)\}
+\]
+와 0/1/2-byte 섬유(fiber)를 사용해 normalization--fast-step을 명시적인
+부분 전단사(partial bijection)로 패키징할 수 있는가? 현재 개별 lemma를 actual
+loop invariant에서 재사용하기 쉬운 하나의 귀납 정리(induction theorem)로 묶는
+것이 목표다.
+\end{question}
+
+\begin{question}[표현의 몫(quotient)과 정준 단면(canonical section)]
+signature 각 구성요소에 대해 raw word 공간(word space), 바이트 몫(byte quotient),
+정준 대표자계(canonical system of representatives), decoder 단면(section)을 한
+번에 기술하는 공통 구조를 만들 수 있는가?
+새 추상화는 실제 기존 술어를 재사용하고, prefix/HBZ/향후 \(h\) codec의
+중복만 제거해야 한다.
+\end{question}
+
+\begin{question}[NTT와 \(R_q\) 표현]
+기존 NTT·KeyGen 결과의 정확한 명제(proposition)/전제(premise) 경계를 유지하면서,
+계수 표현(coefficient representation)과 NTT 표현(NTT representation) 사이의
+가환사각형(commutative square)을
+최상위 \identifier{obl_public_key_algebra_ntt}에 어떻게 연결할 수 있는가?
+종이 위 CRT 동형사상(CRT isomorphism)만 인용하지 말고 실제 procedure theorem이
+필요하다.
+\end{question}
+
+\begin{question}[high/low decomposition의 정수 경계(integer bound)]
+논문의 \(r=\alpha\operatorname{HighBits}(r)+\operatorname{LowBits}(r)\)와
+실제 고정폭 rounding/sign-extension/packing 사이의
+정준 대표자(canonical representative) 조건을 정확히
+분리할 수 있는가? 이 작업은 전체 challenge input과 norm/hint correctness의
+대수적 중심이다.
+\end{question}
+
+\begin{question}[rejection distribution]
+partial map으로 모델링된 retry loop를 확률 커널(probability kernel)로 올리고,
+수락 분포(accepted distribution)와 termination/loss bound를 논문 sampler에
+연결할 수 있는가?
+결정론적 Hoare 정리(deterministic Hoare theorem)와
+분포 정리(distribution theorem)를 섞지 않는 interface 설계가 필요하다.
+\end{question}
+
+\subsection{대수기하학자의 기술이 유용한 곳}
+
+현재 작업이 스킴 이론적(scheme-theoretic) 증명은 아니지만 다음 습관은 직접
+유용하다.
+
+\begin{itemize}
+  \item 전체 객체(object) 대신 필요한 제한(restriction)만 비교하는
+        국소--대역(local-to-global) 사고;
+  \item 서로 다른 표현 좌표(chart) 사이의 전이사상(transition map)과
+        호환성(compatibility) 도식을 명시하는 습관;
+  \item 몫(quotient)과 대표 단면(representative section)을 분리하는 습관;
+  \item 섬유(fiber)가 비어 있지 않음을 witness로 확인하고,
+        조건부 정리(conditional theorem)의
+        non-vacuity를 점검하는 습관;
+  \item 큰 목표를 가환사각형(commutative square)과 장애물(obstruction)로
+        분해하는 습관.
+\end{itemize}
+
+단, 이 습관을 ``현재 코드가 층(sheaf)을 형식화한다''는 주장으로 바꾸면 안 된다.
+실제 proof term은 배열, word, 메모리, procedure semantics 위에 있다.
+
+\subsection{새 정리(theorem)를 제출할 때의 판정 체크리스트}
+
+\begin{enumerate}
+  \item 정리(theorem)의 actual/generated/pure 경계를 이름과 주석에 명시했는가?
+  \item 부모 결론을 전제로 다시 가정하지 않았는가?
+  \item termination, partial correctness, losslessness를 구분했는가?
+  \item canonicality, address range, no-wrap, separation 전제가 모두 보이는가?
+  \item 반환값, global state, ghost observation 중 무엇을 비교하는지 명시했는가?
+  \item 사용하지 않는 배열·메모리 구간의 frame이 필요한가?
+  \item 전제의 concrete witness 또는 실제 predecessor가 있어 non-vacuous한가?
+  \item authored axiom, admit/sorry/abort, debug declaration이 없는가?
+  \item manifest에 들어가 fresh \identifier{-no-eco} compile되는가?
+  \item claim ledger와 theorem graph의 부모 상태를 과장 없이 갱신했는가?
+\end{enumerate}
+
+이 체크리스트를 통과해야 ``수학적으로 그럴듯함''이 ``현재 구현에 대해
+검증됨''으로 바뀐다.

@@ -1,0 +1,119 @@
+\usepackage{fontspec}
+\usepackage{xetexko}
+\usepackage{amsmath,amsthm}
+\usepackage{unicode-math}
+\usepackage[a4paper,margin=26mm]{geometry}
+\usepackage{booktabs,longtable,tabularx,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+\setmathfont{TeX Gyre Pagella Math}
+\setmainhangulfont{Noto Serif CJK KR}
+\setsanshangulfont{Noto Sans CJK KR}
+\setmonohangulfont{Noto Sans Mono CJK KR}[Scale=MatchLowercase]
+
+\definecolor{provedcolor}{HTML}{176B45}
+\definecolor{partialcolor}{HTML}{9A6700}
+\definecolor{specifiedcolor}{HTML}{315E9E}
+\definecolor{blockedcolor}{HTML}{A43A3A}
+\definecolor{ink}{HTML}{1E293B}
+\definecolor{softgray}{HTML}{F3F4F6}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=specifiedcolor,
+  citecolor=provedcolor,
+  urlcolor=specifiedcolor,
+  pdftitle={HAETAE-2 Jasmin 구현 검증: 수학자와 암호이론가를 위한 현재 증명 전선},
+  pdfsubject={HAETAE top-down EasyCrypt proof status},
+  pdfauthor={HAETAE top-down EasyCrypt project}
+}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.25em,topsep=0.35em}
+\setlist[enumerate]{leftmargin=2.25em,itemsep=0.25em,topsep=0.35em}
+\renewcommand{\arraystretch}{1.18}
+\renewcommand{\contentsname}{목차}
+\renewcommand{\figurename}{그림}
+\renewcommand{\tablename}{표}
+\renewcommand{\refname}{참고문헌}
+\setlength{\emergencystretch}{2em}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{정의}[section]
+\newtheorem{verified}{검증된 정리}[section]
+\newtheorem{boundary}{경계 명제}[section]
+\newtheorem{obligation}{미해결 의무}[section]
+
+\crefname{definition}{정의}{정의}
+\crefname{verified}{검증된 정리}{검증된 정리}
+\crefname{boundary}{경계 명제}{경계 명제}
+\crefname{obligation}{미해결 의무}{미해결 의무}
+
+\newcommand{\identifier}[1]{\nolinkurl{#1}}
+\newcommand{\sourcepath}[1]{\nolinkurl{#1}}
+\newcommand{\claim}[1]{\textsf{\textbf{\detokenize{#1}}}}
+\newcommand{\take}{\mathop{\mathrm{take}}}
+\newcommand{\prefix}{\mathop{\mathrm{prefix}}}
+\newcommand{\statusproved}{\textcolor{provedcolor}{\textsf{\textbf{PROVED}}}}
+\newcommand{\statuspartial}{\textcolor{partialcolor}{\textsf{\textbf{PARTIAL}}}}
+\newcommand{\statusspecified}{\textcolor{specifiedcolor}{\textsf{\textbf{SPECIFIED}}}}
+\newcommand{\statusblocked}{\textcolor{blockedcolor}{\textsf{\textbf{BLOCKED}}}}
+\newcommand{\statusdeferred}{\textcolor{partialcolor}{\textsf{\textbf{DEFERRED}}}}
+
+\newenvironment{takeaway}[1]
+  {\begin{quote}\color{ink}\noindent\textbf{#1}\par\smallskip}
+  {\end{quote}}
+
+\tikzset{
+  chainnode/.style={
+    draw=specifiedcolor,
+    rounded corners=2pt,
+    fill=specifiedcolor!6,
+    align=center,
+    minimum height=12mm,
+    text width=31mm,
+    inner sep=4pt
+  },
+  provennode/.style={
+    draw=provedcolor,
+    rounded corners=2pt,
+    fill=provedcolor!6,
+    align=center,
+    minimum height=11mm,
+    text width=39mm,
+    inner sep=4pt
+  },
+  partialnode/.style={
+    draw=partialcolor,
+    dashed,
+    rounded corners=2pt,
+    fill=partialcolor!6,
+    align=center,
+    minimum height=11mm,
+    text width=39mm,
+    inner sep=4pt
+  },
+  opennode/.style={
+    draw=blockedcolor,
+    dashed,
+    rounded corners=2pt,
+    fill=blockedcolor!4,
+    align=center,
+    minimum height=11mm,
+    text width=39mm,
+    inner sep=4pt
+  },
+  chainarrow/.style={-{Latex[length=2.2mm]},thick,draw=ink}
+}

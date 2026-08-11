@@ -1,0 +1,20 @@
+PASS source drift
+PASS proof-hole scan
+PASS proof target manifest
+PASS authored axiom scan
+PASS debug/temporary declaration scan
+PASS generated top control and reachability source checks
+PASS Week4/5 raw API bridge theorem surface scan
+PASS actual API copy-helper reachability source checks
+PASS focused transcript extraction
+PASS focused mu-hash extraction
+PASS focused packer extraction
+PASS focused API key-memory extraction
+PASS focused raw API caller extraction
+PASS focused extraction regeneration drift
+PASS fresh compile easycrypt/refinement/composition/ExtractedChallengeAbsorb.ec
+PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/ApiKeyMemoryBridge.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMode2RawMuComposition.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMuTopControl.ec
+PASS fresh compile easycrypt/refinement/composition/Mode2MuChallengeComposition.ec

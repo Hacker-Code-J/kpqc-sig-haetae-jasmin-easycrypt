@@ -1,0 +1,37 @@
+\section{Week 1 Transcript Seam}
+\label{sec:week1-retro}
+
+Week 1 established the first extracted cross-module theorem on the challenge
+suffix path:
+\[
+\take_{32}(\mu_{\mathsf{sign}}^{64}) = \mu_{\mathsf{verify}}^{32}
+\Longrightarrow
+\mathsf{equal\_challenge\_suffix}.
+\]
+
+\paragraph{Primary claim IDs.}
+\begin{itemize}
+  \item \claimid{MU32-ABSORB}: \status{PROVED}.
+  \item \claimid{CHAL-LIST}: \status{PROVED}.
+  \item \claimid{CHAL-CALL}: \status{PARTIAL}.
+\end{itemize}
+
+\paragraph{Pinned procedures and theories.}
+\begin{itemize}
+  \item Sign procedure: \procname{__sign\_challenge\_shake256\_absorb\_mu32}.
+  \item Verify procedure: \procname{__verify\_shake256\_absorb\_mu32}.
+  \item EasyCrypt theorem: \theoryname{ExtractedChallengeAbsorb.sign\_verify\_mu32\_absorb\_from\_pos64}.
+  \item EasyCrypt theorem: \theoryname{TranscriptBytes.challenge\_input\_eq\_components}.
+\end{itemize}
+
+\paragraph{Proof strategy.}
+The extracted theorem fixed sponge position 64 and required an explicit
+\texttt{mu32\_prefix} predicate over generated arrays. A separate witness lemma
+showed that this premise is satisfiable, which ruled out one vacuity risk but
+did not yet connect the premise to actual KeyGen/Sign/Verify call paths.
+
+\paragraph{Verification evidence.}
+Week 1 used fresh \texttt{-no-eco} compilation and regenerated focused
+extractions. The operational source of truth remains the Markdown ledger and
+the verifier logs under \pathname{haetae-topdown-easycrypt/logs/}.
+

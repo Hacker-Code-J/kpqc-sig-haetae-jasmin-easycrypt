@@ -1,0 +1,445 @@
+\section{논문 수준의 수학적 대상}
+\label{sec:math-target}
+
+\subsection{HAETAE-2의 최소 배경}
+
+논문은
+\[
+  R=\mathbb{Z}[X]/(X^{256}+1),\qquad
+  R_q=\mathbb{Z}_q[X]/(X^{256}+1),\quad q=64513
+\]
+위의 모듈 격자 서명으로 HAETAE를 기술한다 \cite{haetae-spec}. 모드(mode) 2에서는
+\((k,\ell)=(2,4)\), 작은 비밀계수 범위는 \(\eta=1\), 이진 도전값(binary challenge)의
+무게는 \(\tau=58\)이다. 검증키는 \(vk=(\mathit{seedA},b_1)\)로 압축되며,
+Jasmin API에서 그 mode-2 바이트 길이는 992이다.
+
+논문 Figure~8의 핵심 데이터 흐름을 이 문서에 필요한 수준으로만 쓰면 다음과
+같다.
+
+\begin{align*}
+  b &= a_{\mathrm{gen}}+A_{\mathrm{gen}}s_{\mathrm{gen}}+e_{\mathrm{gen}},
+  & (b_0,b_1)&=(\operatorname{LowBits}_{vk}(b),
+                    \operatorname{HighBits}_{vk}(b)),\\
+  vk&=(\mathit{seedA},b_1),
+  & \mu&=H_{\mathrm{gen}}(\mathit{seedA},b_1,M),\\
+  \rho&=H(\operatorname{HighBits}_h(w),
+          \operatorname{LSB}(\lfloor y_0\rceil),\mu),
+  & c&=\operatorname{SampleBinaryChallenge}_{\tau}(\rho).
+\end{align*}
+
+Sign은 비밀키 내부의 검증키 성분을 이용해 \(\mu\)를 만들고, Verify는 공용
+검증키를 이용해 이를 다시 만든다. 이어서 두 쪽은 하이비트(highbits), LSB,
+\(\mu\)를 도전값 전사(challenge transcript)에 넣는다. 따라서 구현 정확성의
+첫 합성 지점은 단순한
+``SHAKE가 올바르다''가 아니라 다음 세 개의 구체적 등식이다.
+
+\begin{enumerate}
+  \item Sign이 읽는 패킹된 비밀키(packed secret-key) 접두부와 Verify가 읽는
+        패킹된 검증키(packed verification-key) 바이트가 같다.
+  \item 같은 pre와 메시지를 흡수한 뒤 Sign의 64바이트 \(\mu\) 중 처음
+        32바이트가 Verify의 32바이트 \(\mu\)와 같다.
+  \item 그 32바이트를 같은 challenge 상태의 위치 64에서 흡수하면 최종
+        상태와 위치가 같다.
+\end{enumerate}
+
+현재 작업은 이 세 등식을 원시/내부 경로에서 실제 생성 절차까지 연결하고,
+실제 원시 API 호출자가 그 입력에 도달하는 제어/메모리 사실, Sign 출력의
+프레임 조건, 읽는 구간만을 요구하는 해시 동치까지 추적했다. 완료된 추적에
+저장된 두 \(\mu\)를 직접 연결하는 일은 생성/재전달 의미론 경계로 동결되었다.
+현재 주 실행 경로는 실제 서명 코덱의 HBZ rANS 접미부다. 계수/기호 잎, 표,
+순수 단일 단계, 공통 바이트 스택, 실제 접미부 복사와 3회 호출 결합의 제어는
+닫혔다. Week~10에는 실제 인코더의 내부 바이트 쓰기와 성공 시 크기 범위가
+추가되었다. Week~11은 순수 꼬리를 내부 불변식에 보존하는 정확한
+0/1/2바이트 진행, 생성 표 단어 갱신, 외부 한 기호 전이와 마지막 네 저장을
+합성하여 전체 실제 인코더 성공 접미부를 순수 추적과 동일시했다. Week~12는
+같은 추적을 실제 디코더가 정확히 소비함을 닫았고, Week~13은 실제
+인코더--접미부 복사--디코더 결합 합성까지 닫았다. 현재 관문(gate)은 이 핵심
+역함수를 실제 전체 HBZ 래퍼와 prepare/apply 역함수에 합성하는 것이다.
+
+\subsection{mode-2 서명 코덱(signature codec)의 기능정확성 목표}
+
+실제 mode-2 서명은 1474바이트이며 추출된 packer/unpacker의 배치는 다음과
+같다.
+\[
+\underbrace{[0,32)}_{256\text{ challenge bits}}
+\;\Vert\;
+\underbrace{[32,1056)}_{1024\text{ signed low bytes}}
+\;\Vert\;
+\underbrace{[1056,1058)}_{\text{두 size delta}}
+\;\Vert\;
+\underbrace{[1058,1474)}_{\text{hbz/h payload와 canonical zero padding}}.
+\]
+마지막 영역의 총 예산(budget)은 \(416\)바이트이므로
+\(1056+2+416=1474\)이다. 현재 닫힌 접두부 목표는 정준 도전값
+\(c\)와 부호 바이트 범위의 하위 배열 \(z_{\mathrm{low}}\)에 대해
+\[
+  \operatorname{UnpackPrefix}
+    (\operatorname{PackPrefix}(c,z_{\mathrm{low}}))
+  =(c,z_{\mathrm{low}})
+\]
+이다. 이 등식은 실제 생성 절차에 대해 부분정확성으로 증명되었다. 두 rANS
+적재량(payload), 크기 메타데이터(size metadata), 영 패딩(zero padding), 전체
+구문 분석(parse)의 성공과 유일성은 이 등식에 포함되지 않는다. Week~8--12
+결과는 그중 첫 HBZ 적재량의 내부 층을 더
+세분화한다.
+
+\subsection{HBZ 잎(leaf), rANS 단일 단계와 바이트 추적(byte trace)의 수학적 구조}
+
+mode-2 HBZ 입력은 \(1024\)개의 계수 \(h_i\in[-6,7)\)이고, 실제 prepare
+절차는
+\[
+  s_i=h_i+6\in\{0,\ldots,12\}
+\]
+로 옮긴다. 실제 apply 절차는 \(s_i-6\)을 32비트 word로 복원한다. 따라서
+canonical HBZ 배열에 대해 종료한 실제 두 leaf의 합성은
+\[
+  \operatorname{Apply}(\operatorname{Prepare}(h))[0..1024)=h[0..1024)
+\]
+를 만족한다. prepare 정리는 별도로 용량 \(2048\)의 symbol tail을 보존하고,
+이 합성 정리의 사후조건은 복호 계수의 꼬리를 보존한다. 이 결과는 rANS
+버퍼(buffer)의 성공이나 크기를 말하지 않는 잎 수준 부분정확성이다.
+
+13개 symbol의 누적 시작점과 빈도는 각각
+\[
+\begin{aligned}
+(c_s)_{s=0}^{12}
+  &=(0,1,2,3,8,66,312,710,957,1016,1021,1022,1023),\\
+(f_s)_{s=0}^{12}
+  &=(1,1,1,5,58,246,398,247,59,5,1,1,1),
+\end{aligned}
+\]
+이며 \(f_s>0\), \(\sum_s f_s=1024\)이고 구간
+\([c_s,c_s+f_s)\)들이 \([0,1024)\)를 분할한다. 순수 rANS 단계는
+\[
+\begin{aligned}
+  E_s(x)&=\left\lfloor\frac{x}{f_s}\right\rfloor 1024
+           +c_s+(x\bmod f_s),\\
+  D_s(y)&=\left\lfloor\frac{y}{1024}\right\rfloor f_s
+           +(y\bmod 1024)-c_s
+\end{aligned}
+\]
+로 두며, 현재 증명은 \(x\ge0\)에서 \(D_s(E_s(x))=x\)를 보인다. 더 나아가
+실제 mode-2 역수/편향(reciprocal/bias) 식으로 계산하는 빠른 단계(fast step)가
+\(0\le s<13\), \(1\le x<\mathsf{hbz\_xmax}(s)\)에서 \(E_s(x)\)와 같음도
+증명되었다. 실제 패킹/언패킹 추출물의 리터럴(literal)
+\identifier{esyms}/\identifier{dsyms_words}/\identifier{symbol_words} 배열이
+이 certificate를 만족한다.
+
+Week~9은 단일 단계 사이를 잇는 순수 바이트 추적을 다음처럼 고정했다. 기호열을
+\(s_0,\ldots,s_{n-1}\), \(n=1024\)라 하고 \(x_n=L=2^{23}\)로 둔다. encoder
+방향 \(j=n-1,\ldots,0\)에서
+\[
+\begin{aligned}
+  \ell_j&=\operatorname{renorm\_len}
+      (x_{j+1},\mathsf{hbz\_xmax}(s_j))\in\{0,1,2\},\\
+  r_j&=\left\lfloor x_{j+1}/256^{\ell_j}\right\rfloor,\\
+  x_j&=E_{s_j}(r_j).
+\end{aligned}
+\]
+이때 \(\beta_j\)를 실제 디코더가 읽는 순서의 정규화 바이트 구간(segment)이라
+하면, 컴파일된 readback 정리는
+\[
+  \operatorname{ReadBytes}(r_j,\beta_j)=x_{j+1}
+\]
+를 준다. 특히 두 바이트를 내보낼 때 실제 인코더는 하위 바이트를 먼저 쓰면서
+커서(cursor)를 감소시키므로 최종 순방향 구간은
+\([\mathsf{high},\mathsf{low}]\)다.
+따라서
+\[
+  c_0=4,\qquad c_{j+1}=c_j+|\beta_j|,
+  \qquad
+  B=\operatorname{LE32}(x_0)\Vert\beta_0\Vert\cdots\Vert\beta_{n-1}
+\]
+를 공통 추적으로 사용한다. \(\operatorname{ParseLE32}\)가 첫 상태를 복원하고,
+각 \(D_{s_j}\)가 \(x_j\)에서 \(r_j\)를 얻은 뒤 \(\beta_j\)를 읽어
+\(x_{j+1}\)를 복원한다. 순수 귀납 정리는 모든 boundary state에 대해
+\[
+  2^{23}\le x_j<2^{31}
+\]
+을 보존한다.
+
+이 순수 결과만으로 실제 인코더와 디코더의 외부 반복문 정제가 따라오지는
+않는다. 실제 \identifier{__copy_encoded_suffix}가 인코더 접미부를 디코더용
+접두부로 점별 복사하고 남은 꼬리를 보존한다는 Hoare 정리와, 실제 인코더의
+반환 \(bad\)에 따라 복사와 디코더 호출을 수행하거나 생략하는 단항 결합의 제어
+정리까지는 컴파일된다.
+
+\subsection{Week~10 실제 인코더의 수학적 경계}
+
+용량 2048의 기호 배열 \(a\)에서 mode-2가 사용하는 목록과 그 접미부를
+\[
+  S(a)=[\operatorname{uint}(a[0]),\ldots,
+        \operatorname{uint}(a[1023])],\qquad
+  S_i(a)=\operatorname{drop}_i(S(a))
+\]
+로 둔다. 코드의 \identifier{symbol_list_of_array}와
+\identifier{symbol_suffix}가 바로 이 정의다. 배열 구간과 프레임 조건은
+\[
+\begin{aligned}
+  \operatorname{Segment}(A,p,b)
+    &\Longleftrightarrow
+      0\le p\;\land\;p+|b|\le2048\;\land\\
+    &\hspace{2.8em}\forall k\in[0,|b|),\;
+      \operatorname{uint}(A[p+k])=b[k],\\
+  \operatorname{PrefixFrame}(A_0,A_1,p)
+    &\Longleftrightarrow
+      \forall k\in[0,p),\;A_0[k]=A_1[k]
+\end{aligned}
+\]
+로 읽는다. 컴파일된 배열/목록 연결 정리는
+\(S_{1024}(a)=[]\)와
+\(S_i(a)=\operatorname{uint}(a[i])::S_{i+1}(a)\)를 주며, 한 기호 추적의
+점화식도 다음처럼 분리한다.
+\[
+\begin{aligned}
+  T(s::t).\mathsf{state}
+    &=E_s(\operatorname{Norm}(T(t).\mathsf{state},s)),\\
+  T(s::t).\mathsf{bytes}
+    &=\operatorname{NormBytes}(T(t).\mathsf{state},s)
+      \Vert T(t).\mathsf{bytes}.
+\end{aligned}
+\]
+
+실제 표의 네 단어, 64비트 역수 곱과 상위 절반 추출, 이동 사다리와 편향을
+모델링한 단어 단계는
+\[
+\begin{gathered}
+  0\le s<13,\qquad
+  1\le\operatorname{uint}(x)<\mathsf{hbz\_xmax}(s),\\
+  \operatorname{ActualWordStep}(x,s)
+   =\operatorname{W32}
+      (\operatorname{FastStep}(\operatorname{uint}(x),s))
+\end{gathered}
+\]
+를 만족한다. 앞선 빠른 단계 정리와 합치면 오른쪽은 수학적 \(E_s\)의 W32
+표현이다. 이것은 단어 수준 등식이지 생성된 외부 반복문에 대한 Hoare 정리는
+아니다.
+
+생성된 \identifier{_rans_encode}의 내부 정규화 반복문에는 진입 상태
+\((x_0,off_0)\), 임계값 \(x_{\max}\)와 단계 \(k\)를 증인으로 쓰는 다음 국소
+불변식이 설치되었다.
+\[
+\begin{gathered}
+  4\le off_0\le1024,\qquad 0\le k\le4,\qquad
+  1\le\operatorname{uint}(x_{\max}),\\
+  off=off_0-k,\qquad
+  x=\operatorname{PhaseState}(x_0,k),\\
+  \operatorname{Segment}
+    (encp,off_0-k,\operatorname{PhaseBytes}(x_0,k)),\qquad
+  \operatorname{PrefixFrame}(before,encp,off_0-k).
+\end{gathered}
+\]
+각 실제 \identifier{set8} 단계가 낮은 바이트를 목록 앞에 붙이고, W64 커서가
+언더플로하지 않으며, 쓰지 않은 접두부를 보존한다는 사실이 직접 증명된다.
+다만 \(before\)는 해당 내부 반복문 진입 시 배열이므로 이 불변식은 누적된 전체
+외부 추적을 아직 나타내지 않는다. \(0\le k\le4\)도 W32 유한성에서 얻은 보수적
+범위이며, 순수 추적의 정확한 0/1/2바이트 길이와의 동일시는 남아 있다.
+
+그 결과 실제 생성 절차에 대한 두 부분정확성 정리는
+\[
+\begin{aligned}
+ bad'\ne0\quad\lor\quad
+   &(bad'=0\land 0\le off'\le1020),\\
+ bad'=0\quad\Longrightarrow\quad
+   &4\le1024-off'\le1024
+\end{aligned}
+\]
+를 준다. 두 번째 식은 성공 시 인코딩 크기 범위다. 성공 경로의 도달 가능성이나
+종료, 모든 기호가 6인 입력(all-6 input)의 성공은 결론에 포함되지 않는다.
+
+\subsection{Week~11 실제 인코더 추적 폐쇄}
+
+Week~11의 꼬리 인식 내부 불변식은 국소 바이트만 기억하지 않고 이미 작성된
+순수 꼬리(pure tail) \(t\)를 함께 운반한다.
+\[
+\begin{aligned}
+ 0\le k\le\ell(x_0,s),\qquad
+ off&=off_0-k,\\
+ \operatorname{Segment}\bigl(encp,off_0-k,
+   \operatorname{Written}(x_0,s,k)\Vert T(t).\mathsf{bytes}\bigr),\qquad
+ &\operatorname{PrefixFrame}(enc_0,encp,off_0-k).
+\end{aligned}
+\]
+여기서 \(\ell(x_0,s)\in\{0,1,2\}\)는 순수 정규화 길이다. 실제 생성
+가드(guard)가 거짓이 되는 지점에서 \(k=\ell(x_0,s)\)임이 증명되므로 Week~10의 보수적
+\(0..4\) 위상과 순수 추적 사이의 간극이 닫힌다.
+
+성공 경로의 외부 불변식은
+\[
+\begin{gathered}
+  0\le i\le1024,\qquad
+  x=T(S_i(a_0)).\mathsf{state},\qquad 4\le off,\\
+  off+|T(S_i(a_0)).\mathsf{bytes}|=1024,\\
+  \operatorname{Segment}(encp,off,T(S_i(a_0)).\mathsf{bytes}),\qquad
+  \operatorname{PrefixFrame}(enc_0,encp,off)
+\end{gathered}
+\]
+이다. 생성 표 읽기와 보호 연산, 역수 곱과 이동 사다리를 전용 단어 정리로
+접어 한 기호 전이를 복원하고, \(i=0\)에서 네 번의 실제 리틀엔디언 저장을
+합성한다. 그 결과 실제 \identifier{_rans_encode}의 종료한 실행은 실패를
+반환하거나, 성공 시 다음 사후조건을 만족한다.
+\[
+\begin{aligned}
+ bad'\ne0\quad\lor\quad\bigl(bad'=0
+ &\land 0\le off'\le1020
+ \land 4\le1024-off'\le1024\\
+ &\land\operatorname{Segment}(encp',off',
+       \operatorname{trace\_bytes}(S(a_0)))\\
+ &\land off'+|\operatorname{trace\_bytes}(S(a_0))|=1024\\
+ &\land\operatorname{PrefixFrame}(enc_0,encp',off')\bigr).
+\end{aligned}
+\]
+\identifier{actual_rans_encode_trace_closure}와
+\identifier{actual_rans_encode_trace_refinement}가 이 명제를 실제 생성 절차에
+대해 증명한다. 따라서 \claim{OBL-RANS-ENCODE-REFINEMENT}는 성공 조건부
+부분정확성으로 \statusproved 다. 성공은 사전조건이 아니지만, 정리가 종료나
+\(bad'=0\)의 도달 가능성을 보이는 것도 아니다.
+
+\subsection{Week~12 실제 디코더 추적 폐쇄}
+
+용량 2048의 예상 기호 배열 \(a\)에 대해
+\[
+  s:=S(a),\qquad B:=\operatorname{trace\_bytes}(s),\qquad n:=|B|
+\]
+로 둔다. 실제 디코더의 정확 추적 입력(exact-trace input)은
+\identifier{mode2_hbz_symbol_stream}(a), \(4\le n\le1024\), 입력 버퍼의
+\([0,n)\) 구간과 \(B\)의 점별 일치, 상태 필드
+\[
+  (\mathsf{count},\mathsf{size},m)=(1024,n,13)
+\]
+및 실제 \identifier{symbol_words}/\identifier{dsyms_words} 표의 바인딩을
+요구한다. 각 정규화 구간 안에서 생성된 바이트 읽기가 해당 순수 목록 원소와
+같다는 점별 읽기 전제도 명시한다. 이 입력 술어에는 디코더 성공, 출력 기호
+등식이나 사후상태가 들어 있지 않다.
+
+참조 상태, 커서와 구간을
+\[
+\begin{aligned}
+  x_i&:=\operatorname{decoder\_state\_at}(s,i),&
+  c_i&:=\operatorname{decoder\_cursor}(s,i),\\
+  \beta_i&:=\operatorname{decoder\_segment\_at}(s,i)
+\end{aligned}
+\]
+로 두면 컴파일된 경계 정리는
+\[
+  c_0=4,\qquad c_{i+1}=c_i+|\beta_i|,\qquad
+  c_{1024}=n,\qquad x_{1024}=2^{23}
+\]
+을 준다. 실제 내부 반복문은
+\(k=\mathsf{off}-c_i\)와 부분 재생 상태를 운반하며, 구간 길이
+\(|\beta_i|\in\{0,1,2\}\)에 따라 정확히 다음 바이트를 소비하거나 멈춘다.
+구체적 패킹 표 조회와 W32/W64 단어 연산은 같은 기호와 수학적 디코더 단계를
+선택함이 별도 정리로 연결된다.
+
+그 결과
+\identifier{actual_rans_decode_trace_refinement}는 실제 생성
+\identifier{RansDecodeTarget.M._rans_decode}의 모든 종료 실행에 대해
+\[
+\begin{aligned}
+  bad_{\mathrm{dec}}&=0,&
+  off_{\mathrm{dec}}&=n,\\
+  decoded'[0..1024)&=a[0..1024),&
+  decoded'[1024..2048)&=decoded_0[1024..2048)
+\end{aligned}
+\]
+을 증명한다. 내부 사실 \(x_{1024}=2^{23}\)은 실제 마지막 거절 검사를
+배제하는 데 쓰이지만 생성 ABI 결과에는 노출되지 않는다. 따라서
+\claim{OBL-RANS-DECODE-REFINEMENT}는 정확 추적 부분정확성으로
+\statusproved 다. 종료, 손실없음(losslessness), 실제 인코더 성공 도달은 이
+정리의 결론이 아니다.
+
+\subsection{Week~13 실제 rANS 핵심 합성 폐쇄}
+
+Week~13은 앞 절의 세 개별 정리를 실제
+\identifier{Mode2RansActualHarness.run} 안에서 순차 합성했다. 이 결합 모듈은
+고정 추출물의 \identifier{_rans_encode},
+\identifier{__copy_encoded_suffix}, \identifier{_rans_decode}를 그 순서로
+직접 호출한다. \identifier{Mode2RansCoreCompositionBridge.ec}는 인코더의
+\identifier{segment_matches}와 실제 복사의 \identifier{slice_eq}에서 복사된
+버퍼의 정확 추적을 만들고, 이를 모든 디코더 점별 읽기와 구성된 상태 필드
+\((1024,n,13)\)로 운반한다. 또한 실제 성공 범위로부터 W64 뺄셈이 정수
+추적 크기와 같고 랩어라운드하지 않음을 도출한다.
+
+\identifier{actual_rans_encode_copy_decode_inverse}의 사전조건은 초기 인자
+바인딩과 \identifier{mode2_hbz_symbol_stream}뿐이다. 특히 인코더 성공이나
+복사/디코더 결과를 사전조건으로 넣지 않는다. 모든 종료 실행의 결론은 대략
+\[
+\begin{aligned}
+  &\bigl(bad_{\mathrm{enc}}\ne0
+    \land\neg\mathsf{decoder\_ran}
+    \land decoded'=decoded_0\bigr)\\
+  {}\lor{}&\bigl(bad_{\mathrm{enc}}=0
+    \land\mathsf{decoder\_ran}
+    \land bad_{\mathrm{dec}}=0
+    \land off_{\mathrm{dec}}=\mathsf{size}\\
+    &\land decoded[0..1024)=symbols[0..1024)
+    \land\mathsf{frames}\bigr)
+\end{aligned}
+\]
+이다. 실패 분기에서는 디코더 상태도 초기값으로 남고, 성공 분기에서는
+디코더 입력 필드, 실제 인코더 추적 접미부와 초기 접두부 프레임까지 보존된다.
+따라서 \claim{OBL-RANS-CORE-INVERSE}는 성공 조건부 Hoare 부분정확성으로
+\statusproved 다.
+
+이 결과는 세 실제 생성 절차를 직접 호출하는 증명 작성 결합 모듈의 정리이지,
+production \identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full}
+래퍼 정리는 아니다. 정준 \(h\)만으로 버퍼 성공을 결론낼 수도 없으므로 전체
+HBZ 래퍼(wrapper) 목표는 여전히 적어도
+\[
+  \mathsf{size}=0\quad\lor\quad
+  \bigl(\mathsf{size}\ne0\land
+        \mathsf{bad}=0\land
+        \mathsf{decoded}[0..1024)=h[0..1024)\bigr)
+\]
+처럼 실제 실패 분기를 드러내야 한다. HBZ 부모의 전체 프레임/크기 운반,
+인코더와 디코더의 종료, 그리고 모든 기호가 6인 입력의 실제 성공 증인은 아직
+컴파일되지 않았다.
+
+\subsection{최상위 기능정확성 목표}
+
+\sourcepath{easycrypt/specs/TopLevelGoals.ec}는 구현과 논문의 확률적 알고리즘을
+추상 연산으로 두고 다음 목표를 정의한다.
+
+\begin{align*}
+  \mathsf{FC}_{\mathrm{KG}}
+    &:\quad \mathsf{JKeyGen}_2=\mathsf{PaperKeyGen}_2,\\
+  \mathsf{FC}_{\mathrm{Sign}}
+    &:\quad \forall sk,M,\;
+       \mathsf{JSign}_2(sk,M)=\mathsf{PaperSign}_2(sk,M),\\
+  \mathsf{FC}_{\mathrm{Verify}}
+    &:\quad \forall vk,M,\sigma,\;
+       \mathsf{JVerify}_2(vk,M,\sigma)
+       =\mathsf{PaperVerify}_2(vk,M,\sigma).
+\end{align*}
+
+이 식들은 증명 완료 선언이 아니라 앞으로 구현해야 할 명세 인터페이스이다.
+현재의 prefix와 transcript 정리는 이 등식들에 필요한 결정론적 하위 정리다.
+
+\subsection{최상위 보안 합성 목표}
+
+구현의 EUF-CMA 이점을 논문 스킴의 이점과 비교하는 목표는
+\begin{equation}
+\label{eq:implementation-bound}
+  \operatorname{Adv}^{\mathrm{euf\mbox{-}cma}}_{\mathrm{Jasmin}}
+  \le
+  \operatorname{Adv}^{\mathrm{euf\mbox{-}cma}}_{\mathrm{paper}}
+  +\delta_{\mathrm{KeyGen}}
+  +q_{\mathrm{Sign}}\delta_{\mathrm{Sign}}
+  +\delta_{\mathrm{Verify}}
+  +\delta_{\mathrm{Encoding}}
+\end{equation}
+이다. 논문 수준에서는 다시
+\begin{equation}
+\label{eq:paper-bound}
+  \operatorname{Adv}^{\mathrm{euf\mbox{-}cma}}_{\mathrm{paper}}
+  \le
+  \operatorname{Adv}_{\mathrm{MLWE}}
+  +\operatorname{Adv}_{\mathrm{BST\mbox{-}MSIS}}
+  +\varepsilon_{\mathrm{ROM}}
+  +\varepsilon_{\mathrm{Rejection}}
+  +\varepsilon_{\mathrm{Fork}}
+\end{equation}
+을 목표로 한다. \cref{eq:implementation-bound,eq:paper-bound} 역시 현재는
+\statusspecified 또는 조건부 연결식이다. 최종적으로 남길 수 있는 암호학적
+가정 인터페이스는 HAETAE-2의 MLWE, BST-MSIS, ROM 세 종류지만, 구체적 게임
+인스턴스와 감소정리는 아직 모두 연결되지 않았다.

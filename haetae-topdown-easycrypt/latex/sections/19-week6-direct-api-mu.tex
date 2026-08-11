@@ -1,0 +1,80 @@
+\section{Week 6: direct API trace boundary}
+
+\subsection{Actual sequential trace}
+
+\path{RawApiDirectObservedMu.ec} preserves the real execution order:
+\begin{verbatim}
+actual Sign raw ABI -> publish signature -> actual Verify raw ABI
+       |                                      |
+       v                                      v
+SignRawApiMuTrace.run -> VerifyCryptolabMuTrace.run
+\end{verbatim}
+The same \texttt{sigu}, pre, and message arguments are used by both calls.
+The exact theorem is
+\begin{quote}
+\small\path{raw_sign_then_verify_actual_exact_trace}.
+\end{quote}
+It proves equal result pairs and equal final memory. The traces add observations but retain the
+entire signature core, verification residual computation, and rejection
+behavior.
+
+On the trace sequence,
+\theoryname{sign_then_verify_trace_accept_implies_tail_reached} proves
+\[
+  \mathsf{VerifyAccept}\Longrightarrow\mathsf{TailRan},
+\]
+The companion binding lemma
+\begin{center}
+\small\path{sign_then_verify_accept_binds_observed_inputs}
+\end{center}
+derives both sets of VK/pre/message inputs from the post-state. No
+\texttt{tail\_reached}
+or observed hash value occurs in either precondition.
+
+The intended full implication is
+\[
+ \mathsf{VerifyAccept}
+ \Longrightarrow \mathsf{TailRan}
+ \Longrightarrow
+ \take_{32}(\mathsf{SignTrace.observed\_mu})
+ = \mathsf{VerifyTrace.observed\_mu}.
+\]
+
+\subsection{What remains open}
+
+The last implication is not yet compiled. The region-local theorem is a pRHL
+relation between two hash procedure executions, while the desired result is a
+unary postcondition about values stored by two calls that have already
+completed inside one sequential trace. A product program, deterministic
+functional hash specification, or justified replay rule is needed to
+transport the former into the latter.
+
+Repeating the Week 5 construction by placing both observations in a hash-call
+precondition was rejected: it does not establish reachability from trace
+execution. Adding an independent replay without proving equality to the
+original observations was also rejected.
+
+The remaining semantic step is named
+\begin{center}
+\small\path{OBL-MU-PRODUCT-REPLAY}.
+\end{center}
+The usual \texttt{byequiv} pattern does not directly convert the compiled
+pRHL judgment into the required unary Hoare postcondition. Aligning the two
+full traces relationally would leave the post-hash Sign rejection continuation
+unpaired; eliminating it one-sidedly would require the still-open signing-loop
+losslessness proof. That termination premise is outside this partial-
+correctness seam and was not hidden.
+
+Therefore:
+\begin{itemize}
+  \item \claimid{OBL-DIRECT-OBSERVED-MU}: \status{PARTIAL};
+  \item \claimid{OBL-API-KEY-MEMORY-RAW-ACCEPT}: \status{PARTIAL};
+  \item \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\): not claimed.
+\end{itemize}
+
+There is also no accepted Sign-output witness. That separate fact belongs to
+the functional obligation
+\begin{center}
+\small\path{OBL-SIGN-OUTPUT-TAIL-REACH},
+\end{center}
+not to the accepted-forgery adapter.

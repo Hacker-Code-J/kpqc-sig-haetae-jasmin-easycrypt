@@ -1,0 +1,61 @@
+\section{Week 6: actual Sign output frame}
+
+\subsection{Research question and source boundary}
+
+The question for \claimid{OBL-SIGN-OUTPUT-FRAME} is whether the actual raw
+mode-2 Sign ABI can publish its signature and length without changing the
+external VK, SK, pre, or message bytes that a later Verify call reads. The
+paper's signing algorithm (Figure~8 in the pinned official PDF) specifies the
+signature value, while buffer publication is an implementation refinement
+step. The pinned Sign source and generated raw target hashes are:
+
+\noindent\path{sign.jazz}:
+\begin{verbatim}
+fd58271f3ada888dfcef4bcf89027c986cc91464a7cb8446b6de11e40037ac31
+\end{verbatim}
+\noindent\path{RawSignApiTarget.ec}:
+\begin{verbatim}
+5f632a19c7db616ca75f4f2f0b319b1a8ba821f0bd552613f0c77290b19ef02f
+\end{verbatim}
+
+\subsection{Compiled theorem and premises}
+
+Theory \path{RawApiSignOutputFrame.ec} opens the generated
+\procname{_api_copy_2948_to_raw}. Lemma
+\theoryname{sign_output_copy_exact_and_frames_reused} proves exact publication
+of 1474 bytes and a byte frame outside the destination interval. It is then
+composed with the actual 8-byte \texttt{siglenu} store.
+
+The actual caller theorem is
+\theoryname{sign_raw_api_frames_reused_regions}. Its premises are:
+\begin{itemize}
+  \item the initial memory and concrete raw ABI arguments;
+  \item a valid, non-wrapping 1474-byte signature output region;
+  \item disjointness of signature and siglen writes from VK(992), SK(1408),
+        pre, and message regions; and
+  \item disjointness of the signature and siglen output regions.
+\end{itemize}
+For every terminating execution it concludes success, stability of all four
+reused regions, and the value 1474 at \texttt{siglenu}. This is Hoare partial
+correctness: it does not prove termination of the signing rejection loop.
+
+\subsection{Invariant, transfer, and non-vacuity}
+
+The copy-loop invariant records exact bytes already written and a frame for
+all addresses outside the full output interval. The subsequent \texttt{W64}
+store is handled bytewise and composed by transitivity. Exact equivalence
+\theoryname{sign_raw_api_exact_mu_trace} transfers the trace result to the
+actual \procname{cryptolab_haetae_mode2_signature_internal} procedure while
+preserving result and final memory.
+
+The earlier attempt to name the procedure-local \texttt{sigp} array directly
+after a sequence cut failed because that local was outside the theorem
+instantiation scope. The replacement is a source-independent frame lemma for
+the generated copy; exact copied bytes remain in the separate copy theorem.
+The contract is non-vacuous by the following concrete-witness lemma:
+\begin{center}
+\small\path{sign_output_frame_contract_satisfiable}.
+\end{center}
+It supplies pairwise-separated regions.
+
+Status: \status{PROVED} as partial correctness.

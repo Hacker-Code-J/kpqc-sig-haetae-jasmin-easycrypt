@@ -1,0 +1,9 @@
+[submodule "submodules/formosa-mldsa"]
+	path = submodules/formosa-mldsa
+	url = https://github.com/formosa-crypto/formosa-mldsa.git
+[submodule "submodules/easycrypt"]
+	path = submodules/easycrypt
+	url = https://github.com/EasyCrypt/easycrypt.git
+[submodule "submodules/jasmin-compiler"]
+	path = submodules/jasmin-compiler
+	url = https://gitlab.com/jasmin-lang/jasmin-compiler

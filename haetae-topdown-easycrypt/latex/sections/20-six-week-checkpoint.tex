@@ -1,0 +1,35 @@
+\section{Six-week checkpoint}
+
+The operational status is summarized in
+\path{SIX_WEEK_REVIEW.md}; this section is the narrative record rather than a
+second claim ledger.
+
+\begin{center}
+\small
+\begin{tabular}{p{0.29\linewidth}p{0.16\linewidth}p{0.45\linewidth}}
+\toprule
+Lane & Status & Evidence boundary \\
+\midrule
+KeyGen VK/SK prefix/export & PARTIAL FC & Actual terminating raw caller export is proved; retries and distribution are open. \\
+Sign output frame & PROVED & Actual raw caller frames disjoint VK/SK/pre/message regions. \\
+Accepted Verify control & PROVED & Actual success implies tail execution and exact hash input binding. \\
+Generated raw mu relation & PROVED & Actual hash calls are related with region-local memories. \\
+Direct stored trace mu & PARTIAL & Exact sequential trace exists; product/replay transport is missing. \\
+Legitimate Sign correctness & BLOCKED & Pack/unpack, norm, hint, response, and arithmetic remain. \\
+Distribution/security & BLOCKED & Rejection, entropy, forking, and final advantage composition remain. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The smallest defensible paper result is a machine-checked collection of
+mode-2 raw/internal partial-correctness and accepted-event adapters with
+explicit memory premises. It is not a full functional-correctness theorem and
+not a public-API EUF-CMA theorem.
+
+The next gate is deliberately bounded. One sprint may test an explicit
+product/replay construction. If it does not compile, the accepted generated
+hash-call adapter must be frozen as the stated paper boundary, and the main
+effort should move to pack/unpack and norm correctness or another independent
+security lane. More proof-only caller wrappers would not change the semantic
+gap.
+

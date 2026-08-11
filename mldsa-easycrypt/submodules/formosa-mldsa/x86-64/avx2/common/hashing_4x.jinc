@@ -1,0 +1,85 @@
+inline
+fn shake128_absorb_34_4x(
+    reg ptr u256[25] state,
+    reg ptr u8[32] rho,
+    reg ptr u16[4] domain_separators
+) -> reg ptr u256[25]
+{
+    stack u8[2] d0 d1 d2 d3;
+
+    state = __state_init_avx2x4(state);
+
+    state, _ = A32::__absorb_bcast_avx2x4(state, 0, rho, UNFINISHED, SHAKE128_RATE);
+
+    d0[:u16 0] = domain_separators[0];
+    d1[:u16 0] = domain_separators[1];
+    d2[:u16 0] = domain_separators[2];
+    d3[:u16 0] = domain_separators[3];
+    state, _ = A2::__absorb_avx2x4(state, 32, d0, d1, d2, d3, SHAKE, SHAKE128_RATE);
+
+    return state;
+}
+
+inline
+fn shake256_absorb_66_4x(
+    reg ptr u256[25] state,
+    reg ptr u8[64] rho_prime,
+    reg u16 starting_domain_separator
+) -> reg ptr u256[25]
+{
+    stack u8[2] d0 d1 d2 d3;
+    reg u16 t;
+
+    state = __state_init_avx2x4(state);
+
+    state, _ = A64::__absorb_bcast_avx2x4(state, 0, rho_prime, UNFINISHED, SHAKE256_RATE);
+
+    t = starting_domain_separator;
+    d0[:u16 0] = t; t += 1;
+    d1[:u16 0] = t; t += 1;
+    d2[:u16 0] = t; t += 1;
+    d3[:u16 0] = t;
+    state, _ = A2::__absorb_avx2x4(state, 64, d0, d1, d2, d3, SHAKE, SHAKE256_RATE);
+
+    return state;
+}
+
+inline
+fn shake128_squeezeblock4x(
+    reg ptr u256[25] state,
+    reg ptr u8[SHAKE128_RATE] h0 h1 h2 h3
+) ->
+    reg ptr u256[25],
+    reg ptr u8[SHAKE128_RATE],
+    reg ptr u8[SHAKE128_RATE],
+    reg ptr u8[SHAKE128_RATE],
+    reg ptr u8[SHAKE128_RATE]
+{
+    reg ui64 offset;
+
+    state = _keccakf1600_avx2x4(state);
+    offset = 0;
+    h0, h1, h2, h3, _ = A168::__dumpstate_avx2x4(h0, h1, h2, h3, offset, SHAKE128_RATE, state);
+
+    return state, h0, h1, h2, h3;
+}
+
+inline
+fn shake256_squeezeblock4x(
+    reg ptr u256[25] state,
+    reg ptr u8[SHAKE256_RATE] h0 h1 h2 h3
+) ->
+    reg ptr u256[25],
+    reg ptr u8[SHAKE256_RATE],
+    reg ptr u8[SHAKE256_RATE],
+    reg ptr u8[SHAKE256_RATE],
+    reg ptr u8[SHAKE256_RATE]
+{
+    reg ui64 offset;
+
+    state = _keccakf1600_avx2x4(state);
+    offset = 0;
+    h0, h1, h2, h3, _ = A136::__dumpstate_avx2x4(h0, h1, h2, h3, offset, SHAKE256_RATE, state);
+
+    return state, h0, h1, h2, h3;
+}

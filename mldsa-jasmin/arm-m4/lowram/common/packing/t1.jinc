@@ -1,0 +1,115 @@
+/*************************************************
+* Name:        JASMIN_MLDSA_polyt1_pack
+*
+* Description: Bit-pack polynomial t1 with coefficients fitting in 10 bits.
+*              Input coefficients are assumed to be standard representatives.
+*
+* Arguments:   - uint8_t *r: pointer to output byte array with at least
+*                            POLYT1_PACKEDBYTES bytes
+*              - const poly *a: pointer to input polynomial
+**************************************************/
+fn _polyt1_pack(reg ptr u8[POLYT1_PACKEDBYTES] r, reg ptr u32[N] a) -> reg ptr u8[POLYT1_PACKEDBYTES] {
+  reg u32 i, j, aux;
+  reg u32[4] t;
+  inline int k;
+  i = 0; j = 0;
+  while(i < N)
+  {
+    for k = 0 to 4 {
+      t[k] = a[i]; i += 1;
+    }
+    /* r[5 * i + 0] = (uint8_t) (a->coeffs[4 * i + 0] >> 0); */
+    r[j] = t[0]; j += 1;
+
+    /* r[5 * i + 1] = (uint8_t) ((a->coeffs[4 * i + 0] >> 8) | (a->coeffs[4 * i + 1] << 2)); */
+    aux = t[0] >> 8;
+    aux = __or_lsl_inplace(aux, t[1], 2);
+    r[j] = aux; j += 1;
+
+    /* r[5 * i + 2] = (uint8_t) ((a->coeffs[4 * i + 1] >> 6) | (a->coeffs[4 * i + 2] << 4)); */
+    aux = t[1] >> 6;
+    aux = __or_lsl_inplace(aux, t[2], 4);
+    r[j] = aux; j += 1;
+
+    /* r[5 * i + 3] = (uint8_t) ((a->coeffs[4 * i + 2] >> 4) | (a->coeffs[4 * i + 3] << 6)); */
+    aux = t[2] >> 4;
+    aux = __or_lsl_inplace(aux, t[3], 6);
+    r[j] = aux; j += 1;
+
+    /* r[5 * i + 4] = (uint8_t) (a->coeffs[4 * i + 3] >> 2);                                 */
+    aux = t[3] >> 2;
+    r[j] = aux; j += 1;
+  }
+  return r;
+}
+
+fn _t1_unpack_coefficient_at_index(
+    reg ptr u8[POLYT1_PACKEDBYTES] packed,
+    reg u32 index
+) -> reg u32 {
+    reg u32 coeff temp;
+    reg u32 offset;
+    reg u32 start_byte;
+
+    // 4 coefficients are packed in 5 bytes
+    start_byte = (index >> 2);
+    temp = 5;
+    start_byte *= temp;
+
+    offset = index & 0x3;
+
+    if (offset == 0)
+    {
+        coeff = (32u)packed[start_byte];
+        start_byte += 1;
+
+        temp = (32u)packed[start_byte];
+        temp <<= 8;
+
+        coeff |= temp;
+    }
+    else if (offset == 1)
+    {
+        start_byte += offset;
+        coeff = (32u)packed[start_byte];
+        coeff >>= 2;
+
+        start_byte += 1;
+        temp = (32u)packed[start_byte];
+        temp <<= 6;
+
+        coeff |= temp;
+    }
+    else if (offset == 2)
+    {
+        start_byte += offset;
+        coeff = (32u)packed[start_byte];
+
+        coeff >>= 4;
+
+        start_byte += 1;
+        temp = (32u)packed[start_byte];
+        temp <<= 4;
+
+        coeff |= temp;
+    }
+    else
+    {
+        start_byte += offset;
+        coeff = (32u)packed[start_byte];
+
+        coeff >>= 6;
+
+        start_byte += 1;
+        temp = (32u)packed[start_byte];
+        temp <<= 2;
+
+        coeff |= temp;
+    }
+
+    temp = 0x3FF;
+    coeff &= temp;
+    coeff <<= D;
+
+    return coeff;
+}

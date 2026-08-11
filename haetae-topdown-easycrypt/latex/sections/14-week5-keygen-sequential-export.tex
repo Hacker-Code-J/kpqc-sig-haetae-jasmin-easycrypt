@@ -1,0 +1,54 @@
+\section{Week 5: sequential KeyGen export}
+
+Week 5 closes the actual KeyGen sequential-export boundary.  The central
+compiled theorem is
+\theoryname{RawApiKeygenSequentialExport.keypair_raw_api_exports_matching_prefixes},
+which opens the real
+\procname{cryptolab_haetae_mode2_keypair_internal} caller under canonical
+region and disjoint-output premises and closes with the exact external-prefix
+relation:
+\[
+  \mathsf{res} = \mathsf{W64.zero}
+  \;\land\;
+  \mathsf{external\_key\_prefix\_match}(\mathsf{Glob.mem},sku_0,vku_0).
+\]
+
+The proof composes three facts:
+
+\begin{itemize}
+  \item the actual 992-byte VK exporter trace;
+  \item the actual 1408-byte SK exporter trace that frames the earlier VK
+    export; and
+  \item the actual KeyGen caller trace with the returned-array prefix theorem.
+\end{itemize}
+
+This is the first week where the sequential export boundary is proved for the
+real caller rather than a helper-only witness.  The theorem does not claim
+termination, and it does not interpret the raw ABI as a memory-safety
+theorem.
+
+A strengthened one-line \texttt{proc; sim} attempt could not infer the final
+memory-equality set across the two ghost observation assignments.  The
+compiled replacement splits the common prefix from the exporter tail with
+\texttt{seq 18 20} and aligns both actual copy calls under explicit
+\texttt{Glob.mem}/argument/result equality contracts.  Thus the intermediate
+post-memory is carried through the real second export.
+
+The implication for the week-5 claim ledger is narrow and explicit.  The claim
+\begin{quote}
+\path{OBL-API-KEY-MEMORY-RAW-ACCEPT}
+\end{quote}
+remains partial because the accepted Verify path still needs a direct
+caller-trace bridge, but the KeyGen export side of that bridge is now compiled.
+
+The pinned Jasmin source is:
+\begin{quote}
+\path{haetae-ref-jasmin/jasmin/keypair.jazz}
+\end{quote}
+Its SHA-256 is:
+\begin{verbatim}
+8b2ddac2862122d1c9d58767cbc5caa2caad39c8f41fa8096d66ffa77b783e01
+\end{verbatim}
+The theorem is checked by the manifest-driven \texttt{-no-eco} compilation in
+\path{scripts/verify-all.sh}; regeneration uses the separate script
+\path{scripts/extract-raw-api-callers.sh}.

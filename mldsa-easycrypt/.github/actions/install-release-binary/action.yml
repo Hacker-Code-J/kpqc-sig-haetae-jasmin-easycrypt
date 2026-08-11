@@ -1,0 +1,55 @@
+name: Install Release Binary
+description: Download an archive from a URL, extract a binary, and install it into ~/bin.
+
+inputs:
+  url:
+    description: Archive URL to download.
+    required: true
+  binary-name:
+    description: Binary name to extract and install.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Install binary
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        url="${{ inputs.url }}"
+        binary_name="${{ inputs.binary-name }}"
+        archive="$RUNNER_TEMP/${binary_name}.archive"
+        extract_dir="$RUNNER_TEMP/${binary_name}"
+
+        rm -rf "$extract_dir"
+        mkdir -p "$HOME/bin" "$extract_dir"
+
+        curl -fsSL "$url" -o "$archive"
+
+        case "$url" in
+          *.zip)
+            unzip -j "$archive" "*/bin/$binary_name" -d "$extract_dir"
+            ;;
+          *.tar.gz|*.tgz)
+            tar -xzf "$archive" -C "$extract_dir"
+            ;;
+          *.tar.xz)
+            tar -xJf "$archive" -C "$extract_dir"
+            ;;
+          *)
+            echo "Unsupported archive format: $url" >&2
+            exit 1
+            ;;
+        esac
+
+        if [ ! -f "$extract_dir/$binary_name" ]; then
+          found_path="$(find "$extract_dir" -type f -name "$binary_name" | head -n 1 || true)"
+          if [ -z "$found_path" ]; then
+            echo "Could not find binary '$binary_name' in archive: $url" >&2
+            exit 1
+          fi
+          install -m 0755 "$found_path" "$HOME/bin/$binary_name"
+        else
+          install -m 0755 "$extract_dir/$binary_name" "$HOME/bin/$binary_name"
+        fi

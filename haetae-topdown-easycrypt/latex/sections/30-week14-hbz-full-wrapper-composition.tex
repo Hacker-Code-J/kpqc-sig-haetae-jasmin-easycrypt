@@ -1,0 +1,92 @@
+\section{Week 14: Actual Full-HBZ Wrapper Composition}
+
+Week~14 closes \claimid{OBL-SIG-HBZ-ENCODE-DECODE} as
+\status{proved, success-conditioned Hoare partial correctness}.  The proof
+retains the actual encoder's zero-size failure branch; encoder success is not
+a theorem premise.
+
+\subsection*{Internal extraction boundary}
+
+The full-wrapper extraction and the focused Week~8--13 extractions place four
+internal procedures in different EasyCrypt modules.  The theory
+\theoryname{Mode2HbzInternalBoundaries} proves exact equivalences for
+\procname{_encode_hb_z1_prepare}, \procname{_rans_encode},
+\procname{_rans_decode}, and \procname{_decode_hb_z1_apply}.  Each proof is a
+small \texttt{proc; sim} argument over the actual extracted bodies.  The
+focused prepare, encoder, decoder, and apply Hoare theorems are then lifted
+through these equivalences; no generated loop is re-proved.
+
+Two semantic adapters connect the lifted results.  For a canonical mode-2 HBZ
+array, \procname{prepared_hbz_implies_mode2_symbol_stream} turns the actual
+prepare prefix into the canonical rANS symbol-stream predicate.  After the
+actual decoder,
+\procname{decoded_prefix_preserves_prepared_hbz} transports symbol-prefix
+equality back to the prepare predicate required by the actual apply theorem.
+
+\subsection*{Actual full encoder and decoder}
+
+The theorem \procname{actual_encode_hb_z1_full_mode2_trace} targets
+\procname{HbzFullEncodeTarget.M._encode_hb_z1_full} directly.  Its precondition
+binds the initial arrays and literal mode-2 table, count (1024), alphabet
+(13), offset (6), and a canonical HBZ input.  Its postcondition is the
+following disjunction:
+\[
+\begin{array}{ll}
+size=0 &\land\ encoded=encoded_0,\\[1mm]
+size\ne0 &\land\ 4\leq\mathsf{uint}(size)\leq1024\\
+&\land\ size=\mathsf{W64.of\_int}(|trace(prepared)|)\\
+&\land\ \mathsf{segmentMatches}(encoded,0,trace(prepared))\\
+&\land\ \mathsf{suffixFrame}(encoded_0,encoded,\mathsf{uint}(size)).
+\end{array}
+\]
+In both proof branches the prepared-symbol witness comes from the actual
+prepare call.  Canonicality excludes prepare failure; the zero-size return is
+therefore the preserved actual rANS failure path, not a claimed unreachable
+case.
+
+The theorem \procname{actual_decode_hb_z1_full_mode2_inverse} targets
+\procname{HbzFullDecodeTarget.M._decode_hb_z1_full} directly.  Given the exact
+successful trace produced by the encoder theorem, it proves decoder
+\texttt{bad}=0, recovery of coefficients (0\ldots1023), and preservation of
+the initial coefficient tail (1024\ldots2047).  The proof follows the
+generated control flow: the actual apply call occurs only after the actual
+rANS decoder establishes its zero-bad state.  Apply execution and coefficient
+equality are conclusions, not premises.
+
+\subsection*{Direct pair and production lift}
+
+\theoryname{HbzFullActualHarness.run} directly calls the two focused full
+wrappers.  It observes the returned size, skips decoding when the size is zero,
+and otherwise supplies the returned encoded buffer and size to the actual full
+decoder.  The compiled theorem
+\procname{actual_hbz_full_encode_decode_inverse_mode2} assumes only exact
+caller bindings and canonical HBZ coefficients.  Its failure branch returns
+size zero, records that the decoder did not run, and preserves the encoded,
+decoded, and bad arrays.  Its success branch records the size bounds, actual
+prepare trace, decoder execution and zero-bad result, coefficient-prefix
+inverse, coefficient-tail frame, and encoded-output tail frame.
+
+\theoryname{Mode2HbzSignatureBoundaryLift} repeats this direct call shape at
+\procname{SignaturePackMode2Target.M._encode_hb_z1_full} and
+\procname{SignatureUnpackMode2Target.M._decode_hb_z1_full}.  A compiled exact
+equivalence connects the production harness to the focused harness, using the
+already checked production/focused procedure identities.  Consequently
+\procname{signature_pack_unpack_hbz_full_inverse_mode2} has the same
+failure/success contract at the signature extraction boundary.
+
+\subsection*{Claim boundary}
+
+These are unary Hoare partial-correctness results.  They do not prove
+termination or losslessness, that every canonical input reaches encoder
+success, or that the zero-size branch is unreachable.  The optional all-zero
+actual success witness remains \status{partial}.  Malformed-input rejection,
+canonical parsing, the (h) codec, metadata and padding, public-context mu,
+product/replay, complete Sign/Verify correctness, encoding zero-loss, and
+EUF-CMA security remain outside Week~14.
+
+The verification pipeline fresh-compiles 72 authored targets with
+\texttt{-no-eco}, regenerates both focused and signature extractions, checks
+their procedure identity and hashes, regenerates the deterministic HBZ table
+certificate, scans proof holes and authored axioms, checks selected upstream
+baselines and read-only roots, and builds these notes without LaTeX errors.
+

@@ -1,0 +1,53 @@
+inline fn __pack_s1_element_in_signing_key(
+    reg ptr u8[SIGNING_KEY_SIZE] signing_key,
+    reg ptr u32[N] s1_element,
+    inline int INDEX
+) -> reg ptr u8[SIGNING_KEY_SIZE]
+{
+    inline int START_OF_S1_PACKED = (2 * SEEDBYTES) + VERIFICATION_KEY_HASH_SIZE;
+    inline int STARTING_INDEX = START_OF_S1_PACKED + (INDEX * POLYETA_PACKEDBYTES);
+
+    signing_key[STARTING_INDEX : POLYETA_PACKEDBYTES] =
+        _poly_eta_pack(
+            signing_key[STARTING_INDEX : POLYETA_PACKEDBYTES],
+            s1_element
+        );
+
+    return signing_key;
+}
+
+inline fn __pack_s2_element_in_signing_key(
+    reg ptr u8[SIGNING_KEY_SIZE] signing_key,
+    reg ptr u32[N] s2_element,
+    inline int INDEX
+) -> reg ptr u8[SIGNING_KEY_SIZE]
+{
+    inline int START_OF_S2_PACKED = (2 * SEEDBYTES) + VERIFICATION_KEY_HASH_SIZE + (L * POLYETA_PACKEDBYTES);
+    inline int STARTING_INDEX = START_OF_S2_PACKED + (INDEX * POLYETA_PACKEDBYTES);
+
+    signing_key[STARTING_INDEX : POLYETA_PACKEDBYTES] =
+        _poly_eta_pack(
+            signing_key[STARTING_INDEX : POLYETA_PACKEDBYTES],
+            s2_element
+        );
+
+    return signing_key;
+}
+
+inline fn __pack_t0_element_in_signing_key(
+    reg ptr u8[SIGNING_KEY_SIZE] signing_key,
+    reg ptr u32[N] t0_element,
+    inline int INDEX
+) -> reg ptr u8[SIGNING_KEY_SIZE]
+{
+    inline int START_OF_T0_PACKED = (2 * SEEDBYTES) + VERIFICATION_KEY_HASH_SIZE + ((K + L) * POLYETA_PACKEDBYTES);
+    inline int STARTING_INDEX = START_OF_T0_PACKED + (INDEX * POLYT0_PACKEDBYTES);
+
+    signing_key[STARTING_INDEX : POLYT0_PACKEDBYTES] =
+        _polyt0_pack(
+            signing_key[STARTING_INDEX : POLYT0_PACKEDBYTES],
+            t0_element
+        );
+
+    return signing_key;
+}

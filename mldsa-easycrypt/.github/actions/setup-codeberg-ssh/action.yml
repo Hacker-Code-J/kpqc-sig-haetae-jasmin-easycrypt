@@ -1,0 +1,24 @@
+name: Setup Codeberg SSH
+description: Start an SSH agent and install the configured known_hosts entries.
+
+inputs:
+  ssh-private-key:
+    description: SSH private key used for submodule checkout.
+    required: true
+  known-hosts:
+    description: known_hosts entries to install.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: webfactory/ssh-agent@v0.9.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+
+    - name: Setup SSH
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        printf '%s\n' "${{ inputs.known-hosts }}" > ~/.ssh/known_hosts

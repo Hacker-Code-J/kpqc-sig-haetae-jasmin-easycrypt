@@ -1,0 +1,178 @@
+\section{Week 8: Mode-2 HBZ and rANS Boundary}
+
+Week~8 keeps the Week~7 product/replay freeze unchanged and moves only along
+\claimid{OBL-SIG-HBZ-ENCODE-DECODE}.  The result is a compiled leaf inverse,
+an exact focused/full extraction identity for the actual HBZ wrappers, a
+compiled generic mode-2 arithmetic certificate, and a compiled concrete
+actual-array table corollary.  The generated encoder/decoder loop refinement
+remains the
+gates to a full actual HBZ round trip, so the parent claim remains
+\status{partial}.
+
+\subsection*{Actual extraction and implementation graph}
+
+The focused roots are
+\procname{encode_hb_z1_prepare_jazz},
+\procname{decode_hb_z1_apply_jazz},
+\procname{rans_encode_jazz}, \procname{rans_decode_jazz}, and the two
+mode-2 full wrappers.  Their generated closures form
+\[
+\begin{array}{c}
+\procname{encode_hb_z1_mode2_full_jazz}\allowbreak
+ \to \procname{_encode_hb_z1_full}\allowbreak
+ \to \{\procname{_encode_hb_z1_prepare},
+       \procname{_rans_encode},
+       \procname{__copy_encoded_suffix}\},\\[2mm]
+\procname{decode_hb_z1_mode2_full_jazz}\allowbreak
+ \to \procname{_decode_hb_z1_full}\allowbreak
+ \to \{\procname{_rans_decode},
+       \procname{_decode_hb_z1_apply}\}.
+\end{array}
+\]
+The wrappers fix $\mathsf{count}=1024$, $m=13$, and
+$\mathsf{offset}=6$.  Regeneration checks show byte-identical generated
+bodies for these procedures in the focused closure and in the Week~7 actual
+signature pack/unpack closures.  The pinned source hashes include
+\texttt{dff14e57\ldots3516cd} for \path{encoding.jinc},
+\texttt{818bb254\ldots127b49} for \path{sparse_encoding.jinc}, and
+\texttt{b1d4b2dd\ldots228429a} for \path{encoding_tables.jinc}.
+
+\subsection*{Coefficient-to-symbol mapping}
+
+For the first 1024 words, canonical mode-2 input means
+\[
+ -6 \leq \mathsf{signed}(hbz[i]) < 7.
+\]
+The actual prepare loop establishes
+\[
+ \mathsf{symbol}[i]=\mathsf{signed}(hbz[i])+6,
+ \qquad 0\leq\mathsf{symbol}[i]<13,
+\]
+sets its bad word to zero, and preserves symbol bytes $[1024,2048)$.
+The actual apply loop zero-extends the symbol and subtracts six modulo
+$2^{32}$.  Its word-level inverse lemma handles negative input coefficients
+and preserves coefficient words $[1024,2048)$.
+
+The sequential actual-procedure theorem is
+\path{encode_prepare_decode_apply_mode2_inverse}.  Its sole semantic input is
+\path{canonical_hbz_mode2}; the conclusion contains prepare success, exact
+first-1024 recovery, and both tail frames.  It is Hoare partial correctness,
+not a termination claim.  The all-zero array supplies a compiled
+precondition witness.
+
+\subsection*{Concrete 13-symbol table certificate}
+
+The concrete mode-2 intervals are:
+\[
+\begin{array}{c|rrrrrrrrrrrrr}
+s&0&1&2&3&4&5&6&7&8&9&10&11&12\\ \hline
+c_s&0&1&2&3&8&66&312&710&957&1016&1021&1022&1023\\
+f_s&1&1&1&5&58&246&398&247&59&5&1&1&1
+\end{array}
+\]
+Every frequency is positive and the sum is 1024.  The adjacent intervals
+partition $[0,1024)$.  The authored certificate checks the generic encoder
+field formulas, decoder packed start/frequency formulas, and the reciprocal
+division arithmetic used by the mode-2 design.  The concrete actual-array
+corollary is intentionally split out into
+\theoryname{Mode2HbzSymbolWordsGenerated}; the external generator is only a
+deterministic producer of EasyCrypt proof text, and the actual-array link is
+accepted only because that generated theory itself fresh-compiles.
+
+For normalized state $x$, the generic certificate also proves exactness of the
+reciprocal multiply/high-half/shift computation.  Frequency-one symbols use
+the implementation's $x-1$ quotient and compensated bias.  In every case the
+actual fast expression equals
+\[
+ E_s(x)=\left\lfloor\frac{x}{f_s}\right\rfloor 1024
+       +c_s+(x\bmod f_s),
+\]
+with a non-overflowing W64 product and a W32 state below $2^{31}$.
+
+\subsection*{State machine, normalization, and inverse invariant}
+
+The state lower bound is $L=2^{23}$ and the scale is $2^{10}$.  Encoding
+traverses symbols backward.  Before $E_s$, bytes are emitted from the low end
+of $x$ while $x\geq 2^{21}f_s$, using a cursor that moves backward.  The
+final state is written as four little-endian bytes.  Decoding reads those
+bytes, recovers symbols forward from the low 10-bit slot, applies
+\[
+ D_s(x')=\left\lfloor\frac{x'}{1024}\right\rfloor f_s
+          +(x'\bmod1024)-c_s,
+\]
+and consumes normalization bytes while the state is below $L$.
+
+The pure step theorem is now compiled.  In
+\theoryname{Mode2RansCore}, \path{pure_rans_step_inverse} proves
+$D_s(E_s(x))=x$, and \path{hbz_fast_step_decode_inverse} replaces
+$E_s$ with the concrete reciprocal implementation formula under
+$0\leq s<13$ and $1\leq x<\mathsf{hbz\_xmax}(s)$.
+The remaining generated-loop invariant must additionally relate the
+encoder's backward byte stack $[off,count)$ to the decoder's forward input,
+preserve $L\leq x<2^{31}$ at symbol boundaries, and track failure before the
+four-byte state area.  A prototype for the actual suffix copy discharged its
+body invariant but did not finish the quantified loop-exit projection under
+fresh compilation; no such theorem is retained as compiled evidence.
+
+\subsection*{Success-conditioned boundary and failure branch}
+
+Canonical coefficient bounds do not imply buffer success.  If the backward
+encoder exhausts its fixed workspace, the actual full encoder returns
+$\mathsf{size}=0$.  The target theorem must therefore have the form
+\[
+ \mathsf{size}=0\quad\lor\quad
+ \left(4\leq\mathsf{size}\leq1024\;\land\;
+       \mathsf{decode\_bad}=0\;\land\;
+       decoded[0..1024)=original[0..1024)\right).
+\]
+Neither decoder success nor output equality may be assumed.  A successful
+actual encoder/decoder witness is also required before the parent can be
+promoted to \status{proved}.
+
+The authored proof hashes are
+\texttt{909e4eed\ldots0d865f} (prepare),
+\texttt{03ac5595\ldots521d4} (apply),
+\texttt{7da906bc\ldots92e55} (leaf composition),
+\texttt{8bdecef8\ldots6ad58} (table arithmetic),
+\texttt{3f664576\ldots{}d6ba90} (generated table certificate),
+\texttt{6efb58b5\ldots5ba80} (actual extraction boundary), and
+\texttt{a4a10f55\ldots{}a5838c} (pure rANS step).  Each is checked by
+\texttt{easycrypt compile -script -no-eco} through
+\path{scripts/verify-all.sh}; the extraction and generated certificate are
+regenerated before those compilations.
+
+\subsection*{Proof status, failed tactic, and security boundary}
+
+\begin{center}
+\begin{tabular}{l l}
+\toprule
+Obligation & Status \\
+\midrule
+HBZ prepare/apply and leaf frames & \status{proved} \\
+Generic mode-2 table arithmetic certificate & \status{proved} \\
+Concrete actual-array table certificate & \status{proved} \\
+Pure arithmetic rANS step inverse & \status{proved} \\
+Actual suffix copy and frame & \status{partial} \\
+Actual encoder loop refinement & \status{partial} \\
+Actual decoder loop refinement & \status{blocked} \\
+Actual full HBZ left inverse & \status{partial} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+A monolithic \texttt{inline; sim} attempt is structurally inadequate: it
+does not invent the backward-stack/forward-consumption relation, and it
+obscures the size-zero branch.  Repeating larger full-procedure inlining is
+rejected.  A weaker actual-encoder control prototype also stalled at its
+nested normalization loop, after the outer post-loop commands and branch had
+been separated with \texttt{wp}.  The next proof must refine each generated
+loop against one explicit state/byte-stack model instead of adding another
+wrapper.
+
+An encode-to-decode left inverse is functional evidence only.  Canonical
+parsing additionally needs malformed rejection or decode-to-re-encode
+uniqueness.  Week~8 therefore proves neither a zero encoding delta nor
+\claimid{OBL-SIGN-OUTPUT-TAIL-REACH}, full Verify correctness, signing
+losslessness, or implementation EUF-CMA security.  Fresh verification uses
+the aggregate script above and records target-specific logs under
+\path{logs/}.

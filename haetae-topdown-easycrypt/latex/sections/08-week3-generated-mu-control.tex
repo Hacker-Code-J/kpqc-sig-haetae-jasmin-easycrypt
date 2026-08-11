@@ -1,0 +1,124 @@
+\section{Week 3 Generated \texorpdfstring{$\mu$}{mu} Control}
+\label{sec:week3-generated-mu}
+
+\paragraph{Research question and claim.}
+Week~3 targets \claimid{OBL-MU-TOPLEVEL-CONTROL}. The required statement is no
+longer about proof-only local wrappers; the actual generated procedures must
+appear directly in the theorem:
+\[
+  \take_{32}\!\bigl(
+    \mathsf{sf\_mu\_rawpre}(sk,pre,m)
+  \bigr)
+  =
+  \mathsf{verify\_hash\_mu}(vk,pre,m).
+\]
+More precisely, the claim is
+\[
+  \mathsf{raw\_prelen}(\ell)\land
+  \prefix_{992}(sk,mem,vk)
+  \Longrightarrow
+  \take_{32}(
+    \mathsf{sf\_mu\_rawpre}(sk,pre,m)
+  )
+  =
+  \mathsf{verify\_hash\_mu}(vk,pre,m).
+\]
+
+\paragraph{Generated control sequence.}
+The Sign side is the actual generated
+\procname{SignMuHashTarget.M.\_sf\_mu\_rawpre}. Its control sequence is:
+\begin{enumerate}
+  \item stack/local initialization and zeroed Keccak state;
+  \item \procname{\_keccak\_init\_state};
+  \item \procname{\_sf\_shake256\_absorb\_sk} with \texttt{vkbytes = 992};
+  \item raw absorb of \texttt{pre};
+  \item raw absorb of \texttt{message};
+  \item \procname{\_sf\_shake256\_finalize};
+  \item one additional \procname{\_keccakf1600};
+  \item \procname{protect\_ptr};
+  \item \procname{\_sf\_shake256\_squeeze64}.
+\end{enumerate}
+The Verify side is the actual generated
+\procname{VerifyMuHashTarget.M.\_\_verify\_hash\_mu}. After initialization and
+the 992-byte VK absorb, it computes the branch guard
+\[
+  ctxflag \eqdef prelen \gg 63.
+\]
+The raw branch is taken only after this actual generated shift computes zero.
+
+\paragraph{Why exact-to-wrapper refinement was chosen.}
+The Week~2 helper theorem already proved the semantic core of the raw hash
+path, but only through local wrappers that reconstructed the top-level control
+shape. A direct \texttt{inline; sim} proof over the two generated procedures
+stalled on:
+\begin{itemize}
+  \item generated local-variable scheduling;
+  \item erased spill/unspill/declassify instructions;
+  \item the Verify raw/context branch split; and
+  \item mismatch between the generated tail-call boundary and the wrapper-level
+        theorem boundary.
+\end{itemize}
+Week~3 therefore isolates two unary exact adapters and composes them by
+transitivity rather than attempting one monolithic whole-program simulation.
+
+\paragraph{Compiled exact adapters.}
+Theory \theoryname{ExactMuTopControl} proves:
+\begin{itemize}
+  \item \theoryname{sf\_mu\_rawpre\_refines\_raw\_top};
+  \item \theoryname{raw\_prelen\_shr63\_zero};
+  \item \theoryname{raw\_prelen\_branch\_guard}; and
+  \item \theoryname{verify\_hash\_mu\_raw\_refines\_raw\_top}.
+\end{itemize}
+The Verify-side predicate is
+\[
+  \mathsf{raw\_prelen}(prelen)
+  \eqdef
+  0 \le \mathsf{to\_uint}(prelen) < 2^{63}.
+\]
+The two branch lemmas prove that this predicate implies that the actual
+generated shift-by-63 word operation yields \(0\), so the raw branch is
+selected semantically rather than by assumption.
+
+\paragraph{Actual top-level theorem.}
+The closing theorem is
+\theoryname{sign\_verify\_generated\_raw\_mu\_prefix}. Its left and right
+procedures are exactly:
+\begin{verbatim}
+Sign._sf_mu_rawpre
+Verify.__verify_hash_mu
+\end{verbatim}
+Its premises include:
+\begin{itemize}
+  \item Sign \texttt{vkbytes = 992};
+  \item Verify \texttt{vklen = 992};
+  \item equal raw pre/message pointers and lengths;
+  \item \theoryname{raw\_prelen prelen};
+  \item a KeyGen-derived \theoryname{sk\_memory\_prefix}; and
+  \item the explicit VK, pre, and message no-wrap predicates, including
+        \(\mathsf{to\_uint}(base)+992<2^{64}\).
+\end{itemize}
+Its conclusion is bytewise equality of the first 32 Sign output bytes and the
+entire Verify output.
+
+\paragraph{Reachability and non-vacuity.}
+The theorem is not justified by a generic witness over unrelated arrays.
+Theory \theoryname{ExactMode2RawMuComposition} proves
+\theoryname{generated\_raw\_mu\_preconditions\_from\_keygen\_prefix}, which
+packages:
+\begin{itemize}
+  \item the returned KeyGen prefix theorem;
+  \item the concrete witness \(base = 0\);
+  \item \theoryname{raw\_prelen W64.zero}; and
+  \item the constructed Verify memory image obtained by storing the packed VK.
+\end{itemize}
+It further proves the Hoare theorem
+\theoryname{keypair\_internal\_return\_reaches\_generated\_raw\_mu\_preconditions}
+over the actual generated
+\procname{crypto\_sign\_keypair\_internal\_mode2\_jazz}. Every terminating
+execution therefore supplies this constructed local-array/raw premise set;
+KeyGen termination is neither assumed nor concluded. Thus the actual
+generated theorem premises are satisfiable by a concrete call path.
+
+\paragraph{Status.}
+\claimid{OBL-MU-TOPLEVEL-CONTROL} is \status{PROVED} for the raw/internal path.
+The public-context branch remains separate and unproved.

@@ -1,0 +1,48 @@
+/** 
+ * Several alternative permutation implementations
+ */
+require "keccakf1600x4_orig.jinc"
+require "keccakf1600x4_alt.jinc"
+require "keccakf1600x4_native.jinc"
+
+type keccakx4_state = u256[25];
+
+/**
+ * Select intended KeccalF[1600]x4 permutation:
+ */
+inline fn __keccakf1600_avx2x4
+( reg ptr u256[25] a
+) -> reg ptr u256[25]
+{
+  //a = __keccakf1600_avx2x4_orig(a);
+  //a = __keccakf1600_avx2x4_alt(a);
+  a = __keccakf1600_avx2x4_native(a);
+  return a;
+}
+
+fn _keccakf1600_avx2x4
+( reg ptr u256[25] a
+) -> reg ptr u256[25]
+{
+  a = __keccakf1600_avx2x4(a);
+  return a;
+}
+
+inline fn _keccakf1600_avx2x4_
+( reg ptr u256[25] a
+) -> reg ptr u256[25]
+{
+  a = a;
+  a = _keccakf1600_avx2x4(a);
+  a = a;
+  return a;
+}
+
+
+/* For testing:
+export fn testF_avx2x4(reg mut ptr u256[25] st) -> reg ptr u256[25] {
+ st = _keccakf1600_avx2x4(st);
+ return st;
+}
+*/
+

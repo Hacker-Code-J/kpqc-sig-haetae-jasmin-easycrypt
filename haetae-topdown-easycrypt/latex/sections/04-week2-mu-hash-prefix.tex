@@ -1,0 +1,80 @@
+\section{Week 2 \texorpdfstring{$\mu$}{mu} Hash Prefix}
+\label{sec:week2-mu}
+
+\paragraph{Research question.}
+For the internal/raw-pre branch, do the actual generated hash helpers produce
+\[
+  \take_{32}(\mu_{\mathsf{sign}}^{64})
+  = \mu_{\mathsf{verify}}^{32}
+\]
+when they receive the same 992 VK bytes, pre bytes, message bytes, and
+lengths? This is the byte-level implementation instance of the \(H_{\rm gen}\)
+use in Sign and Verify in Figure~8 \cite{haetae-pdf}.
+
+\paragraph{Sources and focused targets.}
+The Sign root is \procname{\_sf\_mu\_rawpre} in \pathname{sign.jazz}, SHA-256
+\texttt{fd58271f3ada888dfcef4bcf89027c986cc91464a7cb8446b6de11e40037ac31}.
+The Verify root is \procname{\_\_verify\_hash\_mu} in
+\pathname{verification\_transcript.jazz}, SHA-256
+\texttt{c2a9865274c5bf2ecbc2ccf6d53065e326df1cb848a329b2c378459b762e0cc8}.
+The regenerated generated-theory hashes are
+\texttt{c2232e64...e83aa7} for Sign and
+\texttt{fcee969a...c0ebb7} for Verify; the full values are pinned in the
+extraction manifest.
+
+\paragraph{Compiled generated-procedure lemmas.}
+Theory \theoryname{ExtractedMuHashPrefix} proves:
+\begin{itemize}
+  \item \theoryname{sign\_verify\_keccak\_init\_from\_same\_state};
+  \item \theoryname{sign\_verify\_keccakf1600\_from\_same\_state};
+  \item \theoryname{sign\_verify\_finalize\_from\_same\_state};
+  \item \theoryname{sign\_verify\_absorb\_addr\_from\_same\_state};
+  \item \theoryname{sign\_sk\_verify\_vk\_absorb\_mode2}; and
+  \item \theoryname{sign\_verify\_final\_squeeze\_mu32\_prefix}.
+\end{itemize}
+The last two are the nontrivial representation bridges. The first relates a
+\texttt{BArray2752} SK prefix to Verify's raw-memory loads for exactly 992
+bytes. The second relates Sign's word-oriented
+\procname{\_sf\_shake256\_squeeze64} to Verify's byte-oriented
+\procname{\_\_poly\_challenge\_squeeze256\_32}, including little-endian byte
+order and the actual Keccak calls.
+
+\paragraph{Composed theorem and premises.}
+\theoryname{sign\_verify\_raw\_mu\_top\_wrappers\_prefix} composes the actual
+helpers. Its premises are:
+\begin{align*}
+  &\mathsf{sk\_memory\_prefix}(sk_0,mem_0,base),\\
+  &\mathsf{to\_uint}(base)+992 < 2^{64},\\
+  &preaddr_{\rm S}=prep_{\rm V},\quad prelen_{\rm S}=prelen_{\rm V},\\
+  &maddr_{\rm S}=mp_{\rm V},\quad mlen_{\rm S}=mlen_{\rm V},\\
+  &\mathsf{Glob.mem}_{\rm S}=\mathsf{Glob.mem}_{\rm V}=mem_0.
+\end{align*}
+Its postcondition is bytewise equality for every \(0\leq i<32\). The proof
+uses no abstract SHAKE-output-prefix axiom. The word/byte invariant uses the
+pinned lemmas \theoryname{drop\_bytes0},
+\theoryname{drop\_bytes\_succ}, and
+\theoryname{rate\_lane\_byte\_get8}, with every range premise discharged.
+
+\paragraph{Exact call-site boundary.}
+The local modules \theoryname{SignRawMuTop} and
+\theoryname{VerifyRawMuTop} reproduce initialization and the complete
+generated helper sequence. An exact refinement from the generated
+\procname{\_sf\_mu\_rawpre} and the raw branch of
+\procname{\_\_verify\_hash\_mu} to these wrappers has not yet compiled.
+The residual is \claimid{OBL-MU-TOPLEVEL-CONTROL}: generated branch condition,
+local-variable scheduling, argument binding, and pointer-protection premises.
+Thus \claimid{MU32-HASH-RAW-HELPERS} is \status{PROVED}, while its parent
+\claimid{MU32-HASH} remains \status{PARTIAL}.
+
+\paragraph{Public-context path.}
+The context variant is kept separate: Sign uses
+\procname{\_sf\_prepare\_pre\_raw} followed by
+\procname{\_sf\_mu\_preptr}, whereas Verify uses the high-bit branch.
+The next statement must require \(ctxlen\leq255\) and prove that the encoded pre
+is exactly the length byte followed by \(ctx\). This variant is
+\status{SPECIFIED}; no raw-path theorem is silently generalized to it.
+
+\paragraph{Verification.}
+All listed helper/composition lemmas fresh-compile with \texttt{-no-eco}.
+Focused extraction hashes and the no-axiom/no-hole scans are checked by
+\pathname{scripts/verify-all.sh}.

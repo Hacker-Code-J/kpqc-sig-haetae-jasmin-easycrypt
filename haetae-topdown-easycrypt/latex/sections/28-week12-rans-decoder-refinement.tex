@@ -1,0 +1,112 @@
+\section{Week 12: Actual Decoder Semantic Refinement}
+
+Week~12 closes \claimid{OBL-RANS-DECODE-REFINEMENT} as
+\status{proved, exact-trace partial correctness}.  The target is the actual
+generated \procname{RansDecodeTarget.M._rans_decode}; it is not a wrapper,
+observer, or pure decoder theorem.
+
+\subsection*{Claim boundary and theorem surface}
+
+The compiled theorem is
+\procname{actual_rans_decode_trace_refinement} in
+\theoryname{Mode2RansDecoderTopHoare}.  Its precondition binds the actual
+generated decoder state and buffer to a canonical exact trace:
+\begin{itemize}
+  \item \texttt{symsp = decoded0};
+  \item \texttt{statep = state0};
+  \item \texttt{bufp = buffer0};
+  \item the literal mode-2 \texttt{symbol\_words} and \texttt{dsyms\_words}
+        tables;
+  \item \texttt{actual\_mode2\_decoder\_trace\_input expected\_symbols
+        buffer0 state0 encoded\_size}.
+\end{itemize}
+The exact-trace premise contains the canonical 1024-symbol stream, the exact
+\texttt{traceBytes} buffer, the encoded-size relation
+\(\mathit{encoded\_size} = |\mathsf{traceBytes}(\mathsf{symbolListOfArray}
+(expected\_symbols))|\), and the concrete state fields
+\((count,size,m)=(1024,encoded\_size,13)\).  It does \emph{not} contain
+decoder success, output equality, or a post-state observation.
+
+The postcondition published by the theorem is:
+\[
+  bad=0 \;\land\;
+  off=\mathit{encoded\_size} \;\land\;
+  decoded[0..1024)=expected\_symbols[0..1024) \;\land\;
+  decoded[1024..2048)=decoded_0[1024..2048).
+\]
+The internal final-state fact \(x=2^{23}\) is proved at the generated loop
+exit and used to discharge the actual final reject checks, but it is not
+exported as an ABI result.
+
+\subsection*{Reference state, cursor, and 0/1/2-byte normalization}
+
+For \(syms=\mathsf{symbolListOfArray}(expected\_symbols)\), the reference
+decoder boundary is given by:
+\[
+  state(i)=\mathsf{decoderStateAt}(syms,i),\qquad
+  cursor(i)=\mathsf{decoderCursor}(syms,i).
+\]
+The compiled cursor lemmas establish
+\[
+  cursor(0)=4,\qquad
+  cursor(i+1)=cursor(i)+|\mathsf{segment}(i)|,\qquad
+  cursor(1024)=|\mathsf{traceBytes}(syms)|,
+\]
+and \(state(0)\) is the parsed little-endian head while \(state(1024)=2^{23}\).
+The concrete mode-2 bound keeps each normalization segment at length
+0, 1, or 2 bytes.
+
+The actual inner invariant tracks the partial replay cursor
+\(k=off-cursor(i)\) and the current reduced state.  The generated guard
+matches the pure replay relation: when one more segment byte remains, the loop
+consumes it; otherwise the no-consume exit establishes the next state/cursor
+boundary.  This is the exact 0/1/2-byte case split used by the theorem
+\procname{decoder\_inner\_trace\_step}, \procname{decoder\_inner\_trace\_stop},
+and \procname{decoder\_inner\_trace\_exit\_to\_outer}.
+
+\subsection*{Concrete table bridge}
+
+The word-step bridge is split from the loop proof.  The generated code uses the
+packed \texttt{symbol\_words} lookup on \(x \mathbin{\&} 1023\), stores the
+recovered symbol, loads the packed \texttt{dsyms\_words} entry, and computes
+the reduced state with the exact mode-2 arithmetic.  The compiled lemma family
+\procname{generated\_decoder\_lookup\_word\_from\_mode2},
+\procname{generated\_decoder\_symbol\_from\_mode2}, and
+\procname{generated\_decoder\_word\_update\_from\_mode2} connects those exact
+generated expressions to the mathematical decoder step without introducing a
+table axiom.
+
+\subsection*{Exact exit and final checks}
+
+At outer-loop exit, \procname{decoder\_outer\_trace\_exit\_components} proves
+\[
+  i=1024,\qquad x=2^{23},\qquad off=\mathit{encoded\_size},\qquad
+  bad=0,
+\]
+together with the full decoded-prefix equality and the untouched
+\([1024,2048)\) output frame.  Those facts discharge the generated final-state
+parse and reject checks.  The theorem is therefore exact-trace partial
+correctness, not losslessness or termination.
+
+\subsection*{Non-vacuity and remaining edge}
+
+The exact-trace premise is satisfiable as a pure trace relation and is the
+mathematical relation produced by the Week~11 encoder success theorem.  It
+does not prove that the actual encoder success branch is reachable.
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} therefore remains
+\status{partial}.
+
+The remaining implementation edge is now only the unary harness composition:
+transport the encoder suffix and the actual copy-helper slice facts into the
+decoder's exact pointwise trace-read premise.  Until that theorem compiles,
+\claimid{OBL-RANS-CORE-INVERSE} and the HBZ parent remain
+\status{partial}.
+
+\subsection*{Rejected tactics and follow-up}
+
+A monolithic \texttt{inline; sim} proof was rejected because the outer symbol
+loop and the variable-length normalization loop require different invariants.
+Extending the older control theorem was also rejected: it can only retain
+\(\texttt{bad}\in\{0,1\}\) and cannot express symbol recovery.  The Week~13
+single edge is the actual encoder\(\rightarrow\)copy\(\rightarrow\)decoder
+harness theorem; no new codec layer should be introduced before it compiles.

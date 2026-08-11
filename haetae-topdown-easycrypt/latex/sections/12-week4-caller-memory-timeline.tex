@@ -1,0 +1,82 @@
+\section{Week 4: caller traces and memory timeline}
+
+\subsection{Data-flow target}
+
+The intended composition is
+\[
+\begin{array}{c}
+  (vk,sk)
+  \longrightarrow \mathsf{export}(vku,sku)
+  \longrightarrow \mathsf{import\_sk}(sku)
+  \longrightarrow \mathsf{hash}_{\rm sign} \\
+  \hfill \equiv \mathsf{hash}_{\rm verify}
+  \longleftarrow \mathsf{raw\_vk}(vku).
+\end{array}
+\]
+At the already proved local hash boundary this would yield
+\[
+  \take_{32}(\mu_{\rm sign}^{64})=\mu_{\rm verify}^{32}.
+\]
+
+\subsection{KeyGen}
+
+\theoryname{keypair_raw_api_exact_export_trace} places the actual
+\procname{cryptolab_haetae_mode2_keypair_internal} on the left of an exact
+equivalence and preserves its final memory.  The isolated generated exporter
+theorems prove a 992-byte VK write, a 1408-byte SK write, and preservation of
+the earlier VK range under the displayed VK/SK disjointness premise.
+\theoryname{keypair_raw_api_exports_matching_prefixes_from_copy_posts}
+combines those postconditions with the returned-array prefix theorem.
+
+The attempted single caller Hoare theorem reached the final post-export
+continuation but its whole-array existential postcondition caused unbounded
+normalization under both \texttt{auto} and \texttt{wp}.  A constructed-memory
+replacement was rejected because it would evade the research question.
+The exact remaining edge is
+\claimid{keypair_raw_api_exports_matching_prefixes_residual}; therefore the
+KeyGen caller claim is \status{partial}.
+
+\subsection{Sign}
+
+\theoryname{sign_raw_api_exact_mu_trace} directly relates the actual raw Sign
+caller to a trace mirror and preserves final memory and return value.  The
+mirror performs the actual signature-core continuation after recording the
+imported SK and mu arguments.  The compiled companion theorems prove import
+length 1408, usable prefix length 992, and exact propagation of raw API
+pre/message addresses and lengths.  This is stronger than a standalone
+observer that stops after hashing.
+
+\subsection{Verify and the early-return boundary}
+
+Exact trace equivalences compile for \procname{_sign_verify_tail_m23},
+\procname{_verify_full_m23}, \procname{_verify_full_mode2}, and
+\procname{sign_verify_internal_mode2_jazz}.  However, the public/raw caller
+may reject before the tail: signature unpacking, norm rejection, and the final
+mismatch test all precede the mu call.  Hence \(\mathit{siglen}=1474\) is
+necessary but insufficient.  The missing lifts are recorded as
+\claimid{verify_raw_api_exact_mu_trace_residual_obligation} and
+\claimid{cryptolab_verify_internal_exact_mu_trace_residual_obligation}; an
+unconditional actual-caller hash-reach theorem would overclaim.
+
+\subsection{Ownership and aliasing}
+
+\begin{center}
+\small
+\begin{tabular}{p{0.22\linewidth}p{0.31\linewidth}p{0.39\linewidth}}
+\toprule
+Regions & Classification & Reason \\
+\midrule
+$vku,sku$ & MUST-DISJOINT & SK export must frame the prior VK export. \\
+$seedu$, outputs & MAY-ALIAS-BECAUSE-COPIED-FIRST & Seed is fully imported before output writes. \\
+$sku,sigu$ & MAY-ALIAS locally; MUST-DISJOINT for reuse & Sign imports first, but a later Verify experiment needs stable keys. \\
+$vku,sigu/siglenu$ & MUST-DISJOINT for composition & Sign output must preserve the VK later read by Verify. \\
+$preu,message$ & READ-ONLY-ALIAS-ALLOWED & Both are hash inputs; lengths still define distinct byte streams. \\
+$rndu,sigu$ & MAY-ALIAS-BECAUSE-COPIED-FIRST & Randomness is copied before signature export. \\
+$sigu,siglenu$ & MUST-DISJOINT & The length write must not corrupt the signature. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cross-call stability is an experiment contract, not a cryptographic
+assumption.  EasyCrypt's total memory map is not treated as a memory-safety
+proof.
