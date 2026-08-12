@@ -98,12 +98,14 @@ predicate, or hidden premise.  Accordingly the frozen KeyGen result claims
 KG-2/finalization only; KG-1, KG-3, complete KG-4, and
 `A s = q j (mod 2q)` remain unproved. The subsequent Sign control boundary
 is frozen at `STOP-SIGN-CHAL-MODE2`.  The subsequent Verify pass is frozen at
-`PARTIAL-VERIFY-MATRIX-CRT`: the actual five-helper order, four helper-local
+`STOP-VERIFY-MATRIX-CRT`: the actual five-helper order, four helper-local
 machine-word reconstruction projections, W64 norm gate, exact tail trace, and
-actual mismatch word expression are checked, but `_verify_matrix_crt` has no
-from-CRT/freeze semantics theorem.  The full-NTT convolution/representation
-bridge is therefore not assumed here.  The V-6 integer centering bridge, norm
-no-wrap bridge, and highbits/LSB/mu/SampleInBall challenge semantics are also
+actual mismatch word expression are checked.  `_verify_matrix_crt` still lacks
+both the 2-by-4 NTT row-product theorem and the exact from-CRT/freeze loop
+theorem.  The first concrete pure NTT gap is the `Rq.&*` foldr-to-finite-sum
+normalization, followed by Montgomery spectral action and odd-root
+orthogonality.  None is a trusted assumption.  The V-6 integer centering,
+norm no-wrap, and highbits/LSB/mu/SampleInBall challenge semantics are also
 named residuals, not trusted assumptions.
 
 ## Trusted computing base

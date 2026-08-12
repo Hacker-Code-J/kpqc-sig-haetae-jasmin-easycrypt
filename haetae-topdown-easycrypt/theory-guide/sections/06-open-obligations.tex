@@ -132,9 +132,9 @@ tree에 없으므로 faithful KG-1, KG-3, 전체 KG-4와
 KeyGen 판정은 \identifier{STOP-KG-NTT}다. \claim{OBL-MINCORE-KEYGEN}은
 KG-2/finalization에서 \statuspartial 로 동결되었다. MINCORE Sign은
 \identifier{STOP-SIGN-CHAL-MODE2}, MINCORE Verify는
-\identifier{PARTIAL-VERIFY-MATRIX-CRT}이며 제한 합성은 \statusspecified 다.
-Verify의 첫 재개 leaf는
-\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다.
+\identifier{STOP-VERIFY-MATRIX-CRT}이며 제한 합성은 \statusspecified 다.
+Verify의 첫 재개 leaf는 \identifier{rq_mul_coeff_foldr_to_bigi}이며, 이어
+2-by-4 NTT row-product와 CRT/freeze 절차 leaf가 남는다.
 
 \subsection{분리된 기능정확성 경로}
 
@@ -221,7 +221,7 @@ adapter가 없어 faithful KG-1/KG-3/전체 KG-4와 논문 식은 동결 \\
 직접 호출과 accepted-branch control만 컴파일; full challenge semantics와
 S-1--S-7 headline은 미증명 \\
 \claim{OBL-MINCORE-VERIFY} & 기능정확성;\newline\statuspartial;\newline
-\identifier{PARTIAL-VERIFY-MATRIX-CRT} & actual helper 순서, V-1/V-2/V-5/V-6
+\identifier{STOP-VERIFY-MATRIX-CRT} & actual helper 순서, V-1/V-2/V-5/V-6
 machine-word 식, W64 norm gate와 tail/mismatch word expression은 컴파일;
 matrix CRT 의미 bridge와 challenge equality는 미증명 \\
 \claim{OBL-MINCORE-COMPOSITION} & 기능정확성;\newline\statusspecified &
@@ -272,9 +272,9 @@ BST-MSIS 인스턴스(instance)를 추출 \\
   \item \identifier{STOP-SIGN-CHAL-MODE2}를 유지한다. full
         highbits/LSB/\(\mu\)-to-SampleInBall leaf와 기존 convolution 의무 없이
         S-1--S-7을 주장하지 않는다.
-  \item Verify의 첫 누락 leaf
-        \identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}를 닫고, 그 다음
-        downstream challenge leaf와 decoded-object 제한 합성을 닫는다.
+  \item Verify의 첫 누락 leaf \identifier{rq_mul_coeff_foldr_to_bigi}를 닫고,
+        2-by-4 NTT row-product와 CRT/freeze 절차 leaf를 거쳐 combined matrix
+        theorem을 합성한 다음 downstream challenge leaf를 닫는다.
   \item (h) 코덱은 현재 연기 상태를 유지한다. 범위가 다시 열리면 크기
         메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
         꼬리 프레임(pack/challenge tail frame)을 합성해 전체 1474바이트

@@ -720,8 +720,8 @@ Week~16은 실제 M23 matrix/finalizer 두 호출을 합성해 snapshot low/high
 주장할 수 없다. KeyGen은 KG-2/finalization에서, Sign은 actual-call control에서
 동결됐다. MINCORE-VERIFY는 V-1/V-2/V-5/V-6 machine-word 식, W64 norm gate와
 tail/mismatch word expression을 보존했으며 첫 blocker는
-\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다. (h) 코덱은
+\identifier{rq_mul_coeff_foldr_to_bigi}와 그 뒤 2-by-4 NTT/CRT 절차 leaf다. (h) 코덱은
 연기됐으며 제한 합성, 종료, 문맥, highbits/LSB, 확률분포와 게임 기반 보안은
 여전히 별도 의무다. 최종 82/82 aggregate 완료 로그는
-\sourcepath{logs/verify-all-week16-verify.log}에 보존되어 있다.
+\sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에 보존되어 있다.
 \end{takeaway}

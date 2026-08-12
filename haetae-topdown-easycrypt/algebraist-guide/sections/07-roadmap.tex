@@ -204,8 +204,10 @@ headline 정리는 아직 컴파일된 증명으로 세어서는 안 된다.
 분포, signing-loop 종료성, packing과 전체 1474-byte signature는 이 단계의 범위
 밖이다.
 
-현재 첫 목표는
-\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact} leaf다.
+현재 첫 목표는 \identifier{rq_mul_coeff_foldr_to_bigi}이며, 그 다음
+\identifier{verify_matrix_ntt_acc_mode2_cols4_correct}와
+\identifier{verify_crt_freeze_mode2_word_exact}를 닫아 combined headline을
+합성한다.
 각 부모를 닫을 때 자식 정리(child theorem)의 전제가 실제 앞 절차의 결론에서
 나오는지를
 확인해야 한다. external precondition으로 다시 요구하면 합성이 아니라 조건부

@@ -17,7 +17,7 @@ PASS Week14 actual full-HBZ failure/success and production-lift surface
 PASS Week15 fixed all-six budget, failure exclusion, and production lift
 PASS Week16 direct-keygen harness and STOP-KG-NTT boundary checks
 PASS Week16 direct Sign-core control and STOP-SIGN-CHAL-MODE2 checks
-PASS Week16 direct Verify-core word results and PARTIAL-VERIFY-MATRIX-CRT checks
+PASS Week16 direct Verify-core word results and STOP-VERIFY-MATRIX-CRT checks
 PASS actual API copy-helper reachability source checks
 PASS focused transcript extraction
 PASS focused mu-hash extraction

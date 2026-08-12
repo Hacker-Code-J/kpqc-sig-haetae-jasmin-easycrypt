@@ -62,7 +62,7 @@ KG-2/finalization에서 동결했고 faithful KG-1, KG-3, complete KG-4와 논�
 canonical decoded \((x,v,h,c)\) 경계의 MINCORE-VERIFY 부분 정리가 추가되어
 V-1/V-2/V-5/V-6, W64 norm gate, tail trace/mismatch word expression은
 proved로 남고 matrix 및 challenge blocker는 명시적으로 남는다. 따라서 최신
-판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}이며, 두 번째 \(h\) suffix codec,
+판정은 \identifier{STOP-VERIFY-MATRIX-CRT}이며, 두 번째 \(h\) suffix codec,
 전체 signature codec, 완료된 API trace의 저장 \(\mu\)를 연결하는
 product/replay 운송, 전체 기능정확성과 구현 수준 보안도 열려 있다. 이 문서는
 완성 증명을 선언하지 않고, 정확히 어디까지 commuting diagram이 닫혔는지를
@@ -73,13 +73,14 @@ product/replay 운송, 전체 기능정확성과 구현 수준 보안도 열려 
 현재 성과는 환(ring) 위의 전체 서명 스킴(signature scheme)을 이미 검증했다는
 뜻이 아니라, 그 스킴의 몇몇 결정론적 표현 사각형(representation square)이
 실제 생성 코드까지 가환(commute)함을 증명했고, 다음 핵심
-gate가 \identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact} leaf임을
+gate가 \identifier{rq_mul_coeff_foldr_to_bigi}와 그 뒤 2-by-4 NTT row-product,
+CRT/freeze leaf임을
 뜻한다. Week~15의 fixed all-6 실패 배제는 \statusproved 이지만
 종료성(termination)을 주지 않는다. Week~16 actual KeyGen snapshot/finalizer
 경계의 KG-2-like 분해와 snapshot 합동식 및 마지막 NTT-word 표현 rewrite는
 닫혔으나, 그 snapshot을 논문의 모듈 곱으로 승격할 full-NTT
 convolution/표현 어댑터가 없어 KeyGen continuation을 중단했다는 판정이다.
-따라서 현재 판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}이며, full KeyGen,
+따라서 현재 판정은 \identifier{STOP-VERIFY-MATRIX-CRT}이며, full KeyGen,
 \(h\) codec, 전체 signature codec이나 Sign--Verify correctness가 완료됐다는
 판정이 아니다.
 \end{takeaway}

@@ -65,9 +65,9 @@ Sign accepted-core control boundary. That baseline aggregate is preserved in
 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`).
 The current manifest contains 82 targets after adding the four focused Verify
 theories. The completed aggregate is preserved in
-`logs/verify-all-week16-verify.log` (exactly 82 fresh compiles, one terminal
+`logs/verify-all-week16-verify-matrix-crt.log` (exactly 82 fresh compiles, one terminal
 `RESULT PASS authored-targets=82 cache=-no-eco`, SHA-256
-`46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c`).
+`4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da`).
 
 Detailed logs are written only under `logs/`. A pre-existing Why3 server can be
 reused with `WHY3_SERVER_SOCKET=/path/to/socket`; otherwise the verifier starts
@@ -576,9 +576,15 @@ the exact W64 norm decision, the tail procedure trace, and the actual
 `_poly_mismatch` accumulator/result expression. None assumes `reject=0`, a
 reconstruction result, norm acceptance, or challenge equality.
 
-The decision is **PARTIAL-VERIFY-MATRIX-CRT**, not `GO-VERIFY`. The first
-missing semantic leaf is `verify_matrix_crt_mode2_fromcrt_freeze_exact`, so
-paper V-3/V-4 and the full Verify predicate are not claimed. Paper V-6 also
+The continuation decision is **STOP-VERIFY-MATRIX-CRT**, not `GO-VERIFY`.
+The absent headline `verify_matrix_crt_mode2_fromcrt_freeze_exact` now has an
+exact dependency split: `verify_matrix_ntt_acc_mode2_cols4_correct` must
+establish the actual 2-by-4 NTT row product, while
+`verify_crt_freeze_mode2_word_exact` must establish the two actual parity
+lifts and 512-word freeze. The NTT side first lacks
+`rq_mul_coeff_foldr_to_bigi` and then the full-NTT Montgomery spectral action.
+Consequently paper V-3/V-4 and the full Verify predicate are not claimed.
+Paper V-6 also
 retains its parity/centering integer bridge, the norm gate retains its
 integer/no-wrap bridge, and the challenge path retains
 `verify_tail_m23_highbits_lsb_sampleinball_correct`. Parser, malformed input,

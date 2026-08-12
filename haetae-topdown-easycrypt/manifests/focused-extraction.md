@@ -801,9 +801,11 @@ The extraction selects no parser, malformed-input wrapper, codec, public API,
 KeyGen root, or Sign root. `ActualVerifyCoreSequence.run` calls all five
 generated helpers directly and invokes the tail only when the actual norm
 helper returns zero. The authored theories prove helper-local machine-word
-results, not the full paper Verify predicate. The earliest absent semantic
-leaf is `verify_matrix_crt_mode2_fromcrt_freeze_exact`; downstream integer and
-challenge leaves are recorded in `WEEK16_VERIFY_REPORT.md`. The extraction
+results, not the full paper Verify predicate. The stopped headline
+`verify_matrix_crt_mode2_fromcrt_freeze_exact` requires an absent 2-by-4
+NTT/row-product leaf and an absent from-CRT/freeze loop leaf; their exact names
+and foundational NTT subleaves are recorded in `WEEK16_VERIFY_REPORT.md`.
+Downstream integer and challenge leaves remain separate. The extraction
 does not justify distribution, losslessness, or termination claims.
 
 Script: `scripts/extract-verify-core.sh`

@@ -1,39 +1,26 @@
-# Week 16 MINCORE-VERIFY report
+# CONTINUE-VERIFY-MATRIX-CRT final report
 
 ## Decision
 
-**PARTIAL-VERIFY-MATRIX-CRT.**
+**STOP-VERIFY-MATRIX-CRT.**
 
-The current Verify work opens the canonical decoded \((x,v,h,c)\) boundary and
-directly composes the actual helpers in order:
-
-1. `_verify_prepare_z1_wprime`
-2. `_verify_matrix_crt`
-3. `_sign_verify_recover_w_z2`
-4. `_sign_verify_norm_reject`
-5. `_sign_verify_tail_m23` under the actual zero-reject branch
-
-The checked work now preserves the exact machine-word/control boundaries for
-the requested V-1, V-2, V-5, V-6, the norm gate, and the tail call trace.
-It does not prove the paper-level Verify formula package, and it does not
-claim `GO-VERIFY`.
-
-## Preserved baseline
-
-Before this pass, the complete aggregate log was copied byte-for-byte to
-`logs/verify-all-before-week16-verify.log`. It contains exactly 78
-`PASS fresh compile` lines and terminates with
+The requested theorem
 
 ```text
-RESULT PASS authored-targets=78 cache=-no-eco
+verify_matrix_crt_mode2_fromcrt_freeze_exact
 ```
 
-Its SHA-256 is
-`cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`.
+did not close in this continuation. The checked tree lacks the exact NTT/CRT
+leaves recorded below; treating the desired row-product/output equality as a
+premise would only hide that gap, so no such premise was added. The previously
+compiled V-1, V-2, V-5, V-6, W64 norm, tail-trace, and mismatch-word theorems
+remain unchanged, and the authored-target baseline remains 82.
 
-The new Verify manifest contains 82 authored targets. Its completed aggregate
-log is preserved as `logs/verify-all-week16-verify.log`; it contains exactly
-82 `PASS fresh compile` lines, exactly one terminal result line, and ends with
+## Preserved 82/82 baseline
+
+Before this continuation, the completed aggregate summary was copied
+byte-for-byte to `logs/verify-all-before-verify-matrix-crt.log`. It has exactly
+82 `PASS fresh compile` lines, exactly one terminal result, and ends with
 
 ```text
 RESULT PASS authored-targets=82 cache=-no-eco
@@ -41,129 +28,158 @@ RESULT PASS authored-targets=82 cache=-no-eco
 
 Its SHA-256 is
 `46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c`.
+The final continuation aggregate again fresh-compiles the same 82 targets; no
+new EasyCrypt target or manifest entry is used to manufacture the stop result.
+It is preserved as `logs/verify-all-week16-verify-matrix-crt.log` with SHA-256
+`4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da`.
 
-## Focused actual boundary
+## Actual procedure boundary
 
-The focused Verify core is split into four direct, checkable pieces:
+Fresh focused extraction confirms that actual `_verify_matrix_crt` executes
+these helpers in order:
 
-- `Mode2VerifyCoreSequence.ActualVerifyCoreSequence.run`
-- `Mode2VerifyPrepareNorm`
-- `Mode2VerifyRecover`
-- `Mode2VerifyTailChallenge`
+1. `_polyvec_ntt(z1p, cols)`
+2. `_polymat_pointwise_acc(highp, a1p, z1p, rows, cols)`
+3. `_polyvec_invntt(highp, rows)`
+4. `_polyveck_poly_fromcrt(z1p, highp, wprimep, rows)`
+5. `_polyvec_freeze2q(z1p, rows * 256)`
 
-The sequence harness calls the actual helpers in the exact order above and
-stores the intermediate arrays/words so that each leaf can be audited
-independently. The harness is control-only: it does not assume reject `= 0`,
-does not assume a reconstruction result, does not assume the norm passes, and
-does not assume challenge equality.
+For mode 2, `rows = 2` and `cols = 4`. The extracted from-CRT body has the
+following exact word behavior before freezing:
 
-## Proven subresults
+- indices `0..255` use
+  `high + ((0 - ((high xor wprime) & 1)) & 64513)`;
+- indices `256..511` use
+  `high + ((0 - (high & 1)) & 64513)`.
 
-### V-1 and V-2
+The final helper applies extracted `__freeze2q` pointwise to those 512 words.
+These observations come from opened generated procedure bodies; they are not
+treated as semantic theorems.
 
-`Mode2VerifyPrepareNorm.ec` proves exact machine-word semantics for the
-boundary helpers that prepare the decoded object:
+## Closure attempts
 
-- `verify_prepare_z1_wprime_mode2_word_exact`
-- `verify_prepare_z1_mode2_word_exact`
-- `verify_prepare_wprime_mode2_word_exact`
+Three independent proof attempts were made and discarded when they did not
+fresh-compile or did not cover the actual four-column semantics.
 
-These are word-level prefix/frame theorems for the actual generated
-procedure. They establish the exact machine-word accumulator and prefix
-relations used by the focused Verify boundary. They do **not** claim the
-paper-level integer reconstruction formulas.
+- A direct from-CRT/freeze proof defined the two parity cases, the exact
+  `__freeze2q` word function, prefix predicates, and frame predicates. Its
+  fresh compile stopped in the first `_polyveck_poly_fromcrt` loop with
+  `nothing to introduce`. The non-compiling block was removed.
+- Reusing the checked KeyGen NTT and pointwise theorems can fresh-compile only
+  a three-slice statement. Those theorems fix `cols = 3` and witnesses
+  `p0,p1,p2`; they say nothing about Verify's fourth column. No such partial
+  reuse was retained as if it proved the 2-by-4 row product.
+- A direct spectral-action prototype reached the coefficient comparison for
+  `Rq.&*` but could not normalize its `foldr (iota_ 0 256)` definition to the
+  finite-sum form needed by the full-NTT double-sum argument. The prototype
+  was removed after fresh compilation failed.
 
-### V-5 and V-6
+Consequently there is no new theorem hidden behind an unmanifested or
+non-compiling file.
 
-`Mode2VerifyRecover.ec` proves exact machine-word semantics for the recovery
-helpers:
+## Exact missing leaves
 
-- `actual_sign_verify_recover_w_z2_mode2_word_semantics`
-- `actual_sign_verify_recover_w_mode2_word_semantics`
-- `actual_sign_verify_recover_z2_mode2_word_semantics`
+The stopped headline needs two Verify-side procedural leaves.
 
-These theorems capture the exact word-level recovery path, including the
-recovery of `w` and the `z2` word result. They do **not** prove the paper
-bridge for the parity/centering interpretation of V-6, and they do not
-assert a semantic integer equality beyond the exact word result.
-
-### Norm gate
-
-`Mode2VerifyPrepareNorm.ec` also proves the exact W64 norm accumulator and
-gate:
-
-- `polyvec_sqnorm2_mode2_word_accumulator`
-- `sign_verify_norm_reject_mode2_word_exact`
-
-This is the exact machine-word reject gate used by the actual Verify tail
-control. It does **not** prove the separate integer no-wrap bridge needed for
-the paper norm predicate.
-
-### Tail trace and challenge word expression
-
-`Mode2VerifyTailChallenge.ec` proves the exact tail call trace and the actual
-comparison word:
-
-- `verify_tail_exact_trace_mode2`
-- `poly_mismatch_mode2_word_exact`
-
-These are the exact generated-procedure boundary facts for the helper trace
-and the final mismatch word expression. They do **not** identify the tail
-path with the paper highbits/LSB/`mu`/`SampleInBall` challenge semantics.
-
-## Exact blockers
-
-The earliest missing Verify leaf is:
+### NTT/row-product leaf
 
 ```text
-verify_matrix_crt_mode2_fromcrt_freeze_exact
+verify_matrix_ntt_acc_mode2_cols4_correct
 ```
 
-That missing leaf blocks the paper-level matrix reconstruction story.
-Downstream from it remain:
-
-- the full-NTT convolution / odd-root orthogonality theorem;
-- the `Rq.poly`-to-integer-list adapter needed for the security-model
-  multiplication statement; and
-- the paper-level rewrite from the checked matrix helper to the claimed
-  reconstruction formula.
-
-The challenge side still lacks:
+This leaf must open or refine the actual `_polyvec_ntt`,
+`_polymat_pointwise_acc`, and `_polyvec_invntt` calls with `rows = 2` and
+`cols = 4`, then prove that each returned `highp` row represents
 
 ```text
-verify_tail_m23_highbits_lsb_sampleinball_correct
+sum (c = 0..3) (matrix_poly a1p row c Rq.&* input_poly c).
 ```
 
-That leaf would have to relate the actual tail highbits/LSB packing and the
-actual challenge comparison path to the paper `SampleInBall(...,58)` result.
-No such theorem is claimed here.
+The existing checked arithmetic interface is KeyGen-specific and fixes
+`rows = 2`, `cols = 3`; it cannot instantiate this leaf.
 
-## Forbidden-premise audit
+Under this procedural leaf, the first concrete pure-algebra normalization
+leaf absent from the checked NTT tree is:
 
-The checked control theorem does not put any of the following in its
-precondition:
+```text
+rq_mul_coeff_foldr_to_bigi
+```
 
-- `reject = 0`
-- a reconstruction result
-- a norm-pass result
-- challenge equality
-- paper-level `(V-1)`--`(V-6)` formulas
-- sampler distribution
-- termination
+For `0 <= i < 256`, it must turn the implementation-facing definition
 
-The report also excludes the following scope items:
+```text
+foldr
+  (fun k ci =>
+     if 0 <= i-k then ci + a.[k] * b.[i-k]
+     else ci - a.[k] * b.[256+i-k])
+  0 (iota_ 0 256)
+```
 
-- parser and malformed-input handling
-- codec internals
-- public API orchestration
-- KeyGen NTT expansion
-- Sign blockers
+into the corresponding `Rq.BigDom.BAdd.bigi` negacyclic coefficient sum. That
+normalization is required before proving the still-absent spectral-action leaf
+
+```text
+full_ntt_montgomery_spectral_action
+```
+
+with mathematical content
+
+```text
+array256_mont
+  (full_invntt
+    (Array256.init (fun j =>
+       ahat.[j] * (full_ntt p).[j] * inv R)))
+= (full_invntt ahat) Rq.&* p.
+```
+
+The subsequent finite-sum proof also needs the absent 256-term odd-root
+orthogonality identity. The checked NTT artifact proves the imperative
+forward/inverse transforms equal `full_ntt`/`full_invntt`; it does not prove
+this convolution theorem.
+
+### CRT/freeze leaf
+
+```text
+verify_crt_freeze_mode2_word_exact
+```
+
+This leaf must prove the two extracted parity cases above for
+`_polyveck_poly_fromcrt`, prove the pointwise 512-word semantics of
+`_polyvec_freeze2q`, preserve the inactive tail, and compose both actual
+helpers. The attempted loop invariant did not compile, so this result is not
+claimed from source inspection alone.
+
+Only after both procedural leaves exist can
+`verify_matrix_crt_mode2_fromcrt_freeze_exact` connect actual output to the
+mathematical 2-by-4 polynomial row product and then be composed into the
+existing Verify control theorem.
+
+## Non-circularity and scope audit
+
+No theorem precondition assumes any of the following:
+
+- V-3 or V-4;
+- the requested row-product or final output equality;
+- `reject = 0`, a norm pass, or challenge equality;
+- sampler distribution or termination.
+
+This continuation did not modify or re-prove V-1, V-2, V-5, V-6, norm, or
+tail results. It did not expand into KeyGen NTT, Sign challenge semantics,
+codec, parser, public API, distribution, termination, or security.
+The independently absent challenge leaf remains
+`verify_tail_m23_highbits_lsb_sampleinball_correct`; it was not reopened in
+this matrix/CRT continuation.
 
 ## Verification evidence
 
-The focused `VerifyCoreTarget.ec` regeneration and all four authored Verify
-targets individually fresh-compiled with `-no-eco`. The final single-writer
-aggregate then fresh-compiled all 82 targets and passed proof-hole,
-authored-axiom, debug/temporary, manifest, focused-extraction/hash, direct-call
-order, forbidden-premise, scope, selected-baseline, LaTeX, and before/after
-source-drift gates. The preserved 78/78 baseline remains unchanged.
+The focused `VerifyCoreTarget.ec` was regenerated and fresh-compiled. All four
+existing Verify targets were individually fresh-compiled with `-no-eco`.
+The final single-writer aggregate fresh-compiled all 82 targets and passed
+proof-hole, authored-axiom, debug/temporary, manifest, extraction/hash,
+actual-call-order, forbidden-premise, stopped-theorem, scope, selected
+baseline, LaTeX, and before/after source-drift checks. It contains exactly 82
+fresh-compile lines and exactly one terminal result line.
+
+This evidence preserves the previous 82/82 result; it does not turn either
+missing leaf into an assumption. The frozen verdict is therefore
+**STOP-VERIFY-MATRIX-CRT**, not `GO-VERIFY`.

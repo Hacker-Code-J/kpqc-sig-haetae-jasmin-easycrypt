@@ -65,7 +65,7 @@ adapter를 특정했다. 이어지는 Sign pass는 actual 세 helper를 직접 �
 78번째 control target을 fresh compile했지만, canonical decoded \((x,v,h,c)\)
 경계의 MINCORE-VERIFY 부분 정리가 추가되어 V-1/V-2/V-5/V-6, W64 norm gate,
 tail trace/mismatch word expression은 proved로, matrix 및 challenge blocker는
-명시적으로 남는다. 따라서 최신 판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}
+명시적으로 남는다. 따라서 최신 판정은 \identifier{STOP-VERIFY-MATRIX-CRT}
 이며, 힌트 (h) 코덱은 현재 범위에서 연기되었다.
 따라서
 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
@@ -103,14 +103,15 @@ two-call harness의 두 active row consequence를 77번째 대상으로 컴파�
 \identifier{STOP-KG-NTT}로 동결했다. 다만 canonical decoded \((x,v,h,c)\)
 경계의 MINCORE-VERIFY 부분 정리가 추가되어 V-1/V-2/V-5/V-6, W64 norm gate,
 tail trace/mismatch word expression은 proved로 남고 matrix 및 challenge blocker는
-열린 상태다. 따라서 현재 판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}이며,
+열린 상태다. 따라서 현재 판정은 \identifier{STOP-VERIFY-MATRIX-CRT}이며,
 이는 full KeyGen, \(h\) codec, 전체 signature codec이나 Sign--Verify
 correctness가 완료됐다는 판정이 아니다.
 다만 완료된 추적의 저장된 \(\mu\)를 연결하는 생성/재전달 정리는
 \statusdeferred 이고, 고정 입력 종료/losslessness, odd-root
 직교성/full-NTT convolution과 security-list adapter, MINCORE Sign/Verify/합성,
 (h) 접미부 및 전체 Verify 관문이 남아 있다. Verify의 첫 재개 leaf는
-\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다. 따라서 API/인코딩 무손실(zero loss)과
+\identifier{rq_mul_coeff_foldr_to_bigi}이며, 이어지는 2-by-4 NTT row-product와
+CRT/freeze 절차 leaf가 combined matrix theorem을 막는다. 따라서 API/인코딩 무손실(zero loss)과
 EUF-CMA로의 승격은 아직 허용되지 않는다.
 \end{takeaway}
 

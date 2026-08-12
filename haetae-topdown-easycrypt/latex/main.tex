@@ -66,10 +66,12 @@ and freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}. The next
 Sign pass directly composes the three actual accepted-core helpers and proves
 their branch control, but freezes S-1--S-7 as
 \textsc{stop-sign-chal-mode2} because the full highbits/LSB/\(\mu\) challenge
-semantics leaf is absent. The active MINCORE lane moves to Verify, where the
-current partial result preserves the canonical helper order and the exact
-word-level V-1, V-2, V-5, V-6, norm, and tail-trace leaves while the paper
-matrix and challenge semantics remain open.
+semantics leaf is absent. The MINCORE Verify pass preserves the canonical
+helper order and the exact word-level V-1, V-2, V-5, V-6, norm, and tail-trace
+leaves. Its matrix continuation audits the actual five-helper body and freezes
+the result as \textsc{stop-verify-matrix-crt}: the checked tree lacks both the
+mode-2 four-column NTT row-product bridge and the exact from-CRT/freeze loop
+leaf, so V-3/V-4 are not claimed.
 \end{abstract}
 
 \tableofcontents
@@ -109,6 +111,7 @@ matrix and challenge semantics remain open.
 \input{sections/33-week16-kg-ntt-mul-stop}
 \input{sections/34-week16-mincore-sign-stop}
 \input{sections/35-week16-mincore-verify-partial}
+\input{sections/36-week16-verify-matrix-crt-stop}
 
 \bibliographystyle{plain}
 \bibliography{references}

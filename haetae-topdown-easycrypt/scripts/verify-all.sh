@@ -849,13 +849,21 @@ if ! rg -F 'module ActualVerifyCoreSequence = {' "$WEEK16_VERIFY_SEQUENCE" \
     "$WEEK16_VERIFY_TAIL" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
    ! rg -F 'lemma verify_tail_exact_trace_mode2' \
     "$WEEK16_VERIFY_TAIL" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
-   ! rg -F 'PARTIAL-VERIFY-MATRIX-CRT' "$WEEK16_VERIFY_REPORT" \
+   ! rg -F 'STOP-VERIFY-MATRIX-CRT' "$WEEK16_VERIFY_REPORT" \
     >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
    ! rg -F 'verify_matrix_crt_mode2_fromcrt_freeze_exact' \
     "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'verify_matrix_ntt_acc_mode2_cols4_correct' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'rq_mul_coeff_foldr_to_bigi' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'full_ntt_montgomery_spectral_action' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'verify_crt_freeze_mode2_word_exact' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
    ! rg -F 'verify_tail_m23_highbits_lsb_sampleinball_correct' \
     "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
-  printf 'FAIL Week16 direct Verify-core/PARTIAL boundary surface\n' \
+  printf 'FAIL Week16 direct Verify-core/STOP boundary surface\n' \
     | tee -a "$SUMMARY"
   exit 1
 fi
@@ -963,13 +971,15 @@ if [ "$(rg -c '^[[:space:]]*-f ' "$WEEK16_VERIFY_EXTRACT")" -ne 5 ] || \
     | tee -a "$SUMMARY"
   exit 1
 fi
-if rg -F 'lemma actual_verify_core_predicate_mode2' "$WEEK16_VERIFY_DIR" \
+if rg -n \
+    'lemma (actual_verify_core_predicate_mode2|verify_matrix_crt_mode2_fromcrt_freeze_exact|verify_matrix_ntt_acc_mode2_cols4_correct|verify_crt_freeze_mode2_word_exact)' \
+    "$WEEK16_VERIFY_DIR" \
     >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
-  printf 'FAIL partial Week16 Verify boundary claims the unproved full predicate\n' \
+  printf 'FAIL stopped Week16 Verify boundary claims an unproved matrix or full predicate theorem\n' \
     | tee -a "$SUMMARY"
   exit 1
 fi
-printf 'PASS Week16 direct Verify-core word results and PARTIAL-VERIFY-MATRIX-CRT checks\n' \
+printf 'PASS Week16 direct Verify-core word results and STOP-VERIFY-MATRIX-CRT checks\n' \
   | tee -a "$SUMMARY"
 
 API_BRIDGE="$PROJECT_DIR/easycrypt/refinement/composition/ApiKeyMemoryBridge.ec"

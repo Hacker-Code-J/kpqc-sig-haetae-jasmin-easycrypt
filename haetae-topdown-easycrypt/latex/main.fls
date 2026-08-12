@@ -927,6 +927,13 @@ INPUT sections/35-week16-mincore-verify-partial.tex
 INPUT ./sections/35-week16-mincore-verify-partial.tex
 INPUT ./sections/35-week16-mincore-verify-partial.tex
 INPUT sections/35-week16-mincore-verify-partial.tex
+INPUT ./sections/36-week16-verify-matrix-crt-stop.tex
+INPUT ./sections/36-week16-verify-matrix-crt-stop.tex
+INPUT ./sections/36-week16-verify-matrix-crt-stop.tex
+INPUT sections/36-week16-verify-matrix-crt-stop.tex
+INPUT ./sections/36-week16-verify-matrix-crt-stop.tex
+INPUT ./sections/36-week16-verify-matrix-crt-stop.tex
+INPUT sections/36-week16-verify-matrix-crt-stop.tex
 INPUT ./main.bbl
 INPUT main.bbl
 INPUT ./main.bbl

@@ -20,13 +20,16 @@ the checked tree. Paper S-1/S-4 additionally retain the frozen full-NTT
 convolution dependency.
 
 The Verify time box is now closed as
-**PARTIAL-VERIFY-MATRIX-CRT**, not `GO-VERIFY`.  Four authored theories
+**STOP-VERIFY-MATRIX-CRT**, not `GO-VERIFY`.  Four authored theories
 directly exercise the five requested actual helpers in order.  They preserve
 exact machine-word `(V-1)`, `(V-2)`, `(V-5)`, `(V-6)`, the W64 norm decision,
 the tail call trace, and the actual `_poly_mismatch` result expression.  The
-earliest missing reconstruction leaf is
-`verify_matrix_crt_mode2_fromcrt_freeze_exact`; the V-6 integer-centering,
-norm no-wrap, and SampleInBall challenge bridges remain separately named.
+stopped `verify_matrix_crt_mode2_fromcrt_freeze_exact` headline decomposes
+into the absent `verify_matrix_ntt_acc_mode2_cols4_correct` and
+`verify_crt_freeze_mode2_word_exact` leaves.  The former first needs
+`rq_mul_coeff_foldr_to_bigi` and the full-NTT Montgomery spectral action; the
+V-6 integer-centering, norm no-wrap, and SampleInBall challenge bridges remain
+separately named.
 
 The paper claim is narrower than full HAETAE correctness:
 
@@ -93,14 +96,17 @@ The paper claim is narrower than full HAETAE correctness:
   actual helpers exactly once in order and enters the challenge tail exactly
   when the actual norm helper returns zero.
 - Stopped reconstruction surface: `(V-3)` and `(V-4)` require the absent
-  `verify_matrix_crt_mode2_fromcrt_freeze_exact` leaf, followed by the already
-  identified full-NTT convolution theorem and representation adapter.
+  `verify_matrix_ntt_acc_mode2_cols4_correct` and
+  `verify_crt_freeze_mode2_word_exact` leaves before the combined
+  `verify_matrix_crt_mode2_fromcrt_freeze_exact` theorem can be composed.
+  The NTT leaf depends on the absent `Rq.&*` foldr normalization and
+  full-NTT Montgomery spectral action.
 - Stopped interpretation surface: paper-level `(V-6)` still needs the
   parity/arithmetic-shift/centering bridge; the norm theorem still needs an
   integer no-wrap bridge; challenge equality still needs
   `verify_tail_m23_highbits_lsb_sampleinball_correct`.
 - Do not claim full parsing or malformed-byte rejection.
-- Final decision: `PARTIAL-VERIFY-MATRIX-CRT`; the planned headline theorem
+- Final decision: `STOP-VERIFY-MATRIX-CRT`; the planned headline theorem
   `Mode2VerifyCorePredicate.actual_verify_core_predicate_mode2` is not
   authored or claimed.
 
@@ -168,5 +174,6 @@ matrix/finalizer snapshot functional partial correctness with KG-2
 finalization semantics**.  It is not the paper KeyGen equation, full HAETAE
 functional correctness, public-API correctness, termination, or
 implementation security. Reopening Verify starts at
-`verify_matrix_crt_mode2_fromcrt_freeze_exact`; no desired reconstruction,
+`rq_mul_coeff_foldr_to_bigi`, then the 2-by-4 NTT and CRT/freeze procedural
+leaves; no desired reconstruction,
 norm-pass, or challenge-equality premise may replace it.

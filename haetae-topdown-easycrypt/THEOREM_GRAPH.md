@@ -486,7 +486,12 @@ ActualVerifyCoreSequence.run(canonical decoded x,v,h,c boundary)
 │   ├── V-1 exact machine-word prefix                          [PROVED]
 │   └── V-2 exact machine-word LSB prefix                      [PROVED]
 ├── _verify_matrix_crt                                         [DIRECT]
-│   ├── verify_matrix_crt_mode2_fromcrt_freeze_exact           [ABSENT]
+│   ├── verify_matrix_ntt_acc_mode2_cols4_correct              [ABSENT]
+│   │   ├── rq_mul_coeff_foldr_to_bigi                         [ABSENT]
+│   │   ├── full_ntt_montgomery_spectral_action                [ABSENT]
+│   │   └── odd-root orthogonality (256 terms)                 [ABSENT]
+│   ├── verify_crt_freeze_mode2_word_exact                     [ABSENT]
+│   ├── verify_matrix_crt_mode2_fromcrt_freeze_exact           [BLOCKED]
 │   ├── V-3 reconstructed matrix                               [NOT PROVED]
 │   └── V-4 matrix/challenge relation                          [NOT PROVED]
 ├── _sign_verify_recover_w_z2                                  [DIRECT]
@@ -500,14 +505,15 @@ ActualVerifyCoreSequence.run(canonical decoded x,v,h,c boundary)
     ├── exact actual tail trace                                [PROVED]
     ├── actual _poly_mismatch result word                      [PROVED]
     └── highbits/LSB/mu/SampleInBall semantics                 [ABSENT]
-        └── OBL-MINCORE-VERIFY             [PARTIAL / PARTIAL-VERIFY-MATRIX-CRT]
+        └── OBL-MINCORE-VERIFY             [PARTIAL / STOP-VERIFY-MATRIX-CRT]
 ```
 
 The direct harness establishes only call order, snapshots, and norm-gated
 control.  Its theorem has precondition `true`.  The helper-local semantic
 theorems bind initial arrays and mode-2 constants but assume no rejection
 result, reconstruction output, norm pass, or challenge equality.  The first
-missing leaf in program order is the matrix from-CRT/freeze theorem; the
-downstream full-NTT convolution and `Rq.poly` adapter are not reopened or
-assumed.  Parser, malformed input, codecs, public APIs, distribution, and
-termination are outside this graph.
+missing procedural leaf in program order is the 2-by-4 NTT/row-product
+theorem; its first concrete pure-algebra subleaf is the `Rq.&*` foldr-to-bigi
+normalization.  The later CRT/freeze leaf is independently absent.  Neither
+desired equality is reopened as an assumption.  Parser, malformed input,
+codecs, public APIs, distribution, and termination are outside this graph.

@@ -117,8 +117,9 @@ inverse를 같은 명제(proposition)로 부르면 안 된다.
 \subsection{대수(algebra)·수치(numerics)·확률(probability) 층(layer)에 남은 의무}
 
 KeyGen의 NTT 곱셈 표현 전선은 \identifier{STOP-KG-NTT}, actual Sign control은
-canonical decoded \((x,v,h,c)\) 경계의 \identifier{PARTIAL-VERIFY-MATRIX-CRT}
-로 정리되었고 첫 재개 leaf는 matrix CRT/freeze 의미론이지만, 전체 구현 refinement에는
+canonical decoded \((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-MATRIX-CRT}
+로 정리되었고 첫 재개 leaf는 \identifier{rq_mul_coeff_foldr_to_bigi}와 그 뒤
+2-by-4 NTT/CRT 절차 의미론이지만, 전체 구현 refinement에는
 다음 독립적인 의무들이
 남는다.
 

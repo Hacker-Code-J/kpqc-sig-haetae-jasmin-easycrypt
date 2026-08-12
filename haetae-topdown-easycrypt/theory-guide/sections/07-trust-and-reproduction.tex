@@ -49,7 +49,7 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
         동치, full encoder/decoder, 직접 결합과 production 경계 lift의
         과대주장 검사, Week~15 고정 all-six 예산/실패 원인/production 성공 lift,
         Week~16 실제 M23 matrix/finalizer 스냅샷, 마지막 NTT 표현 rewrite,
-        직접 Sign/Verify core control과 \identifier{PARTIAL-VERIFY-MATRIX-CRT}
+        직접 Sign/Verify core control과 \identifier{STOP-VERIFY-MATRIX-CRT}
         표면 검사;
   \item 현재 매니페스트된 82개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
         컴파일;
@@ -72,10 +72,10 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
 \sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며
 해시 \texttt{cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75}를
 갖는다. \sourcepath{WEEK16_VERIFY_REPORT.md}는 canonical decoded
-\((x,v,h,c)\) 경계의 \identifier{PARTIAL-VERIFY-MATRIX-CRT}와 남은 blocker를
+\((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-MATRIX-CRT}와 남은 blocker를
 설명한다. 최종 82/82 aggregate 로그는
-\sourcepath{logs/verify-all-week16-verify.log}에 보존되고 SHA-256은
-\texttt{46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c}이다.
+\sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에 보존되고 SHA-256은
+\texttt{4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da}이다.
 
 \begin{boundary}[78대상 pre-Verify 기준선과 82대상 Verify partial boundary]
 2026-08-10의 Week~14 완료 실행은 Week~13의 67대상 기준선에 다음 다섯 이론을
@@ -114,7 +114,7 @@ adapter를 가정하지 않으며 최종 판정은 \identifier{STOP-KG-NTT}다.
 \sourcepath{logs/verify-all-summary.txt}는 덮어쓰는 중간 로그이므로 보존 증거로
 사용하지 않는다. Verify 수정 전 78/78 완료 로그는
 \sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며,
-최종 82/82 aggregate는 \sourcepath{logs/verify-all-week16-verify.log}에
+최종 82/82 aggregate는 \sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에
 보존된다. 그 밖의
 중간 또는 중단 실행은 보존된 77대상 Sign 수정 전 기준선을 갱신하지 않는다.
 \end{boundary}

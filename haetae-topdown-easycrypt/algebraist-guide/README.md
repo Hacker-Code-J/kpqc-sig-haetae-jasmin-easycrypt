@@ -28,8 +28,8 @@ aggregate-verified 기준선은 별도 로그로 보존된다.
 `../logs/verify-all-before-week16-verify.log`는 78/78 pre-Verify 기준선과
 SHA-256 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`를
 보존한다. 최종 82/82 `-no-eco` aggregate는
-`../logs/verify-all-week16-verify.log`에 보존되며 SHA-256은
-`46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c`이다. Week 11에
+`../logs/verify-all-week16-verify-matrix-crt.log`에 보존되며 SHA-256은
+`4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da`이다. Week 11에
 rANS encoder closure 관련 파일 일곱 개가 manifest에 추가되어 `-no-eco`로 fresh
 compile되었고, Week 12에는 actual decoder semantic-refinement 파일 여덟 개가,
 Week 13에는 actual core composition 파일 두 개가, Week 14에는 production full-HBZ
@@ -83,13 +83,14 @@ full-NTT convolution 정리와 `Rq.poly`--security-list 어댑터는 없다. KG-
 특정한 뒤 중단했다. 그러므로 `OBL-MINCORE-KEYGEN`은 `PARTIAL — STOP-KG-NTT`이며,
 faithful KG-1/KG-3, complete KG-4와 논문식 `A s = q j (mod 2q)`는 완료되지
 않았다. KeyGen은 KG-2/finalization에서 동결되고 Sign은 actual-call control에서
-동결되었다. 현재 첫 재개 leaf는
-`verify_matrix_crt_mode2_fromcrt_freeze_exact`다. 두 번째 `h` codec은
+동결되었다. 현재 첫 재개 leaf는 `rq_mul_coeff_foldr_to_bigi`이며, 그 뒤
+2-by-4 NTT row-product와 CRT/freeze 절차 leaf를 닫아야 한다. 두 번째 `h` codec은
 `DEFERRED`다. 별도 보고서
 `../WEEK16_VERIFY_REPORT.md`는 canonical decoded \((x,v,h,c)\) 경계에서 actual
 Verify helper chain의 부분 결과를 기록하며, V-1/V-2/V-5/V-6, W64 norm gate,
-tail trace/mismatch word expression은 proved로, 첫 blocker는
-`verify_matrix_crt_mode2_fromcrt_freeze_exact`와
+tail trace/mismatch word expression은 proved로, matrix blocker는
+`verify_matrix_ntt_acc_mode2_cols4_correct`,
+`verify_crt_freeze_mode2_word_exact`, 그리고 이들의 합성 headline과
 `verify_tail_m23_highbits_lsb_sampleinball_correct`로 고정한다.
 
 ## 빠른 읽기 순서

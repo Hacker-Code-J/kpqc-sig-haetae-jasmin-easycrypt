@@ -148,7 +148,7 @@ A subsequent adapter from `Rq.poly` arrays to
 treated as reused, trusted, or assumed. Final status is `STOP-KG-NTT`; KeyGen
 is frozen at KG-2/finalization. The later Sign pass is separately frozen at
 `STOP-SIGN-CHAL-MODE2`; the subsequent Verify pass is frozen at
-`PARTIAL-VERIFY-MATRIX-CRT`.
+`STOP-VERIFY-MATRIX-CRT`.
 
 ## MINCORE-SIGN actual-call boundary
 
@@ -173,13 +173,17 @@ V-2, V-5, V-6, W64 norm semantics, exact tail trace, and the actual
 `_poly_mismatch` word expression.
 
 No reused theorem identifies `_verify_matrix_crt` with the paper V-3/V-4
-reconstruction. The exact first non-reused leaf is
-`verify_matrix_crt_mode2_fromcrt_freeze_exact`; the later full-NTT
-convolution/odd-root identity and `Rq.poly` adapter remain absent. Likewise,
+reconstruction. The absent headline
+`verify_matrix_crt_mode2_fromcrt_freeze_exact` requires the non-reused
+`verify_matrix_ntt_acc_mode2_cols4_correct` and
+`verify_crt_freeze_mode2_word_exact` leaves.  The NTT leaf cannot reuse the
+KeyGen-only 2-by-3 interface and first lacks `rq_mul_coeff_foldr_to_bigi`,
+followed by full-NTT Montgomery spectral action and odd-root orthogonality.
+Likewise,
 no theorem is reused for the V-6 word/integer centering bridge, W64 norm
 no-wrap, or highbits/LSB/mu/SampleInBall semantics. These are neither trusted
 facts nor representation premises. Final status and non-claims are recorded
-in `WEEK16_VERIFY_REPORT.md` as `PARTIAL-VERIFY-MATRIX-CRT`.
+in `WEEK16_VERIFY_REPORT.md` as `STOP-VERIFY-MATRIX-CRT`.
 
 ## Week 2 generated-procedure boundary
 

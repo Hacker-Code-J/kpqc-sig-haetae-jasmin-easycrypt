@@ -397,15 +397,19 @@ paper reduction.
     paper-level S-1/S-4 paths also retain the frozen full-NTT convolution
     dependency.  No response, norm, hint, distribution, or termination claim
     is made.  The active lane moves to MINCORE-VERIFY.
-11. **MINCORE-VERIFY decision — PARTIAL-VERIFY-MATRIX-CRT.**
+11. **MINCORE-VERIFY decision — STOP-VERIFY-MATRIX-CRT.**
     The focused Verify harness calls `_verify_prepare_z1_wprime`,
     `_verify_matrix_crt`, `_sign_verify_recover_w_z2`,
     `_sign_verify_norm_reject`, and the norm-gated `_sign_verify_tail_m23`
     directly and in order.  The checked surface preserves machine-word V-1,
     V-2, V-5, V-6, the W64 norm result, the exact tail trace, and the actual
-    mismatch word expression.  The first absent reconstruction theorem is
-    `verify_matrix_crt_mode2_fromcrt_freeze_exact`; paper V-3/V-4 therefore
-    remain unproved.  V-6 integer centering, norm no-wrap, and the
+    mismatch word expression.  The stopped headline
+    `verify_matrix_crt_mode2_fromcrt_freeze_exact` depends on the absent
+    2-by-4 `verify_matrix_ntt_acc_mode2_cols4_correct` and
+    `verify_crt_freeze_mode2_word_exact` leaves.  The NTT leaf first needs the
+    absent `Rq.&*` foldr-to-finite-sum normalization and full-NTT Montgomery
+    spectral action.  Paper V-3/V-4 therefore remain unproved.  V-6 integer
+    centering, norm no-wrap, and the
     highbits/LSB/mu/SampleInBall challenge bridge also remain explicit
     residuals.  Parser, malformed input, codec, public API, KeyGen NTT
     expansion, Sign blockers, distribution, and termination stay outside the
@@ -430,14 +434,14 @@ paper reduction.
    highbits/LSB/mu-to-SampleInBall semantics leaf is absent.  S-1/S-4 also
    retain the frozen full-NTT convolution dependency, so S-1--S-7 are not
    claimed.
-5. **Verify status: PARTIAL-VERIFY-MATRIX-CRT.**  The exact actual-call order
-   and helper-local word semantics compile without desired-result premises.
-   The full predicate theorem is not authored because the matrix CRT/freeze
-   semantics leaf is absent; downstream V-6 integer, norm no-wrap, and
-   challenge-semantic leaves remain named rather than assumed.
+5. **Verify status: STOP-VERIFY-MATRIX-CRT.**  The exact actual-call order
+   and previously proved helper-local word semantics compile without
+   desired-result premises.  The attempted matrix proof leaves no new
+   theorem: the actual 2-by-4 NTT row-product leaf and the from-CRT/freeze
+   loop leaf are absent, so the combined predicate is not authored.
 6. Keep sampler distributions, retry termination, packers, public APIs,
    parser/codec paths, and general NTT algebra outside the frozen Verify
-   target.  Any continuation begins with the named matrix leaf and must again
+   target.  Any continuation begins with the named NTT/CRT subleaves and must again
    pass individual and aggregate fresh compilation and independent audit.
 
 The exact schedule, fallback boundary, non-claims, and completion gates are in
