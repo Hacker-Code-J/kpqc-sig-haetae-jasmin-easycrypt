@@ -1179,6 +1179,7 @@ OLD_SUPPORT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/support"
 SECURITY="$ROOT_DIR/haetae-security/provable-security/easycrypt"
 ROOT_SECURITY="$ROOT_DIR/haetae-security"
 NTT_SUPPORT="$ROOT_DIR/haetae-ntt-verify/easycrypt-ct"
+NTT_FOUNDATION="$ROOT_DIR/haetae-ntt-verify/easycrypt"
 
 compiled=0
 while IFS= read -r target || [ -n "$target" ]; do
@@ -1250,7 +1251,7 @@ while IFS= read -r target || [ -n "$target" ]; do
         -I "$PARENT_EXTRACT" -I "$CALLER_EXTRACT" -I "$NTT_EXTRACT" \
         -I "$OLD_SPEC" -I "$OLD_REFINEMENT" -I "$SECURITY" \
         -I "$PROJECT_DIR/easycrypt/refinement/keygen" \
-        -I "$NTT_SUPPORT" -I "$OLD_SUPPORT" \
+        -I "$NTT_FOUNDATION" -I "$NTT_SUPPORT" -I "$OLD_SUPPORT" \
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
       ;;
