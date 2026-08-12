@@ -62,8 +62,10 @@ rewrite와 actual harness의 두 active row consequence가 77번째 대상으로
 \identifier{Rq.poly}-to-security-list adapter가 없다. 또한 sampler, retry,
 packer, public API와 분포/종료를 포함하지 않는다. 따라서 KeyGen은
 \identifier{STOP-KG-NTT}로 동결된다. 이후 Sign actual-call control도
-컴파일됐지만 full challenge semantics 부재로
-\identifier{STOP-SIGN-CHAL-MODE2}에서 동결됐고 활성 전선은 MINCORE Verify다.
+컴파일됐지만 canonical decoded \((x,v,h,c)\) 경계의
+\identifier{PARTIAL-VERIFY-MATRIX-CRT}가 현재 활성 전선이며, V-1/V-2/V-5/V-6,
+W64 norm gate, tail trace/mismatch word expression만 proved로 남고 matrix 및
+challenge blocker는 열려 있다.
 
 \subsection{현재 주장 행렬}
 
@@ -170,12 +172,12 @@ matrix/NTT 표현, finalizer 의미, KG-2형 low/high 분해, 조정된 \(s_2\)�
 스냅샷 mod-\(2q\) 영 등식은 증명됨; faithful KG-1/KG-3/전체 KG-4와 논문 식은
 odd-root convolution 및 security-list adapter 부재로
 \identifier{STOP-KG-NTT} \\
-MINCORE Sign (활성) & \statusspecified & 실제
-\identifier{_sf_round_challenge_mode2}, \identifier{_sf_z_check},
-\identifier{_sf_hint_mode2}의 accepted-core 합성이 다음 단일 목표; 아직 headline
-정리는 미컴파일 \\
-MINCORE Verify/제한 합성 & \statusspecified & 실제 focused core 정리와
-decoded-object 경계 합성의 목표만 고정됨; 아직 개별 정리가 컴파일되지 않음 \\
+MINCORE Sign & \statuspartial & 실제 세 helper의 직접 호출과 accepted-branch
+control은 컴파일; full challenge semantics와 S-1--S-7 headline은 미증명이라
+\identifier{STOP-SIGN-CHAL-MODE2} \\
+MINCORE Verify/제한 합성 & \statuspartial\ /\ \statusspecified & actual 다섯 helper
+순차 control, V-1/V-2/V-5/V-6 machine-word 식, W64 norm gate와 tail/mismatch word
+expression은 컴파일; matrix CRT 및 challenge 의미 bridge와 제한 합성은 열림 \\
 전체 서명 코덱(full signature codec) & \statusblocked & (h) rANS inverse,
 metadata, padding, residual frame과 canonical parse가 필요하며 (h)는 Week~16
 범위에서 \statusdeferred \\

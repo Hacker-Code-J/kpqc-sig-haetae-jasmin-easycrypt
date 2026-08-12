@@ -774,3 +774,36 @@ the three generated helpers and proves only that its accepted-branch flag is
 equivalent to the actual `_sf_z_check` return being zero. The paper equations
 (S-1)--(S-7) are not claimed: the exact missing semantic leaf is recorded in
 `WEEK16_SIGN_REPORT.md`.
+
+## Week 16 Verify core boundary
+
+Source:
+
+- `haetae-ref-jasmin/jasmin/verify.jazz`
+- source SHA-256:
+  `789f36e71ab7784cc37de50ceb04f8d59276f3d1a721acdc64a0be0299f18b06`
+
+Focused roots, in the order used by the authored harness:
+
+- `_verify_prepare_z1_wprime`
+- `_verify_matrix_crt`
+- `_sign_verify_recover_w_z2`
+- `_sign_verify_norm_reject`
+- `_sign_verify_tail_m23`
+
+Output:
+
+- `verify-core/VerifyCoreTarget.ec`
+- generated SHA-256:
+  `ff8fe374de38dc8bd08c4164a0c82c27fcae584b3fcac0b54efd1cc860273373`
+
+The extraction selects no parser, malformed-input wrapper, codec, public API,
+KeyGen root, or Sign root. `ActualVerifyCoreSequence.run` calls all five
+generated helpers directly and invokes the tail only when the actual norm
+helper returns zero. The authored theories prove helper-local machine-word
+results, not the full paper Verify predicate. The earliest absent semantic
+leaf is `verify_matrix_crt_mode2_fromcrt_freeze_exact`; downstream integer and
+challenge leaves are recorded in `WEEK16_VERIFY_REPORT.md`. The extraction
+does not justify distribution, losslessness, or termination claims.
+
+Script: `scripts/extract-verify-core.sh`

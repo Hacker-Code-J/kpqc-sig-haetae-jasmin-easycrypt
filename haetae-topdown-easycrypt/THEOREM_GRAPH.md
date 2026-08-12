@@ -474,6 +474,40 @@ premise.  KeyGen is frozen at KG-2/finalization. The focused
 `Mode2SignAcceptedCore` harness now directly composes the three actual Sign
 helpers and proves accepted-branch control, but the graph stops at
 `STOP-SIGN-CHAL-MODE2`: the full highbits/LSB/mu challenge leaf is absent and
-paper S-1/S-4 retain the frozen convolution dependency. The active graph moves
-to MINCORE-VERIFY. Sampler distribution, retry termination, packers, public
-APIs, and security remain outside scope.
+paper S-1/S-4 retain the frozen convolution dependency. The active graph then
+moved to MINCORE-VERIFY. Sampler distribution, retry termination, packers,
+public APIs, and security remain outside scope.
+
+## Week 16 MINCORE Verify boundary
+
+```text
+ActualVerifyCoreSequence.run(canonical decoded x,v,h,c boundary)
+├── _verify_prepare_z1_wprime                                  [DIRECT]
+│   ├── V-1 exact machine-word prefix                          [PROVED]
+│   └── V-2 exact machine-word LSB prefix                      [PROVED]
+├── _verify_matrix_crt                                         [DIRECT]
+│   ├── verify_matrix_crt_mode2_fromcrt_freeze_exact           [ABSENT]
+│   ├── V-3 reconstructed matrix                               [NOT PROVED]
+│   └── V-4 matrix/challenge relation                          [NOT PROVED]
+├── _sign_verify_recover_w_z2                                  [DIRECT]
+│   ├── V-5 exact machine-word highbits/hint recovery          [PROVED]
+│   └── V-6 exact machine-word reduce/shift result             [PROVED]
+│       └── parity/arithmetic-shift/integer centering bridge   [ABSENT]
+├── _sign_verify_norm_reject                                   [DIRECT]
+│   ├── W64 accumulator and return decision                    [PROVED]
+│   └── integer square norm / no-wrap bridge                   [ABSENT]
+└── reject = 0 branch: _sign_verify_tail_m23                   [DIRECT]
+    ├── exact actual tail trace                                [PROVED]
+    ├── actual _poly_mismatch result word                      [PROVED]
+    └── highbits/LSB/mu/SampleInBall semantics                 [ABSENT]
+        └── OBL-MINCORE-VERIFY             [PARTIAL / PARTIAL-VERIFY-MATRIX-CRT]
+```
+
+The direct harness establishes only call order, snapshots, and norm-gated
+control.  Its theorem has precondition `true`.  The helper-local semantic
+theorems bind initial arrays and mode-2 constants but assume no rejection
+result, reconstruction output, norm pass, or challenge equality.  The first
+missing leaf in program order is the matrix from-CRT/freeze theorem; the
+downstream full-NTT convolution and `Rq.poly` adapter are not reopened or
+assumed.  Parser, malformed input, codecs, public APIs, distribution, and
+termination are outside this graph.

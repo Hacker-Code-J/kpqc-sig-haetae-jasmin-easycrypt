@@ -1,4 +1,4 @@
-# Week 16 plan — MINCORE keygen snapshot
+# Week 16 MINCORE execution record
 
 ## Decision
 
@@ -17,7 +17,16 @@ The focused actual three-helper harness and its accepted-branch control
 theorem compile, but the exact
 `sf_challenge_mode2_highbits_lsb_sampleinball_correct` leaf does not exist in
 the checked tree. Paper S-1/S-4 additionally retain the frozen full-NTT
-convolution dependency. The active single lane is therefore MINCORE-VERIFY.
+convolution dependency.
+
+The Verify time box is now closed as
+**PARTIAL-VERIFY-MATRIX-CRT**, not `GO-VERIFY`.  Four authored theories
+directly exercise the five requested actual helpers in order.  They preserve
+exact machine-word `(V-1)`, `(V-2)`, `(V-5)`, `(V-6)`, the W64 norm decision,
+the tail call trace, and the actual `_poly_mismatch` result expression.  The
+earliest missing reconstruction leaf is
+`verify_matrix_crt_mode2_fromcrt_freeze_exact`; the V-6 integer-centering,
+norm no-wrap, and SampleInBall challenge bridges remain separately named.
 
 The paper claim is narrower than full HAETAE correctness:
 
@@ -77,11 +86,23 @@ The paper claim is narrower than full HAETAE correctness:
   `_sign_verify_recover_w_z2`, `_sign_verify_norm_reject`, and
   `_sign_verify_tail_m23`.
 - Start after a canonical decoded `(x,v,h,c)` object has been supplied.
-- Derive `(V-1)`--`(V-8)` and prove that the returned `reject=0` is equivalent
-  to the exact norm-bound and recomputed-challenge conjunction.
+- Compiled helper-local surface: exact machine-word `(V-1)`, `(V-2)`,
+  `(V-5)`, and `(V-6)` projections; exact W64 norm accumulator/decision;
+  exact tail trace and actual `_poly_mismatch` word expression.
+- Compiled control surface: `ActualVerifyCoreSequence.run` calls the five
+  actual helpers exactly once in order and enters the challenge tail exactly
+  when the actual norm helper returns zero.
+- Stopped reconstruction surface: `(V-3)` and `(V-4)` require the absent
+  `verify_matrix_crt_mode2_fromcrt_freeze_exact` leaf, followed by the already
+  identified full-NTT convolution theorem and representation adapter.
+- Stopped interpretation surface: paper-level `(V-6)` still needs the
+  parity/arithmetic-shift/centering bridge; the norm theorem still needs an
+  integer no-wrap bridge; challenge equality still needs
+  `verify_tail_m23_highbits_lsb_sampleinball_correct`.
 - Do not claim full parsing or malformed-byte rejection.
-- Planned headline theorem:
-  `Mode2VerifyCorePredicate.actual_verify_core_predicate_mode2`.
+- Final decision: `PARTIAL-VERIFY-MATRIX-CRT`; the planned headline theorem
+  `Mode2VerifyCorePredicate.actual_verify_core_predicate_mode2` is not
+  authored or claimed.
 
 ### MINCORE-COMPOSITION — restricted completeness
 
@@ -138,11 +159,14 @@ odd-root orthogonality/full-NTT convolution theorem and the security-list
 adapter; those results are not premises of the frozen theorem.
 
 The broader Week 16 MINCORE lane is not complete. Sign is frozen as an audited
-partial control result; Verify and restricted decoded-object composition are
-still open.
+partial control result; Verify is frozen with the checked helper-local results
+listed above; restricted decoded-object composition remains blocked and is not
+started in this Verify scope.
 
 The currently permitted KeyGen conclusion is **actual M23
 matrix/finalizer snapshot functional partial correctness with KG-2
 finalization semantics**.  It is not the paper KeyGen equation, full HAETAE
 functional correctness, public-API correctness, termination, or
-implementation security. Work proceeds with MINCORE-VERIFY.
+implementation security. Reopening Verify starts at
+`verify_matrix_crt_mode2_fromcrt_freeze_exact`; no desired reconstruction,
+norm-pass, or challenge-equality premise may replace it.

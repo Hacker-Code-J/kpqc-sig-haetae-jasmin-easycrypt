@@ -678,7 +678,8 @@ certificate generator/output의 pinned hash \\
   \identifier{STOP-KG-NTT}로 동결됐다.
   \item[MINCORE] 전체 공개 API, 코덱, sampler/retry와 종료를 제외하고
   KeyGen/Sign/Verify의 논문 핵심 식과 제한된 decoded-object 합성만을 목표로 한
-  Week~16 최소 논문 범위. KeyGen은 부분/중단, Sign은 활성 명세, Verify와 제한
+  Week~16 최소 논문 범위. KeyGen은 부분/중단, Sign은 actual-call control에서
+  부분/중단, Verify는 helper-local word/control 결과를 보존한 부분 상태이며 제한
   합성은 후속 명세 상태다.
   \item[생성 절차(generated procedure)] 고정된 Jasmin 소스에서
   \identifier{jasmin2ec}로 생성한 EasyCrypt 절차.
@@ -716,9 +717,11 @@ Week~16은 실제 M23 matrix/finalizer 두 호출을 합성해 snapshot low/high
 컴파일했다. 하지만 odd-root 직교성/full-NTT convolution과 native
 \identifier{Rq.poly}에서 security-list 곱으로 가는 adapter가 없어 최종 판정은
 \identifier{STOP-KG-NTT}다. 따라서 \identifier{GO-KG}나 전체 KeyGen 정확성을
-주장할 수 없다. KeyGen은 KG-2/finalization에서 동결됐고 현재 단일 목표는
-actual accepted Sign core다. (h) 코덱은 연기됐으며 MINCORE Verify/합성, 종료,
-문맥, highbits/LSB, 확률분포와 게임 기반 보안은 여전히 별도 의무다. 수정 전
-76대상 기준선만 전체 완료로 보존되며, 최종 77대상 aggregate 완료 로그는 아직
-없다.
+주장할 수 없다. KeyGen은 KG-2/finalization에서, Sign은 actual-call control에서
+동결됐다. MINCORE-VERIFY는 V-1/V-2/V-5/V-6 machine-word 식, W64 norm gate와
+tail/mismatch word expression을 보존했으며 첫 blocker는
+\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다. (h) 코덱은
+연기됐으며 제한 합성, 종료, 문맥, highbits/LSB, 확률분포와 게임 기반 보안은
+여전히 별도 의무다. 최종 82/82 aggregate 완료 로그는
+\sourcepath{logs/verify-all-week16-verify.log}에 보존되어 있다.
 \end{takeaway}

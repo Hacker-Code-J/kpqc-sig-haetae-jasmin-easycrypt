@@ -694,11 +694,13 @@ convolution 정리와 \identifier{Rq.poly}를 보안 모형의 integer-list 곱�
 KG-3, complete KG-4와 논문식 \(A s=qj\pmod{2q}\)는 증명되지 않았다.
 \end{openobligation}
 
-KG-NTT-MUL 감사는 이 두 누락 leaf를 특정하고 \CurrentGate 로 종료했다.
+KG-NTT-MUL 감사는 이 두 누락 leaf를 특정하고
+\identifier{STOP-KG-NTT}로 종료했다.
 \identifier{GO-KG}가 아니며, KeyGen은 KG-2/finalization 경계에서 동결되었다.
 sampler, retry, packing, public API, KeyGen 종료성과 보안은 이 actual two-call
-snapshot 정리의 결론 밖에 있다. 활성 MINCORE lane은 아직
-\statusspecified 인 accepted Sign core로 이동했다.
+snapshot 정리의 결론 밖에 있다. 뒤이은 Sign은
+\identifier{STOP-SIGN-CHAL-MODE2}, Verify는
+\identifier{PARTIAL-VERIFY-MATRIX-CRT}로 각각 동결되었다.
 
 \subsection{닫힌 사슬의 정확한 끝점}
 

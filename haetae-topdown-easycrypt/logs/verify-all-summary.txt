@@ -17,6 +17,7 @@ PASS Week14 actual full-HBZ failure/success and production-lift surface
 PASS Week15 fixed all-six budget, failure exclusion, and production lift
 PASS Week16 direct-keygen harness and STOP-KG-NTT boundary checks
 PASS Week16 direct Sign-core control and STOP-SIGN-CHAL-MODE2 checks
+PASS Week16 direct Verify-core word results and PARTIAL-VERIFY-MATRIX-CRT checks
 PASS actual API copy-helper reachability source checks
 PASS focused transcript extraction
 PASS focused mu-hash extraction
@@ -29,6 +30,7 @@ PASS focused/signature HBZ generated procedure identity
 PASS focused API key-memory extraction
 PASS focused raw API caller extraction
 PASS focused Sign accepted-core extraction
+PASS focused Verify core extraction
 PASS focused extraction regeneration drift
 PASS fresh compile easycrypt/refinement/composition/ExtractedChallengeAbsorb.ec
 PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
@@ -104,6 +106,10 @@ PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2SignAcceptedCore.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyPrepareNorm.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyRecover.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyTailChallenge.ec
 PASS fresh compile easycrypt/security/ImplementationSecurityGoals.ec
 PASS fresh compile easycrypt/security/SecurityAssumptions.ec
 PASS fresh compile easycrypt/specs/TopLevelGoals.ec
@@ -111,4 +117,4 @@ PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
 PASS baseline verification
 PASS LaTeX research notes build
 PASS read-only roots unchanged after verification
-RESULT PASS authored-targets=78 cache=-no-eco
+RESULT PASS authored-targets=82 cache=-no-eco

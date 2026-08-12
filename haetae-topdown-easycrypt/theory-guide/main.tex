@@ -62,10 +62,11 @@ Week~16의 현재 전선은 실제 \identifier{_kp_m23_matrix}와
 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱으로 식별하는 다리가 없다. KG-NTT-MUL
 감사는 누락된 odd-root orthogonality/full-NTT convolution과 security-list
 adapter를 특정했다. 이어지는 Sign pass는 actual 세 helper를 직접 합성하는
-78번째 control target을 fresh compile했지만, full highbits/LSB/\(\mu\) challenge
-semantics leaf의 부재로 \identifier{STOP-SIGN-CHAL-MODE2}에서 동결되었다.
-따라서 최신 판정은 \identifier{GO-SIGN}이 아니며 활성 전선은 Verify다. 힌트
-(h) 코덱은 현재 범위에서 연기되었다.
+78번째 control target을 fresh compile했지만, canonical decoded \((x,v,h,c)\)
+경계의 MINCORE-VERIFY 부분 정리가 추가되어 V-1/V-2/V-5/V-6, W64 norm gate,
+tail trace/mismatch word expression은 proved로, matrix 및 challenge blocker는
+명시적으로 남는다. 따라서 최신 판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}
+이며, 힌트 (h) 코덱은 현재 범위에서 연기되었다.
 따라서
 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
 \(\delta_{\mathrm{Encoding}}=0\)은 아직 주장할 수 없다. 접미부 코덱,
@@ -99,13 +100,17 @@ production 고정 입력 왕복을 닫았다. Week~16은 실제 KeyGen matrix/fi
 스냅샷 의미, low/high 분해와 mod-\(2q\) 등식을 닫고, KG-NTT-MUL 감사는
 \identifier{output_row}의 마지막 full-invNTT/pointwise 표현 rewrite와 actual
 two-call harness의 두 active row consequence를 77번째 대상으로 컴파일한 뒤
-\identifier{STOP-KG-NTT}로 동결했다.
+\identifier{STOP-KG-NTT}로 동결했다. 다만 canonical decoded \((x,v,h,c)\)
+경계의 MINCORE-VERIFY 부분 정리가 추가되어 V-1/V-2/V-5/V-6, W64 norm gate,
+tail trace/mismatch word expression은 proved로 남고 matrix 및 challenge blocker는
+열린 상태다. 따라서 현재 판정은 \identifier{PARTIAL-VERIFY-MATRIX-CRT}이며,
+이는 full KeyGen, \(h\) codec, 전체 signature codec이나 Sign--Verify
+correctness가 완료됐다는 판정이 아니다.
 다만 완료된 추적의 저장된 \(\mu\)를 연결하는 생성/재전달 정리는
 \statusdeferred 이고, 고정 입력 종료/losslessness, odd-root
 직교성/full-NTT convolution과 security-list adapter, MINCORE Sign/Verify/합성,
-(h) 접미부 및 전체 Verify 관문이 남아 있다. 현재 단일 전선은 actual accepted
-Sign core다. 따라서
-API/인코딩 무손실(zero loss)과
+(h) 접미부 및 전체 Verify 관문이 남아 있다. Verify의 첫 재개 leaf는
+\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다. 따라서 API/인코딩 무손실(zero loss)과
 EUF-CMA로의 승격은 아직 허용되지 않는다.
 \end{takeaway}
 

@@ -1,0 +1,66 @@
+\section{Week 16 MINCORE: Verify Partial Boundary}
+
+The current MINCORE Verify pass stops at
+\status{part-verify-matrix-crt}, not \status{go-verify}. The verified boundary
+directly composes the actual helpers in the canonical decoded \((x,v,h,c)\)
+order:
+\procname{_verify_prepare_z1_wprime}, \procname{_verify_matrix_crt},
+\procname{_sign_verify_recover_w_z2}, \procname{_sign_verify_norm_reject},
+and the guarded \procname{_sign_verify_tail_m23}. The checked result is
+control-preserving and leaf-preserving, not a full paper reconstruction proof.
+
+\subsection*{Baseline}
+
+The preserved aggregate baseline remains the 78-target run from
+\pathname{logs/verify-all-before-week16-verify.log}, with SHA-256
+\texttt{cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75}.
+The completed 82-target Verify aggregate is preserved in
+\pathname{logs/verify-all-week16-verify.log}. It has exactly 82 fresh compile
+lines, one terminal result
+\texttt{RESULT PASS authored-targets=82 cache=-no-eco}, and SHA-256
+\texttt{46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c}.
+
+\subsection*{What is proved}
+
+The focused Verify work proves the exact machine-word/control facts needed to
+separate the leaves:
+
+\begin{itemize}
+\item V-1 and V-2: the exact word-level prepare helpers and their prefix/frame
+  consequences.
+\item V-5 and V-6: the exact word-level recovery helpers for the returned
+  \texttt{w} and \texttt{z2} words.
+\item Norm gate: the exact W64 reject guard returned by the actual norm helper.
+\item Tail trace: the exact generated tail call sequence and the actual
+  comparison-word expression.
+\end{itemize}
+
+These are genuine compiled boundaries. They do not assume reject
+\texttt{= 0}, a reconstruction result, a norm-pass result, or challenge
+equality.
+
+\subsection*{What remains open}
+
+The earliest missing leaf is
+\procname{verify_matrix_crt_mode2_fromcrt_freeze_exact}. It is the first
+missing paper-level bridge from the checked matrix helper to the reconstructed
+Verify object. Downstream from it remain the full-NTT convolution / odd-root
+orthogonality theorem and the \texttt{Rq.poly} adapter needed for the paper
+matrix equation.
+
+The challenge-side missing leaf is
+\procname{verify_tail_m23_highbits_lsb_sampleinball_correct}. It must connect
+the actual tail packing and comparison path to the paper
+\(\mathsf{SampleInBall}(\cdots,58)\) challenge semantics. This report does not
+claim that theorem.
+
+The following remain explicitly out of scope for this Verify pass:
+parser and malformed inputs, codec internals, public API orchestration,
+KeyGen NTT expansion, Sign blockers, sampler distribution, and termination.
+
+\subsection*{Transition}
+
+The checked result is a partial Verify boundary only. It preserves the
+direct call order and the exact leaf results, but it stops before the full
+paper-level reconstruction and challenge semantics. The correct verdict is
+\status{part-verify-matrix-crt}.

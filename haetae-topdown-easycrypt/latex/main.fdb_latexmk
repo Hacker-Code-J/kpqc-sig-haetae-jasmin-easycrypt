@@ -1,12 +1,12 @@
 # Fdb version 3
-["bibtex main"] 1786509821 "main.aux" "main.bbl" "main" 1786509821
+["bibtex main"] 1786525911 "main.aux" "main.bbl" "main" 1786526455
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1786509821 15643 adbf78bdbe20209f45b5e48be4253d92 "pdflatex"
+  "main.aux" 1786526454 15783 0478a8bf430ec84708469bca5d19f4ff "pdflatex"
   "references.bib" 1785906462 633 2905e873c19ad361886ffd59ac468436 ""
   (generated)
   "main.bbl"
   "main.blg"
-["pdflatex"] 1786509821 "main.tex" "main.pdf" "main" 1786509821
+["pdflatex"] 1786526454 "main.tex" "main.pdf" "main" 1786526455
   "/etc/texmf/web2c/texmf.cnf" 1675738244 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/ecrm1095.tfm" 1136768653 3584 929cdff2b7a8c11bd4d49fd68cb0ae70 ""
@@ -142,11 +142,11 @@
   "/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map" 1675739085 4379155 98693266ff65f58d9f98aff394de12d2 ""
   "/var/lib/texmf/web2c/pdftex/pdflatex.fmt" 1775014346 2799532 1b167c4adcdb4a43e9dcfcebf6c05ff4 ""
   "macros.tex" 1785934942 664 652b929c974eed20ee5716a4f82f760a ""
-  "main.aux" 1786509821 15643 adbf78bdbe20209f45b5e48be4253d92 "pdflatex"
-  "main.bbl" 1786509821 613 2f51554d2ab8d9181d39db77d9a0d691 "bibtex main"
-  "main.out" 1786509821 11917 dd0fed9b16ba123f46b292a60c0a5eb6 "pdflatex"
-  "main.tex" 1786509715 6145 8e11ffb22328faa03d227ca702eec236 ""
-  "main.toc" 1786509821 9388 fb6e55ec5e3c840f008c1137280815fd "pdflatex"
+  "main.aux" 1786526454 15783 0478a8bf430ec84708469bca5d19f4ff "pdflatex"
+  "main.bbl" 1786525911 613 2f51554d2ab8d9181d39db77d9a0d691 "bibtex main"
+  "main.out" 1786526454 12177 6fa66914856609e1381ffec58b14899d "pdflatex"
+  "main.tex" 1786523355 6398 927a3d029cd0dbc5049b76d1b6923af3 ""
+  "main.toc" 1786526454 9487 ec1232c0167d3e549b71b0d91df6eece "pdflatex"
   "sections/01-scope-and-proof-architecture.tex" 1785927216 1600 cd682df9db84dd7a5e57644ab1aa379e ""
   "sections/02-week1-transcript-seam.tex" 1785906351 1478 3de8b95bd2bace60b76cf9fda0010052 ""
   "sections/03-week2-packed-key-prefix.tex" 1785927130 3532 6f503b4cfbb51141f8176b969e99d9c3 ""
@@ -181,6 +181,7 @@
   "sections/32-week16-mincore-keygen-first-task.tex" 1786499013 4107 33f17c81b80529f910da6a28de6a3b24 ""
   "sections/33-week16-kg-ntt-mul-stop.tex" 1786504445 3695 b4ea26c9298310630d72e214d2490b65 ""
   "sections/34-week16-mincore-sign-stop.tex" 1786509728 2277 c44c484d73a0c1768c7855bee924a4ed ""
+  "sections/35-week16-mincore-verify-partial.tex" 1786525949 2933 3d863df93dae127d86cbca35e76bb794 ""
   (generated)
   "main.aux"
   "main.log"

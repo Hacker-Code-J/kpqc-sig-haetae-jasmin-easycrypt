@@ -24,6 +24,10 @@
   \item \sourcepath{WEEK16_KG_NTT_MUL_}\allowbreak\sourcepath{REPORT.md},
         Week~16 KG-NTT 감사 메모 \sourcepath{latex/sections/}\allowbreak
         \sourcepath{33-week16-kg-ntt-mul-stop.tex};
+  \item \sourcepath{WEEK16_SIGN_REPORT.md},
+        \sourcepath{WEEK16_VERIFY_REPORT.md},
+        \sourcepath{logs/verify-all-week16-}\allowbreak
+        \sourcepath{verify.log};
   \item \sourcepath{WEEK16_KG_REPORT.md},
         \sourcepath{WEEK16_MINCORE_PLAN.md},
         \sourcepath{logs/verify-all-week16-}\allowbreak
@@ -120,10 +124,11 @@ SHA-256 \\
 구현 & 고정된 \sourcepath{haetae-ref-jasmin/} 소스와
 \identifier{jasmin2ec} 생성물 \cite{haetae-jasmin} \\
 작성 증명 & \sourcepath{haetae-topdown-easycrypt/easycrypt/} 아래 매니페스트된
-78개 EasyCrypt 대상; Sign 수정 전 보존 전체 완료 기준선은 77개 \\
-최신 판정 & \identifier{STOP-SIGN-CHAL-MODE2};
+82개 EasyCrypt 대상; Verify 수정 전 보존 전체 완료 기준선은 78개 \\
+최신 판정 & \identifier{PARTIAL-VERIFY-MATRIX-CRT};
 \identifier{OBL-MINCORE-KEYGEN}은 실제 matrix/finalizer 스냅샷 경계에서
-\statuspartial 이고 Sign은 actual-call control에서 \statuspartial; 활성 전선은 Verify \\
+\statuspartial 이고 Sign은 actual-call control에서 \statuspartial; Verify의 첫
+재개 leaf는 \identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact} \\
 재사용 증명 & 고정된 KeyGen, NTT, sampler, singularity, FFT 결과를 원래 전제
 그대로 가져오는 import-only 어댑터 \cite{haetae-easycrypt} \\
 제외 범위 & 다른 파라미터 집합, 물리적 부채널, fault, RNG 품질, 그리고
@@ -132,14 +137,16 @@ EUF-CMA로부터 자동으로 따라오지 않는 메모리 안전성 및 SCT \\
 \end{tabularx}
 \end{table}
 
-\begin{boundary}[78대상 매니페스트와 완료 증거]
+\begin{boundary}[82대상 매니페스트와 완료 증거]
 77번째 대상 \sourcepath{Mode2KeygenNttMulBridge.ec} 뒤에 78번째
-\sourcepath{Mode2SignAcceptedCore.ec}가 actual Sign control boundary를 fresh
-compile한다. Sign 수정 전 77대상 전체 완료 실행은
-\sourcepath{logs/verify-all-before-week16-sign.log}에 보존된다. 실행 중 덮어쓰는
-\sourcepath{logs/verify-all-summary.txt}는 마지막 줄에
-\texttt{RESULT PASS authored-targets=78 cache=-no-eco}가 있을 때만 현재
-78대상 전체 완료 증거다. Hoare 정리의 \statusproved 는 여전히 실제 절차의
+\sourcepath{Mode2SignAcceptedCore.ec}와 82번째
+\sourcepath{Mode2VerifyCoreSequence.ec}가 actual Sign/Verify control boundary를 fresh
+compile한다. Verify 수정 전 78대상 전체 완료 실행은
+\sourcepath{logs/verify-all-before-week16-verify.log}에 보존된다. 실행 중 덮어쓰는
+\sourcepath{logs/verify-all-week16-verify.log}는 마지막 줄
+\texttt{RESULT PASS authored-targets=82 cache=-no-eco}와 SHA-256
+\texttt{46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c}를
+가지는 보존된 현재 전체 완료 증거다. Hoare 정리의 \statusproved 는 여전히 실제 절차의
 종료나 확률 1 실행을 뜻하지 않는다.
 \end{boundary}
 

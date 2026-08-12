@@ -72,6 +72,10 @@ easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec
 easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec
 easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec
 easycrypt/refinement/sign/Mode2SignAcceptedCore.ec
+easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec
+easycrypt/refinement/verify/Mode2VerifyPrepareNorm.ec
+easycrypt/refinement/verify/Mode2VerifyRecover.ec
+easycrypt/refinement/verify/Mode2VerifyTailChallenge.ec
 easycrypt/security/ImplementationSecurityGoals.ec
 easycrypt/security/SecurityAssumptions.ec
 easycrypt/specs/TopLevelGoals.ec

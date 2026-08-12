@@ -49,8 +49,9 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
         동치, full encoder/decoder, 직접 결합과 production 경계 lift의
         과대주장 검사, Week~15 고정 all-six 예산/실패 원인/production 성공 lift,
         Week~16 실제 M23 matrix/finalizer 스냅샷, 마지막 NTT 표현 rewrite,
-        직접 Sign core control과 \identifier{STOP-SIGN-CHAL-MODE2} 표면 검사;
-  \item 현재 매니페스트된 78개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
+        직접 Sign/Verify core control과 \identifier{PARTIAL-VERIFY-MATRIX-CRT}
+        표면 검사;
+  \item 현재 매니페스트된 82개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
         컴파일;
   \item \identifier{admit}, \identifier{sorry}, 작성 \identifier{axiom},
         디버그/임시(debug/temporary) 선언 부재와 매니페스트(manifest) 완전성;
@@ -65,11 +66,18 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
 \sourcepath{logs/verify-all-before-kg-ntt-mul.log}에 보존된
 \texttt{RESULT PASS authored-targets=76}\newline
 \texttt{cache=-no-eco}다. Sign 수정 전 77대상 완료 표식은
-\sourcepath{logs/verify-all-before-week16-sign.log}에 보존된다.
+\sourcepath{logs/verify-all-before-week16-sign.log}에 보존되고
 \sourcepath{WEEK16_SIGN_REPORT.md}는 78번째 대상의 직접 actual-call control과
-중단 판정을 설명한다.
+중단 판정을 설명한다. Verify 수정 전 78/78 완료 로그는
+\sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며
+해시 \texttt{cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75}를
+갖는다. \sourcepath{WEEK16_VERIFY_REPORT.md}는 canonical decoded
+\((x,v,h,c)\) 경계의 \identifier{PARTIAL-VERIFY-MATRIX-CRT}와 남은 blocker를
+설명한다. 최종 82/82 aggregate 로그는
+\sourcepath{logs/verify-all-week16-verify.log}에 보존되고 SHA-256은
+\texttt{46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c}이다.
 
-\begin{boundary}[76대상 수정 전 기준선과 77대상 continuation]
+\begin{boundary}[78대상 pre-Verify 기준선과 82대상 Verify partial boundary]
 2026-08-10의 Week~14 완료 실행은 Week~13의 67대상 기준선에 다음 다섯 이론을
 추가해 72대상을 닫았다.
 \begin{itemize}[leftmargin=1.5em,itemsep=0.05em,topsep=0.25em]
@@ -103,10 +111,12 @@ adapter를 가정하지 않으며 최종 판정은 \identifier{STOP-KG-NTT}다.
 \identifier{STOP-KG-NTT} 경계를 검사한다.
 \sourcepath{logs/week16-sign-core-surface-scan.log}는 실제 세 helper 호출,
 비순환 precondition과 stop 경계를 검사한다. 실행 중 생성되는
-\sourcepath{logs/verify-all-summary.txt}는 마지막 줄이
-\texttt{RESULT PASS authored-targets=78 cache=-no-eco}일 때만 현재 78대상
-완료 실행의 증거다. 그 줄이 없는 중간 또는 중단 실행은 보존된 77대상
-Sign 수정 전 기준선을 갱신하지 않는다.
+\sourcepath{logs/verify-all-summary.txt}는 덮어쓰는 중간 로그이므로 보존 증거로
+사용하지 않는다. Verify 수정 전 78/78 완료 로그는
+\sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며,
+최종 82/82 aggregate는 \sourcepath{logs/verify-all-week16-verify.log}에
+보존된다. 그 밖의
+중간 또는 중단 실행은 보존된 77대상 Sign 수정 전 기준선을 갱신하지 않는다.
 \end{boundary}
 
 \subsection{이 문서 빌드}
@@ -130,8 +140,7 @@ prover에는 Alt-Ergo 2.6.0, CVC4 1.8.0, CVC5 1.2.1, Z3 4.12.6이 포함된다.
 이 안내서가 컴파일되는 것과 EasyCrypt 정리가 컴파일되는 것은 서로 다른
 증거다. 문서 배포 전에는 \identifier{build.sh}와 전체
 \identifier{verify-all.sh}를 모두 성공시켜야 한다. 현재 증명 기준선은
-78대상 매니페스트다. Sign 수정 전 77대상 완료 로그가 보존되어 있다. 전체
-78대상 완료는 위 종료 표식까지 확인한 실행에만 주장한다.
-덮어쓰기 중인 summary의 중간 PASS 줄은 완료 증거가 아니다. 이 안내서의 별도
-빌드도 함께 확인한다.
+78/78 pre-Verify 로그와 최종 82/82 Verify aggregate 로그가 각각 보존되어 있다.
+Sign 수정 전 77대상 완료 로그가 보존되어 있다. 덮어쓰기 중인 summary의 중간
+PASS 줄은 완료 증거가 아니다. 이 안내서의 별도 빌드도 함께 확인한다.
 \end{takeaway}

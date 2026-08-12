@@ -141,9 +141,9 @@ theorem)에 있다.
         마지막 \identifier{output_row} NTT-word rewrite 뒤의 full-NTT convolution과
         보안 모형 표현 어댑터가 없어 논문 KeyGen 식으로 승격되지 않는다.
         따라서 KeyGen은 \identifier{STOP-KG-NTT}로 동결되었다. 다음 actual
-        accepted Sign core는 control만 컴파일되고
-        \identifier{STOP-SIGN-CHAL-MODE2}의 \statuspartial 상태이며, 활성 전선은
-        Verify다.
+        accepted Sign core는 control만 컴파일되고 canonical decoded \((x,v,h,c)\)
+        경계의 \identifier{PARTIAL-VERIFY-MATRIX-CRT} 상태이며, 첫 재개 leaf는
+        \identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다.
   \item 최종 암호학적 가정과 구현 증명 의무를 분리한다. MLWE/BST-MSIS/ROM
         인터페이스 외의 구현 정확성은 가정으로 숨기지 않는다.
 \end{enumerate}

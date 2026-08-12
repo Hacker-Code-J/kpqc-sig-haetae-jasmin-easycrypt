@@ -980,7 +980,7 @@ KG-2형 실제 계수 low/high 분해 & \statusproved \\
 KG-4의 조정된 \(s_2\) 성분 / 전체 KG-4 & \statusproved\ /\ \statuspartial \\
 faithful KG-1, KG-3, 논문 \(As=qj\bmod2q\) & \statusblocked \\
 \claim{OBL-MINCORE-SIGN}, \claim{OBL-MINCORE-VERIFY},
-\claim{OBL-MINCORE-COMPOSITION} & \statusspecified \\
+\claim{OBL-MINCORE-COMPOSITION} & \statuspartial\ /\ \statuspartial\ /\ \statusspecified \\
 \claim{OBL-SIG-H-ENCODE-DECODE} & \statusdeferred \\
 \bottomrule
 \end{tabularx}
@@ -1033,4 +1033,8 @@ legacy \identifier{Rq.ntt}는 실제 full transform과 다르므로 이 공백�
 그 뒤 78번째 대상 \identifier{Mode2SignAcceptedCore}가 실제 세 helper의 직접
 호출과 accepted-branch control을 컴파일했다. 그러나 full challenge semantics
 leaf가 없어 판정은 \identifier{STOP-SIGN-CHAL-MODE2}이며 S-1--S-7은
-미증명이다. 활성 단일 목표는 Verify core predicate다.
+미증명이다. 이어진 네 Verify 대상은 actual 다섯 helper의 순차 control,
+V-1/V-2/V-5/V-6의 exact machine-word 식, W64 norm gate와 tail/mismatch word
+expression을 컴파일했다. matrix CRT 의미 bridge가 없으므로 판정은
+\identifier{PARTIAL-VERIFY-MATRIX-CRT}이며 첫 재개 leaf는
+\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact}다.

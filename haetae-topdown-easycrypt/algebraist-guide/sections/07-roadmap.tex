@@ -1,18 +1,17 @@
 \section{의존성에 따른 다음 작업과 참여 지점}
 \label{sec:roadmap}
 
-\subsection{현재 단일 우선순위: accepted Sign core}
+\subsection{현재 단일 우선순위: Verify matrix CRT/freeze leaf}
 
 \SnapshotWeek{}의 최종 gate는 \CurrentGate 다. 첫 의무는
 \begin{quote}
 \CurrentPriority
 \end{quote}
-이다. \CurrentGate 는 KG-NTT-MUL 시간 제한의 최종 판정이다. KG-2-like 분해,
-adjusted \(s_2\), snapshot-only mod-\(2q\) 합동식과 마지막 NTT-word 표현 edge는
-컴파일되었다. 그러나 odd-root orthogonality/full-NTT convolution과
-\identifier{Rq.poly}--보안 모형 list adapter가 없으므로 \identifier{GO-KG}가
-아니다. KeyGen을 KG-2/finalization에서 동결하고 actual accepted Sign core로
-이동한다.
+이다. \CurrentGate 는 actual Verify의 helper-local word/control 결과를 보존한
+부분 판정이다. V-1/V-2/V-5/V-6, W64 norm gate와 tail trace/mismatch word는
+컴파일되었지만 matrix CRT/freeze 의미론이 없어 V-3/V-4 및 전체 predicate는
+동결되었다. 그 leaf 뒤에도 full-NTT convolution/adapter, V-6 integer centering,
+norm no-wrap, challenge semantics가 남는다.
 
 \begin{figure}[ht]
 \centering
@@ -205,7 +204,8 @@ headline 정리는 아직 컴파일된 증명으로 세어서는 안 된다.
 분포, signing-loop 종료성, packing과 전체 1474-byte signature는 이 단계의 범위
 밖이다.
 
-현재 단일 목표는 canonical decoded object의 MINCORE-VERIFY core predicate다.
+현재 첫 목표는
+\identifier{verify_matrix_crt_mode2_fromcrt_freeze_exact} leaf다.
 각 부모를 닫을 때 자식 정리(child theorem)의 전제가 실제 앞 절차의 결론에서
 나오는지를
 확인해야 한다. external precondition으로 다시 요구하면 합성이 아니라 조건부

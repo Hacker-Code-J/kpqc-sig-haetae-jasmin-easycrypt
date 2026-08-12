@@ -97,7 +97,14 @@ adapter.  Neither is a trusted assumption, semantic axiom, representation
 predicate, or hidden premise.  Accordingly the frozen KeyGen result claims
 KG-2/finalization only; KG-1, KG-3, complete KG-4, and
 `A s = q j (mod 2q)` remain unproved. The subsequent Sign control boundary
-is frozen at `STOP-SIGN-CHAL-MODE2`; the active lane has moved to Verify.
+is frozen at `STOP-SIGN-CHAL-MODE2`.  The subsequent Verify pass is frozen at
+`PARTIAL-VERIFY-MATRIX-CRT`: the actual five-helper order, four helper-local
+machine-word reconstruction projections, W64 norm gate, exact tail trace, and
+actual mismatch word expression are checked, but `_verify_matrix_crt` has no
+from-CRT/freeze semantics theorem.  The full-NTT convolution/representation
+bridge is therefore not assumed here.  The V-6 integer centering bridge, norm
+no-wrap bridge, and highbits/LSB/mu/SampleInBall challenge semantics are also
+named residuals, not trusted assumptions.
 
 ## Trusted computing base
 

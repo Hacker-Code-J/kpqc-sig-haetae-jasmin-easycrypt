@@ -33,8 +33,8 @@ The verifier:
 
 - checks pinned source hashes and tracked read-only-tree drift;
 - regenerates the focused packer, mu-hash, transcript, API copy-helper,
-  actual raw-ABI caller, signature-codec, HBZ/rANS, and Sign accepted-core
-  extractions;
+  actual raw-ABI caller, signature-codec, HBZ/rANS, Sign accepted-core, and
+  Verify-core extractions;
 - checks the regenerated targets against
   `manifests/generated-extractions.sha256`;
 - regenerates the concrete HBZ symbol-table certificate and checks its
@@ -58,12 +58,16 @@ The KG-NTT-MUL continuation baseline is the fresh 76-target run preserved in
 The 77-target pre-Sign baseline is preserved in
 `logs/verify-all-before-week16-sign.log` (SHA-256
 `8480d2e2f2ddda421c3d244ab5ec0a50196cadd7a8e1a29e996fd307aec7db57`).
-The current manifest contains 78 authored targets, adding only the focused
-Sign accepted-core control boundary. The latest aggregate result is mirrored
-by `logs/verify-all-summary.txt` and preserved in
-`logs/verify-all-week16-sign.log` (exactly 78 fresh compiles, terminal
+The pre-Verify manifest contains 78 authored targets, ending at the focused
+Sign accepted-core control boundary. That baseline aggregate is preserved in
+`logs/verify-all-before-week16-verify.log` (exactly 78 fresh compiles, terminal
 `RESULT PASS authored-targets=78 cache=-no-eco`, SHA-256
 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`).
+The current manifest contains 82 targets after adding the four focused Verify
+theories. The completed aggregate is preserved in
+`logs/verify-all-week16-verify.log` (exactly 82 fresh compiles, one terminal
+`RESULT PASS authored-targets=82 cache=-no-eco`, SHA-256
+`46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c`).
 
 Detailed logs are written only under `logs/`. A pre-existing Why3 server can be
 reused with `WHY3_SERVER_SOCKET=/path/to/socket`; otherwise the verifier starts
@@ -80,6 +84,7 @@ The individual reproduction surfaces are:
 ./haetae-topdown-easycrypt/scripts/extract-signature-codec.sh
 ./haetae-topdown-easycrypt/scripts/extract-hbz-codec.sh
 ./haetae-topdown-easycrypt/scripts/extract-sign-accepted-core.sh
+./haetae-topdown-easycrypt/scripts/extract-verify-core.sh
 ./haetae-topdown-easycrypt/scripts/generate-hbz-symbol-certificate.sh
 ./haetae-topdown-easycrypt/scripts/verify-baselines.sh
 ./haetae-topdown-easycrypt/scripts/build-notes.sh
@@ -561,4 +566,21 @@ theorem is stopped at **STOP-SIGN-CHAL-MODE2**: the exact missing
 by the current abstract `challenge_hash`, which omits highbits. Paper S-1 and
 S-4 also retain the frozen full-NTT convolution dependency. Response, norm,
 hint, distribution, and termination claims remain open; the active MINCORE
-lane moves to Verify. See `WEEK16_SIGN_REPORT.md`.
+lane then moved to Verify. See `WEEK16_SIGN_REPORT.md`.
+
+The Verify pass fresh-compiles four focused theories over the canonical
+decoded-array boundary. `ActualVerifyCoreSequence.run` directly calls the
+actual prepare, matrix, recover, norm, and norm-gated tail helpers in order.
+Independent theorems preserve exact machine-word V-1, V-2, V-5, and V-6,
+the exact W64 norm decision, the tail procedure trace, and the actual
+`_poly_mismatch` accumulator/result expression. None assumes `reject=0`, a
+reconstruction result, norm acceptance, or challenge equality.
+
+The decision is **PARTIAL-VERIFY-MATRIX-CRT**, not `GO-VERIFY`. The first
+missing semantic leaf is `verify_matrix_crt_mode2_fromcrt_freeze_exact`, so
+paper V-3/V-4 and the full Verify predicate are not claimed. Paper V-6 also
+retains its parity/centering integer bridge, the norm gate retains its
+integer/no-wrap bridge, and the challenge path retains
+`verify_tail_m23_highbits_lsb_sampleinball_correct`. Parser, malformed input,
+codec, public API, KeyGen NTT expansion, Sign blockers, distribution, and
+termination remain outside this result. See `WEEK16_VERIFY_REPORT.md`.

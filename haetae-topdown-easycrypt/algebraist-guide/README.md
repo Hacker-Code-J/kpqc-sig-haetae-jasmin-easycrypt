@@ -17,21 +17,27 @@
    state machine)의
    refinement로 읽는 방법.
 
-현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 MINCORE-SIGN
-종료 기준선이다. 운영상
+현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 MINCORE-VERIFY
+부분 기준선이다. 운영상
 source of truth는 `../CLAIM_LEDGER.md`이고, 최종 증거는 `../easycrypt/` 아래의
 명명된 EasyCrypt 정리(theorem)다. 안내서의 문장은 이 스냅샷에 고정되어 있으며,
 “현재”라는 표현도 모두 이 날짜를 뜻한다.
 
-여기서 78개는 현재 manifest의 authored target 수이며, Sign 수정 전 77개
-aggregate-verified 기준선은 별도 로그로 보존된다. Week 11에
+여기서 82개는 현재 manifest의 authored target 수이며, Verify 수정 전 78개
+aggregate-verified 기준선은 별도 로그로 보존된다.
+`../logs/verify-all-before-week16-verify.log`는 78/78 pre-Verify 기준선과
+SHA-256 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`를
+보존한다. 최종 82/82 `-no-eco` aggregate는
+`../logs/verify-all-week16-verify.log`에 보존되며 SHA-256은
+`46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c`이다. Week 11에
 rANS encoder closure 관련 파일 일곱 개가 manifest에 추가되어 `-no-eco`로 fresh
 compile되었고, Week 12에는 actual decoder semantic-refinement 파일 여덟 개가,
 Week 13에는 actual core composition 파일 두 개가, Week 14에는 production full-HBZ
 wrapper 경계를 닫는 파일 다섯 개가 추가되었다. Week 15에는 고정 all-6 입력의
 actual 성공 사후조건을 닫는 파일 두 개가, Week 16에는 actual KeyGen
 matrix/finalize snapshot과 KG-NTT-MUL 중단 경계를 다루는 파일 세 개, actual
-Sign accepted-core control 파일 하나가 더해졌다.
+Sign accepted-core control 파일 하나, actual Verify helper-local word/control 및
+tail/mismatch 파일 네 개가 더해졌다.
 encoder의 핵심 정리(theorem)
 `actual_rans_encode_trace_closure`와
 `actual_rans_encode_trace_refinement`는 실제 generated encoder가 반환하는 성공
@@ -76,8 +82,15 @@ full-NTT convolution 정리와 `Rq.poly`--security-list 어댑터는 없다. KG-
 감사는 첫 누락 leaf를 odd-root orthogonality/full-NTT convolution 식으로
 특정한 뒤 중단했다. 그러므로 `OBL-MINCORE-KEYGEN`은 `PARTIAL — STOP-KG-NTT`이며,
 faithful KG-1/KG-3, complete KG-4와 논문식 `A s = q j (mod 2q)`는 완료되지
-않았다. KeyGen은 KG-2/finalization에서 동결되고 현재 단일 우선순위는 actual
-accepted Sign core다. 두 번째 `h` codec은 `DEFERRED`다.
+않았다. KeyGen은 KG-2/finalization에서 동결되고 Sign은 actual-call control에서
+동결되었다. 현재 첫 재개 leaf는
+`verify_matrix_crt_mode2_fromcrt_freeze_exact`다. 두 번째 `h` codec은
+`DEFERRED`다. 별도 보고서
+`../WEEK16_VERIFY_REPORT.md`는 canonical decoded \((x,v,h,c)\) 경계에서 actual
+Verify helper chain의 부분 결과를 기록하며, V-1/V-2/V-5/V-6, W64 norm gate,
+tail trace/mismatch word expression은 proved로, 첫 blocker는
+`verify_matrix_crt_mode2_fromcrt_freeze_exact`와
+`verify_tail_m23_highbits_lsb_sampleinball_correct`로 고정한다.
 
 ## 빠른 읽기 순서
 
@@ -91,7 +104,9 @@ accepted Sign core다. 두 번째 `h` codec은 `DEFERRED`다.
   `../RANS_CORE_COMPOSITION.md`,
   `../easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec`,
   `../easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec`,
-  `../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec`
+  `../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec`,
+  `../easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec`,
+  `../WEEK16_VERIFY_REPORT.md`
 
 ## 문서 구성
 

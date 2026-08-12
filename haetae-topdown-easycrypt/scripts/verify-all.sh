@@ -71,8 +71,8 @@ if ! diff -u "$WORK_DIR/manifest-targets.txt" \
   cat "$LOG_DIR/target-manifest.log"
   exit 1
 fi
-if [ "$manifest_target_count" -ne 78 ]; then
-  printf 'FAIL expected 78 authored proof targets, found %s\n' \
+if [ "$manifest_target_count" -ne 82 ]; then
+  printf 'FAIL expected 82 authored proof targets, found %s\n' \
     "$manifest_target_count" | tee -a "$SUMMARY"
   exit 1
 fi
@@ -822,6 +822,156 @@ fi
 printf 'PASS Week16 direct Sign-core control and STOP-SIGN-CHAL-MODE2 checks\n' \
   | tee -a "$SUMMARY"
 
+WEEK16_VERIFY_DIR="$PROJECT_DIR/easycrypt/refinement/verify"
+WEEK16_VERIFY_SEQUENCE="$WEEK16_VERIFY_DIR/Mode2VerifyCoreSequence.ec"
+WEEK16_VERIFY_PREPARE="$WEEK16_VERIFY_DIR/Mode2VerifyPrepareNorm.ec"
+WEEK16_VERIFY_RECOVER="$WEEK16_VERIFY_DIR/Mode2VerifyRecover.ec"
+WEEK16_VERIFY_TAIL="$WEEK16_VERIFY_DIR/Mode2VerifyTailChallenge.ec"
+WEEK16_VERIFY_REPORT="$PROJECT_DIR/WEEK16_VERIFY_REPORT.md"
+WEEK16_VERIFY_EXTRACT="$SCRIPT_DIR/extract-verify-core.sh"
+if ! rg -F 'module ActualVerifyCoreSequence = {' "$WEEK16_VERIFY_SEQUENCE" \
+    > "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_verify_core_sequence_branch_control_mode2' \
+    "$WEEK16_VERIFY_SEQUENCE" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_verify_core_sequence_input_snapshots_mode2' \
+    "$WEEK16_VERIFY_SEQUENCE" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma verify_prepare_z1_mode2_word_exact' \
+    "$WEEK16_VERIFY_PREPARE" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma verify_prepare_wprime_mode2_word_exact' \
+    "$WEEK16_VERIFY_PREPARE" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma sign_verify_norm_reject_mode2_word_exact' \
+    "$WEEK16_VERIFY_PREPARE" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_sign_verify_recover_w_mode2_word_semantics' \
+    "$WEEK16_VERIFY_RECOVER" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_sign_verify_recover_z2_mode2_word_semantics' \
+    "$WEEK16_VERIFY_RECOVER" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma poly_mismatch_mode2_word_exact' \
+    "$WEEK16_VERIFY_TAIL" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'lemma verify_tail_exact_trace_mode2' \
+    "$WEEK16_VERIFY_TAIL" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'PARTIAL-VERIFY-MATRIX-CRT' "$WEEK16_VERIFY_REPORT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'verify_matrix_crt_mode2_fromcrt_freeze_exact' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F 'verify_tail_m23_highbits_lsb_sampleinball_correct' \
+    "$WEEK16_VERIFY_REPORT" >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 direct Verify-core/PARTIAL boundary surface\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+
+sed -n '/module ActualVerifyCoreSequence = {/,/^}./p' \
+  "$WEEK16_VERIFY_SEQUENCE" > "$WORK_DIR/week16-verify-harness-body.txt"
+if ! awk '
+  /Verify[.]_verify_prepare_z1_wprime/ {
+    prepare++; if (state != 0) bad = 1; state = 1
+  }
+  /Verify[.]_verify_matrix_crt/ {
+    matrix++; if (state != 1) bad = 1; state = 2
+  }
+  /Verify[.]_sign_verify_recover_w_z2/ {
+    recover++; if (state != 2) bad = 1; state = 3
+  }
+  /Verify[.]_sign_verify_norm_reject/ {
+    norm++; if (state != 3) bad = 1; state = 4
+  }
+  /Verify[.]_sign_verify_tail_m23/ {
+    tail++; if (state != 4) bad = 1; state = 5
+  }
+  END {
+    if (bad || state != 5 || prepare != 1 || matrix != 1 || recover != 1 ||
+        norm != 1 || tail != 1) exit 1
+  }
+' "$WORK_DIR/week16-verify-harness-body.txt"; then
+  printf 'FAIL Week16 Verify helpers are not called exactly once in order\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if ! rg -F 'if (reject = W64.zero)' \
+    "$WORK_DIR/week16-verify-harness-body.txt" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 Verify tail is not guarded by the actual norm result\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -n 'cryptolab_|_unpack|_decode|_encode|_keypair|_sf_|Raw[A-Za-z]*Api|PublicApi' \
+    "$WORK_DIR/week16-verify-harness-body.txt" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 Verify harness widens into codec, API, KeyGen, or Sign\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+
+: > "$WORK_DIR/week16-verify-preconditions.txt"
+for theorem in \
+    actual_verify_core_sequence_branch_control_mode2 \
+    verify_prepare_z1_mode2_word_exact \
+    verify_prepare_wprime_mode2_word_exact \
+    sign_verify_norm_reject_mode2_word_exact \
+    actual_sign_verify_recover_w_mode2_word_semantics \
+    actual_sign_verify_recover_z2_mode2_word_semantics \
+    poly_mismatch_mode2_word_exact; do
+  case "$theorem" in
+    actual_verify_core_sequence_branch_control_mode2)
+      theorem_file="$WEEK16_VERIFY_SEQUENCE"
+      ;;
+    verify_prepare_z1_mode2_word_exact|verify_prepare_wprime_mode2_word_exact|sign_verify_norm_reject_mode2_word_exact)
+      theorem_file="$WEEK16_VERIFY_PREPARE"
+      ;;
+    actual_sign_verify_recover_w_mode2_word_semantics|actual_sign_verify_recover_z2_mode2_word_semantics)
+      theorem_file="$WEEK16_VERIFY_RECOVER"
+      ;;
+    poly_mismatch_mode2_word_exact)
+      theorem_file="$WEEK16_VERIFY_TAIL"
+      ;;
+  esac
+  awk -v theorem="$theorem" '
+    $0 ~ "lemma " theorem { found = 1 }
+    found && /hoare \[/ { inside = 1 }
+    inside { print }
+    inside && /==>/ { exit }
+  ' "$theorem_file" >> "$WORK_DIR/week16-verify-preconditions.txt"
+done
+if rg -n \
+    'reject[[:space:]]*=[[:space:]]*W64[.]zero|res[[:space:]]*=|verify_norm_accepts_word|matrix_highbits[[:space:]]*=|recover_[wz2]+_prefix[[:space:]]+res|SampleInBall|challenge[_ -]?equality' \
+    "$WORK_DIR/week16-verify-preconditions.txt" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 Verify theorem assumes rejection, reconstruction, norm, or challenge result\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -n 'phoare|islossless|is_lossless' \
+    "$WEEK16_VERIFY_SEQUENCE" "$WEEK16_VERIFY_PREPARE" \
+    "$WEEK16_VERIFY_RECOVER" "$WEEK16_VERIFY_TAIL" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 Verify partial-correctness result claims termination\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if [ "$(rg -c '^[[:space:]]*-f ' "$WEEK16_VERIFY_EXTRACT")" -ne 5 ] || \
+   ! rg -F -- '-f _verify_prepare_z1_wprime' "$WEEK16_VERIFY_EXTRACT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F -- '-f _verify_matrix_crt' "$WEEK16_VERIFY_EXTRACT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F -- '-f _sign_verify_recover_w_z2' "$WEEK16_VERIFY_EXTRACT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F -- '-f _sign_verify_norm_reject' "$WEEK16_VERIFY_EXTRACT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log" || \
+   ! rg -F -- '-f _sign_verify_tail_m23' "$WEEK16_VERIFY_EXTRACT" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL Week16 Verify focused extraction roots drifted\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -F 'lemma actual_verify_core_predicate_mode2' "$WEEK16_VERIFY_DIR" \
+    >> "$LOG_DIR/week16-verify-core-surface-scan.log"; then
+  printf 'FAIL partial Week16 Verify boundary claims the unproved full predicate\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+printf 'PASS Week16 direct Verify-core word results and PARTIAL-VERIFY-MATRIX-CRT checks\n' \
+  | tee -a "$SUMMARY"
+
 API_BRIDGE="$PROJECT_DIR/easycrypt/refinement/composition/ApiKeyMemoryBridge.ec"
 if ! rg -F 'lemma keygen_export_vk_mode2_prefix' "$API_BRIDGE" \
     > "$LOG_DIR/api-memory-reachability-scan.log" || \
@@ -979,6 +1129,13 @@ WHY3_SERVER_SOCKET="$SERVER_SOCKET" \
 printf 'PASS focused Sign accepted-core extraction\n' \
   | tee -a "$SUMMARY"
 
+TOPDOWN_EXTRACT_DIR="$WORK_DIR" \
+WHY3_SERVER_SOCKET="$SERVER_SOCKET" \
+  "$SCRIPT_DIR/extract-verify-core.sh" \
+  > "$LOG_DIR/focused-extraction-verify-core.log" 2>&1
+printf 'PASS focused Verify core extraction\n' \
+  | tee -a "$SUMMARY"
+
 (cd "$WORK_DIR" && sha256sum -c "$EXTRACTION_HASHES") \
   > "$LOG_DIR/focused-extraction-drift.log" 2>&1
 printf 'PASS focused extraction regeneration drift\n' \
@@ -998,6 +1155,7 @@ SIG_PACK_EXTRACT="$WORK_DIR/pack"
 SIG_UNPACK_EXTRACT="$WORK_DIR/unpack"
 HBZ_EXTRACT="$WORK_DIR/hbz-codec"
 SIGN_CORE_EXTRACT="$WORK_DIR/sign-accepted-core"
+VERIFY_CORE_EXTRACT="$WORK_DIR/verify-core"
 PARENT_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/keygen-mode2-parent"
 CALLER_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/keygen-sampler-callers"
 NTT_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/ntt"
@@ -1055,6 +1213,13 @@ while IFS= read -r target || [ -n "$target" ]; do
       "$EASYCRYPT_BIN" compile -script -no-eco -timeout 5 "$file" \
         -I "$SIGN_CORE_EXTRACT" \
         -I "$PROJECT_DIR/easycrypt/refinement/sign" \
+        -server "$SERVER_SOCKET" -max-provers 1 \
+        < /dev/null > "$log" 2>&1
+      ;;
+    Mode2VerifyCoreSequence|Mode2VerifyPrepareNorm|Mode2VerifyRecover|Mode2VerifyTailChallenge)
+      "$EASYCRYPT_BIN" compile -script -no-eco -timeout 5 "$file" \
+        -I "$VERIFY_CORE_EXTRACT" \
+        -I "$PROJECT_DIR/easycrypt/refinement/verify" \
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
       ;;

@@ -66,7 +66,10 @@ and freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}. The next
 Sign pass directly composes the three actual accepted-core helpers and proves
 their branch control, but freezes S-1--S-7 as
 \textsc{stop-sign-chal-mode2} because the full highbits/LSB/\(\mu\) challenge
-semantics leaf is absent. The active MINCORE lane moves to Verify.
+semantics leaf is absent. The active MINCORE lane moves to Verify, where the
+current partial result preserves the canonical helper order and the exact
+word-level V-1, V-2, V-5, V-6, norm, and tail-trace leaves while the paper
+matrix and challenge semantics remain open.
 \end{abstract}
 
 \tableofcontents
@@ -105,6 +108,7 @@ semantics leaf is absent. The active MINCORE lane moves to Verify.
 \input{sections/32-week16-mincore-keygen-first-task}
 \input{sections/33-week16-kg-ntt-mul-stop}
 \input{sections/34-week16-mincore-sign-stop}
+\input{sections/35-week16-mincore-verify-partial}
 
 \bibliographystyle{plain}
 \bibliography{references}
