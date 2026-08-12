@@ -209,12 +209,10 @@ lemma freeze_repr_preserves_poly before after p :
   NTT_Fq.poly_repr after p.
 proof.
 move=> hfreeze hbefore.
+rewrite /NTT_Fq.poly_repr /NTT_Fq.barray256_to_poly.
 apply Array256.ext_eq => i hi.
-rewrite /NTT_Fq.poly_repr /NTT_Fq.barray256_to_poly Array256.initiE 1:/#.
-rewrite (hfreeze i).
-have hprev : p.[i] = word_to_coeff (BArray1024.get32 before i).
-  exact (NTT_Fq.poly_repr_get before p i hbefore hi).
-by rewrite -hprev.
+rewrite !Array256.initiE 1,2:/#.
+exact (hfreeze i hi).
 qed.
 
 end NTTRowProductSpec.
