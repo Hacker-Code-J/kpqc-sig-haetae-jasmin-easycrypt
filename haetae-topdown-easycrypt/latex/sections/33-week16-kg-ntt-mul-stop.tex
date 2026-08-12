@@ -1,0 +1,80 @@
+\section{Week 16 Continuation: KG--NTT--MUL Stop Boundary}
+
+The continuation exits as \status{stop-kg-ntt}, not \status{go-kg}.  The
+actual \procname{_kp_m23_matrix} chain already has checked procedure theorems
+for the forward transform, three-column pointwise accumulation, and inverse
+transform.  A new authored boundary theorem fresh-compiles the final rewrite
+to
+\[
+ \mathsf{array256\_mont}
+ \bigl(\mathsf{full\_invntt}
+       (\mathsf{pointwise\_row\_words}(\cdots))\bigr),
+\]
+but no checked theorem identifies this value with the negacyclic row product
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\).
+
+The compiled corollary
+\procname{actual_m23_matrix_snapshot_rows_explicit} applies the rewrite to
+both active rows of the transparent harness that directly calls
+\procname{_kp_m23_matrix} and \procname{_keypair_finalize_m23}. Its
+precondition contains only the six initial-array bindings, matrix/input
+representation bounds, centered active \(s_2\), and canonical active \(a\).
+Its postcondition exposes each returned row slice as
+\(\mathsf{array256\_mont}(\mathsf{full\_invntt}
+(\mathsf{pointwise\_row\_words}(\cdots)))\). It is a consequence of the
+existing snapshot theorem, not a rewritten loop proof, and it assumes no
+product or key equation.
+
+\subsection*{Exact missing leaf}
+
+For one matrix spectrum \(\widehat a\) and one coefficient-domain secret
+polynomial \(p\), the first missing theorem is
+\[
+ \mathsf{mont}\!\left(
+  \mathsf{full\_invntt}\left(
+   \left[\widehat a_j\,\mathsf{full\_ntt}(p)_j R^{-1}\right]_{j=0}^{255}
+  \right)\right)
+ = \mathsf{full\_invntt}(\widehat a)\mathbin{\ast}p,
+\]
+where \(\ast\) is multiplication in
+\(\mathbb F_q[X]/(X^{256}+1)\).  A direct expansion needs the absent
+odd-root orthogonality formula
+\[
+ \sum_{j=0}^{255}
+ \zeta^{(2\operatorname{br}(j)+1)(k-i)}
+ = \begin{cases}256,&k=i,\\0,&k\ne i,\end{cases}
+ \qquad 0\leq i,k<256.
+\]
+The checked NTT development proves each executable transform against its
+closed formula, but does not contain this orthogonality lemma, a standalone
+\(\mathsf{full\_invntt}(\mathsf{full\_ntt}(p))=p\) theorem, or the
+pointwise-product/convolution theorem.  The legacy incomplete
+\procname{Rq.ntt} is unusable because a checked counterexample distinguishes
+it from \procname{full\_ntt}.
+
+After the native array theorem, a second adapter must preserve negacyclic
+multiplication while mapping \(\mathsf{Rq.poly}\) field arrays to the
+integer-list polynomials used by \procname{HAETAE_Algebra.poly_mul} and
+\procname{matrix_vec_mul}.  That adapter is also absent.
+
+\subsection*{Frozen KeyGen claim and transition}
+
+KG-2 remains proved at the actual finalizer boundary:
+\(b=b_0+2b_1\), \(b_0\in\{-1,0,1\}\).  The adjusted words
+\(e'=e-b_0\) remain a partial KG-4 component.  KG-1, KG-3, the complete KG-4
+object, and \(As=qj\pmod{2q}\) are not proved.  In particular, the existing
+snapshot congruence over \texttt{pre\_bp} is not relabelled as the paper key
+equation.
+
+The KeyGen lane is now frozen at this finalization boundary.  The next single
+MINCORE target moves to the actual accepted Sign helpers
+\procname{_sf_round_challenge_mode2}, \procname{_sf_z_check}, and
+\procname{_sf_hint_mode2}.  Sampler distributions, retry termination,
+packing, public APIs, and general NTT algebra remain outside that target.
+
+The final single-instance verifier run fresh-compiled all 77 authored targets
+with \texttt{-no-eco}, passed hole/axiom/debug, extraction/table drift,
+selected baseline, LaTeX, and read-only-root checks, and ended with
+\texttt{RESULT PASS authored-targets=77 cache=-no-eco}.  An independent
+read-only verifier audited the actual-call and precondition surfaces and
+returned \status{pass} for this stop decision.

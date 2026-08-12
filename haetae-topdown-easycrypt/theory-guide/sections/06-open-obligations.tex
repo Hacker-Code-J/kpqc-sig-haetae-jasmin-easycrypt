@@ -54,13 +54,16 @@ boundary로 동결했다. 따라서 이 lane에서
 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)을 기록하지 않으며 같은 seam에
 wrapper를 더 쌓지 않는다.
 
-\subsection{최근 닫힌 관문과 현재 진행 관문: 실제 rANS 핵심에서 전체 HBZ로}
+\subsection{최근 닫힌 관문: 실제 rANS 핵심과 production 전체 HBZ}
 
 Week~7--11은 정준 서명 접두부, HBZ 잎/표, 순수 바이트 추적, 실제 접미부 복사와
 결합 제어, 그리고 실제 인코더의 성공 접미부 정제를 차례로 닫았다. Week~12는
 \claim{OBL-RANS-DECODE-REFINEMENT}를 정확 추적 부분정확성으로 닫았다. Week~13은
 이 세 결과를 \identifier{Mode2RansActualHarness.run} 안에서 합성해
 \claim{OBL-RANS-CORE-INVERSE}를 성공 조건부 Hoare 부분정확성으로 닫았다.
+Week~14는 실제 full-HBZ prepare/apply와 이 핵심 역함수를 합성하고 production
+SignaturePack/Unpack 경계까지 정확히 운반해
+\claim{OBL-SIG-HBZ-ENCODE-DECODE}를 같은 강도의 부분정확성으로 닫았다.
 
 \identifier{actual_rans_encode_copy_decode_inverse}의 전제는 초기 인자
 바인딩과 \identifier{mode2_hbz_symbol_stream}뿐이다. 인코더가 실제로 실패하면
@@ -79,23 +82,57 @@ Week~7--11은 정준 서명 접두부, HBZ 잎/표, 순수 바이트 추적, 실
 범위에서 W64 크기 뺄셈의 무랩을 도출하므로 임의의 정수 버퍼 증인을 두지
 않는다.
 
-이 결과는 세 실제 생성 절차를 직접 호출하는 증명 작성 결합 모듈에 대한
-정리다. production \identifier{_encode_hb_z1_full}과
-\identifier{_decode_hb_z1_full} 자체의 합성, 인코더/디코더 종료 또는 성공 분기
-도달을 증명하지 않는다.
+\identifier{signature_pack_unpack_hbz_full_actual_exact}는 production 결합과
+focused full-HBZ 결합의 반환 튜플 및 \identifier{decoder_ran}을 정확히
+맞춘다. 그 Hoare 따름정리
+\identifier{signature_pack_unpack_hbz_full_inverse_mode2}는 정준 HBZ만으로
+zero-size 실패 또는 nonzero-size 성공 결론을 낸다. 성공 분기에서는
+(4\le size\le1024), (bad=0), 1024계수 복원, coefficient/encoded 꼬리
+프레임과 실제 prepare-symbol 추적을 얻는다. encoder success나 decoder 결과는
+전제가 아니다.
 
-\begin{obligation}[\claim{OBL-SIG-HBZ-ENCODE-DECODE}]
-이미 증명된 실제 prepare/apply 역함수와 실제 rANS 핵심 역함수를 production
-전체 HBZ 래퍼 경계에서 성공 조건부로 합성한다. 래퍼의 반환 크기, 실패 분기,
-encoder/copied/decoded 배열 사이의 프레임과 실제 coefficient 결과를 함께
-운반해야 한다. 별도로 \claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 모든 기호가
-6인 정준 입력에서 실제 성공 분기의 도달 가능성을 EasyCrypt 안에서 보여야
-한다.
-\end{obligation}
+\begin{verified}[\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS}]
+Week~15의 \identifier{actual_rans_encode_all_six_success}는 실제 prepare가
+만든 all-6 기호열에서 종료한 실제 encoder가 \(bad=0\), \(0\le off\le1020\),
+\(4\le size\le1024\)와 정확한 trace/frame을 반환함을 증명한다.
+\identifier{signature_pack_unpack_hbz_zero_success_mode2}는 이를 고정
+all-zero HBZ의 production pack/unpack 왕복까지 올린다. 성공, 크기나 trace를
+전제로 받지 않으므로 이 고정 입력 Hoare 의무는 \statusproved 다.
+\end{verified}
 
-최신 판정은 \identifier{GO-CORE}이고 위 전체 HBZ 래퍼 합성이 Week~14의 단일
-구현 간선이다. 이 경계가 컴파일되기 전에는 힌트(hint) \(h\), 두 크기 차이,
-정준 영 패딩과 전체 1474바이트 코덱으로 확장하지 않는다.
+Week~15 판정은 \identifier{GO-WITNESS}였지만
+\identifier{GO-WITNESS-LOSSLESS}는 아니다. 고정 입력 실행의 종료,
+losslessness, 확률 1 성공과 일반 정준 입력의 성공은 여전히 별도다. 이후
+1주 최소 논문 범위가 원래 (h) 코덱 권고를 덮어썼으므로
+\claim{OBL-SIG-H-ENCODE-DECODE}는 현재 \statusdeferred 다.
+
+\subsection{KeyGen 종료 관문: STOP-KG-NTT}
+
+Week~16은 실제 \identifier{_kp_m23_matrix}와
+\identifier{_keypair_finalize_m23}를 투명한 두 호출 harness에서 합성했다.
+\identifier{actual_m23_matrix_finalize_semantic_snapshot}는 실제 중간
+\identifier{pre_bp}, NTT scratch, finalizer low/high 의미와 스냅샷
+mod-\(2q\) 영 등식을 닫는다. 이 결과로 KG-2형 계수 분해와 KG-4의 조정된
+\(s_2\) 성분은 증명되었지만 전체 논문 KeyGen 식은 아니다.
+
+\begin{boundary}[\claim{STOP-KG-NTT}]
+\identifier{KeygenM23ArithmeticSpec.output_row}가 표현하는
+full-NTT--점별 곱--inverse-NTT 결과를 보안 모델의 행별 다항식 곱
+\[
+  \sum_{\mathrm{col}}
+  A_{\mathrm{gen}}[\mathrm{row},\mathrm{col}]
+  s_{\mathrm{gen}}[\mathrm{col}]
+\]
+과 연결하려면 odd-root orthogonality/full-NTT convolution 정리와
+\identifier{Rq.poly}--security-list adapter가 필요하다. 둘 다 현재 checked
+tree에 없으므로 faithful KG-1, KG-3, 전체 KG-4와
+\(As=qj\pmod{2q}\)를 구성하지 않는다.
+\end{boundary}
+
+최신 판정은 \identifier{STOP-KG-NTT}다. \claim{OBL-MINCORE-KEYGEN}은
+KG-2/finalization에서 \statuspartial 로 동결되었다. MINCORE Sign/Verify/제한
+합성은 \statusspecified 이며 \identifier{GO-KG}는 허용되지 않는다. 현재 단일
+목표는 actual accepted Sign core다.
 
 \subsection{분리된 기능정확성 경로}
 
@@ -155,19 +192,35 @@ low tail)는 증명됨 \\
 정확한 실제 추적, 상태 필드와 mode-2 표 아래 실제 디코더의 \(bad=0\), 정확한
 소비 크기(consumed size), 1024기호 일치(symbol equality)와 출력 꼬리
 프레임(frame); 종료는 별도 \\
-\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & 인코딩(encoding);\newline\statuspartial &
-모든 기호가 6인 입력의 실제 인코더가 종료하여 \(bad=0\)을 반환한다는 증인;
-성공 시 크기 범위는
-그 뒤 기존 정리에서 따라옴 \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & 인코딩(encoding);\newline\statusproved &
+모든 기호가 6인 고정 입력에서 종료한 실제 인코더가 \(bad=0\), 정확한
+크기/trace/frame을 반환함; 종료, losslessness와 \(\operatorname{phoare}=1\)은
+별도 \\
 \claim{OBL-RANS-CORE-INVERSE} & 인코딩(encoding);\newline\statusproved & 실제
 인코더 실패 분기를 보존하고, 성공 시 실제 복사 구간을 디코더의 정확 추적
 입력으로 운반해 \(bad=0\), 정확한 소비, 1024기호 복원과 꼬리 프레임을 얻는
 성공 조건부 부분정확성; 종료/성공 도달은 별도 \\
-\claim{OBL-SIG-HBZ-ENCODE-DECODE} & 인코딩(encoding);\newline\statuspartial &
-prepare/apply 역함수와 실제 rANS 핵심 역함수를 production 전체 HBZ 래퍼에서
-합성하고 프레임/크기 및 실제 성공 증인을 공급 \\
-\claim{OBL-SIG-H-ENCODE-DECODE} & 인코딩(encoding);\newline\statusspecified & HBZ
-부모(parent)가 닫힌 뒤 시작할 실제 힌트 코덱 역함수(hint codec inverse) \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & 인코딩(encoding);\newline\statusproved &
+production 전체 HBZ 래퍼에서 zero-size 실패를 보존하고, nonzero-size 성공 시
+크기 범위, \(bad=0\), 1024계수 복원, 두 꼬리 프레임과 prepare-symbol 추적을
+공급하는 성공 조건부 부분정확성; 고정 zero 입력의 실패 배제는 증명됐고
+종료/일반 입력 성공은 별도 \\
+\claim{OBL-SIG-H-ENCODE-DECODE} & 인코딩(encoding);\newline\statusdeferred &
+Week~16 최소 KeyGen 범위가 우선되어 연기된 실제 힌트 코덱 역함수 \\
+\claim{OBL-MINCORE-KEYGEN} & 기능정확성;\newline
+\statuspartial;\newline\identifier{STOP-KG-NTT} &
+실제 snapshot/finalizer는 76대상 기준선에서 증명됨. 마지막
+\identifier{output_row} NTT rewrite와 두 active row consequence는 77번째
+파일에서 개별 컴파일됨. 그래도 odd-root convolution과
+\identifier{Rq.poly}-to-security-list
+adapter가 없어 faithful KG-1/KG-3/전체 KG-4와 논문 식은 동결 \\
+\claim{OBL-MINCORE-SIGN} & 기능정확성;\newline\statusspecified & 실제
+round-challenge, z-check, hint helper의 accepted-core 식이 현재 단일 목표; 아직
+headline 정리 미컴파일 \\
+\claim{OBL-MINCORE-VERIFY},\newline
+\claim{OBL-MINCORE-COMPOSITION} &
+기능정확성;\newline\statusspecified & canonical decoded Verify core 술어와
+decoded-object 경계의 제한 합성; 아직 개별 정리 미컴파일 \\
 \claim{OBL-SIG-SUFFIX-METADATA},\newline
 \claim{OBL-SIG-SUFFIX-PADDING} & 인코딩(encoding) & 크기 차이 왕복(size-delta
 round trip)과 1474바이트 정준 영 패딩(canonical zero padding) \\
@@ -204,13 +257,20 @@ BST-MSIS 인스턴스(instance)를 추출 \\
 \begin{enumerate}
   \item 생성/재전달 경로는 현재 논문 경계로 유지하고 같은 호출자 이음매에
         관찰 래퍼를 더하지 않는다.
-  \item Week~13에서 닫힌 실제 rANS 핵심 역함수를 prepare/apply 역함수와
-        production 전체 HBZ 래퍼에 합성한다. 세 하위 절차의 반복 불변식은
-        다시 증명하지 않는다.
-  \item 래퍼 수준 크기/프레임 및 실제 성공 증인을 공급해
-        \claim{OBL-SIG-HBZ-ENCODE-DECODE}를 닫은 뒤 같은 rANS 불변식을 h 코덱에
-        재사용한다.
-  \item 크기 메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
+  \item Week~14 production 래퍼와 Week~15 고정 all-6 성공 정리를 유지하고
+        rANS 반복 불변식을 다시 증명하지 않는다. 고정 입력 종료/losslessness는
+        별도 의무로 남긴다.
+  \item KG-NTT-MUL 감사의 \identifier{STOP-KG-NTT}를 유지한다. odd-root
+        직교성/full-NTT convolution과 security-list adapter 없이는
+        \identifier{pre_bp}를 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 바꾸거나
+        faithful KG-1/KG-3/전체 KG-4를 주장하지 않는다.
+  \item 현재 단일 목표인
+        \identifier{actual_sign_accepted_core_equations_mode2}를 실제
+        round-challenge, z-check, hint helper 합성으로 닫는다.
+  \item 그 다음 canonical decoded Verify core 술어와 decoded-object 제한 합성을
+        각각 닫는다.
+  \item (h) 코덱은 현재 연기 상태를 유지한다. 범위가 다시 열리면 크기
+        메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
         꼬리 프레임(pack/challenge tail frame)을 합성해 전체 1474바이트
         코덱(codec)과 정준 구문 분석(canonical parse)을 닫는다.
   \item 노름/힌트(norm/hint), 응답(response)과 산술 정확성을 결합하여

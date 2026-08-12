@@ -27,7 +27,10 @@ EasyCrypt 타깃이 manifest에 들어가 aggregate \identifier{-no-eco} fresh c
 통과했다. Week~10의 rANS encoder 타깃 \WeekTenTargetCount 개에 이어
 Week~11의 encoder closure 타깃 \WeekElevenTargetCount 개, Week~12의 decoder
 semantic-refinement 타깃 \WeekTwelveTargetCount 개, Week~13의 actual core
-composition 타깃 \WeekThirteenTargetCount 개가 추가되었다.
+composition 타깃 \WeekThirteenTargetCount 개, Week~14의 production full-HBZ
+boundary 타깃 \WeekFourteenTargetCount 개, Week~15의 fixed all-6 success 타깃
+\WeekFifteenTargetCount 개, Week~16의 MINCORE KeyGen/KG--NTT boundary 타깃
+\WeekSixteenTargetCount 개가 추가되었다.
 닫힌 핵심은 비밀키의
 992바이트 검증키 접두부,
 raw/internal Sign--Verify의 32바이트 \(\mu\) 일치, challenge suffix 흡수,
@@ -38,25 +41,40 @@ encoder--decoder harness의 제어, 그리고 actual encoder 성공 출력 전�
 \(\operatorname{TraceBytes}(\operatorname{SymbolList}(symbols_0))\) 사이의 정확한
 등식(equality), exact trace에서 1024개 기호(symbol)를 복원하는 actual decoder
 정제(refinement), 그리고 두 정리(theorem)와 actual suffix copy를
-\identifier{Mode2RansActualHarness.run}에서 합성한 core 역함수(inverse function)다.
-마지막 정리(theorem)는 encoder 성공을 전제로 요구하지 않고, 실패 시 decoder를
-실행하지 않는 가지(branch)와 성공 시 1024개 기호(symbol)를 복원하는 가지를 함께
-보이는 성공 조건부 부분정확성(success-conditioned partial correctness)이다.
-반면 실제 encoder 성공 증인(success witness), encoder/decoder 종료성(termination),
-production full-HBZ wrapper, 전체 suffix codec, 완료된 API trace의 저장
-\(\mu\)를 연결하는 product/replay 운송, 전체 기능정확성과 구현 수준 보안은
-열려 있다. 따라서 이 문서는 완성 증명을 선언하지 않고, 정확히 어디까지
-commuting diagram이 닫혔는지를 표시한다.
+\identifier{Mode2RansActualHarness.run}에서 합성한 core 역함수(inverse function),
+그리고 actual \identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full}을
+SignaturePack/Unpack 경계까지 올린 production full-HBZ wrapper 역함수다. Week~15는
+canonical all-zero HBZ가 만드는 all-6 stream에 대해 actual failure를 배제하고,
+반환하는 실행의 \(bad=0\), \(4\le size\le1024\), exact trace/frame과 production
+zero round trip을 증명했다. 이는 fixed-input Hoare 부분정확성(partial
+correctness)이지 종료성·losslessness·확률~1 성공 정리는 아니다.
+
+Week~16은 실제 \identifier{_kp_m23_matrix}와
+\identifier{_keypair_finalize_m23}를 연속 호출한 snapshot에 대해
+\(r=2b_1+b_0\), \(b_0\in[-1,1]\), adjusted \(s_2=s_2-b_0\)와 snapshot-only
+mod-\(2q\) 영 합동식을 닫았다. 그러나 actual
+\theoremname{output_row_from_mode2_ntt_words}가 \identifier{output_row}를 실제
+full-invNTT/pointwise 표현으로 고정한 뒤에도, 이를 native \(R_q\) 곱과 보안
+모형의 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱으로 옮기는 full-NTT convolution
+정리와 표현 어댑터가 없다. 따라서 \identifier{STOP-KG-NTT}로 KeyGen을
+KG-2/finalization에서 동결했고 faithful KG-1, KG-3, complete KG-4와 논문식은
+막혀 있다. 현재 lane은 actual accepted Sign core로 이동했다. 두 번째 \(h\) suffix codec,
+전체 signature codec, 완료된 API trace의 저장 \(\mu\)를 연결하는 product/replay
+운송, 전체 기능정확성과 구현 수준 보안도 열려 있다. 따라서 이 문서는 완성
+증명을 선언하지 않고, 정확히 어디까지 commuting diagram이 닫혔는지를 표시한다.
 \end{abstract}
 
 \begin{takeaway}{한 문장 요약}
 현재 성과는 환(ring) 위의 전체 서명 스킴(signature scheme)을 이미 검증했다는
 뜻이 아니라, 그 스킴의 몇몇 결정론적 표현 사각형(representation square)이
 실제 생성 코드까지 가환(commute)함을 증명했고, 다음 핵심
-gate가 \CurrentPriority\ 임을 뜻한다. \CurrentGate 는 encoder와 decoder의
-개별 간선(edge)에 이어 actual suffix copy를 통한 core 가환사각형(commutative
-square)까지 닫혔다는 판정이다. production full-HBZ wrapper나 전체 codec이
-완료됐다는 판정은 아니다.
+gate가 \CurrentPriority\ 임을 뜻한다. Week~15의 fixed all-6 실패 배제는
+\statusproved 이지만 종료성(termination)을 주지 않는다. \CurrentGate 는
+Week~16 actual KeyGen snapshot/finalizer 경계의 KG-2-like 분해와 snapshot
+합동식 및 마지막 NTT-word 표현 rewrite는 닫혔으나, 그 snapshot을 논문의 모듈
+곱으로 승격할 full-NTT convolution/표현 어댑터가 없어 KeyGen continuation을
+중단했다는 판정이다. 이는 full KeyGen, \(h\) codec, 전체 signature codec이나
+Sign--Verify correctness가 완료됐다는 판정이 아니다.
 \end{takeaway}
 
 \tableofcontents

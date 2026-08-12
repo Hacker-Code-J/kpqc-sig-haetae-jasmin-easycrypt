@@ -1,4 +1,3 @@
-PASS supplied Why3 server socket
 PASS source drift
 PASS proof-hole scan
 PASS proof target manifest
@@ -15,6 +14,8 @@ PASS Week11 tail-aware actual encoder trace-closure checks
 PASS Week12 actual decoder symbol/off/bad/frame semantic surface
 PASS Week13 actual encoder/copy/decoder core-composition surface
 PASS Week14 actual full-HBZ failure/success and production-lift surface
+PASS Week15 fixed all-six budget, failure exclusion, and production lift
+PASS Week16 direct-keygen harness and STOP-KG-NTT boundary checks
 PASS actual API copy-helper reachability source checks
 PASS focused transcript extraction
 PASS focused mu-hash extraction
@@ -46,6 +47,9 @@ PASS fresh compile easycrypt/refinement/composition/RawApiVerifyMuTrace.ec
 PASS fresh compile easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec
 PASS fresh compile easycrypt/refinement/composition/RegionLocalMuTop.ec
 PASS fresh compile easycrypt/refinement/composition/TranscriptBytes.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec
 PASS fresh compile easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
 PASS fresh compile easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
 PASS fresh compile easycrypt/refinement/keygen/PackedKeyPrefix.ec
@@ -90,11 +94,13 @@ PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderFinalization.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderGeneratedFinalization.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderActualTraceClosure.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderOuterRefinement.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansAllSixBudget.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzInternalBoundaries.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullEncodeTrace.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullDecodeInverse.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec
 PASS fresh compile easycrypt/security/ImplementationSecurityGoals.ec
 PASS fresh compile easycrypt/security/SecurityAssumptions.ec
 PASS fresh compile easycrypt/specs/TopLevelGoals.ec
@@ -102,4 +108,4 @@ PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
 PASS baseline verification
 PASS LaTeX research notes build
 PASS read-only roots unchanged after verification
-RESULT PASS authored-targets=72 cache=-no-eco
+RESULT PASS authored-targets=77 cache=-no-eco

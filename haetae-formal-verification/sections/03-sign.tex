@@ -1,0 +1,82 @@
+\section{Sign: challenge, response, hint 및 rejection}
+\label{sec:sign}
+
+\paragraph{검증 당위성.}
+Sign의 네 대상은 서로 독립적인 산술 helper가 아니다. challenge는 commitment와
+message transcript를 묶고, response \(z\)는 그 challenge와 비밀키의 관계를
+구현하며, 두 rejection predicate는 명세가 반환하도록 허용한 norm 영역을
+결정한다. hint는 전송하지 않은 \(z_2\) 대신 Verify가 같은 \(w_1\)을 복원하게
+한다 \cite{haetae-spec}. 따라서 transcript 순서, 부호, 비교의 strictness 또는
+high-bit modulus 중 하나의 오류도 명세 밖 trial의 반환이나 honest signature의
+거부를 만들 수 있다. 아래 정리는 이 네 의미가 실제 accepted 실행 하나에서
+동시에 성립함을 보이는 데 필요하다. 다만 이는 sampler 분포나 rejection
+termination을 증명한다는 뜻은 아니다.
+
+\subsection{입력 경계}
+
+Sign core theorem은 다음을 입력 계약으로 사용한다.
+
+\begin{itemize}
+  \item SK 배열은 \cref{sec:keygen}의
+        \((seed_A,b_1,s_{\mathrm{gen}},e_{\mathrm{gen}}-b_0,K)\)를 encoding한다.
+  \item \(\mu=H_{\mathrm{gen}}(vk[0..992],pre,M)\)는 실제 raw/internal Sign
+        transcript가 계산한 64-byte 값이다.
+  \item hyperball sampler가 한 iteration의 \((y,b,b')\)를 제공한다.
+        이 장은 그 출력분포를 증명하지 않는다.
+\end{itemize}
+
+\subsection{실제 계산과 대응할 식}
+
+\proc{_sf_round_challenge_mode2}가 다음 값을 계산함을 증명한다.
+
+\begin{align}
+w &= A\lfloor y\rceil, \tag{S-1}\\
+w_1 &= \HighBits_{512}(w), \tag{S-2}\\
+c &= \SampleInBall\!\left(
+ H(w_1,\LSB(\lfloor y_0\rceil),\mu),58
+ \right). \tag{S-3}
+\end{align}
+
+\proc{_sf_z_check}가 secret-key NTT 표현과 challenge product를 사용하여
+
+\[
+  z=(z_1,z_2)=y+(-1)^b c\,s
+  \tag{S-4}
+\]
+
+를 계산함을 증명한다. 같은 절차가 반환한 \(reject=0\)은 실제 fixed-point
+표현에서 다음 두 조건과 같아야 한다.
+
+\begin{align}
+\norm{z}_2^2
+  &\le 6496508945891328, \tag{S-5}\\
+\neg\bigl(
+  b'=0 \;\land\;
+  \norm{2z-y}_2^2 < 6505809026482176
+\bigr). \tag{S-6}
+\end{align}
+
+마지막으로 \proc{_sf_hint_mode2}가
+
+\[
+  h=w_1-
+  \HighBits_{512}\!\left(w-2\lfloor z_2\rceil\right)
+  \pmod{252}
+  \tag{S-7}
+\]
+
+를 coefficientwise 계산함을 증명한다.
+
+\begin{verificationgoal}[Sign core theorem]
+유효한 mode-2 SK, 정확한 \(\mu\), 그리고 한 sampler witness
+\((y,b,b')\)에서 시작한 실제
+\proc{_sf_round_challenge_mode2}--\proc{_sf_z_check}--
+\proc{_sf_hint_mode2} 연속 실행이 \(reject=0\)을 반환하면,
+그 실행의 \((w,w_1,c,z,h)\)가
+\textup{(S-1)}--\textup{(S-7)}을 모두 만족함을 증명한다.
+\end{verificationgoal}
+
+이 목표는 ``Sign이 1474 byte를 썼다''보다 강하고, ``Sign 분포가 논문 분포와
+같다''보다 좁다. 실제 HBZ/rANS wrapper inverse는 \(z_1\) high-part의 byte
+표현을 보조하지만, 전체 signature byte theorem에는 아직 \(h\) codec과
+canonical metadata/padding 정리가 추가로 필요하다.

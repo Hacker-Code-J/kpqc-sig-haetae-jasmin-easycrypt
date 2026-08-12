@@ -48,8 +48,23 @@ invariant), Week~10 설계 경계와 Week~11 actual trace closure \\
 decoder pointwise read와 configured state 사이의 Week~13 운송 구조 \\
 \sourcepath{MODE2_HBZ_CODEC_OBLIGATIONS.md} & HBZ leaf, rANS core, production wrapper
 의무의 최신 층별 상태 \\
-\sourcepath{WEEK13_REPORT.md} & 현재 \identifier{GO-CORE} 판정,
-67-target 검증 결과, actual core inverse와 full-HBZ wrapper 단일 우선순위 \\
+\sourcepath{WEEK13_REPORT.md} & 역사적 \identifier{GO-CORE} 판정,
+67-target 검증 결과와 actual core inverse \\
+\sourcepath{HBZ_FULL_WRAPPER_COMPOSITION.md} & focused full-HBZ harness와 production
+SignaturePack/Unpack 경계의 실패/성공 계약 \\
+\sourcepath{WEEK14_REPORT.md} & 역사적 \identifier{GO-HBZ} 판정,
+72-target 검증 결과와 production full-HBZ wrapper closure \\
+\sourcepath{RANS_ACTUAL_SUCCESS_WITNESS.md} & actual prepare의 all-6 stream,
+1020-byte budget, failure-cause 모순과 production zero round trip \\
+\sourcepath{WEEK15_REPORT.md} & 역사적 \identifier{GO-WITNESS} 판정,
+74-target 검증 결과와 fixed all-6 Hoare success; termination/losslessness 제외 \\
+\sourcepath{WEEK16_MINCORE_PLAN.md} & one-week MINCORE의 KeyGen/Sign/Verify 계획,
+KeyGen 중단 기준과 현재 Sign 전환 \\
+\sourcepath{WEEK16_KG_REPORT.md} & 역사적 첫 과제
+\identifier{CONTINUE-KG} 판정과 76-target 수정 전 기준선 \\
+\sourcepath{WEEK16_KG_NTT_MUL_REPORT.md} & 마지막 sound
+\identifier{output_row} rewrite, exact missing convolution/adapter leaf,
+\identifier{STOP-KG-NTT}와 actual accepted Sign core 전환 \\
 \bottomrule
 \end{longtable}
 
@@ -103,6 +118,56 @@ canonical integer/\(W64\) 주소 대응 \\
 \theoremname{keypair_raw_api_trace_exports_matching_prefixes};
 \theoremname{keypair_raw_api_exports_matching_prefixes} &
 실제 raw KeyGen caller의 순차 외부 export \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{Week 16 MINCORE KeyGen과 KG--NTT 중단 경계}
+
+아래 \WeekSixteenTargetCount 개 파일은 actual matrix helper의 반환 snapshot,
+actual finalizer와 마지막 NTT-word rewrite를 다룬다. snapshot을 논문 matrix
+product로 재명명하지 않는 것이 이 표의 핵심 경계다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/keygen/}\allowbreak
+\sourcepath{Mode2KeygenSnapshotAlgebra.ec} &
+\theoremname{snapshot_residue_exact_low_high};
+\theoremname{raw_sum_raw_residue_congruent_mod_2q};
+\theoremname{snapshot_expression_from_product_congruent_mod_2q} &
+canonical residue의 \(r=2b_1+b_0\), low/high bounds와 doubled
+mod-\(2q\) 합동식 \\
+\sourcepath{easycrypt/refinement/keygen/}\allowbreak
+\sourcepath{Mode2KeygenCoreEquation.ec} &
+\theoremname{actual_m23_matrix_finalize_snapshot};
+\theoremname{finalize_semantic_output_low_high_decomposition};
+\theoremname{finalize_semantic_output_snapshot_mod2q_zero} &
+actual \identifier{_kp_m23_matrix(2,3)} snapshot과 actual
+\identifier{_keypair_finalize_m23(512)}의 exact/semantic 결과 \\
+같은 파일 &
+\theoremname{actual_m23_matrix_finalize_semantic_snapshot} &
+representation, finalizer semantics, KG-2-like 분해, adjusted \(s_2\),
+snapshot-only congruence와 tail frame의 strongest transparent-harness theorem \\
+\sourcepath{easycrypt/refinement/keygen/}\allowbreak
+\sourcepath{Mode2KeygenNttMulBridge.ec} &
+\theoremname{output_row_from_mode2_ntt_words};
+\theoremname{output_row_repr_from_mode2_ntt_words};
+\theoremname{actual_m23_matrix_snapshot_rows_explicit} &
+actual NTT chain의 마지막 full-invNTT/pointwise-word 표현 rewrite와 직접
+matrix/finalizer harness의 두 active row consequence만 증명;
+\identifier{Rq.\&*}나 security-model 곱은 주장하지 않음 \\
+같은 파일 &
+odd-root orthogonality/full-NTT convolution 및
+\identifier{Rq.poly}--security-list adapter의 부재 &
+\claimid{OBL-MINCORE-KEYGEN}이 \identifier{STOP-KG-NTT}인 정확한 경계 \\
 \bottomrule
 \end{longtable}
 \normalsize
@@ -509,12 +574,108 @@ canonical all-zero 입력으로 semantic precondition의 일관성만 확인 \\
 \end{longtable}
 \normalsize
 
-\begin{caution}[닫힌 core 정리(theorem)와 남은 production 경계]
-actual encoder 성공 suffix, actual suffix copy, actual decoder exact trace는
-\theoremname{actual_rans_encode_copy_decode_inverse} 안에서 합성되었다. 그러나 이
-Hoare 정리(theorem)는 실제 성공 증인(success witness), encoder/decoder
-종료성(termination), production full-HBZ wrapper 역함수(inverse function)를
-주지 않는다.
+\paragraph{Week 14 production full-HBZ boundary 타깃.}
+아래 \WeekFourteenTargetCount 개 파일은 Week~13 core inverse를 actual
+prepare/apply와 합성하고, focused full-HBZ harness에서 production
+SignaturePack/Unpack harness까지 올린다. 모두 \identifier{-no-eco}로 fresh
+compile된다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2HbzInternal}\allowbreak
+\sourcepath{Boundaries.ec} &
+\theoremname{full_encode_prepare_mode2_correct};
+\theoremname{full_rans_encode_trace_refinement};
+\theoremname{full_rans_decode_trace_refinement};
+\theoremname{full_decode_apply_mode2_correct} &
+focused full wrapper의 네 내부 actual 호출을 기존 prepare/rANS/apply 정리와
+exact하게 연결 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2HbzFull}\allowbreak
+\sourcepath{EncodeTrace.ec} &
+\theoremname{actual_encode_hb_z1_full_mode2_trace} &
+canonical HBZ 입력의 full encoder 실패/성공 분기, prepared-symbol trace, size와
+suffix frame \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2HbzFull}\allowbreak
+\sourcepath{DecodeInverse.ec} &
+\theoremname{actual_decode_hb_z1_full_mode2_inverse} &
+exact prepared trace에서 \(bad=0\), 원래 coefficient prefix와 tail frame 복원 \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2HbzFull}\allowbreak
+\sourcepath{ActualInverse.ec} &
+\theoremname{actual_hbz_full_encode_decode_inverse_mode2} &
+focused full-HBZ direct harness의 failure/success 합(disjunction)과 성공 조건부
+coefficient round trip \\
+\sourcepath{easycrypt/}\allowbreak\sourcepath{refinement/}\allowbreak
+\sourcepath{sign/}\allowbreak\sourcepath{Mode2HbzSignature}\allowbreak
+\sourcepath{BoundaryLift.ec} &
+\theoremname{signature_pack_unpack_hbz_full_actual_exact};
+\theoremname{signature_pack_unpack_hbz_full_inverse_mode2} &
+focused harness와 production SignaturePack/Unpack harness의 exact equivalence 및
+production Hoare 따름정리(corollary) \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\paragraph{Week 15 fixed all-6 success 타깃.}
+아래 \WeekFifteenTargetCount 개 새 파일과 기존 closure의 강화 정리는 actual
+all-zero prepare, all-6 capacity와 failure cause를 production zero round trip으로
+합성한다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{easycrypt/refinement/sign/}\allowbreak
+\sourcepath{Mode2RansAllSixBudget.ec} &
+\theoremname{actual_prepare_zero_hbz_all_six};
+\theoremname{symbol6_normalization_len_le1};
+\theoremname{all_six_normalization_budget};
+\theoremname{all_six_trace_fits_mode2} &
+actual prepare의 all-6 prefix와 보수적 1020-byte normalization/
+\([4,1024]\) total trace bound \\
+\sourcepath{easycrypt/refinement/sign/}\allowbreak
+\sourcepath{Mode2RansEncoderActual}\allowbreak
+\sourcepath{TraceClosure.ec} &
+\theoremname{actual_rans_encode_failure_trace_cause} &
+actual nonzero \(bad\)가 normalization trace \(>1020\)을 요구한다는 기존 target의
+강화된 consequence \\
+\sourcepath{easycrypt/refinement/sign/}\allowbreak
+\sourcepath{Mode2RansActual}\allowbreak
+\sourcepath{SuccessWitness.ec} &
+\theoremname{actual_rans_encode_all_six_success};
+\theoremname{actual_encode_hb_z1_full_zero_success};
+\theoremname{signature_pack_hbz_zero_success_mode2};
+\theoremname{signature_pack_unpack_hbz_zero_success_mode2} &
+actual core에서 focused/production full wrapper까지 fixed-input failure exclusion,
+exact trace/frame과 zero coefficient round trip \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\begin{caution}[닫힌 fixed-input failure exclusion과 남은 termination]
+actual encoder suffix, actual suffix copy, actual decoder exact trace는 Week~13
+core에서 합성되었고, Week~14는 prepare/apply와 production boundary까지
+합성했다. Week~15는 fixed all-zero/all-6 입력에서 반환하는 actual 실행의
+failure를 배제했다. 그러나 이 Hoare 정리(theorem)는 fixed-input termination,
+losslessness, non-vacuous execution이나 probability-one success를 주지 않는다.
+이를 무조건적 total round trip으로 읽으면 안 된다.
 \end{caution}
 
 \subsection{최상위 목표와 가정 표면}
@@ -643,11 +804,14 @@ selected baseline, 기존 연구노트 LaTeX를 검사한다. \SnapshotWeek\ 기
 target 수는 \AuthoredTargetCount 이지만, 재현 시점의 실제 출력이 항상 우선한다.
 
 \begin{verified}[문서 작성 시점의 aggregate 결과]
-\sourcepath{WEEK13_REPORT.md}와 최신 aggregate log에 기록된 전체 실행은
-\identifier{RESULT} \identifier{PASS}, \identifier{authored-targets=67},
+\sourcepath{WEEK16_KG_NTT_MUL_REPORT.md}와 최신 aggregate log에 기록된 전체 실행은
+\identifier{RESULT} \identifier{PASS}, \identifier{authored-targets=77},
 \identifier{cache=-no-eco}다. Week~10의 여섯 파일, Week~11의 일곱 encoder 파일,
-Week~12의 여덟 decoder 파일, Week~13의 두 core-composition 파일이 manifest completeness,
-proof-hole/axiom/debug scan과 fresh compile 대상에 포함된다. 이 PASS는 명명된
+Week~12의 여덟 decoder 파일, Week~13의 두 core-composition 파일, Week~14의 다섯
+full-HBZ boundary 파일, Week~15의 두 fixed-input success 파일과 Week~16의 두
+KeyGen snapshot 파일 및 한 NTT boundary 파일이 manifest completeness,
+proof-hole/axiom/debug scan과
+fresh compile 대상에 포함된다. 이 PASS는 명명된
 타깃들의 컴파일과 감사(audit)를 뜻하며,
 상위 \statuspartial 또는 \statusblocked 주장을 완료로 승격하지 않는다.
 \end{verified}
@@ -662,11 +826,20 @@ proof-hole/axiom/debug scan과 fresh compile 대상에 포함된다. 이 PASS는
         \claimid{OBL-RANS-ENCODE-REFINEMENT},
         \claimid{OBL-RANS-DECODE-REFINEMENT},
         \claimid{OBL-RANS-CORE-INVERSE},
-        \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} 여섯 행을 비교한다.
+        \claimid{OBL-SIG-HBZ-ENCODE-DECODE},
+        \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS},
+        \claimid{OBL-MINCORE-KEYGEN},
+        \claimid{OBL-MINCORE-SIGN} 아홉 행을 비교한다.
   \item 본문의 \cref{sec:algebraic-object,sec:rans-frontier,sec:boundaries}를 읽는다.
-  \item \sourcepath{WEEK13_REPORT.md}와
-        \sourcepath{Mode2RansCoreActualInverse.ec}에서 failure/success
-        사후조건(postconditions)과 아직 없는 full-HBZ wrapper 결론을 구분한다.
+  \item \sourcepath{WEEK15_REPORT.md}와
+        \sourcepath{Mode2RansActualSuccessWitness.ec}에서 fixed all-6 Hoare
+        success와 termination/losslessness의 차이를 확인한다.
+  \item \sourcepath{WEEK16_KG_REPORT.md}와
+        \sourcepath{Mode2KeygenCoreEquation.ec}에서 snapshot-only 합동식을 읽는다.
+  \item \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md}와
+        \sourcepath{Mode2KeygenNttMulBridge.ec}에서 proved NTT-word rewrite와
+        absent convolution/security-list bridge를 구분하고, 다음
+        \claimid{OBL-MINCORE-SIGN}이 아직 \statusspecified 임을 확인한다.
 \end{enumerate}
 
 \subsection{증명 참여 전 반나절 경로}
@@ -692,8 +865,30 @@ proof-hole/axiom/debug scan과 fresh compile 대상에 포함된다. 이 PASS는
   \item \sourcepath{Mode2RansCoreCompositionBridge.ec}에서 encoder/copy 결론을
         decoder 입력 술어(input predicate)로 운송하는 bridge를 읽는다.
   \item \sourcepath{Mode2RansCoreActualInverse.ec}에서 세 actual 호출의
-        성공 조건부 역함수(inverse function)를 읽고, production full-HBZ wrapper에
-        남은 size/frame 간극(gap)을 적는다.
+        성공 조건부 역함수(inverse function)를 읽는다.
+  \item \sourcepath{HBZ_FULL_WRAPPER_COMPOSITION.md}\newline
+        \sourcepath{Mode2HbzFullEncodeTrace.ec}와
+        \sourcepath{Mode2HbzFullDecodeInverse.ec}에서 prepare/rANS/apply 전제 운송과
+        wrapper-level size/frame을 대조한다.
+  \item \sourcepath{Mode2HbzFullActualInverse.ec}\newline
+        failure/success 합을 읽고,
+        \sourcepath{Mode2HbzSignatureBoundaryLift.ec}\newline
+        focused harness와 production harness의 exact equivalence를 확인한다.
+  \item \sourcepath{RANS_ACTUAL_SUCCESS_WITNESS.md}\newline
+        \sourcepath{Mode2RansAllSixBudget.ec}와
+        \sourcepath{Mode2RansActualSuccessWitness.ec}에서 1020-byte budget,
+        failure-cause 모순과 production zero round trip을 따라간다.
+  \item \sourcepath{WEEK16_MINCORE_PLAN.md}\newline
+        \sourcepath{WEEK16_KG_REPORT.md},\newline
+        \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md},\newline
+        \sourcepath{Mode2KeygenSnapshot}\allowbreak
+        \sourcepath{Algebra.ec}와\newline
+        \sourcepath{Mode2KeygenCore}\allowbreak
+        \sourcepath{Equation.ec},\newline
+        \sourcepath{Mode2KeygenNttMul}\allowbreak
+        \sourcepath{Bridge.ec}를 대조한다.\newline
+        KG-2-like proved boundary와 exact missing leaf,
+        \identifier{STOP-KG-NTT}를 분리한다.
   \item 변경 전에 전체 verifier의 baseline을 보존한다.
 \end{enumerate}
 

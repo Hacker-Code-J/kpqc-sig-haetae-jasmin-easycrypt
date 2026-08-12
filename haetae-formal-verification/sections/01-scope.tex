@@ -1,0 +1,107 @@
+\section{고정 범위와 구현 경계}
+\label{sec:scope}
+
+\paragraph{왜 범위를 먼저 고정하는가.}
+``HAETAE 구현을 검증했다''는 문장만으로는 parameter set, 호출 상수, 실제
+procedure와 수학 모델 사이의 연결 여부를 판단할 수 없다. mode~2와 아래 actual
+경계를 고정해야 정리가 어느 실행을 포괄하는지 재현할 수 있고, 다른 mode나
+관찰용 wrapper에 대한 결과를 production 구현의 결과로 오인하지 않는다.
+구체적인 추출·표현·Hoare 합성 절차는 \cref{sec:methodology}를 따른다.
+
+\subsection{HAETAE-2 파라미터}
+
+검증 대상은 HAETAE mode~2 하나이다. 환과 핵심 상수는 다음과 같이 고정한다
+\cite{haetae-spec}.
+
+\[
+\begin{gathered}
+  \Rq=\ZZ_q[X]/(X^{256}+1),\qquad q=64513,\\
+  n=256,\quad k=2,\quad \ell=4,\quad
+  \tau=58,\quad \alpha_h=512,\\
+  m_h=\frac{2(q-1)}{\alpha_h}=252.
+\end{gathered}
+\]
+
+여기서 \(A_{\mathrm{gen}}\in\Rq^{2\times3}\),
+\(a\in\Rq^2\), \(s_{\mathrm{gen}}\in\Rq^3\),
+\(e_{\mathrm{gen}}\in\Rq^2\), 그리고
+\(j=(1,0)^{\mathsf T}\in\Rq^2\)이다.
+
+\subsection{실제 Jasmin 프로시저}
+
+목표 정리는 새로 만든 관찰용 모델만을 대상으로 하지 않는다. 최종 정리 또는
+그 직접 하위 정리는 다음 pinned Jasmin 프로시저의 추출 결과를 호출해야 한다
+\cite{pinned-jasmin}.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabularx}{\textwidth}{L{22mm}Y Y}
+\toprule
+영역 & 상위 경계 & 검증할 핵심 하위 절차 \\
+\midrule
+KeyGen & focused core harness &
+  \proc{_kp_m23_matrix}, \proc{_keypair_finalize_m23};
+  \proc{_keypair_full_m23} 및 packer lift는 후속 범위 \\
+Sign & \proc{_sf_signature_core_mode2} &
+  \proc{_sf_round_challenge_mode2}, \proc{_sf_z_check},
+  \proc{_sf_hint_mode2} \\
+Verify & \proc{_verify_full_m23} &
+  \proc{_verify_prepare_z1_wprime}, \proc{_verify_matrix_crt},
+  \proc{_sign_verify_recover_w_z2},
+  \proc{_sign_verify_norm_reject}, \proc{_sign_verify_tail_m23} \\
+Codec (기존 증거) & \proc{_encode_hb_z1_full}, \proc{_decode_hb_z1_full} &
+  actual rANS encoder, suffix copy, actual rANS decoder; Week~16 신규 확장 없음 \\
+\bottomrule
+\end{tabularx}
+\caption{논문에서 직접 연결할 Jasmin 경계}
+\label{tab:actual-boundaries}
+\end{table}
+
+Mode~2 상위 호출의 구현 상수는 다음과 같다.
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+KeyGen & \((k,m,\lvert vk\rvert,\tau)=(2,3,992,58)\) &
+  singular bound \(611098\) \\
+Sign & \((\lvert sk\rvert,\lvert\sigma\rvert)=(1408,1474)\) &
+  response bounds는 \cref{sec:sign}에 명시 \\
+Verify & \((k,\ell,m)=(2,4,3)\) &
+  \(\lvert\sigma\rvert=1474,\lvert vk\rvert=992\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{정확성 양식}
+
+KeyGen과 Sign에는 rejection loop가 있다. 본 범위의 일반 정리는 다음 형식을
+사용한다.
+
+\begin{itemize}
+  \item \textbf{KeyGen/Sign:} 종료하여 accepted branch를 반환한 실행의
+        기능적 부분정확성(partial correctness).
+  \item \textbf{Verify:} canonical signature object와 유효한 메모리 계약 아래
+        bounded core 실행의 accept predicate 정확성.
+  \item \textbf{고정 증인:} all-zero HBZ 같은 구체 입력은 별도의
+        losslessness/termination 정리가 있을 때만 non-vacuous witness로 부른다.
+\end{itemize}
+
+\begin{scopeboundary}[Object 경계와 byte 경계]
+주요 KeyGen--Sign--Verify 합성은 decoded polynomial/signature object 경계에서
+수행한다. 현재 실제 HBZ/rANS byte codec 결과는 이 object 경계의 한 부분을
+byte 배열까지 연결한다. 전체 1474-byte canonical parser를 주장하려면 별도로
+\(h\) codec, metadata, padding 및 malformed-input rejection을 닫아야 한다.
+\end{scopeboundary}
+
+\paragraph{Codec 검증의 당위성.}
+대수 정리가 올바른 signature object를 말하더라도 packer가 다른 coefficient
+순서나 길이로 byte를 쓰면 public API에서 그 object는 전달되지 않는다. 반대로
+decoder가 같은 byte를 다른 object로 읽으면 Verify 정리는 Sign 결과에 적용되지
+않는다. 따라서 actual encode--copy--decode inverse는 단순 저장 형식 검사가
+아니라 object 정리를 실제 서명 구간으로 운반하는 필수 refinement이다. 또한
+success-conditioned inverse와 concrete success witness를 분리하여, 도달할 수
+없는 성공 분기에 대해서만 성립하는 공허한 정리를 구분한다. 현재 fixed all-6
+결과는 종료한 실행의 실패를 배제하지만 termination/losslessness를 증명하지
+않으므로 non-vacuous 실행 증거로 승격하지 않는다. \(h\)와 full parser는 7일
+MINCORE 범위에서 명시적으로 보류한다.

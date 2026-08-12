@@ -181,7 +181,7 @@ mode-2 signature codec
 ├── OBL-RANS-SUFFIX-COPY                               [PROVED]
 ├── OBL-RANS-ACTUAL-HARNESS-CONTROL                    [PROVED]
 ├── OBL-RANS-CORE-INVERSE                              [PROVED/success-conditioned partial correctness]
-├── OBL-RANS-ACTUAL-SUCCESS-WITNESS                    [PARTIAL]
+├── OBL-RANS-ACTUAL-SUCCESS-WITNESS                    [PROVED/fixed-input Hoare partial correctness]
 ├── OBL-SIG-HBZ-ACTUAL-BOUNDARY                        [PROVED]
 ├── OBL-SIG-HBZ-ENCODE-DECODE                          [PROVED/success-conditioned partial correctness]
 │   ├── signature_pack_unpack_hbz_full_actual_exact    [PROVED]
@@ -225,8 +225,8 @@ actual `_encode_hb_z1_full` and `_decode_hb_z1_full` procedures. The generic
 and concrete actual-array certificates both compile, as does the pure
 single-step inverse in `Mode2RansCore`.  The graph deliberately stopped
 before promoting this mathematical step to an actual loop theorem. Week 14
-later closes the production wrapper composition; the remaining open edge is
-the actual all-zero success witness, not the wrapper boundary itself.
+later closes the production wrapper composition; Week 15 closes the fixed
+all-6 success witness, and Week 16 is limited to the `h` codec.
 
 ## Week 9 additions
 
@@ -316,7 +316,7 @@ actual mode-2 symbol array
             └── generated four-byte final stores          [PROVED]
                 └── actual_rans_encode_trace_closure      [PROVED/partial correctness]
                     └── OBL-RANS-ENCODE-REFINEMENT        [PROVED/partial correctness]
-                        ├── OBL-RANS-ACTUAL-SUCCESS-WITNESS [PARTIAL]
+                        ├── OBL-RANS-ACTUAL-SUCCESS-WITNESS [PROVED/fixed-input Hoare partial correctness]
                         ├── OBL-RANS-DECODE-REFINEMENT     [PROVED/exact-trace partial correctness]
                         ├── OBL-RANS-CORE-INVERSE          [PARTIAL]
                         └── OBL-SIG-HBZ-ENCODE-DECODE      [PARTIAL]
@@ -418,10 +418,58 @@ signature_pack_unpack_hbz_full_actual_exact               [PROVED]
         ├── decoder_ran = true                            [PROVED]
         ├── decoded prefix / tail frame                   [PROVED]
         └── prepared_symbols witness                      [PROVED]
-            └── actual all-zero success witness          [PARTIAL]
+            └── actual all-6 success witness             [PROVED/fixed-input partial correctness]
 ```
 
 The production wrapper theorem is now closed as success-conditioned partial
-correctness. The only remaining HBZ-specific open edge is the actual
-all-zero success witness. The `h` codec stays out of scope until that witness
-compiles.
+correctness. The fixed all-6 theorem excludes failure for terminating runs;
+termination, losslessness, and non-vacuous reachability remain open.
+The former Week 16 `h`-codec recommendation was superseded by the MINCORE
+KeyGen first task.
+
+## Week 16 MINCORE KeyGen first-task boundary
+
+```text
+actual KeygenMode2ParentTarget.M._kp_m23_matrix(rows=2, cols=3)
+├── actual pre-finalization bp snapshot = res.`1                 [PROVED]
+├── mode2_output_repr_bound16(output_row mat p0 p1 p2)          [PROVED]
+├── mode2_ntt_repr_bound24(s1hat)                               [PROVED]
+└── actual KeygenMode2ParentTarget.M._keypair_finalize_m23(512)
+    ├── exact finalize_output                                   [PROVED]
+    ├── scalar/HAETAE finalizer semantics                       [PROVED]
+    ├── r = b0 + 2*b1, b0 in {-1,0,1}                          [PROVED]
+    ├── adjusted_s2 = s2 - b0                                   [PROVED]
+    ├── snapshot-only coefficient congruence mod 2q             [PROVED]
+    └── initial/snapshot/final/scratch tail frames              [PROVED]
+
+output_row(full_invntt(pointwise_row_ntt(...)))
+├── output_row_from_mode2_ntt_words                             [PROVED]
+│   └── array256_mont(full_invntt(pointwise_row_words(...)))    [PROVED]
+├── actual_m23_matrix_snapshot_rows_explicit                    [PROVED]
+│   └── both active rows of actual matrix→finalizer harness     [PROVED]
+└── native Rq negacyclic row product                            [STOPPED]
+    ├── odd-root orthogonality / full-NTT convolution leaf      [ABSENT]
+    ├── Rq.poly -> HAETAE integer-list multiplication adapter   [ABSENT]
+    ├── faithful KG-1                                           [NOT PROVED]
+    ├── faithful KG-3                                           [NOT PROVED]
+    ├── complete KG-4 vector construction                       [PARTIAL]
+    └── paper A s = q j (mod 2q)                                [NOT PROVED]
+        └── OBL-MINCORE-KEYGEN                                  [PARTIAL / STOP-KG-NTT]
+```
+
+`ActualM23MatrixFinalizeSnapshot.run` contains the two actual calls shown
+above and only the intervening immutable snapshot assignment.  Its Hoare
+precondition has exact initial bindings, the existing matrix/input
+representation bounds, centered active `s2`, and canonical active `avec`.
+No finalizer result, KG predicate, success result, or desired equation is a
+premise.
+
+The compiled `actual_snapshot_mod2q_zero` relation deliberately uses the
+actual returned `pre_bp` snapshot.  It must not be relabeled as the paper
+matrix-vector equation until the missing `output_row`/full-NTT to
+security-model multiplication bridge compiles.  The KG-NTT-MUL continuation
+audited that edge and stopped it at the missing odd-root orthogonality/full-NTT
+convolution theorem; it did not turn the desired product into a representation
+premise.  KeyGen is frozen at KG-2/finalization, and the active graph now moves
+to the planned MINCORE-SIGN actual-helper composition.  Sampler distribution,
+retry termination, packers, public APIs, and security remain outside scope.

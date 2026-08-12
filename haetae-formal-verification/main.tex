@@ -1,0 +1,60 @@
+\documentclass[11pt,a4paper]{article}
+\input{preamble}
+
+\title{\textbf{HAETAE-2 Jasmin 구현의 핵심 연산\\기능정확성 검증 목표}\\[0.45em]
+  \Large KeyGen 키 방정식, Sign 응답·힌트, Verify 재구성·승인}
+\author{HAETAE formal verification project}
+\date{2026년 8월 11일}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+이 문서는 HAETAE-2 Jasmin 구현에 대해 최종적으로 증명할 기능정확성 명제를
+고정한다. 대상은 전체 확률분포나 EUF-CMA 보안이 아니라, 실제 추출된
+KeyGen, Sign, Verify 절차 안에서 HAETAE 고유의 계산을 수행하는 핵심 경로이다.
+KeyGen에서는 저장된 검증키와 비밀키가 만드는 키 방정식,
+Sign에서는 challenge, response, hint 및 두 rejection predicate,
+Verify에서는 서명 성분의 복원, 공개키 행렬식, challenge 재계산 및 norm 판정을
+검증한다. 마지막으로 세 결과를 합성하여 accepted Sign 계산이 Verify 핵심
+predicate를 만족함을 보인다. 모든 명제는 실제 프로시저, mode-2 상수,
+종료성 양식과 byte/object 경계를 명시한다. 또한 각 대상이 HAETAE correctness의
+어느 전제를 구현하는지, 구현 오류가 어떤 false reject·명세 밖 승인·표현 단절을
+만드는지, 해당 정리가 그 실패를 어떻게 배제하는지를 명시한다. 검증 방법은
+pinned Jasmin 추출, 수학 object와 word/array 표현 관계, 실제 procedure Hoare
+정리, 호출 순서 합성 및 fresh proof audit의 단계로 재현 가능하게 고정한다.
+\end{abstract}
+
+\begin{reportstatement}
+HAETAE-2 \((q,n,k,\ell)=(64513,256,2,4)\) Jasmin 구현에서 KeyGen의
+키 방정식 계산, Sign의 challenge·response·hint·거부조건 계산, Verify의
+서명 재구성·challenge 재계산·norm 판정을 EasyCrypt로 기계검증하고,
+accepted KeyGen과 Sign의 결과가 Verify 핵심 계산에서 승인됨을 증명한다.
+\end{reportstatement}
+
+\begin{statusnote}
+이 문서는 목표 정리(theorem target)를 명세한다. 이 문서에 수식이 적혀 있다는
+사실은 해당 정리가 이미 컴파일되었다는 뜻이 아니다. 실제 상태는 claim ledger와
+fresh EasyCrypt 검증 로그로만 판정한다.
+
+현재 실행 범위는 \textbf{GO-MINCORE-7D}이다. 7일 동안 KeyGen, Sign, Verify의
+focused actual core 정리와 decoded-object 제한 합성을 목표로 하며, \(h\) codec,
+full parser, termination, 분포 및 public API 전체 정리는 보류한다.
+\end{statusnote}
+
+\tableofcontents
+\clearpage
+
+\input{sections/00-rationale}
+\input{sections/01-methodology}
+\input{sections/01-scope}
+\input{sections/02-keygen}
+\input{sections/03-sign}
+\input{sections/04-verify}
+\input{sections/05-composition}
+\input{sections/06-artifact-plan}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

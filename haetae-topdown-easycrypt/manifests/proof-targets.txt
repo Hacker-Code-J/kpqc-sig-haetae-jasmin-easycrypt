@@ -17,6 +17,9 @@ easycrypt/refinement/composition/RawApiVerifyMuTrace.ec
 easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec
 easycrypt/refinement/composition/RegionLocalMuTop.ec
 easycrypt/refinement/composition/TranscriptBytes.ec
+easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec
+easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec
+easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec
 easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
 easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
 easycrypt/refinement/keygen/PackedKeyPrefix.ec
@@ -61,11 +64,13 @@ easycrypt/refinement/sign/Mode2RansEncoderFinalization.ec
 easycrypt/refinement/sign/Mode2RansEncoderGeneratedFinalization.ec
 easycrypt/refinement/sign/Mode2RansEncoderActualTraceClosure.ec
 easycrypt/refinement/sign/Mode2RansEncoderOuterRefinement.ec
+easycrypt/refinement/sign/Mode2RansAllSixBudget.ec
 easycrypt/refinement/sign/Mode2HbzInternalBoundaries.ec
 easycrypt/refinement/sign/Mode2HbzFullEncodeTrace.ec
 easycrypt/refinement/sign/Mode2HbzFullDecodeInverse.ec
 easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec
 easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec
+easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec
 easycrypt/security/ImplementationSecurityGoals.ec
 easycrypt/security/SecurityAssumptions.ec
 easycrypt/specs/TopLevelGoals.ec

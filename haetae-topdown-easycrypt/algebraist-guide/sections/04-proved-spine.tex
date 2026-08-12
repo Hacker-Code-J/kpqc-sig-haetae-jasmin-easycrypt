@@ -7,15 +7,17 @@
 명제(proposition)의
 정확한 전제와 EasyCrypt 이름은 \cref{sec:source-index}에서 찾을 수 있다.
 
-\subsection{두 개의 주 진행선}
+\subsection{세 개의 주 진행선}
 
-현재 작업은 서로 연결되지만 상태가 다른 두 진행선으로 보는 것이 가장 쉽다.
+현재 작업은 서로 연결되지만 상태가 다른 세 진행선으로 보는 것이 가장 쉽다.
 
 \begin{enumerate}
   \item \textbf{key/transcript 선}: packed key 접두부에서 raw \(\mu\)와
         challenge suffix까지 내려가고, 실제 API memory/trace로 올리는 선;
   \item \textbf{signature codec 선}: canonical signature prefix와 HBZ/rANS
-        suffix의 역함수(inverse function)를 실제 pack/unpack 절차까지 닫는 선.
+        suffix의 역함수(inverse function)를 실제 pack/unpack 절차까지 닫는 선;
+  \item \textbf{MINCORE KeyGen 선}: 실제 matrix/finalize snapshot의 대수적
+        결과를 논문 \(R_q\)-모듈 곱으로 운송하는 선.
 \end{enumerate}
 
 \begin{figure}[ht]
@@ -48,19 +50,25 @@
   \node[provennode, below=of pure] (copy) {actual encoder trace와\\suffix copy};
   \node[provennode, left=of copy] (loops) {actual decoder\\exact-trace refinement};
   \node[provennode, left=of loops] (core) {actual harness\\core inverse};
-  \node[partialnode, below=of core] (hbz) {production full-HBZ\\wrapper inverse};
-  \node[blockednode, below=of hbz] (full) {full signature codec와\\Sign--Verify correctness};
+  \node[provennode, below=of core] (hbz) {production full-HBZ\\wrapper inverse};
+  \node[provennode, below=of hbz] (witness) {fixed all-zero/all-6\\Hoare success};
+  \node[deferrednode, below=of witness] (hcodec) {\(h\) suffix codec\\Week~16 deferred};
+  \node[blockednode, below=of hcodec] (full) {full signature codec와\\Sign--Verify correctness};
   \draw[flowarrow] (prefix) -- (leaf);
   \draw[flowarrow] (leaf) -- (pure);
   \draw[flowarrow] (pure) -- (copy);
   \draw[flowarrow] (copy) -- (loops);
   \draw[flowarrow] (loops) -- (core);
-  \draw[openarrow] (core) -- (hbz);
-  \draw[openarrow] (hbz) -- (full);
+  \draw[flowarrow] (core) -- (hbz);
+  \draw[flowarrow] (hbz) -- (witness);
+  \draw[openarrow] (witness) -- (hcodec);
+  \draw[openarrow] (hcodec) -- (full);
 \end{tikzpicture}
 \caption{signature codec 진행선. Week~11은 actual encoder의 성공
 접미부(success suffix)를, Week~12는 exact trace를 소비하는 actual decoder를,
-Week~13은 actual copy를 사이에 둔 core 합성(composition)을 닫았다.}
+Week~13은 actual copy를 사이에 둔 core 합성(composition)을, Week~14는
+production full-HBZ wrapper 경계를, Week~15는 fixed all-6 failure exclusion을
+닫았다. \(h\) codec은 Week~16 MINCORE 전환으로 동결되었다.}
 \label{fig:codec-spine}
 \end{figure}
 
@@ -415,7 +423,9 @@ normalization suffix 앞에 붙인다는 합성도 이 정리(theorem) 안에 �
 \claimid{OBL-RANS-ENCODE-REFINEMENT}는 각각 명시된 범위에서 \statusproved 다.
 그러나 이는 Hoare 부분정확성(Hoare partial correctness)이다. 실제 호출의
 종료성(termination)이나 \(bad'=0\)인 실행의 존재를 주지 않으므로
-\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 \statuspartial 이다.
+이 정리 하나만으로는 고정 입력의 성공을 결론낼 수 없다. Week~11 당시
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 \statuspartial 이었고, Week~15의
+별도 all-6 정리가 반환하는 fixed-input 실행에서 failure를 배제한다.
 
 \subsection{12단계: actual decoder의 exact-trace 의미론(semantics)}
 
@@ -530,8 +540,165 @@ decoder 실행 또는 성공을 전제로 요구하지 않는다. 반환한다�
 배열(canonical symbol array)로 전제의 비공허성(non-vacuity)만 보인다. 결론이
 실패/성공의 합(disjunction)이므로 실제 성공 가지의 도달가능성(reachability)이나
 encoder/decoder 종료성(termination)은 따라오지 않는다. 따라서
-\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}와 production full-HBZ wrapper는
-\statuspartial 로 남는다.
+Week~13 시점에는 \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}가
+\statuspartial 로 남았다. 이 결론만으로는 production full-HBZ wrapper까지 자동
+승격되지 않았고, 별도 승격은 Week~14에, fixed all-6 failure exclusion은
+Week~15에 각각 닫혔다.
+
+\subsection{14단계: production full-HBZ wrapper 경계}
+
+Week~14는 \WeekFourteenTargetCount 개 타깃을 추가해 focused full-HBZ 절차와
+실제 SignaturePack/Unpack 추출 경계를 연결했다
+\cite{week14-report,hbz-full-wrapper-composition}. 증명 사슬은 다음 네 층이다.
+
+\begin{enumerate}
+  \item \sourcepath{Mode2HbzInternalBoundaries.ec}는 focused full wrapper 내부의
+        prepare, rANS encode/decode, apply 호출을 기존 actual 정리(theorem)에
+        exact하게 연결한다.
+  \item \theoremname{actual_encode_hb_z1_full_mode2_trace}는 canonical HBZ
+        coefficient를 받는 실제 full encoder의 실패/성공 분기를 보존하고, 성공
+        시 prepared symbol witness, 정확한 trace size/segment와 suffix frame을 준다.
+  \item \theoremname{actual_decode_hb_z1_full_mode2_inverse}는 그 exact trace와
+        prepared-symbol 관계에서 실제 full decoder가 \(bad=0\), 원래 1024개
+        coefficient prefix와 coefficient tail frame을 반환함을 보인다.
+  \item \theoremname{actual_hbz_full_encode_decode_inverse_mode2}가 focused
+        encode/decode harness를 합성하고,
+        \theoremname{signature_pack_unpack_hbz_full_actual_exact}가 이를 production
+        SignaturePack/Unpack harness와 결과 tuple 및 \identifier{decoder_ran}까지
+        exact하게 맞춘다.
+\end{enumerate}
+
+\begin{verified}[\claimid{OBL-SIG-HBZ-ENCODE-DECODE}]
+Hoare 따름정리(corollary)
+\theoremname{signature_pack_unpack_hbz_full_inverse_mode2}의 유일한 의미론적
+사전조건(semantic precondition)은 argument binding과
+\identifier{canonical_hbz_mode2}다. 반환한다면 다음 합(disjunction)이 성립한다.
+\[
+\begin{aligned}
+\mathsf{failure}:\quad
+  &size=0,\quad \neg decoderRan,\quad encoded=out_0,\\
+  &decoded=decoded_0,\quad bad=bad_0;\\[0.3em]
+\mathsf{success}:\quad
+  &size\ne0,\quad 4\le size\le1024,\quad decoderRan,\quad bad=0,\\
+  &decoded[0..1024)=hbz_0[0..1024),\\
+  &\operatorname{CoeffTailFrame}(decoded_0,decoded),\quad
+    \operatorname{SuffixFrame}(out_0,encoded),
+\end{aligned}
+\]
+그리고 성공 가지에는 prepared-symbol witness와 그
+\identifier{mode2_trace_bytes}에 대한 \identifier{segment_matches}가 존재한다.
+따라서 production wrapper 합성은 성공 조건부 부분정확성(success-conditioned
+partial correctness)으로 \statusproved 다.
+\end{verified}
+
+이 정리(theorem)는 encoder 성공을 전제로 받지 않고 실제 실패 branch를 보존한다.
+그러나 canonical all-zero HBZ 입력이 actual encoder의 nonzero-size branch에
+들어가는 반환 실행의 failure exclusion이나 encoder/decoder 종료성은 이
+Week~14 정리 자체가 증명하지 않는다. prepare 뒤의 해당 symbol stream이
+all-6이라는 사실과 실제 encoder의 성공은 서로 다른 명제다. 전자는
+Week~15의 별도 budget/failure-cause 정리와 합성되지만, 종료성은 여전히 별도다.
+
+\subsection{15단계: fixed all-6 actual success 사후조건}
+
+Week~15는 \WeekFifteenTargetCount 개 타깃을 추가하여
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}를 fixed-input Hoare
+부분정확성(partial correctness)으로 닫았다
+\cite{week15-report,rans-actual-success-witness}. 첫 타깃
+\sourcepath{Mode2RansAllSixBudget.ec}는 다음 순수·prepare 사슬을 증명한다.
+
+\begin{itemize}
+  \item \theoremname{zero_hbz_get32}, \theoremname{zero_hbz_canonical}과
+        \theoremname{actual_prepare_zero_hbz_all_six}가 실제 prepare 반환의
+        \(bad=0\)과 1024개 all-6 prefix를 산출함;
+  \item \theoremname{symbol6_normalization_len_le1}가 symbol~6의 각 step이
+        normalization byte를 최대 하나만 방출함;
+  \item \theoremname{all_six_first_four_no_normalization}과
+        \theoremname{all_six_normalization_budget}이 첫 네 step의 0-byte와
+        전체 1020-byte 상계를 결합함;
+  \item \theoremname{all_six_trace_fits_mode2}가 마지막 state 네 바이트를 더해
+        total trace size를 \([4,1024]\)에 둠.
+\end{itemize}
+
+기존 encoder closure는
+\theoremname{actual_rans_encode_failure_trace_cause}로 강화되어 nonzero
+\(bad\)이면 normalization trace가 1020바이트를 넘는다고 결론낸다. all-6
+상계와 모순시키면 다음 실제 사후조건을 얻는다.
+
+\begin{verified}[\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}]
+\theoremname{actual_rans_encode_all_six_success}는 actual
+\identifier{_rans_encode}의 모든 반환 실행에서 \(bad=0\),
+\(0\le off\le1020\), \(4\le1024-off\le1024\), exact trace segment와 prefix
+frame을 준다. \theoremname{actual_encode_hb_z1_full_zero_success}와
+\theoremname{signature_pack_hbz_zero_success_mode2}가 이를 focused/production
+full encoder로 올리고,
+\theoremname{signature_pack_unpack_hbz_zero_success_mode2}가 production zero
+round trip, \identifier{decoder_ran}, decoder \(bad=0\), coefficient/encoded
+tail frame을 결론낸다.
+\end{verified}
+
+이 증명은 success를 사전조건으로 요구하지 않지만 Hoare 논리의
+부분정확성이다. 실제 fixed-input 실행이 종료하거나 존재한다는 명제,
+losslessness, probability-one success 또는 \identifier{phoare} 정리는 포함하지
+않는다. 따라서 ``fixed all-6 Hoare success가 \statusproved''와 ``fixed-input
+termination은 미증명''을 동시에 유지해야 한다.
+
+\subsection{16단계: actual KeyGen snapshot과 KG--NTT 중단 경계}
+
+Week~16은 \WeekSixteenTargetCount 개 KeyGen 타깃을 추가했다
+\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}. 순수 파일
+\sourcepath{Mode2KeygenSnapshot}%
+\allowbreak\sourcepath{Algebra.ec}의
+\theoremname{snapshot_residue_exact_low_high},
+\theoremname{raw_sum_raw_residue_congruent_mod_2q},
+\theoremname{snapshot_expression_from_product_congruent_mod_2q}는 canonical
+residue의 low/high 분해와 doubled congruence를 증명한다.
+
+\sourcepath{Mode2KeygenCoreEquation.ec}의 투명한
+\identifier{ActualM23MatrixFinalizeSnapshot.run}은 실제
+\identifier{_kp_m23_matrix(2,3)} 반환을 snapshot한 뒤 실제
+\identifier{_keypair_finalize_m23(512)}를 호출한다.
+
+\begin{verified}[actual snapshot/finalizer 경계]
+\theoremname{actual_m23_matrix_finalize_snapshot}은 matrix output/NTT
+representation, exact finalization과 tail frame을 합성한다. 가장 강한 정리
+\theoremname{actual_m23_matrix_finalize_semantic_snapshot}은 여기에
+\theoremname{finalize_semantic_output_low_high_decomposition}, HAETAE finalizer
+semantics와 \theoremname{finalize_semantic_output_snapshot_mod2q_zero}를 더해,
+active coefficient마다 KG-2-like 분해, adjusted \(s_2\)와 snapshot-only
+mod-\(2q\) 영 합동식을 준다.
+\end{verified}
+
+세 번째 타깃 \sourcepath{Mode2KeygenNttMulBridge.ec}는 actual loop를 복제하지
+않고 기존 NTT 사슬의 마지막 sound rewrite만 고정한다.
+\theoremname{output_row_from_mode2_ntt_words}는 transformed-secret 표현 아래
+\identifier{output_row}가
+\[
+  \operatorname{array256\_mont}
+  \bigl(\operatorname{full\_invntt}
+    (\operatorname{pointwise\_row\_words}(m,v,row))\bigr)
+\]
+와 정확히 같음을 증명한다.
+\theoremname{output_row_repr_from_mode2_ntt_words}는 이 등식을 기존
+\identifier{wide_slice_repr_bound} 계약으로 운송한다.
+\theoremname{actual_m23_matrix_snapshot_rows_explicit}는 strongest snapshot
+정리를 consequence로 재사용하여 두 active row 모두를 해당
+full-invNTT/pointwise-word 표현으로 내린다. 어느 정리도 native \(R_q\) 곱,
+보안 모형 곱 또는 원하는 KeyGen 식을 전제로 넣지 않는다.
+
+\begin{openobligation}[\claimid{OBL-MINCORE-KEYGEN}: \identifier{STOP-KG-NTT}]
+마지막 NTT-word rewrite까지는 컴파일되었지만, actual pointwise/inverse-NTT
+표현을 native \(R_q\) negacyclic 곱으로 바꾸는 odd-root orthogonality/full-NTT
+convolution 정리와 \identifier{Rq.poly}를 보안 모형의 integer-list 곱으로 옮기는
+어댑터가 없다. 따라서 해당 행 곱
+\(\sum_j A_{\mathrm{gen},ij}s_{\mathrm{gen},j}\)을 얻지 못한다. faithful KG-1,
+KG-3, complete KG-4와 논문식 \(A s=qj\pmod{2q}\)는 증명되지 않았다.
+\end{openobligation}
+
+KG-NTT-MUL 감사는 이 두 누락 leaf를 특정하고 \CurrentGate 로 종료했다.
+\identifier{GO-KG}가 아니며, KeyGen은 KG-2/finalization 경계에서 동결되었다.
+sampler, retry, packing, public API, KeyGen 종료성과 보안은 이 actual two-call
+snapshot 정리의 결론 밖에 있다. 활성 MINCORE lane은 아직
+\statusspecified 인 accepted Sign core로 이동했다.
 
 \subsection{닫힌 사슬의 정확한 끝점}
 
@@ -567,9 +734,14 @@ actual encoder--copy--decoder harness control &
 actual encoder--copy--decoder의 inverse &
 \statusproved\ (성공 조건부 부분정확성(success-conditioned partial correctness)) \\
 production full-HBZ wrapper inverse &
-\statuspartial\ (success-conditioned wrapper frame/size transport 미완) \\
+\statusproved\ (success-conditioned partial correctness, production boundary) \\
 actual encoder success witness &
-\statuspartial\ (concrete all-6 입력의 성공 도달성과 종료성 부재) \\
+\statusproved\ (fixed all-6 입력의 Hoare failure exclusion; 종료성/losslessness 없음) \\
+actual KeyGen matrix/finalize snapshot &
+\statuspartial\ (KG-2-like 분해와 snapshot 합동식은 증명;
+마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT}) \\
+\(h\) suffix codec &
+\statusdeferred\ (Week~16 MINCORE KeyGen 범위) \\
 full signature codec와 Sign--Verify correctness &
 \statusblocked \\
 구현 수준 기능정확성과 보안 &

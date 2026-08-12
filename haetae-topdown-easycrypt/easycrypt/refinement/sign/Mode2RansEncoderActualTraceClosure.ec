@@ -45,6 +45,13 @@ op encoder_trace_post
    prefix_frame enc0 result.`1
      (W64.to_uint (BArray16.get64 result.`2 0))).
 
+op encoder_trace_post_strong
+    (enc0 symbols0 : BArray2048.t)
+    (result : BArray2048.t * BArray16.t) : bool =
+  encoder_trace_post enc0 symbols0 result /\
+  (BArray16.get64 result.`2 1 <> W64.zero =>
+    1020 < size (encode_trace (symbol_list_of_array symbols0)).`2).
+
 op encoder_after_inner_ready
     (enc0 symbols0 encp : BArray2048.t)
     (i : W64.t) (s : W8.t) (x : W32.t) (off : W64.t)
@@ -205,7 +212,106 @@ rewrite -hi0.
 exact hlive.
 qed.
 
-lemma actual_rans_encode_trace_closure
+lemma trace_segments_drop_local (symbols : int list) i :
+  0 <= i <= size symbols =>
+  drop i (trace_segments symbols) = trace_segments (drop i symbols).
+proof.
+elim: symbols i => [|s tl ih] i /=; first smt().
+move=> hi.
+have [-> | hpos] : i = 0 \/ 0 < i by smt().
++ trivial.
+have hi1 : 0 <= i - 1 <= size tl by smt().
+have hrec := ih (i - 1) hi1.
+move: hrec; smt().
+qed.
+
+lemma encode_trace_suffix_size_le_full
+    (symbols0 : BArray2048.t) i :
+  0 <= i <= mode2_hbz_count =>
+  size (encode_trace (symbol_suffix symbols0 i)).`2 <=
+    size (encode_trace (symbol_list_of_array symbols0)).`2.
+proof.
+move=> hi.
+have hdropseg := trace_segments_drop_local
+  (symbol_list_of_array symbols0) i _.
++ rewrite symbol_list_of_array_size.
+  exact hi.
+rewrite encode_trace_bytes_segments.
+rewrite /symbol_suffix in hdropseg.
+rewrite -hdropseg encode_trace_bytes_segments.
+have htake :
+    flatten (trace_segments (symbol_list_of_array symbols0)) =
+    flatten (take i (trace_segments (symbol_list_of_array symbols0))) ++
+    flatten (drop i (trace_segments (symbol_list_of_array symbols0))).
++ rewrite -flatten_cat cat_take_drop.
+  trivial.
+have hleft :
+    0 <= size (flatten (take i (trace_segments (symbol_list_of_array symbols0))))
+  by exact (size_ge0
+    (flatten (take i (trace_segments (symbol_list_of_array symbols0))))).
+rewrite htake size_cat.
+smt().
+qed.
+
+lemma encoder_generated_failure_trace_cause
+    (enc0 symbols0 encp : BArray2048.t)
+    (i off : W64.t) (s : W8.t) (x x_max rcp bias packed
+      complement shift : W32.t) :
+  mode2_hbz_symbol_stream symbols0 =>
+  encoder_after_inner_ready enc0 symbols0 encp i s x off
+    x_max rcp bias packed complement shift =>
+  off \ult W64.of_int 4 =>
+  1020 < size (encode_trace (symbol_list_of_array symbols0)).`2.
+proof.
+move=> hstream hready hoff.
+rewrite /encoder_after_inner_ready in hready.
+move: hready =>
+  [hi [hs [hxmax [_ [_ [_ [_ [_ [hguarddone hlive]]]]]]]]].
+move: hlive => [hsrange hinner].
+have [x0 off0 hexit] := encoder_inner_tail_exit_exact enc0
+  (symbol_suffix symbols0 (W64.to_uint i + 1))
+  (W8.to_uint s) x off encp hsrange hinner _.
++ rewrite -hxmax.
+  exact hguarddone.
+move: hexit => [[hofflo hoffhi]
+  [hstate0 [hcursor0 [hx0 [hoffcur [hxcur [hsegment hframe]]]]]]].
+have hsint :
+    W8.to_uint s =
+      W8.to_uint (BArray2048.get8 symbols0 (W64.to_uint i)).
++ rewrite hs.
+  trivial.
+have hlen := mode2_normalization_bytes_size (W8.to_uint s)
+  (W32.to_uint x0) hsrange hx0.
+move: hlen => [hlen _].
+have hfit :
+    size (mode2_normalization_bytes
+      (encode_trace (symbol_suffix symbols0 (W64.to_uint i + 1))).`1
+      (W8.to_uint (BArray2048.get8 symbols0 (W64.to_uint i)))) <= off0.
++ rewrite -hstate0 -hsint hlen.
+  smt().
+have hcurrent0 := trace_cursor_extension symbols0 (W64.to_uint i) off0
+  hstream hi hcursor0 hfit.
+have hcurrent :
+    W64.to_uint off +
+      size (encode_trace (symbol_suffix symbols0 (W64.to_uint i))).`2 =
+    mode2_hbz_count.
++ move: hcurrent0.
+  smt().
+have hoffsmall : W64.to_uint off < 4.
++ rewrite W64.ultE W64.of_uintK /= in hoff.
+  exact hoff.
+have hsuffix :
+    1020 <
+      size (encode_trace (symbol_suffix symbols0 (W64.to_uint i))).`2.
++ rewrite /mode2_hbz_count in hcurrent.
+  smt().
+have hfull :=
+  encode_trace_suffix_size_le_full symbols0 (W64.to_uint i) _.
++ smt().
+smt().
+qed.
+
+lemma actual_rans_encode_trace_closure_strong
     (enc0 : BArray2048.t)
     (state0 : BArray16.t)
     (symbols0 : BArray2048.t) :
@@ -216,7 +322,7 @@ lemma actual_rans_encode_trace_closure
     esymsp = SignaturePackMode2Target.jmode2_hb_z1_esyms /\
     count = W64.of_int mode2_hbz_count /\
     mode2_hbz_symbol_stream symbols0
-    ==> encoder_trace_post enc0 symbols0 res].
+    ==> encoder_trace_post_strong enc0 symbols0 res].
 proof.
 proc.
 seq 5 :
@@ -227,6 +333,8 @@ seq 5 :
    mode2_hbz_symbol_stream symbols0 /\
    (bad = W64.zero \/ bad = W64.one) /\
    !(W64.zero \ult i) /\
+   (bad <> W64.zero =>
+      1020 < size (encode_trace (symbol_list_of_array symbols0)).`2) /\
    (bad = W64.zero =>
       encoder_outer_tail_inv enc0 symbols0 encp
         (W64.to_uint i) x off)).
@@ -238,6 +346,8 @@ seq 5 :
    mode2_hbz_symbol_stream symbols0 /\
    0 <= W64.to_uint i <= mode2_hbz_count /\
    (bad = W64.zero \/ bad = W64.one) /\
+   (bad <> W64.zero =>
+      1020 < size (encode_trace (symbol_list_of_array symbols0)).`2) /\
    (bad = W64.zero =>
       encoder_outer_tail_inv enc0 symbols0 encp
         (W64.to_uint i) x off)).
@@ -274,7 +384,8 @@ seq 5 :
     auto => &m houter.
     move: houter => [[hout higuard] hbadzero].
     move: hout =>
-      [hstate [hsym [hesym [hcount [hstream [hi [hbaddisj hlive]]]]]]].
+      [hstate [hsym [hesym [hcount [hstream [hi [hbaddisj
+        [hbadlarge hlive]]]]]]]].
     rewrite W64.ultE W64.to_uint0 in higuard.
     have hipos : 0 < W64.to_uint i{m} by exact higuard.
     have hj :
@@ -329,7 +440,19 @@ seq 5 :
             W64.one) + W64.one) + W64.one) =
         4 * W8.to_uint (BArray2048.get8 symbols0
           (W64.to_uint (i{m} - W64.one))) + 3.
-    + rewrite W64.to_uintD_small 1:/# hidx2 W64.to_uint1.
+    + have hu := W8.to_uint_cmp
+          (BArray2048.get8 symbols0
+            (W64.to_uint (i{m} - W64.one))).
+      have hidx2bound :
+          W64.to_uint
+            ((((zeroextu64 (BArray2048.get8 symbols0
+                (W64.to_uint (i{m} - W64.one)))) * W64.of_int 4) +
+              W64.one) + W64.one) +
+          W64.to_uint W64.one < W64.modulus.
+      + rewrite hidx2 W64.to_uint1.
+        smt().
+      rewrite W64.to_uintD_small 1:hidx2bound
+              hidx2 W64.to_uint1.
       ring.
     have hinner := encoder_outer_tail_to_inner
       enc0 symbols0 encp{m}
@@ -384,7 +507,11 @@ seq 5 :
       case (off{m} \ult W64.of_int 4) => hoff.
       -
         simplify.
-        move: hready.
+        have hcause := encoder_generated_failure_trace_cause
+          enc0 symbols0 encp{m} i{m} off{m} s{m} x{m} x_max{m}
+          rcp_freq{m} bias{m} packed{m} cmpl_freq{m} rcp_shift{m}
+          hstream hready hoff.
+        move: hstate hsym hesym hcount hstream hbadzero hready hcause.
         rewrite /encoder_after_inner_ready.
         auto => />.
         smt(W64.to_uint1 W64.to_uint0).
@@ -412,8 +539,11 @@ seq 5 :
           [hlive_i [hlive_x [hlive_cursor [hlive_segment
             [hlive_frame hlive_low]]]]].
         rewrite hbadzero.
-        rewrite -hlive_x.
-        auto.
+        move: hsucc_state hsucc_symbols hsucc_table hsucc_count hsucc_stream
+              hsucc_i hsucc_bad hlive_i hlive_x hlive_cursor hlive_segment
+              hlive_frame hlive_low.
+        auto => />.
+        smt().
 + auto => />.
   move=> _.
   rewrite W64.of_uintK /= /mode2_hbz_count.
@@ -442,22 +572,65 @@ seq 5 :
       enc0 symbols0 encp{m1} x{m1} off{m1} hout.
     move: hfinal =>
       [hoff [hsize [hsegment [hcursor hframe]]]].
-    rewrite /encoder_trace_post /=.
-    right.
-    split; first exact hbad0.
-    split; first exact hoff.
-    split; first exact hsize.
+    rewrite /encoder_trace_post_strong /encoder_trace_post /=.
     split.
-    + rewrite /generated_store_w32_le /= in hsegment.
-      exact hsegment.
-    split; first exact hcursor.
-    rewrite /generated_store_w32_le /= in hframe.
-    exact hframe.
+    * right.
+      split; first exact hbad0.
+      split; first exact hoff.
+      split; first exact hsize.
+      split.
+      + rewrite /generated_store_w32_le /= in hsegment.
+        exact hsegment.
+      split; first exact hcursor.
+      rewrite /generated_store_w32_le /= in hframe.
+      exact hframe.
+    move=> hbad1.
+    smt().
   - wp.
     auto => &m2 hpost.
-    rewrite /encoder_trace_post /=.
-    left.
+    rewrite /encoder_trace_post_strong /encoder_trace_post /=.
+    split.
+    * left.
+      move: hpost; smt().
+    move=> _.
     move: hpost; smt().
+qed.
+
+lemma actual_rans_encode_trace_closure
+    (enc0 : BArray2048.t)
+    (state0 : BArray16.t)
+    (symbols0 : BArray2048.t) :
+  hoare [Encode._rans_encode :
+    encp = enc0 /\
+    statep = state0 /\
+    symsp = symbols0 /\
+    esymsp = SignaturePackMode2Target.jmode2_hb_z1_esyms /\
+    count = W64.of_int mode2_hbz_count /\
+    mode2_hbz_symbol_stream symbols0
+    ==> encoder_trace_post enc0 symbols0 res].
+proof.
+conseq (actual_rans_encode_trace_closure_strong enc0 state0 symbols0) => //=.
+move=> &m hpre hpost.
+smt().
+qed.
+
+lemma actual_rans_encode_failure_trace_cause
+    (enc0 : BArray2048.t)
+    (state0 : BArray16.t)
+    (symbols0 : BArray2048.t) :
+  hoare [Encode._rans_encode :
+    encp = enc0 /\
+    statep = state0 /\
+    symsp = symbols0 /\
+    esymsp = SignaturePackMode2Target.jmode2_hb_z1_esyms /\
+    count = W64.of_int mode2_hbz_count /\
+    mode2_hbz_symbol_stream symbols0
+    ==> BArray16.get64 res.`2 1 <> W64.zero =>
+          1020 < size (encode_trace (symbol_list_of_array symbols0)).`2].
+proof.
+conseq (actual_rans_encode_trace_closure_strong enc0 state0 symbols0) => //=.
+move=> &m hpre hpost.
+smt().
 qed.
 
 end Mode2RansEncoderActualTraceClosure.

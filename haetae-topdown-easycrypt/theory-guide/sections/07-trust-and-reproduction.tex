@@ -45,8 +45,12 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
         실제 내부 반복문, 직렬화와 성공 크기 정리 표면 및 Week~11 꼬리 인식
         불변식, 생성 단어 단계, 최종 저장과 실제 인코더 추적 폐쇄, Week~12
         디코더 커서/표/재생 불변식과 실제 추적 정제, Week~13 복사 추적/점별
-        입력/W64 크기 어댑터와 실제 핵심 역함수의 과대주장 검사;
-  \item 현재 매니페스트된 67개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
+        입력/W64 크기 어댑터와 실제 핵심 역함수, Week~14 full/focused 내부
+        동치, full encoder/decoder, 직접 결합과 production 경계 lift의
+        과대주장 검사, Week~15 고정 all-six 예산/실패 원인/production 성공 lift,
+        Week~16 실제 M23 matrix/finalizer 스냅샷, 마지막 NTT 표현 rewrite와
+        \identifier{STOP-KG-NTT} 표면 검사;
+  \item 현재 매니페스트된 77개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
         컴파일;
   \item \identifier{admit}, \identifier{sorry}, 작성 \identifier{axiom},
         디버그/임시(debug/temporary) 선언 부재와 매니페스트(manifest) 완전성;
@@ -57,21 +61,51 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
 추출 해시(hash)는 생성물 변동(drift)을 탐지하지만 번역 의미의 정당성을
 대신하지 않는다. 또한 실행 요약은 매 실행 때 덮어쓰므로, 발표용 스냅샷에는
 마지막 \texttt{RESULT PASS} 줄까지 포함된 완전한 로그를 보관해야 한다.
-\sourcepath{WEEK13_REPORT.md}가 기록한 Week~13 완료 실행의 종료 표식은
-\texttt{RESULT PASS authored-targets=67}\newline
-\texttt{cache=-no-eco}다.
+수정 전 완료 스냅샷의 종료 표식은
+\sourcepath{logs/verify-all-before-kg-ntt-mul.log}에 보존된
+\texttt{RESULT PASS authored-targets=76}\newline
+\texttt{cache=-no-eco}다. \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md}는 77번째
+대상의 개별 fresh compile, 새 표현 경계와 중단 판정을 설명한다. 현재 체크아웃의
+개별 재실행도 성공했다. 다만 최종 77대상 전체 완료 로그는 아직 없다.
 
-\begin{boundary}[67대상 완료 스냅샷]
-2026-08-09의 Week~13 완료 실행은 Week~12의 65대상 기준선에
-\sourcepath{Mode2RansCoreCompositionBridge.ec}와
-\sourcepath{Mode2RansCoreActualInverse.ec}를 더한 67개를 모두 컴파일한 뒤
-기준선, 주차별 LaTeX와 읽기 전용 소스 무변경 검사를 통과했다. 독립 검증 기록
-\sourcepath{logs/week13-independent-verifier.md}도 최종 정리의 사전조건에
-인코더 성공, 복사 추적, 디코더 성공이나 출력 등식이 숨어 있지 않음을
-확인한다.
-실행 중 생성되는 \sourcepath{logs/verify-all-summary.txt}는 마지막 줄이
-\texttt{RESULT PASS}일 때만 완료 실행의 증거다. 그 줄이 없는 중간 또는
-중단 실행은 보존된 완료 기준선을 갱신하지 않는다.
+\begin{boundary}[76대상 수정 전 기준선과 77대상 continuation]
+2026-08-10의 Week~14 완료 실행은 Week~13의 67대상 기준선에 다음 다섯 이론을
+추가해 72대상을 닫았다.
+\begin{itemize}[leftmargin=1.5em,itemsep=0.05em,topsep=0.25em]
+  \raggedright
+  \item \sourcepath{Mode2HbzInternal}\allowbreak\sourcepath{Boundaries.ec};
+  \item \sourcepath{Mode2HbzFullEncodeTrace.ec},
+        \sourcepath{Mode2HbzFullDecodeInverse.ec};
+  \item \sourcepath{Mode2HbzFullActualInverse.ec},
+        \sourcepath{Mode2HbzSignature}\allowbreak\sourcepath{BoundaryLift.ec}.
+\end{itemize}
+Week~15는 \sourcepath{Mode2RansAllSixBudget.ec}와
+\sourcepath{Mode2RansActualSuccessWitness.ec}를 더해 74대상으로, Week~16은
+\sourcepath{Mode2KeygenSnapshotAlgebra.ec}와
+\sourcepath{Mode2KeygenCoreEquation.ec}를 더해 76대상으로 확장했다.
+KG-NTT-MUL 감사가 추가한 77번째 대상
+\sourcepath{Mode2Keygen}\allowbreak\sourcepath{NttMulBridge.ec}는 마지막
+\identifier{output_row} 표현
+rewrite와 actual two-call harness의 두 active row consequence를 개별 fresh
+compile한다. 이 대상은 odd-root convolution이나 security-list
+adapter를 가정하지 않으며 최종 판정은 \identifier{STOP-KG-NTT}다.
+\sourcepath{logs/week14-hbz-full-}\allowbreak
+\sourcepath{surface-scan.log}는 production 직접 호출,
+사전조건, 실패/성공 분기와 frame 결론의 정리 표면을 검사한다. Week~13 독립
+검증 기록은 그 아래 실제 rANS 핵심 역함수에 순환 전제가 없음을 별도로
+확인한다. \sourcepath{logs/week15-rans-}\allowbreak
+\sourcepath{success-surface-scan.log}는 고정 입력
+정리가 성공, trace, capacity나 losslessness를 전제하지 않는지 검사하고,
+\sourcepath{logs/week16-keygen-}\allowbreak
+\sourcepath{core-surface-scan.log}는 실제 두 호출, 비순환
+사전조건, NTT boundary가 원하는 곱을 숨기지 않는지와
+\identifier{STOP-KG-NTT} 경계를 검사한다.
+실행 중 생성되는 \sourcepath{logs/verify-all-}\allowbreak
+\sourcepath{summary.txt}는 마지막 줄이
+\texttt{RESULT PASS authored-targets=77 cache=-no-eco}일 때만 현재 77대상
+완료 실행의 증거다. 그 줄이 없는 중간 또는
+중단 실행은 보존된 완료 기준선을 갱신하지 않는다. 따라서 이 파일이 다른
+실행에 의해 덮어써지는 동안에는 위 76대상 보존 로그를 사용한다.
 \end{boundary}
 
 \subsection{이 문서 빌드}
@@ -95,5 +129,8 @@ prover에는 Alt-Ergo 2.6.0, CVC4 1.8.0, CVC5 1.2.1, Z3 4.12.6이 포함된다.
 이 안내서가 컴파일되는 것과 EasyCrypt 정리가 컴파일되는 것은 서로 다른
 증거다. 문서 배포 전에는 \identifier{build.sh}와 전체
 \identifier{verify-all.sh}를 모두 성공시켜야 한다. 현재 증명 기준선은
-67대상 전체 통과이며, 이 안내서의 별도 빌드도 함께 확인한다.
+77대상 매니페스트다. 마지막 보존 전체 완료는 76대상이고 77번째 대상은 개별
+컴파일됐다. 전체 77대상 완료는 위 종료 표식까지 확인한 실행에만 주장한다.
+덮어쓰기 중인 summary의 중간 PASS 줄은 완료 증거가 아니다. 이 안내서의 별도
+빌드도 함께 확인한다.
 \end{takeaway}

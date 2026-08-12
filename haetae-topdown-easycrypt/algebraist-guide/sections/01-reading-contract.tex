@@ -121,7 +121,7 @@ equality), frame 조건은 제한사상(restriction map)과 접합(gluing)을 �
 functionality)보다 실제 두 프로그램의 관계적 실행 정리(relational execution
 theorem)에 있다.
 
-\subsection{먼저 기억할 네 문장}
+\subsection{먼저 기억할 여섯 문장}
 
 \begin{enumerate}
   \item 최상위 \identifier{FC_KeyGen}, \identifier{FC_Sign},
@@ -130,9 +130,20 @@ theorem)에 있다.
         생성 절차까지 증명되었지만, 전체 API 보안으로 자동 승격되지 않는다.
   \item HBZ/rANS의 순수 역함수 구조, 실제 encoder/decoder의 개별 trace
         정제(refinement), actual copy를 포함한 core harness 역함수(inverse
-        function)는 닫혔지만, production full-HBZ wrapper 화살표는 열려 있다.
+        function), production full-HBZ wrapper 화살표까지 성공 조건부
+        부분정확성(success-conditioned partial correctness)으로 닫혔다.
+  \item canonical all-zero HBZ가 만드는 all-6 stream에서는 반환하는 실제
+        encoder의 실패가 배제되고 production zero round trip도 증명되었지만,
+        고정 입력의 종료성(termination), losslessness와 \identifier{phoare}는
+        열려 있다.
+  \item actual KeyGen matrix/finalize snapshot에서는 KG-2-like 분해와
+        snapshot-only mod-\(2q\) 합동식이 증명되었지만,
+        마지막 \identifier{output_row} NTT-word rewrite 뒤의 full-NTT convolution과
+        보안 모형 표현 어댑터가 없어 논문 KeyGen 식으로 승격되지 않는다.
+        따라서 KeyGen은 \identifier{STOP-KG-NTT}로 동결되었고, 다음 actual
+        accepted Sign core는 아직 \statusspecified 상태다.
   \item 최종 암호학적 가정과 구현 증명 의무를 분리한다. MLWE/BST-MSIS/ROM
         인터페이스 외의 구현 정확성은 가정으로 숨기지 않는다.
 \end{enumerate}
 
-이 네 문장은 이후 모든 장의 상태 판정 규칙이다.
+이 여섯 문장은 이후 모든 장의 상태 판정 규칙이다.

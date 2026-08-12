@@ -1,0 +1,112 @@
+\section{아티팩트 산출물과 완료 판정}
+\label{sec:artifact-plan}
+
+\subsection{작업 순서}
+
+이 장은 \cref{sec:methodology}의 증명 절차를 실제 산출물과 완료 판정으로
+구체화한다.
+아래 순서는 7일 마감에 맞춘 \textbf{GO-MINCORE-7D} 실행 순서이면서 theorem
+dependency 순서이다. Week~15의 fixed all-6 정리는 종료한 실행의 실패를
+배제하는 Hoare 부분정확성이지 termination/losslessness나 non-vacuous 실행
+증명이 아니다. 이 미완료 항목과 \(h\) byte codec은 이번 일정에서 보류한다.
+대신 KeyGen이 제공하는 키 관계, Sign의 accepted core 계산, Verify의 bounded
+core predicate를 증명하고 decoded signature object 경계에서 합성한다. 앞 단계가
+닫히지 않으면 후속 headline theorem에 결론을 새 가정으로 숨기지 않고 정확한
+focused actual 경계에서 미완료로 남긴다.
+
+\begin{longtable}{L{13mm}L{37mm}L{92mm}}
+\toprule
+단계 & 산출물 & 닫아야 할 내용 \\
+\midrule
+\endhead
+1일차 & 범위와 baseline 동결 &
+actual procedure, mode-2 상수, theorem signature와 현재 aggregate fresh
+baseline을 고정한다. \\
+2일차 & KeyGen headline theorem &
+actual matrix/finalization 경계에서 \textup{(KG-1)}--\textup{(KG-4)}와
+\(As=qj\pmod{2q}\)를 도출한다. accepted parent lift는 기존 caller 사실로
+즉시 합성되는 경우에만 포함한다. \\
+3--4일차 & Sign headline theorem &
+\textup{(S-1)}--\textup{(S-7)}과 실제 두 norm predicate를 세 core
+procedure의 순차 호출로 합성한다. \\
+5--6일차 & Verify 및 제한 합성 &
+\textup{(V-1)}--\textup{(V-8)}과 \(reject=0\) 동치를 bounded actual core
+경계에서 증명하고, 동일 key/message transcript와 decoded-object identity 아래
+accepted Sign 결과가 Verify core에서 승인됨을 증명한다. \\
+7일차 & Paper artifact &
+source hash, extraction identity, safety evidence, theorem manifest, fresh
+\proc{-no-eco} build, proof-hole/axiom scan, 독립 audit와 TCB를 제공한다. \\
+\bottomrule
+\end{longtable}
+
+\subsection{각 headline theorem의 완료 기준}
+
+\begin{acceptancecriterion}[기계검증 완료]
+KeyGen, Sign, Verify 정리는 각각 다음 조건을 모두 만족할 때만 완료로 판정한다.
+\begin{enumerate}
+  \item 최종 정리가 pinned extraction의 실제 프로시저를 직접 호출한다.
+  \item 성공, decoded equality, trace equality 또는 최종 predicate를 전제로
+        넣지 않고 실제 하위 postcondition에서 도출한다.
+  \item 모든 representation, bounds, frame 및 memory-disjointness 전제를
+        theorem statement에 공개한다.
+  \item Hoare partial correctness, losslessness, termination을 구분하여 표기한다.
+  \item 신규 타깃 개별 fresh compile과 aggregate fresh \proc{-no-eco}
+        compile이 모두 통과한다.
+  \item proof hole, authored axiom, debug declaration, extraction/table drift가 없다.
+  \item claim ledger, theorem graph, proof manifest와 논문의 상태가 일치한다.
+\end{enumerate}
+\end{acceptancecriterion}
+
+\subsection{안전성 및 TCB}
+
+Jasmin compiler와 EasyCrypt extraction의 의미 연결은 safe program에 대해
+적용된다 \cite{jasmin-extraction}. 따라서 assembly-level correctness를
+주장하려면 논문 대상 프로시저의 memory safety 증거를 함께 제공한다. 이를
+제공하지 못한 프로시저는 ``extracted EasyCrypt model 수준''의 결과로만
+표현한다.
+
+TCB에는 적어도 다음을 명시한다.
+
+\begin{itemize}
+  \item pinned HAETAE 명세와 그 EasyCrypt formalization,
+  \item Jasmin instruction semantics, compiler proof 및 \proc{jasmin2ec},
+  \item EasyCrypt kernel/SMT backends와 사용한 버전,
+  \item generated mode-2 tables와 extraction scripts,
+  \item theorem statement와 구현 배열을 수학 object로 해석하는 bridge.
+\end{itemize}
+
+\subsection{명시적 비주장}
+
+최종 핵심 연산 논문은 다음을 주장하지 않는다.
+
+\begin{itemize}
+  \item KeyGen sampler와 hyperball sampler의 정확한 출력분포,
+  \item KeyGen/Sign rejection loop의 일반 termination 또는 기대 반복 횟수,
+  \item 모든 canonical HBZ stream의 rANS encoder 성공,
+  \item \(h\) codec, metadata, padding을 포함한 full 1474-byte canonical
+        parser,
+  \item 임의 malformed signature의 완전한 rejection characterization,
+  \item 전체 public API의 분포 동등성,
+  \item HAETAE 구현의 EUF-CMA 또는 논문 보안 환원 전체.
+\end{itemize}
+
+\subsection{예상 작업량과 보고 제목}
+
+현재 추출, memory bridge, raw \(\mu\) transcript, signature prefix 및
+HBZ/rANS vertical slice를 재사용한다 \cite{claim-ledger,week14-report}.
+활성 산출물의 시간 한도는 7일이다. 이는 주장 강도를 높이는 근거가 아니라
+범위를 decoded-object MINCORE로 동결하는 제약이다. upper caller lift가 일정에
+맞지 않으면 관찰용 모델로 대체하지 않고 focused actual core 경계를 명시한다.
+full byte codec, public API, termination과 분포까지 포함하는 기존 장기 계획은
+이번 산출물 범위 밖이다.
+
+최종 보고 제목은 다음과 같이 고정한다.
+
+\begin{center}
+\bfseries
+HAETAE-2 Jasmin 구현의 KeyGen 키 방정식,\\
+Sign 응답·힌트 계산 및 Verify 재구성·승인 계산에 대한 기계검증
+\end{center}
+
+``HAETAE 전체 기능정확성 검증'' 또는 ``HAETAE 구현 보안 증명''이라는 제목은
+위 비주장들이 닫히기 전에는 사용하지 않는다.

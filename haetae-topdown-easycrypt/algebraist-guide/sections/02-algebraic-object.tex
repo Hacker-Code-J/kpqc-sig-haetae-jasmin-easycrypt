@@ -82,6 +82,44 @@ packed representation은 Sign이 같은 검증키 성분을 다시 읽을 수 �
 class)가 public key의 표현과 같다''는 명제(proposition)다. 비밀키 전체의
 등식(equality)이 아니다.
 
+\subsection{Week 16 KeyGen snapshot의 합동식(congruence)}
+
+Week~16의 투명한 harness
+\identifier{ActualM23MatrixFinalizeSnapshot.run}은 실제
+\identifier{_kp_m23_matrix}를 mode~2 차원 \((2,3)\)으로 호출하고 반환된
+\(bp\)를 \(\mathit{pre\_bp}\)로 저장한 뒤, 실제
+\identifier{_keypair_finalize_m23}를 512개 active word에 호출한다
+\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}.
+coefficient \(i\)에서
+\[
+  r_i=(\mathit{pre\_bp}_i+s_{2,i}+a_i)\bmod q
+\]
+라 두면 compiled semantic snapshot은
+\[
+  r_i=2b_{1,i}+b_{0,i},\qquad -1\le b_{0,i}\le1,
+  \qquad s'_{2,i}=s_{2,i}-b_{0,i}
+\]
+를 준다. 더 나아가
+\[
+  2(a_i-2b_{1,i})+2\mathit{pre\_bp}_i+2s'_{2,i}
+  \equiv0\pmod{2q}
+\]
+가 각 active coefficient에서 성립한다. 여기서 \(\mathit{pre\_bp}\)는 실제
+matrix helper의 반환 snapshot이며, 아직 논문의
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 식별되지 않았다.
+
+\begin{caution}[snapshot 합동식과 논문 KeyGen 식의 분리]
+\theoremname{actual_m23_matrix_finalize_semantic_snapshot}은 두 actual 호출,
+low/high 분해(decomposition), adjusted \(s_2\), frame을 한 Hoare 사후조건에
+모은다. \theoremname{output_row_from_mode2_ntt_words}는
+\identifier{KeygenM23ArithmeticSpec.output_row}를 실제
+full-invNTT/pointwise word 표현과 정확히 동일시한다. 그러나 그 표현을 native
+\(R_q\) negacyclic 곱으로 옮기는 odd-root orthogonality/full-NTT convolution
+정리와, 이어지는 보안 모형 integer-list 곱 어댑터는 없다. 따라서 위 합동식을
+\(A s=qj\pmod{2q}\)로 이름만 바꾸거나 faithful KG-1/KG-3가 증명되었다고 읽으면
+안 된다. 이 경계의 최종 판정은 \identifier{STOP-KG-NTT}다.
+\end{caution}
+
 \subsection{Sign과 Verify가 만나는 transcript}
 
 고정 명세에서 Sign과 Verify가 공통으로 재구성해야 하는 첫 관측값은 메시지
@@ -158,6 +196,9 @@ payload, canonical zero padding, 전체 parser의 성공과 유일성이 남아 
 \(R_q\)-모듈(module) KeyGen & Jasmin 연산과 논문 KeyGen
 분포(distribution)의 동일성 &
 \statuspartial / 최상위 목표 \\
+actual KeyGen snapshot & matrix/finalize 결과의 low/high 분해와
+snapshot-only mod-\(2q\) 합동식 &
+\statuspartial\ (KG-2-like 경계 증명; NTT 곱 bridge blocked) \\
 packed key & \(\pi_{992}(sk)=\pi_{992}(vk)\) &
 \statusproved\ (partial correctness) \\
 raw \(\mu\) transcript & Sign 64-byte 출력의 첫 32바이트와 Verify 32바이트 일치 &
@@ -167,7 +208,7 @@ challenge suffix & 같은 position~64에서 \(\mu_{32}\) 흡수 뒤 상태 일�
 signature prefix & canonical 입력에서 decode-after-encode가 항등(identity) &
 \statusproved\ (prefix만) \\
 HBZ/rANS suffix & 실제 full encoder와 decoder의 역관계(inverse relation) &
-\statuspartial\ (actual core inverse는 \statusproved, production full wrapper는 미완) \\
+\statusproved\ (production wrapper와 fixed all-6 Hoare success; 종료성은 미증명) \\
 전체 서명 스킴 & KeyGen/Sign/Verify refinement와 보안 합성 &
 \statusspecified / \statusblocked \\
 \bottomrule

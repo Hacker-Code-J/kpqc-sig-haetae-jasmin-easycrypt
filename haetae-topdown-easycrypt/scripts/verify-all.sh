@@ -62,11 +62,18 @@ find "$PROJECT_DIR/easycrypt" -type f -name '*.ec' \
   | sed "s#^$PROJECT_DIR/##" | LC_ALL=C sort \
   > "$WORK_DIR/discovered-targets.txt"
 LC_ALL=C sort "$MANIFEST" > "$WORK_DIR/manifest-targets.txt"
+manifest_target_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' \
+  "$MANIFEST")
 if ! diff -u "$WORK_DIR/manifest-targets.txt" \
     "$WORK_DIR/discovered-targets.txt" \
     > "$LOG_DIR/target-manifest.log"; then
   printf 'FAIL unmanifested or missing proof target\n' | tee -a "$SUMMARY"
   cat "$LOG_DIR/target-manifest.log"
+  exit 1
+fi
+if [ "$manifest_target_count" -ne 77 ]; then
+  printf 'FAIL expected 77 authored proof targets, found %s\n' \
+    "$manifest_target_count" | tee -a "$SUMMARY"
   exit 1
 fi
 printf 'PASS proof target manifest\n' | tee -a "$SUMMARY"
@@ -611,6 +618,158 @@ fi
 printf 'PASS Week14 actual full-HBZ failure/success and production-lift surface\n' \
   | tee -a "$SUMMARY"
 
+WEEK15_RANS="$PROJECT_DIR/easycrypt/refinement/sign"
+WEEK15_BUDGET="$WEEK15_RANS/Mode2RansAllSixBudget.ec"
+WEEK15_CLOSURE="$WEEK15_RANS/Mode2RansEncoderActualTraceClosure.ec"
+WEEK15_WITNESS="$WEEK15_RANS/Mode2RansActualSuccessWitness.ec"
+if ! rg -F 'lemma zero_hbz_get32' \
+    "$WEEK15_BUDGET" > "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma zero_hbz_canonical' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma prepared_zero_hbz_is_all_six' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma actual_focused_encode_hb_z1_prepare_zero_hbz' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma actual_prepare_zero_hbz_all_six' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma symbol6_normalization_len_le1' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma hbz_xmax_symbol6_product' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma symbol6_div256_below_xmax' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma all_six_first_four_no_normalization' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma all_six_normalization_budget' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma all_six_list_normalization_budget' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma all_six_trace_fits_mode2' \
+    "$WEEK15_BUDGET" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma actual_rans_encode_failure_trace_cause' \
+    "$WEEK15_CLOSURE" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F '1020 < size (encode_trace (symbol_list_of_array symbols0)).`2' \
+    "$WEEK15_CLOSURE" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma actual_rans_encode_all_six_success' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'hoare [Encode._rans_encode :' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma actual_encode_hb_z1_full_zero_success' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'hoare [Focus._encode_hb_z1_full :' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma signature_pack_hbz_zero_success_mode2' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'hoare [Pack._encode_hb_z1_full :' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F 'lemma signature_pack_unpack_hbz_zero_success_mode2' \
+    "$WEEK15_WITNESS" >> "$LOG_DIR/week15-rans-success-surface-scan.log" || \
+   ! rg -F '| OBL-RANS-ACTUAL-SUCCESS-WITNESS | PROVED (fixed all-6 input, Hoare partial correctness) |' \
+    "$PROJECT_DIR/CLAIM_LEDGER.md" >> "$LOG_DIR/week15-rans-success-surface-scan.log"; then
+  printf 'FAIL Week15 fixed all-six actual success-witness surface\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+awk '
+  /lemma actual_rans_encode_all_six_success/ { inside = 1 }
+  inside { print }
+  inside && /==>/ { exit }
+' "$WEEK15_WITNESS" > "$WORK_DIR/week15-core-success-precondition.txt"
+awk '
+  /lemma actual_encode_hb_z1_full_zero_success/ { inside = 1 }
+  inside { print }
+  inside && /==>/ { exit }
+' "$WEEK15_WITNESS" > "$WORK_DIR/week15-full-success-precondition.txt"
+if rg -n \
+    'encoder_success|decoder_success|segment_matches|trace_bytes|prepared_hbz_prefix|BArray16.get64[[:space:]]+res|bad[[:space:]]*=|off[[:space:]]*(>=|>)|size[[:space:]]*(<>|>|>=|<=)' \
+    "$WORK_DIR/week15-core-success-precondition.txt" \
+    "$WORK_DIR/week15-full-success-precondition.txt" \
+    >> "$LOG_DIR/week15-rans-success-surface-scan.log"; then
+  printf 'FAIL Week15 success theorem assumes success, capacity, or trace evidence\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -n 'phoare|islossless|is_lossless' \
+    "$WEEK15_BUDGET" "$WEEK15_CLOSURE" "$WEEK15_WITNESS" \
+    >> "$LOG_DIR/week15-rans-success-surface-scan.log"; then
+  printf 'FAIL Week15 Hoare witness is mislabeled as a losslessness theorem\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+printf 'PASS Week15 fixed all-six budget, failure exclusion, and production lift\n' \
+  | tee -a "$SUMMARY"
+
+WEEK16_CORE="$PROJECT_DIR/easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec"
+WEEK16_NTT_BRIDGE="$PROJECT_DIR/easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec"
+WEEK16_SNAPSHOT="$PROJECT_DIR/easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec"
+WEEK16_REUSED="$PROJECT_DIR/manifests/reused-theorems.md"
+WEEK16_LEDGER="$PROJECT_DIR/CLAIM_LEDGER.md"
+WEEK16_NTT_REPORT="$PROJECT_DIR/WEEK16_KG_NTT_MUL_REPORT.md"
+if ! rg -F 'module ActualM23MatrixFinalizeSnapshot' "$WEEK16_CORE" \
+    > "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F '(bp, s1hatp) <@ Parent._kp_m23_matrix' "$WEEK16_CORE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F '(bp, s2) <@ Parent._keypair_finalize_m23' "$WEEK16_CORE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_m23_matrix_finalize_snapshot' "$WEEK16_CORE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'op actual_snapshot_mod2q_zero' "$WEEK16_CORE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma finalize_semantic_output_snapshot_mod2q_zero' \
+    "$WEEK16_CORE" >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma snapshot_expression_from_product_congruent_mod_2q' \
+    "$WEEK16_SNAPSHOT" >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F '| OBL-MINCORE-KEYGEN | PARTIAL — STOP-KG-NTT |' \
+    "$WEEK16_LEDGER" >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma output_row_from_mode2_ntt_words' "$WEEK16_NTT_BRIDGE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma output_row_repr_from_mode2_ntt_words' "$WEEK16_NTT_BRIDGE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_m23_matrix_snapshot_rows_explicit' "$WEEK16_NTT_BRIDGE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'Mode2KeygenCoreEquation.ActualM23MatrixFinalizeSnapshot.run' \
+    "$WEEK16_NTT_BRIDGE" >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'STOP-KG-NTT' "$WEEK16_NTT_REPORT" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'odd-root orthogonality' "$WEEK16_NTT_REPORT" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log" || \
+   ! rg -F 'KG-NTT-MUL continuation and stop boundary' "$WEEK16_REUSED" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log"; then
+  printf 'FAIL Week16 direct keygen harness surface\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -n 'require import.*HAETAE_Algebra|poly_mul|matrix_vec_mul|Agen|sgen|KG-|desired|equation' \
+    "$WEEK16_NTT_BRIDGE" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log"; then
+  printf 'FAIL Week16 NTT boundary hides the missing security-model product\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+sed -n '/module ActualM23MatrixFinalizeSnapshot = {/,/^}./p' \
+  "$WEEK16_CORE" > "$WORK_DIR/week16-keygen-harness-body.txt"
+if rg -n 'CheckedMode2Parent|Sampler|retry|pack|cryptolab_|_keypair_full_m23|Api|public' \
+    "$WORK_DIR/week16-keygen-harness-body.txt" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log"; then
+  printf 'FAIL Week16 harness pulls sampler, retry, packer, or public-API machinery\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+awk '
+  /lemma actual_m23_matrix_finalize_snapshot/ { inside = 1 }
+  inside { print }
+  inside && /==>/ { exit }
+' "$WEEK16_CORE" > "$WORK_DIR/week16-keygen-precondition.txt"
+if rg -n 'KG-|desired|equation|finalize_semantic_output|finalize_haetae_semantic_output|accepted|success' \
+    "$WORK_DIR/week16-keygen-precondition.txt" \
+    >> "$LOG_DIR/week16-keygen-core-surface-scan.log"; then
+  printf 'FAIL Week16 direct Hoare precondition assumes target equations or success facts\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+printf 'PASS Week16 direct-keygen harness and STOP-KG-NTT boundary checks\n' \
+  | tee -a "$SUMMARY"
+
 API_BRIDGE="$PROJECT_DIR/easycrypt/refinement/composition/ApiKeyMemoryBridge.ec"
 if ! rg -F 'lemma keygen_export_vk_mode2_prefix' "$API_BRIDGE" \
     > "$LOG_DIR/api-memory-reachability-scan.log" || \
@@ -824,7 +983,7 @@ while IFS= read -r target || [ -n "$target" ]; do
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
       ;;
-    Mode2RansDecoderCursor|Mode2RansDecoderWordStep|Mode2RansDecoderNormalization|Mode2RansDecoderActualWord|Mode2RansDecoderGeneratedStep|Mode2RansDecoderCursorSteps|Mode2RansDecoderActualTrace|Mode2RansDecoderTopHoare|Mode2RansCoreCompositionBridge|Mode2RansCoreActualInverse|Mode2HbzInternalBoundaries|Mode2HbzFullEncodeTrace|Mode2HbzFullDecodeInverse|Mode2HbzFullActualInverse|Mode2HbzSignatureBoundaryLift)
+    Mode2RansDecoderCursor|Mode2RansDecoderWordStep|Mode2RansDecoderNormalization|Mode2RansDecoderActualWord|Mode2RansDecoderGeneratedStep|Mode2RansDecoderCursorSteps|Mode2RansDecoderActualTrace|Mode2RansDecoderTopHoare|Mode2RansCoreCompositionBridge|Mode2RansCoreActualInverse|Mode2RansEncoderActualTraceClosure|Mode2RansAllSixBudget|Mode2HbzInternalBoundaries|Mode2HbzFullEncodeTrace|Mode2HbzFullDecodeInverse|Mode2HbzFullActualInverse|Mode2HbzSignatureBoundaryLift|Mode2RansActualSuccessWitness)
       "$EASYCRYPT_BIN" compile -script -no-eco -timeout 10 "$file" \
         -I "$HBZ_EXTRACT" -I "$SIG_PACK_EXTRACT" \
         -I "$SIG_UNPACK_EXTRACT" \
@@ -832,7 +991,7 @@ while IFS= read -r target || [ -n "$target" ]; do
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
       ;;
-    Mode2HbzCodecSpec|Mode2HbzPrepare|Mode2HbzApply|Mode2HbzLeafRoundTrip|Mode2HbzTableCertificate|Mode2HbzSymbolWordsGenerated|Mode2RansCore|Mode2HbzActualBoundary|Mode2RansByteStack|Mode2RansNormalization|Mode2RansSuffixCopy|Mode2RansEncodeRefinement|Mode2RansDecodeRefinement|Mode2RansActualInverse|Mode2RansArrayListBridge|Mode2RansEncoderWordStep|Mode2RansEncoderGeneratedWordStep|Mode2RansEncoderInnerProgress|Mode2RansEncoderSerialization|Mode2RansEncoderSerializationComposition|Mode2RansEncoderTrace|Mode2RansEncoderActualInner|Mode2RansEncoderTailInvariant|Mode2RansEncoderFinalization|Mode2RansEncoderGeneratedFinalization|Mode2RansEncoderActualTraceClosure|Mode2RansEncoderOuterRefinement)
+    Mode2HbzCodecSpec|Mode2HbzPrepare|Mode2HbzApply|Mode2HbzLeafRoundTrip|Mode2HbzTableCertificate|Mode2HbzSymbolWordsGenerated|Mode2RansCore|Mode2HbzActualBoundary|Mode2RansByteStack|Mode2RansNormalization|Mode2RansSuffixCopy|Mode2RansEncodeRefinement|Mode2RansDecodeRefinement|Mode2RansActualInverse|Mode2RansArrayListBridge|Mode2RansEncoderWordStep|Mode2RansEncoderGeneratedWordStep|Mode2RansEncoderInnerProgress|Mode2RansEncoderSerialization|Mode2RansEncoderSerializationComposition|Mode2RansEncoderTrace|Mode2RansEncoderActualInner|Mode2RansEncoderTailInvariant|Mode2RansEncoderFinalization|Mode2RansEncoderGeneratedFinalization|Mode2RansEncoderOuterRefinement)
       "$EASYCRYPT_BIN" compile -script -no-eco -timeout 5 "$file" \
         -I "$HBZ_EXTRACT" -I "$SIG_PACK_EXTRACT" \
         -I "$SIG_UNPACK_EXTRACT" \
@@ -840,10 +999,11 @@ while IFS= read -r target || [ -n "$target" ]; do
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
       ;;
-    ExistingFirstAttemptAdapter)
+    ExistingFirstAttemptAdapter|Mode2KeygenSnapshotAlgebra|Mode2KeygenNttMulBridge|Mode2KeygenCoreEquation)
       "$EASYCRYPT_BIN" compile -script -no-eco -timeout 5 "$file" \
         -I "$PARENT_EXTRACT" -I "$CALLER_EXTRACT" -I "$NTT_EXTRACT" \
         -I "$OLD_SPEC" -I "$OLD_REFINEMENT" -I "$SECURITY" \
+        -I "$PROJECT_DIR/easycrypt/refinement/keygen" \
         -I "$NTT_SUPPORT" -I "$OLD_SUPPORT" \
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1

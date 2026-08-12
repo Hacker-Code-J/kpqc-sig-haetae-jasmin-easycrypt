@@ -81,8 +81,10 @@ observation 관계(relation)로 운반하는 sound rule 또는 증명 구조가 
 
 \begin{openobligation}[\claimid{OBL-SIGN-OUTPUT-TAIL-REACH}]
 실제 Sign output이 실제 Verify의 early-reject tree를 통과해 tail에 도달함을
-증명해야 한다. 현재 signature prefix inverse만 닫혔고 full suffix, norm,
-hint, arithmetic correctness가 남아 있다.
+증명해야 한다. 현재 signature prefix inverse와 성공 조건부 full-HBZ wrapper는
+닫혔고, fixed all-zero HBZ의 반환 실행에서는 failure도 배제되었다. 그러나 이
+고정 입력은 실제 Sign output 전체의 canonicality를 대신하지 않는다. \(h\)
+suffix, metadata/padding, norm, hint, arithmetic correctness가 남아 있다.
 \end{openobligation}
 
 \claimid{OBL-SIGN-VERIFY-CORRECTNESS}는 이 의무와 나머지 산술·challenge
@@ -91,13 +93,17 @@ hint, arithmetic correctness가 남아 있다.
 \subsection{full signature codec에서 남은 표현론}
 
 prefix의 단면--수축(section--retraction)을 full codec으로 확장하려면 적어도
-다음 사각형(square)을
-닫아야 한다.
+다음 사각형(square)이 필요하다. Week~14에는 이 중 HBZ 간선 하나가 닫혔고,
+Week~15에는 그 간선의 fixed all-zero 반환 실행에서 failure가 배제되었다.
 
 \begin{itemize}
   \item 두 size-delta metadata byte가 pack/unpack에서 같은 크기를 나타냄;
-  \item HBZ rANS actual full wrapper가 성공 조건 아래 역함수(inverse function)임;
-  \item 두 번째 \(h\) suffix codec의 encode/decode;
+  \item HBZ rANS actual full wrapper가 성공 조건 아래 역함수(inverse function)임
+        (\statusproved, Week~14);
+  \item canonical all-zero HBZ의 fixed-input Hoare success
+        (\statusproved, Week~15; termination은 미증명);
+  \item 두 번째 \(h\) suffix codec의 encode/decode
+        (\statusdeferred, Week~16 MINCORE 전환);
   \item trailing zero padding의 정준성(canonicality)과 parser의 zero gate;
   \item packer/unpacker가 목표 밖 배열 tail을 보존함;
   \item 실제 Sign이 canonical 입력과 성공 buffer bound를 산출함.
@@ -110,7 +116,8 @@ inverse를 같은 명제(proposition)로 부르면 안 된다.
 
 \subsection{대수(algebra)·수치(numerics)·확률(probability) 층(layer)에 남은 의무}
 
-현재 활발한 전선은 production full-HBZ wrapper지만, 전체 구현 refinement에는
+KeyGen의 NTT 곱셈 표현 전선은 \identifier{STOP-KG-NTT}로 동결되었고 현재
+활성 전선은 actual accepted Sign core지만, 전체 구현 refinement에는
 다음 독립적인 의무들이
 남는다.
 
@@ -137,6 +144,37 @@ inverse를 같은 명제(proposition)로 부르면 안 된다.
     실제 byte-level challenge와 accepted signature instance를 paper/ROM reduction의
     두 transcript 추출에 연결함.
 \end{description}
+
+\subsection{Week 16 KeyGen의 KG--NTT--MUL 종료 경계}
+
+actual \identifier{_kp_m23_matrix}와 \identifier{_keypair_finalize_m23}의
+투명한 two-call harness는 pre-finalization \(bp\) snapshot, finalizer semantics,
+KG-2-like low/high 분해, adjusted \(s_2\), snapshot-only mod-\(2q\) 영 합동식을
+같은 사후조건에 둔다
+\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}. 이는
+\claimid{OBL-MINCORE-KEYGEN}의 실제 coefficient 경계에서 의미 있는
+\statuspartial 진전이다.
+
+matrix helper의 결과는 \identifier{KeygenM23ArithmeticSpec.output_row}로
+표현된다. 새 \theoremname{output_row_from_mode2_ntt_words}는 이것을 actual full
+NTT, pointwise row product, inverse NTT와 Montgomery 표현으로 정확히 rewrite하며,
+\theoremname{actual_m23_matrix_snapshot_rows_explicit}는 투명한 harness의 두 active
+row에 그 표현을 적용한다.
+그러나 그 spectral 표현이 native \(R_q\) negacyclic 곱과 같다는 compiled
+정리와, \identifier{Rq.poly}를 보안 모형의
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) integer-list 곱으로 옮기는 어댑터는 없다.
+KG-NTT-MUL 감사는 누락 leaf를 odd-root orthogonality/full-NTT convolution과
+이 어댑터로 특정하고 \identifier{STOP-KG-NTT}로 종료했다. 다음 승격은 금지된다.
+
+\begin{itemize}
+  \item snapshot의 \(\mathit{pre\_bp}\)를 근거 없이
+        \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 이름 바꾸기;
+  \item KG-2-like coefficient 분해에서 faithful KG-1 또는 KG-3를 결론내기;
+  \item adjusted \(s_2\) 한 성분에서 complete KG-4 vector를 결론내기;
+  \item snapshot 합동식을 논문식 \(A s=qj\pmod{2q}\)로 승격하기;
+  \item 이 two-call harness에서 sampler, retry, packing, public API 또는 KeyGen
+        종료성을 추론하기.
+\end{itemize}
 
 \sourcepath{ImplementationSecurityGoals.ec}는 이 항목들을
 \identifier{obl_*} operation으로 열거한다. 이 파일이 컴파일된다는 것은
@@ -261,16 +299,22 @@ actual rANS harness control & \statusproved &
 실제 호출 순서와 성공/실패 분기만 완료 \\
 actual rANS core inverse & \statusproved &
 actual encoder/copy/decoder의 성공 조건부 부분정확성(success-conditioned partial correctness) \\
-actual encoder success witness & \statuspartial &
-concrete all-6 입력의 \(bad=0\) 도달성과 encoder/decoder 종료성 부재 \\
-production full-HBZ wrapper inverse & \statuspartial &
-prepare/apply와 core는 증명됨; success-conditioned wrapper size/frame 합성 미완 \\
+actual encoder success witness & \statusproved &
+fixed all-zero/all-6 반환 실행의 failure exclusion; termination/losslessness 없음 \\
+production full-HBZ wrapper inverse & \statusproved &
+prepare/apply, rANS core와 production lift의 성공 조건부 합성 완료 \\
+actual KeyGen matrix/finalize snapshot & \statuspartial &
+KG-2-like 분해와 snapshot mod-\(2q\) identity는 증명;
+마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT} \\
+\(h\) suffix codec & \statusdeferred &
+Week~16 MINCORE KeyGen 범위 전환; inverse 미시도 \\
 full signature codec & \statusblocked &
 HBZ wrapper 뒤에도 \(h\), metadata, padding과 residual frame 잔여 \\
 Sign output tail reach & \statuspartial &
-prefix만 닫힘; norm/hint/arithmetic 잔여 \\
+prefix와 success-conditioned HBZ wrapper만 닫힘; \(h\), metadata/padding,
+norm/hint/arithmetic 잔여 \\
 FC-KeyGen/Sign/Verify & \statusspecified / \statuspartial &
-하위 결정론적 seam만 일부 증명 \\
+KeyGen snapshot 포함 하위 결정론적 seam만 일부 증명 \\
 구현 EUF-CMA & \statusspecified &
 loss와 paper reduction 연결 미완 \\
 \bottomrule

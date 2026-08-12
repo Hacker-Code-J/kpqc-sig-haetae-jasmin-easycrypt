@@ -1,0 +1,168 @@
+\section{검증 당위성과 실패 모델}
+\label{sec:rationale}
+
+\subsection{왜 명세의 정확성 정리만으로 충분하지 않은가}
+
+HAETAE 명세가 요구하는 correctness는 KeyGen이 만든 키쌍과 메시지에 대해
+Sign이 만든 서명을 Verify가 승인하는 성질이다 \cite{haetae-spec}. 명세의
+correctness 및 보안 정리는 KeyGen, Sign, Verify가 명세에 적힌 환 연산, 분해,
+해시 transcript, norm 판정을 그대로 수행한다는 것을 전제로 한다. 그러나 실제
+Jasmin 구현에는 NTT/CRT 배열, 고정폭 word, 포인터와 offset, in-place 갱신,
+packing 및 rejection branch가 들어간다. 따라서 명세 정리가 참이라는 사실만으로
+추출된 프로시저가 그 정리의 알고리즘을 구현한다는 결론은 나오지 않는다.
+
+본 작업이 닫으려는 공백은 다음 세 층 사이의 대응이다.
+
+\[
+\begin{gathered}
+  \text{HAETAE 수학식}\\[-0.15em]
+  \Updownarrow\\[-0.15em]
+  \text{추출된 Jasmin 프로시저의 word/array 상태}\\[-0.15em]
+  \Updownarrow\\[-0.15em]
+  \text{공개 key/signature byte 표현}
+\end{gathered}
+\]
+
+첫 번째 화살표가 없으면 구현이 다른 수식을 계산해도 ``명세가 안전하다''는
+사실만 남는다. 두 번째 화살표가 없으면 object 수준에서 올바른 값이 실제 공개
+API의 byte 배열에 보존되는지 알 수 없다. 이 문서의 핵심 정리는 첫 번째
+화살표와 두 번째 화살표의 현재 증명 가능한 부분을 실제 추출 코드에 대해
+확립한다. 이는 구현의 기능정확성이며, 그 자체로 sampler 분포, side channel,
+termination 또는 EUF-CMA를 증명하지는 않는다.
+
+\subsection{고려하는 구현 실패}
+
+유한한 test vector는 실행한 입력에서 나온 값만 비교한다. 본 검증은 다음과 같이
+입력 공간 전체에 걸쳐 나타날 수 있는 구조적 실패를 정리의 반례로 만든다.
+
+\begin{description}[leftmargin=2.7em,style=nextline]
+  \item[계산 불일치]
+    부호, modulus, rounding, norm bound 또는 rejection 조건이 명세와 다른 경우.
+  \item[표현 불일치]
+    coefficient 순서, NTT/CRT 표현, signed/unsigned word, byte offset 또는
+    pack/unpack 변환이 같은 수학 object를 나타내지 않는 경우.
+  \item[제어흐름 불일치]
+    실패 뒤의 상태를 성공으로 사용하거나, 성공해야 하는 후속 절차를 건너뛰거나,
+    theorem이 실제로 도달할 수 없는 성공 branch만 기술하는 경우.
+  \item[경계 불일치]
+    개별 프로시저의 정리는 맞지만 key, transcript, signature object의 해석이
+    호출자와 피호출자 사이에서 달라 합성되지 않는 경우.
+  \item[실행 의미의 공백]
+    추출 모델의 postcondition은 맞지만 memory safety가 없어 그 결과를 compiled
+    Jasmin 실행으로 올릴 수 없는 경우.
+\end{description}
+
+어떤 오류가 실제 위조로 이어진다고 이 문서가 주장하지는 않는다. 다만 아래
+계산이 명세와 다르면 구현이 명세의 correctness 정리 또는 보안 환원의 전제를
+만족한다고 말할 근거가 사라진다. 따라서 보안 증명과 별개로 이 대응을 검증해야
+한다.
+
+\subsection{각 검증 대상의 필요성}
+\label{sec:target-necessity}
+
+대상은 임의로 선택한 helper 목록이 아니라, 키 생성에서 최종 승인까지 값이
+흐르는 한 개의 의존 사슬을 따른다.
+
+\[
+\begin{aligned}
+  &\text{KeyGen 키 관계}
+  \longrightarrow \text{Sign의 commitment와 response}
+  \longrightarrow \text{hint/codec}\notag\\
+  &\hspace{34mm}\longrightarrow \text{Verify의 복원}
+  \longrightarrow \text{challenge·norm 승인}.
+\end{aligned}
+\]
+
+\begingroup
+\small
+\begin{longtable}{L{18mm}L{39mm}L{45mm}L{38mm}}
+\toprule
+대상 & HAETAE에서의 역할 & 구현 오류가 만드는 구체적 실패 & 정리가 제공하는 보증 \\
+\midrule
+\endhead
+KeyGen &
+검증키와 비밀키가 같은 키쌍임을 나타내는
+\(As=qj\pmod{2q}\)를 만들고, 공개되는 \(b_1\)과 비밀 성분을 저장한다. &
+잘못된 truncation, NTT 곱 또는 부호는 Sign이 사용하는 비밀 성분과 Verify가
+재생성할 공개 행렬의 관계를 끊는다. &
+actual matrix/finalization core의 배열이 \textup{(KG-1)}--\textup{(KG-4)}와
+\(As=qj\pmod{2q}\)를 만족함을 보인다. byte packing과 parent guard는 별도
+확장이다. \\
+\addlinespace
+Sign challenge &
+\((w_1,\LSB(\lfloor y_0\rceil),\mu)\)를 hash하여 commitment, 메시지와
+challenge를 결합한다. &
+byte transcript, component 순서 또는 challenge weight가 다르면 Sign과
+Verify가 서로 다른 challenge를 계산한다. &
+실제 transcript와 \textup{(S-3)}의 challenge 식이 정확히 대응함을 보인다. \\
+\addlinespace
+Sign response·rejection &
+\(z=y+(-1)^bcs\)를 만들고 명세의 두 norm 조건을 통과한 trial만 반환한다. &
+곱셈·부호 오류는 challenge에 대한 올바른 response 관계를 깨뜨린다. 비교 연산,
+strictness 또는 상수 오류는 명세 밖의 trial을 승인하거나 유효 trial을 버린다. &
+actual \(z\) 식과 \(reject=0\)의 두 정수 norm predicate를 동치로 연결한다. \\
+\addlinespace
+Sign hint &
+전송하지 않은 \(z_2\) 정보를 대신하여 Verify가 Sign과 같은 \(w_1\)을
+복원하게 한다. &
+high-bit 경계, centered reduction 또는 modulus 오류는 올바른 서명의 challenge
+재계산을 다르게 만들어 false reject를 일으킨다. &
+실제 coefficient마다 명세의 hint 식이 성립하고 Verify 복원 lemma에 사용할
+범위가 보존됨을 보인다. \\
+\addlinespace
+Verify reconstruction &
+압축된 \((x,v,h,c)\)와 VK에서 \(\widetilde z_1,w',u,w_1,\widetilde z_2\)를
+재구성한다. &
+parity, division by two, arithmetic shift 또는 centered reduction 오류는 공격자가
+제공한 byte가 의도한 수학 object와 다른 값으로 해석되게 한다. &
+실제 word/array 계산을 \textup{(V-1)}--\textup{(V-6)}의 integer/ring 식으로
+refine한다. \\
+\addlinespace
+Verify acceptance &
+재구성된 norm과 message-bound challenge를 검사하는 외부 승인 경계이다. &
+잘못된 boolean 조합은 honest signature를 거부하거나, 명세 predicate를 만족하지
+않는 object를 승인한다. 후자는 곧바로 위조 증명은 아니지만 명세 보안 정리의
+구현 적용을 무효화한다. &
+actual \(reject=0\)과 norm·challenge 조건의 필요충분 동치를 보인다. \\
+\addlinespace
+HBZ/rANS codec (기존 byte 경계) &
+Sign의 \(z_1\) high coefficients와 실제 signature byte 구간을 연결한다. &
+순서·길이·offset 오류는 다른 object를 encode하거나 decode한다. 성공 branch가
+도달 가능하다는 증인 없이 inverse만 증명하면 정리가 공허할 수도 있다. &
+actual encoder/copy/decoder inverse와 frame 보존을 제공한다. fixed all-6 결과는
+종료한 실행의 실패를 배제하지만 termination/non-vacuity는 제공하지 않는다. \\
+\addlinespace
+제한 합성 &
+KeyGen, Sign, decoded signature object, Verify의 국소 정리를 하나의 honest
+accepted execution으로 연결한다. &
+각 정리가 서로 다른 key 배열, message transcript 또는 representation을
+가정하면 모든 국소 정리가 참이어도 최종 Verify는 거부할 수 있다. &
+동일 key/message와 object identity 아래 actual Verify core의
+\(reject=0\)을 도출한다. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{현재 범위가 정당화하는 결론}
+
+활성 MINCORE 대상들은 accepted KeyGen과 Sign 실행이 만든 수학 object가 동일한
+key와 message transcript 아래 Verify core에서 승인된다는
+\textbf{제한된 implementation completeness}를 주장하기 위해 모두 필요하다.
+하나라도 빠지면 다음과 같은 단절이 남는다.
+
+\begin{itemize}
+  \item KeyGen 정리가 없으면 Verify 재구성에서 사용하는 키 관계를 구현에서
+        얻지 못한다.
+  \item Sign 또는 Verify 정리가 없으면 같은 challenge와 norm predicate를
+        계산했다는 사실을 얻지 못한다.
+  \item full codec 정리가 없으면 public signature byte 배열까지 결론을 올릴 수
+        없지만, 명시적 decoded-object identity를 둔 현재 합성은 수행할 수 있다.
+  \item 합성 정리가 없으면 개별 postcondition의 전제가 실제 호출 사이에서
+        동시에 성립한다는 보장이 없다.
+  \item safety 증거가 없으면 결론은 extracted EasyCrypt model에 머문다.
+\end{itemize}
+
+반대로 이 대상들만으로는 임의 byte 입력에 대한 parser soundness, sampler의
+확률분포, rejection loop의 termination, constant-time 실행 또는 EUF-CMA를
+결론낼 수 없다. 이 구분 때문에 본 작업은 전체 보안 증명보다 먼저 결정적 핵심
+경로와 표현 경계를 닫고, 제외한 성질은 독립된 후속 정리로 남긴다.

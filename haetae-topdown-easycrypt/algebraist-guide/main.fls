@@ -1034,10 +1034,10 @@ INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msam7.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm10.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/amsfonts/symbols/msbm7.tfm
+OUTPUT main.xdv
 INPUT ./main.toc
 INPUT main.toc
 INPUT main.toc
-OUTPUT main.xdv
 OUTPUT main.toc
 INPUT ./sections/01-reading-contract.tex
 INPUT ./sections/01-reading-contract.tex

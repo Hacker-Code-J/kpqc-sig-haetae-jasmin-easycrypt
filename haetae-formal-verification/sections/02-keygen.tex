@@ -1,0 +1,88 @@
+\section{KeyGen: 핵심 상태가 만족해야 하는 정확한 키 방정식}
+\label{sec:keygen}
+
+\paragraph{검증 당위성.}
+HAETAE의 bimodal signing과 Verify 재구성은 KeyGen이 만든 공개 행렬과 비밀
+vector가 \(As=qj\pmod{2q}\)를 만족한다는 사실에 의존한다
+\cite{haetae-spec}. 이 관계는 Sign과 Verify가 독립적으로 사용하는 두 byte
+배열이 실제로 같은 키쌍임을 나타내는 연결 불변식이다. finalization의 부호,
+truncation 또는 NTT/CRT 곱이 틀리면 후속 packer와 각 절차가 정상 종료하더라도
+이 불변식이 깨질 수 있다. 그러므로 출력 길이나 test-vector 일치가 아니라 실제
+matrix/finalization core가 만든 배열을 환의 키 식으로 해석하여 검증해야 한다.
+992/1408-byte packing과 accepted parent lift는 이 core 정리와 구분한다.
+
+\subsection{중간값과 저장 표현}
+
+한 KeyGen iteration에서 sampler와 행렬 곱이 다음 값을 만든다고 하자.
+
+\[
+  b=a+A_{\mathrm{gen}}s_{\mathrm{gen}}+e_{\mathrm{gen}}\pmod q.
+  \tag{KG-1}
+\]
+
+실제 \proc{_keypair_finalize_m23}는 각 coefficient에 대해
+\(b_0\in\{-1,0,1\}\)와 저장되는 high part \(b_1\)을 계산하여
+
+\[
+  b=b_0+2b_1
+  \tag{KG-2}
+\]
+
+을 만족시켜야 한다. 여기서 \(b_1\)은 992-byte verification key에 packing되는
+값이다. 이 저장 표현을 기준으로 verifier가 사용하는 전체 키 행렬과 secret
+vector를 다음과 같이 정의한다.
+
+\begin{align}
+A &:=
+ \left(
+   2(a-2b_1)+qj
+   \;\middle|\;
+   2A_{\mathrm{gen}}
+   \;\middle|\;
+   2I_2
+ \right)
+ \pmod{2q},
+ \tag{KG-3}\\
+s &:=
+ \left(1\;\middle|\;s_{\mathrm{gen}}\;\middle|\;
+ e_{\mathrm{gen}}-b_0\right).
+ \tag{KG-4}
+\end{align}
+
+\subsection{키 방정식}
+
+\cref{sec:keygen}의 핵심 결론은 모호한 ``키가 올바르다''가 아니라 다음
+coefficientwise 환 등식이다.
+
+\begin{align*}
+As
+ &=2(a-2b_1)+qj
+   +2A_{\mathrm{gen}}s_{\mathrm{gen}}
+   +2(e_{\mathrm{gen}}-b_0)\\
+ &=2b-4b_1-2b_0+qj\\
+ &=qj\pmod{2q}.
+\end{align*}
+
+\begin{verificationgoal}[KeyGen core theorem]
+실제 \proc{_kp_m23_matrix}와 \proc{_keypair_finalize_m23}를 mode-2
+\((k,m)=(2,3)\) 배열 상태에서 호출한다. matrix 입력은
+\(a,A_{\mathrm{gen}},s_{\mathrm{gen}},e_{\mathrm{gen}}\)의 명시적
+NTT/CRT representation을 만족해야 하며, desired key equation은 전제로 두지
+않는다. 종료한 core 실행의 결과 배열을 decoding하여 다음 object를 얻는다.
+\[
+  (seed_A,b_1,s_{\mathrm{gen}},e_{\mathrm{gen}}-b_0,K).
+\]
+이 object가
+\textup{(KG-1)}--\textup{(KG-4)}를 만족하고
+\[
+  As=qj\pmod{2q}
+\]
+를 만족함을 증명한다. 반환 code, 실제 변경 구간과 비대상 array frame도 함께
+보존한다.
+\end{verificationgoal}
+
+이 목표에는 seed에서 sampler 출력으로 가는 확률분포의 정확성이나 rejection
+loop의 거의확실한 종료를 포함하지 않는다. NTT/CRT 배열 표현과
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 사이의 refinement는 포함한다. 실제
+\proc{_keypair_full_m23}의 guard, 992/1408-byte packing과 public API lift는
+이번 MINCORE 완료 조건이 아니다.

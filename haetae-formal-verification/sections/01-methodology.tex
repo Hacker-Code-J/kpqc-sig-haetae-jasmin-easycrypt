@@ -1,0 +1,242 @@
+\section{검증 방법론}
+\label{sec:methodology}
+
+\subsection{재현 가능한 일곱 단계}
+
+본 작업에서 ``EasyCrypt로 검증한다''는 말은 수학식을 별도 모델에서 다시
+계산한다는 뜻이 아니다. pinned Jasmin 구현에서 추출된 실제 procedure와
+HAETAE 명세의 수학 object 사이에 refinement 정리를 세우고, 그 정리들을 실제
+호출 순서대로 합성한다는 뜻이다. 전체 절차는 다음 일곱 단계로 고정한다.
+
+\begin{enumerate}
+  \item \textbf{소스와 추출 경계 고정.}
+        Jasmin source hash, mode~2 호출 상수와 대상 procedure 목록을 고정하고
+        \proc{jasmin2ec}로 EasyCrypt procedure를 생성한다.
+  \item \textbf{수학 명세 고정.}
+        HAETAE 명세의 환·정수 식, decomposition, norm predicate와 byte/object
+        경계를 실행 코드와 독립적으로 정의한다.
+  \item \textbf{표현 관계 정의.}
+        수학 polynomial·vector·signature object가 구현의 NTT/CRT 배열,
+        고정폭 word와 byte slice에 어떻게 표현되는지 predicate로 명시한다.
+  \item \textbf{실제 procedure의 국소 Hoare 정리.}
+        추출된 procedure를 직접 호출하여 precondition에서 실제 postcondition을
+        도출한다. 성공이나 원하는 출력 equality를 전제로 넣지 않는다.
+  \item \textbf{제어흐름과 정확성 양식 분리.}
+        loop invariant, failure/success branch, frame을 증명하고 partial
+        correctness, losslessness, termination을 서로 다른 주장으로 관리한다.
+  \item \textbf{호출 순서 합성.}
+        KeyGen, Sign, Verify의 국소 정리를 실제 caller/callee binding, 동일
+        transcript와 decoded-signature-object identity 아래 합성하여 제한된
+        최종 승인 정리를 만든다.
+  \item \textbf{기계적 검증과 증거 보존.}
+        fresh compile, proof-hole·axiom scan, extraction drift, safety evidence와
+        claim ledger를 검사하고 재현 가능한 로그를 남긴다.
+\end{enumerate}
+
+이 순서에서 앞 단계는 뒤 단계의 theorem precondition을 정당화한다. 앞 단계가
+미완료이면 그 사실을 새 가정으로 숨기지 않고 최종 claim의 경계로 공개한다.
+
+현재 7일 MINCORE 실행에서는 decoded signature object를 합성 경계로 고정한다.
+HBZ/rANS의 기존 결과는 재사용 증거이지만, \(h\), metadata, padding, full parser를
+새로 닫는 작업은 보류한다. 따라서 byte codec 방법은 후속 확장의 방법론이지
+이번 headline theorem의 완료 조건이 아니다.
+
+\subsection{소스 고정, 추출과 증명 경계}
+
+검증 단위는 함수 이름이 비슷한 새 observation model이 아니라
+\cref{sec:scope}에 열거한 pinned Jasmin procedure의 EasyCrypt 추출 결과이다.
+각 최종 정리 또는 그 직접 하위 정리는 해당 generated procedure를
+\texttt{proc} 본문에서 직접 호출해야 한다. proof-friendly wrapper를 사용할
+경우에는 wrapper와 generated procedure 사이의 exact equivalence를 먼저
+증명한다. 이 조건은 구현의 branch, word 연산 또는 memory update를 수학식으로
+대체한 뒤 그 대체 모델만 증명하는 것을 막는다.
+
+추출은 다음 두 경계를 구분한다.
+
+\begin{itemize}
+  \item \textbf{EasyCrypt 실행 경계:} generated procedure의 명령 의미에 대한
+        Hoare 결과이다.
+  \item \textbf{compiled Jasmin 경계:} 위 결과에 Jasmin compiler theorem을
+        적용한 결과이며, 대상 procedure의 safety 증거를 추가로 요구한다.
+\end{itemize}
+
+따라서 safety가 확보되지 않은 정리는 ``extracted EasyCrypt model 수준''으로만
+표기하고 assembly-level functional correctness로 올리지 않는다. compiler,
+extraction, EasyCrypt kernel 및 representation bridge는
+\cref{sec:artifact-plan}의 TCB에 기록한다.
+
+\subsection{수학 명세와 구현 표현의 연결}
+
+명세는 \(\Rq\)의 polynomial·vector와 무한정수 연산으로 기술하지만 구현은
+고정 길이 배열과 word를 사용한다. 각 procedure precondition에는 적어도 다음
+세 층을 동시에 둔다.
+
+\[
+\begin{gathered}
+  \mathsf{Spec}(x)\\[-0.2em]
+  \Updownarrow\;\mathsf{Rep}(x,a)\\[-0.2em]
+  \mathsf{ArrayWordState}(a,m)\\[-0.2em]
+  \Updownarrow\;\mathsf{Memory}(m)\\[-0.2em]
+  \mathsf{ConcreteBytesAndPointers}.
+\end{gathered}
+\]
+
+여기서 \(\mathsf{Rep}\)는 결과 equality의 다른 이름이 아니라, 입력 배열이 어떤
+수학 object를 나타내는지 정의하는 독립 predicate이다. 필요한 bridge lemma는
+다음 범주로 나눈다.
+
+\begin{itemize}
+  \item NTT/CRT 배열과 \(\Rq\)의 coefficientwise polynomial 연산,
+  \item W64/W32 값과 정수 사이의 범위 및 no-wraparound 관계,
+  \item signed/unsigned 변환, arithmetic shift와 division by two,
+  \item \(\HighBits\), \(\LowBits\), \(\LSB\), centered reduction과 rounding,
+  \item byte offset, slice equality, encode/decode와 coefficient 순서,
+  \item pointer separation, 변경 구간과 보존해야 할 prefix·suffix frame.
+\end{itemize}
+
+상수 범위나 memory-disjointness가 필요한 경우 theorem statement에 공개한다.
+SMT가 우연히 concrete 상수를 풀었다는 사실을 representation theorem으로
+대체하지 않는다.
+
+\subsection{국소 Hoare 정리의 표준 형태}
+
+각 actual procedure 정리는 다음 형태를 따른다.
+
+\[
+\begin{aligned}
+\{\;&\mathsf{ArgBinding}
+    \land \mathsf{Mode2Constants}
+    \land \mathsf{InputRep}
+    \land \mathsf{MemoryContract}\;\}\\
+&\text{\proc{Actual.M._procedure}}\\
+\{\;&\mathsf{ExactResult}
+    \land \mathsf{OutputRep}
+    \land \mathsf{BranchState}
+    \land \mathsf{Frame}\;\}.
+\end{aligned}
+\]
+
+\(\mathsf{ArgBinding}\)은 harness 인자와 procedure formal argument의 동일성을,
+\(\mathsf{Mode2Constants}\)는 실제 \(q,n,k,\ell,\tau\) 및 길이를,
+\(\mathsf{MemoryContract}\)는 유효 범위와 alias 조건을 고정한다. postcondition은
+수학 결과뿐 아니라 반환 code, 실행된 branch, offset, 변경하지 않은 배열 구간을
+함께 기술한다.
+
+다음 항목은 원하는 결론을 가정하는 것이므로 원칙적으로 precondition에 두지
+않는다.
+
+\begin{itemize}
+  \item encoder 또는 decoder가 성공했다는 가정,
+  \item decoded object가 입력과 같다는 가정,
+  \item copied trace나 decoder byte read가 encoder 출력과 같다는 가정,
+  \item Sign 또는 Verify의 최종 \(reject\) 값,
+  \item KeyGen의 최종 키 방정식이나 packing equality.
+\end{itemize}
+
+이 값들은 실제 하위 procedure의 postcondition과 bridge lemma에서 도출해야 한다.
+도출할 수 없는 경우에는 theorem 이름과 claim 상태에 그 한계를 표시한다.
+
+\subsection{대상별 증명 전략}
+
+\begingroup
+\small
+\begin{longtable}{L{27mm}L{45mm}L{70mm}}
+\toprule
+대상 & 실제 증명 경계 & 핵심 증명 방법 \\
+\midrule
+\endhead
+KeyGen &
+\proc{_kp_m23_matrix}, \proc{_keypair_finalize_m23}의 focused actual sequence &
+matrix/NTT 결과를 \textup{(KG-1)}로 refine하고 finalization에서
+\textup{(KG-2)}를 얻는다. 배열로 구성한 \(A,s\)에 환 계산을 적용하여
+\(As=qj\pmod{2q}\)를 도출하고 return/frame 상태를 보존한다. accepted parent의
+guard, 길이와 packing lift는 7일 MINCORE 완료 조건에서 제외한다. \\
+\addlinespace
+Sign &
+\proc{_sf_round_challenge_mode2}, \proc{_sf_z_check},
+\proc{_sf_hint_mode2}의 순차 실행 &
+raw \(\mu\) memory transcript와 challenge hash 입력을 연결하고, NTT challenge
+product를 \(cs\)로 refine한다. fixed-point accumulator와 정수 squared norm의
+범위를 증명하여 두 rejection comparison을 동치화하고, high-bit bridge로 hint
+식을 얻는다. \\
+\addlinespace
+Verify &
+canonical object 이후 \proc{_verify_prepare_z1_wprime}부터
+\proc{_sign_verify_tail_m23}까지 &
+byte/high-low decomposition에서 \(\widetilde z_1,w'\)를 복원하고, CRT matrix
+결과를 \(u\)로 refine한다. 분자의 parity와 word 범위를 이용해 arithmetic shift를
+정수 나눗셈으로 연결한 뒤, 반환 \(reject=0\)과 norm·challenge conjunction의
+필요충분 동치를 증명한다. \\
+\addlinespace
+HBZ/rANS codec (기존 증거) &
+actual encoder, suffix copy, actual decoder와 full wrapper; Week~16 확장 없음 &
+encoder의 \texttt{segment\_matches}, copy의 \texttt{slice\_eq}, decoder의
+pointwise read 조건을 adapter lemma로 연결한다. failure/success postcondition과
+frame을 모두 유지한다. fixed all-6 결과는 종료한 실행의 실패만 배제하며
+termination/losslessness를 제공하지 않는다고 표기한다. \\
+\addlinespace
+제한 합성 &
+accepted KeyGen·Sign 결과와 actual Verify core &
+동일 VK, prefix/context, message memory로 \(\mu=\widetilde\mu\)를 얻고 명시적
+decoded-object identity로 signature object를 전달한다. KeyGen의 키 식과 Sign의
+hint 식을 Verify 복원 lemma에 대입하여 최종 challenge equality와 norm 승인을
+도출한다. \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\subsection{제어흐름, 종료성과 non-vacuity}
+
+KeyGen과 Sign에는 rejection loop가 있으므로 일반 headline theorem은
+\textbf{종료한 accepted execution}에 대한 Hoare partial correctness로 작성한다.
+이는 해당 실행이 종료하면 postcondition이 성립한다는 뜻이지, 모든 입력에서
+loop가 종료한다거나 기대 반복 횟수가 유한하다는 뜻이 아니다. loop 본문에서는
+accepted branch에 필요한 invariant와 rejected iteration 뒤의 frame을 증명하고,
+termination/losslessness는 별도 claim으로 관리한다.
+
+codec처럼 실제 procedure가 실패할 수 있는 경우에는 결과를 다음처럼 분기한다.
+
+\begin{itemize}
+  \item failure branch: 반환 code, 미실행 후속 절차와 보존된 상태,
+  \item success branch: 정확한 크기·trace·decoded equality와 frame.
+\end{itemize}
+
+success-conditioned partial correctness만으로는 성공 branch가 실제로 도달한다고
+결론낼 수 없다. Week~15 결과는 all-zero HBZ의 \emph{종료한} 실행이 성공함을
+보이지만 termination/losslessness를 보이지 않으므로 non-vacuous witness로
+부르지 않는다. Verify core는 고정 길이 loop의 bounded 실행으로 다루며, 전체
+parser나 malformed-input 경로를 포함하지 않으면 그 사실을 precondition에
+명시한다.
+
+\subsection{합성 정리와 완료 증거}
+
+국소 정리는 caller가 실제로 제공하는 배열과 memory를 precondition에 대입할 수
+있을 때만 합성한다. composition harness는 production 호출 순서를 보존하고,
+procedure 사이에서 다음 상태를 명시적으로 전달한다.
+
+\begin{itemize}
+  \item KeyGen이 만든 VK/SK object와 \(As=qj\pmod{2q}\),
+  \item Sign과 Verify가 공유하는 VK, prefix/context, message transcript,
+  \item Sign의 \((z,h,c)\)와 동일 object를 나타내는 decoded \((x,v,h,c)\),
+  \item 각 호출의 pointer binding, 변경 구간과 frame.
+\end{itemize}
+
+최종 목표는 다음 implication을 actual procedure composition의 postcondition으로
+도출하는 것이다.
+
+\[
+\begin{gathered}
+  \mathsf{TerminatedAcceptedKeyGen}
+  \land \mathsf{TerminatedAcceptedSign}\\
+  {}\land \mathsf{SameKeyAndMessageTranscript}
+  \land \mathsf{DecodedSignatureObjectIdentity}\\
+  {}\Longrightarrow \mathsf{ActualVerifyCore.reject}=0.
+\end{gathered}
+\]
+
+정리는 EasyCrypt가 한 번 통과했다는 사실만으로 완료 처리하지 않는다. 각 신규
+target의 fresh \proc{-no-eco} compile, 전체 aggregate compile, proof-hole·authored
+axiom·debug declaration scan, extraction regeneration/hash 및 generated table drift,
+read-only source root, safety 결과와 독립 audit를 함께 확인한다. theorem manifest,
+claim ledger, 보고서와 논문이 같은 precondition과 claim status를 가질 때만
+\cref{sec:artifact-plan}의 완료 기준을 만족한다.

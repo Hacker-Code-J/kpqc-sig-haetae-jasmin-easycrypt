@@ -362,5 +362,53 @@ paper reduction.
    `signature_pack_unpack_hbz_full_actual_exact` /
    `signature_pack_unpack_hbz_full_inverse_mode2` compose actual
    `_encode_hb_z1_full`/`_decode_hb_z1_full` with the proved prepare/apply
-   inverse and rANS core inverse. The actual all-zero success witness remains
-   open; do not start the `h` codec until that witness compiles.
+   inverse and rANS core inverse. The fixed all-6 success witness now
+   compiles, and the `h` codec stays out of scope until Week 16.
+7. **Week 15 decision — GO-WITNESS.**
+   `Mode2RansActualSuccessWitness.actual_rans_encode_all_six_success` closes
+   the fixed all-6 witness, and the HBZ lift
+   `actual_hbz_full_encode_decode_zero_success_mode2` /
+   `signature_pack_unpack_hbz_zero_success_mode2` carries it through the
+   actual wrapper boundary. `OBL-RANS-ACTUAL-SUCCESS-WITNESS` is now PROVED as
+   fixed-input Hoare partial correctness.
+8. **Week 16 first-task decision — narrowed to the KeyGen snapshot leaf.**
+   The active Week 16 result is the transparent two-call KeyGen snapshot
+   harness. `Mode2KeygenCoreEquation.actual_m23_matrix_finalize_semantic_snapshot`
+   compiles after the rename to the mod-2q zero predicate. The faithful
+   `KG-1`, `KG-3`, and paper `A s = q j (mod 2q)` claims remain blocked on
+   the missing `output_row` / full-NTT-to-`Agen*sgen` multiplication bridge.
+   `OBL-SIG-H-ENCODE-DECODE` stays deferred; the Sign, Verify, and
+   composition lanes remain planned, not claimed.
+9. **KG-NTT-MUL continuation decision — STOP-KG-NTT.**
+   The actual forward-NTT, pointwise-accumulation, and inverse-NTT procedure
+   leaves are already checked, and `Mode2KeygenNttMulBridge` fresh-compiles
+   their last `output_row` representation rewrite plus its consequence for
+   both active rows of the direct matrix/finalizer harness. The checked tree has no
+   odd-root orthogonality/full-NTT convolution theorem and no `Rq.poly` to
+   HAETAE integer-list multiplication adapter.  KeyGen is frozen at the
+   KG-2/finalization boundary; KG-1, KG-3, complete KG-4, and the paper key
+   equation are not claimed.  The active lane moves to MINCORE-SIGN.
+
+## Sprint 16 — seven-day minimum paper lane
+
+1. **First-task status: CONTINUE-KG (`BLOCKED-KG-NTT-MUL`).**  The exact
+   actual procedure boundary, direct two-call harness, snapshot low/high
+   decomposition, adjusted-`s2` equation, snapshot mod-`2q` identity, and
+   frames compile.
+2. **Continuation status: STOP-KG-NTT.**  The bridge audit reached the exact
+   absent leaf
+   `mont(full_invntt(ahat * full_ntt(p) * inv R)) = full_invntt(ahat) &* p`.
+   Its required odd-root orthogonality formula is not machine-checked in the
+   NTT artifact; the security-model list adapter is also absent.
+3. **Frozen KeyGen scope:** retain KG-2 and actual finalization semantics only.
+   Do not substitute the snapshot-only identity for KG-1, KG-3, complete KG-4,
+   or the paper `A s = q j (mod 2q)` theorem.
+4. **Active single target:** move to
+   `Mode2SignAcceptedCore.actual_sign_accepted_core_equations_mode2` over the
+   actual challenge-rounding, `z`-check, and hint helpers.
+5. Keep sampler distributions, retry termination, packers, public APIs, and
+   general NTT algebra outside the Sign target.  Freeze each claim only after
+   individual and aggregate fresh compilation and independent audit.
+
+The exact schedule, fallback boundary, non-claims, and completion gates are in
+`WEEK16_MINCORE_PLAN.md`.

@@ -70,6 +70,8 @@ reachable.
 
 ## Remaining edge
 
-The remaining open edge is the actual all-zero success witness. Until that is
-proved, `OBL-SIG-HBZ-ENCODE-DECODE` should be read as success-conditioned
-partial correctness, not as an unconditional round-trip theorem.
+The fixed all-6 failure-exclusion theorem for terminating runs compiles as
+`Mode2RansActualSuccessWitness.actual_hbz_full_encode_decode_zero_success_mode2`
+and `signature_pack_unpack_hbz_zero_success_mode2`. `OBL-SIG-HBZ-ENCODE-DECODE`
+should still be read as success-conditioned partial correctness, not as an
+unconditional round-trip theorem. Week 16 is now the `h` codec only.

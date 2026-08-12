@@ -91,6 +91,63 @@ current checked result is reproducible extraction/compilation of one-shot
 wrappers, and the specialized KeyGen/Sign/Verify paths do not call those
 wrappers directly.
 
+## Week 16 direct M23/finalizer harness boundary
+
+`Mode2KeygenCoreEquation.ec` and `Mode2KeygenSnapshotAlgebra.ec` are authored
+locally. No source was copied.
+
+- `Mode2KeygenCoreEquation.ec` SHA-256:
+  `6f1cd6f8bae4d3228280da9fe044f9106ac803b3ad6a27347432904b66912d9f`.
+- `Mode2KeygenSnapshotAlgebra.ec` SHA-256:
+  `d86ecbbcf338f0916ee28131e3adaef1ae534d54a4ba6c74d83933e0c244dbe4`.
+
+- `Mode2KeygenCoreEquation.actual_m23_matrix_finalize_snapshot` directly reuses
+  `TargetKeygenM23Arithmetic.kp_m23_matrix_mode2_arithmetic_correct` and
+  `TargetKeygenM23Finalize.keypair_finalize_m23_mode2_correct` through a
+  transparent two-call harness over the generated parent procedures
+  `_kp_m23_matrix` and `_keypair_finalize_m23`.
+- The harness snapshots the pre-finalization `bp` array and returns only
+  `(pre_bp, s1hat, final_bp, adjusted_s2)`. Its Hoare precondition uses the
+  actual matrix/finalizer range premises only; it does not assume desired
+  key-generation equations, acceptance, retry success, packing, or public-API
+  caller facts.
+- `Mode2KeygenSnapshotAlgebra.ec` records the local low/high decomposition
+  algebra induced by the finalizer residue. The core theory defines the
+  `actual_snapshot_mod2q_zero` predicate and proves it from finalizer semantics
+  with `finalize_semantic_output_snapshot_mod2q_zero`. This is a pointwise
+  arithmetic hook, not a proof that the transparent harness already
+  establishes the full `(KG-1)` to `(KG-4)` equation package.
+
+Current blocker hook: the direct harness stops at exact extracted helper
+semantics. The faithful `(KG-1)`, `(KG-3)`, and paper `A s = q j (mod 2q)`
+claims need a theorem identifying `KeygenM23ArithmeticSpec.output_row`---the
+checked full-NTT/pointwise/inverse-NTT representation---with the security
+model's `Agen * sgen` polynomial product. Retry and acceptance remain deferred,
+not premises or substitutes for that missing bridge.
+
+### KG-NTT-MUL continuation and stop boundary
+
+`Mode2KeygenNttMulBridge.ec` is an authored boundary file. It reuses
+`KeygenM23ArithmeticSpec.pointwise_row_words_ntt` to fresh-compile the exact
+rewrite
+`output_row = array256_mont(full_invntt(pointwise_row_words ...))` and its
+representation transport. Its `actual_m23_matrix_snapshot_rows_explicit`
+corollary weakens the already-compiled direct two-call snapshot theorem to
+that explicit representation for both active rows. It does not copy an actual
+loop proof or import the desired product as a predicate or assumption. The
+authored file SHA-256 is
+`cc9c645b58fc8c1165982f3053b62148e690e5de7b72c1c5bf4ad214dfd7c2eb`.
+
+The continuation audited the checked NTT leaves
+`NTTFullAlgebra.ntt_full_ntt` and `invntt_full_invntt` and the actual
+pointwise/inverse parent refinements. The first absent mathematical leaf is
+the odd-root orthogonality/full-NTT spectral action
+`mont(full_invntt(ahat * full_ntt(p) * inv R)) = full_invntt(ahat) Rq.&* p`.
+A subsequent adapter from `Rq.poly` arrays to
+`HAETAE_Algebra.poly_mul` integer lists is also absent. Neither result is
+treated as reused, trusted, or assumed. Final status is `STOP-KG-NTT`; KeyGen
+is frozen at KG-2/finalization and the active MINCORE lane moves to Sign.
+
 ## Week 2 generated-procedure boundary
 
 `ExtractedPackedKeyPrefix.ec` imports generated procedures from
@@ -737,3 +794,36 @@ introduced from the actual prepare call's post-state; it is not a theorem
 precondition or an arbitrary exact-trace witness. The final pair and
 production theorems retain the zero-size branch and make no termination,
 success-reachability, malformed-input, zero-loss, or security claim.
+
+## Week 15 fixed all-six success-witness reuse and authored boundary
+
+Week 15 reuses the Week 14 actual-wrapper chain and the existing literal-table
+and loop invariants. In particular, it imports
+`actual_rans_encode_trace_closure`, `encoder_outer_tail_inv`,
+`encoder_inner_tail_inv`, `full_encode_prepare_mode2_correct`,
+`pack_target_encode_hb_z1_full_exact_focused`,
+`actual_decode_hb_z1_full_mode2_inverse`, and
+`signature_pack_unpack_hbz_full_actual_exact`. No encoder loop is copied into a
+new theory.
+
+The authored Week 15 proof boundary is:
+
+- `Mode2RansAllSixBudget.ec` (SHA-256
+  `4f3368905676620a1bd118ca65dc7b273a84d9cef5890f108ee24eeccd874dac`),
+  which proves the byte-level zero-HBZ load/canonical bridge, actual prepare
+  all-six result, symbol-6 one-byte normalization bound, first-four
+  zero-emission calculation, and the 1020-byte coarse normalization budget;
+- `Mode2RansEncoderActualTraceClosure.ec` (SHA-256
+  `689d563a3a2c94b49df5c6b9e5259520223131f5f44638738840f77057648287`),
+  whose strengthened postcondition preserves the concrete `off < 4` failure
+  cause while retaining the previous public theorem by consequence; and
+- `Mode2RansActualSuccessWitness.ec` (SHA-256
+  `c006c23c4e5e31bdb20cdb64361dacf904ee65267fb06a3c10b50ba70feadb19`),
+  which excludes that failure branch for all-six input and lifts the resulting
+  Hoare theorem through the actual full HBZ and SignaturePack boundaries.
+
+The hashes are drift identifiers, not trusted proof evidence. Evidence is the
+fresh `-no-eco` compilation recorded by `verify-all.sh`. These are Hoare
+partial-correctness results: they do not establish termination, probability
+one, a non-vacuous execution witness, all-canonical-input success, or encoding
+security.

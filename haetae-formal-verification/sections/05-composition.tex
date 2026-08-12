@@ -1,0 +1,72 @@
+\section{KeyGen--Sign--Verify 제한 합성}
+\label{sec:composition}
+
+\paragraph{검증 당위성.}
+KeyGen, Sign, Verify의 국소 정리가 각각 참이어도 서로 다른 key 해석, message
+transcript 또는 coefficient 표현을 전제로 한다면 end-to-end correctness는
+따라오지 않는다. 합성 정리는 실제 호출 사이에서 그 전제들이 동시에 성립하고,
+KeyGen의 키 관계와 Sign의 hint가 Verify 복원식에 정확히 소비됨을 확인한다.
+따라서 이 정리는 개별 산술 정리의 단순 묶음이 아니라, accepted Sign 결과가
+actual Verify core에서 승인된다는 구현 수준 completeness를 얻는 마지막
+필수 단계이다.
+
+\subsection{합성할 세 사실}
+
+KeyGen과 Sign 결과가 Verify 계산으로 연결되기 위해 다음 세 등식이 실제
+배열 표현에서도 성립해야 한다 \cite{haetae-spec}.
+
+\begin{enumerate}
+  \item Sign의 \(w_1\)과 Verify가 hint를 사용해 복원한 \(w_1\)이 같다.
+  \item
+  \[
+    w'j=\LSB(\lfloor y_0\rceil)j
+       =\LSB(w)
+       =\LSB(w-2\lfloor z_2\rceil).
+  \]
+  \item
+  \[
+    2\lfloor z_2\rceil-2\widetilde z_2
+       =\LowBits_{512}(w)-\LSB(w).
+  \]
+\end{enumerate}
+
+이 세 식으로 Sign이 hash한 \((w_1,\LSB(\lfloor y_0\rceil),\mu)\)와
+Verify가 hash한 \((w_1,w',\widetilde\mu)\)가 같음을 얻는다. KeyGen의
+\(As=qj\pmod{2q}\)는 \textup{(V-4)}--\textup{(V-6)}의 재구성식에
+사용된다.
+
+\begin{verificationgoal}[제한된 implementation completeness]
+다음 전제를 둔다.
+\begin{enumerate}
+  \item 종료한 accepted KeyGen iteration이 \cref{sec:keygen}의 키를 만들었다.
+  \item 종료한 accepted Sign iteration이 \cref{sec:sign}의
+        \((z,h,c)\)를 만들었다.
+  \item Sign과 Verify가 읽는 VK, prefix/context, message byte가 같아서
+        \(\mu=\widetilde\mu\)이다.
+  \item Verify에 공급한 decoded signature object의 \((x,v,h,c)\)가 Sign의
+        \((\lfloor z_1\rceil,h,c)\)와 동일한 수학 object를 나타낸다.
+\end{enumerate}
+그러면 \cref{sec:verify}의 actual Verify core가
+\[
+  reject=0
+\]
+을 반환함을 증명한다.
+\end{verificationgoal}
+
+이를 논리식으로 쓰면 다음과 같다.
+
+\[
+\begin{gathered}
+  \mathsf{KeyGenCoreAccept}\land \mathsf{SignCoreAccept}\\
+  {}\land \mathsf{DecodedSignatureObjectIdentity}\\
+  {}\Longrightarrow \mathsf{VerifyCoreReject}=0.
+\end{gathered}
+\]
+
+\begin{scopeboundary}[이 합성이 의미하지 않는 것]
+이 정리는 KeyGen/Sign의 확률분포 동등성이나 rejection loop의 종료확률을
+말하지 않는다. 또한 \(h\)를 포함한 full 1474-byte pack/unpack이 닫히기 전에는
+public API byte 배열에 대한 무조건 end-to-end theorem으로 부르지 않는다.
+정확한 명칭은 ``accepted core execution에 대한 제한된 implementation
+completeness''이다.
+\end{scopeboundary}

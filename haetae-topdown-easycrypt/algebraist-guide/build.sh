@@ -11,6 +11,13 @@ for required in \
   "$SCRIPT_DIR/../WEEK11_REPORT.md" \
   "$SCRIPT_DIR/../WEEK12_REPORT.md" \
   "$SCRIPT_DIR/../WEEK13_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK14_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK15_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK16_MINCORE_PLAN.md" \
+  "$SCRIPT_DIR/../WEEK16_KG_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK16_KG_NTT_MUL_REPORT.md" \
+  "$SCRIPT_DIR/../HBZ_FULL_WRAPPER_COMPOSITION.md" \
+  "$SCRIPT_DIR/../RANS_ACTUAL_SUCCESS_WITNESS.md" \
   "$SCRIPT_DIR/../RANS_BYTE_STACK_INVARIANT.md" \
   "$SCRIPT_DIR/../RANS_ENCODER_INVARIANT.md" \
   "$SCRIPT_DIR/../RANS_DECODER_INVARIANT.md" \
@@ -23,7 +30,17 @@ for required in \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansDecoderActualTrace.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansDecoderTopHoare.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansCoreCompositionBridge.ec" \
-  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansCoreActualInverse.ec"
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansCoreActualInverse.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2HbzInternalBoundaries.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2HbzFullEncodeTrace.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2HbzFullDecodeInverse.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansAllSixBudget.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec"
 do
   if [ ! -f "$required" ]; then
     printf 'FAIL missing source-of-truth artifact: %s\n' "$required" >&2

@@ -47,10 +47,21 @@ Week~8--10의 HBZ 잎/표/단일 단계, 순수 바이트 스택, 실제 접미�
 결정론적 기능정확성 증거다. Week~11의 전체 실제 인코더 성공 접미부 등식까지
 같은 종류의 증거로 닫혔다. Week~12의 실제 디코더 정확 추적 복원도
 정확한 입력 관계 아래의 결정론적 부분정확성으로 닫혔다. Week~13은 세 실제
-절차의 순차 결합까지 성공 조건부 부분정확성으로 닫았다. 그러나 production
-전체 HBZ 래퍼 합성과 실제 성공 증인이 열려 있으므로 이를
-\(\delta_{\mathrm{Encoding}}=0\)으로 승격할 수 없다. 인코더/디코더 종료와 실제
-성공 인코딩 증인이 없다는 사실도 부모 정리의 비공허성 경계로 남는다.
+절차의 순차 결합까지 성공 조건부 부분정확성으로 닫았다. Week~14는 실제
+prepare/apply를 포함한 full-HBZ 직접 결합과 production SignaturePack/Unpack
+경계의 정확 동치까지 닫았다. Week~15는 고정 all-zero 입력에서 종료한
+production 실행의 zero-size 실패를 배제했다. 그러나 이 고정 입력의 종료와
+losslessness, 일반 정준 입력 성공, (h) 코덱, metadata/padding 및 전체 parse가
+열려 있으므로 이를 \(\delta_{\mathrm{Encoding}}=0\)으로 승격할 수 없다.
+
+Week~16의 KeyGen 스냅샷 정리도 결정론적 기능정확성 증거지만
+\(\delta_{\mathrm{KeyGen}}=0\)을 뜻하지 않는다. 실제 matrix helper의
+\identifier{output_row}를 full-invNTT/pointwise-word 식으로 펼치는 마지막
+rewrite와 actual harness의 두 active row consequence가 77번째 대상으로
+컴파일됐다. 그러나 odd-root 직교성/full-NTT convolution과
+\identifier{Rq.poly}-to-security-list adapter가 없다. 또한 sampler, retry,
+packer, public API와 분포/종료를 포함하지 않는다. 따라서 KeyGen은
+\identifier{STOP-KG-NTT}로 동결되고 활성 전선은 MINCORE Sign으로 이동했다.
 
 \subsection{현재 주장 행렬}
 
@@ -145,13 +156,29 @@ guard에서 정확히 종료하는 부분정확성 \\
 디코더 미실행/초기 상태 보존, 성공 시 실제 복사와 디코더의 \(bad=0\), 정확한
 소비 크기, 1024기호 복원 및 꼬리 프레임을 한 harness에서 증명; 성공 도달과
 종료는 별도 \\
-실제 전체 HBZ 부모(actual full-HBZ parent) & \statuspartial & prepare/apply 잎과
-실제 rANS 핵심 역함수는 닫혔지만 production full wrapper의 프레임/크기 합성과
-성공 증인이 열림 \\
-전체 서명 코덱(full signature codec) & \statusblocked & 남은 actual full-HBZ wrapper, h rANS inverse,
-metadata, padding, residual frame과 canonical parse가 필요 \\
+실제 전체 HBZ 부모(actual full-HBZ parent) & \statusproved & production
+SignaturePack/Unpack 경계에서 zero-size 실패 보존 또는 nonzero-size 성공 시
+1024계수 복원, 크기/두 꼬리 프레임과 prepare-symbol 추적을 주는 성공 조건부
+부분정확성; 고정 zero 입력의 실패 배제는 별도 Week~15 정리, 종료는 별도 \\
+고정 all-6/zero-HBZ 성공 사후조건 & \statusproved & 종료한 실제 all-6
+인코더와 production zero-HBZ pack/unpack이 \(bad=0\), nonzero size, 정확한
+trace/복원/프레임을 만족; 종료, losslessness와 일반 입력 성공은 별도 \\
+KeyGen matrix/finalizer 스냅샷 & \statuspartial & 실제 두 helper의
+matrix/NTT 표현, finalizer 의미, KG-2형 low/high 분해, 조정된 \(s_2\)와
+스냅샷 mod-\(2q\) 영 등식은 증명됨; faithful KG-1/KG-3/전체 KG-4와 논문 식은
+odd-root convolution 및 security-list adapter 부재로
+\identifier{STOP-KG-NTT} \\
+MINCORE Sign (활성) & \statusspecified & 실제
+\identifier{_sf_round_challenge_mode2}, \identifier{_sf_z_check},
+\identifier{_sf_hint_mode2}의 accepted-core 합성이 다음 단일 목표; 아직 headline
+정리는 미컴파일 \\
+MINCORE Verify/제한 합성 & \statusspecified & 실제 focused core 정리와
+decoded-object 경계 합성의 목표만 고정됨; 아직 개별 정리가 컴파일되지 않음 \\
+전체 서명 코덱(full signature codec) & \statusblocked & (h) rANS inverse,
+metadata, padding, residual frame과 canonical parse가 필요하며 (h)는 Week~16
+범위에서 \statusdeferred \\
 정당한 Sign 출력 꼬리 도달(legitimate tail reach) & \statuspartial & prefix inverse만 닫혔고 full
-codec의 rANS core 층까지 진전; full-HBZ wrapper, norm, hint,
+codec의 HBZ 층까지 진전; (h), metadata/padding, norm, hint,
 response/arithmetic가 필요한 별도
 기능정확성 의무 \\
 공용 문맥 \(\mu\)(public-context \(\mu\)) & \statusspecified & 문맥 길이 바이트,
@@ -159,8 +186,8 @@ response/arithmetic가 필요한 별도
 전체 도전값 호출(full challenge call) & \statuspartial & \(\mu\) 접미부와 목록
 합동성(list congruence)은 있으나 highbits/LSB, 패딩/도메인(padding/domain),
 짜내기/표본기(squeeze/sampler)가 열림 \\
-전체 KeyGen/Sign/Verify FC & \statusspecified & abstract goal은 있으나 세 API의
-paper refinement 정리 없음 \\
+전체 KeyGen/Sign/Verify FC & \statusspecified & KeyGen 스냅샷 leaf는
+부분적으로 진전했으나 세 API의 paper refinement 정리는 없음 \\
 구현 EUF-CMA & \statusspecified & 모든 API loss, query accounting, 정확한
 paper/ROM instance가 필요 \\
 논문 보안 reduction & \statuspartial & 기존 조건부 chain은 있으나 정확한

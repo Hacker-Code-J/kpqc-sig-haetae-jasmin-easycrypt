@@ -39,8 +39,8 @@ Date: 2026-08-09
 | `OBL-RANS-SUFFIX-COPY` | `PROVED` | actual `__copy_encoded_suffix` | exact pointwise slice plus unused-tail frame | derive `off/size` bounds from actual encoder success |
 | `OBL-RANS-ACTUAL-HARNESS-CONTROL` | `PROVED` | actual `_rans_encode`, `__copy_encoded_suffix`, `_rans_decode` | actual success branch and decoder `count/size/m` initialization | no inverse conclusion |
 | `OBL-RANS-CORE-INVERSE` | `PROVED` (success-conditioned partial correctness) | actual `_rans_encode`, `__copy_encoded_suffix`, `_rans_decode` in `Mode2RansActualHarness.run` | `actual_rans_encode_copy_decode_inverse`; bridge from encoder segment through actual copy to decoder pointwise reads; failure branch retained | actual success reachability and encoder/decoder termination remain separate |
-| `OBL-RANS-ACTUAL-SUCCESS-WITNESS` | `PARTIAL` | actual encoder on all-6 symbols | no compiled witness | prove actual `bad=0` and `4 <= size <= 1024` |
-| `OBL-SIG-HBZ-ENCODE-DECODE` | `PROVED (success-conditioned partial correctness)` | actual full HBZ wrapper pair | `signature_pack_unpack_hbz_full_actual_exact`, `signature_pack_unpack_hbz_full_inverse_mode2`, `actual_hbz_full_encode_decode_inverse_mode2` | actual success reachability and the all-zero success witness remain PARTIAL |
+| `OBL-RANS-ACTUAL-SUCCESS-WITNESS` | `PROVED (fixed all-6 input, Hoare partial correctness)` | actual encoder on all-6 symbols | `Mode2RansActualSuccessWitness.actual_rans_encode_all_six_success`, `full_rans_encode_all_six_success`, `actual_encode_hb_z1_full_zero_success`, `signature_pack_hbz_zero_success_mode2`, `actual_hbz_full_encode_decode_zero_success_mode2`, `signature_pack_unpack_hbz_zero_success_mode2` | every terminating fixed-input run returns success; termination/losslessness, probability-one, and non-vacuous execution remain unproved because no `phoare` theorem was compiled |
+| `OBL-SIG-HBZ-ENCODE-DECODE` | `PROVED (success-conditioned partial correctness)` | actual full HBZ wrapper pair | `signature_pack_unpack_hbz_full_actual_exact`, `signature_pack_unpack_hbz_full_inverse_mode2`, `actual_hbz_full_encode_decode_inverse_mode2` | fixed-input success is now witnessed by `Mode2RansActualSuccessWitness.actual_hbz_full_encode_decode_zero_success_mode2`; the theorem still does not claim termination or unconditional reachability |
 
 ## Not proved by Week 8 leaf results
 
@@ -147,10 +147,10 @@ applies the actual decoder theorem. The result is decoder `bad=0`, exact
 Thus `OBL-RANS-CORE-INVERSE` is **PROVED as success-conditioned partial
 correctness**. The result is a direct composition theorem over three actual
 extracted procedures, not production full-HBZ wrapper correctness. Encoder
-success reachability, both termination claims, and
-`OBL-RANS-ACTUAL-SUCCESS-WITNESS` stay `PARTIAL`. Week 14 is restricted to the
-actual full-HBZ wrapper composition; the `h` codec remains out of scope until
-that edge compiles.
+success reachability, both termination claims, and the fixed-input success
+branch remain separate proof obligations at this stage. Week 14 is restricted
+to the actual full-HBZ wrapper composition; the `h` codec remains out of scope
+until Week 16.
 
 ## Week 14 decision update
 
@@ -167,5 +167,20 @@ split visible:
   bytes.
 
 Therefore `OBL-SIG-HBZ-ENCODE-DECODE` is now **PROVED (success-conditioned
-partial correctness)**. The actual all-zero success witness remains `PARTIAL`,
-so the unconditional round-trip statement is still open.
+partial correctness)**. The fixed all-6 success witness now compiles, so the
+closed fixed-input statement is failure exclusion for terminating runs only;
+termination, losslessness, and non-vacuous reachability remain open.
+
+## Week 15 decision update
+
+`Mode2RansActualSuccessWitness.actual_rans_encode_all_six_success` is the
+fixed all-6 success witness. The derived HBZ lift
+`actual_hbz_full_encode_decode_zero_success_mode2` and the production wrapper
+corollary `signature_pack_unpack_hbz_zero_success_mode2` carry that witness
+through the actual wrapper boundary. `OBL-RANS-ACTUAL-SUCCESS-WITNESS` is now
+`PROVED (fixed all-6 input, Hoare partial correctness)`.
+
+## Week 16 decision update
+
+Restrict Week 16 to `OBL-SIG-H-ENCODE-DECODE` only. Do not widen beyond the
+`h` codec.

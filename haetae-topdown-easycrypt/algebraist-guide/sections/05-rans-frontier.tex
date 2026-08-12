@@ -1,16 +1,20 @@
-\section{현재 전선: HBZ/rANS를 유한 동역학계(finite dynamical system)로 읽기}
+\section{HBZ/rANS 동역학계와 fixed-input failure exclusion}
 \label{sec:rans-frontier}
 
-\subsection{왜 production full-HBZ wrapper가 지금의 단일 gate인가}
+\subsection{왜 success 사후조건과 종료성은 다른 주장인가}
 
 signature prefix의 역함수(inverse function), HBZ coefficient--symbol leaf,
 그리고 actual encoder가 정준 기호열(canonical symbol stream)을 순수 byte
 trace로 보내는 간선(edge), exact trace를 actual decoder가 정준 기호열로
-되돌리는 간선(edge), actual copy를 사이에 둔 core 합성(composition)은 각각
-닫혔다. \CurrentGate 는 세 actual generated 절차의 성공 조건부
-역함수(inverse function)가 컴파일되었다는 판정이다. full signature codec으로
-가는 현재 단일 우선순위는 \CurrentPriority 이다
-\cite{week13-report,rans-core-composition}.
+되돌리는 간선(edge), actual copy를 사이에 둔 core 합성(composition), 그리고
+production SignaturePack/Unpack의 full-HBZ wrapper 경계는 각각 닫혔다.
+Week~15는 canonical all-zero HBZ가 만드는 all-6 stream에서 반환하는 actual
+encoder의 failure를 배제하고 production zero round trip까지 올렸다
+\cite{week15-report,rans-actual-success-witness}. 따라서
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 fixed-input Hoare
+부분정확성(partial correctness)으로 \statusproved 다. 다만 반환·실행 존재를
+보장하는 termination/losslessness 정리는 아니며, 현재 프로젝트 gate는
+Week~16 KeyGen의 \CurrentGate 로 이동했다.
 
 rANS 자체의 정수 산술(integer arithmetic)은 복잡하지 않다. 어려움은 encoder가
 symbol을 뒤에서부터
@@ -19,9 +23,13 @@ symbol을 뒤에서부터
 실제 두 중첩 loop의 state와 결합하는 불변식(invariant)이 핵심이다. Week~11은
 reverse encoder 쪽 결합을, Week~12는 forward decoder 쪽 결합을, Week~13은
 두 정리(theorem) 사이의 actual copy와 전제 운송(premise transport)을 완료했다.
-이제 남은 간극(gap)은 이 core 정리(theorem)를 production
+Week~14는 이 core 정리(theorem)를 production
 \identifier{_encode_hb_z1_full}/\identifier{_decode_hb_z1_full}의
-prepare/apply·frame·size 의미론(semantics)과 합성하는 wrapper 경계다.
+prepare/apply·frame·size 의미론(semantics)과 합성했다. Week~15는 actual prepare가
+all-6 stream을 만든다는 사실, 1020-byte normalization budget, actual failure의
+필요조건을 합성해 반환하는 fixed input 실행의 nonzero-size branch를 강제한다.
+HBZ에 남은 간극(gap)은 이 실행 자체의 종료·존재, 임의의 canonical 입력에 대한
+전역 성공, malformed rejection과 probabilistic losslessness다.
 
 \subsection{13-symbol 분할(partition)}
 
@@ -202,7 +210,9 @@ Week~10 기준선에서 위 파일들은 보조정리(lemma)와 국소 실제
 순수 \identifier{trace_bytes}의 등식(equality)이 없어
 \claimid{OBL-RANS-ENCODE-REFINEMENT}가 \statuspartial 이었다. 바로 그 부모
 간선(edge)을 Week~11의 다음 절이 닫는다. 성공 분기(success branch)의
-도달가능성(reachability)과 종료성(termination)은 여전히 인증하지 않는다.
+도달가능성(reachability)과 종료성(termination)은 이 Week~10 타깃들이 인증하지
+않았다. fixed all-6 failure exclusion은 Week~15의 별도 정리이고, 종료성은 현재도
+열려 있다.
 \end{caution}
 
 \subsection{Week 11에서 닫힌 actual encoder 불변식(invariant)}
@@ -256,8 +266,9 @@ offset/size 범위(range), \(bad=0\)을 모두 보인다.
 \begin{caution}[부분정확성(partial correctness)의 한계]
 이 정리(theorem)는 actual encoder의 종료성(termination), 성공
 도달가능성(success reachability), all-6 symbol 성공 증인(success witness)을
-보이지 않는다. 따라서 \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는
-\statuspartial 이다.
+그 자체로 보이지 않는다. Week~11 당시
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}는 \statuspartial 이었고, Week~15의
+별도 정리가 fixed all-6 반환 실행의 failure만 배제한다.
 \end{caution}
 
 \subsection{Week 12에서 닫힌 actual decoder 불변식(invariant)}
@@ -340,15 +351,16 @@ decoder 하위 증명은 내부 종료 상태(internal exit state)
 부분정확성(success-conditioned partial correctness)이다.
 \end{verified}
 
-실제 success branch가 도달 가능하다는 EasyCrypt witness도 아직 없다. pure
-trace의 concrete witness, canonical all-zero precondition witness 또는 decoder
-state의 size-4 witness는 concrete all-6 입력에서 actual encoder가
-\(bad=0\)을 반환한다는 success witness를 대신하지 않는다.
+Week~13 종료 시점에는 실제 success branch를 강제하는 EasyCrypt 정리가 없었다.
+pure trace의 concrete witness, canonical all-zero precondition witness 또는
+decoder state의 size-4 witness는 concrete all-6 입력에서 actual encoder가
+\(bad=0\)을 반환한다는 사후조건을 대신하지 않았다. Week~15는 바로 이 간극을
+budget과 actual failure-cause의 모순으로 닫는다.
 
-\subsection{full HBZ wrapper의 올바른 목표 모양}
+\subsection{Week 14에서 닫힌 full HBZ wrapper의 올바른 판독}
 
 actual encoder는 실패를 표현할 수 있으므로, canonical \(h\)만으로 무조건적인
-round trip을 선언해서는 안 된다. 현재 필요한 부모 명제(parent proposition)는 적어도
+round trip을 선언해서는 안 된다. Week~14에서 증명된 부모 명제(parent proposition)는
 \[
   size=0\quad\lor\quad
   \bigl(size\ne0\land bad=0\land
@@ -357,12 +369,53 @@ round trip을 선언해서는 안 된다. 현재 필요한 부모 명제(parent 
 처럼 failure branch를 드러내야 한다. nonzero size bounds와 buffer frames도
 함께 필요하다.
 
-\begin{openobligation}[\claimid{OBL-SIG-HBZ-ENCODE-DECODE}]
-actual \identifier{_encode_hb_z1_full}과 \identifier{_decode_hb_z1_full}을 직접
-열고, 이미 증명된 prepare/apply 역함수(inverse function)와 actual rANS core
-정리(theorem)를 wrapper-level size/frame에 맞춰 합성해야 한다. 이 정리(theorem)가
-컴파일되기 전에는 두 번째 (h) codec으로 이동하지 않는다.
-\end{openobligation}
+\begin{verified}[\claimid{OBL-SIG-HBZ-ENCODE-DECODE}]
+\theoremname{actual_hbz_full_encode_decode_inverse_mode2}가 focused actual
+full-HBZ harness에서 위 failure/success 합(disjunction)을 증명한다.
+\theoremname{signature_pack_unpack_hbz_full_actual_exact}는 production
+SignaturePack/Unpack harness가 focused harness와 반환 tuple 및
+\identifier{decoder_ran} flag에서 exact함을 보이고,
+\theoremname{signature_pack_unpack_hbz_full_inverse_mode2}가 같은 계약을
+production 경계에 올린다. 성공 가지에는 \(4\le size\le1024\), coefficient
+prefix 복원, coefficient/suffix frame과 prepared-symbol trace witness가 포함된다.
+\end{verified}
+
+\subsection{Week 15의 fixed all-6 budget과 actual failure 배제}
+
+\identifier{zero_hbz}의 실제 32-bit load가 모두 0임을 byte projection까지 열어
+증명하면 actual prepare가 \(bad=0\)과 1024개 symbol~6 prefix를 반환한다. literal
+table에서 \(f_6=398\), \(x_{\max}(6)=2^{21}\cdot398\)이고,
+\theoremname{symbol6_normalization_len_le1}는 \(2^{23}\le x<2^{31}\)인 각
+symbol~6 step이 normalization byte를 최대 하나만 방출함을 준다.
+
+초기 state에서 계산한 첫 네 상태는
+\[
+  8388608\to21582496\to55528910\to142868116\to367580518
+\]
+이고 네 step 모두 0-byte다. 따라서 나머지 1020개 step에 각 한 byte를 허용해도
+normalization length는 최대 1020이며, 마지막 state 네 바이트를 더한 total
+trace는 \([4,1024]\)에 들어간다. 이는 관찰된 정확한 174/178-byte 실행을
+정리로 가장하지 않는 보수적 capacity argument다.
+
+\begin{verified}[\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}]
+\theoremname{actual_rans_encode_failure_trace_cause}는 actual encoder의 nonzero
+\(bad\)가 trace length \(>1020\)을 함의한다고 말한다. 위 all-6 상계와
+모순시키면 \theoremname{actual_rans_encode_all_six_success}가 반환하는 actual
+core 실행마다 \(bad=0\), size/frame/exact-trace 사후조건을 준다.
+\theoremname{actual_encode_hb_z1_full_zero_success},
+\theoremname{signature_pack_hbz_zero_success_mode2},
+\theoremname{signature_pack_unpack_hbz_zero_success_mode2}가 이 결론을 실제
+prepare를 포함한 focused full wrapper와 production SignaturePack/Unpack zero
+round trip으로 올린다.
+\end{verified}
+
+\begin{caution}[\identifier{GO-WITNESS}는 \identifier{GO-WITNESS-LOSSLESS}가 아니다]
+위 정리는 모든 \emph{반환하는} fixed-input 실행에서 failure를 배제하는 Hoare
+부분정확성이다. fixed-input termination, 실행 존재(non-vacuity), losslessness,
+probability-one success 또는 \identifier{phoare}는 증명하지 않았다. \(h\)
+codec은 성공 증인이 미완이라서가 아니라 Week~16 MINCORE KeyGen 범위로 전환되어
+\statusdeferred 되었다.
+\end{caution}
 
 \begin{center}
 \begin{tabularx}{\textwidth}{Y L{31mm}}
@@ -386,9 +439,10 @@ actual decoder가 exact trace를 소비함 &
 \statusproved\ (1024-symbol 복원, exact consumption, tail frame) \\
 actual encoder--copy--decoder core inverse &
 \statusproved\ (성공 조건부 부분정확성(success-conditioned partial correctness)) \\
+full HBZ encode/decode &
+\statusproved\ (production wrapper의 성공 조건부 부분정확성) \\
 actual encoder success witness &
-\statuspartial\ (success reachability와 termination 부재) \\
-full HBZ encode/decode & \statuspartial\ (production wrapper 합성 미완) \\
+\statusproved\ (fixed all-6 Hoare failure exclusion; termination/losslessness 없음) \\
 \bottomrule
 \end{tabularx}
 \end{center}

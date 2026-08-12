@@ -300,14 +300,107 @@ Week~11의 \identifier{encoder_inner_tail_inv}는 정확한 순수 정규화 길
 부분정확성이므로 성공 도달과 두 반복문의 종료는 별도 의무다.
 \end{verified}
 
+\begin{definition}[production full-HBZ 결합]
+\label{def:production-full-hbz-harness}
+\identifier{SignaturePackUnpackHbzFullHarness.run}은 실제 production
+\identifier{SignaturePackMode2Target.M._encode_hb_z1_full}을 호출하고, 반환
+크기가 0이 아닐 때만 실제
+\identifier{SignatureUnpackMode2Target.M._decode_hb_z1_full}을 호출한다.
+\identifier{HbzFullActualHarness.run}은 같은 제어 형태를 focused full-HBZ
+추출물에 대해 실행한다. Week~14의 관계 정리는 두 결합의 결과 튜플과
+\identifier{decoder_ran} 플래그를 정확히 맞춘다.
+\end{definition}
+
+\begin{verified}[production full-HBZ 성공 조건부 역함수]
+\label{thm:production-full-hbz-inverse}
+\identifier{signature_pack_unpack_hbz_full_actual_exact}는 같은 초기 인자에서
+두 결합의 반환값과 디코더 실행 여부가 같음을 증명한다. 이어지는
+\identifier{signature_pack_unpack_hbz_full_inverse_mode2}의 사전조건은 초기
+인자 바인딩과 \identifier{canonical_hbz_mode2}뿐이다. 종료한 실행에서
+\(size=0\)이면 디코더가 실행되지 않고 초기 encoded/decoded/bad 배열이
+보존된다. \(size\ne0\)이면
+\[
+  4\le\operatorname{uint}(size)\le1024,
+  \qquad bad=0,
+  \qquad decoded[0..1024)=hbz_0[0..1024)
+\]
+이고 coefficient tail, encoded suffix frame 및 실제
+\identifier{prepared_symbols} 추적 증인이 함께 보존된다. encoder success,
+decoder success, 출력 등식이나 trace는 사전조건이 아니다. 이 정리는 Hoare
+부분정확성이므로 nonzero-size 도달과 종료는 별도 의무다.
+\end{verified}
+
 \begin{boundary}[성공 조건부(success-conditioned) HBZ]
 \label{bdry:hbz-success}
 \(\operatorname{CanonicalHBZ}_2(h)\)는 prepare leaf가 성공함을 보장하지만 고정
 1024바이트 rANS workspace의 actual full encoder가 nonzero size를 반환함을
-보장하지 않는다. 따라서 full round trip에서 encoder success나 decoder success를
-독립된 사전조건으로 가정하면 비공허성이 사라진다. 실제 return의
-\(\mathsf{size}=0\) branch를 결론에 남기거나, actual successful witness를 별도로
-증명해야 한다.
+보장하지 않는다. Week~14 production 정리는 encoder success나 decoder success를
+사전조건으로 가정하지 않고 실제 return의 \(\mathsf{size}=0\) branch를 결론에
+남긴다. Week~15는 고정 all-zero 입력의 종료한 실행에 한해 이 실패 분기를
+배제하지만, 일반 정준 입력이나 종료 자체를 보이지 않는다.
+\end{boundary}
+
+\begin{verified}[고정 all-zero HBZ의 production 성공]
+\label{thm:fixed-zero-hbz-success}
+\identifier{signature_pack_unpack_hbz_zero_success_mode2}의 사전조건은 초기
+encoded/decoded/bad 배열과 정확한
+\identifier{zero_hbz} 입력 바인딩뿐이다. 종료한 실행에서
+\[
+  size\ne0,\qquad 4\le\operatorname{uint}(size)\le1024,\qquad
+  \mathsf{decoder\_ran},\qquad bad=0
+\]
+이고, 복원된 첫 1024계수는 모두 0이며 coefficient/encoded tail frame과
+정확한 \identifier{mode2_trace_bytes(all_six_symbols)}를 보존한다. 하위 정리
+\identifier{actual_rans_encode_all_six_success}는 실제 인코더의 nonzero
+\(bad\)가 1020바이트를 넘는 정규화 추적을 요구한다는 실패 원인을, all-6
+추적의 1020바이트 상계와 모순시킨다. 이는 고정 입력 Hoare 부분정확성이지
+종료/losslessness 또는 \(\operatorname{phoare}=1\) 정리가 아니다.
+\end{verified}
+
+\begin{definition}[실제 KeyGen matrix/finalizer 스냅샷]
+\label{def:keygen-matrix-finalizer-snapshot}
+\identifier{ActualM23MatrixFinalizeSnapshot.run}은 실제
+\identifier{_kp_m23_matrix}의 반환 \(bp\)를 \(\mathsf{pre\_bp}\)로 저장하고
+실제 \identifier{_keypair_finalize_m23}를 연속 호출한다. 활성 계수마다
+\[
+\begin{aligned}
+  r_i&=(\mathsf{pre\_bp}_i+s_{2,i}+a_i)\bmod q,\\
+  r_i&=2b_{1,i}+b_{0,i},\qquad -1\le b_{0,i}\le1,\\
+  s'_{2,i}&=s_{2,i}-b_{0,i}
+\end{aligned}
+\]
+를 만족하는 것을
+\identifier{actual_snapshot_low_high_decomposition}이라 한다.
+\identifier{actual_snapshot_mod2q_zero}는 같은 활성 범위에서
+\[
+  2(a_i-2b_{1,i})+
+  2\mathsf{pre\_bp}_i+2s'_{2,i}\equiv0\pmod{2q}
+\]
+를 요구한다.
+\end{definition}
+
+\begin{verified}[실제 KeyGen 스냅샷 의미 합성]
+\label{thm:keygen-semantic-snapshot}
+\identifier{actual_m23_matrix_finalize_semantic_snapshot}의 전제는 여섯 초기
+배열의 정확한 바인딩, matrix/input 표현 범위, 활성 \(s_2\in[-1,1]\), 활성
+\(a\in[0,q)\)뿐이다. 결론은 matrix 출력/NTT 표현, 정확한 finalizer 의미,
+\cref{def:keygen-matrix-finalizer-snapshot}의 두 술어와 초기--스냅샷--최종
+꼬리 프레임을 함께 준다. finalizer 출력이나 KG 식을 사전조건으로 요구하지
+않는다.
+\end{verified}
+
+\begin{boundary}[\identifier{STOP-KG-NTT}]
+\label{bdry:keygen-ntt-mul}
+\cref{thm:keygen-semantic-snapshot}의 \(\mathsf{pre\_bp}\)는 실제
+\identifier{output_row}다. 77번째 파일의
+\identifier{output_row_from_mode2_ntt_words}는 이를 실제
+full-invNTT/pointwise-word 표현으로 펼치고,
+\identifier{actual_m23_matrix_snapshot_rows_explicit}는 실제 harness의 두 row로
+운반한다. 두 결과 모두 컴파일되지만 그 표현을 보안 모델의
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 다항식 곱과 식별하지 않는다. odd-root
+직교성/full-NTT convolution과 \identifier{Rq.poly}-to-security-list 곱셈
+adapter가 모두 없으므로 스냅샷 합동식을 논문 \(As=qj\pmod{2q}\)로 승격할 수
+없다. 이 감사 결과로 KeyGen 전선은 KG-2/finalization에서 동결되었다.
 \end{boundary}
 
 \begin{definition}[\(\mu\) 접두부]

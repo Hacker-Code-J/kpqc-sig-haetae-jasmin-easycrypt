@@ -1,0 +1,90 @@
+\section{Week 16: MINCORE KeyGen First Task}
+
+The Week~16 first task originally exited as
+\status{continue-kg: blocked-kg-ntt-mul}.  The continuation reported in the
+next section supersedes that intermediate decision with
+\status{stop-kg-ntt}, not \status{go-kg}.  A transparent
+Hoare harness now composes the actual mode-2
+\procname{_kp_m23_matrix} and \procname{_keypair_finalize_m23} procedures.
+The faithful paper claims (KG-1)--(KG-4) and
+\(A s = q j \pmod {2q}\) remain incomplete because the checked matrix output
+has not yet been related to the security model's polynomial multiplication.
+
+\subsection*{Baseline and actual boundary}
+
+Before modification, the aggregate verifier fresh-compiled 74 authored
+targets with \texttt{-no-eco}.  The preserved log is
+\pathname{logs/verify-all-before-week16.log}, with SHA-256
+\texttt{da7a7516166d54e93665d36e9a81348050ac6a83786111eb83ac6901743d6056}.
+
+\theoryname{Mode2KeygenCoreEquation.ActualM23MatrixFinalizeSnapshot.run}
+first invokes the generated parent procedure \procname{_kp_m23_matrix} with
+\((\mathit{rows},\mathit{cols})=(2,3)\), records the returned
+pre-finalization \texttt{bp} array, and then invokes
+\procname{_keypair_finalize_m23} with count 512.  It returns the actual
+snapshot, transformed-secret scratch, finalized high-part array, and adjusted
+\texttt{s2}.  The harness contains no sampler, retry loop, packer, acceptance
+guard, or public API.
+
+\subsection*{Compiled snapshot consequences}
+
+The Hoare precondition binds all six initial arrays and requires only the
+existing matrix bound, the three input-polynomial representations, centered
+active \texttt{s2} words, and canonical active \texttt{avec} words.  It does
+not assume finalizer success, a KG predicate, or a desired equation.
+
+\procname{actual_m23_matrix_finalize_snapshot} exports the actual matrix
+output and NTT-scratch representations, exact finalizer output, and tail
+frames.  The stronger
+\procname{actual_m23_matrix_finalize_semantic_snapshot} additionally exports
+the scalar and HAETAE finalizer semantics.  For every active coefficient, if
+\[
+ r=(\mathit{pre\_bp}+e+a)\bmod q,
+ \qquad b_0=\mathsf{low}(r),
+\]
+then the compiled result includes
+\[
+ r=2b_1+b_0,\qquad -1\leq b_0\leq1,
+ \qquad e'=e-b_0.
+\]
+This is the KG-2 coefficient decomposition and the adjusted component of
+KG-4 at the actual finalizer boundary.
+
+\theoryname{Mode2KeygenSnapshotAlgebra} proves the required integer division,
+parity, and reduction lemmas internally.  The resulting actual predicate is
+the deliberately snapshot-only congruence
+\[
+ 2(a-2b_1)+2\,\mathit{pre\_bp}+2e'\equiv0\pmod {2q}.
+\]
+The name \procname{actual_snapshot_mod2q_zero} preserves that distinction;
+the returned snapshot is not silently renamed to
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\).
+
+\subsection*{Exact blocker}
+
+The checked matrix postcondition represents each returned row by
+\[
+ \mathsf{output\_row}
+ =\mathsf{array256\_mont}
+   (\mathsf{full\_invntt}(\mathsf{pointwise\_row\_ntt}(\cdots))).
+\]
+No compiled theorem identifies this object with the security model's row
+product \(\sum_c A_{\mathrm{gen}}[r,c]s_{\mathrm{gen}}[c]\).  The legacy
+\procname{Rq.ntt} cannot be substituted: the existing full-NTT specification
+contains a theorem showing that the two transforms differ on one.
+
+Consequently KG-1 and KG-3 are \status{blocked}; KG-4 is partial because only
+the adjusted \(e-b_0\) component is constructed; and the paper
+\(A s=qj\pmod {2q}\) conclusion is \status{blocked}.  The claim ledger keeps
+\claimid{OBL-MINCORE-KEYGEN} partial.  Sampler distributions, retry
+termination, packing, public APIs, Sign/Verify correctness, and security are
+outside this result.
+
+\subsection*{Historical continuation target}
+
+The requested KeyGen continuation was one representation theorem: connect
+\procname{KeygenM23ArithmeticSpec.output_row} to the security model's
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) polynomial product through the checked
+full NTT.  The next section records why that bridge did not close and why the
+active lane moves to Sign without assembling KG-1, KG-3, complete KG-4, or
+the paper key equation.

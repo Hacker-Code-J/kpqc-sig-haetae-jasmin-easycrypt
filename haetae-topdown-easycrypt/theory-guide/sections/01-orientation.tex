@@ -21,6 +21,23 @@
 
 \begin{itemize}[leftmargin=1.5em,itemsep=0.1em,topsep=0.3em]
   \raggedright
+  \item \sourcepath{WEEK16_KG_NTT_MUL_}\allowbreak\sourcepath{REPORT.md},
+        Week~16 KG-NTT 감사 메모 \sourcepath{latex/sections/}\allowbreak
+        \sourcepath{33-week16-kg-ntt-mul-stop.tex};
+  \item \sourcepath{WEEK16_KG_REPORT.md},
+        \sourcepath{WEEK16_MINCORE_PLAN.md},
+        \sourcepath{logs/verify-all-week16-}\allowbreak
+        \sourcepath{kg-first-task.log};
+  \item \sourcepath{WEEK15_REPORT.md},
+        \sourcepath{RANS_ACTUAL_SUCCESS_}\allowbreak\sourcepath{WITNESS.md},
+        Week~15 연구 메모 \sourcepath{latex/sections/}\allowbreak
+        \sourcepath{31-week15-rans-actual-}\allowbreak
+        \sourcepath{success-witness.tex};
+  \item \sourcepath{WEEK14_REPORT.md}, Week~14 연구 메모
+        \sourcepath{latex/sections/}\allowbreak
+        \sourcepath{30-week14-hbz-full-wrapper-}\allowbreak
+        \sourcepath{composition.tex},
+        \sourcepath{HBZ_FULL_WRAPPER_}\allowbreak\sourcepath{COMPOSITION.md};
   \item \sourcepath{WEEK13_REPORT.md}, Week~13 연구 메모
         \sourcepath{latex/sections/}\allowbreak
         \sourcepath{29-week13-rans-core-}\allowbreak\sourcepath{composition.tex},
@@ -103,10 +120,10 @@ SHA-256 \\
 구현 & 고정된 \sourcepath{haetae-ref-jasmin/} 소스와
 \identifier{jasmin2ec} 생성물 \cite{haetae-jasmin} \\
 작성 증명 & \sourcepath{haetae-topdown-easycrypt/easycrypt/} 아래 매니페스트된
-67개 EasyCrypt 대상의 완전 검증 기준선 \\
-최신 판정 & \identifier{GO-CORE}; 실제 인코더와 디코더 정제 및 실제
-인코더--복사--디코더 핵심 역함수는 성공 조건부 Hoare 부분정확성으로
-\statusproved, 다음 관문은 실제 전체 HBZ 래퍼 합성 \\
+77개 EasyCrypt 대상; 마지막 보존 전체 완료 기준선은 76개 \\
+최신 판정 & \identifier{STOP-KG-NTT};
+\identifier{OBL-MINCORE-KEYGEN}은 실제 matrix/finalizer 스냅샷 경계에서
+\statuspartial 이고 KeyGen은 KG-2/finalization에서 동결; 활성 전선은 Sign \\
 재사용 증명 & 고정된 KeyGen, NTT, sampler, singularity, FFT 결과를 원래 전제
 그대로 가져오는 import-only 어댑터 \cite{haetae-easycrypt} \\
 제외 범위 & 다른 파라미터 집합, 물리적 부채널, fault, RNG 품질, 그리고
@@ -115,20 +132,28 @@ EUF-CMA로부터 자동으로 따라오지 않는 메모리 안전성 및 SCT \\
 \end{tabularx}
 \end{table}
 
-\begin{boundary}[67대상 검증의 해석]
-\sourcepath{WEEK13_REPORT.md}가 기록한 Week~13 완료 실행의 종료 표식은
-\texttt{RESULT PASS authored-targets=67 cache=-no-eco}다. 이는 매니페스트,
-추출 재생성, 증명 구멍/공리(proof-hole/axiom) 검사, 67개 대상의 새 컴파일,
-기준선과 주차별 LaTeX 빌드가 통과했다는 뜻이다. 실행 중 덮어쓰는
-\sourcepath{logs/verify-all-summary.txt}는 마지막 \texttt{RESULT PASS}가
-있을 때만 완료 증거다. Hoare 정리의 \statusproved 는 여전히 실제 절차의
-종료나 성공 분기 도달 가능성을 뜻하지 않는다.
+\begin{boundary}[77대상 매니페스트와 완료 증거]
+현재 77번째 대상 \sourcepath{Mode2KeygenNttMulBridge.ec}는 stop-boundary 감사
+결과와 actual harness의 두 active row consequence를 개별 fresh compile한다.
+그 직전 76대상 전체 완료 실행은
+\sourcepath{logs/verify-all-before-}\allowbreak
+\sourcepath{kg-ntt-mul.log}에 보존된다. 최종 77대상 전체 완료 로그는 아직
+없다. 실행 중 덮어쓰는
+\sourcepath{logs/verify-all-}\allowbreak\sourcepath{summary.txt}는 마지막 줄에
+\texttt{RESULT PASS authored-targets=77 cache=-no-eco}가 있을 때만 현재
+77대상 전체 완료 증거다. 현재는 77번째 대상의 개별 fresh compile과 76대상
+aggregate 완료만 확인된다. Hoare 정리의 \statusproved 는 여전히 실제
+절차의 종료나 확률 1 실행을 뜻하지 않는다.
 \end{boundary}
 
 \begin{takeaway}{이 문서가 주장하지 않는 것}
 완전한 KeyGen 분포 일치, 전체 Sign/Verify 기능정확성, 공용 문맥 추적
 (public-context transcript) 일치, 승인된 원시 API 추적의 직접 \(\mu\) 등식,
-전체 1474바이트 서명 코덱, 실제 rANS 인코더의 성공 도달, 인코더/디코더 종료,
-실제 전체 HBZ 래퍼의 결합 왕복, 인코딩 무손실, 또는
-Jasmin 구현의 종단간 EUF-CMA 보안은 아직 증명되었다고 주장하지 않는다.
+전체 1474바이트 서명 코덱, 일반 정준 입력의 실제 rANS 성공 도달,
+인코더/디코더 종료,
+실제 전체 HBZ 래퍼의 모든 정준 입력에 대한 무조건 왕복, (h) 코덱,
+full-NTT 표현과 논문 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱의 동일시,
+논문 KeyGen 식, MINCORE Sign/Verify 합성, 인코딩 무손실, 또는 Jasmin 구현의
+종단간 EUF-CMA 보안은 아직 증명되었다고 주장하지 않는다. 고정 all-zero
+입력의 성공 사후조건은 증명됐지만 그 실행의 종료/losslessness는 별도다.
 \end{takeaway}

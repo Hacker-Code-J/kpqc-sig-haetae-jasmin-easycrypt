@@ -86,6 +86,18 @@ not infer this round trip from a possibly empty region.
 
 None is hidden behind a newly authored implementation axiom.
 
+## KG-NTT-MUL stop boundary
+
+The actual `_kp_m23_matrix` postcondition is not assumed to equal
+`Agen*sgen`.  The checked chain ends at
+`array256_mont(full_invntt(pointwise_row_words ...))`.  Promoting it to the
+security-model product requires an absent odd-root orthogonality/full-NTT
+convolution theorem and a separate `Rq.poly`-to-integer-list multiplication
+adapter.  Neither is a trusted assumption, semantic axiom, representation
+predicate, or hidden premise.  Accordingly the frozen KeyGen result claims
+KG-2/finalization only; KG-1, KG-3, complete KG-4, and
+`A s = q j (mod 2q)` remain unproved while the active lane moves to Sign.
+
 ## Trusted computing base
 
 - EasyCrypt kernel/type checker and imported standard libraries;
@@ -140,8 +152,9 @@ claims.
   its entry state and symbol to `encode_trace`.
 - `actual_rans_encode_success_size_bound` is partial correctness.  It keeps the
   returned failure disjunct and says nothing about termination or reachability
-  of actual success.  The all-6 success witness therefore remains an open
-  proof obligation, not a runtime or cryptographic assumption.
+  of actual success.  The all-6 theorem now excludes failure for terminating
+  fixed-input runs, but it does not upgrade the theorem into a termination,
+  reachability, or cryptographic assumption.
 - Exact equality between the returned actual byte suffix and
   `trace_bytes(symbol_list_of_array(symbols0))` is a compiled Week 11
   postcondition, not an assumption. Week 12 consumes the same mathematical
@@ -156,8 +169,9 @@ claims.
   and exact-trace decoder recovery; neither proves losslessness or termination.
 - `Mode2RansActualHarness` branches on the returned encoder `bad` and therefore
   does not assume encoder success. Its decoder branch is reachable only
-  conditionally; an EasyCrypt witness for that branch remains open as
-  `OBL-RANS-ACTUAL-SUCCESS-WITNESS`.
+  conditionally; the fixed all-6 witness now compiles as
+  `OBL-RANS-ACTUAL-SUCCESS-WITNESS`, but the harness still does not claim
+  termination or unconditional reachability.
 - `keygen_prefix_reaches_mu_memory` constructs the helper-level memory premise.
 - `mode2_base_zero_no_wrap` proves a concrete address premise is satisfiable.
 - A security inequality with loss at least one is recorded as vacuous.
@@ -322,8 +336,10 @@ statuses are stated in the Week 5 subsection below.
   termination nor losslessness.
 - The exact input relation is satisfiable as a pure/array trace relation and
   is the relation produced mathematically by the Week 11 encoder success
-  theorem. This does not establish that the actual encoder success branch is
-  reachable; `OBL-RANS-ACTUAL-SUCCESS-WITNESS` remains `PARTIAL`.
+  theorem. Week 15 closes the fixed all-6 witness as
+  `OBL-RANS-ACTUAL-SUCCESS-WITNESS`, but that remains a Hoare partial-
+  correctness statement rather than a total or probabilistic termination
+  theorem.
 - `OBL-RANS-CORE-INVERSE` remains `PARTIAL` until an actual unary harness
   transports the encoder segment and actual copy-helper result into every
   decoder byte-read premise. This is an implementation composition
@@ -349,13 +365,14 @@ statuses are stated in the Week 5 subsection below.
 - The precondition is satisfiable via the existing zero-valued canonical
   symbol-array witness. This establishes harness-precondition non-vacuity,
   not reachability of the success disjunct.
-- Encoder success reachability, encoder/decoder losslessness and termination,
-  malformed-input rejection, canonical parsing, and all encoding/security
-  deltas remain proof obligations. `OBL-RANS-ACTUAL-SUCCESS-WITNESS` remains
-  `PARTIAL`. `OBL-SIG-HBZ-ENCODE-DECODE` is now
-  `PROVED (success-conditioned partial correctness)` via
-  `signature_pack_unpack_hbz_full_actual_exact`; the unconditional round-trip
-  statement still depends on the witness.
+- Encoder success reachability for arbitrary inputs, encoder/decoder
+  losslessness and termination, malformed-input rejection, canonical parsing,
+  and all encoding/security deltas remain proof obligations.
+  `OBL-RANS-ACTUAL-SUCCESS-WITNESS` is now
+  `PROVED (fixed all-6 input, Hoare partial correctness)`. `OBL-SIG-HBZ-ENCODE-DECODE`
+  is `PROVED (success-conditioned partial correctness)` via
+  `signature_pack_unpack_hbz_full_actual_exact`; the theorem still does not
+  claim unconditional reachability or termination.
 - The Week 14 wrapper theorem is a proof-authored production full-HBZ
   boundary and is not added to the cryptographic assumption or runtime-
   contract interfaces.

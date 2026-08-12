@@ -1,0 +1,100 @@
+\section{Week 15: Fixed All-Six Actual Encoder Success}
+
+Week~15 closes \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS} as
+\status{proved for the fixed all-six input, Hoare partial correctness}.  The
+result excludes the actual encoder's failure return for every terminating run
+from the fixed precondition.  It does not establish termination or a
+probability-one reachability theorem.
+
+\subsection*{Zero HBZ to the actual all-six prepare result}
+
+\theoryname{Mode2RansAllSixBudget} defines \procname{zero_hbz} by initializing
+every byte of the 8192-byte coefficient array to zero.  The lemma
+\procname{zero_hbz_get32} opens the four-byte \texttt{BArray8192.get32} load
+and proves every coefficient word is \texttt{W32.zero}; canonicality is then
+derived by \procname{zero_hbz_canonical}.  Thus canonicality is not an input
+assumption of the final witness theorem.
+
+The actual focused \procname{_encode_hb_z1_prepare} theorem yields
+\texttt{bad=0}, the prepared-prefix relation, and its byte-tail frame.
+\procname{prepared_zero_hbz_is_all_six} unfolds each prepared coefficient,
+uses the zero word load, and proves that all first 1024 symbols equal 6.
+Consequently \procname{actual_focused_encode_hb_z1_prepare_zero_hbz} connects
+the concrete zero coefficient input to the all-six predicate without an
+arbitrary prepared-symbol witness.
+
+\subsection*{A coarse capacity proof}
+
+The literal table certificate gives
+\[
+ f(6)=398,
+ \qquad x_{\max}(6)=2{,}097{,}152\cdot398=834{,}666{,}496.
+\]
+For every state in the actual encoder range
+$2^{23}\leq x<2^{31}$, integer division gives
+$x\mathbin{\mathrm{div}}256<x_{\max}(6)$.  The lemma
+\procname{symbol6_normalization_len_le1} therefore proves
+$0\leq\ell_6(x)\leq1$: symbol 6 emits at most one normalization byte.
+
+The first four all-six suffix states are checked inside EasyCrypt by unfolding
+the certified fast/math update:
+\[
+ 2^{23},\ 21{,}582{,}496,\ 55{,}528{,}910,\
+ 142{,}868{,}116,\ 367{,}580{,}518.
+\]
+The first four inputs are below $x_{\max}(6)$ before their updates, so
+\procname{all_six_first_four_no_normalization} proves zero emitted bytes for
+each of these four prefixes.  Induction then combines four zero-emission
+steps with at most one byte for every remaining step:
+\[
+ \left|\mathsf{encodeTrace}(6^n).\mathsf{bytes}\right|
+ \leq \max(0,n-4).
+\]
+At $n=1024$, \procname{all_six_trace_fits_mode2} derives at most 1020
+normalization bytes and a total serialized trace size between 4 and 1024.
+No externally computed exact trace length is used as proof evidence.
+
+\subsection*{Failure guard and actual success}
+
+The strengthened Week~11 closure retains the actual failure cause rather than
+only \texttt{bad}\,$\ne0$.  The theorem
+\procname{actual_rans_encode_failure_trace_cause} proves that a nonzero bad
+return requires more than 1020 normalization bytes.  This certificate is
+threaded from the generated \texttt{off < 4} guard through the existing
+outer/inner tail invariants; the encoder loops are not copied or re-proved in
+a new theory.
+
+\procname{actual_rans_encode_all_six_success} targets
+\procname{RansEncodeTarget.M._rans_encode} directly.  Its precondition binds
+the actual arrays, literal mode-2 table, count 1024, and the all-six prefix; it
+does not assume success, buffer fit, trace size, or a returned offset.  The
+pure 1020-byte upper bound contradicts the actual failure certificate.  The
+remaining branch has \texttt{bad=0}, offset in $[0,1020]$, serialized size in
+$[4,1024]$, the exact all-six trace segment, and the initial prefix frame.
+
+\subsection*{Full and production boundaries}
+
+\procname{actual_encode_hb_z1_full_zero_success} opens the actual
+\procname{HbzFullEncodeTarget.M._encode_hb_z1_full}.  It derives zero-input
+canonicality, prepare success, and all-six symbols internally; calls the
+actual rANS encoder theorem; and follows the actual suffix-copy branch.  Its
+postcondition gives a nonzero returned size, the 4--1024 bound, exact trace,
+output-tail frame, and the actual prepare-call symbol witness.
+
+The exact focused/production procedure equivalence yields
+\procname{signature_pack_hbz_zero_success_mode2} for
+\procname{SignaturePackMode2Target.M._encode_hb_z1_full}.  The additional
+corollary \procname{signature_pack_unpack_hbz_zero_success_mode2} eliminates
+the failure disjunct of the existing production pack/unpack harness using the
+new encoder theorem, then obtains decoder execution, decoder \texttt{bad=0},
+the zero coefficient prefix, and both coefficient and encoded tail frames.
+
+\subsection*{Boundary and next target}
+
+All Week~15 claims remain unary Hoare partial correctness.  No
+\texttt{phoare}=1 or losslessness theorem was compiled, so fixed-input
+termination and actual non-vacuous reachability remain \status{partial}.
+General encoder termination, all-canonical-input success, malformed-input
+rejection, encoding zero-loss, and security are not claimed.  The Week~16
+single recommended target is \claimid{OBL-SIG-H-ENCODE-DECODE}: the actual
+mode-2 \(h\)-suffix codec leaf/table/loop/full-wrapper inverse.

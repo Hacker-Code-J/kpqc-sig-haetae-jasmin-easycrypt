@@ -257,6 +257,56 @@ three generated hashes listed above, and `verify-all.sh` compares them with
 The existing closure is sufficient for the newly compiled procedure-level
 results:
 
+## Week 16 transparent direct-keygen harness
+
+Source:
+
+- `haetae-ref-jasmin/jasmin/keypair.jazz`
+- source SHA-256:
+  `8b2ddac2862122d1c9d58767cbc5caa2caad39c8f41fa8096d66ffa77b783e01`
+
+Generated parent theory boundary:
+
+- `haetae-ref-easycrypt/easycrypt/extract/keygen-mode2-parent/KeygenMode2ParentTarget.ec`
+- generated SHA-256:
+  `248f8157e348e3f294665d12573a58ee58e860884356bfe82324fda64de5d0b4`
+
+Selected generated procedures:
+
+- `_kp_m23_matrix`
+- `_keypair_finalize_m23`
+
+Authored targets:
+
+- `Mode2KeygenCoreEquation.ec`
+- `Mode2KeygenNttMulBridge.ec`
+- `Mode2KeygenSnapshotAlgebra.ec`
+
+Authored proof boundary:
+
+- `Mode2KeygenCoreEquation.ActualM23MatrixFinalizeSnapshot.run` is a
+  transparent two-call harness over the exact generated parent procedures.
+- `actual_m23_matrix_finalize_snapshot` proves only the direct matrix output,
+  retained transformed-secret scratch, exact finalizer output, and the returned
+  tail frames.
+- `Mode2KeygenSnapshotAlgebra` is a local arithmetic decomposition hook for the
+  returned snapshot. The core theory defines `actual_snapshot_mod2q_zero` and
+  proves it through `finalize_semantic_output_snapshot_mod2q_zero`; it does not
+  claim the paper key equations.
+- `Mode2KeygenNttMulBridge` adds no extraction root or wrapper. It only exposes
+  the existing checked `output_row` as the Montgomery `full_invntt` of the
+  actual pointwise row words and transports that representation to both rows
+  of the direct snapshot harness. It does not identify those words with
+  `Agen*sgen`.
+
+Status:
+
+- transparent direct helper composition: **PROVED**
+- `output_row`/full-NTT to security-model `Agen * sgen` bridge:
+  **STOPPED (`STOP-KG-NTT`)** at the absent odd-root orthogonality/convolution
+  theorem and absent `Rq.poly`-to-security-list adapter
+- retry, acceptance, packing, and public-API lift: **DEFERRED**
+
 - actual KeyGen caller:
   `RawApiKeygenSequentialExport.keypair_raw_api_exports_matching_prefixes`;
 - actual/raw Verify exact mirrors:
@@ -669,3 +719,32 @@ extraction boundary. `verify-all.sh` regenerates both target pairs, checks
 `generated-extractions.sha256`, and byte-compares all six relevant procedure
 bodies, including both full wrappers. No generated/source hash manifest entry
 changes.
+
+## Week 15 fixed-input success-witness reuse
+
+Week 15 adds no extraction root, generated wrapper, table data, or copied
+upstream source. The core witness targets the same pinned generated procedure
+directly:
+
+```text
+RansEncodeTarget.M._rans_encode
+  3184367f5d41196b54e43524a2b04ea709387f30d72e1a3f699a9e33e22cebc5
+```
+
+The zero-HBZ corollary opens the existing focused full wrapper, and the
+production corollary uses the compiled exact focused/production equivalence:
+
+```text
+HbzFullEncodeTarget.M._encode_hb_z1_full
+  6c085864d31a3cb406b4b0e4be0d87842e8fc2d574b161e1a0dc89953f0882e0
+SignaturePackMode2Target.M._encode_hb_z1_full
+  cec608044cf12611e5fddce4764bf9b582aa03c3ce69caaeb8d453ed4028f8a9
+```
+
+The all-six capacity proof and failure-cause transport are authored EasyCrypt
+lemmas over these bodies and the existing deterministic literal table
+certificate. `verify-all.sh` regenerates the focused and production targets,
+checks their stored hashes and internal procedure identity, regenerates the
+table certificate, and fresh-compiles the new Hoare theorems. No source,
+generated-extraction, or generated-certificate hash entry changes. This reuse
+does not assert fixed-input termination or general encoder losslessness.

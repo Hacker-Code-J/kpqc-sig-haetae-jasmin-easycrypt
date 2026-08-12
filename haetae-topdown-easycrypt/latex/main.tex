@@ -2,8 +2,8 @@
 \input{macros}
 
 \title{HAETAE Top-Down EasyCrypt\\Research Development Notes}
-\author{Codex Week 1--14 Sprint Record}
-\date{August 10, 2026}
+\author{Codex Week 1--16 Sprint Record}
+\date{August 12, 2026}
 
 \begin{document}
 \maketitle
@@ -11,7 +11,7 @@
 \begin{abstract}
 These notes are research development notes, not a completed paper. They record
 the top-down proof architecture, the exact theorem statements attempted during
-the first fourteen sprints, the compiled EasyCrypt evidence, and the remaining
+the first fifteen sprints, the compiled EasyCrypt evidence, and the remaining
 named obligations that still block a public-API EUF-CMA theorem for the pinned
 HAETAE Jasmin implementation. Week~1 and Week~2 entries are retained as
 retrospective research records; Week~3 adds the exact generated raw-top mu
@@ -50,6 +50,20 @@ Week~14 lifts the completed leaf and rANS results through exact internal
 procedure boundaries, proves the actual full encoder and decoder wrappers,
 composes their visible zero-size failure and nonzero success branches, and
 formally transfers the result to the SignaturePack/Unpack extraction boundary.
+Week~15 specializes the actual encoder to the zero-HBZ/all-six input, proves a
+1020-byte coarse normalization budget, connects actual failure to budget
+overflow, excludes that failure in Hoare partial correctness, and lifts the
+fixed-input failure-exclusion result through the full HBZ and production pack/unpack
+boundaries while leaving termination explicit and open.
+Week~16 directly composes the actual M23 matrix and finalizer helpers, proves
+their exact and semantic snapshot consequences including the coefficient
+low/high split and a snapshot-only congruence modulo \(2q\), and records the
+missing full-NTT-to-security-model multiplication bridge as the exact blocker
+to the faithful paper KeyGen equation. The KG--NTT--MUL continuation
+fresh-compiles the last honest NTT-word representation edge, identifies the
+missing odd-root orthogonality/convolution and array-to-list adapter leaves,
+freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}, and moves the
+active MINCORE lane to Sign.
 \end{abstract}
 
 \tableofcontents
@@ -84,6 +98,9 @@ formally transfers the result to the SignaturePack/Unpack extraction boundary.
 \input{sections/28-week12-rans-decoder-refinement}
 \input{sections/29-week13-rans-core-composition}
 \input{sections/30-week14-hbz-full-wrapper-composition}
+\input{sections/31-week15-rans-actual-success-witness}
+\input{sections/32-week16-mincore-keygen-first-task}
+\input{sections/33-week16-kg-ntt-mul-stop}
 
 \bibliographystyle{plain}
 \bibliography{references}

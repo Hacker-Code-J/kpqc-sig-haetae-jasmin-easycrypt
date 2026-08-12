@@ -1,0 +1,80 @@
+\usepackage{fontspec}
+\usepackage{xetexko}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{unicode-math}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{booktabs,tabularx,array,longtable}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
+\setmathfont{TeX Gyre Pagella Math}
+\setmainhangulfont{Noto Serif CJK KR}
+\setsanshangulfont{Noto Sans CJK KR}
+\setmonohangulfont{Noto Sans Mono CJK KR}[Scale=MatchLowercase]
+
+\definecolor{ink}{HTML}{1E293B}
+\definecolor{goalblue}{HTML}{315E9E}
+\definecolor{provedgreen}{HTML}{176B45}
+\definecolor{boundaryred}{HTML}{A43A3A}
+\definecolor{partialgold}{HTML}{9A6700}
+\definecolor{softgray}{HTML}{F3F4F6}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=goalblue,
+  citecolor=provedgreen,
+  urlcolor=goalblue,
+  pdftitle={HAETAE-2 Jasmin 구현의 핵심 연산 기능정확성 검증 목표},
+  pdfsubject={KeyGen, Sign, Verify 핵심 계산의 EasyCrypt 검증 목표와 아티팩트 계획},
+  pdfauthor={HAETAE formal verification project}
+}
+
+\setlist[itemize]{leftmargin=2em,itemsep=0.28em,topsep=0.4em}
+\setlist[enumerate]{leftmargin=2.3em,itemsep=0.28em,topsep=0.4em}
+\renewcommand{\arraystretch}{1.18}
+\renewcommand{\contentsname}{목차}
+\renewcommand{\refname}{참고문헌}
+\renewcommand{\tablename}{표}
+\setlength{\emergencystretch}{3em}
+\setlength{\parindent}{1em}
+\setlength{\parskip}{0.2em}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\theoremstyle{definition}
+\newtheorem{verificationgoal}{검증 목표}[section]
+\newtheorem{scopeboundary}[verificationgoal]{범위 경계}
+\newtheorem{acceptancecriterion}[verificationgoal]{완료 기준}
+
+\crefname{verificationgoal}{검증 목표}{검증 목표}
+\crefname{scopeboundary}{범위 경계}{범위 경계}
+\crefname{acceptancecriterion}{완료 기준}{완료 기준}
+
+\newcommand{\proc}[1]{{\begingroup\urlstyle{tt}\nolinkurl{#1}\endgroup}}
+\newcommand{\claim}[1]{\textsf{\textbf{\detokenize{#1}}}}
+\newcommand{\Rq}{R_q}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\norm}[1]{\left\lVert #1\right\rVert}
+\newcommand{\HighBits}{\operatorname{HighBits}}
+\newcommand{\LowBits}{\operatorname{LowBits}}
+\newcommand{\LSB}{\operatorname{LSB}}
+\newcommand{\Encode}{\operatorname{Encode}}
+\newcommand{\Decode}{\operatorname{Decode}}
+\newcommand{\SampleInBall}{\operatorname{SampleInBall}}
+\newcommand{\centerq}{\operatorname{center}_{q}}
+\newcommand{\sqnorm}{\operatorname{sqnorm}}
+
+\newenvironment{reportstatement}
+  {\begin{quote}\color{ink}\noindent\textbf{최종 보고 문장.}\par\smallskip}
+  {\end{quote}}
+
+\newenvironment{statusnote}
+  {\begin{quote}\color{partialgold}\noindent\textbf{상태 주의.}\par\smallskip}
+  {\end{quote}}

@@ -17,15 +17,20 @@
    state machine)의
    refinement로 읽는 방법.
 
-현재 스냅샷은 2026년 8월 10일에 다시 감사한 Week 13 종료 기준선이다. 운영상
+현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 KG-NTT-MUL continuation
+종료 기준선이다. 운영상
 source of truth는 `../CLAIM_LEDGER.md`이고, 최종 증거는 `../easycrypt/` 아래의
 명명된 EasyCrypt 정리(theorem)다. 안내서의 문장은 이 스냅샷에 고정되어 있으며,
 “현재”라는 표현도 모두 이 날짜를 뜻한다.
 
-여기서 67개는 최신 aggregate-verified 기준선의 authored target 수다. Week 11에
+여기서 77개는 최신 aggregate-verified 기준선의 authored target 수다. Week 11에
 rANS encoder closure 관련 파일 일곱 개가 manifest에 추가되어 `-no-eco`로 fresh
 compile되었고, Week 12에는 actual decoder semantic-refinement 파일 여덟 개가,
-Week 13에는 actual core composition 파일 두 개가 추가되었다. encoder의 핵심 정리(theorem)
+Week 13에는 actual core composition 파일 두 개가, Week 14에는 production full-HBZ
+wrapper 경계를 닫는 파일 다섯 개가 추가되었다. Week 15에는 고정 all-6 입력의
+actual 성공 사후조건을 닫는 파일 두 개가, Week 16에는 actual KeyGen
+matrix/finalize snapshot과 KG-NTT-MUL 중단 경계를 다루는 파일 세 개가 더해졌다.
+encoder의 핵심 정리(theorem)
 `actual_rans_encode_trace_closure`와
 `actual_rans_encode_trace_refinement`는 실제 generated encoder가 반환하는 성공
 접미부(suffix)를 actual symbol array의 순수 `trace_bytes`와 정확히 연결한다.
@@ -41,19 +46,50 @@ Week 13에는 actual core composition 파일 두 개가 추가되었다. encoder
 read/state 전제로 운송하고, `Mode2RansCoreActualInverse.ec`의
 `actual_rans_encode_copy_decode_inverse`가 이 harness의 의미론적 역함수(semantic
 inverse)를 닫는다. 따라서 `OBL-RANS-CORE-INVERSE`도 성공 조건부
-부분정확성(success-conditioned partial correctness)으로 `PROVED`다. 다만 concrete
-all-6 입력의 실제 성공 증인(success witness), encoder/decoder 종료성(termination),
-production full-HBZ wrapper와 full signature codec은 여전히 `PARTIAL` 또는
-`BLOCKED`다.
+부분정확성(success-conditioned partial correctness)으로 `PROVED`다.
+Week 14의 `signature_pack_unpack_hbz_full_actual_exact`는 focused full-HBZ harness와
+실제 SignaturePack/Unpack 경계를 정확히 일치시키고,
+`signature_pack_unpack_hbz_full_inverse_mode2`는 실패 분기를 보존하면서 성공 시
+원래 HBZ coefficient prefix, tail frame, trace witness를 복원한다. 따라서
+`OBL-SIG-HBZ-ENCODE-DECODE`는 성공 조건부 부분정확성으로 `PROVED`다. 다만
+Week 15의 `actual_rans_encode_all_six_success`와
+`signature_pack_unpack_hbz_zero_success_mode2`는 canonical all-zero HBZ 입력이
+만드는 all-6 stream에 대해, 반환하는 모든 실행이 `bad=0`과
+`4 <= size <= 1024`를 만족하고 production pack/unpack이 zero coefficient prefix를
+복원함을 보인다. 따라서 `OBL-RANS-ACTUAL-SUCCESS-WITNESS`는
+`PROVED (fixed all-6 input, Hoare partial correctness)`다. 이 판정은 해당 실행의
+종료·존재, losslessness, probability-one success를 뜻하지 않으며 `phoare` 정리는
+아직 없다.
+
+Week 16의 `actual_m23_matrix_finalize_semantic_snapshot`은 실제
+`_kp_m23_matrix(2,3)`와 `_keypair_finalize_m23(512)`를 순서대로 호출하는 투명한
+harness에서 pre-finalization `bp` snapshot, low/high 분해, adjusted `s2`, snapshot
+전용 mod-`2q` 영 합동식을 함께 보인다.
+`output_row_from_mode2_ntt_words`는 그 `output_row`를 실제
+`array256_mont(full_invntt(pointwise_row_words(...)))` 표현으로 정확히 고정한다.
+`actual_m23_matrix_snapshot_rows_explicit`는 이 rewrite를 투명한 two-call
+harness의 두 active row에 적용한다.
+그러나 이를 native `Rq` 곱 및 보안 모형의 `Agen*sgen` 다항식 곱과 동일시하는
+full-NTT convolution 정리와 `Rq.poly`--security-list 어댑터는 없다. KG-NTT-MUL
+감사는 첫 누락 leaf를 odd-root orthogonality/full-NTT convolution 식으로
+특정한 뒤 중단했다. 그러므로 `OBL-MINCORE-KEYGEN`은 `PARTIAL — STOP-KG-NTT`이며,
+faithful KG-1/KG-3, complete KG-4와 논문식 `A s = q j (mod 2q)`는 완료되지
+않았다. KeyGen은 KG-2/finalization에서 동결되고 현재 단일 우선순위는 actual
+accepted Sign core다. 두 번째 `h` codec은 `DEFERRED`다.
 
 ## 빠른 읽기 순서
 
 - 30분: 본문의 1절, 2절, 6절
 - 반나절: 1--6절과 8절의 정리 인덱스(theorem index)
-- 증명 참여 준비: 전 장과 `../CLAIM_LEDGER.md`, `../WEEK13_REPORT.md`,
+- 증명 참여 준비: 전 장과 `../CLAIM_LEDGER.md`, `../WEEK15_REPORT.md`,
+  `../RANS_ACTUAL_SUCCESS_WITNESS.md`, `../WEEK16_KG_REPORT.md`,
+  `../WEEK16_KG_NTT_MUL_REPORT.md`, `../WEEK16_MINCORE_PLAN.md`,
+  `../HBZ_FULL_WRAPPER_COMPOSITION.md`,
   `../RANS_ENCODER_INVARIANT.md`, `../RANS_DECODER_INVARIANT.md`,
   `../RANS_CORE_COMPOSITION.md`,
-  `../easycrypt/refinement/sign/Mode2RansCoreActualInverse.ec`
+  `../easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec`,
+  `../easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec`,
+  `../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec`
 
 ## 문서 구성
 
@@ -64,9 +100,9 @@ production full-HBZ wrapper와 full signature codec은 여전히 `PARTIAL` 또�
 - `sections/02-algebraic-object.tex`: 몫환(quotient ring)·모듈(module)과 HAETAE-2 데이터 흐름
 - `sections/03-representation-and-logic.tex`: 표현 사상(representation map), 메모리 제한, Hoare/pRHL 사전
 - `sections/04-proved-spine.tex`: 현재 실제로 닫힌 증명 사슬
-- `sections/05-rans-frontier.tex`: HBZ/rANS의 순수 역함수(pure inverse function)와 실제 루프 사이의 간극
+- `sections/05-rans-frontier.tex`: HBZ/rANS 증명 사슬, 고정 입력 성공 정리와 종료성 경계
 - `sections/06-boundaries.tex`: 미해결 의무, 가정 표면, 과장 금지선
-- `sections/07-roadmap.tex`: 대수학자가 참여할 수 있는 다음 작업
+- `sections/07-roadmap.tex`: KeyGen NTT 중단 경계와 현재 MINCORE-SIGN 작업
 - `sections/08-source-index.tex`: 정리명(theorem name), 소스 경로, 용어 사전, 재현 방법
 - `references.bib`: 고정된 로컬 명세와 프로젝트 문서
 

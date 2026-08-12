@@ -47,9 +47,17 @@ The verifier:
 The Week 12 pre-edit baseline is preserved in
 `logs/verify-all-before-week12.log` (all earlier historical baselines remain
 unchanged), and the Week 14 pre-edit 67-target baseline is preserved in
-`logs/verify-all-before-week14.log`. The current verification summary reports
-72 authored `-no-eco` targets after the production HBZ wrapper lift. The final
-aggregate result is recorded in `logs/verify-all-summary.txt`.
+`logs/verify-all-before-week14.log`. The pre-edit Week 16 baseline reports 74
+authored `-no-eco` targets and is preserved in
+`logs/verify-all-before-week16.log` (SHA-256
+`da7a7516166d54e93665d36e9a81348050ac6a83786111eb83ac6901743d6056`).
+The KG-NTT-MUL continuation baseline is the fresh 76-target run preserved in
+`logs/verify-all-before-kg-ntt-mul.log` (SHA-256
+`c556834b6e881930c8357ed136c5eb138a1a63bfdb977f194a63edae3298f348`).
+The current manifest contains 77 authored targets, including the final sound
+NTT-word representation boundary. Its aggregate result is preserved in
+`logs/verify-all-week16-kg-ntt-mul.log` and mirrored by the latest
+`logs/verify-all-summary.txt`.
 
 Detailed logs are written only under `logs/`. A pre-existing Why3 server can be
 reused with `WHY3_SERVER_SOCKET=/path/to/socket`; otherwise the verifier starts
@@ -460,14 +468,14 @@ decoder read; the harness's three actual state stores establish
 success bounds, with no modular wraparound.
 
 Accordingly `OBL-RANS-CORE-INVERSE` is **PROVED as success-conditioned partial
-correctness**. This does not prove encoder success reachability, encoder or
+correctness**. The Week 13 theorem by itself does not prove encoder success
+reachability, encoder or
 decoder termination, the production full-HBZ wrapper inverse, canonical
 malformed-input rejection, or any encoding/security zero-loss claim.
-`OBL-RANS-ACTUAL-SUCCESS-WITNESS` remains `PARTIAL`. Week 14's single goal is
-the production full-HBZ wrapper boundary, now captured by
-`signature_pack_unpack_hbz_full_actual_exact` and
-`signature_pack_unpack_hbz_full_inverse_mode2`; keep the `h` codec out of
-scope until the actual success witness compiles.
+`OBL-RANS-ACTUAL-SUCCESS-WITNESS` is now **PROVED (fixed all-6 input, Hoare
+partial correctness)**. Week 15 records that witness only.  Its original
+Week 16 `h`-codec recommendation was later superseded by the narrower KeyGen
+snapshot leaf.
 
 ## Week 14
 
@@ -488,6 +496,52 @@ The production boundary remains success-conditioned:
   encoded buffer.
 
 This is the production formal lift. It closes the wrapper composition, but it
-does not prove encoder-success reachability or the all-zero witness. That
-witness remains `PARTIAL`, and the `h` codec stays out of scope until it
-compiles.
+does not prove encoder-success reachability for arbitrary inputs. The fixed
+all-6 success witness now compiles separately.  The `h` codec remains outside
+the active one-week minimum-paper scope.
+
+## Week 15
+
+Week 15 records the fixed all-6 witness only. The exact witness is
+`Mode2RansActualSuccessWitness.actual_rans_encode_all_six_success`, and the
+fixed-input HBZ lift is carried by
+`full_rans_encode_all_six_success`,
+`actual_encode_hb_z1_full_zero_success`,
+`signature_pack_hbz_zero_success_mode2`,
+`actual_hbz_full_encode_decode_zero_success_mode2`, and
+`signature_pack_unpack_hbz_zero_success_mode2`. This remains Hoare partial
+correctness only: every terminating fixed-input execution returns the stated
+success result. It does not add termination, losslessness, probability-one
+success, or a non-vacuous execution theorem.
+
+## Week 16 — MINCORE keygen snapshot
+
+The active Week 16 result is narrower than the previous paper target.  The
+compiled KeyGen surface is the transparent two-call harness:
+
+- `ActualM23MatrixFinalizeSnapshot.run` calls `_kp_m23_matrix` and
+  `_keypair_finalize_m23` in sequence and returns the snapshot needed by the
+  later bridge;
+- `Mode2KeygenSnapshotAlgebra` proves the residue split, low/high parity
+  relation, and the mod-2q snapshot congruence lemmas; and
+- `Mode2KeygenCoreEquation.actual_m23_matrix_finalize_semantic_snapshot`
+  exports the actual snapshot low/high decomposition and the mod-2q zero
+  identity through the two-call harness.
+
+This is a focused keygen leaf, not the paper KeyGen theorem.  The KG-NTT-MUL
+continuation reused the checked actual forward-NTT, pointwise, and inverse-NTT
+leaves and fresh-compiled `Mode2KeygenNttMulBridge` as the last honest
+`output_row` representation rewrite. Its
+`actual_m23_matrix_snapshot_rows_explicit` corollary carries that expression
+to both rows returned by the direct matrix/finalizer harness without copying
+the actual loops. The checked NTT tree still lacks the
+odd-root orthogonality/full-NTT convolution identity
+`mont(full_invntt(ahat * full_ntt(p) * inv R)) = full_invntt(ahat) &* p`, and
+the `Rq.poly`-to-security-list multiplication adapter is also absent.
+
+The final decision is therefore **STOP-KG-NTT**, not `GO-KG`.  KeyGen is
+frozen at KG-2/finalization: faithful KG-1, KG-3, complete KG-4, and the paper
+`A s = q j (mod 2q)` are not proved.  No sampler, retry, packer, public API,
+termination, or security claim is made. `WEEK16_KG_NTT_MUL_REPORT.md` records
+the missing leaf at procedure and formula level; the active MINCORE lane now
+moves to the accepted Sign-core helpers.

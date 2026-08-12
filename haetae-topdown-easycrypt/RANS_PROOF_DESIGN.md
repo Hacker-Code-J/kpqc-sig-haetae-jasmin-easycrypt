@@ -454,6 +454,22 @@ split visible:
 - `size <> 0`: decoder runs, `bad = 0`, the decoded prefix and tail frame are
   proved, and a concrete `prepared_symbols` witness supplies the trace bytes.
 
-This is success-conditioned partial correctness only. The actual all-zero
-success witness remains `PARTIAL`, so the unconditional round-trip statement
-is still open and the `h` codec remains out of scope.
+This is success-conditioned partial correctness only. The fixed all-6 theorem
+now excludes failure for terminating runs; it does not establish termination,
+losslessness, or non-vacuous reachability. The `h` codec is now the Week 16
+target only.
+
+## Week 15 witness
+
+`Mode2RansActualSuccessWitness.actual_rans_encode_all_six_success` proves the
+fixed all-6 witness at the actual `RansEncodeTarget.M._rans_encode` surface.
+The fixed-input HBZ lift is carried by
+`full_rans_encode_all_six_success`,
+`actual_encode_hb_z1_full_zero_success`,
+`signature_pack_hbz_zero_success_mode2`,
+`actual_hbz_full_encode_decode_zero_success_mode2`, and
+`signature_pack_unpack_hbz_zero_success_mode2`.
+
+This is fixed-input Hoare partial correctness: every terminating run has the
+success result. It is not a termination, losslessness, probability-one, or
+non-vacuous execution theorem.

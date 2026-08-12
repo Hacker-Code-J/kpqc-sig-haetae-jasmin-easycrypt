@@ -4,7 +4,7 @@
 \title{\textbf{HAETAE-2 Jasmin 구현 검증}\\[0.4em]
   \Large 수학자와 암호이론가를 위한 현재 증명 전선}
 \author{HAETAE top-down EasyCrypt 작업 문서}
-\date{상태 기준: 2026년 8월 10일}
+\date{상태 기준: 2026년 8월 12일}
 
 \begin{document}
 \maketitle
@@ -45,11 +45,27 @@ certificate), 순수 rANS 단계와 정규화 바이트 스택(normalization-byt
 보존하고 \(bad=0\)을 반환한다는 정확 추적 부분정확성(exact-trace partial
 correctness)이 컴파일된다. Week~13은 실제 인코더의 접미부와 실제 복사의
 점별 구간 등식을 디코더의 정확 추적 입력으로 운반하고, 동일한 결합 모듈에서
-실패 시 디코더 미실행과 성공 시 1024기호 복원을 함께 증명했다. 67개 작성 검증
-대상(authored proof target)의 전체 검증도 통과했으며 운영 판정은 rANS 핵심
-역함수 관문 통과를 뜻하는 \identifier{GO-CORE}다. 다만 실제 성공
-증인(success witness), 인코더/디코더 종료와 실제 전체 HBZ 래퍼 합성은 여전히
-열려 있다.
+실패 시 디코더 미실행과 성공 시 1024기호 복원을 함께 증명했다. Week~14는
+실제 full-HBZ prepare--rANS--apply 경계를 production
+SignaturePack/Unpack 추출 경계까지 올려, 실패 시 초기 버퍼 보존과 성공 시
+원래 1024계수 복원 및 꼬리 프레임을 같은 계약으로 증명했다. Week~15는
+all-zero HBZ의 실제 prepare 결과가 all-6 기호열임을 보이고, 그 기호열의
+정규화 예산이 1020바이트 이하라는 순수 상계로 실제 인코더 실패를 배제했다.
+따라서 종료한 고정 입력 실행에 대해서는 production pack/unpack의 nonzero-size
+왕복까지 컴파일된다. 이는 Hoare 부분정확성이므로 종료, losslessness나
+확률 1 성공을 뜻하지 않는다.
+
+Week~16의 현재 전선은 실제 \identifier{_kp_m23_matrix}와
+\identifier{_keypair_finalize_m23}를 잇는 KeyGen 스냅샷이다. KG-2형 low/high
+분해, 조정된 \(s2\) 성분과 스냅샷 한정 mod-\(2q\) 영 등식은 닫혔지만,
+\identifier{output_row}의 full-NTT 표현을 논문 보안 모델의
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱으로 식별하는 다리가 없다. KG-NTT-MUL
+감사는 누락된 odd-root orthogonality/full-NTT convolution과 security-list
+adapter를 특정했다. 77개 작성 검증 대상이 매니페스트됐고 최신 판정은
+\identifier{STOP-KG-NTT}이며, \identifier{GO-KG}가 아니다. KeyGen은
+KG-2/finalization에서 동결되고 actual accepted Sign core로 이동한다. 힌트 (h)
+코덱은 현재 범위에서 연기되었다. 77번째 대상은 마지막 snapshot 정리의
+consequence로 두 active row의 explicit NTT 표현을 개별 fresh compile했다.
 따라서
 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
 \(\delta_{\mathrm{Encoding}}=0\)은 아직 주장할 수 없다. 접미부 코덱,
@@ -76,9 +92,19 @@ Week~11은 순수 꼬리를 보존하는 정확한 내부 불변식, 생성 단�
 같은 순수 추적을 실제 디코더가 앞에서부터 소비하여 원래 기호, 정확한 소비
 크기와 출력 꼬리 프레임을 복원함을 닫았다. Week~13은 실제
 인코더--복사--디코더 세 절차를 직접 호출하는 결합 모듈에서 실패/성공 분기와
-성공 시 전체 기호 복원을 합성했다. 다만 완료된 추적의 저장된 \(\mu\)를
-연결하는 생성/재전달 정리는 \statusdeferred 이고, 실제 인코더 성공,
-인코더/디코더 종료, 실제 전체 HBZ/h 접미부 및 Verify 관문이 남아 있다. 따라서
+성공 시 전체 기호 복원을 합성했다. Week~14는 그 결과를 실제 full-HBZ
+prepare/apply와 합성하고 production SignaturePack/Unpack 경계로 운반했다.
+Week~15는 all-zero HBZ에 대해 실제 all-6 prepare, 인코더 실패 배제와
+production 고정 입력 왕복을 닫았다. Week~16은 실제 KeyGen matrix/finalizer의
+스냅샷 의미, low/high 분해와 mod-\(2q\) 등식을 닫고, KG-NTT-MUL 감사는
+\identifier{output_row}의 마지막 full-invNTT/pointwise 표현 rewrite와 actual
+two-call harness의 두 active row consequence를 77번째 대상으로 컴파일한 뒤
+\identifier{STOP-KG-NTT}로 동결했다.
+다만 완료된 추적의 저장된 \(\mu\)를 연결하는 생성/재전달 정리는
+\statusdeferred 이고, 고정 입력 종료/losslessness, odd-root
+직교성/full-NTT convolution과 security-list adapter, MINCORE Sign/Verify/합성,
+(h) 접미부 및 전체 Verify 관문이 남아 있다. 현재 단일 전선은 actual accepted
+Sign core다. 따라서
 API/인코딩 무손실(zero loss)과
 EUF-CMA로의 승격은 아직 허용되지 않는다.
 \end{takeaway}
