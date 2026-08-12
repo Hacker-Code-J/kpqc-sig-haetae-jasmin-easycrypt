@@ -58,6 +58,10 @@ printf 'PASS source drift\n' | tee -a "$SUMMARY"
   > "$LOG_DIR/proof-hole-scan.log" 2>&1
 printf 'PASS proof-hole scan\n' | tee -a "$SUMMARY"
 
+PAPER_FREEZE_SCOPE_ONLY=1 "$SCRIPT_DIR/check-paper-freeze.sh" \
+  > "$LOG_DIR/paper-freeze-scope-audit.log" 2>&1
+printf 'PASS paper-freeze claim-scope audit\n' | tee -a "$SUMMARY"
+
 find "$PROJECT_DIR/easycrypt" -type f -name '*.ec' \
   | sed "s#^$PROJECT_DIR/##" | LC_ALL=C sort \
   > "$WORK_DIR/discovered-targets.txt"
@@ -1340,5 +1344,15 @@ printf 'PASS LaTeX research notes build\n' | tee -a "$SUMMARY"
 "$SCRIPT_DIR/check-source-drift.sh" \
   > "$LOG_DIR/source-drift-after.log" 2>&1
 printf 'PASS read-only roots unchanged after verification\n' | tee -a "$SUMMARY"
+
+PAPER_AUDIT_SUMMARY="$WORK_DIR/paper-freeze-summary.txt"
+cp "$SUMMARY" "$PAPER_AUDIT_SUMMARY"
+printf 'RESULT PASS authored-targets=%s cache=-no-eco\n' "$compiled" \
+  >> "$PAPER_AUDIT_SUMMARY"
+PAPER_FREEZE_SUMMARY="$PAPER_AUDIT_SUMMARY" \
+  "$SCRIPT_DIR/check-paper-freeze.sh" \
+  > "$LOG_DIR/paper-freeze-audit.log" 2>&1
+printf 'PASS paper-freeze scope and 82-target evidence audit\n' \
+  | tee -a "$SUMMARY"
 printf 'RESULT PASS authored-targets=%s cache=-no-eco\n' "$compiled" \
   | tee -a "$SUMMARY"

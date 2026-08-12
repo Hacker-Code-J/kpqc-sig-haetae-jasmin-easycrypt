@@ -20,12 +20,12 @@ At the already proved local hash boundary this would yield
 
 \subsection{KeyGen}
 
-\theoryname{keypair_raw_api_exact_export_trace} places the actual
-\procname{cryptolab_haetae_mode2_keypair_internal} on the left of an exact
+\breakablesame{keypair_raw_api_exact_export_trace} places the actual
+\breakablett{cryptolab_haetae_mode2_keypair_internal} on the left of an exact
 equivalence and preserves its final memory.  The isolated generated exporter
 theorems prove a 992-byte VK write, a 1408-byte SK write, and preservation of
 the earlier VK range under the displayed VK/SK disjointness premise.
-\theoryname{keypair_raw_api_exports_matching_prefixes_from_copy_posts}
+\breakablesame{keypair_raw_api_exports_matching_prefixes_from_copy_posts}
 combines those postconditions with the returned-array prefix theorem.
 
 The attempted single caller Hoare theorem reached the final post-export

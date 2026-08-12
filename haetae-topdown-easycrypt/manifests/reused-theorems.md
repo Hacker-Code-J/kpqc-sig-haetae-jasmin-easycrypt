@@ -1,5 +1,10 @@
 # Reused theorem manifest
 
+Paper-freeze scope is canonicalized in `manifests/paper-artifacts.md`.
+Everything below is a leaf-level reuse record: imported `PROVED` theorems do
+not establish the partial or blocked `PAPER-KG`, `PAPER-SIGN`,
+`PAPER-VERIFY`, or `PAPER-SIGN-VERIFY` parents.
+
 No source was copied.  Direct reuse is through
 `easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec`.  Its imported
 source is pinned at SHA-256

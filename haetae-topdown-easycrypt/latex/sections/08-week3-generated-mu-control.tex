@@ -14,14 +14,12 @@ appear directly in the theorem:
 \]
 More precisely, the claim is
 \[
-  \mathsf{raw\_prelen}(\ell)\land
-  \prefix_{992}(sk,mem,vk)
-  \Longrightarrow
-  \take_{32}(
-    \mathsf{sf\_mu\_rawpre}(sk,pre,m)
-  )
-  =
-  \mathsf{verify\_hash\_mu}(vk,pre,m).
+\begin{aligned}
+  &\mathsf{raw\_prelen}(\ell)\land \prefix_{992}(sk,mem,vk) \\
+  &\qquad\Longrightarrow
+  \take_{32}\bigl(\mathsf{sf\_mu\_rawpre}(sk,pre,m)\bigr)
+  = \mathsf{verify\_hash\_mu}(vk,pre,m).
+\end{aligned}
 \]
 
 \paragraph{Generated control sequence.}
@@ -81,7 +79,7 @@ selected semantically rather than by assumption.
 
 \paragraph{Actual top-level theorem.}
 The closing theorem is
-\theoryname{sign\_verify\_generated\_raw\_mu\_prefix}. Its left and right
+\breakablesame{sign_verify_generated_raw_mu_prefix}. Its left and right
 procedures are exactly:
 \begin{verbatim}
 Sign._sf_mu_rawpre
@@ -112,9 +110,9 @@ packages:
   \item the constructed Verify memory image obtained by storing the packed VK.
 \end{itemize}
 It further proves the Hoare theorem
-\theoryname{keypair\_internal\_return\_reaches\_generated\_raw\_mu\_preconditions}
+\breakablesame{keypair_internal_return_reaches_generated_raw_mu_preconditions}
 over the actual generated
-\procname{crypto\_sign\_keypair\_internal\_mode2\_jazz}. Every terminating
+\breakablett{crypto_sign_keypair_internal_mode2_jazz}. Every terminating
 execution therefore supplies this constructed local-array/raw premise set;
 KeyGen termination is neither assumed nor concluded. Thus the actual
 generated theorem premises are satisfiable by a concrete call path.

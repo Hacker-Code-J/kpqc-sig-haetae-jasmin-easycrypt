@@ -20,8 +20,10 @@ suffix path:
 \begin{itemize}
   \item Sign procedure: \procname{__sign\_challenge\_shake256\_absorb\_mu32}.
   \item Verify procedure: \procname{__verify\_shake256\_absorb\_mu32}.
-  \item EasyCrypt theorem: \theoryname{ExtractedChallengeAbsorb.sign\_verify\_mu32\_absorb\_from\_pos64}.
-  \item EasyCrypt theorem: \theoryname{TranscriptBytes.challenge\_input\_eq\_components}.
+  \item EasyCrypt theorem:
+        \breakablesame{ExtractedChallengeAbsorb.sign_verify_mu32_absorb_from_pos64}.
+  \item EasyCrypt theorem:
+        \breakablesame{TranscriptBytes.challenge_input_eq_components}.
 \end{itemize}
 
 \paragraph{Proof strategy.}
@@ -34,4 +36,3 @@ did not yet connect the premise to actual KeyGen/Sign/Verify call paths.
 Week 1 used fresh \texttt{-no-eco} compilation and regenerated focused
 extractions. The operational source of truth remains the Markdown ledger and
 the verifier logs under \pathname{haetae-topdown-easycrypt/logs/}.
-

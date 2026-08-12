@@ -1,5 +1,6 @@
 PASS source drift
 PASS proof-hole scan
+PASS paper-freeze claim-scope audit
 PASS proof target manifest
 PASS authored axiom scan
 PASS debug/temporary declaration scan
@@ -117,4 +118,5 @@ PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
 PASS baseline verification
 PASS LaTeX research notes build
 PASS read-only roots unchanged after verification
+PASS paper-freeze scope and 82-target evidence audit
 RESULT PASS authored-targets=82 cache=-no-eco

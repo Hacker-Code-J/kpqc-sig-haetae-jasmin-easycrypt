@@ -7,13 +7,13 @@ HAETAE KeyGen/Sign algorithms (official PDF, Figure~8) survives the actual
 Jasmin export/import loops.  The whole claim is tracked as
 \claimid{OBL-API-KEY-MEMORY-RAW}:
 \[
-  \mathsf{KeyGen.local}\;(vk,sk)
-  \Longrightarrow
-  \mathsf{memory}[vku,vku+992)=vk
-  \land
-  \mathsf{memory}[sku,sku+1408)=sk
-  \Longrightarrow
-  \prefix_{992}(sk_{\mathrm{Sign}})=vk_{\mathrm{Verify}}.
+\begin{aligned}
+  &\mathsf{KeyGen.local}\;(vk,sk) \\
+  &\quad\Longrightarrow \mathsf{memory}[vku,vku+992)=vk \\
+  &\qquad\land \mathsf{memory}[sku,sku+1408)=sk \\
+  &\quad\Longrightarrow
+    \prefix_{992}(sk_{\mathrm{Sign}})=vk_{\mathrm{Verify}}.
+\end{aligned}
 \]
 
 \paragraph{Pinned implementation and extraction.}

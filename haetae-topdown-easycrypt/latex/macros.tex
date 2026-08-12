@@ -5,12 +5,16 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{array}
 \usepackage{booktabs}
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{enumitem}
 \geometry{margin=1in}
 \setlist[itemize]{leftmargin=2em}
 \setlist[enumerate]{leftmargin=2.2em}
+\emergencystretch=3em
+\sloppy
 
+\newcommand{\breakablett}[1]{{\begingroup\Urlmuskip=0mu plus 2mu\relax\urlstyle{tt}\nolinkurl{#1}\endgroup}}
+\newcommand{\breakablesame}[1]{{\begingroup\Urlmuskip=0mu plus 2mu\relax\urlstyle{same}\nolinkurl{#1}\endgroup}}
 \newcommand{\claimid}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\status}[1]{\textsc{#1}}
 \newcommand{\procname}[1]{\texttt{\detokenize{#1}}}

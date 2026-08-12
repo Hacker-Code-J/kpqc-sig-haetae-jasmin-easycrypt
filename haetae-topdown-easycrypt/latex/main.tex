@@ -1,77 +1,29 @@
 \documentclass[11pt,a4paper]{article}
 \input{macros}
 
-\title{HAETAE Top-Down EasyCrypt\\Research Development Notes}
-\author{Codex Week 1--16 Sprint Record}
+\title{Machine-Checked Refinement Slices for HAETAE-2 Jasmin\\
+An EasyCrypt Proof Freeze at the Actual Proved Scope}
+\author{HAETAE top-down EasyCrypt project}
 \date{August 12, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-These notes are research development notes, not a completed paper. They record
-the top-down proof architecture, the exact theorem statements attempted during
-the first fifteen sprints, the compiled EasyCrypt evidence, and the remaining
-named obligations that still block a public-API EUF-CMA theorem for the pinned
-HAETAE Jasmin implementation. Week~1 and Week~2 entries are retained as
-retrospective research records; Week~3 adds the exact generated raw-top mu
-control closure and procedure-level API copy-helper evidence. Week~4 records
-the raw ABI caller extraction, canonical address bridge, stores-free memory
-adapter, and the actual-caller residuals that keep the parent claim partial.
-Week~5 closes the sequential KeyGen export and accepted Verify control/input
-binding while retaining direct caller-observed mu equality and cross-call
-memory framing as explicit residuals. Week~6 closes the actual Sign output
-frame and region-local generated mu relation, adds an exact sequential
-Sign/Verify trace, and isolates the still-open product/replay step needed for
-direct equality of the traces' stored mu observations. Week~7 time-boxes that
-replay step into an explicit paper-boundary decision and shifts the main effort
-to mode-2 signature codec functional correctness, including a compiled actual
-prefix pack/unpack round trip. Week~8 closes the actual HBZ coefficient leaf
-inverse, concrete mode-2 table certificate, and focused/full extraction
-identity for the HBZ wrappers. Week~9 adds a common normalization-byte trace,
-closes the actual suffix-copy procedure, and constructs a unary harness using
-the actual encoder, copy, and decoder, while retaining both generated-loop
-trace refinements as explicit gates to the full core inverse.
-Week~10 isolates the encoder, proves the actual nested normalization byte/frame
-transition and actual success-size range, and records the still-open
-tail-aware outer trace relation without beginning decoder semantics.
-Week~11 replaces the local inner snapshot with an initial-array and pure-tail
-relation, connects generated table loads and final stores, and closes the
-actual encoder's success-conditioned full-suffix trace refinement.
-Week~12 closes the exact-trace semantic refinement of the actual generated
-decoder, including symbol recovery, exact byte consumption, final-state
-checking, and the output-tail frame, while leaving actual harness composition
-and termination as explicit downstream obligations.
-Week~13 composes the actual encoder, suffix-copy helper, and decoder in one
-unary harness, deriving the decoder's pointwise trace reads from the actual
-encoder/copy post-state and closing the rANS core inverse as
-success-conditioned partial correctness.
-Week~14 lifts the completed leaf and rANS results through exact internal
-procedure boundaries, proves the actual full encoder and decoder wrappers,
-composes their visible zero-size failure and nonzero success branches, and
-formally transfers the result to the SignaturePack/Unpack extraction boundary.
-Week~15 specializes the actual encoder to the zero-HBZ/all-six input, proves a
-1020-byte coarse normalization budget, connects actual failure to budget
-overflow, excludes that failure in Hoare partial correctness, and lifts the
-fixed-input failure-exclusion result through the full HBZ and production pack/unpack
-boundaries while leaving termination explicit and open.
-Week~16 directly composes the actual M23 matrix and finalizer helpers, proves
-their exact and semantic snapshot consequences including the coefficient
-low/high split and a snapshot-only congruence modulo \(2q\), and records the
-missing full-NTT-to-security-model multiplication bridge as the exact blocker
-to the faithful paper KeyGen equation. The KG--NTT--MUL continuation
-fresh-compiles the last honest NTT-word representation edge, identifies the
-missing odd-root orthogonality/convolution and array-to-list adapter leaves,
-and freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}. The next
-Sign pass directly composes the three actual accepted-core helpers and proves
-their branch control, but freezes S-1--S-7 as
-\textsc{stop-sign-chal-mode2} because the full highbits/LSB/\(\mu\) challenge
-semantics leaf is absent. The MINCORE Verify pass preserves the canonical
-helper order and the exact word-level V-1, V-2, V-5, V-6, norm, and tail-trace
-leaves. Its matrix continuation audits the actual five-helper body and freezes
-the result as \textsc{stop-verify-matrix-crt}: the checked tree lacks both the
-mode-2 four-column NTT row-product bridge and the exact from-CRT/freeze loop
-leaf, so V-3/V-4 are not claimed.
+This document freezes the strongest paper-safe results that are actually
+fresh-compiled for the pinned HAETAE-2 Jasmin implementation.  The proved
+spine includes exact transcript and caller-boundary lemmas, a mode-2
+signature-codec vertical slice through the HBZ and rANS stack, the actual
+KeyGen M23 matrix/finalizer snapshot with KG-2 decomposition and a
+snapshot-only congruence modulo \(2q\), and the actual Verify helper chain
+with V-1, V-2, V-5, V-6, the norm gate, and the tail mismatch path.  The
+paper is intentionally frozen short of stronger claims: the faithful KeyGen
+equation \(A s = q j \pmod{2q}\), paper-literal Sign S-1--S-7, Verify V-3/V-4,
+and any full Sign\(\Rightarrow\)Verify theorem all remain blocked by named
+missing leaves.  The final freeze section states those exact blockers,
+preserves the Week~16 82-target reproduction boundary, and records the trusted
+computing base; the chronological sections that follow remain as the audit
+trail for how that boundary was reached.
 \end{abstract}
 
 \tableofcontents
@@ -112,6 +64,7 @@ leaf, so V-3/V-4 are not claimed.
 \input{sections/34-week16-mincore-sign-stop}
 \input{sections/35-week16-mincore-verify-partial}
 \input{sections/36-week16-verify-matrix-crt-stop}
+\input{sections/37-paper-freeze}
 
 \bibliographystyle{plain}
 \bibliography{references}

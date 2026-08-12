@@ -29,10 +29,12 @@ decoder success, output equality, or a post-state observation.
 
 The postcondition published by the theorem is:
 \[
-  bad=0 \;\land\;
-  off=\mathit{encoded\_size} \;\land\;
-  decoded[0..1024)=expected\_symbols[0..1024) \;\land\;
-  decoded[1024..2048)=decoded_0[1024..2048).
+\begin{aligned}
+  bad=0
+  &\;\land\; off=\mathit{encoded\_size} \\
+  &\;\land\; decoded[0..1024)=expected\_symbols[0..1024) \\
+  &\;\land\; decoded[1024..2048)=decoded_0[1024..2048).
+\end{aligned}
 \]
 The internal final-state fact \(x=2^{23}\) is proved at the generated loop
 exit and used to discharge the actual final reject checks, but it is not
@@ -48,9 +50,11 @@ decoder boundary is given by:
 \]
 The compiled cursor lemmas establish
 \[
-  cursor(0)=4,\qquad
-  cursor(i+1)=cursor(i)+|\mathsf{segment}(i)|,\qquad
-  cursor(1024)=|\mathsf{traceBytes}(syms)|,
+\begin{aligned}
+  cursor(0)&=4,\\
+  cursor(i+1)&=cursor(i)+|\mathsf{segment}(i)|,\\
+  cursor(1024)&=|\mathsf{traceBytes}(syms)|,
+\end{aligned}
 \]
 and \(state(0)\) is the parsed little-endian head while \(state(1024)=2^{23}\).
 The concrete mode-2 bound keeps each normalization segment at length
@@ -70,9 +74,9 @@ The word-step bridge is split from the loop proof.  The generated code uses the
 packed \texttt{symbol\_words} lookup on \(x \mathbin{\&} 1023\), stores the
 recovered symbol, loads the packed \texttt{dsyms\_words} entry, and computes
 the reduced state with the exact mode-2 arithmetic.  The compiled lemma family
-\procname{generated\_decoder\_lookup\_word\_from\_mode2},
-\procname{generated\_decoder\_symbol\_from\_mode2}, and
-\procname{generated\_decoder\_word\_update\_from\_mode2} connects those exact
+\breakablett{generated_decoder_lookup_word_from_mode2},
+\breakablett{generated_decoder_symbol_from_mode2}, and
+\breakablett{generated_decoder_word_update_from_mode2} connects those exact
 generated expressions to the mathematical decoder step without introducing a
 table axiom.
 

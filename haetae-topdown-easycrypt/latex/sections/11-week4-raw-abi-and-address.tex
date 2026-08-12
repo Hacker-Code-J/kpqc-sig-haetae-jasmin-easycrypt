@@ -9,18 +9,18 @@ proved generated mu theorem without constructing an artificial
 \subsection{Actual extraction roots}
 
 The focused roots are
-\procname{cryptolab_haetae_mode2_keypair_internal},
-\procname{cryptolab_haetae_mode2_signature_internal}, and
-\procname{cryptolab_haetae_mode2_verify_internal}.  Their source hashes are,
+\breakablett{cryptolab_haetae_mode2_keypair_internal},
+\breakablett{cryptolab_haetae_mode2_signature_internal}, and
+\breakablett{cryptolab_haetae_mode2_verify_internal}.  Their source hashes are,
 respectively,
-\texttt{8b2ddac28621...b783e01},
-\texttt{fd58271f3ada...ac31}, and
-\texttt{789f36e71ab7...8b06}.  Fresh extraction produced target hashes
-\texttt{70716a5cf03d...4565},
-\texttt{5f632a19c7db...f02f}, and
-\texttt{b745f8919f2c...142b}.  The exact hashes and commands are operationally
-pinned in \pathname{manifests/generated-extractions.sha256} and
-\pathname{manifests/focused-extraction.md}.
+\breakablett{8b2ddac28621...b783e01},
+\breakablett{fd58271f3ada...ac31}, and
+\breakablett{789f36e71ab7...8b06}.  Fresh extraction produced target hashes
+\breakablett{70716a5cf03d...4565},
+\breakablett{5f632a19c7db...f02f}, and
+\breakablett{b745f8919f2c...142b}.  The exact hashes and commands are operationally
+pinned in \breakablett{manifests/generated-extractions.sha256} and
+\breakablett{manifests/focused-extraction.md}.
 
 The closure is intentionally caller-rooted: KeyGen contains the two external
 exporters, Sign contains the SK importer and \procname{_sf_mu_rawpre}, and
@@ -35,11 +35,12 @@ source provenance alone are therefore not used as an interchange rule.
 
 \claimid{OBL-API-ADDRESS-BINDING} uses the definitions
 \[
+\begin{aligned}
   \mathsf{canonical\_ui64\_address}(a)
-    \eqdef 0 \leq a < 2^{64},
-  \qquad
+    &\eqdef 0 \leq a < 2^{64}, \\
   \mathsf{canonical\_region}(a,n)
-    \eqdef 0 \leq a \land 0 \leq n \land a+n \leq 2^{64}.
+    &\eqdef 0 \leq a \land 0 \leq n \land a+n \leq 2^{64}.
+\end{aligned}
 \]
 The central compiled statement is
 \[

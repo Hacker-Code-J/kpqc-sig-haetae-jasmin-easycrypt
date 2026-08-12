@@ -1,11 +1,17 @@
-# HAETAE top-down EasyCrypt sprints
+# HAETAE mode-2 machine-checked refinement slices
 
 This directory is an isolated, mode-2-first proof workspace. It records what
 is fresh-compiled about the pinned HAETAE Jasmin implementation, what is only
-specified, and which named obligations still block a public-API EUF-CMA
-theorem. The LaTeX document is a research-development narrative; this
-Markdown tree and the generated verification logs are the operational source
-of truth.
+partial, and which named obligations block complete KeyGen, Sign, Verify, and
+public-API EUF-CMA results.  The frozen paper claims selected actual-procedure
+refinement slices, a signature-codec vertical slice, KeyGen finalization,
+Verify reconstruction/norm word semantics, and the mechanical identification
+of the remaining NTT/CRT semantic gap.  It does not claim `A s = q j`, paper
+S-1--S-7, V-3/V-4, or a full Sign-to-Verify theorem.
+
+The canonical paper artifact/status inventory is
+`manifests/paper-artifacts.md`; `CLAIM_LEDGER.md` and `THEOREM_GRAPH.md` give
+the statement-level and dependency-level views of the same boundary.
 
 ## Reader guides
 
@@ -41,9 +47,11 @@ The verifier:
   pinned generator/output hashes;
 - compiles every manifested authored EasyCrypt target with `-no-eco`;
 - scans for proof holes, authored axioms, and debug declarations;
+- audits the frozen paper claim surface against the 82-target evidence;
 - checks target-manifest completeness;
 - fresh-compiles selected upstream baselines; and
-- builds `latex/main.pdf` and rejects undefined references/citations.
+- builds `latex/main.pdf` and rejects undefined references/citations and
+  overfull boxes.
 
 The Week 12 pre-edit baseline is preserved in
 `logs/verify-all-before-week12.log` (all earlier historical baselines remain
@@ -88,6 +96,7 @@ The individual reproduction surfaces are:
 ./haetae-topdown-easycrypt/scripts/generate-hbz-symbol-certificate.sh
 ./haetae-topdown-easycrypt/scripts/verify-baselines.sh
 ./haetae-topdown-easycrypt/scripts/build-notes.sh
+./haetae-topdown-easycrypt/scripts/check-paper-freeze.sh
 ```
 
 Toolchain observed on 2026-08-05:

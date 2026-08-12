@@ -74,17 +74,17 @@ $[4,1024]$, the exact all-six trace segment, and the initial prefix frame.
 
 \subsection*{Full and production boundaries}
 
-\procname{actual_encode_hb_z1_full_zero_success} opens the actual
-\procname{HbzFullEncodeTarget.M._encode_hb_z1_full}.  It derives zero-input
+\breakablett{actual_encode_hb_z1_full_zero_success} opens the actual
+\breakablett{HbzFullEncodeTarget.M._encode_hb_z1_full}.  It derives zero-input
 canonicality, prepare success, and all-six symbols internally; calls the
 actual rANS encoder theorem; and follows the actual suffix-copy branch.  Its
 postcondition gives a nonzero returned size, the 4--1024 bound, exact trace,
 output-tail frame, and the actual prepare-call symbol witness.
 
 The exact focused/production procedure equivalence yields
-\procname{signature_pack_hbz_zero_success_mode2} for
-\procname{SignaturePackMode2Target.M._encode_hb_z1_full}.  The additional
-corollary \procname{signature_pack_unpack_hbz_zero_success_mode2} eliminates
+\breakablett{signature_pack_hbz_zero_success_mode2} for
+\breakablett{SignaturePackMode2Target.M._encode_hb_z1_full}.  The additional
+corollary \breakablett{signature_pack_unpack_hbz_zero_success_mode2} eliminates
 the failure disjunct of the existing production pack/unpack harness using the
 new encoder theorem, then obtains decoder execution, decoder \texttt{bad=0},
 the zero coefficient prefix, and both coefficient and encoded tail frames.

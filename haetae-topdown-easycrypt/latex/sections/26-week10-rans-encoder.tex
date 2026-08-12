@@ -97,16 +97,12 @@ actual byte-write/frame step is proved.
 
 On the live branch the target invariant is
 \begin{align*}
+ T_i&\eqdef \mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)),\\
  0&\le i\le1024,\\
- \mathsf{uint}(x)&=
-   \mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{state},\\
- \mathsf{uint}(off)+
- |\mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{bytes}|
-   &=1024,\\
- \mathsf{segment\_matches}(encp,\mathsf{uint}(off),
-   \mathsf{encode\_trace}(\mathsf{suffix}(symbols_0,i)).\mathsf{bytes})&,
- \qquad
- \mathsf{prefix\_frame}(enc_0,encp,\mathsf{uint}(off)).
+ \mathsf{uint}(x)&=T_i.\mathsf{state},\\
+ \mathsf{uint}(off)+|T_i.\mathsf{bytes}|&=1024,\\
+ \mathsf{segment\_matches}(encp,\mathsf{uint}(off),T_i.\mathsf{bytes})&,\\
+ \mathsf{prefix\_frame}(enc_0,encp,\mathsf{uint}(off))&.
 \end{align*}
 The actual program sets $bad=1$ when $off<4$.  The failure branch therefore
 does not retain the live trace equality; subsequent control forces $i=0$ and

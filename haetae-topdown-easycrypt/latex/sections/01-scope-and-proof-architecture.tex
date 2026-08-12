@@ -1,12 +1,16 @@
 \section{Scope and Proof Architecture}
 
-These notes cover HAETAE mode 2 only. The official specification source is the
+This paper covers HAETAE mode 2 only. The official specification source is the
 pinned PDF artifact \cite{haetae-pdf}. The implementation target is the pinned
 Jasmin source tree \cite{haetae-jasmin}. Existing EasyCrypt artifacts are
 reused only through explicit imports with premise preservation
 \cite{haetae-ref-easycrypt}.
 
-The top-down structure used in this workspace is:
+The frozen objective is to report the strongest fresh-compiled refinement
+slices for actual extracted procedures and to identify, mechanically and by
+name, the semantic leaves that prevent full algorithm composition.  It is not
+to claim complete functional correctness or implementation EUF--CMA security.
+One checked composition seam used in this workspace is:
 \[
 \prefix_{992}(sk) = vk
 \Rightarrow \mathsf{equal\_hash\_inputs}
@@ -18,16 +22,18 @@ The Week 1 and Week 2 seams are intentionally narrower than full API
 correctness. The work records exact theorem statements, premises, and blocked
 obligations instead of hiding them behind new axioms.
 
-\paragraph{Current theorem-graph position.}
+\paragraph{Frozen theorem-graph position.}
 \begin{itemize}
-  \item \claimid{KG-PREFIX-CALL}: \status{PROVED} as generated-procedure
-  partial correctness; retry termination remains separate.
-  \item \claimid{MU32-HASH-RAW-HELPERS}: \status{PROVED} through the actual
-  generated absorb, Keccak, finalize, and squeeze helpers.
-  \item \claimid{MU32-HASH}: \status{PARTIAL} until the exact generated
-  top-level control adapter is proved.
-  \item \claimid{MU-CHAL-COMPOSITION}: \status{PROVED} with local
-  $\delta_\mu=0$ for the explicit raw wrappers and challenge suffix.
+  \item \claimid{PAPER-KG}: selected actual first-attempt, packing/export,
+  matrix-snapshot, and finalizer results compile; the paper key equation does
+  not.
+  \item \claimid{PAPER-SIGN}: actual raw-mu/frame and accepted-core control
+  results compile together with a signature-codec vertical slice; paper
+  S-1--S-7 do not.
+  \item \claimid{PAPER-VERIFY}: actual helper order, reconstruction words,
+  W64 norm decision, and tail trace compile; paper V-3/V-4 do not.
+  \item \claimid{PAPER-SIGN-VERIFY}: local and accepted-path adapters compile,
+  but legitimate-output acceptance and the full composition remain blocked.
 \end{itemize}
 
 \paragraph{Week 1 note status.}

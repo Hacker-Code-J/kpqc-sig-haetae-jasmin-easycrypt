@@ -11,6 +11,22 @@ Status meanings:
 - **DEFERRED/paper boundary**: the obligation was time-boxed, remains
   unproved, and is intentionally not pursued through additional wrappers.
 
+## Frozen paper result matrix
+
+| Lane | PROVED | PARTIAL | BLOCKED |
+| --- | --- | --- | --- |
+| `PAPER-KG` | actual first-attempt/prefix/export and matrix/finalizer slices; KG-2 | snapshot-level KeyGen result | KG-1, KG-3, complete KG-4 and `A s = q j (mod 2q)` |
+| `PAPER-SIGN` | actual raw-mu/frame and accepted-core control; codec vertical slice | terminating-run/success-conditioned slices | S-1--S-7 and complete Sign |
+| `PAPER-VERIFY` | actual order, word-level V-1/V-2/V-5/V-6, W64 norm and tail | reconstruction/norm word boundary | V-3/V-4, matrix/CRT semantics and complete Verify |
+| `PAPER-SIGN-VERIFY` | actual trace/control and local mu adapters | accepted-path observation/memory bridge | legitimate-output acceptance and full Sign-to-Verify composition |
+
+The exact Verify-side stopped chain is
+`verify_matrix_ntt_acc_mode2_cols4_correct` over
+`rq_mul_coeff_foldr_to_bigi` and
+`full_ntt_montgomery_spectral_action`, together with the sibling
+`verify_crt_freeze_mode2_word_exact`.  These absent leaves are shared
+evidence for the paper boundary, not assumptions.
+
 ```text
 Implementation-EUF-CMA                                      [SPECIFIED]
 ├── ImplementationSecurityComposition                      [SPECIFIED]

@@ -88,12 +88,10 @@ this genuine failure disjunct instead of assuming encoder success.
 
 The live outer invariant is
 \begin{align*}
+  T_i &\eqdef \mathsf{encodeTrace}(\mathsf{symbolSuffix}(symbols_0,i)),\\
   0 &\le i\le1024,\\
-  \mathsf{uint}(x)
-    &=\mathsf{encodeTrace}(\mathsf{symbolSuffix}(symbols_0,i)).\mathsf{state},\\
-  \mathsf{uint}(off)
-    +|\mathsf{encodeTrace}(\mathsf{symbolSuffix}(symbols_0,i)).\mathsf{bytes}|
-    &=1024,
+  \mathsf{uint}(x)&=T_i.\mathsf{state},\\
+  \mathsf{uint}(off)+|T_i.\mathsf{bytes}|&=1024,
 \end{align*}
 together with exact segment matching, an initial-array prefix frame, and
 \(4\le\mathsf{uint}(off)\).  It initializes at $i=1024$ with state
@@ -109,11 +107,12 @@ The generated procedure subtracts four from $off$ and performs four
 little-endian byte stores.  The compiled finalization theorem turns their
 weakest-precondition expression into
 \[
+\begin{aligned}
+  S_0&\eqdef\mathsf{symbolListOfArray}(symbols_0),\\
   \mathsf{serialize32LE}(\mathsf{uint}(x))
-    \mathbin{++}
-  \mathsf{encodeTrace}(\mathsf{symbolListOfArray}(symbols_0)).\mathsf{bytes}
-  =
-  \mathsf{traceBytes}(\mathsf{symbolListOfArray}(symbols_0)).
+    \mathbin{++}\mathsf{encodeTrace}(S_0).\mathsf{bytes}
+  &=\mathsf{traceBytes}(S_0).
+\end{aligned}
 \]
 It simultaneously preserves the initial prefix below the returned offset.
 

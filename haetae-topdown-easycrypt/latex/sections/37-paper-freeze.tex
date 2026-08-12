@@ -1,0 +1,179 @@
+\fussy
+\emergencystretch=3em
+\section{Primary Paper Freeze: Proved Scope and Exact Blockers}
+
+This section is the final public freeze for the primary paper.  The preceding
+chronological sections remain the audit trail; the claims below are the
+strongest statements that are supported by the current fresh-compiled
+EasyCrypt evidence and the preserved Week~16 aggregate logs.
+
+\subsection*{Frozen status table}
+
+% Canonical row IDs: PAPER-KG, PAPER-SIGN, PAPER-VERIFY, PAPER-SIGN-VERIFY.
+\begin{center}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.10\textwidth}>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}p{0.30\textwidth}@{}}
+\toprule
+Area & PROVED & PARTIAL & BLOCKED \\
+\midrule
+\texttt{PAPER-}\newline\texttt{KG} &
+actual two-call \breakablett{_kp_m23_matrix} \(\rightarrow\)
+\breakablett{_keypair_finalize_m23} snapshot; exact finalizer low/high split;
+KG-2 coefficient decomposition \(b=b_0+2b_1\) with \(b_0\in\{-1,0,1\}\) &
+adjusted \(e'=e-b_0\) component of KG-4; snapshot-only congruence modulo
+\(2q\) over the returned \breakablett{pre_bp} boundary &
+faithful KG-1, KG-3, complete KG-4, and the paper equation
+\(A s = q j \pmod{2q}\) \\
+\addlinespace
+\texttt{PAPER-}\newline\texttt{SIGN} &
+actual three-helper accepted-core control theorem for
+\breakablett{_sf_round_challenge_mode2},
+\breakablett{_sf_z_check}, and \breakablett{_sf_hint_mode2}; exact branch fact
+that the hint call is taken iff the returned \breakablett{_sf_z_check} word is
+zero &
+only this actual accepted-core partial-correctness control boundary is
+proved; no response, norm, hint, or final-output equation is derived &
+paper S-1--S-7, the challenge leaf
+\breakablett{sf_challenge_mode2_highbits_lsb_sampleinball_correct}, and any full
+Sign\(\Rightarrow\)Verify theorem \\
+\addlinespace
+\texttt{PAPER-}\newline\texttt{VERIFY} &
+actual five-helper order; machine-word V-1, V-2, V-5, and V-6 leaves; exact
+W64 norm gate; exact tail trace and mismatch-word expression &
+canonical decoded \((x,v,h,c)\) core composition remains a partial boundary,
+not a full reconstruction or acceptance theorem &
+V-3, V-4, the combined
+\breakablett{verify_matrix_crt_mode2_fromcrt_freeze_exact} bridge, and the full
+Verify predicate \\
+\addlinespace
+\texttt{PAPER-}\newline\texttt{SIGN-}\newline\texttt{VERIFY} &
+actual sequential trace/control and local generated \(\mu\) adapters &
+accepted-path memory and stored-observation bridge &
+legitimate Sign-output acceptance and full Sign\(\Rightarrow\)Verify
+composition \\
+\bottomrule
+\end{tabular}
+\normalsize
+\end{center}
+
+\subsection*{Main achievements}
+
+\begin{itemize}
+\item The project now proves direct actual-procedure refinement statements
+  rather than paper-only surrogates at the transcript seam, raw/internal
+  caller boundary, and accepted Verify helper chain.
+\item The signature-codec vertical slice is mechanically closed through the
+  mode-2 prefix pack/unpack round trip, HBZ leaf inverse, concrete table
+  certificate, exact decoder refinement, and the success-conditioned actual
+  rANS core/wrapper composition.
+\item KeyGen is frozen at an honest actual-procedure finalization boundary:
+  the M23 matrix/finalizer harness exports exact snapshots and semantic
+  low/high decomposition facts without relabelling them as the paper key
+  equation.
+\item Verify now has an explicit proved reconstruction/norm frontier:
+  helper-local V-1, V-2, V-5, V-6, the norm gate, and the tail mismatch path
+  are all compiled against the actual helper order.
+\item The missing NTT/CRT ingredients are now named as concrete checked leaf
+  gaps rather than informal future work.
+\end{itemize}
+
+\subsection*{Explicit non-claims}
+
+\begin{itemize}
+\item No theorem in this paper claims \(A s = q j \pmod{2q}\).
+\item No theorem in this paper claims paper-literal S-1--S-7.
+\item No theorem in this paper claims paper-literal V-3 or V-4.
+\item No theorem in this paper claims full Sign\(\Rightarrow\)Verify
+  correctness, full public-API correctness, or decoded-object composition.
+\item No theorem in this paper claims sampler distribution, retry/loop
+  termination, malformed-input rejection, or EUF-CMA security.
+\end{itemize}
+
+\subsection*{Exact blocker leaf hierarchy}
+
+\paragraph{KeyGen.}
+The blocked paper conclusion
+\[
+  A s = q j \pmod{2q}
+\]
+first needs a checked identification of
+\breakablesame{KeygenM23ArithmeticSpec.output_row} with the security-model row
+product.  That bridge requires the missing leaf
+\breakablett{full_ntt_montgomery_spectral_action}; its proof in turn needs the
+256-term odd-root orthogonality identity.  Even after that native array-level
+theorem, the checked tree still lacks the adapter from \breakablett{Rq.poly}
+to the integer-list multiplication used by
+\breakablesame{HAETAE_Algebra.poly_mul} and \breakablesame{matrix_vec_mul}.
+
+\paragraph{Sign.}
+The stopped headline theorem is
+\breakablett{actual_sign_accepted_core_equations_mode2}.  Its first absent
+Sign-specific semantic leaf is
+\breakablett{sf_challenge_mode2_highbits_lsb_sampleinball_correct}, which must
+connect actual highbits, packed LSBs of rounded \(y_0\), the first 32 bytes of
+\(\mu\), and mode-2 \(\mathsf{SampleInBall}(\cdots,58)\).  Independently,
+paper S-1 and S-4 retain the frozen KeyGen NTT-convolution/adapter dependency;
+S-5 and S-6 need
+\breakablett{_sf_add_cs_and_check_mode2_integer_semantics}; and S-7 needs
+\breakablett{_sf_hint_mode2_hint_equation_correct}.
+
+\paragraph{Verify.}
+The planned headline theorem
+\breakablesame{Mode2VerifyCorePredicate.actual_verify_core_predicate_mode2} cannot
+start until the combined bridge
+\breakablett{verify_matrix_crt_mode2_fromcrt_freeze_exact} exists.  That bridge
+splits into two absent procedural leaves:
+\breakablett{verify_matrix_ntt_acc_mode2_cols4_correct} and
+\breakablett{verify_crt_freeze_mode2_word_exact}.  The NTT leaf first encounters
+the pure normalization gap \breakablett{rq_mul_coeff_foldr_to_bigi}, then the
+same missing \breakablett{full_ntt_montgomery_spectral_action}, then the same
+odd-root orthogonality identity.  Downstream residuals remain the V-6 integer
+centering bridge, the norm no-wrap bridge, and the challenge leaf
+\breakablett{verify_tail_m23_highbits_lsb_sampleinball_correct}.
+
+\subsection*{Reproduction boundary and TCB}
+
+From the repository root, the aggregate proof boundary is reproduced with
+\begin{verbatim}
+./haetae-topdown-easycrypt/scripts/verify-all.sh
+\end{verbatim}
+The preserved aggregate certificates are:
+\begin{center}
+\small
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.14\textwidth}>{\raggedright\arraybackslash}p{0.75\textwidth}@{}}
+Final log & \breakablett{logs/verify-all-summary.txt} \\
+Final result & exactly 82 fresh compile lines and exactly one
+\texttt{RESULT PASS authored-targets=82 cache=-no-eco} line \\
+Final SHA-256 &
+\texttt{08ef9639dc73d56dba42d02999d07897d29bc8e60aa100a648e9437fd64387ad} \\
+Week~16 log & \breakablett{logs/verify-all-week16-verify-matrix-crt.log} \\
+Week~16 SHA-256 &
+\texttt{4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da} \\
+Earlier log & \breakablett{logs/verify-all-before-verify-matrix-crt.log} \\
+Earlier SHA-256 &
+\texttt{46e7dac8e442c820f746139a164c8bc00d6af17b7ad25cbd5d195507fddae03c}
+\end{tabular}
+\normalsize
+\end{center}
+
+The trusted computing base is unchanged: the EasyCrypt kernel and imported
+libraries; Why3 and the invoked SMT provers; the Jasmin parser/compiler and
+\breakablett{jasmin2ec} translation; the pinned Jasmin, generated extraction, and
+reused EasyCrypt artifacts; and the host filesystem/hash/\LaTeX{} tools used
+by the reproduction scripts.  Extraction hashes detect drift, but they do not
+remove \breakablett{jasmin2ec} from the TCB.
+
+This document itself is rebuilt from the repository root with
+\begin{verbatim}
+./haetae-topdown-easycrypt/scripts/build-notes.sh
+\end{verbatim}
+
+\subsection*{Conclusion}
+
+The final artifact verdict is \status{PAPER-FROZEN}.  The primary paper is
+therefore frozen at the actual proved scope: a substantial
+direct verification spine, a closed codec vertical slice, an honest KeyGen
+finalization boundary, and a partial but explicit Verify reconstruction/norm
+frontier.  The paper must cite the named blocker leaves above rather than
+silently promoting snapshot, control, or helper-local facts into full KeyGen,
+Sign, Verify, or Sign\(\Rightarrow\)Verify correctness claims.

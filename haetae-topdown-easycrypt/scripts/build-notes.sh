@@ -16,4 +16,9 @@ if rg -ni 'undefined (reference|references|citation|citations)|citation .* undef
   exit 1
 fi
 
+if rg -n 'Overfull \\[hv]box' main.log; then
+  printf 'FAIL LaTeX overfull box\n'
+  exit 1
+fi
+
 printf 'PASS notes build %s/main.pdf\n' "$LATEX_DIR"

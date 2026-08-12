@@ -17,17 +17,21 @@ The focused roots are
 \procname{rans_encode_jazz}, \procname{rans_decode_jazz}, and the two
 mode-2 full wrappers.  Their generated closures form
 \[
-\begin{array}{c}
-\procname{encode_hb_z1_mode2_full_jazz}\allowbreak
- \to \procname{_encode_hb_z1_full}\allowbreak
- \to \{\procname{_encode_hb_z1_prepare},
-       \procname{_rans_encode},
-       \procname{__copy_encoded_suffix}\},\\[2mm]
-\procname{decode_hb_z1_mode2_full_jazz}\allowbreak
- \to \procname{_decode_hb_z1_full}\allowbreak
- \to \{\procname{_rans_decode},
-       \procname{_decode_hb_z1_apply}\}.
-\end{array}
+\begin{aligned}
+\mathsf{encode:}\quad \procname{encode_hb_z1_mode2_full_jazz}
+ &\to \procname{_encode_hb_z1_full}\\
+ &\to \left\{\begin{gathered}
+       \procname{_encode_hb_z1_prepare},\\
+       \procname{_rans_encode},\\
+       \procname{__copy_encoded_suffix}
+       \end{gathered}\right\},\\[2mm]
+\mathsf{decode:}\quad \procname{decode_hb_z1_mode2_full_jazz}
+ &\to \procname{_decode_hb_z1_full}\\
+ &\to \left\{\begin{gathered}
+       \procname{_rans_decode},\\
+       \procname{_decode_hb_z1_apply}
+       \end{gathered}\right\}.
+\end{aligned}
 \]
 The wrappers fix $\mathsf{count}=1024$, $m=13$, and
 $\mathsf{offset}=6$.  Regeneration checks show byte-identical generated

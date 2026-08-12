@@ -1,5 +1,11 @@
 # Focused mode-2 extraction manifest
 
+The canonical frozen-paper inventory and KeyGen/Sign/Verify status matrix are
+in `manifests/paper-artifacts.md`.  This file retains the detailed extraction
+provenance beneath that `PAPER-KG` / `PAPER-SIGN` / `PAPER-VERIFY` /
+`PAPER-SIGN-VERIFY` boundary.  It does not promote `A s = q j`, S-1--S-7,
+V-3/V-4, or the full Sign-to-Verify composition to proved claims.
+
 Generated files are temporary. The scripts under `scripts/` regenerate them
 from pinned read-only Jasmin sources, fresh-compile them, and
 `verify-all.sh` checks their exact SHA-256 values against

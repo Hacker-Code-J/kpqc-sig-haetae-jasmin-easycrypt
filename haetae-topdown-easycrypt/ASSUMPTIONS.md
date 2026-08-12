@@ -1,5 +1,10 @@
 # Assumptions, contracts, and proof obligations
 
+The frozen paper scope is summarized in `manifests/paper-artifacts.md`.
+Neither a cryptographic assumption nor a runtime contract below supplies the
+missing NTT/CRT, challenge, termination, distribution, or full
+Sign-to-Verify semantic leaves.
+
 ## Permitted final cryptographic assumptions
 
 - **MLWE:** hardness of the concrete HAETAE-2 public-key game instance.
