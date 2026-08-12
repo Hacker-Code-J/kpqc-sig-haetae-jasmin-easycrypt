@@ -61,11 +61,11 @@ Week~16의 현재 전선은 실제 \identifier{_kp_m23_matrix}와
 \identifier{output_row}의 full-NTT 표현을 논문 보안 모델의
 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱으로 식별하는 다리가 없다. KG-NTT-MUL
 감사는 누락된 odd-root orthogonality/full-NTT convolution과 security-list
-adapter를 특정했다. 77개 작성 검증 대상이 매니페스트됐고 최신 판정은
-\identifier{STOP-KG-NTT}이며, \identifier{GO-KG}가 아니다. KeyGen은
-KG-2/finalization에서 동결되고 actual accepted Sign core로 이동한다. 힌트 (h)
-코덱은 현재 범위에서 연기되었다. 77번째 대상은 마지막 snapshot 정리의
-consequence로 두 active row의 explicit NTT 표현을 개별 fresh compile했다.
+adapter를 특정했다. 이어지는 Sign pass는 actual 세 helper를 직접 합성하는
+78번째 control target을 fresh compile했지만, full highbits/LSB/\(\mu\) challenge
+semantics leaf의 부재로 \identifier{STOP-SIGN-CHAL-MODE2}에서 동결되었다.
+따라서 최신 판정은 \identifier{GO-SIGN}이 아니며 활성 전선은 Verify다. 힌트
+(h) 코덱은 현재 범위에서 연기되었다.
 따라서
 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
 \(\delta_{\mathrm{Encoding}}=0\)은 아직 주장할 수 없다. 접미부 코덱,

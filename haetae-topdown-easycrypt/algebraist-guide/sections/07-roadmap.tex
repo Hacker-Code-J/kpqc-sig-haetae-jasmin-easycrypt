@@ -179,30 +179,33 @@ word 표현으로 rewrite하고 두 active row에 적용하는 마지막 sound e
 감사는 이를 새 전제로 가정하지 않고 \identifier{STOP-KG-NTT}로 종료했다.
 faithful KG-1, KG-3, complete KG-4와 \(A s=qj\pmod{2q}\)는 미증명 상태다.
 
-\subsection{7단계 현재: accepted Sign core}
+\subsection{7단계 동결: accepted Sign core}
 
-현재 단일 목표는 다음 세 actual helper의 순차 실행을 투명한 harness에서
-합성하는 것이다.
+다음 세 actual helper의 순차 실행은 투명한 harness에서 합성되어 control
+정리까지 컴파일됐다.
 \begin{center}
 \identifier{_sf_round_challenge_mode2}\quad
 \identifier{_sf_z_check}\quad
 \identifier{_sf_hint_mode2}
 \end{center}
-계획된 headline theorem은
+컴파일된 control theorem은
 \sourcepath{Mode2SignAcceptedCore.ec}의
 \begin{center}
-\theoremname{actual_sign_accepted_core_equations_mode2}
+\theoremname{actual_sign_accepted_core_branch_control_mode2}
 \end{center}
-이다.
+이다. 그러나 headline S-1--S-7 정리는
+\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct} 부재로
+\identifier{STOP-SIGN-CHAL-MODE2}에서 동결되었다.
 반환하고 accept한 실행에 대해 commitment/challenge, response
 \(z=y+(-1)^bcs\), 두 exact integer norm predicate와 coefficientwise hint 식을
 도출해야 한다 \cite{week16-mincore-plan,claim-ledger}.
 
-이 정리는 아직 \statusspecified 이며 컴파일된 증명으로 세어서는 안 된다.
+headline 정리는 아직 컴파일된 증명으로 세어서는 안 된다.
 사전조건이 \identifier{reject=0}이나 최종 식을 가정해서도 안 된다. sampler
 분포, signing-loop 종료성, packing과 전체 1474-byte signature는 이 단계의 범위
 밖이다.
 
+현재 단일 목표는 canonical decoded object의 MINCORE-VERIFY core predicate다.
 각 부모를 닫을 때 자식 정리(child theorem)의 전제가 실제 앞 절차의 결론에서
 나오는지를
 확인해야 한다. external precondition으로 다시 요구하면 합성이 아니라 조건부

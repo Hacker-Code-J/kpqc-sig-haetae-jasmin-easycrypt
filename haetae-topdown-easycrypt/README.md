@@ -33,7 +33,8 @@ The verifier:
 
 - checks pinned source hashes and tracked read-only-tree drift;
 - regenerates the focused packer, mu-hash, transcript, API copy-helper,
-  actual raw-ABI caller, signature-codec, and HBZ/rANS extractions;
+  actual raw-ABI caller, signature-codec, HBZ/rANS, and Sign accepted-core
+  extractions;
 - checks the regenerated targets against
   `manifests/generated-extractions.sha256`;
 - regenerates the concrete HBZ symbol-table certificate and checks its
@@ -54,10 +55,15 @@ authored `-no-eco` targets and is preserved in
 The KG-NTT-MUL continuation baseline is the fresh 76-target run preserved in
 `logs/verify-all-before-kg-ntt-mul.log` (SHA-256
 `c556834b6e881930c8357ed136c5eb138a1a63bfdb977f194a63edae3298f348`).
-The current manifest contains 77 authored targets, including the final sound
-NTT-word representation boundary. Its aggregate result is preserved in
-`logs/verify-all-week16-kg-ntt-mul.log` and mirrored by the latest
-`logs/verify-all-summary.txt`.
+The 77-target pre-Sign baseline is preserved in
+`logs/verify-all-before-week16-sign.log` (SHA-256
+`8480d2e2f2ddda421c3d244ab5ec0a50196cadd7a8e1a29e996fd307aec7db57`).
+The current manifest contains 78 authored targets, adding only the focused
+Sign accepted-core control boundary. The latest aggregate result is mirrored
+by `logs/verify-all-summary.txt` and preserved in
+`logs/verify-all-week16-sign.log` (exactly 78 fresh compiles, terminal
+`RESULT PASS authored-targets=78 cache=-no-eco`, SHA-256
+`cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`).
 
 Detailed logs are written only under `logs/`. A pre-existing Why3 server can be
 reused with `WHY3_SERVER_SOCKET=/path/to/socket`; otherwise the verifier starts
@@ -73,6 +79,7 @@ The individual reproduction surfaces are:
 ./haetae-topdown-easycrypt/scripts/extract-raw-api-callers.sh
 ./haetae-topdown-easycrypt/scripts/extract-signature-codec.sh
 ./haetae-topdown-easycrypt/scripts/extract-hbz-codec.sh
+./haetae-topdown-easycrypt/scripts/extract-sign-accepted-core.sh
 ./haetae-topdown-easycrypt/scripts/generate-hbz-symbol-certificate.sh
 ./haetae-topdown-easycrypt/scripts/verify-baselines.sh
 ./haetae-topdown-easycrypt/scripts/build-notes.sh
@@ -543,5 +550,15 @@ The final decision is therefore **STOP-KG-NTT**, not `GO-KG`.  KeyGen is
 frozen at KG-2/finalization: faithful KG-1, KG-3, complete KG-4, and the paper
 `A s = q j (mod 2q)` are not proved.  No sampler, retry, packer, public API,
 termination, or security claim is made. `WEEK16_KG_NTT_MUL_REPORT.md` records
-the missing leaf at procedure and formula level; the active MINCORE lane now
-moves to the accepted Sign-core helpers.
+the missing leaf at procedure and formula level.
+
+The next Sign pass fresh-compiled `Mode2SignAcceptedCore`, whose transparent
+harness calls actual `_sf_round_challenge_mode2`, `_sf_z_check`, and
+accepted-only `_sf_hint_mode2` in that order. The checked theorem proves only
+the branch-control fact and has precondition `true`. The paper S-1--S-7
+theorem is stopped at **STOP-SIGN-CHAL-MODE2**: the exact missing
+`sf_challenge_mode2_highbits_lsb_sampleinball_correct` leaf cannot be replaced
+by the current abstract `challenge_hash`, which omits highbits. Paper S-1 and
+S-4 also retain the frozen full-NTT convolution dependency. Response, norm,
+hint, distribution, and termination claims remain open; the active MINCORE
+lane moves to Verify. See `WEEK16_SIGN_REPORT.md`.

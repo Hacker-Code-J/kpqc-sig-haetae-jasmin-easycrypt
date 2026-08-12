@@ -96,7 +96,8 @@ convolution theorem and a separate `Rq.poly`-to-integer-list multiplication
 adapter.  Neither is a trusted assumption, semantic axiom, representation
 predicate, or hidden premise.  Accordingly the frozen KeyGen result claims
 KG-2/finalization only; KG-1, KG-3, complete KG-4, and
-`A s = q j (mod 2q)` remain unproved while the active lane moves to Sign.
+`A s = q j (mod 2q)` remain unproved. The subsequent Sign control boundary
+is frozen at `STOP-SIGN-CHAL-MODE2`; the active lane has moved to Verify.
 
 ## Trusted computing base
 

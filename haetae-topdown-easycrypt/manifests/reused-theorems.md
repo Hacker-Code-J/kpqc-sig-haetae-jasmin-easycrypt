@@ -146,7 +146,19 @@ the odd-root orthogonality/full-NTT spectral action
 A subsequent adapter from `Rq.poly` arrays to
 `HAETAE_Algebra.poly_mul` integer lists is also absent. Neither result is
 treated as reused, trusted, or assumed. Final status is `STOP-KG-NTT`; KeyGen
-is frozen at KG-2/finalization and the active MINCORE lane moves to Sign.
+is frozen at KG-2/finalization. The later Sign pass is separately frozen at
+`STOP-SIGN-CHAL-MODE2`, and the active MINCORE lane is Verify.
+
+## MINCORE-SIGN actual-call boundary
+
+The generated `SignAcceptedCoreTarget.M` module is not trusted for a paper
+postcondition. The authored `Mode2SignAcceptedCore` file opens its three
+selected procedures directly and proves only
+`actual_sign_accepted_core_branch_control_mode2`. No theorem is reused for
+the absent highbits/LSB/mu-to-SampleInBall semantics. In particular, the
+current abstract `challenge_hash`, which omits highbits, is not treated as a
+valid replacement. The exact non-reused leaf and the response/norm/hint
+non-claims are recorded in `WEEK16_SIGN_REPORT.md`.
 
 ## Week 2 generated-procedure boundary
 

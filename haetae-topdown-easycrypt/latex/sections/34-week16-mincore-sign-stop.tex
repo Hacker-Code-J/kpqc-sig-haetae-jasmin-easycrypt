@@ -1,0 +1,40 @@
+\section{Week 16 MINCORE--SIGN: Actual Control and Stop Boundary}
+
+The Sign time box exits as \status{stop-sign-chal-mode2}, not
+\status{go-sign}. A focused extraction selects exactly the actual
+\procname{_sf_round_challenge_mode2}, \procname{_sf_z_check}, and
+\procname{_sf_hint_mode2} roots. The transparent
+\procname{ActualSignAcceptedCore.run} harness calls them in that order, with
+the hint helper guarded by the actual zero rejection result.
+
+The fresh-compiled theorem
+\procname{actual_sign_accepted_core_branch_control_mode2} has precondition
+\texttt{true} and proves that the recorded accepted branch is equivalent to
+the returned \procname{_sf_z_check} word being zero. It does not assume or
+prove rejection success, a response equation, a norm predicate, a hint
+equation, or final output equality. The harness includes neither the sampler
+nor a retry loop, packer, codec, or public API.
+
+\subsection*{Exact missing semantic leaf}
+
+The first Sign-specific absent theorem is
+\procname{sf_challenge_mode2_highbits_lsb_sampleinball_correct}. It must
+connect the actual high-bit calculation and packing, the packed LSB of the
+rounded \(y_0\), and the first 32 bytes of \(\mu\) to the mode-2
+\(\mathsf{SampleInBall}(\cdots,58)\) challenge. Existing checked transcript
+work stops at the \(\mu\)-absorb seam. Moreover, the current abstract security
+model's challenge operator omits its highbits input, so it is not a sound
+replacement for this leaf.
+
+Paper-literal S-1 and S-4 independently retain the already-frozen full-NTT
+pointwise-product/convolution dependency. S-4 also needs a checked response
+representation theorem; S-5 and S-6 need signed-word, no-wrap accumulator and
+strict-comparison semantics for \procname{_sf_add_cs_and_check}; S-7 needs the
+fixed-point rounding/highbits interpretation of \procname{_sf_hint_mode2}.
+Those source-level calculations are not promoted to proved equations.
+
+The 77-target pre-Sign aggregate was preserved before this change. The new
+manifest adds one focused authored target without replacing any baseline
+target. Sampler distributions, Sign termination, KeyGen NTT expansion,
+packing, codecs and public APIs remain outside scope. Under the stop rule, the
+active MINCORE lane moves to the canonical decoded-object Verify core.

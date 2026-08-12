@@ -58,7 +58,9 @@ full-invNTT/pointwise 표현으로 고정한 뒤에도, 이를 native \(R_q\) �
 모형의 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱으로 옮기는 full-NTT convolution
 정리와 표현 어댑터가 없다. 따라서 \identifier{STOP-KG-NTT}로 KeyGen을
 KG-2/finalization에서 동결했고 faithful KG-1, KG-3, complete KG-4와 논문식은
-막혀 있다. 현재 lane은 actual accepted Sign core로 이동했다. 두 번째 \(h\) suffix codec,
+막혀 있다. 이어 actual accepted Sign core의 직접 호출/control은 컴파일됐지만
+full challenge semantics 부재로 \identifier{STOP-SIGN-CHAL-MODE2}에서
+동결되었고 현재 lane은 Verify core로 이동했다. 두 번째 \(h\) suffix codec,
 전체 signature codec, 완료된 API trace의 저장 \(\mu\)를 연결하는 product/replay
 운송, 전체 기능정확성과 구현 수준 보안도 열려 있다. 따라서 이 문서는 완성
 증명을 선언하지 않고, 정확히 어디까지 commuting diagram이 닫혔는지를 표시한다.

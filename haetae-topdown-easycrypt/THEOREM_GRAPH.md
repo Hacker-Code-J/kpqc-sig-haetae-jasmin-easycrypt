@@ -470,6 +470,10 @@ matrix-vector equation until the missing `output_row`/full-NTT to
 security-model multiplication bridge compiles.  The KG-NTT-MUL continuation
 audited that edge and stopped it at the missing odd-root orthogonality/full-NTT
 convolution theorem; it did not turn the desired product into a representation
-premise.  KeyGen is frozen at KG-2/finalization, and the active graph now moves
-to the planned MINCORE-SIGN actual-helper composition.  Sampler distribution,
-retry termination, packers, public APIs, and security remain outside scope.
+premise.  KeyGen is frozen at KG-2/finalization. The focused
+`Mode2SignAcceptedCore` harness now directly composes the three actual Sign
+helpers and proves accepted-branch control, but the graph stops at
+`STOP-SIGN-CHAL-MODE2`: the full highbits/LSB/mu challenge leaf is absent and
+paper S-1/S-4 retain the frozen convolution dependency. The active graph moves
+to MINCORE-VERIFY. Sampler distribution, retry termination, packers, public
+APIs, and security remain outside scope.

@@ -120,10 +120,10 @@ SHA-256 \\
 구현 & 고정된 \sourcepath{haetae-ref-jasmin/} 소스와
 \identifier{jasmin2ec} 생성물 \cite{haetae-jasmin} \\
 작성 증명 & \sourcepath{haetae-topdown-easycrypt/easycrypt/} 아래 매니페스트된
-77개 EasyCrypt 대상; 마지막 보존 전체 완료 기준선은 76개 \\
-최신 판정 & \identifier{STOP-KG-NTT};
+78개 EasyCrypt 대상; Sign 수정 전 보존 전체 완료 기준선은 77개 \\
+최신 판정 & \identifier{STOP-SIGN-CHAL-MODE2};
 \identifier{OBL-MINCORE-KEYGEN}은 실제 matrix/finalizer 스냅샷 경계에서
-\statuspartial 이고 KeyGen은 KG-2/finalization에서 동결; 활성 전선은 Sign \\
+\statuspartial 이고 Sign은 actual-call control에서 \statuspartial; 활성 전선은 Verify \\
 재사용 증명 & 고정된 KeyGen, NTT, sampler, singularity, FFT 결과를 원래 전제
 그대로 가져오는 import-only 어댑터 \cite{haetae-easycrypt} \\
 제외 범위 & 다른 파라미터 집합, 물리적 부채널, fault, RNG 품질, 그리고
@@ -132,18 +132,15 @@ EUF-CMA로부터 자동으로 따라오지 않는 메모리 안전성 및 SCT \\
 \end{tabularx}
 \end{table}
 
-\begin{boundary}[77대상 매니페스트와 완료 증거]
-현재 77번째 대상 \sourcepath{Mode2KeygenNttMulBridge.ec}는 stop-boundary 감사
-결과와 actual harness의 두 active row consequence를 개별 fresh compile한다.
-그 직전 76대상 전체 완료 실행은
-\sourcepath{logs/verify-all-before-}\allowbreak
-\sourcepath{kg-ntt-mul.log}에 보존된다. 최종 77대상 전체 완료 로그는 아직
-없다. 실행 중 덮어쓰는
-\sourcepath{logs/verify-all-}\allowbreak\sourcepath{summary.txt}는 마지막 줄에
-\texttt{RESULT PASS authored-targets=77 cache=-no-eco}가 있을 때만 현재
-77대상 전체 완료 증거다. 현재는 77번째 대상의 개별 fresh compile과 76대상
-aggregate 완료만 확인된다. Hoare 정리의 \statusproved 는 여전히 실제
-절차의 종료나 확률 1 실행을 뜻하지 않는다.
+\begin{boundary}[78대상 매니페스트와 완료 증거]
+77번째 대상 \sourcepath{Mode2KeygenNttMulBridge.ec} 뒤에 78번째
+\sourcepath{Mode2SignAcceptedCore.ec}가 actual Sign control boundary를 fresh
+compile한다. Sign 수정 전 77대상 전체 완료 실행은
+\sourcepath{logs/verify-all-before-week16-sign.log}에 보존된다. 실행 중 덮어쓰는
+\sourcepath{logs/verify-all-summary.txt}는 마지막 줄에
+\texttt{RESULT PASS authored-targets=78 cache=-no-eco}가 있을 때만 현재
+78대상 전체 완료 증거다. Hoare 정리의 \statusproved 는 여전히 실제 절차의
+종료나 확률 1 실행을 뜻하지 않는다.
 \end{boundary}
 
 \begin{takeaway}{이 문서가 주장하지 않는 것}

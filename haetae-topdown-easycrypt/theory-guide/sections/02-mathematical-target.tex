@@ -544,10 +544,11 @@ convolution을 동일시하는 정리다. 그 뒤에도 \identifier{Rq.poly} 배
   A s=qj\pmod{2q}
 \]
 는 증명되지 않았다. 최종 판정 \identifier{STOP-KG-NTT}는 KeyGen을 KG-2 및
-finalization 경계에서 동결한다. 다음 단일 MINCORE 목표는 실제
-\identifier{_sf_round_challenge_mode2}, \identifier{_sf_z_check},
-\identifier{_sf_hint_mode2}를 합성하는
-\identifier{actual_sign_accepted_core_equations_mode2}다.
+finalization 경계에서 동결한다. 이후 실제 세 Sign helper의 직접 호출과
+accepted-branch control은 컴파일됐지만
+\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct}가 없어
+\identifier{STOP-SIGN-CHAL-MODE2}로 동결되었다. S-1--S-7 headline 정리는
+미증명이며 다음 단일 MINCORE 목표는 Verify core predicate다.
 
 \subsection{최상위 기능정확성 목표}
 

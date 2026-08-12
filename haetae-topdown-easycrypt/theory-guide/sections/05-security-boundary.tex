@@ -61,7 +61,9 @@ rewrite와 actual harness의 두 active row consequence가 77번째 대상으로
 컴파일됐다. 그러나 odd-root 직교성/full-NTT convolution과
 \identifier{Rq.poly}-to-security-list adapter가 없다. 또한 sampler, retry,
 packer, public API와 분포/종료를 포함하지 않는다. 따라서 KeyGen은
-\identifier{STOP-KG-NTT}로 동결되고 활성 전선은 MINCORE Sign으로 이동했다.
+\identifier{STOP-KG-NTT}로 동결된다. 이후 Sign actual-call control도
+컴파일됐지만 full challenge semantics 부재로
+\identifier{STOP-SIGN-CHAL-MODE2}에서 동결됐고 활성 전선은 MINCORE Verify다.
 
 \subsection{현재 주장 행렬}
 

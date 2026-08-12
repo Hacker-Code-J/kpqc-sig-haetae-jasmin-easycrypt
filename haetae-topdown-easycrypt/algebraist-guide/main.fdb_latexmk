@@ -1,16 +1,16 @@
 # Fdb version 3
-["bibtex main"] 1786499843 "main.aux" "main.bbl" "main" 1786502219
+["bibtex main"] 1786509823 "main.aux" "main.bbl" "main" 1786509826
   "/usr/share/texlive/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "main.aux" 1786502218 23154 788b0354ddf03a829513ed4d188ee94d "xelatex"
+  "main.aux" 1786509825 23154 c29cb5a5ba063cfe029044b404e0aede "xelatex"
   "references.bib" 1786499406 5119 22bcffd310aa2458b7fc1c609b965432 ""
   (generated)
   "main.bbl"
   "main.blg"
-["xdvipdfmx"] 1786502218 "main.xdv" "main.pdf" "main" 1786502219
-  "main.xdv" 1786502218 1568136 591779dae81f2f7564a954b2794f0269 "xelatex"
+["xdvipdfmx"] 1786509825 "main.xdv" "main.pdf" "main" 1786509826
+  "main.xdv" 1786509825 1577616 2553f1930ff94eb674a6f4fbc3ee3ac5 "xelatex"
   (generated)
   "main.pdf"
-["xelatex"] 1786502215 "main.tex" "main.xdv" "main" 1786502219
+["xelatex"] 1786509823 "main.tex" "main.xdv" "main" 1786509826
   "/etc/texmf/web2c/texmf.cnf" 1675738244 475 c0e671620eb5563b2130f56340a5fde8 ""
   "/usr/share/texlive/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/share/texlive/texmf-dist/fonts/tfm/adobe/zapfding/pzdr.tfm" 1136768653 1528 f853c4d1b4e0550255e02831fdc8496f ""
@@ -175,21 +175,21 @@
   "/usr/share/texlive/texmf-dist/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/usr/share/texmf/web2c/texmf.cnf" 1644012257 39432 7155514e09a3d69036fac785183a21c2 ""
   "/var/lib/texmf/web2c/xetex/xelatex.fmt" 1775014353 5133299 21f89cc34a3723845a9da03dab0dfa3f ""
-  "main.aux" 1786502218 23154 788b0354ddf03a829513ed4d188ee94d "xelatex"
-  "main.bbl" 1786499843 4114 6d86f6272ac5bf6ef3d43e95a7894a2b "bibtex main"
-  "main.out" 1786502218 22852 0b64cb7d737cd16ba6b1435326bdfb1b "xelatex"
-  "main.tex" 1786499406 5480 74a9e42e28eb29b44dacd362e7d552b4 ""
-  "main.toc" 1786502218 10887 dc9babb57837ef94f64ffb495e9ad699 "xelatex"
+  "main.aux" 1786509825 23154 c29cb5a5ba063cfe029044b404e0aede "xelatex"
+  "main.bbl" 1786509823 4114 6d86f6272ac5bf6ef3d43e95a7894a2b "bibtex main"
+  "main.out" 1786509825 22852 02e3c142cbad4c1501243a5e4663738c "xelatex"
+  "main.tex" 1786509760 5637 c996eb6bb9e704c5cc5747261f5506a2 ""
+  "main.toc" 1786509825 10887 6d65517ee7af26df9be17698fb716e29 "xelatex"
   "preamble.tex" 1786192647 5249 3c20fdf43427d1c22586a8efe868c424 ""
-  "sections/01-reading-contract.tex" 1786499406 8408 1b89500046e2a2692431fec0972a16f4 ""
+  "sections/01-reading-contract.tex" 1786509760 8510 f7e63a6ab0494b790a3de31e9f5fbcee ""
   "sections/02-algebraic-object.tex" 1786499406 9594 a84405ff7eaae8de2d197efbce76616b ""
   "sections/03-representation-and-logic.tex" 1786192674 10490 6934664f7d2653c8152a11b5d33a381d ""
   "sections/04-proved-spine.tex" 1786499976 38012 db360439cefd5b868eca4cbad87b176a ""
   "sections/05-rans-frontier.tex" 1786498658 22042 bba3ae9098b9685c9621e213d4c468ba ""
-  "sections/06-boundaries.tex" 1786499976 15910 2d98fef3ede0eefe9281e8e1a6556814 ""
-  "sections/07-roadmap.tex" 1786500163 16514 fdedb66407ccc6dca398b75fc6db3514 ""
-  "sections/08-source-index.tex" 1786499909 43592 0d50a12fac421ad8668c7968c235a4af ""
-  "status.tex" 1786499153 822 4f064d0b413ba8f05b4309a1d170a1ba ""
+  "sections/06-boundaries.tex" 1786509760 15954 e1753aa9cc3388298536f5a56fb64e67 ""
+  "sections/07-roadmap.tex" 1786509677 16762 8ae8de66f1792d4c35501684a874a92c ""
+  "sections/08-source-index.tex" 1786509761 44151 55ae5d66336050cb461d2c3a24ff6bab ""
+  "status.tex" 1786509655 776 0369a312f45b52afc7556ff3a42b66af ""
   (generated)
   "main.aux"
   "main.log"

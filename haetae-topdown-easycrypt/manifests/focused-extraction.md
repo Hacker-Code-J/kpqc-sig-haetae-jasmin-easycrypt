@@ -748,3 +748,29 @@ checks their stored hashes and internal procedure identity, regenerates the
 table certificate, and fresh-compiles the new Hoare theorems. No source,
 generated-extraction, or generated-certificate hash entry changes. This reuse
 does not assert fixed-input termination or general encoder losslessness.
+
+## Week 16 Sign accepted-core boundary
+
+Source:
+
+- `haetae-ref-jasmin/jasmin/sign.jazz`
+- source hash remains pinned by `sources.sha256`
+
+Focused roots, in the order used by the authored harness:
+
+- `_sf_round_challenge_mode2`
+- `_sf_z_check`
+- `_sf_hint_mode2`
+
+Output:
+
+- `sign-accepted-core/SignAcceptedCoreTarget.ec`
+- generated SHA-256:
+  `ebfe228473760f2f0978ef262c6a5d1f5ef5d01307b2cc0f7f76623fb4ab4b1d`
+
+The extraction deliberately selects no hyperball sampler, retry loop,
+signature packer, or public API root. `Mode2SignAcceptedCore` directly calls
+the three generated helpers and proves only that its accepted-branch flag is
+equivalent to the actual `_sf_z_check` return being zero. The paper equations
+(S-1)--(S-7) are not claimed: the exact missing semantic leaf is recorded in
+`WEEK16_SIGN_REPORT.md`.

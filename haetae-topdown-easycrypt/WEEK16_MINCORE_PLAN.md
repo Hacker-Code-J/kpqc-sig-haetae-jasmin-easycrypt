@@ -12,6 +12,13 @@ KG-NTT-MUL continuation has now reached the time-boxed final decision
 snapshot consequences, and the final NTT-word representation rewrite compile;
 the complete `(KG-1)`--`(KG-4)` package and paper equation do not.
 
+The subsequent Sign time box is also closed: **STOP-SIGN-CHAL-MODE2**.
+The focused actual three-helper harness and its accepted-branch control
+theorem compile, but the exact
+`sf_challenge_mode2_highbits_lsb_sampleinball_correct` leaf does not exist in
+the checked tree. Paper S-1/S-4 additionally retain the frozen full-NTT
+convolution dependency. The active single lane is therefore MINCORE-VERIFY.
+
 The paper claim is narrower than full HAETAE correctness:
 
 > For HAETAE-2, prove the actual KeyGen matrix/finalize snapshot bridge and
@@ -57,8 +64,12 @@ The paper claim is narrower than full HAETAE correctness:
   must not assume `reject=0`, the final equations, or output equality.
 - Do not claim the sampler distribution, signing-loop termination, or a full
   1474-byte signature theorem.
-- Planned headline theorem:
-  `Mode2SignAcceptedCore.actual_sign_accepted_core_equations_mode2`.
+- Compiled control theorem:
+  `Mode2SignAcceptedCore.actual_sign_accepted_core_branch_control_mode2`.
+- Stopped, unproved headline theorem:
+  `Mode2SignAcceptedCore.actual_sign_accepted_core_equations_mode2`; exact
+  blocker and all S-1--S-7 non-claims are recorded in
+  `WEEK16_SIGN_REPORT.md`.
 
 ### MINCORE-VERIFY — reconstruction and acceptance predicate
 
@@ -126,11 +137,12 @@ extraction-drift checks pass, and the ledger and paper record `STOP-KG-NTT`.
 odd-root orthogonality/full-NTT convolution theorem and the security-list
 adapter; those results are not premises of the frozen theorem.
 
-The broader Week 16 MINCORE lane is complete only when its remaining actual
-Sign, Verify, and restricted decoded-object composition targets also compile.
+The broader Week 16 MINCORE lane is not complete. Sign is frozen as an audited
+partial control result; Verify and restricted decoded-object composition are
+still open.
 
 The currently permitted KeyGen conclusion is **actual M23
 matrix/finalizer snapshot functional partial correctness with KG-2
 finalization semantics**.  It is not the paper KeyGen equation, full HAETAE
 functional correctness, public-API correctness, termination, or
-implementation security. Work proceeds with MINCORE-SIGN.
+implementation security. Work proceeds with MINCORE-VERIFY.

@@ -388,6 +388,15 @@ paper reduction.
    HAETAE integer-list multiplication adapter.  KeyGen is frozen at the
    KG-2/finalization boundary; KG-1, KG-3, complete KG-4, and the paper key
    equation are not claimed.  The active lane moves to MINCORE-SIGN.
+10. **MINCORE-SIGN decision — STOP-SIGN-CHAL-MODE2.**
+    `Mode2SignAcceptedCore` now fresh-compiles a focused harness that directly
+    calls `_sf_round_challenge_mode2`, `_sf_z_check`, and the accepted-only
+    `_sf_hint_mode2`; its checked control theorem assumes neither rejection
+    success nor a target equation.  The first Sign-specific absent semantic
+    leaf is `sf_challenge_mode2_highbits_lsb_sampleinball_correct`.  The
+    paper-level S-1/S-4 paths also retain the frozen full-NTT convolution
+    dependency.  No response, norm, hint, distribution, or termination claim
+    is made.  The active lane moves to MINCORE-VERIFY.
 
 ## Sprint 16 — seven-day minimum paper lane
 
@@ -403,10 +412,15 @@ paper reduction.
 3. **Frozen KeyGen scope:** retain KG-2 and actual finalization semantics only.
    Do not substitute the snapshot-only identity for KG-1, KG-3, complete KG-4,
    or the paper `A s = q j (mod 2q)` theorem.
-4. **Active single target:** move to
-   `Mode2SignAcceptedCore.actual_sign_accepted_core_equations_mode2` over the
-   actual challenge-rounding, `z`-check, and hint helpers.
-5. Keep sampler distributions, retry termination, packers, public APIs, and
+4. **Sign status: STOP-SIGN-CHAL-MODE2.**  The direct actual helper harness and
+   accepted-branch control theorem compile, but the exact full
+   highbits/LSB/mu-to-SampleInBall semantics leaf is absent.  S-1/S-4 also
+   retain the frozen full-NTT convolution dependency, so S-1--S-7 are not
+   claimed.
+5. **Active single target:** move to
+   `Mode2VerifyCorePredicate.actual_verify_core_predicate_mode2` over the
+   canonical decoded-object core, without parser, codec, or public-API scope.
+6. Keep sampler distributions, retry termination, packers, public APIs, and
    general NTT algebra outside the Sign target.  Freeze each claim only after
    individual and aggregate fresh compilation and independent audit.
 

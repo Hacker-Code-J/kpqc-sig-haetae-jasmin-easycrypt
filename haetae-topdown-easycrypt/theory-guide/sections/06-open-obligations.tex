@@ -214,9 +214,10 @@ Week~16 최소 KeyGen 범위가 우선되어 연기된 실제 힌트 코덱 역�
 파일에서 개별 컴파일됨. 그래도 odd-root convolution과
 \identifier{Rq.poly}-to-security-list
 adapter가 없어 faithful KG-1/KG-3/전체 KG-4와 논문 식은 동결 \\
-\claim{OBL-MINCORE-SIGN} & 기능정확성;\newline\statusspecified & 실제
-round-challenge, z-check, hint helper의 accepted-core 식이 현재 단일 목표; 아직
-headline 정리 미컴파일 \\
+\claim{OBL-MINCORE-SIGN} & 기능정확성;\newline\statuspartial;\newline
+\identifier{STOP-SIGN-CHAL-MODE2} & 실제 round-challenge, z-check, hint helper
+직접 호출과 accepted-branch control만 컴파일; full challenge semantics와
+S-1--S-7 headline은 미증명 \\
 \claim{OBL-MINCORE-VERIFY},\newline
 \claim{OBL-MINCORE-COMPOSITION} &
 기능정확성;\newline\statusspecified & canonical decoded Verify core 술어와
@@ -264,11 +265,11 @@ BST-MSIS 인스턴스(instance)를 추출 \\
         직교성/full-NTT convolution과 security-list adapter 없이는
         \identifier{pre_bp}를 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 바꾸거나
         faithful KG-1/KG-3/전체 KG-4를 주장하지 않는다.
-  \item 현재 단일 목표인
-        \identifier{actual_sign_accepted_core_equations_mode2}를 실제
-        round-challenge, z-check, hint helper 합성으로 닫는다.
-  \item 그 다음 canonical decoded Verify core 술어와 decoded-object 제한 합성을
-        각각 닫는다.
+  \item \identifier{STOP-SIGN-CHAL-MODE2}를 유지한다. full
+        highbits/LSB/\(\mu\)-to-SampleInBall leaf와 기존 convolution 의무 없이
+        S-1--S-7을 주장하지 않는다.
+  \item 현재 단일 목표인 canonical decoded Verify core 술어를 닫고, 그 다음
+        decoded-object 제한 합성을 닫는다.
   \item (h) 코덱은 현재 연기 상태를 유지한다. 범위가 다시 열리면 크기
         메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
         꼬리 프레임(pack/challenge tail frame)을 합성해 전체 1474바이트

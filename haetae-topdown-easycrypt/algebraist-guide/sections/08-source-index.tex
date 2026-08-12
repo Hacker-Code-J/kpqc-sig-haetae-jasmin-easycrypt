@@ -59,12 +59,14 @@ SignaturePack/Unpack 경계의 실패/성공 계약 \\
 \sourcepath{WEEK15_REPORT.md} & 역사적 \identifier{GO-WITNESS} 판정,
 74-target 검증 결과와 fixed all-6 Hoare success; termination/losslessness 제외 \\
 \sourcepath{WEEK16_MINCORE_PLAN.md} & one-week MINCORE의 KeyGen/Sign/Verify 계획,
-KeyGen 중단 기준과 현재 Sign 전환 \\
+KeyGen/Sign 중단 기준과 현재 Verify 전환 \\
 \sourcepath{WEEK16_KG_REPORT.md} & 역사적 첫 과제
 \identifier{CONTINUE-KG} 판정과 76-target 수정 전 기준선 \\
 \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md} & 마지막 sound
 \identifier{output_row} rewrite, exact missing convolution/adapter leaf,
-\identifier{STOP-KG-NTT}와 actual accepted Sign core 전환 \\
+\identifier{STOP-KG-NTT}와 후속 Sign 경계 \\
+\sourcepath{WEEK16_SIGN_REPORT.md} & actual 세 Sign helper 직접 호출/control,
+누락된 full challenge semantics와 \identifier{STOP-SIGN-CHAL-MODE2} \\
 \bottomrule
 \end{longtable}
 
@@ -168,6 +170,10 @@ matrix/finalizer harness의 두 active row consequence만 증명;
 odd-root orthogonality/full-NTT convolution 및
 \identifier{Rq.poly}--security-list adapter의 부재 &
 \claimid{OBL-MINCORE-KEYGEN}이 \identifier{STOP-KG-NTT}인 정확한 경계 \\
+\sourcepath{easycrypt/refinement/sign/Mode2SignAcceptedCore.ec} &
+\theoremname{actual_sign_accepted_core_branch_control_mode2} &
+actual round-challenge, z-check, accepted-only hint 직접 호출; S-1--S-7은
+\identifier{STOP-SIGN-CHAL-MODE2}로 미증명 \\
 \bottomrule
 \end{longtable}
 \normalsize
@@ -838,8 +844,11 @@ fresh compile 대상에 포함된다. 이 PASS는 명명된
         \sourcepath{Mode2KeygenCoreEquation.ec}에서 snapshot-only 합동식을 읽는다.
   \item \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md}와
         \sourcepath{Mode2KeygenNttMulBridge.ec}에서 proved NTT-word rewrite와
-        absent convolution/security-list bridge를 구분하고, 다음
-        \claimid{OBL-MINCORE-SIGN}이 아직 \statusspecified 임을 확인한다.
+        absent convolution/security-list bridge를 구분한다.
+  \item \sourcepath{WEEK16_SIGN_REPORT.md}와
+        \sourcepath{Mode2SignAcceptedCore.ec}에서 actual-call control과
+        \claimid{OBL-MINCORE-SIGN}의 \identifier{STOP-SIGN-CHAL-MODE2}
+        \statuspartial 경계를 확인한다.
 \end{enumerate}
 
 \subsection{증명 참여 전 반나절 경로}

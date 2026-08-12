@@ -17,19 +17,21 @@
    state machine)의
    refinement로 읽는 방법.
 
-현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 KG-NTT-MUL continuation
+현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 MINCORE-SIGN
 종료 기준선이다. 운영상
 source of truth는 `../CLAIM_LEDGER.md`이고, 최종 증거는 `../easycrypt/` 아래의
 명명된 EasyCrypt 정리(theorem)다. 안내서의 문장은 이 스냅샷에 고정되어 있으며,
 “현재”라는 표현도 모두 이 날짜를 뜻한다.
 
-여기서 77개는 최신 aggregate-verified 기준선의 authored target 수다. Week 11에
+여기서 78개는 현재 manifest의 authored target 수이며, Sign 수정 전 77개
+aggregate-verified 기준선은 별도 로그로 보존된다. Week 11에
 rANS encoder closure 관련 파일 일곱 개가 manifest에 추가되어 `-no-eco`로 fresh
 compile되었고, Week 12에는 actual decoder semantic-refinement 파일 여덟 개가,
 Week 13에는 actual core composition 파일 두 개가, Week 14에는 production full-HBZ
 wrapper 경계를 닫는 파일 다섯 개가 추가되었다. Week 15에는 고정 all-6 입력의
 actual 성공 사후조건을 닫는 파일 두 개가, Week 16에는 actual KeyGen
-matrix/finalize snapshot과 KG-NTT-MUL 중단 경계를 다루는 파일 세 개가 더해졌다.
+matrix/finalize snapshot과 KG-NTT-MUL 중단 경계를 다루는 파일 세 개, actual
+Sign accepted-core control 파일 하나가 더해졌다.
 encoder의 핵심 정리(theorem)
 `actual_rans_encode_trace_closure`와
 `actual_rans_encode_trace_refinement`는 실제 generated encoder가 반환하는 성공
@@ -102,7 +104,7 @@ accepted Sign core다. 두 번째 `h` codec은 `DEFERRED`다.
 - `sections/04-proved-spine.tex`: 현재 실제로 닫힌 증명 사슬
 - `sections/05-rans-frontier.tex`: HBZ/rANS 증명 사슬, 고정 입력 성공 정리와 종료성 경계
 - `sections/06-boundaries.tex`: 미해결 의무, 가정 표면, 과장 금지선
-- `sections/07-roadmap.tex`: KeyGen NTT 중단 경계와 현재 MINCORE-SIGN 작업
+- `sections/07-roadmap.tex`: KeyGen/Sign 중단 경계와 현재 MINCORE-VERIFY 작업
 - `sections/08-source-index.tex`: 정리명(theorem name), 소스 경로, 용어 사전, 재현 방법
 - `references.bib`: 고정된 로컬 명세와 프로젝트 문서
 

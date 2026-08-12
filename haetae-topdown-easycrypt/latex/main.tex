@@ -62,8 +62,11 @@ missing full-NTT-to-security-model multiplication bridge as the exact blocker
 to the faithful paper KeyGen equation. The KG--NTT--MUL continuation
 fresh-compiles the last honest NTT-word representation edge, identifies the
 missing odd-root orthogonality/convolution and array-to-list adapter leaves,
-freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}, and moves the
-active MINCORE lane to Sign.
+and freezes KeyGen at KG-2/finalization as \textsc{stop-kg-ntt}. The next
+Sign pass directly composes the three actual accepted-core helpers and proves
+their branch control, but freezes S-1--S-7 as
+\textsc{stop-sign-chal-mode2} because the full highbits/LSB/\(\mu\) challenge
+semantics leaf is absent. The active MINCORE lane moves to Verify.
 \end{abstract}
 
 \tableofcontents
@@ -101,6 +104,7 @@ active MINCORE lane to Sign.
 \input{sections/31-week15-rans-actual-success-witness}
 \input{sections/32-week16-mincore-keygen-first-task}
 \input{sections/33-week16-kg-ntt-mul-stop}
+\input{sections/34-week16-mincore-sign-stop}
 
 \bibliographystyle{plain}
 \bibliography{references}

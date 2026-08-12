@@ -41,6 +41,8 @@ LaTeX 문서다.
 - Week 16 KG-NTT-MUL 감사에서 77번째 대상으로 컴파일한 `output_row`의
   full-invNTT/pointwise 표현 rewrite, actual 두 row consequence와
   `STOP-KG-NTT` 판정;
+- Week 16 Sign pass에서 78번째 대상으로 컴파일한 actual 세 helper 직접 호출,
+  accepted-branch control과 `STOP-SIGN-CHAL-MODE2` 판정;
 - 아직 남은 고정 입력 종료/losslessness, odd-root 직교성/full-NTT convolution,
   `Rq.poly`→보안 모델 list 곱셈 adapter, 그리고 연기된 힌트 (h) 코덱;
 - 생성/재전달(product/replay)로 동결된 저장 관찰 \(\mu\) 간선과 남은 서명
@@ -48,27 +50,26 @@ LaTeX 문서다.
 
 상태 판정의 운영상 단일 기준(source of truth)은 `../CLAIM_LEDGER.md`이며, 최종
 근거는 `../easycrypt/` 아래의 명명된 EasyCrypt 선언이다. 현재 매니페스트는
-`Mode2KeygenNttMulBridge.ec`를 포함한 77개 작성 검증 대상(authored target)이다.
-마지막 보존 전체 완료 로그
-`../logs/verify-all-week16-kg-first-task.log`는 그 직전 76대상 기준선의
-`RESULT PASS authored-targets=76 cache=-no-eco`를 기록한다. 77번째 경계 대상과
-stop 판정은 `../WEEK16_KG_NTT_MUL_REPORT.md`에 기록되어 있다. 77번째 대상은
-개별 `-no-eco` fresh compile을 통과했지만 최종 77대상 전체 완료 로그는 아직
-없다. 덮어쓰기 요약 로그는 terminal `RESULT PASS`가 남은 실행만 증거로 삼는다.
+`Mode2SignAcceptedCore.ec`를 포함한 78개 작성 검증 대상(authored target)이다.
+Sign 수정 전 77대상 완료 로그는
+`../logs/verify-all-before-week16-sign.log`에 보존되어 있다. 77번째 KeyGen
+경계는 `../WEEK16_KG_NTT_MUL_REPORT.md`, 78번째 Sign control 경계는
+`../WEEK16_SIGN_REPORT.md`에 기록되어 있다. 덮어쓰기 요약 로그는 terminal
+`RESULT PASS`가 남은 실행만 증거로 삼는다.
 
 Week 15의 `actual_rans_encode_all_six_success`와
 `signature_pack_unpack_hbz_zero_success_mode2`는 고정 all-6/all-zero 입력에서
 종료한 실제 실행이 반드시 성공함을 보인다. 이는 Hoare 부분정확성이므로 실제
 종료, losslessness, 확률 1 성공이나 비공허 실행을 증명하지 않는다. 현재 운영
-판정은 Week 16의 `STOP-KG-NTT`다.
+판정은 Week 16의 `STOP-SIGN-CHAL-MODE2`다.
 `actual_m23_matrix_finalize_semantic_snapshot`는 실제 두 KeyGen 보조절차의
 스냅샷 의미를 닫는다. 77번째 파일의 `output_row_from_mode2_ntt_words`와
 `actual_m23_matrix_snapshot_rows_explicit`는 마지막 sound rewrite와 직접
 two-call harness의 두 active row consequence를 컴파일한다. 그러나 논문 식
 `A s = q j (mod 2q)`로 승격할 odd-root
 orthogonality/full-NTT convolution과 `Rq.poly`--security-list adapter가 없다.
-KeyGen은 KG-2/finalization에서 동결되었고 다음 단일 목표는 actual accepted
-Sign core다.
+KeyGen은 KG-2/finalization에서 동결되었다. Sign은 actual-call control에서
+동결되었고 다음 단일 목표는 Verify core predicate다.
 
 ## 용어 표기(Terminology)
 
@@ -96,11 +97,10 @@ XeLaTeX, `latexmk`, Noto CJK 글꼴이 필요하다. 성공하면 `main.pdf`가 
 ```
 
 새 안내서의 빌드 성공은 EasyCrypt 검증 성공을 대신하지 않는다. 검증 판정은
-`../WEEK16_KG_NTT_MUL_REPORT.md`, 이전 스냅샷 보고서
+`../WEEK16_SIGN_REPORT.md`, `../WEEK16_KG_NTT_MUL_REPORT.md`, 이전 스냅샷 보고서
 `../WEEK16_KG_REPORT.md`, Week 15/16 surface scan과 보존 로그에서 확인한다.
 Week 14 및 Week 13 기록은 각각 그 아래 full-HBZ와 rANS 핵심 경계의 역사적
 교차검사다. `../logs/verify-all-summary.txt`는 진행 중 실행이 덮어쓰므로, 현재
-77대상 매니페스트에 대해서는 마지막 줄이
-`RESULT PASS authored-targets=77 cache=-no-eco`일 때만 전체 완료 증거로
-사용한다. 현재는 77번째 대상의 개별 컴파일만 성공했고, 전체 완료는 보존된
-76대상 로그까지만 확인된다.
+78대상 매니페스트에 대해서는 마지막 줄이
+`RESULT PASS authored-targets=78 cache=-no-eco`일 때만 전체 완료 증거로
+사용한다. Sign 수정 전 77대상 완료 로그는 별도로 보존된다.

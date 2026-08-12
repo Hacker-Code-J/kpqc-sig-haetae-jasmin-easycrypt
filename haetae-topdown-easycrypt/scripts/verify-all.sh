@@ -71,8 +71,8 @@ if ! diff -u "$WORK_DIR/manifest-targets.txt" \
   cat "$LOG_DIR/target-manifest.log"
   exit 1
 fi
-if [ "$manifest_target_count" -ne 77 ]; then
-  printf 'FAIL expected 77 authored proof targets, found %s\n' \
+if [ "$manifest_target_count" -ne 78 ]; then
+  printf 'FAIL expected 78 authored proof targets, found %s\n' \
     "$manifest_target_count" | tee -a "$SUMMARY"
   exit 1
 fi
@@ -770,6 +770,58 @@ fi
 printf 'PASS Week16 direct-keygen harness and STOP-KG-NTT boundary checks\n' \
   | tee -a "$SUMMARY"
 
+WEEK16_SIGN="$PROJECT_DIR/easycrypt/refinement/sign/Mode2SignAcceptedCore.ec"
+WEEK16_SIGN_REPORT="$PROJECT_DIR/WEEK16_SIGN_REPORT.md"
+if ! rg -F 'module ActualSignAcceptedCore = {' "$WEEK16_SIGN" \
+    > "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'Sign._sf_round_challenge_mode2' "$WEEK16_SIGN" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'Sign._sf_z_check' "$WEEK16_SIGN" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'Sign._sf_hint_mode2' "$WEEK16_SIGN" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'if (zcheck_reject = W64.zero)' "$WEEK16_SIGN" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'lemma actual_sign_accepted_core_branch_control_mode2' \
+    "$WEEK16_SIGN" >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'STOP-SIGN-CHAL-MODE2' "$WEEK16_SIGN_REPORT" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log" || \
+   ! rg -F 'sf_challenge_mode2_highbits_lsb_sampleinball_correct' \
+    "$WEEK16_SIGN_REPORT" >> "$LOG_DIR/week16-sign-core-surface-scan.log"; then
+  printf 'FAIL Week16 direct Sign-core/STOP boundary surface\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+sed -n '/module ActualSignAcceptedCore = {/,/^}./p' \
+  "$WEEK16_SIGN" > "$WORK_DIR/week16-sign-harness-body.txt"
+if rg -n 'RawSignApiTarget|cryptolab_|_sf_signature_core|_sf_hyperball|_sf_pack|public[ -]API' \
+    "$WORK_DIR/week16-sign-harness-body.txt" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log"; then
+  printf 'FAIL Week16 Sign harness pulls sampler, retry, packer, or public API\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+awk '
+  /lemma actual_sign_accepted_core_branch_control_mode2/ { inside = 1 }
+  inside { print }
+  inside && /==>/ { exit }
+' "$WEEK16_SIGN" > "$WORK_DIR/week16-sign-precondition.txt"
+if rg -n 'reject[[:space:]]*=[[:space:]]*W64.zero|S-[1-7]|SampleInBall|HighBits|norm|hint_hp[[:space:]]*=' \
+    "$WORK_DIR/week16-sign-precondition.txt" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log"; then
+  printf 'FAIL Week16 Sign theorem precondition assumes acceptance or target equations\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+if rg -F 'lemma actual_sign_accepted_core_equations_mode2' "$WEEK16_SIGN" \
+    >> "$LOG_DIR/week16-sign-core-surface-scan.log"; then
+  printf 'FAIL stopped Week16 Sign boundary claims unproved S-1--S-7 theorem\n' \
+    | tee -a "$SUMMARY"
+  exit 1
+fi
+printf 'PASS Week16 direct Sign-core control and STOP-SIGN-CHAL-MODE2 checks\n' \
+  | tee -a "$SUMMARY"
+
 API_BRIDGE="$PROJECT_DIR/easycrypt/refinement/composition/ApiKeyMemoryBridge.ec"
 if ! rg -F 'lemma keygen_export_vk_mode2_prefix' "$API_BRIDGE" \
     > "$LOG_DIR/api-memory-reachability-scan.log" || \
@@ -920,6 +972,13 @@ WHY3_SERVER_SOCKET="$SERVER_SOCKET" \
 printf 'PASS focused raw API caller extraction\n' \
   | tee -a "$SUMMARY"
 
+TOPDOWN_EXTRACT_DIR="$WORK_DIR" \
+WHY3_SERVER_SOCKET="$SERVER_SOCKET" \
+  "$SCRIPT_DIR/extract-sign-accepted-core.sh" \
+  > "$LOG_DIR/focused-extraction-sign-accepted-core.log" 2>&1
+printf 'PASS focused Sign accepted-core extraction\n' \
+  | tee -a "$SUMMARY"
+
 (cd "$WORK_DIR" && sha256sum -c "$EXTRACTION_HASHES") \
   > "$LOG_DIR/focused-extraction-drift.log" 2>&1
 printf 'PASS focused extraction regeneration drift\n' \
@@ -938,6 +997,7 @@ RAW_VERIFY_EXTRACT="$WORK_DIR/raw-api-extract/verify"
 SIG_PACK_EXTRACT="$WORK_DIR/pack"
 SIG_UNPACK_EXTRACT="$WORK_DIR/unpack"
 HBZ_EXTRACT="$WORK_DIR/hbz-codec"
+SIGN_CORE_EXTRACT="$WORK_DIR/sign-accepted-core"
 PARENT_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/keygen-mode2-parent"
 CALLER_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/keygen-sampler-callers"
 NTT_EXTRACT="$ROOT_DIR/haetae-ref-easycrypt/easycrypt/extract/ntt"
@@ -987,6 +1047,13 @@ while IFS= read -r target || [ -n "$target" ]; do
       "$EASYCRYPT_BIN" compile -script -no-eco -timeout 10 "$file" \
         -I "$HBZ_EXTRACT" -I "$SIG_PACK_EXTRACT" \
         -I "$SIG_UNPACK_EXTRACT" \
+        -I "$PROJECT_DIR/easycrypt/refinement/sign" \
+        -server "$SERVER_SOCKET" -max-provers 1 \
+        < /dev/null > "$log" 2>&1
+      ;;
+    Mode2SignAcceptedCore)
+      "$EASYCRYPT_BIN" compile -script -no-eco -timeout 5 "$file" \
+        -I "$SIGN_CORE_EXTRACT" \
         -I "$PROJECT_DIR/easycrypt/refinement/sign" \
         -server "$SERVER_SOCKET" -max-provers 1 \
         < /dev/null > "$log" 2>&1
