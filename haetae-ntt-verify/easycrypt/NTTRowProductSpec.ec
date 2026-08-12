@@ -209,10 +209,18 @@ lemma freeze_repr_preserves_poly before after p :
   NTT_Fq.poly_repr after p.
 proof.
 move=> hfreeze hbefore.
-rewrite /NTT_Fq.poly_repr /NTT_Fq.barray256_to_poly.
-apply Array256.ext_eq => i hi.
-rewrite !Array256.initiE 1,2:/#.
-exact (hfreeze i hi).
+have harrays :
+    NTT_Fq.barray256_to_poly after =
+    NTT_Fq.barray256_to_poly before.
++ apply Array256.ext_eq => i hi.
+  have himem : i \in range 0 256 by rewrite mem_range.
+  have hafter := NTT_Fq.barray256_to_polyE after i himem.
+  have hbefore' := NTT_Fq.barray256_to_polyE before i himem.
+  have hfreeze' := hfreeze i himem.
+  smt().
+move: hbefore; rewrite /NTT_Fq.poly_repr => hbefore.
+rewrite /NTT_Fq.poly_repr.
+by rewrite harrays hbefore.
 qed.
 
 end NTTRowProductSpec.
