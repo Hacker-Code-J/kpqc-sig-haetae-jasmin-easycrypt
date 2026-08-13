@@ -5,7 +5,9 @@ require import Array256 BArray8192 BArray32768
                NTTRowProductSpec NTTFullSpectralAction
                KeygenM23MatrixSpec
                KeygenM23ArithmeticSpec
-               Mode2KeygenCoreEquation.
+               Mode2KeygenCoreEquation
+               HAETAE_Params HAETAE_Algebra
+               RqHAETAEBridge.
 
 theory Mode2KeygenNttMulBridge.
 
@@ -47,6 +49,43 @@ rewrite /KeygenM23ArithmeticSpec.output_row
         pointwise_row_ntt_shared /mode2_row_product.
 exact (NTTFullSpectralAction.full_ntt_montgomery_row_product
   3 (mode2_matrix_hat m) (mode2_vector p0 p1 p2) row).
+qed.
+
+lemma mode2_row_product_haetae_dot
+    (m : BArray32768.t) (p0 p1 p2 : Rq.poly) row
+    (ah0 ah1 ah2 bh0 bh1 bh2 : HAETAE_Algebra.poly) :
+  0 <= row < KeygenM23MatrixSpec.mode2_rows_i =>
+  RqHAETAEBridge.rq_poly_repr
+    (NTTFullSpec.full_invntt (mode2_matrix_hat m row 0)) ah0 =>
+  RqHAETAEBridge.rq_poly_repr
+    (NTTFullSpec.full_invntt (mode2_matrix_hat m row 1)) ah1 =>
+  RqHAETAEBridge.rq_poly_repr
+    (NTTFullSpec.full_invntt (mode2_matrix_hat m row 2)) ah2 =>
+  RqHAETAEBridge.rq_poly_repr p0 bh0 =>
+  RqHAETAEBridge.rq_poly_repr p1 bh1 =>
+  RqHAETAEBridge.rq_poly_repr p2 bh2 =>
+  RqHAETAEBridge.rq_poly_repr
+    (mode2_row_product m p0 p1 p2 row)
+    (HAETAE_Algebra.poly_dot [ah0; ah1; ah2] [bh0; bh1; bh2]).
+proof.
+move=> _ hhat0 hhat1 hhat2 hp0 hp1 hp2.
+rewrite /mode2_matrix_hat in hhat0.
+rewrite /mode2_matrix_hat in hhat1.
+rewrite /mode2_matrix_hat in hhat2.
+rewrite /mode2_row_product.
+rewrite RqHAETAEBridge.coefficient_row_product3_atE.
+rewrite /mode2_vector /mode2_matrix_hat /=.
+have hdot := RqHAETAEBridge.rq_poly_dot3_repr
+  (NTTFullSpec.full_invntt
+    (KeygenM23ArithmeticSpec.matrix_poly m row 0))
+  (NTTFullSpec.full_invntt
+    (KeygenM23ArithmeticSpec.matrix_poly m row 1))
+  (NTTFullSpec.full_invntt
+    (KeygenM23ArithmeticSpec.matrix_poly m row 2))
+  p0 p1 p2 ah0 ah1 ah2 bh0 bh1 bh2
+  hhat0 hhat1 hhat2 hp0 hp1 hp2.
+move: hdot.
+by rewrite RqHAETAEBridge.coefficient_row_product3E.
 qed.
 
 lemma output_row_from_mode2_ntt_words
