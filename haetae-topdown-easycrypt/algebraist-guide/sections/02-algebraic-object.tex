@@ -113,12 +113,42 @@ matrix helper의 반환 snapshot이며, 아직 논문의
 low/high 분해(decomposition), adjusted \(s_2\), frame을 한 Hoare 사후조건에
 모은다. \theoremname{output_row_from_mode2_ntt_words}는
 \identifier{KeygenM23ArithmeticSpec.output_row}를 실제
-full-invNTT/pointwise word 표현과 정확히 동일시한다. 그러나 그 표현을 native
-\(R_q\) negacyclic 곱으로 옮기는 odd-root orthogonality/full-NTT convolution
-정리와, 이어지는 보안 모형 integer-list 곱 어댑터는 없다. 따라서 위 합동식을
-\(A s=qj\pmod{2q}\)로 이름만 바꾸거나 faithful KG-1/KG-3가 증명되었다고 읽으면
-안 된다. 이 경계의 최종 판정은 \identifier{STOP-KG-NTT}다.
+full-invNTT/pointwise word 표현과 정확히 동일시한다. frozen paper에서는 그
+표현을 native \(R_q\) negacyclic 곱으로 옮기는
+odd-root orthogonality/full-NTT convolution 정리와 표현 어댑터가 없어
+\identifier{STOP-KG-NTT}로 끝났다.
+
+post-freeze에는 \theoremname{rq_mul_coeff_foldr_to_bigi},
+\theoremname{full_ntt_montgomery_spectral_action},
+\theoremname{full_ntt_montgomery_row_product},
+\theoremname{keygen_mode2_row_product},
+\theoremname{mode2_row_product_haetae_dot}가 이 순수 대수와 표현 운송을 닫는다.
+또한 actual \identifier{avec}의 두 행을 paper \(a\)로 해석하고 paper
+\(j=(1,0)^T\)에서 오는 \(qj\)를 snapshot 합동식에 별도 항으로 더한다.
+하지만 기존 security-side \identifier{haetae_mode23_qj_vector}는 계수 401에서
+시작하는 synthetic generator로, paper \(qj[0,0]=64513\) 및 actual
+SHAKE128/rejection expansion과 같지 않다. 그러므로 위 합동식을
+기존 security object의 \(A s=qj\pmod{2q}\)로 이름만 바꾸거나 security-model
+KG-1--KG-4가 증명되었다고 읽으면 안 된다. 현재 경계는 \CurrentGate 이고 frozen paper 경계는 그대로다
+\cite{post-freeze-kg-rq-haetae-report,
+post-freeze-kg-actual-avec-qj-report}.
 \end{caution}
+
+최신 standalone \sourcepath{KgFaithfulAugmentedModel.ec}는 이 간극을 우회해
+숨기지 않고 별도의 faithful coefficient carrier와 actual matrix/secret
+구체화를 만든다. \theoremname{actual_faithful_augmented_productE}는 active row의
+structured coefficient-product를 head, generated HAETAE \identifier{poly_dot},
+adjusted error의 합으로 전개한다.
+\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj}는
+actual sampler의 paper \(a\), actual 3-term \(R_q\) row product와 adjusted error를
+한 식에 넣어 각 active coefficient에서
+\identifier{faithful_augmented_matrix_vector_product_coeff}가
+\identifier{faithful_qj_coeff}와 mod-\(2q\) 합동임을 증명한다. 이는
+\statusproved 이며 \FaithfulAugmentedVerdict 로 판정한다. product evaluator는
+actual width-6 matrix/secret만을 받아 head, 중간 세 열, 두 identity 열을
+소비한다. 다만 (qj)를 mod-\(q\) 환에서 소거하지 않기 위한
+mod-\(2q\) block 전용 coefficient semantics이므로, 기존 width-4 security
+\identifier{matrix_vec_mul} 정리나 synthetic security ExpandVecA equivalence는 아니다.
 
 \subsection{Sign과 Verify가 만나는 transcript}
 

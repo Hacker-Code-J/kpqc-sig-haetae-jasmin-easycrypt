@@ -2,7 +2,7 @@
 
 ## Verdict
 
-`GO-KG-ASQJ-PAPER`
+`GO-KG-FAITHFUL-AUGMENTED`
 
 The separate post-freeze model proves that the actual checked Mode-2 KeyGen
 core path satisfies the paper augmented key equation coefficientwise modulo
@@ -38,6 +38,13 @@ The six columns are represented explicitly by
 `actual_faithful_augmented_secret`; its matrix-vector coefficient semantics is
 `faithful_augmented_matrix_vector_product_coeff`.
 
+That product operator receives only the explicit matrix and secret carriers.
+It reads the head and identity columns directly, reconstructs the three
+generated polynomials from columns 1--3, and evaluates that middle block with
+the existing HAETAE `poly_dot`.  There is no separately supplied generated
+matrix or secret argument that could drift away from the displayed `A` and
+`s`.
+
 `faithful_j_coeff row coeff` is one exactly when `row = 0` and `coeff = 0`,
 and zero otherwise.  Thus the first entry of `j=(1,0)^T` is the ring identity
 polynomial, not a polynomial whose every coefficient is one.
@@ -45,10 +52,14 @@ polynomial, not a polynomial whose every coefficient is one.
 `actual_faithful_augmented_productE` expands the actual width-6 product to
 
 ```text
-2(a - 2b1) + qj + 2(Agen*sgen) + 2(egen-b0)
+2(a - 2b1) + qj + 2*HAETAE.poly_dot(Agen,sgen) + 2(egen-b0)
 ```
 
-at every active row and coefficient.
+at every active row and coefficient.  The separate
+`faithful_generated_row_product_haetae_dot` representation theorem identifies
+that middle dot with the native NTT/Rq row product; the final statement uses
+the resulting coefficient congruence modulo `2q`, not an unproved equality of
+integer representatives.
 
 ## Connection to the actual KeyGen spine
 
@@ -83,23 +94,28 @@ so the matrix head and the sampler correspondence cannot drift apart.
 
 This result does not claim a security-theorem refinement, distribution or
 uniformity, sampler termination or losslessness, packing correctness, or a
-public-API theorem.  It is partial correctness for the checked actual KeyGen
-core path.  The synthetic security model's object mismatch remains a separate
-formal-model correspondence defect.
+public-API theorem.  Nor is the mixed modulo-`2q` block evaluator the existing
+modulo-`q`, width-four security `matrix_vec_mul`; that operation would erase
+the `qj` lift.  The result is partial correctness for the checked actual
+KeyGen core path.  The synthetic security model's object mismatch remains a
+separate formal-model correspondence defect.
 
 ## Verification
 
-- `KgFaithfulAugmentedModel.ec` passes fresh `easycrypt compile -script
-  -no-eco` with Z3 and the repository KeyGen/NTT/Rq/HAETAE include surface.
-- The three preceding post-freeze actual-`avec` modules also pass fresh
-  `-no-eco` regression compilation.
-- Post-freeze scans find no proof holes, authored axioms, debug declarations,
-  or `haetae_mode23_qj_vector` reference in the new target.
-- Source-drift, proof-hole, and paper-freeze scope checks pass.  The frozen PDF
-  SHA-256 remains
-  `be935948028829556951863b44ceb2e6c5b2037820991b3a43a4b461b036e53d`.
-- An isolated aggregate run, free of shared-log races, passes all 82 frozen
-  authored targets, baseline verification, the LaTeX notes build, read-only
-  source checks, and the final paper-freeze evidence audit.  Its summary
-  retains SHA-256
+- `post-freeze/KgFaithfulAugmentedModel.ec` passes a fresh `easycrypt compile
+  -script -no-eco` with Z3 and the repository KeyGen/NTT/Rq/HAETAE include
+  surface.
+- `scripts/check-proof-holes.sh`, plus explicit scans of the post-freeze target,
+  find no proof holes, authored axioms, or debug declarations.  The target also
+  contains no `haetae_mode23_qj_vector` reference.
+- `algebraist-guide/build.sh` rebuilds the guide and checks unresolved
+  references/citations.  The generated evidence is
+  `algebraist-guide/main.pdf`.
+- A single full `scripts/verify-all.sh` run regenerated
+  `logs/verify-all-summary.txt` with 82 `PASS fresh compile` rows, baseline and
+  research-notes checks, the final paper-freeze evidence audit, and terminal
+  `RESULT PASS authored-targets=82 cache=-no-eco`.  Its SHA-256 is
   `08ef9639dc73d56dba42d02999d07897d29bc8e60aa100a648e9437fd64387ad`.
+- `manifests/proof-targets.txt` remains byte-for-byte unchanged from `e87bcc3`,
+  and neither the frozen paper sources nor the existing security model are in
+  this change set.

@@ -59,7 +59,7 @@ SignaturePack/Unpack 경계의 실패/성공 계약 \\
 \sourcepath{WEEK15_REPORT.md} & 역사적 \identifier{GO-WITNESS} 판정,
 74-target 검증 결과와 fixed all-6 Hoare success; termination/losslessness 제외 \\
 \sourcepath{WEEK16_MINCORE_PLAN.md} & one-week MINCORE의 KeyGen/Sign/Verify 계획,
-KeyGen/Sign 중단 기준과 현재 Verify 전환 \\
+KeyGen/Sign/Verify의 frozen 중단 기준 \\
 \sourcepath{WEEK16_KG_REPORT.md} & 역사적 첫 과제
 \identifier{CONTINUE-KG} 판정과 76-target 수정 전 기준선 \\
 \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md} & 마지막 sound
@@ -67,6 +67,19 @@ KeyGen/Sign 중단 기준과 현재 Verify 전환 \\
 \identifier{STOP-KG-NTT}와 후속 Sign 경계 \\
 \sourcepath{WEEK16_SIGN_REPORT.md} & actual 세 Sign helper 직접 호출/control,
 누락된 full challenge semantics와 \identifier{STOP-SIGN-CHAL-MODE2} \\
+\sourcepath{WEEK16_VERIFY_REPORT.md} & actual 다섯 Verify helper의 순서와
+helper-local word/control 결과, 82-target frozen 판정
+\identifier{STOP-VERIFY-MATRIX-CRT} \\
+\sourcepath{manifests/paper-artifacts.md} & frozen paper/PDF/82-target 증거의
+범위와 post-freeze 작업의 비포함 경계 \\
+\sourcepath{POST_FREEZE_KG_RQ_HAETAE_REPORT.md} & full-NTT/native \(R_q\) 행곱과
+HAETAE 표현 운송, 남은 actual \identifier{avec}/security 의미론 경계 \\
+\sourcepath{POST_FREEZE_KG_ACTUAL_AVEC_QJ_REPORT.md} & actual SHAKE128/rejection
+\identifier{avec}와 paper \(a,qj\), synthetic security object의 concrete mismatch,
+\CurrentGate \\
+\sourcepath{POST_FREEZE_KG_FAITHFUL_AUGMENTED_MODEL_REPORT.md} & 명시적 2-by-6
+actual carrier, matrix/secret-only block product와 \FaithfulAugmentedVerdict;
+security-model 대응은 제외 \\
 \bottomrule
 \end{longtable}
 
@@ -124,11 +137,11 @@ canonical integer/\(W64\) 주소 대응 \\
 \end{longtable}
 \normalsize
 
-\subsection{Week 16 MINCORE KeyGen과 KG--NTT 중단 경계}
+\subsection{Week 16 frozen MINCORE KeyGen, Sign, Verify 경계}
 
-아래 \WeekSixteenTargetCount 개 파일은 actual matrix helper의 반환 snapshot,
-actual finalizer와 마지막 NTT-word rewrite를 다룬다. snapshot을 논문 matrix
-product로 재명명하지 않는 것이 이 표의 핵심 경계다.
+아래 \WeekSixteenTargetCount 개 파일은 frozen 82-target manifest에서 actual
+KeyGen matrix/finalizer, Sign control, Verify helper-local semantics를 다룬다.
+부분 결과를 전체 headline으로 재명명하지 않는 것이 이 표의 핵심 경계다.
 
 \footnotesize
 \begin{longtable}{L{50mm} L{49mm} L{46mm}}
@@ -162,18 +175,114 @@ snapshot-only congruence와 tail frame의 strongest transparent-harness theorem 
 \sourcepath{Mode2KeygenNttMulBridge.ec} &
 \theoremname{output_row_from_mode2_ntt_words};
 \theoremname{output_row_repr_from_mode2_ntt_words};
-\theoremname{actual_m23_matrix_snapshot_rows_explicit} &
+\theoremname{actual_m23_matrix_snapshot_rows_explicit};
+\theoremname{keygen_mode2_row_product};
+\theoremname{mode2_row_product_haetae_dot};
+\theoremname{actual_m23_matrix_snapshot_rows_row_product} &
 actual NTT chain의 마지막 full-invNTT/pointwise-word 표현 rewrite와 직접
-matrix/finalizer harness의 두 active row consequence만 증명;
-\identifier{Rq.\&*}나 security-model 곱은 주장하지 않음 \\
+matrix/finalizer harness의 두 active row consequence. 뒤의 세 정리는
+post-freeze shared NTT/Rq/HAETAE 결과를 KeyGen 3열에 합성 \\
 같은 파일 &
 odd-root orthogonality/full-NTT convolution 및
-\identifier{Rq.poly}--security-list adapter의 부재 &
-\claimid{OBL-MINCORE-KEYGEN}이 \identifier{STOP-KG-NTT}인 정확한 경계 \\
+\identifier{Rq.poly} 표현 운송의 frozen 시점 부재 &
+frozen \claimid{OBL-MINCORE-KEYGEN}이 \identifier{STOP-KG-NTT}였던 역사적 경계;
+post-freeze에는 해당 순수/표현 leaf가 닫힘 \\
 \sourcepath{easycrypt/refinement/sign/Mode2SignAcceptedCore.ec} &
 \theoremname{actual_sign_accepted_core_branch_control_mode2} &
 actual round-challenge, z-check, accepted-only hint 직접 호출; S-1--S-7은
 \identifier{STOP-SIGN-CHAL-MODE2}로 미증명 \\
+\sourcepath{easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec} &
+\theoremname{actual_verify_core_sequence_branch_control_mode2};
+\theoremname{actual_verify_core_sequence_input_snapshots_mode2} &
+actual 다섯 helper의 호출/분기 순서와 입력 snapshot \\
+\sourcepath{easycrypt/refinement/verify/Mode2VerifyPrepareNorm.ec} &
+\theoremname{verify_prepare_z1_wprime_mode2_word_exact} &
+V-1/V-2 word projection과 W64 norm gate의 helper-local semantics \\
+\sourcepath{easycrypt/refinement/verify/Mode2VerifyRecover.ec} &
+\theoremname{actual_sign_verify_recover_w_z2_mode2_word_semantics} &
+recover path의 V-5/V-6 word semantics \\
+\sourcepath{easycrypt/refinement/verify/Mode2VerifyTailChallenge.ec} &
+\theoremname{verify_tail_exact_trace_mode2};
+\theoremname{poly_mismatch_mode2_word_exact} &
+tail trace와 mismatch word expression; actual matrix/CRT/challenge leaf는
+\FrozenPaperGate 로 미증명 \\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\subsection{post-freeze shared NTT/Rq와 actual avec/qj}
+
+아래 파일은 frozen 82-target 수를 늘리지 않는 별도 proof surface다. shared NTT
+theory는 순수 수학을 제공한다. \sourcepath{post-freeze/}의 세
+\sourcepath{KgActualAvecQj*.ec} theory는 actual sampler/finalizer 경계와 발견된
+불일치를 컴파일된 정리로 기록하고, 최신 \sourcepath{KgFaithfulAugmentedModel.ec}는
+faithful augmented coefficient 합성을 standalone 정리로 닫는다.
+
+\footnotesize
+\begin{longtable}{L{50mm} L{49mm} L{46mm}}
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endfirsthead
+\toprule
+파일 & 주요 선언 & 수학적 역할 \\
+\midrule
+\endhead
+\sourcepath{haetae-ntt-verify/easycrypt/NTTRowProductSpec.ec} &
+\identifier{coefficient_row_product};
+\identifier{matrix_inverse_repr};
+\identifier{vector_forward_repr};
+\theoremname{freeze_repr_preserves_poly} &
+generic row-product와 NTT/freeze 표현 계약 \\
+\sourcepath{haetae-ntt-verify/easycrypt/NTTFullSpectralAction.ec} &
+\theoremname{rq_mul_coeff_foldr_to_bigi};
+\theoremname{full_ntt_montgomery_spectral_action};
+\theoremname{full_ntt_montgomery_row_product} &
+negacyclic coefficient 합, full-NTT convolution과 generic 행곱 \\
+\sourcepath{haetae-ntt-verify/easycrypt/NTTMode2RowSpecializations.ec} &
+\theoremname{keygen_mode2_row_product_from_reprs};
+\theoremname{verify_mode2_row_product_from_reprs} &
+Mode~2 KeyGen 3열/Verify 4열 순수 specialization; actual Verify loop는 제외 \\
+\sourcepath{haetae-ntt-verify/easycrypt/RqHAETAEBridge.ec} &
+\theoremname{rq_poly_add_repr};
+\theoremname{rq_poly_mul_repr};
+\theoremname{rq_poly_dot3_repr} &
+native \(R_q\) 연산에서 HAETAE coefficient/list 표현으로 운송 \\
+\sourcepath{post-freeze/KgActualAvecQjSemantics.ec} &
+\theoremname{mode2_uniform_stream_paper_a_flat};
+\theoremname{paper_qj_row0_coeff0};
+\theoremname{paper_qj_remaining_row} &
+actual SHAKE128/rejection \identifier{avec}의 paper \(a\) 해석과
+\(qj=q(1,0)^T\) coefficient semantics \\
+\sourcepath{post-freeze/KgActualAvecQjComposition.ec} &
+\theoremname{mode2_sampler_facts_actual_paper_a};
+\theoremname{actual_snapshot_zero_adds_paper_qj};
+\theoremname{checked_mode2_parent_m23_finalize_actual_avec_qj} &
+actual sampler, matrix/finalizer snapshot과 별도 paper \(qj\) 항의 부분 합성 \\
+\sourcepath{post-freeze/KgActualAvecQjBlocker.ec} &
+\theoremname{security_named_qj_mode2_row0_coeff0};
+\theoremname{security_named_qj_is_not_paper_qj} &
+synthetic security coefficient 401과 paper \(qj[0,0]=64513\)의 compiled 불일치 \\
+\sourcepath{post-freeze/KgFaithfulAugmentedModel.ec} &
+\identifier{faithful_augmented_matrix_coeff};
+\identifier{faithful_augmented_secret_coeff};
+\identifier{actual_faithful_augmented_matrix};
+\identifier{actual_faithful_augmented_secret};
+\identifier{faithful_augmented_matrix_vector_product_coeff};
+\theoremname{actual_faithful_augmented_productE};
+\theoremname{faithful_generated_row_product_haetae_dot};
+\theoremname{faithful_augmented_product_qj_from_generated_dot};
+\theoremname{mode2_m23_facts_generated_row_product};
+\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj} &
+actual width-6 carrier, generated \identifier{poly_dot} transport와 structured
+coefficient-product의 paper-shaped mod-\(2q\) 합성; standalone fresh compile,
+product는 명시적 matrix/secret만을 소비; \FaithfulAugmentedVerdict,
+generic security-model \identifier{matrix_vec_mul}/ExpandVecA equivalence는 제외 \\
+\sourcepath{post-freeze/}\newline
+\sourcepath{check-kg-actual-}\newline
+\sourcepath{avec-qj-trace.py} &
+zero-seed row~0 coefficient~0: actual 44985, synthetic 401 &
+독립 deterministic FIPS-202 trace witness \\
 \bottomrule
 \end{longtable}
 \normalsize
@@ -810,16 +919,27 @@ selected baseline, 기존 연구노트 LaTeX를 검사한다. \SnapshotWeek\ 기
 target 수는 \AuthoredTargetCount 이지만, 재현 시점의 실제 출력이 항상 우선한다.
 
 \begin{verified}[문서 작성 시점의 aggregate 결과]
-\sourcepath{WEEK16_KG_NTT_MUL_REPORT.md}와 최신 aggregate log에 기록된 전체 실행은
-\identifier{RESULT} \identifier{PASS}, \identifier{authored-targets=77},
-\identifier{cache=-no-eco}다. Week~10의 여섯 파일, Week~11의 일곱 encoder 파일,
+\sourcepath{WEEK16_VERIFY_REPORT.md}와 최신 aggregate log에 기록된 frozen 전체 실행은
+\identifier{RESULT} \identifier{PASS}, \identifier{authored-targets=82},
+\identifier{cache=-no-eco}다. 77은 KG--NTT 중단 당시의 역사적 기준선이며,
+그 뒤 actual Sign control 한 파일과 Verify 네 파일이 더해졌다.
+Week~10의 여섯 파일, Week~11의 일곱 encoder 파일,
 Week~12의 여덟 decoder 파일, Week~13의 두 core-composition 파일, Week~14의 다섯
 full-HBZ boundary 파일, Week~15의 두 fixed-input success 파일과 Week~16의 두
-KeyGen snapshot 파일 및 한 NTT boundary 파일이 manifest completeness,
-proof-hole/axiom/debug scan과
-fresh compile 대상에 포함된다. 이 PASS는 명명된
+KeyGen snapshot 파일, 한 NTT boundary 파일, Sign 한 파일, Verify 네 파일이
+manifest completeness, proof-hole/axiom/debug scan과 fresh compile 대상에
+포함된다. 이 PASS는 명명된
 타깃들의 컴파일과 감사(audit)를 뜻하며,
 상위 \statuspartial 또는 \statusblocked 주장을 완료로 승격하지 않는다.
+
+post-freeze shared NTT/Rq 및 \sourcepath{post-freeze/} theory는 이 82에 포함되지
+않는다 \cite{paper-freeze-artifacts}. shared NTT/Rq와 세
+\sourcepath{KgActualAvecQj*.ec} 파일은 별도 fresh compile, deterministic trace
+checker로 검증하며 frozen aggregate와 paper artifact를 변경하지 않는다
+\cite{post-freeze-kg-rq-haetae-report,
+post-freeze-kg-actual-avec-qj-report}.
+\sourcepath{KgFaithfulAugmentedModel.ec}도 별도 standalone fresh compile을
+통과했지만 frozen aggregate의 82개에는 포함되지 않는다.
 \end{verified}
 
 \subsection{30분 독해 경로}
@@ -835,7 +955,8 @@ fresh compile 대상에 포함된다. 이 PASS는 명명된
         \claimid{OBL-SIG-HBZ-ENCODE-DECODE},
         \claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS},
         \claimid{OBL-MINCORE-KEYGEN},
-        \claimid{OBL-MINCORE-SIGN} 아홉 행을 비교한다.
+        \claimid{OBL-MINCORE-SIGN},
+        \claimid{OBL-MINCORE-VERIFY} 열 행을 비교한다.
   \item 본문의 \cref{sec:algebraic-object,sec:rans-frontier,sec:boundaries}를 읽는다.
   \item \sourcepath{WEEK15_REPORT.md}와
         \sourcepath{Mode2RansActualSuccessWitness.ec}에서 fixed all-6 Hoare
@@ -849,6 +970,15 @@ fresh compile 대상에 포함된다. 이 PASS는 명명된
         \sourcepath{Mode2SignAcceptedCore.ec}에서 actual-call control과
         \claimid{OBL-MINCORE-SIGN}의 \identifier{STOP-SIGN-CHAL-MODE2}
         \statuspartial 경계를 확인한다.
+  \item \sourcepath{WEEK16_VERIFY_REPORT.md}와 네
+        \sourcepath{Mode2Verify*.ec} 파일에서 helper-local 결과와 실제
+        matrix/CRT/challenge blocker를 구분하고 frozen \FrozenPaperGate 를 확인한다.
+  \item 세 \sourcepath{POST_FREEZE_KG_*_REPORT.md}와 compiled 세
+        \sourcepath{post-freeze/KgActualAvecQj*.ec} 파일에서 닫힌 NTT/Rq/actual
+        \identifier{avec} 화살표와 현재 \CurrentGate 를 구분한다.
+        이어 \sourcepath{KgFaithfulAugmentedModel.ec}에서 명시적 matrix/secret만을
+        소비하는 structured coefficient-product 합성과 generic security-model
+        equivalence의 부재를 구분한다.
 \end{enumerate}
 
 \subsection{증명 참여 전 반나절 경로}
@@ -890,14 +1020,27 @@ fresh compile 대상에 포함된다. 이 PASS는 명명된
   \item \sourcepath{WEEK16_MINCORE_PLAN.md}\newline
         \sourcepath{WEEK16_KG_REPORT.md},\newline
         \sourcepath{WEEK16_KG_NTT_MUL_REPORT.md},\newline
+        \sourcepath{WEEK16_SIGN_REPORT.md},\newline
+        \sourcepath{WEEK16_VERIFY_REPORT.md},\newline
         \sourcepath{Mode2KeygenSnapshot}\allowbreak
         \sourcepath{Algebra.ec}와\newline
         \sourcepath{Mode2KeygenCore}\allowbreak
         \sourcepath{Equation.ec},\newline
         \sourcepath{Mode2KeygenNttMul}\allowbreak
-        \sourcepath{Bridge.ec}를 대조한다.\newline
-        KG-2-like proved boundary와 exact missing leaf,
-        \identifier{STOP-KG-NTT}를 분리한다.
+        \sourcepath{Bridge.ec}, Sign/Verify 다섯 target을 대조한다.\newline
+        frozen KG-2-like/Sign-control/Verify helper-local 경계와 세 STOP 판정을
+        분리한다.
+  \item \sourcepath{NTTFullSpectralAction.ec},
+        \sourcepath{NTTMode2RowSpecializations.ec},
+        \sourcepath{RqHAETAEBridge.ec}에서 frozen 뒤 닫힌 pure NTT, native \(R_q\),
+        HAETAE representation 화살표를 따라간다.
+  \item \sourcepath{POST_FREEZE_KG_ACTUAL_AVEC_QJ_REPORT.md}와 compiled 세
+        \sourcepath{KgActualAvecQj*.ec}, deterministic trace checker를 대조한다.
+        actual \identifier{avec}, paper \(a\), paper \(qj\), synthetic security
+        object를 서로 다른 대상으로 유지하고 \CurrentGate 를 확인한다.
+        \sourcepath{KgFaithfulAugmentedModel.ec}의 fresh-compiled actual-carrier
+        matrix/secret-only structured coefficient-product와 여전히 없는 generic security-model
+        \identifier{matrix_vec_mul}/ExpandVecA edge를 분리한다.
   \item 변경 전에 전체 verifier의 baseline을 보존한다.
 \end{enumerate}
 

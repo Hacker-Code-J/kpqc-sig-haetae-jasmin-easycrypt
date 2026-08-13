@@ -16,6 +16,11 @@ for required in \
   "$SCRIPT_DIR/../WEEK16_MINCORE_PLAN.md" \
   "$SCRIPT_DIR/../WEEK16_KG_REPORT.md" \
   "$SCRIPT_DIR/../WEEK16_KG_NTT_MUL_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK16_SIGN_REPORT.md" \
+  "$SCRIPT_DIR/../WEEK16_VERIFY_REPORT.md" \
+  "$SCRIPT_DIR/../POST_FREEZE_KG_RQ_HAETAE_REPORT.md" \
+  "$SCRIPT_DIR/../POST_FREEZE_KG_ACTUAL_AVEC_QJ_REPORT.md" \
+  "$SCRIPT_DIR/../POST_FREEZE_KG_FAITHFUL_AUGMENTED_MODEL_REPORT.md" \
   "$SCRIPT_DIR/../HBZ_FULL_WRAPPER_COMPOSITION.md" \
   "$SCRIPT_DIR/../RANS_ACTUAL_SUCCESS_WITNESS.md" \
   "$SCRIPT_DIR/../RANS_BYTE_STACK_INVARIANT.md" \
@@ -24,6 +29,7 @@ for required in \
   "$SCRIPT_DIR/../RANS_CORE_COMPOSITION.md" \
   "$SCRIPT_DIR/../MODE2_HBZ_CODEC_OBLIGATIONS.md" \
   "$SCRIPT_DIR/../manifests/proof-targets.txt" \
+  "$SCRIPT_DIR/../manifests/paper-artifacts.md" \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansActualInverse.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansEncoderActualTraceClosure.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansEncoderOuterRefinement.ec" \
@@ -40,7 +46,21 @@ for required in \
   "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec" \
   "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec" \
-  "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec"
+  "$SCRIPT_DIR/../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/sign/Mode2SignAcceptedCore.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/verify/Mode2VerifyPrepareNorm.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/verify/Mode2VerifyRecover.ec" \
+  "$SCRIPT_DIR/../easycrypt/refinement/verify/Mode2VerifyTailChallenge.ec" \
+  "$SCRIPT_DIR/../post-freeze/KgActualAvecQjSemantics.ec" \
+  "$SCRIPT_DIR/../post-freeze/KgActualAvecQjComposition.ec" \
+  "$SCRIPT_DIR/../post-freeze/KgActualAvecQjBlocker.ec" \
+  "$SCRIPT_DIR/../post-freeze/KgFaithfulAugmentedModel.ec" \
+  "$SCRIPT_DIR/../post-freeze/check-kg-actual-avec-qj-trace.py" \
+  "$SCRIPT_DIR/../../haetae-ntt-verify/easycrypt/NTTRowProductSpec.ec" \
+  "$SCRIPT_DIR/../../haetae-ntt-verify/easycrypt/NTTMode2RowSpecializations.ec" \
+  "$SCRIPT_DIR/../../haetae-ntt-verify/easycrypt/NTTFullSpectralAction.ec" \
+  "$SCRIPT_DIR/../../haetae-ntt-verify/easycrypt/RqHAETAEBridge.ec"
 do
   if [ ! -f "$required" ]; then
     printf 'FAIL missing source-of-truth artifact: %s\n' "$required" >&2

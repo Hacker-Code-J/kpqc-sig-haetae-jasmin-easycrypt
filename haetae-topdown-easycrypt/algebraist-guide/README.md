@@ -17,13 +17,14 @@
    state machine)의
    refinement로 읽는 방법.
 
-현재 스냅샷은 2026년 8월 12일에 다시 감사한 Week 16 MINCORE-VERIFY
-부분 기준선이다. 운영상
-source of truth는 `../CLAIM_LEDGER.md`이고, 최종 증거는 `../easycrypt/` 아래의
-명명된 EasyCrypt 정리(theorem)다. 안내서의 문장은 이 스냅샷에 고정되어 있으며,
-“현재”라는 표현도 모두 이 날짜를 뜻한다.
+현재 스냅샷은 2026년 8월 13일의 post-freeze KeyGen `avec`/`qj` 감사를
+포함한다. frozen paper의 운영상 source of truth는 `../CLAIM_LEDGER.md`와
+`../manifests/paper-artifacts.md`이고, 그 뒤의 증거는 두
+`POST_FREEZE_*_REPORT.md`, 명명된 EasyCrypt 정리(theorem), deterministic trace
+checker다. 안내서의 문장은 이 두 층을 섞지 않는다. “82 targets”는 frozen
+authored manifest를, “post-freeze”는 그 밖의 별도 검증 산출물을 뜻한다.
 
-여기서 82개는 현재 manifest의 authored target 수이며, Verify 수정 전 78개
+여기서 82개는 frozen manifest의 authored target 수이며, Verify 수정 전 78개
 aggregate-verified 기준선은 별도 로그로 보존된다.
 `../logs/verify-all-before-week16-verify.log`는 78/78 pre-Verify 기준선과
 SHA-256 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`를
@@ -77,21 +78,51 @@ harness에서 pre-finalization `bp` snapshot, low/high 분해, adjusted `s2`, sn
 `array256_mont(full_invntt(pointwise_row_words(...)))` 표현으로 정확히 고정한다.
 `actual_m23_matrix_snapshot_rows_explicit`는 이 rewrite를 투명한 two-call
 harness의 두 active row에 적용한다.
-그러나 이를 native `Rq` 곱 및 보안 모형의 `Agen*sgen` 다항식 곱과 동일시하는
-full-NTT convolution 정리와 `Rq.poly`--security-list 어댑터는 없다. KG-NTT-MUL
-감사는 첫 누락 leaf를 odd-root orthogonality/full-NTT convolution 식으로
-특정한 뒤 중단했다. 그러므로 `OBL-MINCORE-KEYGEN`은 `PARTIAL — STOP-KG-NTT`이며,
-faithful KG-1/KG-3, complete KG-4와 논문식 `A s = q j (mod 2q)`는 완료되지
-않았다. KeyGen은 KG-2/finalization에서 동결되고 Sign은 actual-call control에서
-동결되었다. 현재 첫 재개 leaf는 `rq_mul_coeff_foldr_to_bigi`이며, 그 뒤
-2-by-4 NTT row-product와 CRT/freeze 절차 leaf를 닫아야 한다. 두 번째 `h` codec은
-`DEFERRED`다. 별도 보고서
+frozen paper 시점에는 이를 native `Rq` 곱 및 보안 모형의 `Agen*sgen` 곱으로
+옮기는 full-NTT convolution 정리와 표현 어댑터가 없어
+`PARTIAL — STOP-KG-NTT`로 중단했다. Sign도 actual-call control에서
+`STOP-SIGN-CHAL-MODE2`로 동결되었다. 두 번째 `h` codec은 `DEFERRED`다. 별도 보고서
 `../WEEK16_VERIFY_REPORT.md`는 canonical decoded \((x,v,h,c)\) 경계에서 actual
 Verify helper chain의 부분 결과를 기록하며, V-1/V-2/V-5/V-6, W64 norm gate,
 tail trace/mismatch word expression은 proved로, matrix blocker는
 `verify_matrix_ntt_acc_mode2_cols4_correct`,
 `verify_crt_freeze_mode2_word_exact`, 그리고 이들의 합성 headline과
-`verify_tail_m23_highbits_lsb_sampleinball_correct`로 고정한다.
+`verify_tail_m23_highbits_lsb_sampleinball_correct`로 고정한다. 이것이 frozen
+paper의 `STOP-VERIFY-MATRIX-CRT`다.
+
+그 뒤 post-freeze branch는 frozen 82-target 수를 늘리지 않고
+`rq_mul_coeff_foldr_to_bigi`, `full_ntt_montgomery_spectral_action`, generic
+row-product, 그리고 `Rq.poly`--HAETAE coefficient representation을 닫았다.
+`mode2_row_product_haetae_dot`는 native mode-2 3-term row product를
+`HAETAE_Algebra.poly_dot`로 운송한다. 이어 세 standalone theory는 actual
+`avec`의 SHAKE128 framing, nonce 515/516, little-endian 16-bit parsing,
+`<64513` rejection과 unchanged storage를 paper `a`로 해석하고, paper
+`qj=q(1,0)^T`를 snapshot 합동식에 별도 항으로 더한다.
+
+그러나 기존 security-side `haetae_mode23_qj_vector`는 actual ExpandVecA도 paper
+`qj`도 아닌 synthetic generator다. compiled blocker는 그 첫 계수가 401인 반면
+paper `qj[0][0]=64513`임을 보이며, zero-seed trace에서도 actual 첫 계수 44985와
+synthetic 401이 다르다. 따라서 기존 security-model 대응 전체의 post-freeze gate는
+`STOP-KG-AVEC-QJ — OBL-KG-SECURITY-EXPANDVECA-SEMANTICS`다. 기존
+security model에 대한 KG-1--KG-4와 security-level `A s = q j (mod 2q)`는
+여전히 주장하지 않는다.
+
+작업 트리의 최신 `../post-freeze/KgFaithfulAugmentedModel.ec`는 width-6
+coefficient carrier를 actual matrix/secret에 구체화하고, generated 3-term
+row-product를 HAETAE `poly_dot`으로 운송한 structured coefficient-product를
+패키징하며 standalone `-no-eco` fresh compile을 통과한다.
+`actual_faithful_augmented_productE`는 active row에서 이 product를
+head + generated dot + adjusted error로 전개한다. 가장 강한
+`checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj`는 actual sampler의
+paper `a` 해석을 포함해 각 active coefficient에서
+`faithful_augmented_matrix_vector_product_coeff ≡ faithful_qj_coeff (mod 2q)`를
+증명한다. 이 product는 명시적 matrix와 secret만을 입력으로 받고, head와
+두 identity 열을 직접 읽으며 중간 2x3 block을 해당 열에서 복원해
+HAETAE `poly_dot`으로 계산한다. 따라서 이 작업의 판정은
+`GO-KG-FAITHFUL-AUGMENTED`이다. 다만 이 mod-`2q` block 전용 evaluator는
+기존 mod-`q`, width-4 security `matrix_vec_mul`과 같은 작업이 아니며,
+synthetic security object의 semantics를 증명하지도 않는다. 따라서 위
+security current gate를 해제하거나 frozen 82-target 수를 바꾸지 않는다.
 
 ## 빠른 읽기 순서
 
@@ -100,6 +131,11 @@ tail trace/mismatch word expression은 proved로, matrix blocker는
 - 증명 참여 준비: 전 장과 `../CLAIM_LEDGER.md`, `../WEEK15_REPORT.md`,
   `../RANS_ACTUAL_SUCCESS_WITNESS.md`, `../WEEK16_KG_REPORT.md`,
   `../WEEK16_KG_NTT_MUL_REPORT.md`, `../WEEK16_MINCORE_PLAN.md`,
+  `../WEEK16_SIGN_REPORT.md`, `../WEEK16_VERIFY_REPORT.md`,
+  `../manifests/paper-artifacts.md`,
+  `../POST_FREEZE_KG_RQ_HAETAE_REPORT.md`,
+  `../POST_FREEZE_KG_ACTUAL_AVEC_QJ_REPORT.md`,
+  `../POST_FREEZE_KG_FAITHFUL_AUGMENTED_MODEL_REPORT.md`,
   `../HBZ_FULL_WRAPPER_COMPOSITION.md`,
   `../RANS_ENCODER_INVARIANT.md`, `../RANS_DECODER_INVARIANT.md`,
   `../RANS_CORE_COMPOSITION.md`,
@@ -107,7 +143,14 @@ tail trace/mismatch word expression은 proved로, matrix blocker는
   `../easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec`,
   `../easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec`,
   `../easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec`,
-  `../WEEK16_VERIFY_REPORT.md`
+  `../../haetae-ntt-verify/easycrypt/NTTFullSpectralAction.ec`,
+  `../../haetae-ntt-verify/easycrypt/NTTMode2RowSpecializations.ec`,
+  `../../haetae-ntt-verify/easycrypt/RqHAETAEBridge.ec`,
+  `../post-freeze/KgActualAvecQjSemantics.ec`,
+  `../post-freeze/KgActualAvecQjComposition.ec`,
+  `../post-freeze/KgActualAvecQjBlocker.ec`,
+  `../post-freeze/KgFaithfulAugmentedModel.ec`,
+  `../post-freeze/check-kg-actual-avec-qj-trace.py`
 
 ## 문서 구성
 
@@ -120,7 +163,7 @@ tail trace/mismatch word expression은 proved로, matrix blocker는
 - `sections/04-proved-spine.tex`: 현재 실제로 닫힌 증명 사슬
 - `sections/05-rans-frontier.tex`: HBZ/rANS 증명 사슬, 고정 입력 성공 정리와 종료성 경계
 - `sections/06-boundaries.tex`: 미해결 의무, 가정 표면, 과장 금지선
-- `sections/07-roadmap.tex`: KeyGen/Sign 중단 경계와 현재 MINCORE-VERIFY 작업
+- `sections/07-roadmap.tex`: frozen KeyGen/Sign/Verify 경계와 post-freeze KG blocker
 - `sections/08-source-index.tex`: 정리명(theorem name), 소스 경로, 용어 사전, 재현 방법
 - `references.bib`: 고정된 로컬 명세와 프로젝트 문서
 

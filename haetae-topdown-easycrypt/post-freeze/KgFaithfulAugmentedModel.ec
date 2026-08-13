@@ -408,13 +408,25 @@ op actual_generated_secret_poly
     (KeygenM23ArithmeticSpec.wide_poly
       sgen (col * KeygenM23MatrixSpec.poly_words_i)).
 
+op faithful_middle_matrix_poly
+    (a : int -> int -> int -> int) row midcol : HAETAE_Algebra.poly =
+  mkseq (fun i => (a row (midcol + 1) i) %/ 2) HAETAE_Params.n.
+
+op faithful_middle_secret_poly
+    (s : int -> int -> int) midcol : HAETAE_Algebra.poly =
+  mkseq (fun i => s (midcol + 1) i) HAETAE_Params.n.
+
 op faithful_generated_block_dot
-    (gmat : int -> int -> HAETAE_Algebra.poly)
-    (gsec : int -> HAETAE_Algebra.poly)
+    (a : int -> int -> int -> int)
+    (s : int -> int -> int)
     row : HAETAE_Algebra.poly =
   HAETAE_Algebra.poly_dot
-    [gmat row 0; gmat row 1; gmat row 2]
-    [gsec 0; gsec 1; gsec 2].
+    [faithful_middle_matrix_poly a row 0;
+     faithful_middle_matrix_poly a row 1;
+     faithful_middle_matrix_poly a row 2]
+    [faithful_middle_secret_poly s 0;
+     faithful_middle_secret_poly s 1;
+     faithful_middle_secret_poly s 2].
 
 op actual_faithful_augmented_matrix
     (mat : BArray32768.t) (a b1 : BArray8192.t)
@@ -442,15 +454,12 @@ op actual_faithful_augmented_secret
 op faithful_augmented_matrix_vector_product_coeff
     (a : int -> int -> int -> int)
     (s : int -> int -> int)
-    (gmat : int -> int -> HAETAE_Algebra.poly)
-    (gsec : int -> HAETAE_Algebra.poly)
     row coeff : int =
-  a row 0 coeff +
+  a row 0 coeff * s 0 0 +
   2 * HAETAE_Algebra.poly_coeff
-        (faithful_generated_block_dot gmat gsec row) coeff +
-  (if row = 0 then 2 * s 4 coeff
-   else if row = 1 then 2 * s 5 coeff
-   else 0).
+        (faithful_generated_block_dot a s row) coeff +
+  a row 4 0 * s 4 coeff +
+  a row 5 0 * s 5 coeff.
 
 lemma actual_faithful_augmented_productE
     (mat : BArray32768.t)
@@ -459,15 +468,13 @@ lemma actual_faithful_augmented_productE
   faithful_augmented_matrix_vector_product_coeff
     (actual_faithful_augmented_matrix mat a b1)
     (actual_faithful_augmented_secret sgen adjusted)
-    (actual_generated_matrix_poly mat)
-    (actual_generated_secret_poly sgen)
     row coeff =
   faithful_head_coeff (actual_array_coeff a) (actual_array_coeff b1)
     row coeff +
   2 * HAETAE_Algebra.poly_coeff
         (faithful_generated_block_dot
-          (actual_generated_matrix_poly mat)
-          (actual_generated_secret_poly sgen)
+          (actual_faithful_augmented_matrix mat a b1)
+          (actual_faithful_augmented_secret sgen adjusted)
           row)
         coeff +
   2 * actual_centered_coeff adjusted row coeff.
@@ -484,13 +491,14 @@ trivial.
 qed.
 
 lemma faithful_generated_row_product_haetae_dot
-    (mat : BArray32768.t) (sgen : BArray8192.t) row :
+    (mat : BArray32768.t)
+    (sgen a b1 adjusted : BArray8192.t) row :
   0 <= row < 2 =>
   RqHAETAEBridge.rq_poly_repr
     (actual_generated_row_product mat sgen row)
     (faithful_generated_block_dot
-      (actual_generated_matrix_poly mat)
-      (actual_generated_secret_poly sgen)
+      (actual_faithful_augmented_matrix mat a b1)
+      (actual_faithful_augmented_secret sgen adjusted)
       row).
 proof.
 move=> hrow.
@@ -504,41 +512,102 @@ apply
     (KeygenM23ArithmeticSpec.wide_poly
       sgen (2 * KeygenM23MatrixSpec.poly_words_i))
     row
-    (actual_generated_matrix_poly mat row 0)
-    (actual_generated_matrix_poly mat row 1)
-    (actual_generated_matrix_poly mat row 2)
-    (actual_generated_secret_poly sgen 0)
-    (actual_generated_secret_poly sgen 1)
-    (actual_generated_secret_poly sgen 2)) => //.
-+ rewrite /actual_generated_matrix_poly.
+    (faithful_middle_matrix_poly
+      (actual_faithful_augmented_matrix mat a b1) row 0)
+    (faithful_middle_matrix_poly
+      (actual_faithful_augmented_matrix mat a b1) row 1)
+    (faithful_middle_matrix_poly
+      (actual_faithful_augmented_matrix mat a b1) row 2)
+    (faithful_middle_secret_poly
+      (actual_faithful_augmented_secret sgen adjusted) 0)
+    (faithful_middle_secret_poly
+      (actual_faithful_augmented_secret sgen adjusted) 1)
+    (faithful_middle_secret_poly
+      (actual_faithful_augmented_secret sgen adjusted) 2)) => //.
++ split.
+   + by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_matrix_poly size_mkseq.
+   move=> i hi.
+   rewrite /faithful_middle_matrix_poly /actual_faithful_augmented_matrix
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   rewrite /actual_generated_matrix_poly /rq_as_haetae_poly
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   have -> :
+       (2 *
+        asint
+          (NTTFullSpec.full_invntt
+            (KeygenM23ArithmeticSpec.matrix_poly mat row 0)).[i]) %/ 2 =
+       asint
+         (NTTFullSpec.full_invntt
+           (KeygenM23ArithmeticSpec.matrix_poly mat row 0)).[i] by smt().
+   exact (asintK
+     (NTTFullSpec.full_invntt
+       (KeygenM23ArithmeticSpec.matrix_poly mat row 0)).[i]).
++ split.
+   + by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_matrix_poly size_mkseq.
+   move=> i hi.
+   rewrite /faithful_middle_matrix_poly /actual_faithful_augmented_matrix
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   rewrite /actual_generated_matrix_poly /rq_as_haetae_poly
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   have -> :
+       (2 *
+        asint
+          (NTTFullSpec.full_invntt
+            (KeygenM23ArithmeticSpec.matrix_poly mat row 1)).[i]) %/ 2 =
+       asint
+         (NTTFullSpec.full_invntt
+           (KeygenM23ArithmeticSpec.matrix_poly mat row 1)).[i] by smt().
+   exact (asintK
+     (NTTFullSpec.full_invntt
+       (KeygenM23ArithmeticSpec.matrix_poly mat row 1)).[i]).
++ split.
+   + by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_matrix_poly size_mkseq.
+   move=> i hi.
+   rewrite /faithful_middle_matrix_poly /actual_faithful_augmented_matrix
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   rewrite /actual_generated_matrix_poly /rq_as_haetae_poly
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   have -> :
+       (2 *
+        asint
+          (NTTFullSpec.full_invntt
+            (KeygenM23ArithmeticSpec.matrix_poly mat row 2)).[i]) %/ 2 =
+       asint
+         (NTTFullSpec.full_invntt
+           (KeygenM23ArithmeticSpec.matrix_poly mat row 2)).[i] by smt().
+   exact (asintK
+     (NTTFullSpec.full_invntt
+       (KeygenM23ArithmeticSpec.matrix_poly mat row 2)).[i]).
++ split.
+   + by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_secret_poly size_mkseq.
+   move=> i hi.
+   rewrite /faithful_middle_secret_poly /actual_faithful_augmented_secret
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   rewrite /actual_generated_secret_poly /rq_as_haetae_poly
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   exact (asintK (KeygenM23ArithmeticSpec.wide_poly sgen 0).[i]).
++ split.
+   + by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_secret_poly size_mkseq.
+   move=> i hi.
+   rewrite /faithful_middle_secret_poly /actual_faithful_augmented_secret
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+   rewrite /actual_generated_secret_poly /rq_as_haetae_poly
+           /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
    exact
-     (rq_as_haetae_poly_repr
-       (NTTFullSpec.full_invntt
-         (KeygenM23ArithmeticSpec.matrix_poly mat row 0))).
-+ rewrite /actual_generated_matrix_poly.
-   exact
-     (rq_as_haetae_poly_repr
-       (NTTFullSpec.full_invntt
-         (KeygenM23ArithmeticSpec.matrix_poly mat row 1))).
-+ rewrite /actual_generated_matrix_poly.
-   exact
-     (rq_as_haetae_poly_repr
-       (NTTFullSpec.full_invntt
-         (KeygenM23ArithmeticSpec.matrix_poly mat row 2))).
-+ rewrite /actual_generated_secret_poly.
-   exact
-     (rq_as_haetae_poly_repr
-       (KeygenM23ArithmeticSpec.wide_poly sgen 0)).
-+ rewrite /actual_generated_secret_poly.
-   exact
-     (rq_as_haetae_poly_repr
+     (asintK
        (KeygenM23ArithmeticSpec.wide_poly
-         sgen KeygenM23MatrixSpec.poly_words_i)).
-rewrite /actual_generated_secret_poly.
+         sgen KeygenM23MatrixSpec.poly_words_i).[i]).
+split.
++ by rewrite /HAETAE_Algebra.poly_wf /faithful_middle_secret_poly size_mkseq.
+move=> i hi.
+rewrite /faithful_middle_secret_poly /actual_faithful_augmented_secret
+        /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
+rewrite /actual_generated_secret_poly /rq_as_haetae_poly
+        /HAETAE_Algebra.poly_coeff nth_mkseq 1:hi /=.
 exact
-  (rq_as_haetae_poly_repr
+  (asintK
     (KeygenM23ArithmeticSpec.wide_poly
-      sgen (2 * KeygenM23MatrixSpec.poly_words_i))).
+      sgen (2 * KeygenM23MatrixSpec.poly_words_i)).[i]).
 qed.
 
 lemma faithful_augmented_product_qj_from_generated_dot
@@ -556,8 +625,6 @@ lemma faithful_augmented_product_qj_from_generated_dot
     (faithful_augmented_matrix_vector_product_coeff
       (actual_faithful_augmented_matrix mat a b1)
       (actual_faithful_augmented_secret sgen adjusted)
-      (actual_generated_matrix_poly mat)
-      (actual_generated_secret_poly sgen)
       row coeff)
     (faithful_qj_coeff row coeff).
 proof.
@@ -571,11 +638,12 @@ have hgen :=
     pre_bp row coeff
     (actual_generated_row_product mat sgen row)
     (faithful_generated_block_dot
-      (actual_generated_matrix_poly mat)
-      (actual_generated_secret_poly sgen)
+      (actual_faithful_augmented_matrix mat a b1)
+      (actual_faithful_augmented_secret sgen adjusted)
       row)
     hrow hcoeff hrepr
-    (faithful_generated_row_product_haetae_dot mat sgen row hrow).
+    (faithful_generated_row_product_haetae_dot
+      mat sgen a b1 adjusted row hrow).
 rewrite (actual_faithful_augmented_productE
   mat sgen a b1 adjusted row coeff hrow).
 have hreflex :
@@ -596,8 +664,8 @@ have hgen_with_context :=
   congruent_mod_2q_add
     (2 * HAETAE_Algebra.poly_coeff
       (faithful_generated_block_dot
-        (actual_generated_matrix_poly mat)
-        (actual_generated_secret_poly sgen)
+        (actual_faithful_augmented_matrix mat a b1)
+        (actual_faithful_augmented_secret sgen adjusted)
         row)
       coeff)
     (2 * actual_centered_coeff pre_bp row coeff)
@@ -615,13 +683,13 @@ have hgen_with_context :=
 have hsum :
     Mode2KeygenSnapshotAlgebra.congruent_mod_2q
       (faithful_head_coeff
-        (actual_array_coeff a)
+       (actual_array_coeff a)
         (actual_array_coeff b1)
         row coeff +
        2 * HAETAE_Algebra.poly_coeff
          (faithful_generated_block_dot
-           (actual_generated_matrix_poly mat)
-           (actual_generated_secret_poly sgen)
+           (actual_faithful_augmented_matrix mat a b1)
+           (actual_faithful_augmented_secret sgen adjusted)
            row)
          coeff +
        2 * actual_centered_coeff adjusted row coeff)
@@ -638,15 +706,15 @@ have hsum :
          row coeff +
        2 * HAETAE_Algebra.poly_coeff
          (faithful_generated_block_dot
-           (actual_generated_matrix_poly mat)
-           (actual_generated_secret_poly sgen)
+           (actual_faithful_augmented_matrix mat a b1)
+           (actual_faithful_augmented_secret sgen adjusted)
            row)
          coeff +
        2 * actual_centered_coeff adjusted row coeff =
        2 * HAETAE_Algebra.poly_coeff
          (faithful_generated_block_dot
-           (actual_generated_matrix_poly mat)
-           (actual_generated_secret_poly sgen)
+           (actual_faithful_augmented_matrix mat a b1)
+           (actual_faithful_augmented_secret sgen adjusted)
            row)
          coeff +
        (faithful_head_coeff
@@ -729,8 +797,6 @@ lemma checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj
         (faithful_augmented_matrix_vector_product_coeff
           (actual_faithful_augmented_matrix res.`2 res.`3 res.`9)
           (actual_faithful_augmented_secret res.`4 res.`10)
-          (actual_generated_matrix_poly res.`2)
-          (actual_generated_secret_poly res.`4)
           row coeff)
         (faithful_qj_coeff row coeff))].
 proof.

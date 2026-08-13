@@ -1,35 +1,39 @@
 \section{의존성에 따른 다음 작업과 참여 지점}
 \label{sec:roadmap}
 
-\subsection{현재 단일 우선순위: Verify matrix CRT/freeze leaf}
+\subsection{현재 단일 우선순위: security ExpandVecA 의미론 수리}
 
-\SnapshotWeek{}의 최종 gate는 \CurrentGate 다. 첫 의무는
+최신 post-freeze gate는 \CurrentGate 다. 첫 의무는
 \begin{quote}
 \CurrentPriority
 \end{quote}
-이다. \CurrentGate 는 actual Verify의 helper-local word/control 결과를 보존한
-부분 판정이다. V-1/V-2/V-5/V-6, W64 norm gate와 tail trace/mismatch word는
-컴파일되었지만 matrix CRT/freeze 의미론이 없어 V-3/V-4 및 전체 predicate는
-동결되었다. 그 leaf 뒤에도 full-NTT convolution/adapter, V-6 integer centering,
-norm no-wrap, challenge semantics가 남는다.
+이다. post-freeze NTT/Rq/HAETAE 운송과 actual \identifier{avec}의 paper \(a\)
+해석은 컴파일되었다. 그러나 기존 security-side object는 actual SHAKE128/rejection
+expansion도 paper \(qj\)도 아닌 synthetic generator다. 이 불일치를 고치지 않은
+채 전체 KeyGen 식을 합성하면 concrete coefficient 44985와 401을 같다고 놓게 된다.
+한편 frozen paper의 \FrozenPaperGate 는 별도 상태다. 순수 2-by-4 행곱
+specialization이 post-freeze에 생겼어도 actual Verify helper loop와 CRT/freeze
+절차 정리는 여전히 열려 있다.
 
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}[node distance=6mm]
-  \node[provennode] (matrix) {1. actual matrix helper\\\identifier{output_row} snapshot};
-  \node[provennode, below=of matrix] (finalize) {2. actual finalizer\\low/high와 adjusted \(s_2\)};
-  \node[provennode, below=of finalize] (snapshot) {3. snapshot-only\\mod-\(2q\) identity};
-  \node[provennode, below=of snapshot] (repr) {4. \identifier{output_row}\\NTT-word rewrite};
-  \node[blockednode, below=of repr] (mul) {5. convolution/adapter\\\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) (STOP)};
-  \node[blockednode, below=of mul] (paper) {6. faithful KG-1/KG-3와\\\(A s=qj\pmod{2q}\)};
-  \draw[flowarrow] (matrix) -- (finalize);
-  \draw[flowarrow] (finalize) -- (snapshot);
-  \draw[flowarrow] (snapshot) -- (repr);
-  \draw[openarrow] (repr) -- (mul);
-  \draw[openarrow] (mul) -- (paper);
+  \node[provennode] (snapshot) {1. actual matrix/finalizer\\snapshot};
+  \node[provennode, below=of snapshot] (ntt) {2. full-NTT와 native \(R_q\)\\row product};
+  \node[provennode, below=of ntt] (repr) {3. \(R_q\)--HAETAE\\dot representation};
+  \node[provennode, below=of repr] (avec) {4. actual \identifier{avec}\(\to\)paper \(a\)\\paper \(qj\) 별도 합성};
+  \node[provennode, below=of avec] (faithful) {5. actual-carrier structured product\\\(\equiv qj\pmod{2q}\)};
+  \node[blockednode, below=of faithful] (security) {6. security ExpandVecA\\semantic equivalence (STOP)};
+  \node[blockednode, below=of security] (paper) {7. security-model\\KG-1--KG-4 lift};
+  \draw[flowarrow] (snapshot) -- (ntt);
+  \draw[flowarrow] (ntt) -- (repr);
+  \draw[flowarrow] (repr) -- (avec);
+  \draw[flowarrow] (avec) -- (faithful);
+  \draw[openarrow] (faithful) -- (security);
+  \draw[openarrow] (security) -- (paper);
 \end{tikzpicture}
-\caption{Week~16 MINCORE KeyGen의 종료 절단면. 마지막 NTT-word rewrite는
-닫혔고, native convolution과 security-list adapter에서 KeyGen을 중단했다.}
+\caption{post-freeze KeyGen의 현재 절단면. actual-carrier 전용 coefficient-product까지
+닫혔지만, generic security ExpandVecA/\identifier{matrix_vec_mul} 의미론에서 중단했다.}
 \label{fig:next-order}
 \end{figure}
 
@@ -159,13 +163,13 @@ losslessness, non-vacuous execution 또는 \identifier{phoare}로 승격하지 �
 Sign output tail reach는 Week~16 MINCORE 전환으로 각각 deferred 또는 blocked
 상태를 유지한다.
 
-\subsection{6단계 종료: KG--NTT--MUL 감사}
+\subsection{6단계 frozen 종료: KG--NTT--MUL 감사}
 
 \theoremname{output_row_from_mode2_ntt_words}와
 \theoremname{actual_m23_matrix_snapshot_rows_explicit}는
 \identifier{KeygenM23ArithmeticSpec.output_row}를 actual full-invNTT/pointwise
 word 표현으로 rewrite하고 두 active row에 적용하는 마지막 sound edge를 닫았다
-\cite{week16-kg-ntt-mul-report}. 그러나 다음 두 화살표는 없다.
+\cite{week16-kg-ntt-mul-report}. frozen paper 시점에는 다음 두 화살표가 없었다.
 \[
   \operatorname{array256\_mont}
     (\operatorname{full\_invntt}(\widehat a\odot\operatorname{full\_ntt}(p)))
@@ -174,9 +178,10 @@ word 표현으로 rewrite하고 두 active row에 적용하는 마지막 sound e
 \]
 그리고 native \identifier{Rq.poly} 곱을 보안 모형의 integer-list
 \identifier{poly_mul}/\identifier{matrix_vec_mul}로 옮기는 어댑터도 없다. 첫
-화살표에는 odd-root orthogonality와 full-NTT convolution이 필요하다. 시간 제한
+화살표에는 odd-root orthogonality와 full-NTT convolution이 필요했다. 시간 제한
 감사는 이를 새 전제로 가정하지 않고 \identifier{STOP-KG-NTT}로 종료했다.
-faithful KG-1, KG-3, complete KG-4와 \(A s=qj\pmod{2q}\)는 미증명 상태다.
+post-freeze에 이 순수 대수와 \(R_q\)--HAETAE 표현 간극은 닫혔지만, 이 역사적
+frozen 판정 자체는 변경하지 않는다.
 
 \subsection{7단계 동결: accepted Sign core}
 
@@ -204,14 +209,61 @@ headline 정리는 아직 컴파일된 증명으로 세어서는 안 된다.
 분포, signing-loop 종료성, packing과 전체 1474-byte signature는 이 단계의 범위
 밖이다.
 
-현재 첫 목표는 \identifier{rq_mul_coeff_foldr_to_bigi}이며, 그 다음
-\identifier{verify_matrix_ntt_acc_mode2_cols4_correct}와
-\identifier{verify_crt_freeze_mode2_word_exact}를 닫아 combined headline을
-합성한다.
-각 부모를 닫을 때 자식 정리(child theorem)의 전제가 실제 앞 절차의 결론에서
-나오는지를
-확인해야 한다. external precondition으로 다시 요구하면 합성이 아니라 조건부
-재진술이 된다.
+\subsection{8단계 frozen 종료: actual Verify helper chain}
+
+\sourcepath{Mode2VerifyCoreSequence.ec}의
+\theoremname{actual_verify_core_sequence_branch_control_mode2}와
+\theoremname{actual_verify_core_sequence_input_snapshots_mode2}는 actual
+Verify의 다섯 helper 호출 순서와 입력 snapshot을 고정한다.
+\sourcepath{Mode2VerifyPrepareNorm.ec},
+\sourcepath{Mode2VerifyRecover.ec},
+\sourcepath{Mode2VerifyTailChallenge.ec}는 각각
+\theoremname{verify_prepare_z1_wprime_mode2_word_exact},
+\theoremname{actual_sign_verify_recover_w_z2_mode2_word_semantics},
+\theoremname{verify_tail_exact_trace_mode2}와
+\theoremname{poly_mismatch_mode2_word_exact}를 제공한다
+\cite{week16-verify-report}. 따라서 V-1/V-2/V-5/V-6 projection, W64 norm gate,
+tail trace/mismatch expression은 helper-local 범위에서 닫혔다.
+
+그러나 actual 2-by-4
+\identifier{_polyvec_ntt}/\identifier{_polymat_pointwise_acc}/
+\identifier{_polyvec_invntt}의
+\identifier{verify_matrix_ntt_acc_mode2_cols4_correct}와 actual from-CRT/freeze의
+\identifier{verify_crt_freeze_mode2_word_exact}가 없다. challenge leaf
+\identifier{verify_tail_m23_highbits_lsb_sampleinball_correct}도 독립적으로 남는다.
+이것이 frozen \FrozenPaperGate 다. post-freeze의 pure
+\theoremname{verify_mode2_row_product_from_reprs}는 첫 절차 leaf의 대수적 목표를
+주지만 actual loop refinement를 대신하지 않는다.
+
+\subsection{9단계 진행: post-freeze actual avec/qj 감사}
+
+\theoremname{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral action, generic row
+product, native \(R_q\) 3항 곱과 HAETAE dot representation은 이제
+\statusproved 다. actual sampler 쪽도 nonce 515/516, SHAKE128 framing,
+little-endian parsing, \(<64513\) rejection과 unchanged storage를 paper \(a\)로
+해석하며 paper \(qj\)를 snapshot equation에 별도로 합성한다
+\cite{post-freeze-kg-rq-haetae-report,
+post-freeze-kg-actual-avec-qj-report}.
+
+현재 첫 목표는 \claimid{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}다. security
+\identifier{public_rounding_vector_seed}가 actual expansion과 동일한 semantics를
+갖도록 specification을 교체·정제하고, coefficientwise actual-array
+representation을 증명해야 한다. 이후에도 paper \(qj\) correction을 별도로
+보존하는 actual-carrier width-6 coefficient-product packaging은 최신
+\sourcepath{KgFaithfulAugmentedModel.ec}에서 닫혔다. 이 파일은 actual
+matrix/secret 구체화, generated HAETAE \identifier{poly_dot} 운송과
+\theoremname{actual_faithful_augmented_productE}를 거쳐 actual checked parent의
+product \(\equiv qj\pmod{2q}\) 식을 standalone fresh-compiled theorem으로
+합성한다. 이 product는 actual matrix/secret만을 입력으로 받고 중간
+2-by-3 block을 그 열에서 복원하므로 \FaithfulAugmentedVerdict 로 판정한다.
+남은 의무는 이 전용 mod-\(2q\) block semantics를 기존 mod-\(q\), width-4
+security model로 잘못 동일시하지 않은 채, synthetic security object를 actual
+ExpandVecA semantics로 교체·정제하는 별도 대응 정리다.
+
+각 부모를 닫을 때 자식
+정리(child theorem)의 전제가 실제 앞 절차의 결론에서 나오는지 확인해야 한다.
+external precondition으로 원하는 등식을 다시 요구하면 합성이 아니라 조건부
+재진술이다.
 
 \subsection{동결된 product/replay 선은 별도로 다룬다}
 
@@ -253,13 +305,15 @@ signature 각 구성요소에 대해 raw word 공간(word space), 바이트 몫(
 중복만 제거해야 한다.
 \end{question}
 
-\begin{question}[NTT와 \(R_q\) 표현]
-기존 NTT·KeyGen 결과의 정확한 명제(proposition)/전제(premise) 경계를 유지하면서,
-계수 표현(coefficient representation)과 NTT 표현(NTT representation) 사이의
-가환사각형(commutative square)을
-최상위 \identifier{obl_public_key_algebra_ntt}에 어떻게 연결할 수 있는가?
-종이 위 CRT 동형사상(CRT isomorphism)만 인용하지 말고 실제 procedure theorem이
-필요하다.
+\begin{question}[ExpandVecA, \(R_q\), mod-\(2q\) 표현]
+닫힌 NTT·\(R_q\)·HAETAE 결과의 정확한 명제(proposition)/전제(premise)를
+유지하면서 actual SHAKE128/rejection \identifier{avec}를 faithful security
+matrix로 어떻게 표현할 수 있는가? paper \(qj\) correction을 modulo-\(q\)
+vector와 혼합하지 않고, 새 actual-carrier structured coefficient-product를
+augmented matrix/secret만의 generic ring \identifier{matrix_vec_mul} 및 security
+model에 어떻게 연결할 수 있는가? Verify 쪽은
+동일한 순수 4열 행곱을 actual NTT/CRT/freeze procedure theorem에 연결하는 별도
+가환사각형(commutative square)이 필요하다.
 \end{question}
 
 \begin{question}[high/low decomposition의 정수 경계(integer bound)]

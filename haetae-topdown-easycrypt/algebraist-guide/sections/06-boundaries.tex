@@ -116,12 +116,13 @@ inverse를 같은 명제(proposition)로 부르면 안 된다.
 
 \subsection{대수(algebra)·수치(numerics)·확률(probability) 층(layer)에 남은 의무}
 
-KeyGen의 NTT 곱셈 표현 전선은 \identifier{STOP-KG-NTT}, actual Sign control은
-canonical decoded \((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-MATRIX-CRT}
-로 정리되었고 첫 재개 leaf는 \identifier{rq_mul_coeff_foldr_to_bigi}와 그 뒤
-2-by-4 NTT/CRT 절차 의미론이지만, 전체 구현 refinement에는
-다음 독립적인 의무들이
-남는다.
+frozen paper의 MINCORE 전선은 KeyGen \identifier{STOP-KG-NTT}, Sign
+\identifier{STOP-SIGN-CHAL-MODE2}, Verify \FrozenPaperGate 로 정리되었다.
+post-freeze에는 \identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral action,
+native \(R_q\) 행곱과 HAETAE 표현 운송이 닫혔지만, actual ExpandVecA와 기존
+security-side synthetic object의 의미론 불일치가 \CurrentGate 를 만든다.
+이와 별개로 actual Verify의 2-by-4 NTT/CRT/freeze 절차 의미론도 frozen
+의무로 남는다. 전체 구현 refinement에는 다음 독립적인 의무들이 남는다.
 
 \begin{description}[leftmargin=39mm,style=nextline]
   \item[public-key algebra/NTT]
@@ -147,7 +148,7 @@ canonical decoded \((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-MATRIX-CRT}
     두 transcript 추출에 연결함.
 \end{description}
 
-\subsection{Week 16 KeyGen의 KG--NTT--MUL 종료 경계}
+\subsection{Week 16 frozen KeyGen의 KG--NTT--MUL 종료 경계}
 
 actual \identifier{_kp_m23_matrix}와 \identifier{_keypair_finalize_m23}의
 투명한 two-call harness는 pre-finalization \(bp\) snapshot, finalizer semantics,
@@ -162,11 +163,12 @@ matrix helper의 결과는 \identifier{KeygenM23ArithmeticSpec.output_row}로
 NTT, pointwise row product, inverse NTT와 Montgomery 표현으로 정확히 rewrite하며,
 \theoremname{actual_m23_matrix_snapshot_rows_explicit}는 투명한 harness의 두 active
 row에 그 표현을 적용한다.
-그러나 그 spectral 표현이 native \(R_q\) negacyclic 곱과 같다는 compiled
-정리와, \identifier{Rq.poly}를 보안 모형의
-\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) integer-list 곱으로 옮기는 어댑터는 없다.
+frozen paper 시점에는 그 spectral 표현이 native \(R_q\) negacyclic 곱과 같다는
+compiled 정리와, \identifier{Rq.poly}를 보안 모형의
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 표현으로 옮기는 어댑터가 없었다.
 KG-NTT-MUL 감사는 누락 leaf를 odd-root orthogonality/full-NTT convolution과
-이 어댑터로 특정하고 \identifier{STOP-KG-NTT}로 종료했다. 다음 승격은 금지된다.
+이 어댑터로 특정하고 \identifier{STOP-KG-NTT}로 종료했다. frozen 판정에서
+다음 승격은 금지된다.
 
 \begin{itemize}
   \item snapshot의 \(\mathit{pre\_bp}\)를 근거 없이
@@ -177,6 +179,58 @@ KG-NTT-MUL 감사는 누락 leaf를 odd-root orthogonality/full-NTT convolution�
   \item 이 two-call harness에서 sampler, retry, packing, public API 또는 KeyGen
         종료성을 추론하기.
 \end{itemize}
+
+\subsection{post-freeze KG 진전과 새로운 의미론 경계}
+
+frozen 뒤의 shared NTT theory는 pure coefficient normalization, full-NTT
+spectral action과 임의 열 수 행곱을 증명했다. Mode~2에서는 KeyGen 3열 및 Verify
+4열의 순수 specialization이 모두 컴파일된다. KeyGen 쪽은 native \(R_q\) 행곱에서
+\identifier{HAETAE_Algebra.poly_dot}까지 운송되었다
+\cite{post-freeze-kg-rq-haetae-report}. 단, Verify 4열 정리는 actual helper
+loop를 열지 않으므로 \FrozenPaperGate 를 해제하지 않는다.
+
+다음 감사는 actual \identifier{avec}의 SHAKE128 framing, nonce 515/516,
+little-endian candidate와 \(<64513\) rejection을 paper \(a\)에 연결하고 paper
+\(qj=q(1,0)^T\)를 snapshot zero equation에 독립적으로 더했다. 그러나 다음 세
+대상은 서로 같지 않다.
+
+\begin{center}
+actual SHAKE128/rejection \(a\)
+\(\neq\) synthetic security generator,
+\qquad paper \(qj\)는 별도 correction.
+\end{center}
+
+compiled counterexample는 security-named row~0 coefficient~0이 401이고 paper
+\(qj[0,0]=64513\)임을 보인다. all-zero seed trace의 actual 값도 44985다.
+따라서 \CurrentGate 의 수리는 synthetic
+\identifier{public_rounding_vector_seed}를 actual expansion 의미론으로 교체 또는
+정제하고 coefficientwise actual-array representation을 증명하는 일이다
+\cite{post-freeze-kg-actual-avec-qj-report}. 이 경계를 넘기 전에는 다음 승격도
+금지된다.
+
+\begin{itemize}
+  \item synthetic object를 actual \identifier{avec} 또는 paper \(qj\)로 재명명;
+  \item 별도 \(qj\) correction을 modulo-\(q\) HAETAE vector 안에서 보존된다고 가정;
+  \item 새 actual-carrier 전용 coefficient-product를 기존 security
+        matrix/secret만으로 정의한 일반 ring \identifier{matrix_vec_mul} 정리 없이
+        security-level width-6 mod-\(2q\) 식으로 재명명;
+  \item deterministic partial correctness에서 sampler distribution, uniformity,
+        losslessness 또는 termination을 추론.
+\end{itemize}
+
+\sourcepath{KgFaithfulAugmentedModel.ec}는 이 포장을 위한 actual width-6 carrier와
+generated-product transport를 정의하고 standalone fresh compile을 통과한다.
+\theoremname{actual_faithful_augmented_productE}는 전용 structured
+coefficient-product를 head, generated HAETAE \identifier{poly_dot}, adjusted
+error의 합으로 전개한다.
+\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj}가
+actual checked parent에 대해 이 product와 faithful \(qj\)의 합동식을
+coefficientwise 증명한다. product는 actual matrix/secret만을 입력으로 받으며,
+중간 2-by-3 block은 명시된 열에서 복원된 \identifier{poly_dot}이다.
+따라서 이 작업의 판정은 \FaithfulAugmentedVerdict 다. 그러나 이 전용
+mod-\(2q\) evaluator는 기존 mod-\(q\) security \identifier{matrix_vec_mul}이 아니고,
+security-side ExpandVecA equivalence도 아니다. 따라서 \CurrentGate 가 사라지지는
+않는다.
 
 \sourcepath{ImplementationSecurityGoals.ec}는 이 항목들을
 \identifier{obl_*} operation으로 열거한다. 이 파일이 컴파일된다는 것은
@@ -307,7 +361,22 @@ production full-HBZ wrapper inverse & \statusproved &
 prepare/apply, rANS core와 production lift의 성공 조건부 합성 완료 \\
 actual KeyGen matrix/finalize snapshot & \statuspartial &
 KG-2-like 분해와 snapshot mod-\(2q\) identity는 증명;
-마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT} \\
+frozen paper에서는 마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT} \\
+post-freeze NTT/Rq/HAETAE 행곱 & \statusproved &
+순수 spectral action, native \(R_q\) 3열/4열 행곱과 KeyGen 3열 HAETAE 표현 운송;
+actual Verify procedure는 제외 \\
+post-freeze actual \identifier{avec}/paper \(a,qj\) & \statuspartial &
+결정론적 expansion과 별도 \(qj\) snapshot 합성은 증명;
+synthetic security 의미론 불일치에서 \CurrentGate \\
+faithful augmented coefficient-product 합성 & \statusproved &
+standalone actual-carrier structured product \(\equiv qj\); frozen 82-target 밖이며
+generic security-model \identifier{matrix_vec_mul}/ExpandVecA equivalence는 제외 \\
+actual Sign accepted core & \statuspartial &
+실제 세 helper의 호출·accept branch control만;
+\identifier{STOP-SIGN-CHAL-MODE2} \\
+actual Verify core sequence & \statuspartial &
+실제 다섯 helper 순서, V-1/V-2/V-5/V-6 word projection, norm/tail local 결과;
+frozen \FrozenPaperGate \\
 \(h\) suffix codec & \statusdeferred &
 Week~16 MINCORE KeyGen 범위 전환; inverse 미시도 \\
 full signature codec & \statusblocked &

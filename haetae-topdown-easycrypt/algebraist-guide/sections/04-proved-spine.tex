@@ -642,10 +642,12 @@ losslessness, probability-one success 또는 \identifier{phoare} 정리는 포�
 않는다. 따라서 ``fixed all-6 Hoare success가 \statusproved''와 ``fixed-input
 termination은 미증명''을 동시에 유지해야 한다.
 
-\subsection{16단계: actual KeyGen snapshot과 KG--NTT 중단 경계}
+\subsection{16단계: frozen actual KeyGen snapshot과 KG--NTT 중단 경계}
 
-Week~16은 \WeekSixteenTargetCount 개 KeyGen 타깃을 추가했다
-\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}. 순수 파일
+Week~16은 KeyGen 세 개, Sign 한 개, Verify 네 개로 모두
+\WeekSixteenTargetCount 개 MINCORE 타깃을 추가했다
+\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report,
+week16-sign-report,week16-verify-report}. 이 절의 첫 순수 파일
 \sourcepath{Mode2KeygenSnapshot}%
 \allowbreak\sourcepath{Algebra.ec}의
 \theoremname{snapshot_residue_exact_low_high},
@@ -685,8 +687,8 @@ mod-\(2q\) 영 합동식을 준다.
 full-invNTT/pointwise-word 표현으로 내린다. 어느 정리도 native \(R_q\) 곱,
 보안 모형 곱 또는 원하는 KeyGen 식을 전제로 넣지 않는다.
 
-\begin{openobligation}[\claimid{OBL-MINCORE-KEYGEN}: \identifier{STOP-KG-NTT}]
-마지막 NTT-word rewrite까지는 컴파일되었지만, actual pointwise/inverse-NTT
+\begin{openobligation}[frozen \claimid{OBL-MINCORE-KEYGEN}: \identifier{STOP-KG-NTT}]
+frozen paper 시점에는 마지막 NTT-word rewrite까지 컴파일되었지만, actual pointwise/inverse-NTT
 표현을 native \(R_q\) negacyclic 곱으로 바꾸는 odd-root orthogonality/full-NTT
 convolution 정리와 \identifier{Rq.poly}를 보안 모형의 integer-list 곱으로 옮기는
 어댑터가 없다. 따라서 해당 행 곱
@@ -700,7 +702,91 @@ KG-NTT-MUL 감사는 이 두 누락 leaf를 특정하고
 sampler, retry, packing, public API, KeyGen 종료성과 보안은 이 actual two-call
 snapshot 정리의 결론 밖에 있다. 뒤이은 Sign은
 \identifier{STOP-SIGN-CHAL-MODE2}, Verify는
-\identifier{STOP-VERIFY-MATRIX-CRT}로 각각 동결되었다.
+\identifier{STOP-VERIFY-MATRIX-CRT}로 각각 동결되었다
+\cite{week16-sign-report,week16-verify-report,paper-freeze-artifacts}.
+
+\subsection{17단계: post-freeze NTT/Rq 운송과 actual avec/qj 경계}
+
+post-freeze 작업은 frozen 82-target manifest를 늘리지 않고 위의 첫 대수적
+간극을 닫았다. \sourcepath{NTTFullSpectralAction.ec}의
+\theoremname{rq_mul_coeff_foldr_to_bigi}와
+\theoremname{full_ntt_montgomery_spectral_action}은 구현형 negacyclic coefficient
+합과 full-NTT spectral action을 연결한다.
+\theoremname{full_ntt_montgomery_row_product}는 이를 임의 열 수의 행곱으로
+합성하고, \sourcepath{NTTMode2RowSpecializations.ec}는 KeyGen 3열과 Verify 4열의
+순수 specialization을 제공한다. 이 Verify 결과는 실제
+\identifier{_polyvec_ntt}/\identifier{_polymat_pointwise_acc}/
+\identifier{_polyvec_invntt} 절차 정리가 아니므로 frozen
+\identifier{STOP-VERIFY-MATRIX-CRT}를 닫지 않는다.
+
+\sourcepath{RqHAETAEBridge.ec}의
+\theoremname{rq_poly_add_repr}, \theoremname{rq_poly_mul_repr},
+\theoremname{rq_poly_dot3_repr}와
+\sourcepath{Mode2KeygenNttMulBridge.ec}의
+\theoremname{keygen_mode2_row_product},
+\theoremname{mode2_row_product_haetae_dot},
+\theoremname{actual_m23_matrix_snapshot_rows_row_product}는 native \(R_q\)
+3항 행곱을 HAETAE \identifier{poly_dot} 표현까지 운송한다
+\cite{post-freeze-kg-rq-haetae-report}.
+
+\begin{verified}[actual avec와 paper \(a,qj\)의 결정론적 경계]
+\sourcepath{KgActualAvecQjSemantics.ec}는 Mode~2 행 nonce 515/516,
+32-byte seed 뒤의 \([3+row,2]\), SHAKE128 domain/padding 31/128,
+168-byte block, little-endian 16-bit parsing과 \(<64513\) rejection을 고정한다.
+\theoremname{mode2_uniform_stream_paper_a_flat}은 종료한 actual sampler의 두
+256-coefficient 행을 paper \(a\)로 해석한다. paper \(j=(1,0)^T\)는
+\theoremname{paper_qj_row0_coeff0},
+\theoremname{paper_qj_row0_other},
+\theoremname{paper_qj_remaining_row}로 분리되며,
+\theoremname{checked_mode2_parent_m23_finalize_actual_avec_qj}가 actual sampler,
+matrix helper와 finalizer의 현재 결과를 한 Hoare 경계에 모은다. 이는 종료한
+실행의 부분정확성이며 분포·uniformity·losslessness·종료성 주장이 아니다.
+\end{verified}
+
+\begin{verified}[faithful augmented coefficient-product 합성]
+최신 unmanifested standalone 파일
+\sourcepath{KgFaithfulAugmentedModel.ec}는
+\identifier{faithful_augmented_matrix_coeff},
+\identifier{faithful_augmented_secret_coeff},
+\identifier{actual_faithful_augmented_matrix},
+\identifier{actual_faithful_augmented_secret}로 width-6 carrier를 actual 배열에
+구체화한다. 이어
+\theoremname{actual_snapshot_paper_qj_to_faithful_augmented},
+\theoremname{generated_product_coeff_from_rq_repr},
+\theoremname{faithful_augmented_As_qj_from_generated_repr},
+\theoremname{rq_as_haetae_poly_repr},
+\theoremname{faithful_generated_row_product_haetae_dot},
+\theoremname{actual_faithful_augmented_productE},
+\theoremname{faithful_augmented_product_qj_from_generated_dot},
+\theoremname{mode2_m23_facts_generated_row_product}를 합성한다. 가장 강한
+\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj}는
+actual checked sampler/matrix/finalizer parent의 각 active coefficient에서
+\identifier{faithful_augmented_matrix_vector_product_coeff}와
+\identifier{faithful_qj_coeff}의 mod-\(2q\) 합동식을 증명한다. 이 파일은
+standalone \identifier{-no-eco} fresh compile을 통과했다.
+
+정확한 끝점은 actual-carrier 전용 structured coefficient-product다.
+\identifier{actual_faithful_augmented_productE}가 matrix와 secret만을 입력으로 받는
+product의 전개를 닫는다. 중간 2-by-3 block은 명시된 열에서 복원되어
+HAETAE \identifier{poly_dot}으로 계산된다. 이 작업의 판정은
+\FaithfulAugmentedVerdict 다. 다만 이 전용 mod-\(2q\) block semantics는 기존
+width-4, mod-\(q\) security \identifier{matrix_vec_mul}의 계수 정리가 아니며,
+security-side synthetic ExpandVecA를 actual sampler와 동일시하지도 않는다.
+\cite{post-freeze-kg-faithful-augmented-report}
+\end{verified}
+
+\begin{openobligation}[\CurrentGate: \claimid{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}]
+기존 security-side \identifier{haetae_mode23_qj_vector}는
+\identifier{public_key_seed_polyveck} tag 401을 쓰는 synthetic object다.
+\theoremname{security_named_qj_is_not_paper_qj}는 그 row~0 coefficient~0이
+401인 반면 paper \(qj\)는 \(q=64513\)임을 증명한다. zero-seed 실행에서도
+actual nonce-515 첫 계수는 44985다. 따라서 security specification을 actual
+SHAKE128/LE16/rejection/nonce 의미론으로 교체 또는 정제하고, paper \(qj\)는
+별도 correction으로 유지한 뒤 actual-array representation을 증명해야 한다.
+따라서 새 custom carrier의 paper-shaped 합동식을 기존 security model의
+KG-1--KG-4 또는 security-level \(A s=qj\pmod{2q}\)로 승격할 수 없다
+\cite{post-freeze-kg-actual-avec-qj-report}.
+\end{openobligation}
 
 \subsection{닫힌 사슬의 정확한 끝점}
 
@@ -741,7 +827,19 @@ actual encoder success witness &
 \statusproved\ (fixed all-6 입력의 Hoare failure exclusion; 종료성/losslessness 없음) \\
 actual KeyGen matrix/finalize snapshot &
 \statuspartial\ (KG-2-like 분해와 snapshot 합동식은 증명;
-마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT}) \\
+frozen paper에서는 마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT}) \\
+post-freeze full-NTT/native \(R_q\)/HAETAE 행곱 운송 &
+\statusproved\ (frozen 82-target 밖의 명명된 순수·표현 정리) \\
+post-freeze actual \identifier{avec}와 paper \(a,qj\) 경계 &
+\statuspartial\ (deterministic semantics와 별도 \(qj\) 합성은 증명;
+security object 불일치에서 \CurrentGate) \\
+faithful augmented coefficient-product/transport &
+\statusproved\ (standalone, frozen 82-target 밖; actual-carrier 전용 product이며
+generic security-model \identifier{matrix_vec_mul} equivalence 아님) \\
+actual accepted Sign core &
+\statuspartial\ (호출·분기 control만; \identifier{STOP-SIGN-CHAL-MODE2}) \\
+actual Verify core &
+\statuspartial\ (helper-local word/control만; frozen \FrozenPaperGate) \\
 \(h\) suffix codec &
 \statusdeferred\ (Week~16 MINCORE KeyGen 범위) \\
 full signature codec와 Sign--Verify correctness &
