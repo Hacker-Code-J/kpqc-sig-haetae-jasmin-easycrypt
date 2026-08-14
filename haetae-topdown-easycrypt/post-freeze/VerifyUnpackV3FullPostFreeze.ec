@@ -10,6 +10,7 @@ require import BArray2752 BArray8192 BArray32768 VerifyUnpackMode2Target
   VerifyUnpackV3AssemblyPostFreeze VerifyUnpackV3ExpandBoundsPostFreeze
   VerifyUnpackV3PreNttPostFreeze VerifyUnpackV3PreNttBoundPostFreeze
   VerifyUnpackV3NttBound17PostFreeze VerifyUnpackV3NttInstallPostFreeze
+  VerifyUnpackV3MatrixProfilePostFreeze
   VerifyUnpackV3SourceBoundPostFreeze
   VerifyUnpackV3PostDecodeThroughNttPostFreeze.
 
@@ -30,6 +31,8 @@ op verify_unpack_mode2_result
     VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
       vkp0 preinstall_mat pre_ntt mode2_vec_words /\
     mat_firstcol_frame expanded preinstall_mat /\
+    VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+      preinstall_mat /\
     VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
       pre_ntt
       (KeygenM23ArithmeticSpec.wide_poly pre_ntt 0)
@@ -53,7 +56,9 @@ op verify_unpack_mode2_result
         VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_words /\
     mat_firstcol_install_prefix outbp outmat mode2_vec_words /\
     mat_firstcol_install_frame
-      preinstall_mat outmat mode2_vec_words.
+      preinstall_mat outmat mode2_vec_words /\
+    VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17
+      outmat.
 
 module StructuredVerifyUnpackMode2 = {
   proc run (matp : BArray32768.t, vkp : BArray2752.t, seedu : int)
@@ -111,8 +116,16 @@ call
        decoded0 vkp0 expanded0).
 auto => />.
 move=> hdecoded hexpand hsource out pre_ntt preinstall_mat
-        hprefix hframe hinput0 hinput1 hntt0 hntt0bound
-        hntt1 hntt1bound hforward htail hinstall hinstallframe.
+        hprefix hframe hnonfirst hinput0 hinput1 hntt0 hntt0bound
+        hntt1 hntt1bound hforward htail hinstall hinstallframe
+        hmatrixfirst.
+move=> hmatrixnonfirst.
+have hmatrixprofile :
+    VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17
+      out.`2 by
+  rewrite
+    /VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17;
+  auto.
 rewrite /verify_unpack_mode2_result.
 exists decoded0 expanded0 pre_ntt preinstall_mat.
 rewrite

@@ -8,9 +8,12 @@ require import BArray2752 BArray8192 BArray32768 VerifyUnpackMode2Target
   KeygenM23ArithmeticSpec KeygenM23MatrixSpec NTTRowProductSpec
   VerifyUnpackVkM23CoefficientsPostFreeze
   VerifyUnpackV3AssemblyPostFreeze VerifyUnpackV3PreNttPostFreeze
+  VerifyUnpackV3ExpandBoundsPostFreeze
   VerifyUnpackV3PreNttBoundPostFreeze
   VerifyUnpackV3NttBound17PostFreeze
-  VerifyUnpackV3NttInstallPostFreeze.
+  VerifyUnpackV3NttInstallPostFreeze
+  VerifyUnpackV3MatrixProfilePostFreeze
+  VerifyUnpackV3MatDoubleBoundsPostFreeze.
 
 import VerifyUnpackV3AssemblyPostFreeze.
 
@@ -40,11 +43,14 @@ lemma actual_verify_unpack_post_decode_pre_ntt_mode2_word_exact
   hoare [ActualVerifyUnpackPostDecodePreNttMode2.run :
     bp = bp0 /\ vkp = vkp0 /\ matp = mat0 /\
     VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
-      bp0 vkp0 mode2_vec_words
+      bp0 vkp0 mode2_vec_words /\
+    VerifyUnpackV3ExpandBoundsPostFreeze.expanded_mode2_prefix_bound mat0
     ==>
     VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
       vkp0 res.`2 res.`1 mode2_vec_words /\
-    mat_firstcol_frame mat0 res.`2].
+    mat_firstcol_frame mat0 res.`2 /\
+    VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+      res.`2].
 proof.
 proc.
 seq 1 :
@@ -52,10 +58,14 @@ seq 1 :
      bp = bp0 /\ vkp = vkp0 /\ matp = doubled_mat /\
      VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
        bp0 vkp0 mode2_vec_words /\
-     mat_firstcol_frame mat0 doubled_mat).
-+ call (polymatkl_double_mode2_firstcol_frame mat0).
+     mat_firstcol_frame mat0 doubled_mat /\
+     VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+       doubled_mat).
++ call
+    (VerifyUnpackV3MatDoubleBoundsPostFreeze.verify_unpack_v3_mat_double_mixed_bounds
+       mat0).
   auto => />.
-  move=> result hdecoded hframe.
+  move=> result hdecoded hframe hnonfirst hfirst16 hprofile.
   smt().
 exlim matp => doubled_mat0.
 seq 1 :
@@ -64,10 +74,12 @@ seq 1 :
      VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
        bp0 vkp0 mode2_vec_words /\
      mat_firstcol_frame mat0 doubled_mat0 /\
+     VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+       doubled_mat0 /\
      vec_double_prefix bp0 first_double mode2_vec_words).
 + call (polyvec_double_mode2_word_exact bp0).
   auto => />.
-  move=> &hr hdecoded hmatframe result hdouble htail.
+  move=> &hr hdecoded hmatframe hnonfirst result hdouble htail.
   exists result.
   by auto.
 exlim bp => first_double0.
@@ -77,6 +89,8 @@ seq 1 :
      VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
        bp0 vkp0 mode2_vec_words /\
      mat_firstcol_frame mat0 doubled_mat0 /\
+     VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+       doubled_mat0 /\
      vec_double_prefix bp0 first_double0 mode2_vec_words /\
      sub_firstcol_prefix first_double0 doubled_mat0 subtracted
        mode2_vec_words).
@@ -84,13 +98,13 @@ seq 1 :
     (polyvec_sub_left_inplace_mode2_word_exact
       first_double0 doubled_mat0).
   auto => />.
-  move=> &hr hdecoded hmatframe hdouble result hsub htail.
+  move=> &hr hdecoded hmatframe hnonfirst hdouble result hsub htail.
   exists result.
   by auto.
 exlim bp => subtracted0.
 call (polyvec_double_mode2_word_exact subtracted0).
 auto => />.
-move=> &hr hdecoded hmatframe hdouble1 hsub result hdouble2 htail.
+move=> &hr hdecoded hmatframe hnonfirst hdouble1 hsub result hdouble2 htail.
 have hprefix :=
   VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix_of_actual_steps
     bp0 first_double0 subtracted0 result
@@ -105,11 +119,14 @@ lemma actual_verify_unpack_post_decode_pre_ntt_mode2_bound17
     bp = bp0 /\ vkp = vkp0 /\ matp = mat0 /\
     VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
       bp0 vkp0 mode2_vec_words /\
+    VerifyUnpackV3ExpandBoundsPostFreeze.expanded_mode2_prefix_bound mat0 /\
     VerifyUnpackV3PreNttBoundPostFreeze.pre_ntt_source_bound vkp0 mat0
     ==>
     VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
       vkp0 res.`2 res.`1 mode2_vec_words /\
     mat_firstcol_frame mat0 res.`2 /\
+    VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+      res.`2 /\
     VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
       res.`1
       (KeygenM23ArithmeticSpec.wide_poly res.`1 0)
@@ -120,7 +137,7 @@ conseq
   (actual_verify_unpack_post_decode_pre_ntt_mode2_word_exact
      bp0 vkp0 mat0).
 + auto.
-move=> &m hpre result [hprefix hframe].
+move=> &m hpre result [hprefix [hframe hnonfirst]].
 have hsource :
     VerifyUnpackV3PreNttBoundPostFreeze.pre_ntt_source_bound
       vkp0 mat0 by
@@ -156,12 +173,15 @@ lemma actual_verify_unpack_post_decode_through_ntt_install_mode2_correct
     bp = bp0 /\ vkp = vkp0 /\ matp = mat0 /\
     VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
       bp0 vkp0 mode2_vec_words /\
+    VerifyUnpackV3ExpandBoundsPostFreeze.expanded_mode2_prefix_bound mat0 /\
     VerifyUnpackV3PreNttBoundPostFreeze.pre_ntt_source_bound vkp0 mat0
     ==>
     exists pre_ntt preinstall_mat,
       VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
         vkp0 preinstall_mat pre_ntt mode2_vec_words /\
       mat_firstcol_frame mat0 preinstall_mat /\
+      VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+        preinstall_mat /\
       VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
         pre_ntt
         (KeygenM23ArithmeticSpec.wide_poly pre_ntt 0)
@@ -185,7 +205,9 @@ lemma actual_verify_unpack_post_decode_through_ntt_install_mode2_correct
           VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_words /\
       mat_firstcol_install_prefix res.`1 res.`2 mode2_vec_words /\
       mat_firstcol_install_frame
-        preinstall_mat res.`2 mode2_vec_words].
+        preinstall_mat res.`2 mode2_vec_words /\
+      VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17
+        res.`2].
 proof.
 proc.
 seq 1 :
@@ -194,6 +216,8 @@ seq 1 :
      VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
        vkp0 preinstall_mat pre_ntt mode2_vec_words /\
      mat_firstcol_frame mat0 preinstall_mat /\
+     VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+       preinstall_mat /\
      VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
        pre_ntt
        (KeygenM23ArithmeticSpec.wide_poly pre_ntt 0)
@@ -203,7 +227,7 @@ seq 1 :
     (actual_verify_unpack_post_decode_pre_ntt_mode2_bound17
        bp0 vkp0 mat0).
   auto => />.
-  move=> result hprefix hframe hinput.
+  move=> result hprefix hframe hnonfirst hinput.
   smt().
 exlim bp => pre_ntt0.
 exlim matp => preinstall_mat0.
@@ -214,9 +238,26 @@ call
      (KeygenM23ArithmeticSpec.wide_poly
        pre_ntt0 KeygenM23MatrixSpec.poly_words_i)).
 auto => />.
-move=> &m hprefix hmatframe hinput result
+move=> &m hprefix hmatframe hnonfirst hinput result
         hbound hforward htail hinstall hinstallframe.
 move=> hvector htailframe hinstallprefix hmatrixframe.
+have hnttbound :
+    VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_repr_bound25
+      hbound.`1
+      (KeygenM23ArithmeticSpec.wide_poly pre_ntt0 0)
+      (KeygenM23ArithmeticSpec.wide_poly
+        pre_ntt0 KeygenM23MatrixSpec.poly_words_i).
++ rewrite
+    /VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_repr_bound25
+    /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+  by auto.
+have hmatrixprofile :=
+  VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17_of_install
+    hbound.`1 preinstall_mat0 hbound.`2
+    (KeygenM23ArithmeticSpec.wide_poly pre_ntt0 0)
+    (KeygenM23ArithmeticSpec.wide_poly
+      pre_ntt0 KeygenM23MatrixSpec.poly_words_i)
+    hnonfirst hnttbound hinstallprefix hmatrixframe.
 exists pre_ntt0 preinstall_mat0.
 by auto.
 qed.
