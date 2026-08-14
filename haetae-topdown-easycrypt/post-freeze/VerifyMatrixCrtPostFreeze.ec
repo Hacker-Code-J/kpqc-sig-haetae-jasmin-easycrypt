@@ -1316,6 +1316,18 @@ op verify_mode2_matrix_repr_bound16
   verify_matrix_slice_bound16
     mp (7 * KeygenM23MatrixSpec.poly_words_i).
 
+op verify_mode2_matrix_repr_bound20_17
+    (mp : BArray32768.t) : bool =
+  forall row col j,
+    0 <= row < verify_mode2_rows_i =>
+    0 <= col < verify_mode2_cols_i =>
+    0 <= j < KeygenM23MatrixSpec.poly_words_i =>
+    Fq.bw32
+      (BArray32768.get32 mp
+        ((row * verify_mode2_cols_i + col) *
+           KeygenM23MatrixSpec.poly_words_i + j))
+      (if col = 0 then 20 else 17).
+
 op verify_mode2_matrix_bound16
     (mp : BArray32768.t) : bool =
   forall i,
@@ -1874,6 +1886,46 @@ apply h7.
 smt().
 qed.
 
+lemma verify_mode2_matrix_repr_bound20_17_get mp row col j :
+  verify_mode2_matrix_repr_bound20_17 mp =>
+  0 <= row < verify_mode2_rows_i =>
+  0 <= col < verify_mode2_cols_i =>
+  0 <= j < KeygenM23MatrixSpec.poly_words_i =>
+  Fq.bw32
+    (BArray32768.get32 mp
+      ((row * verify_mode2_cols_i + col) *
+         KeygenM23MatrixSpec.poly_words_i + j))
+    (if col = 0 then 20 else 17).
+proof.
+move=> hmatrix hrow hcol hj.
+exact (hmatrix row col j hrow hcol hj).
+qed.
+
+lemma verify_mode2_matrix_repr_bound16_to_bound20_17 mp :
+  verify_mode2_matrix_repr_bound16 mp =>
+  verify_mode2_matrix_repr_bound20_17 mp.
+proof.
+move=> hmatrix.
+rewrite /verify_mode2_matrix_repr_bound20_17 => row col j hrow hcol hj.
+have h16 :=
+  verify_mode2_matrix_repr_bound16_get mp
+    ((row * verify_mode2_cols_i + col) *
+       KeygenM23MatrixSpec.poly_words_i + j)
+    hmatrix _.
++ move: hrow hcol hj.
+  rewrite /verify_mode2_rows_i /verify_mode2_cols_i
+          /KeygenM23MatrixSpec.poly_words_i.
+  smt().
+apply
+  (NTT_Fq.bw32_weaken
+    (BArray32768.get32 mp
+      ((row * verify_mode2_cols_i + col) *
+         KeygenM23MatrixSpec.poly_words_i + j))
+    16 (if col = 0 then 20 else 17)).
++ smt().
+exact h16.
+qed.
+
 lemma verify_mode2_matrix_repr_bound16_to_bound mp :
   verify_mode2_matrix_repr_bound16 mp =>
   verify_mode2_matrix_bound16 mp.
@@ -1971,7 +2023,7 @@ lemma parent_polymat_pointwise_acc_verify_cols4_bound18_frame
     tp = tp0 /\ mp = mp0 /\ vp = vp0 /\
     rows = W64.of_int verify_mode2_rows_i /\
     cols = W64.of_int verify_mode2_cols_i /\
-    verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
     verify_mode2_vector_bound24 vp0
     ==>
     prefix_bound8192 res 512 18 /\
@@ -1982,7 +2034,7 @@ while
   (mp = mp0 /\ vp = vp0 /\
    rows = W64.of_int verify_mode2_rows_i /\
    cols = W64.of_int verify_mode2_cols_i /\
-   verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
    verify_mode2_vector_bound24 vp0 /\
    0 <= W64.to_uint row <= verify_mode2_rows_i /\
    W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -1994,7 +2046,7 @@ while
     (mp = mp0 /\ vp = vp0 /\
      rows = W64.of_int verify_mode2_rows_i /\
      cols = W64.of_int verify_mode2_cols_i /\
-     verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
      verify_mode2_vector_bound24 vp0 /\
      0 <= W64.to_uint row < verify_mode2_rows_i /\
      W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2009,7 +2061,7 @@ while
       (mp = mp0 /\ vp = vp0 /\
        rows = W64.of_int verify_mode2_rows_i /\
        cols = W64.of_int verify_mode2_cols_i /\
-       verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
        verify_mode2_vector_bound24 vp0 /\
        0 <= W64.to_uint row < verify_mode2_rows_i /\
        W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2025,7 +2077,7 @@ while
         (mp = mp0 /\ vp = vp0 /\
          rows = W64.of_int verify_mode2_rows_i /\
          cols = W64.of_int verify_mode2_cols_i /\
-         verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
          verify_mode2_vector_bound24 vp0 /\
          0 <= W64.to_uint row < verify_mode2_rows_i /\
          W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2042,7 +2094,7 @@ while
            (W64.to_uint (row_mat + col_off + j)) /\
          b = BArray8192.get32 vp0
            (W64.to_uint (col_off + j)) /\
-         Fq.bw32 a 16 /\ Fq.bw32 b 24).
+         Fq.bw32 a 20 /\ Fq.bw32 b 24).
       + auto => /> &hr hmp hvp hrow0 hrowlt hrowout hrowmat
                     hcol0 hcollt hcoloff hj0 hjle _ _ _ _ hguard.
         have hjlt : W64.to_uint j{hr} < 256.
@@ -2062,12 +2114,27 @@ while
           trivial.
         split; first exact hjlt.
         split.
-        + rewrite hmidx.
-          apply hmp.
-          rewrite hrowmat hcoloff /verify_mode2_rows_i
-                  /verify_mode2_cols_i
-                  /KeygenM23MatrixSpec.poly_words_i.
-          smt().
+        + rewrite hmidx hrowmat hcoloff.
+          have -> :
+              1024 * W64.to_uint row{hr} +
+                256 * W64.to_uint col{hr} + W64.to_uint j{hr} =
+              ((W64.to_uint row{hr} * verify_mode2_cols_i +
+                  W64.to_uint col{hr}) *
+                 KeygenM23MatrixSpec.poly_words_i + W64.to_uint j{hr}).
+          + rewrite /verify_mode2_cols_i
+                    /KeygenM23MatrixSpec.poly_words_i.
+            ring.
+          apply
+            (NTT_Fq.bw32_weaken
+              (BArray32768.get32 mp0
+                ((W64.to_uint row{hr} * verify_mode2_cols_i +
+                    W64.to_uint col{hr}) *
+                   KeygenM23MatrixSpec.poly_words_i + W64.to_uint j{hr}))
+              (if W64.to_uint col{hr} = 0 then 20 else 17) 20).
+          + smt().
+          apply
+            (hmp (W64.to_uint row{hr}) (W64.to_uint col{hr})
+              (W64.to_uint j{hr})); smt().
         rewrite hvidx hcoloff.
         apply hvp.
         rewrite /verify_mode2_vec_words_i
@@ -2077,7 +2144,7 @@ while
       + wp.
         exlim a => aa.
         exlim b => bb.
-        call (TargetKeygenM23Pointwise.parent_fqmul_16_24 aa bb).
+        call (TargetKeygenM23Pointwise.parent_fqmul_20_24 aa bb).
         auto => &hr hpre.
         split.
         + move: hpre.
@@ -2323,7 +2390,7 @@ while
     (mp = mp0 /\ vp = vp0 /\
      rows = W64.of_int verify_mode2_rows_i /\
      cols = W64.of_int verify_mode2_cols_i /\
-     verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
      verify_mode2_vector_bound24 vp0 /\
      0 <= W64.to_uint row < verify_mode2_rows_i /\
      W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2498,7 +2565,7 @@ lemma parent_polymat_pointwise_acc_verify_cols4_semantics
     tp = tp0 /\ mp = mp0 /\ vp = vp0 /\
     rows = W64.of_int verify_mode2_rows_i /\
     cols = W64.of_int verify_mode2_cols_i /\
-    verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
     verify_mode2_vector_bound24 vp0
     ==>
     verify_pointwise_rows_repr res mp0 vp0].
@@ -2508,7 +2575,7 @@ while
   (mp = mp0 /\ vp = vp0 /\
    rows = W64.of_int verify_mode2_rows_i /\
    cols = W64.of_int verify_mode2_cols_i /\
-   verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
    verify_mode2_vector_bound24 vp0 /\
    0 <= W64.to_uint row <= verify_mode2_rows_i /\
    W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2519,7 +2586,7 @@ while
     (mp = mp0 /\ vp = vp0 /\
      rows = W64.of_int verify_mode2_rows_i /\
      cols = W64.of_int verify_mode2_cols_i /\
-     verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
      verify_mode2_vector_bound24 vp0 /\
      0 <= W64.to_uint row < verify_mode2_rows_i /\
      W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2535,7 +2602,7 @@ while
       (mp = mp0 /\ vp = vp0 /\
        rows = W64.of_int verify_mode2_rows_i /\
        cols = W64.of_int verify_mode2_cols_i /\
-       verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
        verify_mode2_vector_bound24 vp0 /\
        0 <= W64.to_uint row < verify_mode2_rows_i /\
        W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2552,7 +2619,7 @@ while
         (mp = mp0 /\ vp = vp0 /\
          rows = W64.of_int verify_mode2_rows_i /\
          cols = W64.of_int verify_mode2_cols_i /\
-         verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
          verify_mode2_vector_bound24 vp0 /\
          0 <= W64.to_uint row < verify_mode2_rows_i /\
          W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -2570,7 +2637,7 @@ while
            (W64.to_uint (row_mat + col_off + j)) /\
          b = BArray8192.get32 vp0
            (W64.to_uint (col_off + j)) /\
-         Fq.bw32 a 16 /\ Fq.bw32 b 24).
+         Fq.bw32 a 20 /\ Fq.bw32 b 24).
       + auto => /> &hr hmp hvp hrow0 hrowlt hrowout hrowmat
                     hcol0 hcollt hcoloff hj0 hjle _ _ _ _ _
                     hguard.
@@ -2591,12 +2658,27 @@ while
           trivial.
         split; first exact hjlt.
         split.
-        + rewrite hmidx.
-          apply hmp.
-          rewrite hrowmat hcoloff /verify_mode2_rows_i
-                  /verify_mode2_cols_i
-                  /KeygenM23MatrixSpec.poly_words_i.
-          smt().
+        + rewrite hmidx hrowmat hcoloff.
+          have -> :
+              1024 * W64.to_uint row{hr} +
+                256 * W64.to_uint col{hr} + W64.to_uint j{hr} =
+              ((W64.to_uint row{hr} * verify_mode2_cols_i +
+                  W64.to_uint col{hr}) *
+                 KeygenM23MatrixSpec.poly_words_i + W64.to_uint j{hr}).
+          + rewrite /verify_mode2_cols_i
+                    /KeygenM23MatrixSpec.poly_words_i.
+            ring.
+          apply
+            (NTT_Fq.bw32_weaken
+              (BArray32768.get32 mp0
+                ((W64.to_uint row{hr} * verify_mode2_cols_i +
+                    W64.to_uint col{hr}) *
+                   KeygenM23MatrixSpec.poly_words_i + W64.to_uint j{hr}))
+              (if W64.to_uint col{hr} = 0 then 20 else 17) 20).
+          + smt().
+          apply
+            (hmp (W64.to_uint row{hr}) (W64.to_uint col{hr})
+              (W64.to_uint j{hr})); smt().
         rewrite hvidx hcoloff.
         apply hvp.
         rewrite /verify_mode2_vec_words_i
@@ -2606,7 +2688,7 @@ while
       + wp.
         exlim a => aa.
         exlim b => bb.
-        call (TargetKeygenM23Pointwise.parent_fqmul_16_24 aa bb).
+        call (TargetKeygenM23Pointwise.parent_fqmul_20_24 aa bb).
         auto => &hr hpre.
         split.
         + move: hpre.
@@ -2920,7 +3002,7 @@ while
     (mp = mp0 /\ vp = vp0 /\
      rows = W64.of_int verify_mode2_rows_i /\
      cols = W64.of_int verify_mode2_cols_i /\
-     verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
      verify_mode2_vector_bound24 vp0 /\
      0 <= W64.to_uint row < verify_mode2_rows_i /\
      W64.to_uint row_out = 256 * W64.to_uint row /\
@@ -3092,7 +3174,7 @@ lemma parent_polymat_pointwise_acc_verify_cols4_local_spec
     tp = tp0 /\ mp = mp0 /\ vp = vp0 /\
     rows = W64.of_int verify_mode2_rows_i /\
     cols = W64.of_int verify_mode2_cols_i /\
-    verify_mode2_matrix_bound16 mp0 /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
     verify_mode2_vector_bound24 vp0
     ==>
     prefix_bound8192 res 512 18 /\
@@ -3102,6 +3184,59 @@ proof.
 conseq
   (parent_polymat_pointwise_acc_verify_cols4_bound18_frame tp0 mp0 vp0)
   (parent_polymat_pointwise_acc_verify_cols4_semantics tp0 mp0 vp0) => />.
+qed.
+
+lemma parent_polymat_pointwise_acc_verify_cols4_mixed_correct
+    (tp0 : BArray8192.t)
+    (mp0 : BArray32768.t)
+    (vp0 : BArray8192.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [Parent._polymat_pointwise_acc :
+    tp = tp0 /\ mp = mp0 /\ vp = vp0 /\
+    rows = W64.of_int verify_mode2_rows_i /\
+    cols = W64.of_int verify_mode2_cols_i /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
+    verify_mode2_ntt_repr_bound24 vp0 p0 p1 p2 p3
+    ==>
+    verify_mode2_pointwise_repr_bound18 res mp0 vp0 /\
+    KeygenM23MatrixSpec.word_tail_frame tp0 res 512].
+proof.
+conseq
+  (parent_polymat_pointwise_acc_verify_cols4_local_spec tp0 mp0 vp0).
++ move=> &hr hpre.
+  move: hpre => [htp hpre].
+  move: hpre => [hmp hpre].
+  move: hpre => [hvp hpre].
+  move: hpre => [hrows hpre].
+  move: hpre => [hcols hpre].
+  move: hpre => [hmatrix hntt].
+  have hmatrix_bound : verify_mode2_matrix_repr_bound20_17 mp0.
+  + exact hmatrix.
+  have hvector_bound : verify_mode2_vector_bound24 vp0.
+  + apply (verify_mode2_ntt_repr_bound24_to_vector4
+             vp0 p0 p1 p2 p3).
+    exact hntt.
+  split; first exact htp.
+  split; first exact hmp.
+  split; first exact hvp.
+  split; first exact hrows.
+  split; first exact hcols.
+  split; first exact hmatrix_bound.
+  exact hvector_bound.
+move=> &hr _ result hpost_local.
+move: hpost_local => [hprefix hpost_local].
+move: hpost_local => [hframe hrows_repr].
+have hpost :
+    verify_mode2_pointwise_repr_bound18
+      result mp0 vp0.
++ apply
+    (verify_mode2_pointwise_rows_prefix_to_repr_bound18
+      result mp0 vp0).
+  + exact hrows_repr.
+  exact hprefix.
+split.
++ exact hpost.
+exact hframe.
 qed.
 
 lemma parent_polymat_pointwise_acc_verify_cols4_correct
@@ -3120,43 +3255,37 @@ lemma parent_polymat_pointwise_acc_verify_cols4_correct
     KeygenM23MatrixSpec.word_tail_frame tp0 res 512].
 proof.
 conseq
-  (parent_polymat_pointwise_acc_verify_cols4_local_spec tp0 mp0 vp0).
-+ move=> &hr hpre.
-  move: hpre => [htp hpre].
-  move: hpre => [hmp hpre].
-  move: hpre => [hvp hpre].
-  move: hpre => [hrows hpre].
-  move: hpre => [hcols hpre].
-  move: hpre => [hmatrix hntt].
-  have hmatrix_bound : verify_mode2_matrix_bound16 mp0.
-  + apply (verify_mode2_matrix_repr_bound16_to_bound mp0).
-    exact hmatrix.
-  have hvector_bound : verify_mode2_vector_bound24 vp0.
-  + apply (verify_mode2_ntt_repr_bound24_to_vector4
-             vp0 p0 p1 p2 p3).
-    exact hntt.
-  rewrite /verify_mode2_matrix_bound16 /Fq.bw32 in hmatrix_bound.
-  rewrite /verify_mode2_vector_bound24 /Fq.bw32 in hvector_bound.
-  split; first exact htp.
-  split; first exact hmp.
-  split; first exact hvp.
-  split; first exact hrows.
-  split; first exact hcols.
-  smt().
-move=> &hr _ result hpost_local.
-move: hpost_local => [hprefix hpost_local].
-move: hpost_local => [hframe hrows_repr].
-have hpost :
-    verify_mode2_pointwise_repr_bound18
-      result mp0 vp0.
-+ apply
-    (verify_mode2_pointwise_rows_prefix_to_repr_bound18
-      result mp0 vp0).
-  + exact hrows_repr.
-  exact hprefix.
+  (parent_polymat_pointwise_acc_verify_cols4_mixed_correct
+     tp0 mp0 vp0 p0 p1 p2 p3) => //=.
+move=> &m [htp [hmp [hvp [hrows [hcols [hmatrix hntt]]]]]].
+split; first exact htp.
+split; first exact hmp.
+split; first exact hvp.
+split; first exact hrows.
+split; first exact hcols.
 split.
-+ exact hpost.
-exact hframe.
++ exact (verify_mode2_matrix_repr_bound16_to_bound20_17 mp0 hmatrix).
+exact hntt.
+qed.
+
+lemma verify_polymat_pointwise_acc_verify_cols4_mixed_correct
+    (tp0 : BArray8192.t)
+    (mp0 : BArray32768.t)
+    (vp0 : BArray8192.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [Verify._polymat_pointwise_acc :
+    tp = tp0 /\ mp = mp0 /\ vp = vp0 /\
+    rows = W64.of_int verify_mode2_rows_i /\
+    cols = W64.of_int verify_mode2_cols_i /\
+    verify_mode2_matrix_repr_bound20_17 mp0 /\
+    verify_mode2_ntt_repr_bound24 vp0 p0 p1 p2 p3
+    ==>
+    verify_mode2_pointwise_repr_bound18 res mp0 vp0 /\
+    KeygenM23MatrixSpec.word_tail_frame tp0 res 512].
+proof.
+by conseq verify_polymat_pointwise_acc_equiv_parent
+  (parent_polymat_pointwise_acc_verify_cols4_mixed_correct
+     tp0 mp0 vp0 p0 p1 p2 p3) => /#.
 qed.
 
 lemma verify_polymat_pointwise_acc_verify_cols4_correct
@@ -3234,14 +3363,14 @@ by conseq verify_polyvec_invntt_equiv_parent
   (parent_polyvec_invntt_verify_cols4_correct18 xp0 mp0 vp0) => /#.
 qed.
 
-lemma verify_matrix_ntt_acc_mode2_cols4_spectral_correct
+lemma verify_matrix_ntt_acc_mode2_cols4_spectral_mixed_correct
     (z10 high0 : BArray8192.t)
     (a10 : BArray32768.t)
     (p0 p1 p2 p3 : Rq.poly) :
   hoare [ActualVerifyMatrixNttAccMode2.run :
     z1p = z10 /\ highp = high0 /\ a1p = a10 /\
     verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
-    verify_mode2_matrix_repr_bound16 a10
+    verify_mode2_matrix_repr_bound20_17 a10
     ==>
     NTTRowProductSpec.vector_forward_repr
       verify_mode2_cols_i
@@ -3269,7 +3398,7 @@ proof.
 proc.
 seq 5 :
   (highp = high0 /\ a1p = a10 /\
-   verify_mode2_matrix_repr_bound16 a10 /\
+   verify_mode2_matrix_repr_bound20_17 a10 /\
    verify_mode2_ntt_repr_bound24 z1p p0 p1 p2 p3 /\
    NTTRowProductSpec.vector_forward_repr
      verify_mode2_cols_i
@@ -3302,7 +3431,7 @@ seq 2 :
      high0 highp verify_mode2_out_words_i).
 + wp.
   call
-    (verify_polymat_pointwise_acc_verify_cols4_correct
+    (verify_polymat_pointwise_acc_verify_cols4_mixed_correct
       high0 a10 transformed p0 p1 p2 p3).
   auto => />.
 exlim highp => pointwise.
@@ -3319,6 +3448,49 @@ exact
   (KeygenM23MatrixSpec.word_tail_frame_trans
     high0 pointwise result verify_mode2_out_words_i
     htail_pointwise htail_inv).
+qed.
+
+lemma verify_matrix_ntt_acc_mode2_cols4_spectral_correct
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixNttAccMode2.run :
+    z1p = z10 /\ highp = high0 /\ a1p = a10 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound16 a10
+    ==>
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res.`1 (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 0
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words a10 res.`1 0))) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 KeygenM23MatrixSpec.poly_words_i
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words a10 res.`1 1))) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      z10 res.`1 verify_mode2_vec_words_i /\
+    KeygenM23MatrixSpec.word_tail_frame
+      high0 res.`2 verify_mode2_out_words_i].
+proof.
+conseq
+  (verify_matrix_ntt_acc_mode2_cols4_spectral_mixed_correct
+    z10 high0 a10 p0 p1 p2 p3) => //=.
+move=> &m [hz1 [hhigh [hmat [hinput hbound16]]]].
+split; first exact hz1.
+split; first exact hhigh.
+split; first exact hmat.
+split; first exact hinput.
+exact (verify_mode2_matrix_repr_bound16_to_bound20_17 a10 hbound16).
 qed.
 
 op verify_mode2_matrix_hat4
@@ -3416,14 +3588,14 @@ exact (NTTFullSpectralAction.full_ntt_montgomery_row_product
   (verify_mode2_vector_words4 input) row).
 qed.
 
-lemma verify_matrix_ntt_acc_mode2_cols4_correct
+lemma verify_matrix_ntt_acc_mode2_cols4_mixed_correct
     (z10 high0 : BArray8192.t)
     (a10 : BArray32768.t)
     (p0 p1 p2 p3 : Rq.poly) :
   hoare [ActualVerifyMatrixNttAccMode2.run :
     z1p = z10 /\ highp = high0 /\ a1p = a10 /\
     verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
-    verify_mode2_matrix_repr_bound16 a10
+    verify_mode2_matrix_repr_bound20_17 a10
     ==>
     NTTRowProductSpec.vector_forward_repr
       verify_mode2_cols_i
@@ -3445,7 +3617,7 @@ lemma verify_matrix_ntt_acc_mode2_cols4_correct
       high0 res.`2 verify_mode2_out_words_i].
 proof.
 conseq
-  (verify_matrix_ntt_acc_mode2_cols4_spectral_correct
+  (verify_matrix_ntt_acc_mode2_cols4_spectral_mixed_correct
     z10 high0 a10 p0 p1 p2 p3) => //=.
 move=> &m _ result
         [hforward [hout0 [hout1 [htail_ntt htail_out]]]].
@@ -3482,6 +3654,45 @@ split.
   exact hout1_bound.
 split; first exact htail_ntt.
 exact htail_out.
+qed.
+
+lemma verify_matrix_ntt_acc_mode2_cols4_correct
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixNttAccMode2.run :
+    z1p = z10 /\ highp = high0 /\ a1p = a10 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound16 a10
+    ==>
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res.`1 (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 0
+        (verify_mode2_coefficient_row_product a10 z10 0) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 KeygenM23MatrixSpec.poly_words_i
+        (verify_mode2_coefficient_row_product a10 z10 1) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      z10 res.`1 verify_mode2_vec_words_i /\
+    KeygenM23MatrixSpec.word_tail_frame
+      high0 res.`2 verify_mode2_out_words_i].
+proof.
+conseq
+  (verify_matrix_ntt_acc_mode2_cols4_mixed_correct
+    z10 high0 a10 p0 p1 p2 p3) => //=.
+move=> &m [hz1 [hhigh [hmat [hinput hbound16]]]].
+split; first exact hz1.
+split; first exact hhigh.
+split; first exact hmat.
+split; first exact hinput.
+exact (verify_mode2_matrix_repr_bound16_to_bound20_17 a10 hbound16).
 qed.
 
 end VerifyMatrixCrtPostFreeze.

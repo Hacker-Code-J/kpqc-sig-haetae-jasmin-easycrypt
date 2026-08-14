@@ -6,7 +6,9 @@ import SLH64.
 require import VerifyCoreTarget.
 require import KeygenM23MatrixSpec KeygenM23ArithmeticSpec.
 require import Array256 Fq GFq Rq NTT_Fq NTTFullSpec NTTRowProductSpec.
-require import VerifyMatrixCrtPostFreeze VerifyCrtFreezeMode2PostFreeze.
+require import VerifyMatrixCrtPostFreeze VerifyCrtFreezeMode2PostFreeze
+               VerifyUnpackV3AssemblyPostFreeze
+               VerifyUnpackV3MatrixProfilePostFreeze.
 
 import VerifyMatrixCrtPostFreeze VerifyCrtFreezeMode2PostFreeze.
 
@@ -119,7 +121,38 @@ rewrite /KeygenM23MatrixSpec.array_words_i /BArray8192.size /=.
 smt().
 qed.
 
-lemma sequential_verify_matrix_crt_mode2_correct
+lemma verify_unpack_matrix_profile20_17_to_matrix_crt
+    (mat : BArray32768.t) :
+  VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17
+    mat =>
+  verify_mode2_matrix_repr_bound20_17 mat.
+proof.
+move=> hunpack.
+rewrite /verify_mode2_matrix_repr_bound20_17 => row col j hrow hcol hj.
+have h :=
+  VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17_get
+    mat row col j hunpack _ _ _.
++ move: hrow.
+  rewrite /verify_mode2_rows_i
+          /VerifyUnpackV3AssemblyPostFreeze.mode2_rows.
+  trivial.
++ move: hcol.
+  rewrite /verify_mode2_cols_i
+          /VerifyUnpackV3AssemblyPostFreeze.mode2_cols.
+  trivial.
++ move: hj.
+  rewrite /KeygenM23MatrixSpec.poly_words_i
+          /VerifyUnpackV3AssemblyPostFreeze.poly_words.
+  trivial.
+move: h.
+rewrite /VerifyUnpackV3AssemblyPostFreeze.mat_idx
+        /VerifyUnpackV3AssemblyPostFreeze.mode2_cols
+        /VerifyUnpackV3AssemblyPostFreeze.poly_words
+        /verify_mode2_cols_i /KeygenM23MatrixSpec.poly_words_i.
+trivial.
+qed.
+
+lemma sequential_verify_matrix_crt_mode2_mixed_correct
     (z10 high0 : BArray8192.t)
     (a10 : BArray32768.t)
     (wprime0 : BArray1024.t)
@@ -128,7 +161,7 @@ lemma sequential_verify_matrix_crt_mode2_correct
     z1p = z10 /\ highp = high0 /\
     a1p = a10 /\ wprimep = wprime0 /\
     verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
-    verify_mode2_matrix_repr_bound16 a10
+    verify_mode2_matrix_repr_bound20_17 a10
     ==>
     verify_matrix_crt_mode2_result
       z10 high0 a10 wprime0 res.`1 res.`2].
@@ -154,7 +187,7 @@ seq 1 :
    KeygenM23MatrixSpec.word_tail_frame
      high0 highp verify_mode2_out_words_i).
 + call
-    (verify_matrix_ntt_acc_mode2_cols4_correct
+    (verify_matrix_ntt_acc_mode2_cols4_mixed_correct
       z10 high0 a10 p0 p1 p2 p3).
   auto => />.
 exlim z1p => transformed.
@@ -209,6 +242,32 @@ split; first exact htail_result.
 exact htail_high.
 qed.
 
+lemma sequential_verify_matrix_crt_mode2_correct
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (wprime0 : BArray1024.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [SequentialVerifyMatrixCrtMode2.run :
+    z1p = z10 /\ highp = high0 /\
+    a1p = a10 /\ wprimep = wprime0 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound16 a10
+    ==>
+    verify_matrix_crt_mode2_result
+      z10 high0 a10 wprime0 res.`1 res.`2].
+proof.
+conseq
+  (sequential_verify_matrix_crt_mode2_mixed_correct
+    z10 high0 a10 wprime0 p0 p1 p2 p3) => //=.
+move=> &m [hz1 [hhigh [hmat [hwprime [hinput hbound16]]]]].
+split; first exact hz1.
+split; first exact hhigh.
+split; first exact hmat.
+split; first exact hwprime.
+split; first exact hinput.
+exact (verify_mode2_matrix_repr_bound16_to_bound20_17 a10 hbound16).
+qed.
+
 lemma actual_verify_matrix_crt_mode2_equiv_sequential :
   equiv [ActualVerifyMatrixCrtMode2.run ~
          SequentialVerifyMatrixCrtMode2.run :
@@ -234,6 +293,25 @@ call (: ={xp, count} ==> ={res}).
 auto => />.
 qed.
 
+lemma verify_matrix_crt_mode2_fromcrt_freeze_mixed_exact
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (wprime0 : BArray1024.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixCrtMode2.run :
+    z1p = z10 /\ highp = high0 /\
+    a1p = a10 /\ wprimep = wprime0 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound20_17 a10
+    ==>
+    verify_matrix_crt_mode2_result
+      z10 high0 a10 wprime0 res.`1 res.`2].
+proof.
+by conseq actual_verify_matrix_crt_mode2_equiv_sequential
+  (sequential_verify_matrix_crt_mode2_mixed_correct
+    z10 high0 a10 wprime0 p0 p1 p2 p3) => /#.
+qed.
+
 lemma verify_matrix_crt_mode2_fromcrt_freeze_exact
     (z10 high0 : BArray8192.t)
     (a10 : BArray32768.t)
@@ -248,9 +326,16 @@ lemma verify_matrix_crt_mode2_fromcrt_freeze_exact
     verify_matrix_crt_mode2_result
       z10 high0 a10 wprime0 res.`1 res.`2].
 proof.
-by conseq actual_verify_matrix_crt_mode2_equiv_sequential
-  (sequential_verify_matrix_crt_mode2_correct
-    z10 high0 a10 wprime0 p0 p1 p2 p3) => /#.
+conseq
+  (verify_matrix_crt_mode2_fromcrt_freeze_mixed_exact
+    z10 high0 a10 wprime0 p0 p1 p2 p3) => //=.
+move=> &m [hz1 [hhigh [hmat [hwprime [hinput hbound16]]]]].
+split; first exact hz1.
+split; first exact hhigh.
+split; first exact hmat.
+split; first exact hwprime.
+split; first exact hinput.
+exact (verify_mode2_matrix_repr_bound16_to_bound20_17 a10 hbound16).
 qed.
 
 end VerifyMatrixCrtCompositionPostFreeze.

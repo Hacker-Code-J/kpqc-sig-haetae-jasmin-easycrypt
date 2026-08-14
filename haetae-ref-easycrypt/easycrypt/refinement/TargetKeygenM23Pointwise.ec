@@ -103,6 +103,52 @@ proof.
 by conseq parent_fqmul_loop_equiv (loop_fqmul_16_24 aa bb) => /#.
 qed.
 
+lemma fqmul_product_bound_20_24 a b :
+  Fq.bw32 a 20 =>
+  Fq.bw32 b 24 =>
+  - Fq.SignedReductions.R %/ 2 * Fq.q <=
+    W32.to_sint a * W32.to_sint b <
+    Fq.SignedReductions.R %/ 2 * Fq.q.
+proof.
+rewrite /Fq.bw32 /Fq.SignedReductions.R /Fq.q /=.
+smt().
+qed.
+
+lemma loop_fqmul_20_24 (aa bb : W32.t) :
+  hoare [Loop.__fqmul :
+    a = aa /\ b = bb /\
+    Fq.bw32 aa 20 /\ Fq.bw32 bb 24
+    ==>
+    NTT_Fq.word_to_coeff res =
+      NTT_Fq.word_to_coeff aa *
+      NTT_Fq.word_to_coeff bb * inv NTT_Fq.R /\
+    Fq.bw32 res 16].
+proof.
+conseq
+  (RefJasminNTT.fqmul_word_to_coeff_mul_bound_h
+     (W32.to_sint aa) (W32.to_sint bb)).
++ move=> &hr [-> [-> [haa hbb]]].
+  split; first trivial.
+  split; first trivial.
+  exact (fqmul_product_bound_20_24 aa bb haa hbb).
+move=> &hr _ result [hsem hbound] /=.
+split; last exact hbound.
+exact hsem.
+qed.
+
+lemma parent_fqmul_20_24 (aa bb : W32.t) :
+  hoare [Parent.__fqmul :
+    a = aa /\ b = bb /\
+    Fq.bw32 aa 20 /\ Fq.bw32 bb 24
+    ==>
+    NTT_Fq.word_to_coeff res =
+      NTT_Fq.word_to_coeff aa *
+      NTT_Fq.word_to_coeff bb * inv NTT_Fq.R /\
+    Fq.bw32 res 16].
+proof.
+by conseq parent_fqmul_loop_equiv (loop_fqmul_20_24 aa bb) => /#.
+qed.
+
 lemma acc_add_bound (col : int) (a b : W32.t) :
   0 <= col < 3 =>
   acc_word_ok a col =>

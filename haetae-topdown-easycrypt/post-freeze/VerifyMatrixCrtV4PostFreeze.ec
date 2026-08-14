@@ -695,6 +695,31 @@ move=> [transformed [hforward [hrow0 [hrow1 [hprefix hrest]]]]].
 exact (crt_freeze_prefix_v4_semantics out high wprime0 hbound hprefix).
 qed.
 
+lemma verify_matrix_crt_mode2_v4_crt_mixed_exact
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (wprime0 : BArray1024.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixCrtMode2.run :
+    z1p = z10 /\ highp = high0 /\
+    a1p = a10 /\ wprimep = wprime0 /\
+    VerifyMatrixCrtPostFreeze.VerifyMatrixCrtPostFreeze.verify_mode2_input_repr_bound16
+      z10 p0 p1 p2 p3 /\
+    VerifyMatrixCrtPostFreeze.VerifyMatrixCrtPostFreeze.verify_mode2_matrix_repr_bound20_17
+      a10
+    ==>
+    verify_matrix_crt_mode2_v4_result
+      z10 high0 a10 wprime0 res.`1 res.`2].
+proof.
+conseq
+  (verify_matrix_crt_mode2_fromcrt_freeze_mixed_exact
+    z10 high0 a10 wprime0 p0 p1 p2 p3).
+move=> &hr _ result hresult.
+exact
+  (verify_matrix_crt_mode2_result_v4
+    z10 high0 a10 wprime0 result.`1 result.`2 hresult).
+qed.
+
 lemma verify_matrix_crt_mode2_v4_crt_exact
     (z10 high0 : BArray8192.t)
     (a10 : BArray32768.t)
@@ -712,12 +737,17 @@ lemma verify_matrix_crt_mode2_v4_crt_exact
       z10 high0 a10 wprime0 res.`1 res.`2].
 proof.
 conseq
-  (verify_matrix_crt_mode2_fromcrt_freeze_exact
-    z10 high0 a10 wprime0 p0 p1 p2 p3).
-move=> &hr _ result hresult.
+  (verify_matrix_crt_mode2_v4_crt_mixed_exact
+    z10 high0 a10 wprime0 p0 p1 p2 p3) => //=.
+move=> &m [hz1 [hhigh [hmat [hwprime [hinput hbound16]]]]].
+split; first exact hz1.
+split; first exact hhigh.
+split; first exact hmat.
+split; first exact hwprime.
+split; first exact hinput.
 exact
-  (verify_matrix_crt_mode2_result_v4
-    z10 high0 a10 wprime0 result.`1 result.`2 hresult).
+  (VerifyMatrixCrtPostFreeze.VerifyMatrixCrtPostFreeze.verify_mode2_matrix_repr_bound16_to_bound20_17
+    a10 hbound16).
 qed.
 
 end VerifyMatrixCrtV4PostFreeze.
