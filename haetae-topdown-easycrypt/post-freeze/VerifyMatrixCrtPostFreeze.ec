@@ -1,4 +1,4 @@
-require import AllCore IntDiv Ring StdOrder.
+require import AllCore IntDiv List Ring StdOrder.
 
 from Jasmin require import JModel_x86.
 
@@ -6,7 +6,8 @@ import SLH64.
 require import VerifyCoreTarget KeygenMode2ParentTarget.
 require import KeygenM23MatrixSpec KeygenM23ArithmeticSpec.
 require import Array256 Fq GFq Rq.
-require import NTT_Fq NTTFullSpec NTTRowProductSpec RefJasminNTT.
+require import NTT_Fq NTTFullSpec NTTRowProductSpec
+               NTTFullSpectralAction RefJasminNTT.
 require import TargetNTTRefinement
                TargetKeygenM23Pointwise
                TargetKeygenM23WideNTT
@@ -1224,6 +1225,60 @@ lemma verify_polyvec_ntt_verify_cols4_correct
 proof.
 by conseq verify_polyvec_ntt_equiv_parent
   (parent_polyvec_ntt_verify_cols4_correct xp0 p0 p1 p2 p3) => /#.
+qed.
+
+lemma parent_polyvec_ntt_verify_cols4_bound24
+    (xp0 : BArray8192.t) (p0 p1 p2 p3 : Rq.poly) :
+  hoare [Parent._polyvec_ntt :
+    xp = xp0 /\
+    count = W64.of_int verify_mode2_cols_i /\
+    verify_mode2_input_repr_bound16 xp0 p0 p1 p2 p3
+    ==>
+    verify_mode2_ntt_repr_bound24 res p0 p1 p2 p3 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      xp0 res verify_mode2_vec_words_i].
+proof.
+have hwide := wide_polyvec_ntt_verify_cols4_correct xp0 p0 p1 p2 p3.
+by conseq parent_polyvec_ntt_equiv_wide_cols4 hwide => /#.
+qed.
+
+lemma verify_polyvec_ntt_verify_cols4_bound24
+    (xp0 : BArray8192.t) (p0 p1 p2 p3 : Rq.poly) :
+  hoare [Verify._polyvec_ntt :
+    xp = xp0 /\
+    count = W64.of_int verify_mode2_cols_i /\
+    verify_mode2_input_repr_bound16 xp0 p0 p1 p2 p3
+    ==>
+    verify_mode2_ntt_repr_bound24 res p0 p1 p2 p3 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      xp0 res verify_mode2_vec_words_i].
+proof.
+by conseq verify_polyvec_ntt_equiv_parent
+  (parent_polyvec_ntt_verify_cols4_bound24 xp0 p0 p1 p2 p3) => /#.
+qed.
+
+lemma verify_polyvec_ntt_verify_cols4_full_correct
+    (xp0 : BArray8192.t) (p0 p1 p2 p3 : Rq.poly) :
+  hoare [Verify._polyvec_ntt :
+    xp = xp0 /\
+    count = W64.of_int verify_mode2_cols_i /\
+    verify_mode2_input_repr_bound16 xp0 p0 p1 p2 p3
+    ==>
+    verify_mode2_ntt_repr_bound24 res p0 p1 p2 p3 /\
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          xp0 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23MatrixSpec.word_tail_frame
+      xp0 res verify_mode2_vec_words_i].
+proof.
+conseq
+  (verify_polyvec_ntt_verify_cols4_bound24 xp0 p0 p1 p2 p3)
+  (verify_polyvec_ntt_verify_cols4_correct xp0 p0 p1 p2 p3) => />.
 qed.
 
 op prefix_bound8192
@@ -3122,6 +3177,311 @@ proof.
 by conseq verify_polymat_pointwise_acc_equiv_parent
   (parent_polymat_pointwise_acc_verify_cols4_correct
      tp0 mp0 vp0 p0 p1 p2 p3) => /#.
+qed.
+
+lemma parent_polyvec_invntt_verify_cols4_correct18
+    (xp0 : BArray8192.t)
+    (mp0 : BArray32768.t)
+    (vp0 : BArray8192.t) :
+  hoare [Parent._polyvec_invntt :
+    xp = xp0 /\
+    count = W64.of_int verify_mode2_rows_i /\
+    verify_mode2_pointwise_repr_bound18 xp0 mp0 vp0
+    ==>
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res 0
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words mp0 vp0 0))) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res KeygenM23MatrixSpec.poly_words_i
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words mp0 vp0 1))) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      xp0 res verify_mode2_out_words_i].
+proof.
+have h :=
+  TargetKeygenM23WideInvNTT.polyvec_invntt_mode2_correct18 xp0
+    (verify_mode2_pointwise_row_words mp0 vp0 0)
+    (verify_mode2_pointwise_row_words mp0 vp0 1).
+by conseq h => /#; rewrite /verify_mode2_pointwise_repr_bound18.
+qed.
+
+lemma verify_polyvec_invntt_verify_cols4_correct18
+    (xp0 : BArray8192.t)
+    (mp0 : BArray32768.t)
+    (vp0 : BArray8192.t) :
+  hoare [Verify._polyvec_invntt :
+    xp = xp0 /\
+    count = W64.of_int verify_mode2_rows_i /\
+    verify_mode2_pointwise_repr_bound18 xp0 mp0 vp0
+    ==>
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res 0
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words mp0 vp0 0))) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res KeygenM23MatrixSpec.poly_words_i
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words mp0 vp0 1))) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      xp0 res verify_mode2_out_words_i].
+proof.
+by conseq verify_polyvec_invntt_equiv_parent
+  (parent_polyvec_invntt_verify_cols4_correct18 xp0 mp0 vp0) => /#.
+qed.
+
+lemma verify_matrix_ntt_acc_mode2_cols4_spectral_correct
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixNttAccMode2.run :
+    z1p = z10 /\ highp = high0 /\ a1p = a10 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound16 a10
+    ==>
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res.`1 (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 0
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words a10 res.`1 0))) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 KeygenM23MatrixSpec.poly_words_i
+        (NTT_Fq.array256_mont
+          (NTTFullSpec.full_invntt
+            (verify_mode2_pointwise_row_words a10 res.`1 1))) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      z10 res.`1 verify_mode2_vec_words_i /\
+    KeygenM23MatrixSpec.word_tail_frame
+      high0 res.`2 verify_mode2_out_words_i].
+proof.
+proc.
+seq 5 :
+  (highp = high0 /\ a1p = a10 /\
+   verify_mode2_matrix_repr_bound16 a10 /\
+   verify_mode2_ntt_repr_bound24 z1p p0 p1 p2 p3 /\
+   NTTRowProductSpec.vector_forward_repr
+     verify_mode2_cols_i
+     (fun col =>
+       KeygenM23ArithmeticSpec.wide_poly
+         z1p (col * KeygenM23MatrixSpec.poly_words_i))
+     (fun col =>
+       KeygenM23ArithmeticSpec.wide_poly
+         z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+   KeygenM23MatrixSpec.word_tail_frame
+     z10 z1p verify_mode2_vec_words_i).
++ wp.
+  call (verify_polyvec_ntt_verify_cols4_full_correct z10 p0 p1 p2 p3).
+  auto => />.
+exlim z1p => transformed.
+seq 2 :
+  (z1p = transformed /\ a1p = a10 /\
+   NTTRowProductSpec.vector_forward_repr
+     verify_mode2_cols_i
+     (fun col =>
+       KeygenM23ArithmeticSpec.wide_poly
+         z1p (col * KeygenM23MatrixSpec.poly_words_i))
+     (fun col =>
+       KeygenM23ArithmeticSpec.wide_poly
+         z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+   KeygenM23MatrixSpec.word_tail_frame
+     z10 z1p verify_mode2_vec_words_i /\
+   verify_mode2_pointwise_repr_bound18 highp a10 z1p /\
+   KeygenM23MatrixSpec.word_tail_frame
+     high0 highp verify_mode2_out_words_i).
++ wp.
+  call
+    (verify_polymat_pointwise_acc_verify_cols4_correct
+      high0 a10 transformed p0 p1 p2 p3).
+  auto => />.
+exlim highp => pointwise.
+wp.
+call
+  (verify_polyvec_invntt_verify_cols4_correct18
+    pointwise a10 transformed).
+auto => />.
+move=> hforward htail_ntt
+        hrow0 hbound0 hrow1 hbound1 htail_pointwise
+        result
+        hout0_eq hout0_bound hout1_eq hout1_bound htail_inv.
+exact
+  (KeygenM23MatrixSpec.word_tail_frame_trans
+    high0 pointwise result verify_mode2_out_words_i
+    htail_pointwise htail_inv).
+qed.
+
+op verify_mode2_matrix_hat4
+    (m : BArray32768.t) (row col : int) : Rq.poly =
+  Array256.init (fun j =>
+    NTT_Fq.word_to_coeff
+      (BArray32768.get32 m
+        ((row * verify_mode2_cols_i + col) *
+           KeygenM23MatrixSpec.poly_words_i + j))).
+
+op verify_mode2_vector_words4
+    (v : BArray8192.t) (col : int) : Rq.poly =
+  KeygenM23ArithmeticSpec.wide_poly
+    v (col * KeygenM23MatrixSpec.poly_words_i).
+
+lemma verify_mode2_matrix_hat4_get m row col j :
+  0 <= j < 256 =>
+  (verify_mode2_matrix_hat4 m row col).[j] =
+  NTT_Fq.word_to_coeff
+    (BArray32768.get32 m
+      ((row * verify_mode2_cols_i + col) *
+         KeygenM23MatrixSpec.poly_words_i + j)).
+proof.
+move=> hj.
+by rewrite /verify_mode2_matrix_hat4 Array256.initiE.
+qed.
+
+lemma verify_mode2_vector_words4_get v col j :
+  0 <= j < 256 =>
+  (verify_mode2_vector_words4 v col).[j] =
+  NTT_Fq.word_to_coeff
+    (BArray8192.get32 v
+      (col * KeygenM23MatrixSpec.poly_words_i + j)).
+proof.
+move=> hj.
+rewrite /verify_mode2_vector_words4.
+exact (KeygenM23ArithmeticSpec.wide_poly_get
+  v (col * KeygenM23MatrixSpec.poly_words_i) j hj).
+qed.
+
+lemma verify_mode2_pointwise_row_words_shared m v row :
+  verify_mode2_pointwise_row_words m v row =
+  NTTRowProductSpec.pointwise_row_hat
+    verify_mode2_cols_i
+    (verify_mode2_matrix_hat4 m)
+    (verify_mode2_vector_words4 v) row.
+proof.
+apply Array256.ext_eq => j hj.
+rewrite /verify_mode2_pointwise_row_words Array256.initiE 1:hj.
+rewrite NTTRowProductSpec.pointwise_row_hat_get 1:hj.
+rewrite /verify_mode2_cols_i.
+rewrite /Rq.BigDom.BAdd.big /range /= filter_predT foldr_map.
+rewrite (@iotaS 0 3) 1:/# /=
+        (@iotaS 1 2) 1:/# /=
+        (@iotaS 2 1) 1:/# /=
+        (@iotaS 3 0) 1:/# /=
+        (@iota0 4 0) 1:/# /=.
+rewrite !verify_mode2_matrix_hat4_get 1:hj 1:hj 1:hj 1:hj.
+rewrite !verify_mode2_vector_words4_get 1:hj 1:hj 1:hj 1:hj.
+rewrite /verify_mode2_pointwise_term /verify_mode2_cols_i.
+ring.
+qed.
+
+op verify_mode2_coefficient_row_product
+    (m : BArray32768.t) (v : BArray8192.t)
+    (row : int) : Rq.poly =
+  NTTRowProductSpec.coefficient_row_product
+    verify_mode2_cols_i
+    (fun r col =>
+      NTTFullSpec.full_invntt (verify_mode2_matrix_hat4 m r col))
+    (verify_mode2_vector_words4 v) row.
+
+lemma verify_mode2_inverse_pointwise_row_product m transformed input row :
+  NTTRowProductSpec.vector_forward_repr
+    verify_mode2_cols_i
+    (verify_mode2_vector_words4 transformed)
+    (verify_mode2_vector_words4 input) =>
+  NTT_Fq.array256_mont
+    (NTTFullSpec.full_invntt
+      (verify_mode2_pointwise_row_words m transformed row)) =
+  verify_mode2_coefficient_row_product m input row.
+proof.
+move=> hforward.
+rewrite -/NTTRowProductSpec.inverse_row.
+rewrite verify_mode2_pointwise_row_words_shared.
+rewrite (NTTRowProductSpec.pointwise_row_from_forward_repr
+  verify_mode2_cols_i
+  (verify_mode2_matrix_hat4 m)
+  (verify_mode2_vector_words4 transformed)
+  (verify_mode2_vector_words4 input) row hforward).
+rewrite /verify_mode2_coefficient_row_product.
+exact (NTTFullSpectralAction.full_ntt_montgomery_row_product
+  verify_mode2_cols_i
+  (verify_mode2_matrix_hat4 m)
+  (verify_mode2_vector_words4 input) row).
+qed.
+
+lemma verify_matrix_ntt_acc_mode2_cols4_correct
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (p0 p1 p2 p3 : Rq.poly) :
+  hoare [ActualVerifyMatrixNttAccMode2.run :
+    z1p = z10 /\ highp = high0 /\ a1p = a10 /\
+    verify_mode2_input_repr_bound16 z10 p0 p1 p2 p3 /\
+    verify_mode2_matrix_repr_bound16 a10
+    ==>
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res.`1 (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          z10 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 0
+        (verify_mode2_coefficient_row_product a10 z10 0) 16 /\
+    KeygenM23ArithmeticSpec.wide_slice_repr_bound
+      res.`2 KeygenM23MatrixSpec.poly_words_i
+        (verify_mode2_coefficient_row_product a10 z10 1) 16 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      z10 res.`1 verify_mode2_vec_words_i /\
+    KeygenM23MatrixSpec.word_tail_frame
+      high0 res.`2 verify_mode2_out_words_i].
+proof.
+conseq
+  (verify_matrix_ntt_acc_mode2_cols4_spectral_correct
+    z10 high0 a10 p0 p1 p2 p3) => //=.
+move=> &m _ result
+        [hforward [hout0 [hout1 [htail_ntt htail_out]]]].
+have hforward4 :
+    NTTRowProductSpec.vector_forward_repr
+      verify_mode2_cols_i
+      (verify_mode2_vector_words4 result.`1)
+      (verify_mode2_vector_words4 z10).
++ exact hforward.
+move: hout0; rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+move=> [hout0_eq hout0_bound].
+move: hout1; rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+move=> [hout1_eq hout1_bound].
+split; first exact hforward.
+split.
++ rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+  split.
+  + rewrite -hout0_eq.
+    apply eq_sym.
+    apply
+      (verify_mode2_inverse_pointwise_row_product
+        a10 result.`1 z10 0).
+    exact hforward4.
+  exact hout0_bound.
+split.
++ rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+  split.
+  + rewrite -hout1_eq.
+    apply eq_sym.
+    apply
+      (verify_mode2_inverse_pointwise_row_product
+        a10 result.`1 z10 1).
+    exact hforward4.
+  exact hout1_bound.
+split; first exact htail_ntt.
+exact htail_out.
 qed.
 
 end VerifyMatrixCrtPostFreeze.
