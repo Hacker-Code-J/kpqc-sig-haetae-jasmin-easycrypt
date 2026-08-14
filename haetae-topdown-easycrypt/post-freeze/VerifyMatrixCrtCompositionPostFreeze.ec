@@ -68,6 +68,43 @@ op verify_matrix_crt_mode2_result
     KeygenM23MatrixSpec.word_tail_frame
       high0 high verify_mode2_out_words_i.
 
+lemma verify_matrix_crt_mode2_result_active_bound16
+    (z10 high0 : BArray8192.t)
+    (a10 : BArray32768.t)
+    (wprime0 : BArray1024.t)
+    (out high : BArray8192.t) :
+  verify_matrix_crt_mode2_result
+    z10 high0 a10 wprime0 out high =>
+  forall i, 0 <= i < mode2_active_words =>
+    Fq.bw32 (BArray8192.get32 high i) 16.
+proof.
+rewrite /verify_matrix_crt_mode2_result.
+move=> [transformed [hforward [hrow0 [hrow1 hrest]]]] i hi.
+rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound in hrow0.
+rewrite /KeygenM23ArithmeticSpec.wide_slice_repr_bound in hrow1.
+move: hrow0 => [_ hbound0].
+move: hrow1 => [_ hbound1].
+rewrite /KeygenM23ArithmeticSpec.wide_slice_bound in hbound0.
+rewrite /KeygenM23ArithmeticSpec.wide_slice_bound in hbound1.
+case (i < KeygenM23MatrixSpec.poly_words_i) => hfirst.
++ apply (hbound0 i).
+  move: hi hfirst.
+  rewrite /KeygenM23MatrixSpec.poly_words_i.
+  smt().
++ have hlocal :
+      0 <= i - KeygenM23MatrixSpec.poly_words_i <
+        KeygenM23MatrixSpec.poly_words_i.
+  + move: hi hfirst.
+    rewrite /mode2_active_words /KeygenM23MatrixSpec.poly_words_i.
+    smt().
+  have hbound :=
+    hbound1 (i - KeygenM23MatrixSpec.poly_words_i) hlocal.
+  rewrite (_ :
+    KeygenM23MatrixSpec.poly_words_i +
+      (i - KeygenM23MatrixSpec.poly_words_i) = i) 1:/# in hbound.
+  exact hbound.
+qed.
+
 lemma word_tail_frame_of_coeff_tail before after coeff_start word_start :
   coeff_start <= word_start =>
   coeff_tail_frame before after coeff_start =>
