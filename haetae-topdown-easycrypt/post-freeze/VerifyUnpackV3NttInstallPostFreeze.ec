@@ -6,7 +6,8 @@ import SLH64.
 
 require import BArray8192 BArray32768 VerifyUnpackMode2Target
   VerifyUnpackV3AssemblyPostFreeze VerifyUnpackV3NttPostFreeze
-  VerifyUnpackV3NttBound17PostFreeze.
+  VerifyUnpackV3NttBound17PostFreeze
+  VerifyUnpackV3NttTightBoundPostFreeze.
 require import Rq NTTRowProductSpec KeygenM23ArithmeticSpec
   KeygenM23MatrixSpec.
 
@@ -149,6 +150,75 @@ seq 1 :
 exlim bp => ntt0.
 call (install_first_column_mode2_word_exact mat0 ntt0).
 auto => />.
+qed.
+
+lemma actual_verify_unpack_ntt_install_mode2_tight_bound20
+    (bp0 : BArray8192.t) (mat0 : BArray32768.t) :
+  hoare [ActualVerifyUnpackNttInstallMode2.run :
+    bp = bp0 /\ matp = mat0 /\
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_input_signed131068
+      bp0
+    ==>
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_output_bound20
+      res.`1 /\
+    KeygenM23MatrixSpec.word_tail_frame
+      bp0 res.`1
+        VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_words /\
+    mat_firstcol_install_prefix res.`1 res.`2 mode2_vec_words /\
+    mat_firstcol_install_frame mat0 res.`2 mode2_vec_words].
+proof.
+proc.
+seq 1 :
+  (exists ntt,
+     bp = ntt /\ matp = mat0 /\
+     VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_output_bound20
+       ntt /\
+     KeygenM23MatrixSpec.word_tail_frame
+       bp0 ntt
+         VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_words).
++ call
+    (VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_polyvec_ntt_count2_tight_bound20
+       bp0).
+  auto => /> result hbound htail.
+  smt().
+exlim bp => ntt0.
+call (install_first_column_mode2_word_exact mat0 ntt0).
+auto => />.
+qed.
+
+lemma actual_verify_unpack_ntt_install_mode2_full_correct_tight20
+    (bp0 : BArray8192.t) (mat0 : BArray32768.t)
+    (p0 p1 : Rq.poly) :
+  hoare [ActualVerifyUnpackNttInstallMode2.run :
+    bp = bp0 /\ matp = mat0 /\
+    VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
+      bp0 p0 p1 /\
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_input_signed131068
+      bp0
+    ==>
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_output_bound20
+      res.`1 /\
+    VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_repr_bound25
+      res.`1 p0 p1 /\
+    NTTRowProductSpec.vector_forward_repr
+      VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_polys
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          res.`1 (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          bp0 (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23MatrixSpec.word_tail_frame
+      bp0 res.`1
+        VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_words /\
+    mat_firstcol_install_prefix res.`1 res.`2 mode2_vec_words /\
+    mat_firstcol_install_frame mat0 res.`2 mode2_vec_words].
+proof.
+conseq
+  (actual_verify_unpack_ntt_install_mode2_full_correct17
+     bp0 mat0 p0 p1)
+  (actual_verify_unpack_ntt_install_mode2_tight_bound20
+     bp0 mat0) => />.
 qed.
 
 end VerifyUnpackV3NttInstallPostFreeze.

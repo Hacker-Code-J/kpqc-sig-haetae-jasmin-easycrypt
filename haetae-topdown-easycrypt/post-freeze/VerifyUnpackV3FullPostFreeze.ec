@@ -9,7 +9,9 @@ require import BArray2752 BArray8192 BArray32768 VerifyUnpackMode2Target
   VerifyUnpackVkM23CoefficientsPostFreeze VerifyUnpackVkM23BoundsPostFreeze
   VerifyUnpackV3AssemblyPostFreeze VerifyUnpackV3ExpandBoundsPostFreeze
   VerifyUnpackV3PreNttPostFreeze VerifyUnpackV3PreNttBoundPostFreeze
-  VerifyUnpackV3NttBound17PostFreeze VerifyUnpackV3NttInstallPostFreeze
+  VerifyUnpackV3PreNttTightBoundPostFreeze
+  VerifyUnpackV3NttBound17PostFreeze VerifyUnpackV3NttTightBoundPostFreeze
+  VerifyUnpackV3NttInstallPostFreeze
   VerifyUnpackV3MatrixProfilePostFreeze
   VerifyUnpackV3SourceBoundPostFreeze
   VerifyUnpackV3PostDecodeThroughNttPostFreeze.
@@ -59,6 +61,71 @@ op verify_unpack_mode2_result
       preinstall_mat outmat mode2_vec_words /\
     VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound25_17
       outmat.
+
+op verify_unpack_mode2_result_tight20
+    (vkp0 : BArray2752.t) (outbp : BArray8192.t)
+    (outmat : BArray32768.t) : bool =
+  exists decoded expanded pre_ntt preinstall_mat,
+    VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
+      decoded vkp0 mode2_vec_words /\
+    VerifyUnpackV3ExpandBoundsPostFreeze.expanded_mode2_prefix_bound
+      expanded /\
+    VerifyUnpackV3PreNttPostFreeze.pre_ntt_prefix
+      vkp0 preinstall_mat pre_ntt mode2_vec_words /\
+    mat_firstcol_frame expanded preinstall_mat /\
+    VerifyUnpackV3MatrixProfilePostFreeze.unpack_matrix_nonfirst_bound17
+      preinstall_mat /\
+    VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
+      pre_ntt
+      (KeygenM23ArithmeticSpec.wide_poly pre_ntt 0)
+      (KeygenM23ArithmeticSpec.wide_poly
+        pre_ntt KeygenM23MatrixSpec.poly_words_i) /\
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_input_signed131068
+      pre_ntt /\
+    VerifyUnpackV3NttTightBoundPostFreeze.verify_unpack_ntt_output_bound20
+      outbp /\
+    VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_repr_bound25
+      outbp
+      (KeygenM23ArithmeticSpec.wide_poly pre_ntt 0)
+      (KeygenM23ArithmeticSpec.wide_poly
+        pre_ntt KeygenM23MatrixSpec.poly_words_i) /\
+    NTTRowProductSpec.vector_forward_repr
+      VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_polys
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          outbp (col * KeygenM23MatrixSpec.poly_words_i))
+      (fun col =>
+        KeygenM23ArithmeticSpec.wide_poly
+          pre_ntt (col * KeygenM23MatrixSpec.poly_words_i)) /\
+    KeygenM23MatrixSpec.word_tail_frame
+      pre_ntt outbp
+        VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_words /\
+    mat_firstcol_install_prefix outbp outmat mode2_vec_words /\
+    mat_firstcol_install_frame
+      preinstall_mat outmat mode2_vec_words /\
+    VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17
+      outmat.
+
+lemma verify_unpack_mode2_result_tight20_weaken
+    (vkp0 : BArray2752.t) (outbp : BArray8192.t)
+    (outmat : BArray32768.t) :
+  verify_unpack_mode2_result_tight20 vkp0 outbp outmat =>
+  verify_unpack_mode2_result vkp0 outbp outmat.
+proof.
+rewrite /verify_unpack_mode2_result_tight20.
+move=> [decoded expanded pre_ntt preinstall_mat hresult].
+have hprofile20 :
+    VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17
+      outmat by
+  move: hresult => />.
+have hprofile25 :=
+  VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17_weaken
+    outmat hprofile20.
+rewrite /verify_unpack_mode2_result.
+exists decoded expanded pre_ntt preinstall_mat.
+move: hresult hprofile25.
+by auto.
+qed.
 
 module StructuredVerifyUnpackMode2 = {
   proc run (matp : BArray32768.t, vkp : BArray2752.t, seedu : int)
@@ -135,6 +202,62 @@ rewrite
 by auto.
 qed.
 
+lemma structured_verify_unpack_mode2_tight20_correct
+    (mat0 : BArray32768.t) (vkp0 : BArray2752.t) seed0 :
+  hoare [StructuredVerifyUnpackMode2.run :
+    matp = mat0 /\ vkp = vkp0 /\ seedu = seed0
+    ==>
+    verify_unpack_mode2_result_tight20 vkp0 res.`1 res.`2].
+proof.
+proc.
+seq 2 :
+  (matp = mat0 /\ vkp = vkp0 /\ seedu = seed0 /\
+   VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
+     bp vkp0 mode2_vec_words).
++ call
+    (VerifyUnpackVkM23CoefficientsPostFreeze.unpack_vk_m23_coeffs_mode2_actual_exact
+       witness vkp0).
+  auto.
+seq 1 :
+  (vkp = vkp0 /\
+   VerifyUnpackVkM23CoefficientsPostFreeze.decoded_coeff_prefix
+     bp vkp0 mode2_vec_words /\
+   VerifyUnpackV3ExpandBoundsPostFreeze.expanded_mode2_prefix_bound
+     matp /\
+   VerifyUnpackV3PreNttBoundPostFreeze.pre_ntt_source_bound vkp0 matp).
++ call
+    (VerifyUnpackV3ExpandBoundsPostFreeze.verify_expand_with_vecA_mode2_prefix_bound
+       mat0 seed0).
+  auto => /> &hr hdecoded result hexpand.
+  exact
+    (VerifyUnpackV3SourceBoundPostFreeze.expanded_decoder_mode2_source_bound
+       vkp0 result hexpand).
+exlim bp => decoded0.
+exlim matp => expanded0.
+call
+  (VerifyUnpackV3PostDecodeThroughNttPostFreeze.actual_verify_unpack_post_decode_through_ntt_install_mode2_tight20_correct
+       decoded0 vkp0 expanded0).
+auto => />.
+move=> hdecoded hexpand hsource out pre_ntt preinstall_mat
+        hprefix hframe hnonfirst hinput0 hinput1 hsigned htight
+        hntt0 hntt0bound hntt1 hntt1bound hforward htail
+        hinstall hinstallframe hmatrixfirst.
+move=> hmatrixnonfirst.
+have hmatrixprofile :
+    VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17
+      out.`2 by
+  rewrite
+    /VerifyUnpackV3MatrixProfilePostFreeze.verify_unpack_mode2_matrix_repr_bound20_17;
+  auto.
+rewrite /verify_unpack_mode2_result_tight20.
+exists decoded0 expanded0 pre_ntt preinstall_mat.
+rewrite
+  /VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_input_repr_bound17
+  /VerifyUnpackV3NttBound17PostFreeze.verify_unpack_ntt_repr_bound25
+  /KeygenM23ArithmeticSpec.wide_slice_repr_bound.
+by auto.
+qed.
+
 lemma actual_verify_unpack_mode2_equiv_structured :
   equiv [Verify._unpack_vk_m23_full ~ StructuredVerifyUnpackMode2.run :
     ={Glob.mem, matp, vkp, seedu} /\
@@ -191,6 +314,29 @@ lemma actual_verify_unpack_mode2_correct
 proof.
 conseq actual_verify_unpack_mode2_equiv_structured
   (structured_verify_unpack_mode2_correct mat0 vkp0 seed0).
++ move=> &1 [hmat [hvkp [hseed [hk [hl hm]]]]].
+  exists Glob.mem{1}.
+  exists (matp{1}, vkp{1}, seedu{1}).
+  by auto.
++ move=> &1 &2 hres hresult.
+  exists res{2}.`1.
+  rewrite hres.
+  exact hresult.
+qed.
+
+lemma actual_verify_unpack_mode2_tight20_correct
+    (mat0 : BArray32768.t) (vkp0 : BArray2752.t) seed0 :
+  hoare [Verify._unpack_vk_m23_full :
+    matp = mat0 /\ vkp = vkp0 /\ seedu = seed0 /\
+    k = W64.of_int mode2_rows /\
+    l = W64.of_int mode2_cols /\
+    m = W64.of_int VerifyUnpackV3ExpandBoundsPostFreeze.mode2_m
+    ==>
+    exists outbp,
+      verify_unpack_mode2_result_tight20 vkp0 outbp res].
+proof.
+conseq actual_verify_unpack_mode2_equiv_structured
+  (structured_verify_unpack_mode2_tight20_correct mat0 vkp0 seed0).
 + move=> &1 [hmat [hvkp [hseed [hk [hl hm]]]]].
   exists Glob.mem{1}.
   exists (matp{1}, vkp{1}, seedu{1}).
