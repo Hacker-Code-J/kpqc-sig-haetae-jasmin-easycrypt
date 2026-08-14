@@ -4,13 +4,14 @@ from Jasmin require import JModel_x86.
 
 import SLH64.
 
-require import BArray2752 BArray8192.
+require import BArray2752 BArray8192 VerifyUnpackMode2Target.
 
 theory VerifyUnpackVkM23CoefficientsPostFreeze.
 
-(* This theory isolates the exact 15-byte/8-word group transition used by the
-   generated decoder.  Composing these group lemmas with the generated
-   procedure's two nested loops remains a separate obligation. *)
+(* This theory identifies the exact 15-byte/8-word group transition used by
+   the generated decoder and lifts it through both generated loops. *)
+
+module Verify = VerifyUnpackMode2Target.M.
 
 op mode2_rows : int = 2.
 op mode2_groups_per_poly : int = 32.
@@ -515,6 +516,321 @@ apply coeff_tail_frame_step.
           /mode2_rows /mode2_groups_per_poly.
    smt().
 + exact (coeff_tail_frame_stage7 before bp vkp poly group hpoly hgroup hframe).
+qed.
+
+lemma actual_coeff_group_base_uint coeff_base i poly :
+  0 <= poly < mode2_rows =>
+  0 <= W64.to_uint i < mode2_groups_per_poly =>
+  W64.to_uint coeff_base = mode2_coeffs_per_poly * poly =>
+  W64.to_uint (coeff_base + W64.of_int 8 * i) =
+    unpack_vk_group_base poly (W64.to_uint i).
+proof.
+move=> hpoly hi hcoeff.
+rewrite W64.to_uintD_small.
++ rewrite W64.to_uintM W64.of_uintK /=.
+  rewrite (modz_small (8 * W64.to_uint i)).
+  * rewrite /mode2_groups_per_poly in hi.
+    smt().
+  rewrite hcoeff.
+  move: hpoly hi.
+  rewrite /mode2_coeffs_per_poly /mode2_rows /mode2_groups_per_poly.
+  smt().
+rewrite W64.to_uintM W64.of_uintK /=.
+rewrite (modz_small (8 * W64.to_uint i)).
++ rewrite /mode2_groups_per_poly in hi.
+  smt().
+rewrite hcoeff /unpack_vk_group_base.
+rewrite /mode2_coeffs_per_group.
+ring.
+qed.
+
+lemma actual_coeff_group_index_uint coeff_base i poly lane :
+  0 <= poly < mode2_rows =>
+  0 <= W64.to_uint i < mode2_groups_per_poly =>
+  0 <= lane < mode2_coeffs_per_group =>
+  W64.to_uint coeff_base = mode2_coeffs_per_poly * poly =>
+  W64.to_uint
+    (coeff_base + W64.of_int 8 * i + W64.of_int lane) =
+    unpack_vk_group_base poly (W64.to_uint i) + lane.
+proof.
+move=> hpoly hi hlane hcoeff.
+rewrite W64.to_uintD_small.
++ rewrite (actual_coeff_group_base_uint coeff_base i poly hpoly hi hcoeff).
+  rewrite W64.of_uintK /= modz_small 1:/#.
+  rewrite /unpack_vk_group_base /mode2_coeffs_per_poly
+          /mode2_coeffs_per_group /mode2_rows /mode2_groups_per_poly.
+  smt().
+rewrite (actual_coeff_group_base_uint coeff_base i poly hpoly hi hcoeff).
+rewrite W64.of_uintK /= modz_small 1:/#.
+trivial.
+qed.
+
+lemma actual_group_byte_index_uint off poly group byte :
+  0 <= poly < mode2_rows =>
+  0 <= group < mode2_groups_per_poly =>
+  0 <= byte <= mode2_group_stride =>
+  W64.to_uint off = unpack_vk_group_byte_offset poly group =>
+  W64.to_uint (off + W64.of_int byte) =
+    unpack_vk_group_byte_offset poly group + byte.
+proof.
+move=> hpoly hgroup hbyte hoff.
+rewrite W64.to_uintD_small.
++ rewrite W64.of_uintK /= modz_small 1:/# hoff.
+  rewrite /unpack_vk_group_byte_offset /mode2_input_prefix
+          /mode2_poly_stride /mode2_group_stride /mode2_rows
+          /mode2_groups_per_poly.
+  smt().
+rewrite W64.of_uintK /= modz_small 1:/# hoff.
+trivial.
+qed.
+
+lemma unpack_vk_m23_coeffs_mode2_actual_exact
+    (bp0 : BArray8192.t) (vkp0 : BArray2752.t) :
+  hoare [Verify.__unpack_vk_m23_coeffs :
+    bp = bp0 /\ vkp = vkp0 /\ count = W64.of_int mode2_rows
+    ==>
+    decoded_coeff_prefix res vkp0 mode2_active_words /\
+    coeff_tail_frame bp0 res mode2_active_words].
+proof.
+proc.
+while
+  (vkp = vkp0 /\
+   count = W64.of_int mode2_rows /\
+   0 <= W64.to_uint poly <= mode2_rows /\
+   W64.to_uint coeff_base = mode2_coeffs_per_poly * W64.to_uint poly /\
+   W64.to_uint in_base =
+     mode2_input_prefix + mode2_poly_stride * W64.to_uint poly /\
+   decoded_coeff_prefix bp vkp0 (W64.to_uint coeff_base) /\
+   coeff_tail_frame bp0 bp (W64.to_uint coeff_base)).
++ wp.
+  while
+    (vkp = vkp0 /\
+     count = W64.of_int mode2_rows /\
+     0 <= W64.to_uint poly < mode2_rows /\
+     W64.to_uint coeff_base = mode2_coeffs_per_poly * W64.to_uint poly /\
+     W64.to_uint in_base =
+       mode2_input_prefix + mode2_poly_stride * W64.to_uint poly /\
+     0 <= W64.to_uint i <= mode2_groups_per_poly /\
+     W64.to_uint off =
+       unpack_vk_group_byte_offset (W64.to_uint poly) (W64.to_uint i) /\
+     decoded_coeff_prefix bp vkp0
+       (W64.to_uint coeff_base + mode2_coeffs_per_group * W64.to_uint i) /\
+     coeff_tail_frame bp0 bp
+       (W64.to_uint coeff_base + mode2_coeffs_per_group * W64.to_uint i)).
+  + auto => />.
+    move=> &hr hpoly0 hpolylt hcoeff hinbase hi0 hile hoff
+            hprefix hframe hguard.
+    have hilt : W64.to_uint i{hr} < mode2_groups_per_poly.
+    + move: hguard.
+      rewrite W64.ultE W64.of_uintK /mode2_groups_per_poly /=.
+      smt(W64.to_uint_cmp).
+    have hpoly : 0 <= W64.to_uint poly{hr} < mode2_rows by smt().
+    have hgroup :
+        0 <= W64.to_uint i{hr} < mode2_groups_per_poly by smt().
+    have hnext_i :
+        W64.to_uint (i{hr} + W64.one) = W64.to_uint i{hr} + 1.
+    + rewrite W64.to_uintD_small 1:/# W64.to_uint1.
+      trivial.
+    have hnext_off :
+        W64.to_uint (off{hr} + W64.of_int 15) = W64.to_uint off{hr} + 15.
+    + rewrite W64.to_uintD_small 1:/# W64.of_uintK /=.
+      smt(W64.to_uint_cmp).
+    have hc0 := actual_coeff_group_base_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) hpoly hgroup hcoeff.
+    have hc1 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 1 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc2 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 2 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc3 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 3 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc4 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 4 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc5 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 5 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc6 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 6 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hc7 := actual_coeff_group_index_uint
+      coeff_base{hr} i{hr} (W64.to_uint poly{hr}) 7 hpoly hgroup _ hcoeff.
+    + rewrite /mode2_coeffs_per_group; smt().
+    have hb1 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 1
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb2 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 2
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb3 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 3
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb4 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 4
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb5 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 5
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb6 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 6
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb7 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 7
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb8 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 8
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb9 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 9
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb10 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 10
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb11 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 11
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb12 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 12
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb13 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 13
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hb14 := actual_group_byte_index_uint
+      off{hr} (W64.to_uint poly{hr}) (W64.to_uint i{hr}) 14
+      hpoly hgroup _ hoff.
+    + rewrite /mode2_group_stride; smt().
+    have hprefix_start :
+        decoded_coeff_prefix bp{hr} vkp0
+          (mode2_coeffs_per_poly * W64.to_uint poly{hr} +
+           mode2_coeffs_per_group * W64.to_uint i{hr}).
+    + by rewrite -hcoeff.
+    have hframe_start :
+        coeff_tail_frame bp0 bp{hr}
+          (mode2_coeffs_per_poly * W64.to_uint poly{hr} +
+           mode2_coeffs_per_group * W64.to_uint i{hr}).
+    + by rewrite -hcoeff.
+    have hprefix_step := decoded_coeff_prefix_group_step
+      bp{hr} vkp0 (W64.to_uint poly{hr}) (W64.to_uint i{hr})
+      hpoly hgroup hprefix_start.
+    have hframe_step := coeff_tail_frame_group_step
+      bp0 bp{hr} vkp0 (W64.to_uint poly{hr}) (W64.to_uint i{hr})
+      hpoly hgroup hframe_start.
+    split.
+    + rewrite hnext_i.
+      smt(W64.to_uint_cmp).
+    split.
+    + rewrite hnext_i hnext_off hoff /unpack_vk_group_byte_offset
+              /mode2_group_stride.
+      ring.
+    split.
+    + rewrite hnext_i hcoeff hc0 hc1 hc2 hc3 hc4 hc5 hc6 hc7 hoff
+              hb1 hb2 hb3 hb4 hb5 hb6 hb7 hb8 hb9 hb10 hb11 hb12 hb13 hb14.
+      move: hprefix_step.
+      rewrite /unpack_vk_group_write /unpack_vk_group_stage8
+              /unpack_vk_group_stage7 /unpack_vk_group_stage6
+              /unpack_vk_group_stage5 /unpack_vk_group_stage4
+              /unpack_vk_group_stage3 /unpack_vk_group_stage2
+              /unpack_vk_group_stage1 /unpack_vk_lane_word
+              /unpack_vk_group_byte /unpack_vk_group_base.
+      trivial.
+    + rewrite hnext_i hcoeff hc0 hc1 hc2 hc3 hc4 hc5 hc6 hc7 hoff
+              hb1 hb2 hb3 hb4 hb5 hb6 hb7 hb8 hb9 hb10 hb11 hb12 hb13 hb14.
+      move: hframe_step.
+      rewrite /unpack_vk_group_write /unpack_vk_group_stage8
+              /unpack_vk_group_stage7 /unpack_vk_group_stage6
+              /unpack_vk_group_stage5 /unpack_vk_group_stage4
+              /unpack_vk_group_stage3 /unpack_vk_group_stage2
+              /unpack_vk_group_stage1 /unpack_vk_lane_word
+              /unpack_vk_group_byte /unpack_vk_group_base.
+      trivial.
+  + wp.
+    skip => &hr /=.
+    move=> /> hpoly0 hpolyle hcoeff hinbase hprefix hframe hguard.
+    have hpolylt : W64.to_uint poly{hr} < mode2_rows.
+    + move: hguard.
+      rewrite W64.ultE W64.of_uintK /mode2_rows /=.
+      smt(W64.to_uint_cmp).
+    split; first exact hpolylt.
+    move=> bp1 i0 off0 hdone hpolylt1 hi0 hile hoff1 hprefix1 hframe1.
+    have hi_done : W64.to_uint i0 = mode2_groups_per_poly.
+    + move: hdone.
+      rewrite W64.ultE W64.of_uintK /mode2_groups_per_poly /=.
+      smt(W64.to_uint_cmp).
+    have hpoly_next :
+        W64.to_uint (poly{hr} + W64.one) = W64.to_uint poly{hr} + 1.
+    + rewrite W64.to_uintD_small 1:/# W64.to_uint1.
+      trivial.
+    have hcoeff_next :
+        W64.to_uint (coeff_base{hr} + W64.of_int 256) =
+        W64.to_uint coeff_base{hr} + 256.
+    + rewrite W64.to_uintD_small.
+      * rewrite W64.of_uintK /= hcoeff
+                /mode2_coeffs_per_poly /mode2_rows.
+        smt().
+      rewrite W64.of_uintK /=.
+      trivial.
+    have hinbase_next :
+        W64.to_uint (in_base{hr} + W64.of_int 480) =
+        W64.to_uint in_base{hr} + 480.
+    + rewrite W64.to_uintD_small.
+      * rewrite W64.of_uintK /= hinbase
+                /mode2_input_prefix /mode2_poly_stride /mode2_rows.
+        smt().
+      rewrite W64.of_uintK /=.
+      trivial.
+    split.
+    + split.
+      * rewrite hpoly_next; smt(W64.to_uint_cmp).
+      * move=> _; rewrite hpoly_next; smt().
+    split.
+    + rewrite hcoeff_next hpoly_next hcoeff
+              /mode2_coeffs_per_poly.
+      ring.
+    split.
+    + rewrite hinbase_next hpoly_next hinbase
+              /mode2_poly_stride.
+      ring.
+    split.
+    + move: hprefix1.
+      rewrite hcoeff_next hi_done /mode2_groups_per_poly
+              /mode2_coeffs_per_group.
+      trivial.
+    + move: hframe1.
+      rewrite hcoeff_next hi_done /mode2_groups_per_poly
+              /mode2_coeffs_per_group.
+      trivial.
++ wp.
+  skip => &hr /=.
+  move=> />.
++ split; first exact (decoded_coeff_prefix_zero bp{hr} vkp{hr}).
++ move=> bp1 coeff_base0 in_base0 poly0 hdone hpoly0 hpolyle
+         hcoeff hinbase hprefix hframe.
+  have hpoly_done : W64.to_uint poly0 = mode2_rows.
+  + move: hdone.
+    rewrite W64.ultE W64.of_uintK /mode2_rows /=.
+    smt(W64.to_uint_cmp).
+  have hcoeff_done : W64.to_uint coeff_base0 = mode2_active_words.
+  + rewrite hcoeff hpoly_done /mode2_coeffs_per_poly /mode2_rows
+            /mode2_active_words.
+    ring.
+  split.
+  + by rewrite -hcoeff_done.
+  + by rewrite -hcoeff_done.
 qed.
 
 end VerifyUnpackVkM23CoefficientsPostFreeze.
