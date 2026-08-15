@@ -230,4 +230,55 @@ if.
     exact hreject.
 qed.
 
+lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_accept_sound
+    (mat0 : BArray32768.t) (vkp0 : BArray2752.t) seed0
+    (z10 high0 lowz0 highz0 h0 wp0 z20 : BArray8192.t)
+    (wprime0 cp0 : BArray1024.t)
+    (bad0 : BArray8.t) (sig0 : BArray2948.t)
+    (desc0 : BArray40.t) :
+  hoare [RawVerifySignatureUnpackPrepareMatrixCrtRecoverNormTailMode2.run :
+    matp = mat0 /\ vkp = vkp0 /\ seedu = seed0 /\
+    z1p = z10 /\ highp = high0 /\
+    lowzp = lowz0 /\ highzp = highz0 /\ hp = h0 /\
+    wp_0 = wp0 /\ z2p = z20 /\
+    wprimep = wprime0 /\ cp = cp0 /\
+    badp = bad0 /\ sigp = sig0 /\ descp = desc0
+    ==>
+    res.`14 = W64.zero =>
+    res.`13 = W64.zero /\
+    BArray8.get64 res.`6 0 = W64.zero /\
+    raw_verify_signature_unpack_prepare_matrix_crt_mode2_result
+      vkp0 z10 high0 wprime0
+      res.`1 res.`2 res.`3 res.`4 res.`5 res.`6
+      res.`7 res.`8 res.`9 res.`10 /\
+    Mode2VerifyRecover.recover_w_prefix
+      res.`11 res.`7 res.`5 Mode2VerifyRecover.mode2_verify_recover_count /\
+    Mode2VerifyRecover.recover_z2_prefix
+      res.`12 res.`7 res.`5 res.`9
+      Mode2VerifyRecover.mode2_verify_recover_count /\
+    Mode2VerifyPrepareNorm.verify_norm_accepts_word res.`12 res.`10 /\
+    exists cprime,
+      Mode2VerifyTailChallenge.poly_mismatch_result_word
+        (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+          res.`2 cprime Mode2VerifyTailChallenge.mode2_challenge_words) =
+        W64.zero /\
+      Mode2VerifyPrepareNorm.canonical_challenge cprime /\
+      forall i,
+        0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
+        BArray1024.get32 res.`2 i = BArray1024.get32 cprime i].
+proof.
+have hexact :=
+  raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_exact
+    mat0 vkp0 seed0 z10 high0 lowz0 highz0 h0
+    wp0 z20 wprime0 cp0 bad0 sig0 desc0.
+conseq hexact => //=.
+move=> &m _ result hresult hreject.
+exact
+  (raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_result_accepts
+    vkp0 z10 high0 wprime0 wp0 z20
+    result.`1 result.`2 result.`3 result.`4 result.`5 result.`6
+    result.`7 result.`8 result.`9 result.`10 result.`11 result.`12
+    result.`13 result.`14 hresult hreject).
+qed.
+
 end VerifySignatureUnpackPrepareMatrixCrtRecoverNormTailRawCompositionPostFreeze.
