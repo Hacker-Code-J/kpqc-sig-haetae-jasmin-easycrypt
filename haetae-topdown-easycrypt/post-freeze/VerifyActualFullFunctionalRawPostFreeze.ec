@@ -285,9 +285,12 @@ module VerifyFullMode2FlatTrace = {
       hp <- protect_ptr hp ms;
       badp <- protect_ptr badp ms;
       sigp <- protect_ptr sigp ms;
-      (cp, lowzp, highzp, hp, badp) <@
-        RawUnpackSignatureMode2.run
-          (cp, lowzp, highzp, hp, badp, sigp);
+      (cp, lowzp, highzp, hp, badp) <@ Raw._unpack_sig_full
+        (cp, lowzp, highzp, hp, badp, sigp,
+         h_symbolwp, h_dsymswp, hb_symbolwp, hb_dsymswp,
+         l_i, hb_count_i, hb_m_i, hb_offset_i,
+         h_count_i, h_m_i, h_offset_i,
+         base_hb_i, base_h_i, payload_limit_i);
       ms <- init_msf;
       badp <- protect_ptr badp ms;
       badv <- BArray8.get64 badp 0;
@@ -307,9 +310,8 @@ module VerifyFullMode2FlatTrace = {
         lowzp <- protect_ptr lowzp ms;
         cp <- protect_ptr cp ms;
         lcount <- protect_64 lcount ms;
-        (z1p, wprimep, sqnorm2) <@
-          RawVerifyPrepareZ1WprimeMode2.run
-            (z1p, highzp, lowzp, wprimep, cp);
+        (z1p, wprimep, sqnorm2) <@ Raw._verify_prepare_z1_wprime
+          (z1p, wprimep, highzp, lowzp, cp, lcount);
         highbitsp <- highbits;
         ms <- init_msf;
         z1p <- protect_ptr z1p ms;
@@ -318,9 +320,8 @@ module VerifyFullMode2FlatTrace = {
         wprimep <- protect_ptr wprimep ms;
         k <- protect_64 k ms;
         l <- protect_64 l ms;
-        (z1p, highbitsp) <@
-          RawVerifyMatrixCrtMode2.run
-            (z1p, highbitsp, a1p, wprimep);
+        (z1p, highbitsp) <@ Raw._verify_matrix_crt
+          (z1p, highbitsp, a1p, wprimep, k, l);
         wp_0 <- w;
         z2p <- z2;
         kcount <- k;
@@ -332,17 +333,17 @@ module VerifyFullMode2FlatTrace = {
         hp <- protect_ptr hp ms;
         wprimep <- protect_ptr wprimep ms;
         kcount <- protect_64 kcount ms;
-        (wp_0, z2p) <@
-          RawSignVerifyRecoverMode2.run
-            (wp_0, z2p, z1p, hp, wprimep);
+        (wp_0, z2p) <@ Raw._sign_verify_recover_w_z2
+          (wp_0, z2p, z1p, hp, wprimep,
+           kcount, 256, 9, 252, 512);
         bound <- W64.of_int b2sq_i;
         ms <- init_msf;
         z2p <- protect_ptr z2p ms;
         sqnorm2 <- protect_64 sqnorm2 ms;
         kcount <- protect_64 kcount ms;
         bound <- protect_64 bound ms;
-        reject <@
-          RawSignVerifyNormRejectMode2.run (z2p, sqnorm2);
+        reject <@ Raw._sign_verify_norm_reject
+          (z2p, sqnorm2, kcount, bound);
         norm_reject <- reject;
         ms <- init_msf;
         reject <- protect_64 reject ms;
@@ -353,9 +354,9 @@ module VerifyFullMode2FlatTrace = {
           wprimep <- protect_ptr wprimep ms;
           cp <- protect_ptr cp ms;
           taildescp <- protect_ptr taildescp ms;
-          reject <@
-            RawSignVerifyTailMode2.run
-              (wp_0, wprimep, cp, taildescp);
+          reject <@ Raw._sign_verify_tail_m23
+            (wp_0, wprimep, cp, taildescp,
+             k_i, highbits_len_i, vkbytes_i, tau_i);
         }
       }
     }
@@ -419,16 +420,8 @@ lemma actual_verify_full_mode2_exact_flat_trace :
     ={Glob.mem} /\ res{1} = res{2}.`14].
 proof.
 proc.
-inline Raw._verify_full_m23
-       RawUnpackSignatureMode2.run
-       RawVerifyPrepareZ1WprimeMode2.run
-       RawVerifyMatrixCrtMode2.run
-       RawSignVerifyRecoverMode2.run
-       RawSignVerifyNormRejectMode2.run
-       RawSignVerifyTailMode2.run.
+inline Raw._verify_full_m23.
 sim : (={Glob.mem, reject}).
-auto.
-admit.
 qed.
 
 end VerifyActualFullFunctionalRawPostFreeze.
