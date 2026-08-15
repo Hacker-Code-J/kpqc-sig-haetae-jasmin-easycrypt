@@ -10,11 +10,13 @@ require import BArray8 BArray40 BArray1024 BArray2752 BArray2948
                Mode2VerifyTailChallenge
                VerifySignatureUnpackPrepareMatrixCrtRawCompositionPostFreeze
                VerifySignatureUnpackPrepareMatrixCrtRecoverNormRawCompositionPostFreeze
-               VerifyTailRawBoundaryPostFreeze.
+               VerifyTailRawBoundaryPostFreeze
+               VerifyActualAcceptChallengeEqualityRawPostFreeze.
 
 import VerifySignatureUnpackPrepareMatrixCrtRawCompositionPostFreeze
        VerifySignatureUnpackPrepareMatrixCrtRecoverNormRawCompositionPostFreeze
-       VerifyTailRawBoundaryPostFreeze.
+       VerifyTailRawBoundaryPostFreeze
+       VerifyActualAcceptChallengeEqualityRawPostFreeze.
 
 theory VerifySignatureUnpackPrepareMatrixCrtRecoverNormTailRawCompositionPostFreeze.
 
@@ -106,7 +108,11 @@ lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_result_ac
     Mode2VerifyTailChallenge.poly_mismatch_result_word
       (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
         parsed_cp cprime Mode2VerifyTailChallenge.mode2_challenge_words) =
-      W64.zero.
+      W64.zero /\
+    Mode2VerifyPrepareNorm.canonical_challenge cprime /\
+    forall i,
+      0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
+      BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
 proof.
 rewrite
   /raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_result.
@@ -130,8 +136,38 @@ split; first exact hw.
 split; first exact hz.
 split; first exact hnorm.
 exists cprime.
-rewrite -hmismatch.
-exact hreject.
+have hmismatch_zero :
+    Mode2VerifyTailChallenge.poly_mismatch_result_word
+      (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+        parsed_cp cprime Mode2VerifyTailChallenge.mode2_challenge_words) =
+      W64.zero.
++ rewrite -hmismatch.
+  exact hreject.
+have hequal :
+    forall i,
+      0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
+      BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
++ apply
+    (poly_mismatch_result_zero_words_equal
+      parsed_cp cprime Mode2VerifyTailChallenge.mode2_challenge_words).
+  + by rewrite /Mode2VerifyTailChallenge.mode2_challenge_words.
+  + exact hmismatch_zero.
+have hcanonical_parsed :
+    Mode2VerifyPrepareNorm.canonical_challenge parsed_cp.
++ move: hraw.
+  rewrite
+    /raw_verify_signature_unpack_prepare_matrix_crt_mode2_result.
+  move=> [outbp [_ [hcanonical _]]].
+  exact hcanonical.
+have hcanonical_cprime :
+    Mode2VerifyPrepareNorm.canonical_challenge cprime.
++ apply
+    (canonical_challenge_of_word_equal parsed_cp cprime).
+  + exact hcanonical_parsed.
+  + exact hequal.
+split; first exact hmismatch_zero.
+split; first exact hcanonical_cprime.
+exact hequal.
 qed.
 
 lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_exact

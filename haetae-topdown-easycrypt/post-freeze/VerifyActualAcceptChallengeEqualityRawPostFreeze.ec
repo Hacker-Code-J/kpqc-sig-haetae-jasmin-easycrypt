@@ -4,8 +4,8 @@ from Jasmin require import JModel_x86.
 
 import SLH64.
 
-require import BArray1024 Mode2VerifyTailChallenge RawApiVerifyMuTrace
-               RawVerifyApiTarget
+require import BArray1024 Mode2VerifyPrepareNorm Mode2VerifyTailChallenge
+               RawApiVerifyMuTrace RawVerifyApiTarget
                VerifyActualAcceptMismatchRawPostFreeze.
 
 theory VerifyActualAcceptChallengeEqualityRawPostFreeze.
@@ -218,6 +218,30 @@ apply/poly_mismatch_term_eq_zero.
 apply (poly_mismatch_acc_prefix_zero_terms ap bp n hn).
 + by move: hresult; rewrite poly_mismatch_result_word_eq_zero.
 + exact hi.
+qed.
+
+lemma canonical_challenge_of_word_equal
+    (parsed_cp cprime : BArray1024.t) :
+  Mode2VerifyPrepareNorm.canonical_challenge parsed_cp =>
+  (forall i,
+    0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
+    BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i) =>
+  Mode2VerifyPrepareNorm.canonical_challenge cprime.
+proof.
+move=> hcanonical hequal.
+rewrite /Mode2VerifyPrepareNorm.canonical_challenge => i hi.
+have hsame :
+    BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
++ apply hequal.
+  move: hi.
+  rewrite /Mode2VerifyPrepareNorm.challenge_words
+    /Mode2VerifyTailChallenge.mode2_challenge_words.
+  trivial.
+rewrite -hsame.
+move: hcanonical.
+rewrite /Mode2VerifyPrepareNorm.canonical_challenge => hcanonical.
+apply hcanonical.
+exact hi.
 qed.
 
 op accepted_observed_challenges_equal
