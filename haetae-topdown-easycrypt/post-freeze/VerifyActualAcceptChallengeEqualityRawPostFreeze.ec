@@ -5,8 +5,9 @@ from Jasmin require import JModel_x86.
 import SLH64.
 
 require import BArray1024 Mode2VerifyPrepareNorm Mode2VerifyTailChallenge
-               RawApiVerifyMuTrace RawVerifyApiTarget
-               VerifyActualAcceptMismatchRawPostFreeze.
+               RawApiVerifyAcceptTrace RawApiVerifyMuTrace RawVerifyApiTarget
+               VerifyActualAcceptMismatchRawPostFreeze
+               VerifySignatureUnpackRawBoundaryPostFreeze.
 
 theory VerifyActualAcceptChallengeEqualityRawPostFreeze.
 
@@ -270,6 +271,240 @@ apply
 + by rewrite /Mode2VerifyTailChallenge.mode2_challenge_words.
 + apply hmismatch.
   exact hreject.
+qed.
+
+op accepted_observed_canonical_challenges
+    (reject : W64.t) (parsed_cp cprime : BArray1024.t) : bool =
+  reject = W64.zero =>
+  Mode2VerifyPrepareNorm.canonical_challenge parsed_cp /\
+  Mode2VerifyPrepareNorm.canonical_challenge cprime /\
+  parsed_cp = cprime.
+
+lemma parsed_canonical_and_mismatch_implies_canonical_challenges
+    (reject : W64.t) (parsed_cp cprime : BArray1024.t) :
+  (reject = W64.zero =>
+    Mode2VerifyPrepareNorm.canonical_challenge parsed_cp) =>
+  VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero
+    reject parsed_cp cprime =>
+  accepted_observed_canonical_challenges reject parsed_cp cprime.
+proof.
+move=> hcanonical hmismatch.
+rewrite /accepted_observed_canonical_challenges => hreject.
+have hequal :=
+  accepted_observed_mismatch_word_zero_implies_challenges_equal
+    reject parsed_cp cprime hmismatch.
+rewrite /accepted_observed_challenges_equal in hequal.
+have heq := hequal hreject.
+split.
++ exact (hcanonical hreject).
++ split.
+  + by rewrite -heq; exact (hcanonical hreject).
+  + exact heq.
+qed.
+
+lemma verify_full_m23_mode2_mu_trace_accept_parsed_canonical_and_mismatch :
+  hoare [FullM23MuTrace.run :
+    l_i = 4 /\ hb_count_i = 1024 /\ hb_m_i = 13 /\ hb_offset_i = 6
+    ==>
+    (res = W64.zero =>
+      Mode2VerifyPrepareNorm.canonical_challenge
+        FullM23MuTrace.observed_cp) /\
+    VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero
+      res FullM23MuTrace.observed_cp FullM23MuTrace.observed_cprime].
+proof.
+proc.
+sp 38.
+if.
++ auto => />.
+  rewrite
+    /VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero.
+  smt(W64.WRingA.oner_neq0).
++ seq 11 :
+    (l_i = 4 /\ hb_count_i = 1024 /\ hb_m_i = 13 /\ hb_offset_i = 6).
+  + call (_ : true ==> true); first by auto.
+    auto.
+  + sp 5.
+    seq 1 :
+      (l_i = 4 /\ hb_count_i = 1024 /\ hb_m_i = 13 /\ hb_offset_i = 6).
+    + if; auto.
+    + seq 15 :
+        (l_i = 4 /\ hb_count_i = 1024 /\ hb_m_i = 13 /\ hb_offset_i = 6).
+      + auto => />; rewrite /protect_ptr; smt().
+      + seq 1 :
+          (Mode2VerifyPrepareNorm.canonical_challenge cp).
+        + exlim cp => cp0.
+          exlim lowzp => low0.
+          exlim highzp => hbz0.
+          exlim badp => bad0.
+          exlim sigp => sig0.
+          call
+            (VerifySignatureUnpackRawBoundaryPostFreeze.raw_unpack_sig_full_mode2_challenge_canonical
+              cp0 low0 hbz0 bad0 sig0).
+          auto.
+        + sp 5.
+          if.
+          + auto => />.
+            rewrite
+              /VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero.
+            smt(W64.WRingA.oner_neq0).
+          + seq 12 :
+              (Mode2VerifyPrepareNorm.canonical_challenge cp).
+            + call (_ : true ==> true); first by auto.
+              auto.
+            + seq 9 :
+                (Mode2VerifyPrepareNorm.canonical_challenge cp).
+              + call (_ : true ==> true); first by auto.
+                auto.
+              + seq 12 :
+                  (Mode2VerifyPrepareNorm.canonical_challenge cp).
+                + call (_ : true ==> true); first by auto.
+                  auto.
+                + seq 7 :
+                    (Mode2VerifyPrepareNorm.canonical_challenge cp).
+                  + call (_ : true ==> true); first by auto.
+                    auto.
+                  + sp 2.
+                    if.
+                    + wp.
+                      exlim cp => parsed_cp0.
+                      call
+                        (VerifyActualAcceptMismatchRawPostFreeze.verify_tail_mu_trace_mismatch_word_exact
+                          parsed_cp0).
+                      auto => />.
+                    + auto => />.
+                      rewrite
+                        /VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero.
+                      smt().
+qed.
+
+lemma verify_full_mode2_mu_trace_accept_canonical_challenges :
+  hoare [FullMode2MuTrace.run :
+    true
+    ==>
+    accepted_observed_canonical_challenges
+      res FullMode2MuTrace.observed_cp FullMode2MuTrace.observed_cprime].
+proof.
+proc.
+wp.
+call verify_full_m23_mode2_mu_trace_accept_parsed_canonical_and_mismatch.
+auto => />.
+exact parsed_canonical_and_mismatch_implies_canonical_challenges.
+qed.
+
+lemma verify_internal_mode2_mu_trace_accept_canonical_challenges :
+  hoare [InternalMode2MuTrace.run :
+    true
+    ==>
+    accepted_observed_canonical_challenges
+      res InternalMode2MuTrace.observed_cp
+      InternalMode2MuTrace.observed_cprime].
+proof.
+proc.
+wp.
+call verify_full_mode2_mu_trace_accept_canonical_challenges.
+auto.
+qed.
+
+lemma verify_raw_api_mu_trace_accept_canonical_challenges :
+  hoare [RawApiMuTrace.run :
+    true
+    ==>
+    accepted_observed_canonical_challenges
+      res RawApiMuTrace.observed_cp RawApiMuTrace.observed_cprime].
+proof.
+proc.
+sp 15.
+if.
++ auto => />.
+  rewrite /accepted_observed_canonical_challenges.
+  smt(W64.WRingA.oner_neq0).
++ wp.
+  call verify_internal_mode2_mu_trace_accept_canonical_challenges.
+  wp.
+  call (_ : true ==> true); first by auto.
+  wp.
+  call (_ : true ==> true); first by auto.
+  auto.
+qed.
+
+lemma verify_cryptolab_mu_trace_accept_canonical_challenges :
+  hoare [CryptolabMuTrace.run :
+    true
+    ==>
+    accepted_observed_canonical_challenges
+      res CryptolabMuTrace.observed_cp CryptolabMuTrace.observed_cprime].
+proof.
+proc.
+seq 2 :
+  (accepted_observed_canonical_challenges
+    reject RawApiMuTrace.observed_cp RawApiMuTrace.observed_cprime).
++ inline Raw._verify_publish_reject.
+  wp.
+  call verify_raw_api_mu_trace_accept_canonical_challenges.
+  auto => />; rewrite /protect_64; auto.
++ if.
+  + auto.
+  + wp.
+    call RawApiVerifyAcceptTrace.api_reject_returns_nonzero.
+    auto => />.
+    rewrite /accepted_observed_canonical_challenges.
+    smt().
+qed.
+
+lemma actual_verify_full_mode2_accept_observed_canonical_challenges :
+  equiv [Raw._verify_full_mode2 ~ FullMode2MuTrace.run :
+    ={Glob.mem, sigp, siglen, vkp, vku, descp}
+    ==>
+    ={Glob.mem, res} /\
+    accepted_observed_canonical_challenges
+      res{1} FullMode2MuTrace.observed_cp{2}
+      FullMode2MuTrace.observed_cprime{2}].
+proof.
+conseq RawApiVerifyMuTrace.verify_full_mode2_exact_mu_trace
+  (_ : true ==> true)
+  verify_full_mode2_mu_trace_accept_canonical_challenges => //=.
+qed.
+
+lemma actual_verify_internal_mode2_accept_observed_canonical_challenges :
+  equiv [Raw.sign_verify_internal_mode2_jazz ~ InternalMode2MuTrace.run :
+    ={Glob.mem, sigp, siglen, vkp, vku, descp}
+    ==>
+    ={Glob.mem, res} /\
+    accepted_observed_canonical_challenges
+      res{1} InternalMode2MuTrace.observed_cp{2}
+      InternalMode2MuTrace.observed_cprime{2}].
+proof.
+conseq RawApiVerifyMuTrace.verify_internal_mode2_exact_mu_trace
+  (_ : true ==> true)
+  verify_internal_mode2_mu_trace_accept_canonical_challenges => //=.
+qed.
+
+lemma actual_verify_raw_api_accept_observed_canonical_challenges :
+  equiv [Raw._api_verify_mode2_raw ~ RawApiMuTrace.run :
+    ={Glob.mem, sigu, siglen, mu, mlen, preu, prelen, vku}
+    ==>
+    ={Glob.mem, res} /\
+    accepted_observed_canonical_challenges
+      res{1} RawApiMuTrace.observed_cp{2}
+      RawApiMuTrace.observed_cprime{2}].
+proof.
+conseq RawApiVerifyMuTrace.verify_raw_api_exact_mu_trace
+  (_ : true ==> true)
+  verify_raw_api_mu_trace_accept_canonical_challenges => //=.
+qed.
+
+lemma actual_verify_cryptolab_accept_observed_canonical_challenges :
+  equiv [Raw.cryptolab_haetae_mode2_verify_internal ~ CryptolabMuTrace.run :
+    ={Glob.mem, sigu, siglen, mu, mlen, preu, prelen, vku}
+    ==>
+    ={Glob.mem, res} /\
+    accepted_observed_canonical_challenges
+      res{1} CryptolabMuTrace.observed_cp{2}
+      CryptolabMuTrace.observed_cprime{2}].
+proof.
+conseq RawApiVerifyMuTrace.verify_cryptolab_exact_mu_trace
+  (_ : true ==> true)
+  verify_cryptolab_mu_trace_accept_canonical_challenges => //=.
 qed.
 
 lemma verify_full_m23_mu_trace_accept_challenges_equal :

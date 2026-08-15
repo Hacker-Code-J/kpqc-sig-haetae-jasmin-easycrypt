@@ -48,6 +48,34 @@ proof.
 proc; sim.
 qed.
 
+lemma raw_unpack_sig_full_mode2_challenge_canonical
+    (cp0 : BArray1024.t) (low0 hbz0 : BArray8192.t)
+    (bad0 : BArray8.t) (sig0 : BArray2948.t) :
+  hoare [Raw._unpack_sig_full :
+    cp = cp0 /\ lowp = low0 /\ hbzp = hbz0 /\
+    badp = bad0 /\ sigp = sig0 /\
+    lcount_i = 4 /\ hb_count_i = 1024 /\
+    hb_m_i = 13 /\ hb_offset_i = 6
+    ==>
+    Mode2VerifyPrepareNorm.canonical_challenge res.`1].
+proof.
+conseq raw_unpack_sig_full_equiv_focused
+  (VerifyHbzRansSuccessCanonicalPostFreeze.unpack_sig_full_mode2_verify_canonical
+    cp0 low0 hbz0 bad0 sig0).
++ move=> &1 hpre.
+  exists Glob.mem{1}.
+  exists
+    (cp{1}, lowp{1}, hbzp{1}, hp{1}, badp{1}, sigp{1},
+     h_symbolwp{1}, h_dsymswp{1}, hb_symbolwp{1}, hb_dsymswp{1},
+     lcount_i{1}, hb_count_i{1}, hb_m_i{1}, hb_offset_i{1},
+     h_count_i{1}, h_m_i{1}, h_offset_i{1},
+     base_hb_i{1}, base_h_i{1}, payload_limit_i{1}).
+  by auto.
++ move=> &1 &2 [_ hres] [hcanonical _].
+  rewrite hres.
+  exact hcanonical.
+qed.
+
 module RawUnpackSignatureMode2 = {
   proc run
       (cp : BArray1024.t,
