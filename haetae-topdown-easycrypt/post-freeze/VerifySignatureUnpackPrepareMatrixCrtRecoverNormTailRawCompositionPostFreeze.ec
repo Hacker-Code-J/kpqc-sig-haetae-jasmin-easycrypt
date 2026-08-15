@@ -110,9 +110,7 @@ lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_result_ac
         parsed_cp cprime Mode2VerifyTailChallenge.mode2_challenge_words) =
       W64.zero /\
     Mode2VerifyPrepareNorm.canonical_challenge cprime /\
-    forall i,
-      0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
-      BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
+    parsed_cp = cprime.
 proof.
 rewrite
   /raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_result.
@@ -165,9 +163,11 @@ have hcanonical_cprime :
     (canonical_challenge_of_word_equal parsed_cp cprime).
   + exact hcanonical_parsed.
   + exact hequal.
+have hequal_array : parsed_cp = cprime.
++ exact (challenge_array_eq_of_word_equal parsed_cp cprime hequal).
 split; first exact hmismatch_zero.
 split; first exact hcanonical_cprime.
-exact hequal.
+exact hequal_array.
 qed.
 
 lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_exact
@@ -263,9 +263,7 @@ lemma raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_acc
           res.`2 cprime Mode2VerifyTailChallenge.mode2_challenge_words) =
         W64.zero /\
       Mode2VerifyPrepareNorm.canonical_challenge cprime /\
-      forall i,
-        0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
-        BArray1024.get32 res.`2 i = BArray1024.get32 cprime i].
+      res.`2 = cprime].
 proof.
 have hexact :=
   raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_exact

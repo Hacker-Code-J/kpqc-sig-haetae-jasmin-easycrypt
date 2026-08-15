@@ -220,6 +220,21 @@ apply (poly_mismatch_acc_prefix_zero_terms ap bp n hn).
 + exact hi.
 qed.
 
+lemma challenge_array_eq_of_word_equal
+    (ap bp : BArray1024.t) :
+  (forall i,
+    0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
+    BArray1024.get32 ap i = BArray1024.get32 bp i) =>
+  ap = bp.
+proof.
+move=> hequal.
+apply BArray1024.ext_eq32 => i hi.
+apply hequal.
+move: hi.
+rewrite /Mode2VerifyTailChallenge.mode2_challenge_words.
+smt().
+qed.
+
 lemma canonical_challenge_of_word_equal
     (parsed_cp cprime : BArray1024.t) :
   Mode2VerifyPrepareNorm.canonical_challenge parsed_cp =>
@@ -229,27 +244,14 @@ lemma canonical_challenge_of_word_equal
   Mode2VerifyPrepareNorm.canonical_challenge cprime.
 proof.
 move=> hcanonical hequal.
-rewrite /Mode2VerifyPrepareNorm.canonical_challenge => i hi.
-have hsame :
-    BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
-+ apply hequal.
-  move: hi.
-  rewrite /Mode2VerifyPrepareNorm.challenge_words
-    /Mode2VerifyTailChallenge.mode2_challenge_words.
-  trivial.
-rewrite -hsame.
-move: hcanonical.
-rewrite /Mode2VerifyPrepareNorm.canonical_challenge => hcanonical.
-apply hcanonical.
-exact hi.
+have heq := challenge_array_eq_of_word_equal parsed_cp cprime hequal.
+by rewrite -heq.
 qed.
 
 op accepted_observed_challenges_equal
     (reject : W64.t) (parsed_cp cprime : BArray1024.t) : bool =
   reject = W64.zero =>
-  forall i,
-    0 <= i < Mode2VerifyTailChallenge.mode2_challenge_words =>
-    BArray1024.get32 parsed_cp i = BArray1024.get32 cprime i.
+  parsed_cp = cprime.
 
 lemma accepted_observed_mismatch_word_zero_implies_challenges_equal
     (reject : W64.t) (parsed_cp cprime : BArray1024.t) :
@@ -260,14 +262,14 @@ proof.
 rewrite
   /VerifyActualAcceptMismatchRawPostFreeze.accepted_observed_mismatch_word_zero
   /accepted_observed_challenges_equal.
-move=> hmismatch hreject i hi.
+move=> hmismatch hreject.
+apply challenge_array_eq_of_word_equal.
 apply
   (poly_mismatch_result_zero_words_equal parsed_cp cprime
     Mode2VerifyTailChallenge.mode2_challenge_words).
 + by rewrite /Mode2VerifyTailChallenge.mode2_challenge_words.
 + apply hmismatch.
   exact hreject.
-+ exact hi.
 qed.
 
 lemma verify_full_m23_mu_trace_accept_challenges_equal :
