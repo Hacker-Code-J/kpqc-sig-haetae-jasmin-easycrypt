@@ -22,8 +22,9 @@ op mode2_verify_desc
   BArray40.get64 descp 3 = mp /\
   BArray40.get64 descp 4 = mlen.
 
-(* This mirror preserves the full tail computation. Its only extra effect is to
-   expose the mu value returned by the real generated __verify_hash_mu call. *)
+(* This mirror preserves the full tail computation. Its extra effects expose
+   the real mu result and the two challenge arrays passed to _poly_mismatch.
+   The challenge observations are assigned only on the reached tail path. *)
 module VerifyTailMuTrace = {
   var observed_vkp : W64.t
   var observed_prep : W64.t
@@ -32,6 +33,8 @@ module VerifyTailMuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
 
   proc run (wp_0 : BArray8192.t, wprimep : BArray1024.t,
             cp : BArray1024.t, descp : BArray40.t, k_i : int,
@@ -118,6 +121,8 @@ module VerifyTailMuTrace = {
     tau <- protect_64 tau ms;
     cprimep <@ Verify.__verify_challenge_m23
       (cprimep, highp, highlen, lsbp, mup, tau);
+    observed_cp <- cp;
+    observed_cprime <- cprimep;
     ms <- init_msf;
     cp <- protect_ptr cp ms;
     cprimep <- protect_ptr cprimep ms;
@@ -135,6 +140,8 @@ module VerifyFullM23MuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
   var tail_reached : bool
 
   proc run (sigp : BArray2948.t, siglen : W64.t, vkp : BArray2752.t,
@@ -337,6 +344,8 @@ module VerifyFullM23MuTrace = {
           reject <@ VerifyTailMuTrace.run
             (wp_0, wprimep, cp, taildescp, k_i, highbits_len_i, vkbytes_i,
              tau_i);
+          observed_cp <- VerifyTailMuTrace.observed_cp;
+          observed_cprime <- VerifyTailMuTrace.observed_cprime;
           observed_vkp <- VerifyTailMuTrace.observed_vkp;
           observed_prep <- VerifyTailMuTrace.observed_prep;
           observed_prelen <- VerifyTailMuTrace.observed_prelen;
@@ -361,6 +370,8 @@ module VerifyFullMode2MuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
   var tail_reached : bool
 
   proc run (sigp : BArray2948.t, siglen : W64.t, vkp : BArray2752.t,
@@ -380,6 +391,8 @@ module VerifyFullMode2MuTrace = {
       (sigp, siglen, vkp, vku, descp, 2, 4, 3, 1474, 992, 576, 58,
        163265017, 1024, 13, 6, 512, 13, 239, 132, 7, 416);
     observed_vk <- VerifyFullM23MuTrace.observed_vk;
+    observed_cp <- VerifyFullM23MuTrace.observed_cp;
+    observed_cprime <- VerifyFullM23MuTrace.observed_cprime;
     observed_vkp <- VerifyFullM23MuTrace.observed_vkp;
     observed_prep <- VerifyFullM23MuTrace.observed_prep;
     observed_prelen <- VerifyFullM23MuTrace.observed_prelen;
@@ -401,6 +414,8 @@ module VerifyInternalMode2MuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
   var tail_reached : bool
 
   proc run (sigp : BArray2948.t, siglen : W64.t, vkp : BArray2752.t,
@@ -421,6 +436,8 @@ module VerifyInternalMode2MuTrace = {
     siglen <- protect_64 siglen ms;
     reject <@ VerifyFullMode2MuTrace.run (sigp, siglen, vkp, vku, descp);
     observed_vk <- VerifyFullMode2MuTrace.observed_vk;
+    observed_cp <- VerifyFullMode2MuTrace.observed_cp;
+    observed_cprime <- VerifyFullMode2MuTrace.observed_cprime;
     observed_vkp <- VerifyFullMode2MuTrace.observed_vkp;
     observed_prep <- VerifyFullMode2MuTrace.observed_prep;
     observed_prelen <- VerifyFullMode2MuTrace.observed_prelen;
@@ -442,6 +459,8 @@ module VerifyRawApiMuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
   var tail_reached : bool
 
   proc run (sigu : int, siglen : W64.t, mu : W64.t, mlen : W64.t,
@@ -486,6 +505,8 @@ module VerifyRawApiMuTrace = {
       reject <@ VerifyInternalMode2MuTrace.run
         (sigp, W64.of_int mode2_sigbytes, vkp, vku, descp);
       tail_reached <- VerifyInternalMode2MuTrace.tail_reached;
+      observed_cp <- VerifyInternalMode2MuTrace.observed_cp;
+      observed_cprime <- VerifyInternalMode2MuTrace.observed_cprime;
       observed_vkp <- VerifyInternalMode2MuTrace.observed_vkp;
       observed_prep <- VerifyInternalMode2MuTrace.observed_prep;
       observed_prelen <- VerifyInternalMode2MuTrace.observed_prelen;
@@ -507,6 +528,8 @@ module VerifyCryptolabMuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_cp : BArray1024.t
+  var observed_cprime : BArray1024.t
   var tail_reached : bool
 
   proc run (sigu : int, siglen : int, mu : int, mlen : int,
@@ -524,6 +547,8 @@ module VerifyCryptolabMuTrace = {
       r <@ Verify._api_reject ();
     }
     observed_vk <- VerifyRawApiMuTrace.observed_vk;
+    observed_cp <- VerifyRawApiMuTrace.observed_cp;
+    observed_cprime <- VerifyRawApiMuTrace.observed_cprime;
     observed_vkp <- VerifyRawApiMuTrace.observed_vkp;
     observed_prep <- VerifyRawApiMuTrace.observed_prep;
     observed_prelen <- VerifyRawApiMuTrace.observed_prelen;
