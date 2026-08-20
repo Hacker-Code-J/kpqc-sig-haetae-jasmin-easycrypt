@@ -6,7 +6,7 @@ import SLH64.
 
 require import BArray8 BArray1024 BArray2752 BArray2948
                BArray8192 BArray32768
-               RawVerifyApiTarget
+               RawVerifyApiTarget RawApiVerifyMuTrace
                Mode2HbzCodecSpec Mode2VerifyPrepareNorm
                Mode2VerifyRecover Mode2VerifyTailChallenge
                KeygenM23ArithmeticSpec KeygenM23MatrixSpec
@@ -23,7 +23,8 @@ require import BArray8 BArray1024 BArray2752 BArray2948
                VerifySignatureUnpackPrepareMatrixCrtRecoverNormRawCompositionPostFreeze
                VerifySignatureUnpackPrepareMatrixCrtRecoverNormTailRawCompositionPostFreeze
                VerifyActualFullFunctionalRawPostFreeze
-               VerifyMatrixCrtDirectRawPostFreeze.
+               VerifyMatrixCrtDirectRawPostFreeze
+               VerifyActualAcceptMismatchRawPostFreeze.
 
 import Mode2VerifyPrepareNorm Mode2VerifyRecover Mode2VerifyTailChallenge
        VerifySignatureUnpackRawBoundaryPostFreeze
@@ -240,7 +241,12 @@ lemma verify_full_mode2_flat_trace_accept_exact
       witness<:BArray1024.t>
       witness<:BArray8192.t> witness<:BArray8192.t>
       res.`1 res.`2 res.`3 res.`4 res.`5 res.`6
-      res.`7 res.`8 res.`9 res.`10 res.`11 res.`12 res.`13 res.`14].
+      res.`7 res.`8 res.`9 res.`10 res.`11 res.`12 res.`13 res.`14 /\
+    RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cp = res.`2 /\
+    res.`14 = Mode2VerifyTailChallenge.poly_mismatch_result_word
+      (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+        res.`2 RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cprime
+        Mode2VerifyTailChallenge.mode2_challenge_words)].
 proof.
 proc.
 sp.
@@ -545,11 +551,12 @@ if.
                prepared_wprime0 prepared_total0
                recovered_w0 recovered_z20 norm_reject0 /\
              norm_reject0 = W64.zero /\
-             (exists cprime,
-               reject = Mode2VerifyTailChallenge.poly_mismatch_result_word
-                 (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
-                   parsed_cp0 cprime
-                   Mode2VerifyTailChallenge.mode2_challenge_words)) /\
+             reject = Mode2VerifyTailChallenge.poly_mismatch_result_word
+               (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+                 parsed_cp0
+                 RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cprime
+                 Mode2VerifyTailChallenge.mode2_challenge_words) /\
+             RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cp = parsed_cp0 /\
              a1p = unpacked0 /\ lowzp = parsed_low0 /\
              highzp = parsed_high0 /\ badp = parsed_bad0 /\
              z1p = matrix_z10 /\ highbitsp = matrix_high0 /\
@@ -559,9 +566,10 @@ if.
              wprimep = prepared_wprime0 /\
              norm_reject = norm_reject0).
           + call
-              (raw_sign_verify_tail_m23_mismatch_word_exact parsed_cp0).
+              (VerifyActualAcceptMismatchRawPostFreeze.verify_tail_mu_trace_mismatch_word_exact
+                parsed_cp0).
             wp.
-            auto => />; smt().
+            auto => />.
           seq 0 :
             (raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_result
                vkp0 witness witness witness witness witness
@@ -569,6 +577,12 @@ if.
                parsed_h0 parsed_bad0 matrix_z10 matrix_high0
                prepared_wprime0 prepared_total0
                recovered_w0 recovered_z20 norm_reject0 reject /\
+             RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cp = parsed_cp0 /\
+             reject = Mode2VerifyTailChallenge.poly_mismatch_result_word
+               (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+                 parsed_cp0
+                 RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cprime
+                 Mode2VerifyTailChallenge.mode2_challenge_words) /\
              a1p = unpacked0 /\ lowzp = parsed_low0 /\
              highzp = parsed_high0 /\ badp = parsed_bad0 /\
              z1p = matrix_z10 /\ highbitsp = matrix_high0 /\
@@ -581,6 +595,7 @@ if.
             move: hpre => [hrecover hpre].
             move: hpre => [hnormzero hpre].
             move: hpre => [htail hpre].
+            move: hpre => [hobserved hpre].
             split.
             + apply
                 (raw_verify_signature_unpack_prepare_matrix_crt_recover_norm_tail_mode2_result_of_success
@@ -591,8 +606,12 @@ if.
                   recovered_w0 recovered_z20 norm_reject0 reject{hr}).
               + exact hrecover.
               + exact hnormzero.
-              + exact htail.
-            + exact hpre.
+              + exists
+                  RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cprime{hr}.
+                exact htail.
+            + split; first exact hobserved.
+              split; first exact htail.
+              exact hpre.
           + auto => />.
         + auto => />; smt().
 qed.
@@ -615,7 +634,13 @@ lemma actual_verify_full_mode2_accept_exact_flat_trace
         witness<:BArray8192.t> witness<:BArray8192.t>
         res{2}.`1 res{2}.`2 res{2}.`3 res{2}.`4 res{2}.`5 res{2}.`6
         res{2}.`7 res{2}.`8 res{2}.`9 res{2}.`10 res{2}.`11 res{2}.`12
-        res{2}.`13 res{2}.`14)].
+        res{2}.`13 res{2}.`14 /\
+      RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cp{2} = res{2}.`2 /\
+      res{2}.`14 = Mode2VerifyTailChallenge.poly_mismatch_result_word
+        (Mode2VerifyTailChallenge.poly_mismatch_acc_prefix
+          res{2}.`2
+          RawApiVerifyMuTrace.VerifyTailMuTrace.observed_cprime{2}
+          Mode2VerifyTailChallenge.mode2_challenge_words))].
 proof.
 conseq actual_verify_full_mode2_exact_flat_trace
   (_ : true ==> true)

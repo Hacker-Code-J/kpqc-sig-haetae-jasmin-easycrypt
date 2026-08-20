@@ -6,7 +6,7 @@ import SLH64.
 
 require import BArray8 BArray40 BArray528 BArray1024 BArray2048
                BArray2752 BArray2948 BArray8192 BArray32768
-               RawVerifyApiTarget
+               RawVerifyApiTarget RawApiVerifyMuTrace
                Rq KeygenM23ArithmeticSpec KeygenM23MatrixSpec
                VerifyHbzRansSuccessCanonicalPostFreeze
                VerifyUnpackMatrixCrtRawCompositionPostFreeze
@@ -354,7 +354,7 @@ module VerifyFullMode2FlatTrace = {
           wprimep <- protect_ptr wprimep ms;
           cp <- protect_ptr cp ms;
           taildescp <- protect_ptr taildescp ms;
-          reject <@ Raw._sign_verify_tail_m23
+          reject <@ RawApiVerifyMuTrace.VerifyTailMuTrace.run
             (wp_0, wprimep, cp, taildescp,
              k_i, highbits_len_i, vkbytes_i, tau_i);
         }
