@@ -1,4 +1,4 @@
-require import AllCore List.
+require import AllCore IntDiv List.
 
 from Jasmin require import JModel_x86.
 
@@ -7,7 +7,7 @@ import SLH64.
 require import BArray8 BArray32 BArray40 BArray1024 BArray1152
                BArray2752 BArray2948 BArray8192 BArray32768
                Mode2VerifyPrepareNorm Mode2VerifyTailChallenge
-               RawVerifyApiTarget
+               RawVerifyApiTarget TranscriptBytes
                RawApiVerifyMuTrace
                VerifyActualFullFunctionalRawPostFreeze
                VerifyActualFullAcceptApiRawPostFreeze
@@ -31,11 +31,32 @@ op challenge_of_barray
 op bytes_of_barray32 (bp : BArray32.t) : HAETAE_Algebra.byte list =
   mkseq (fun i => W8.to_uint (BArray32.get8 bp i)) 32.
 
+op w8s_of_barray32 (bp : BArray32.t) : W8.t list =
+  mkseq (fun i => BArray32.get8 bp i) 32.
+
 op mode2_highbits_bytes
     (bp : BArray1152.t) : HAETAE_Algebra.byte list =
   mkseq
     (fun i => W8.to_uint (BArray1152.get8 bp i))
     Mode2VerifyTailChallenge.mode2_tail_highlen.
+
+op mode2_highbits_w8s
+    (bp : BArray1152.t) : W8.t list =
+  mkseq
+    (fun i => BArray1152.get8 bp i)
+    Mode2VerifyTailChallenge.mode2_tail_highlen.
+
+op mode2_verify_challenge_input_w8
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) : W8.t list =
+  TranscriptBytes.verify_challenge_input
+    (mode2_highbits_w8s highp)
+    (w8s_of_barray32 lsbp)
+    (w8s_of_barray32 mup).
+
+op mode2_verify_challenge_input_bytes
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) :
+    HAETAE_Algebra.byte list =
+  map W8.to_uint (mode2_verify_challenge_input_w8 highp lsbp mup).
 
 lemma bytes_of_barray32_size (bp : BArray32.t) :
   size (bytes_of_barray32 bp) = 32.
@@ -45,6 +66,10 @@ lemma bytes_of_barray32_coeff (bp : BArray32.t) (i : int) :
   0 <= i < 32 =>
   nth 0 (bytes_of_barray32 bp) i = W8.to_uint (BArray32.get8 bp i).
 proof. by move=> hi; rewrite /bytes_of_barray32 nth_mkseq 1:hi. qed.
+
+lemma bytes_of_barray32_map_w8 (bp : BArray32.t) :
+  bytes_of_barray32 bp = map W8.to_uint (w8s_of_barray32 bp).
+proof. by rewrite /bytes_of_barray32 /w8s_of_barray32 map_mkseq. qed.
 
 lemma mode2_highbits_bytes_size (bp : BArray1152.t) :
   size (mode2_highbits_bytes bp) =
@@ -56,6 +81,24 @@ lemma mode2_highbits_bytes_coeff (bp : BArray1152.t) (i : int) :
   nth 0 (mode2_highbits_bytes bp) i =
     W8.to_uint (BArray1152.get8 bp i).
 proof. by move=> hi; rewrite /mode2_highbits_bytes nth_mkseq 1:hi. qed.
+
+lemma mode2_highbits_bytes_map_w8 (bp : BArray1152.t) :
+  mode2_highbits_bytes bp = map W8.to_uint (mode2_highbits_w8s bp).
+proof. by rewrite /mode2_highbits_bytes /mode2_highbits_w8s map_mkseq. qed.
+
+lemma mode2_verify_challenge_input_bytesE
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) :
+  mode2_verify_challenge_input_bytes highp lsbp mup =
+    mode2_highbits_bytes highp ++
+    bytes_of_barray32 lsbp ++
+    bytes_of_barray32 mup.
+proof.
+rewrite /mode2_verify_challenge_input_bytes
+        /mode2_verify_challenge_input_w8.
+rewrite /TranscriptBytes.verify_challenge_input !map_cat.
+by rewrite -mode2_highbits_bytes_map_w8
+           -bytes_of_barray32_map_w8 -bytes_of_barray32_map_w8.
+qed.
 
 lemma challenge_of_barray_size (cp : BArray1024.t) :
   size (challenge_of_barray cp) = HAETAE_Params.n.
@@ -282,10 +325,12 @@ op mode2_challenge_packed_relation
       (bytes_of_barray32 lsbp)
       (bytes_of_barray32 mup).
 
-(* Exact remaining implementation leaf: establish this relation for
-   Tail.observed_cprime, Tail.observed_highp, Tail.observed_lsbp, and
-   Tail.observed_mu after __verify_challenge_m23.  The current checked tail
-   proofs expose those values but stop before the squeeze/sampler semantics. *)
+(* Historical structural candidate only.  Its packed input order is exact,
+   but challenge_from_seed does not model the SHAKE256 squeeze, rejection, or
+   shuffle performed by __verify_challenge_m23.  Do not establish this
+   relation for Tail.observed_cprime; the actual leaf needs a separate
+   SHAKE-plus-sampler specification.  The blocker lemmas below make the
+   alphabet and support mismatch explicit. *)
 
 lemma mode2_challenge_packed_target_wf
     (actual : BArray1024.t)
@@ -330,6 +375,71 @@ split.
       (mode2_highbits_bytes highp)
       (bytes_of_barray32 lsbp)
       (bytes_of_barray32 mup)).
+qed.
+
+lemma mode2_challenge_packed_relation_uses_verify_input_bytes
+    (actual : BArray1024.t)
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) :
+  mode2_challenge_packed_relation actual highp lsbp mup =
+  (challenge_of_barray actual =
+    HAETAE_Algebra.challenge_from_seed
+      HAETAE_Params.Mode2
+      (mode2_verify_challenge_input_bytes highp lsbp mup)).
+proof.
+rewrite /mode2_challenge_packed_relation.
+rewrite /HAETAE_Algebra.challenge_hash_packed.
+by rewrite mode2_verify_challenge_input_bytesE.
+qed.
+
+lemma canonical_challenge_coeff_range
+    (cp : BArray1024.t) (i : int) :
+  Mode2VerifyPrepareNorm.canonical_challenge cp =>
+  0 <= i < Mode2VerifyPrepareNorm.challenge_words =>
+  0 <= nth 0 (challenge_of_barray cp) i <= 1.
+proof.
+move=> hcanonical hi.
+move: (hcanonical i hi) => [hrange _].
+rewrite challenge_of_barray_coeff 1:hi.
+exact hrange.
+qed.
+
+(* This isolates the support mismatch: challenge_from_seed is fixed to the
+   first tau coordinates. *)
+lemma challenge_from_seed_mode2_suffix_zero
+    (src : HAETAE_Algebra.byte list) (i : int) :
+  HAETAE_Params.mode_tau HAETAE_Params.Mode2 <= i <
+    Mode2VerifyPrepareNorm.challenge_words =>
+  nth 0 (HAETAE_Algebra.challenge_from_seed HAETAE_Params.Mode2 src) i = 0.
+proof.
+move=> hi.
+rewrite /HAETAE_Algebra.challenge_from_seed.
+have hin : 0 <= i < HAETAE_Params.n.
++ by move: hi; smt().
+rewrite nth_mkseq 1:hin.
+smt().
+qed.
+
+lemma challenge_from_seed_mode2_head_minus_one :
+  nth 0
+    (HAETAE_Algebra.challenge_from_seed HAETAE_Params.Mode2 (1 :: [])) 0 = -1.
+proof.
+rewrite /HAETAE_Algebra.challenge_from_seed nth_mkseq.
++ rewrite /=.
+  trivial.
++ by rewrite /HAETAE_Params.n.
+qed.
+
+lemma canonical_challenge_not_mode2_head_minus_one
+    (cp : BArray1024.t) :
+  Mode2VerifyPrepareNorm.canonical_challenge cp =>
+  challenge_of_barray cp <>
+    HAETAE_Algebra.challenge_from_seed HAETAE_Params.Mode2 (1 :: []).
+proof.
+move=> hcanonical.
+have hrange := canonical_challenge_coeff_range cp 0 hcanonical _.
++ by rewrite /Mode2VerifyPrepareNorm.challenge_words.
+have hhead := challenge_from_seed_mode2_head_minus_one.
+smt().
 qed.
 
 lemma paper_challenge_hash_ignores_highbits
