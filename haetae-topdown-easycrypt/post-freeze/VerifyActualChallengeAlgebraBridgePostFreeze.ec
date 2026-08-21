@@ -4,9 +4,9 @@ from Jasmin require import JModel_x86.
 
 import SLH64.
 
-require import BArray8 BArray40 BArray1024 BArray2752 BArray2948
-               BArray8192 BArray32768
-               Mode2VerifyPrepareNorm
+require import BArray8 BArray32 BArray40 BArray1024 BArray1152
+               BArray2752 BArray2948 BArray8192 BArray32768
+               Mode2VerifyPrepareNorm Mode2VerifyTailChallenge
                RawVerifyApiTarget
                RawApiVerifyMuTrace
                VerifyActualFullFunctionalRawPostFreeze
@@ -27,6 +27,35 @@ op challenge_of_barray
   mkseq
     (fun i => W32.to_uint (BArray1024.get32 cp i))
     Mode2VerifyPrepareNorm.challenge_words.
+
+op bytes_of_barray32 (bp : BArray32.t) : HAETAE_Algebra.byte list =
+  mkseq (fun i => W8.to_uint (BArray32.get8 bp i)) 32.
+
+op mode2_highbits_bytes
+    (bp : BArray1152.t) : HAETAE_Algebra.byte list =
+  mkseq
+    (fun i => W8.to_uint (BArray1152.get8 bp i))
+    Mode2VerifyTailChallenge.mode2_tail_highlen.
+
+lemma bytes_of_barray32_size (bp : BArray32.t) :
+  size (bytes_of_barray32 bp) = 32.
+proof. by rewrite /bytes_of_barray32 size_mkseq. qed.
+
+lemma bytes_of_barray32_coeff (bp : BArray32.t) (i : int) :
+  0 <= i < 32 =>
+  nth 0 (bytes_of_barray32 bp) i = W8.to_uint (BArray32.get8 bp i).
+proof. by move=> hi; rewrite /bytes_of_barray32 nth_mkseq 1:hi. qed.
+
+lemma mode2_highbits_bytes_size (bp : BArray1152.t) :
+  size (mode2_highbits_bytes bp) =
+    Mode2VerifyTailChallenge.mode2_tail_highlen.
+proof. by rewrite /mode2_highbits_bytes size_mkseq. qed.
+
+lemma mode2_highbits_bytes_coeff (bp : BArray1152.t) (i : int) :
+  0 <= i < Mode2VerifyTailChallenge.mode2_tail_highlen =>
+  nth 0 (mode2_highbits_bytes bp) i =
+    W8.to_uint (BArray1152.get8 bp i).
+proof. by move=> hi; rewrite /mode2_highbits_bytes nth_mkseq 1:hi. qed.
 
 lemma challenge_of_barray_size (cp : BArray1024.t) :
   size (challenge_of_barray cp) = HAETAE_Params.n.
@@ -243,6 +272,66 @@ split.
       HAETAE_Params.Mode2 highbits lowbits mu).
 qed.
 
+op mode2_challenge_packed_relation
+    (actual : BArray1024.t)
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) : bool =
+  challenge_of_barray actual =
+    HAETAE_Algebra.challenge_hash_packed
+      HAETAE_Params.Mode2
+      (mode2_highbits_bytes highp)
+      (bytes_of_barray32 lsbp)
+      (bytes_of_barray32 mup).
+
+(* Exact remaining implementation leaf: establish this relation for
+   Tail.observed_cprime, Tail.observed_highp, Tail.observed_lsbp, and
+   Tail.observed_mu after __verify_challenge_m23.  The current checked tail
+   proofs expose those values but stop before the squeeze/sampler semantics. *)
+
+lemma mode2_challenge_packed_target_wf
+    (actual : BArray1024.t)
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) :
+  mode2_challenge_packed_relation actual highp lsbp mup =>
+  HAETAE_Algebra.challenge_wf (challenge_of_barray actual).
+proof.
+rewrite /mode2_challenge_packed_relation => ->.
+exact
+  (HAETAE_Algebra.challenge_hash_packed_wf
+    HAETAE_Params.Mode2
+    (mode2_highbits_bytes highp)
+    (bytes_of_barray32 lsbp)
+    (bytes_of_barray32 mup)).
+qed.
+
+lemma accepted_challenge_eq_packed_source
+    (parsed observed_cprime : BArray1024.t)
+    (highp : BArray1152.t) (lsbp mup : BArray32.t) :
+  challenge_of_barray parsed = challenge_of_barray observed_cprime =>
+  mode2_challenge_packed_relation observed_cprime highp lsbp mup =>
+  challenge_of_barray parsed =
+    HAETAE_Algebra.challenge_hash_packed
+      HAETAE_Params.Mode2
+      (mode2_highbits_bytes highp)
+      (bytes_of_barray32 lsbp)
+      (bytes_of_barray32 mup) /\
+  HAETAE_Algebra.challenge_wf
+    (HAETAE_Algebra.challenge_hash_packed
+      HAETAE_Params.Mode2
+      (mode2_highbits_bytes highp)
+      (bytes_of_barray32 lsbp)
+      (bytes_of_barray32 mup)).
+proof.
+rewrite /mode2_challenge_packed_relation.
+move=> hparsed hactual.
+split.
++ by rewrite hparsed hactual.
++ exact
+    (HAETAE_Algebra.challenge_hash_packed_wf
+      HAETAE_Params.Mode2
+      (mode2_highbits_bytes highp)
+      (bytes_of_barray32 lsbp)
+      (bytes_of_barray32 mup)).
+qed.
+
 lemma paper_challenge_hash_ignores_highbits
     (md : HAETAE_Params.mode)
     (left_high right_high : HAETAE_Algebra.polyveck)
@@ -268,5 +357,14 @@ lemma paper_challenge_hash_full_uses_full_source
   HAETAE_Algebra.challenge_from_seed md
     (HAETAE_Algebra.challenge_source highbits lowbits mu).
 proof. by rewrite /HAETAE_Algebra.challenge_hash_full. qed.
+
+lemma paper_challenge_hash_packed_uses_actual_order
+    (md : HAETAE_Params.mode)
+    (highbits_bytes lowbits_bytes mu_bytes : HAETAE_Algebra.byte list) :
+  HAETAE_Algebra.challenge_hash_packed
+    md highbits_bytes lowbits_bytes mu_bytes =
+  HAETAE_Algebra.challenge_from_seed md
+    (highbits_bytes ++ lowbits_bytes ++ mu_bytes).
+proof. by rewrite /HAETAE_Algebra.challenge_hash_packed. qed.
 
 end VerifyActualChallengeAlgebraBridgePostFreeze.

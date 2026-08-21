@@ -33,6 +33,8 @@ module VerifyTailMuTrace = {
   var observed_mlen : W64.t
   var observed_vklen : W64.t
   var observed_mu : BArray32.t
+  var observed_highp : BArray1152.t
+  var observed_lsbp : BArray32.t
   var observed_cp : BArray1024.t
   var observed_cprime : BArray1024.t
 
@@ -96,10 +98,12 @@ module VerifyTailMuTrace = {
     wp_0 <- protect_ptr wp_0 ms;
     count <- protect_64 count ms;
     highp <@ Verify._pack_vec_highbits_m23 (highp, wp_0, count);
+    observed_highp <- highp;
     ms <- init_msf;
     lsbp <- protect_ptr lsbp ms;
     wprimep <- protect_ptr wprimep ms;
     lsbp <@ Verify._pack_poly_lsb (lsbp, wprimep);
+    observed_lsbp <- lsbp;
     vklen <- W64.of_int vklen_i;
     observed_vkp <- vkp;
     observed_prep <- prep;
