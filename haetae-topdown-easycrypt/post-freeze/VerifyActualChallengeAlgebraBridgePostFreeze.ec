@@ -199,9 +199,50 @@ conseq VerifyActualFullAcceptApiRawPostFreeze.verify_cryptolab_exact_flat_trace
   verify_cryptolab_flat_trace_accept_paper_challenges => //=.
 qed.
 
-(* The current security model discards its highbits argument.  This checked
-   identity is the exact model-side blocker to identifying the actual
-   __verify_challenge_m23 call with HAETAE_Algebra.challenge_hash. *)
+op mode2_challenge_full_source_relation
+    (actual : BArray1024.t)
+    (highbits : HAETAE_Algebra.polyveck)
+    (lowbits : HAETAE_Algebra.poly) (mu : HAETAE_Algebra.crh) : bool =
+  challenge_of_barray actual =
+    HAETAE_Algebra.challenge_hash_full
+      HAETAE_Params.Mode2 highbits lowbits mu.
+
+lemma mode2_challenge_full_source_target_wf
+    (actual : BArray1024.t)
+    (highbits : HAETAE_Algebra.polyveck)
+    (lowbits : HAETAE_Algebra.poly) (mu : HAETAE_Algebra.crh) :
+  mode2_challenge_full_source_relation actual highbits lowbits mu =>
+  HAETAE_Algebra.challenge_wf (challenge_of_barray actual).
+proof.
+rewrite /mode2_challenge_full_source_relation => ->.
+exact
+  (HAETAE_Algebra.challenge_hash_full_wf
+    HAETAE_Params.Mode2 highbits lowbits mu).
+qed.
+
+lemma accepted_challenge_eq_full_source
+    (parsed observed_cprime : BArray1024.t)
+    (highbits : HAETAE_Algebra.polyveck)
+    (lowbits : HAETAE_Algebra.poly) (mu : HAETAE_Algebra.crh) :
+  challenge_of_barray parsed = challenge_of_barray observed_cprime =>
+  mode2_challenge_full_source_relation
+    observed_cprime highbits lowbits mu =>
+  challenge_of_barray parsed =
+    HAETAE_Algebra.challenge_hash_full
+      HAETAE_Params.Mode2 highbits lowbits mu /\
+  HAETAE_Algebra.challenge_wf
+    (HAETAE_Algebra.challenge_hash_full
+      HAETAE_Params.Mode2 highbits lowbits mu).
+proof.
+rewrite /mode2_challenge_full_source_relation.
+move=> hparsed hactual.
+split.
++ by rewrite hparsed hactual.
++ exact
+    (HAETAE_Algebra.challenge_hash_full_wf
+      HAETAE_Params.Mode2 highbits lowbits mu).
+qed.
+
 lemma paper_challenge_hash_ignores_highbits
     (md : HAETAE_Params.mode)
     (left_high right_high : HAETAE_Algebra.polyveck)
@@ -218,5 +259,14 @@ lemma paper_challenge_hash_uses_reduced_source
   HAETAE_Algebra.challenge_from_seed md
     (HAETAE_Algebra.encode_poly lowbits ++ mu).
 proof. by rewrite /HAETAE_Algebra.challenge_hash. qed.
+
+lemma paper_challenge_hash_full_uses_full_source
+    (md : HAETAE_Params.mode)
+    (highbits : HAETAE_Algebra.polyveck)
+    (lowbits : HAETAE_Algebra.poly) (mu : HAETAE_Algebra.crh) :
+  HAETAE_Algebra.challenge_hash_full md highbits lowbits mu =
+  HAETAE_Algebra.challenge_from_seed md
+    (HAETAE_Algebra.challenge_source highbits lowbits mu).
+proof. by rewrite /HAETAE_Algebra.challenge_hash_full. qed.
 
 end VerifyActualChallengeAlgebraBridgePostFreeze.

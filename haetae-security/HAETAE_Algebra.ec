@@ -3138,6 +3138,9 @@ op challenge_from_seed (md : mode) (src : byte list) : challenge =
 op challenge_hash : mode -> polyveck -> poly -> crh -> challenge =
   fun md (_ : polyveck) lowbits mu =>
     challenge_from_seed md (encode_poly lowbits ++ mu).
+op challenge_hash_full : mode -> polyveck -> poly -> crh -> challenge =
+  fun md highbits lowbits mu =>
+    challenge_from_seed md (challenge_source highbits lowbits mu).
 op commitment_challenge :
   mode -> skey -> message -> context -> random_coins -> challenge =
   fun md sk m ctx coins =>
@@ -3302,6 +3305,14 @@ lemma challenge_hash_sparse md w1 w0 mu :
   challenge_sparse md (challenge_hash md w1 w0 mu).
 proof. by rewrite /challenge_hash; apply challenge_from_seed_sparse. qed.
 
+lemma challenge_hash_full_wf md w1 w0 mu :
+  challenge_wf (challenge_hash_full md w1 w0 mu).
+proof. by rewrite /challenge_hash_full; apply challenge_from_seed_wf. qed.
+
+lemma challenge_hash_full_sparse md w1 w0 mu :
+  challenge_sparse md (challenge_hash_full md w1 w0 mu).
+proof. by rewrite /challenge_hash_full; apply challenge_from_seed_sparse. qed.
+
 lemma response_vector_wf md sk m ctx coins :
   polyvecl_wf md (response_vector md sk m ctx coins).
 proof.
@@ -3369,6 +3380,10 @@ proof. by rewrite /message_hash size_mkseq /crhbytes. qed.
 lemma challenge_hash_size md w1 w0 mu :
   size (challenge_hash md w1 w0 mu) = n.
 proof. by rewrite /challenge_hash /challenge_from_seed size_mkseq /n. qed.
+
+lemma challenge_hash_full_size md w1 w0 mu :
+  size (challenge_hash_full md w1 w0 mu) = n.
+proof. by rewrite /challenge_hash_full /challenge_from_seed size_mkseq /n. qed.
 
 op keygen_internal (md : mode) (sd : seed) : pkey * skey =
   let sk = secret_key_of_seed md sd in (public_key_of_secret md sk, sk).
