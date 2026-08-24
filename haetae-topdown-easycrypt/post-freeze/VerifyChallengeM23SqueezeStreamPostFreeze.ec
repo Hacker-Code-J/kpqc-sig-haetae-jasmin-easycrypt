@@ -124,6 +124,32 @@ rewrite nth_mkseq 1:hi.
 exact (hprefix i hi).
 qed.
 
+lemma squeeze_state_iter_shift_one initial blocks :
+  0 <= blocks =>
+  KeygenShakeStreamSpec.squeeze_state_iter
+      (KeygenShakeStreamSpec.squeeze_state_iter initial blocks) 1 =
+    KeygenShakeStreamSpec.squeeze_state_iter initial (blocks + 1).
+proof.
+move=> hblocks.
+rewrite (KeygenShakeStreamSpec.squeeze_state_iter_succ
+           (KeygenShakeStreamSpec.squeeze_state_iter initial blocks) 0) 1:/#.
+rewrite KeygenShakeStreamSpec.squeeze_state_iter0.
+rewrite KeygenShakeStreamSpec.squeeze_state_iter_succ 1://.
+trivial.
+qed.
+
+lemma shake256_squeeze_block_shift initial blocks :
+  0 <= blocks =>
+  KeygenShakeStreamSpec.shake256_squeeze_block
+      (KeygenShakeStreamSpec.squeeze_state_iter initial blocks) 0 =
+    KeygenShakeStreamSpec.shake256_squeeze_block initial blocks.
+proof.
+move=> hblocks.
+rewrite /KeygenShakeStreamSpec.shake256_squeeze_block /=.
+rewrite squeeze_state_iter_shift_one 1://.
+trivial.
+qed.
+
 lemma verify_poly_challenge_squeeze256_136_block
     (out0 : BArray136.t) (state0 : BArray200.t) :
   hoare [Verify.__poly_challenge_squeeze256_136 :
@@ -250,6 +276,28 @@ while
     * smt().
     * exact hprefix.
   + exact hstate.
+qed.
+
+lemma verify_poly_challenge_squeeze256_136_iter_block
+    (out0 : BArray136.t) (before : BArray200.t)
+    (initial : int list) (blocks : int) :
+  0 <= blocks =>
+  KeygenShakeStreamSpec.state_bytes_le before =
+    KeygenShakeStreamSpec.squeeze_state_iter initial blocks =>
+  hoare [Verify.__poly_challenge_squeeze256_136 :
+    outp = out0 /\ sp_0 = before
+    ==>
+    squeeze136_fips_prefix_matches
+      res.`1
+      (KeygenShakeStreamSpec.shake256_squeeze_block initial blocks) 136 /\
+    KeygenShakeStreamSpec.state_bytes_le res.`2 =
+      KeygenShakeStreamSpec.squeeze_state_iter initial (blocks + 1)].
+proof.
+move=> hblocks hbefore.
+conseq
+  (verify_poly_challenge_squeeze256_136_block out0 before).
++ move=> &hr hpre.
+  smt().
 qed.
 
 end VerifyChallengeM23SqueezeStreamPostFreeze.
