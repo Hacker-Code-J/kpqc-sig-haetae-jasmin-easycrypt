@@ -220,10 +220,8 @@ call sign_verify_absorb32_from_pos32.
 auto => />.
 qed.
 
-(* The only remaining premise for composing the full generated absorb calls is
-   a focused proof that the 576-byte highbits helper started at position zero
-   returns position 32.  The byte/state equality of that helper, the LSB
-   32-to-64 bridge, the mu-prefix 64-to-96 bridge, and finalization equality
-   are all closed above. *)
+(* This component layer deliberately stops at the highbits position boundary.
+   SignChallengeM23HighbufPositionPostFreeze discharges the 576-byte
+   position-0-to-32 premise and composes the full generated absorb calls. *)
 
 end SignChallengeM23AbsorbComponentsPostFreeze.
