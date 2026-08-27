@@ -108,4 +108,30 @@ exact
     fuel0 &m hfuel).
 qed.
 
+lemma sampled_bounded_keygen_accepted_mass_additive_defect_bound
+    fuel0 &m :
+  0 <= fuel0 =>
+  Pr[SampledDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_first_accept
+         SampledDecision.raw_current fuel0 res] +
+  Pr[SampledDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_rejected_tail_accept
+         SampledDecision.raw_current fuel0 res] >=
+  1%r - delta_bounded_keygen_progress fuel0 -
+  Pr[SampledDecision.main(0) @ &m :
+       sampled_bounded_keygen_rejected_tail_exhausted
+         SampledDecision.raw_current 0 res] -
+  finite_additive_defect_prefix
+    delta_bounded_keygen_progress fuel0.
+proof.
+move=> hfuel.
+have houtcomes :=
+  sampled_bounded_keygen_additive_outcome_mass_bound
+    fuel0 &m hfuel.
+have hexhaust :=
+  sampled_bounded_keygen_exhaustion_additive_defect_bound
+    fuel0 &m hfuel.
+smt().
+qed.
+
 end Mode2FaithfulSecurityBoundedKeygenDefectAccumulationPostFreeze.
