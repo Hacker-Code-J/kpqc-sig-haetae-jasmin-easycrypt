@@ -372,6 +372,33 @@ rewrite /sampled_bounded_keygen_first_accept
 smt().
 qed.
 
+lemma checked_mode2_bounded_keygen_entry_outcome_unionE
+    (raw_seed0 : BArray32.t) fuel0
+    (result :
+      Mode2FaithfulSecurityBoundedKeygenDecisionPostFreeze
+        .checked_mode2_bounded_keygen_decision_result) :
+  Mode2FaithfulSecurityBoundedKeygenDecisionPostFreeze
+    .checked_mode2_bounded_keygen_decision_entry_post
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_mat32768
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+      Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+      raw_seed0 fuel0 result <=>
+  sampled_bounded_keygen_outcome_union raw_seed0 fuel0 result.
+proof.
+rewrite /sampled_bounded_keygen_outcome_union.
+split.
++ exact
+    (checked_mode2_bounded_keygen_entry_outcome_partition
+      raw_seed0 fuel0 result).
+rewrite /sampled_bounded_keygen_first_accept
+        /sampled_bounded_keygen_rejected_tail_accept
+        /sampled_bounded_keygen_rejected_tail_exhausted.
+smt().
+qed.
+
 lemma sampled_bounded_keygen_outcome_union_mass fuel0 :
   phoare [SampledBoundedKeygenDecision.main :
     arg = fuel0 /\ 0 <= fuel0
@@ -385,6 +412,96 @@ move=> &hr hpre result raw_current hentry.
 exact
   (checked_mode2_bounded_keygen_entry_outcome_partition
     raw_current fuel0 result hentry).
+qed.
+
+lemma sampled_bounded_keygen_entry_outcome_mass_partition fuel0 &m :
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_first_accept
+         SampledBoundedKeygenDecision.raw_current fuel0 res] +
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_rejected_tail_accept
+         SampledBoundedKeygenDecision.raw_current fuel0 res] +
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_rejected_tail_exhausted
+         SampledBoundedKeygenDecision.raw_current fuel0 res] =
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       Mode2FaithfulSecurityBoundedKeygenDecisionPostFreeze
+         .checked_mode2_bounded_keygen_decision_entry_post
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_mat32768
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           SampledBoundedKeygenDecision.raw_current fuel0 res].
+proof.
+have hentry_union :
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       Mode2FaithfulSecurityBoundedKeygenDecisionPostFreeze
+         .checked_mode2_bounded_keygen_decision_entry_post
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_mat32768
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           SampledBoundedKeygenDecision.raw_current fuel0 res] =
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_outcome_union
+         SampledBoundedKeygenDecision.raw_current fuel0 res].
++ rewrite Pr[mu_eq].
+  move=> &hr.
+  exact
+    (checked_mode2_bounded_keygen_entry_outcome_unionE
+      SampledBoundedKeygenDecision.raw_current{hr} fuel0 res{hr}).
+  done.
+rewrite hentry_union.
+rewrite /sampled_bounded_keygen_outcome_union.
+rewrite Pr[mu_disjoint].
++ move=> &hr.
+  have hdisjoint :=
+    checked_mode2_bounded_keygen_entry_outcomes_pairwise_disjoint
+      SampledBoundedKeygenDecision.raw_current{hr} fuel0 res{hr}.
+  smt().
+rewrite Pr[mu_disjoint].
++ move=> &hr.
+  have hdisjoint :=
+    checked_mode2_bounded_keygen_entry_outcomes_pairwise_disjoint
+      SampledBoundedKeygenDecision.raw_current{hr} fuel0 res{hr}.
+  smt().
+ring.
+qed.
+
+lemma sampled_bounded_keygen_additive_outcome_mass_bound fuel0 &m :
+  0 <= fuel0 =>
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_first_accept
+         SampledBoundedKeygenDecision.raw_current fuel0 res] +
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_rejected_tail_accept
+         SampledBoundedKeygenDecision.raw_current fuel0 res] +
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       sampled_bounded_keygen_rejected_tail_exhausted
+         SampledBoundedKeygenDecision.raw_current fuel0 res] >=
+  (1%r - delta_bounded_keygen_progress fuel0).
+proof.
+move=> hfuel.
+have hentry_mass :
+  Pr[SampledBoundedKeygenDecision.main(fuel0) @ &m :
+       Mode2FaithfulSecurityBoundedKeygenDecisionPostFreeze
+         .checked_mode2_bounded_keygen_decision_entry_post
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_mat32768
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.zero_vec8192
+           SampledBoundedKeygenDecision.raw_current fuel0 res] >=
+  (1%r - delta_bounded_keygen_progress fuel0).
++ by byphoare (sampled_bounded_keygen_entry_post_mass fuel0) => //.
+have hpartition :=
+  sampled_bounded_keygen_entry_outcome_mass_partition fuel0 &m.
+smt().
 qed.
 
 end Mode2FaithfulSecuritySampledBoundedKeygenMassPostFreeze.
