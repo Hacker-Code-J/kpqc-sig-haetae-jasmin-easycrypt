@@ -191,6 +191,7 @@ op checked_mode2_bounded_retry_tail_post
   result.`3 = avec0 /\
   0 <= result.`11 <= fuel0 /\
   result.`10 = retry0 + result.`11 /\
+  (result.`9 = W64.zero \/ result.`9 = W64.one) /\
   (result.`9 = W64.one =>
     Mode2FaithfulSecurityRetryTailInvariantPostFreeze
       .checked_mode2_retry_tail_state
