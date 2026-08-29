@@ -1,0 +1,70 @@
+{
+  "schema": "haetae-mode2-accepted-all-slot-coordinate-p8-certificate-v1",
+  "method": "certified componentwise P8 union over three unbiased s1 slots and two zero-seed accepted trace-headroom s2 slots",
+  "root_table_sha256": "084c82a16ac59e957af0a43810a7bccca3731e426d4dad08a665f86bb961c38c",
+  "class_trace_sha256": "f7f6836125cbc9eec3a1c165f4ff1523a533960677a0908c31278d581707e948",
+  "homogeneous_class4_theory_sha256": "2141bec11eb85697b0f96acc3b3b8b7279abeb2c8863a769074aec9fc6a85223",
+  "homogeneous_class4_checker_sha256": "78f6ba615893d8ec4b9cd2e690e24822ab643b8c26793e27b755b1991de99468",
+  "s2_trace_headroom_theory_sha256": "7221718b41442d1df1030dc739d0b89cb4ee96a10752b44997291ddd88b86129",
+  "s2_trace_headroom_checker_sha256": "6084cf87084602f65d876ccd88e6c9e5197f35d196bc2c006d2ccccf4ae4b1ed",
+  "s2_trace_headroom_artifact_sha256": "dcb727356fe396c9f646f54e81ee0190a13c92aa5db6804037e4bea314b174db",
+  "slot_count": 5,
+  "root_count": 256,
+  "component_count": 2,
+  "total_component_terms": 2560,
+  "s1": {
+    "slot_count": 3,
+    "component_terms": 1536,
+    "centered_trit_moments": {
+      "m2": "2/3",
+      "m3": "0",
+      "m4": "2/3",
+      "m5": "0",
+      "m6": "2/3",
+      "m8": "2/3"
+    },
+    "coordinate_headroom": {
+      "numerator": 8278239,
+      "denominator": 65536,
+      "decimal": "126.3159027099609375"
+    },
+    "one_row_sum": {
+      "exact_sha256": "fc1b9858560545535425dae228543329c25e223a3f9b5c48283f8db93855ae74",
+      "numerator_digits": 155,
+      "denominator_digits": 159,
+      "decimal": "0.000043213849809975316952645493931816899970620964701541"
+    },
+    "three_slot_sum": {
+      "exact_sha256": "cfedf1ad2731737de8c6b9de347034ebf63a9b38f419711e009536809ad0aae4",
+      "numerator_digits": 155,
+      "denominator_digits": 159,
+      "decimal": "0.00012964154942992595085793648179545069991186289410462",
+      "strictly_below_numerator": 1,
+      "strictly_below_denominator": 4096
+    },
+    "maximum_profile8_upper": {
+      "numerator": "12308347695001004974787451393165056107966550137033046255135982299515776667076115687052376917085741289907479067367466010672899342400767489358108900612552819",
+      "denominator": "2250000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "decimal": "5470376753.3337799887944228414066916035406889497925",
+      "root": 255,
+      "component": "re"
+    }
+  },
+  "s2": {
+    "component_terms": 1024,
+    "exact_sum_sha256": "66bf833ad9b66d1d8a1e3da40fd0a80aefdd67463d9545bf72a34b90f5eab87f",
+    "numerator_digits": 148462,
+    "denominator_digits": 148465,
+    "decimal": "0.00081197955370986979770117155624211658549694829579654"
+  },
+  "all_slots": {
+    "exact_sum_sha256": "eea7789a083726e9029a422b7061edb7717ec0e8ff7cf83d0a00e0ae1140eb44",
+    "numerator_digits": 148587,
+    "denominator_digits": 148590,
+    "decimal": "0.00094162110313979574855910803803756728540881118990116",
+    "target_numerator": 1,
+    "target_denominator": 1024,
+    "strictly_below_target": true,
+    "scaled_margin_decimal": "0.035779990384849153475473369049531099741377341541212"
+  }
+}
