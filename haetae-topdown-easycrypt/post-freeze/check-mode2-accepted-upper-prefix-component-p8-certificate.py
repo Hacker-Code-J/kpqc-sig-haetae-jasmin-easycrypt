@@ -276,6 +276,7 @@ def main() -> None:
     assert "upper_prefix_bad_mu_le_component_cap_sum" in source
     assert "reduced_headroom_bad_mu_lt_one_half" in source
     assert "accumulator_unsafe_mu_lt_one_half" in source
+    assert "accumulator_unsafe_mu_lt_one_half_closed" in source
 
     print(
         "PASS accepted upper-prefix component P8 certificate: "

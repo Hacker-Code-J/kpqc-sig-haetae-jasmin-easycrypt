@@ -10,6 +10,7 @@ require import
   KeygenM23SingularFFTAccumulatorBridge
   KeygenM23SingularFFTAccumulatorProbability
   KeygenM23SingularFFTAccumulatorSafety
+  TargetKeygenM23SingularFFTInputBounds
   Mode2FaithfulSecurityAccumulatorUpperHeadroomPostFreeze
   Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
   Mode2FaithfulSecurityIdealAccumulatorAllSlotCoordinateP8CertificatePostFreeze
@@ -1203,6 +1204,54 @@ apply
 exact
   (ideal_mode2_reduced_headroom_bad_mu_lt_one_half
     pre_bp avec hnumeric hctx htrace).
+qed.
+
+lemma ideal_mode2_accumulator_distribution_support_inputs_bound2
+    pre_bp avec :
+  Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
+    .ideal_mode2_finalize_context_valid pre_bp avec =>
+  forall sample,
+    sample \in
+      (Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
+        .ideal_mode2_accumulator_distribution pre_bp avec) =>
+    mode2_accumulator_inputs_bound2 sample.`1 sample.`2.
+proof.
+move=> hctx sample hsample.
+have hbound :=
+  Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
+    .ideal_mode2_accumulator_distribution_support_bound2_of_context
+      pre_bp avec hctx sample hsample.
+move: hbound.
+rewrite
+  /TargetKeygenM23SingularFFTInputBounds.mode2_fft_inputs_bound2
+  /mode2_accumulator_inputs_bound2.
+trivial.
+qed.
+
+lemma ideal_mode2_accumulator_unsafe_mu_lt_one_half_closed
+    pre_bp avec :
+  ideal_mode2_upper_prefix_p8_numeric_certificate =>
+  Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
+    .ideal_mode2_finalize_context_valid pre_bp avec =>
+  (forall row,
+    0 <= row < KeygenM23SingularFFTSpec.mode2_s2_count_i =>
+    ideal_final_s2_row_class_trace pre_bp avec row =
+      zero_seed_accepted_trace row) =>
+  mu
+    (Mode2FaithfulSecurityIdealAccumulatorPushforwardPostFreeze
+      .ideal_mode2_accumulator_distribution pre_bp avec)
+    (fun (sample : mode2_accumulator_sample) =>
+      ! actual_mode2_accumulate_safe_trace
+          sample.`1 sample.`2
+          KeygenM23SingularFFTSpec.mode2_slice_count_i) <
+  1%r / 2%r.
+proof.
+move=> hnumeric hctx htrace.
+exact
+  (ideal_mode2_accumulator_unsafe_mu_lt_one_half
+    pre_bp avec hnumeric hctx htrace
+    (ideal_mode2_accumulator_distribution_support_inputs_bound2
+      pre_bp avec hctx)).
 qed.
 
 end Mode2FaithfulSecurityIdealAccumulatorUpperPrefixComponentP8CertificatePostFreeze.
