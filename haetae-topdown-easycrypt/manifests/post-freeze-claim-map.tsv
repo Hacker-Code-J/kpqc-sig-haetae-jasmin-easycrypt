@@ -102,6 +102,7 @@ haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledBoundedKeygenEx
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledBoundedKeygenMassPostFreeze.ec	C3-QUANTITATIVE-KEYGEN	theory	PROVED-CONDITIONAL	HEADLINE-CONDITIONAL
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledCheckedSourcePostFreeze.ec	S3-PUBLIC-KEY-NMA	theory	PROVED-SUPPORT	SUPPORT-ONLY
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledDSeedJointGapPostFreeze.ec	C3-QUANTITATIVE-KEYGEN	theory	PROVED-CONDITIONAL	HEADLINE-CONDITIONAL
+haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptAcceptedClassTraceP8PostFreeze.ec	C3-QUANTITATIVE-KEYGEN	accepted-trace-p8-bridge-theory	PROVED-CONDITIONAL	FOLLOWUP-ONLY
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptAccumulatorDistributionPostFreeze.ec	C3-QUANTITATIVE-KEYGEN	theory	PROVED-CONDITIONAL	HEADLINE-CONDITIONAL
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptAccumulatorProbabilityPostFreeze.ec	C3-QUANTITATIVE-KEYGEN	theory	PROVED-CONDITIONAL	HEADLINE-CONDITIONAL
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptClassTracePostFreeze.ec	C3-QUANTITATIVE-KEYGEN	joint-observation-theory	PROVED-PUSHFORWARD	FOLLOWUP-ONLY

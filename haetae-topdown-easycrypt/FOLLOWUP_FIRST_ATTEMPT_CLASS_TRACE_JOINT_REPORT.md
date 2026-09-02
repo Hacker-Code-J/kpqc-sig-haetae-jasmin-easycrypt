@@ -54,17 +54,22 @@ In particular, the existence of the joint carrier does not imply that
 acceptance restricts the class trace to a small set.  It only makes that joint
 question expressible without discarding correlations.
 
-## Next research obligation
+## Completed follow-up and remaining obligation
 
-The next step is to state a distribution-weighted accepted-trace P8
-certificate on the new ideal summary distribution and compose it with the
-now-proved data-processing theorem.  The target interface is an explicit
-bound on
+`Mode2FaithfulSecuritySampledFirstAttemptAcceptedClassTraceP8PostFreeze.ec`
+now states the distribution-weighted accepted-trace P8 certificate interface
+and composes it with the data-processing path.  Its target is the explicit
+bound
 
 ```text
 Pr[accepted and P8_bad(ordered trace)]
 ```
 
-over the sampled-`dseed` program.  Conditioning or division by the acceptance
-mass should be postponed until a positive lower bound on that mass is
-available.
+over the sampled-`dseed` program, with conclusion
+`epsilon_p8 + delta_xof` from an ideal-summary mass certificate at
+`epsilon_p8`.
+
+The remaining obligation is to define the concrete order-sensitive `P8_bad`
+predicate and certify its ideal accepted-trace mass numerically.  Conditioning
+or division by the acceptance mass remains postponed until a positive lower
+bound on that mass is available.

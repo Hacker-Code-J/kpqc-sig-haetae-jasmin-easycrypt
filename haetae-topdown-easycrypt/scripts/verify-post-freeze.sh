@@ -95,8 +95,8 @@ if ! diff -u "$SORTED_PROOFS" "$DISCOVERED_PROOFS" \
   fail "post-freeze proof manifest drift"
 fi
 proof_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' "$PROOF_MANIFEST")
-[ "$proof_count" -eq 166 ] || fail "expected 166 proof targets, found $proof_count"
-pass "post-freeze proof manifest targets=166"
+[ "$proof_count" -eq 167 ] || fail "expected 167 proof targets, found $proof_count"
+pass "post-freeze proof manifest targets=167"
 
 DISCOVERED_ARTIFACTS="$WORK_DIR/discovered-artifacts.txt"
 SORTED_ARTIFACTS="$WORK_DIR/manifest-artifacts.txt"
@@ -136,11 +136,11 @@ if ! awk -F '\t' '
   $2 !~ /^(C1-FAITHFUL-REFINEMENT|C2-CHALLENGE-MODEL|C3-QUANTITATIVE-KEYGEN|S2-SIGN-ROM|S3-PUBLIC-KEY-NMA)$/ { exit 1 }
   seen[$1]++ > 0 { exit 1 }
   { count++ }
-  END { if (count != 184) exit 1 }
+  END { if (count != 185) exit 1 }
 ' "$CLAIM_MAP" > "$LOG_DIR/claim-map-schema.log" 2>&1; then
   fail "post-freeze claim-map schema"
 fi
-pass "post-freeze claim map entries=184"
+pass "post-freeze claim map entries=185"
 
 if rg -ni '^[[:space:]]*axiom[[:space:]]|(^|[^[:alnum:]_])(admit|admitted|abort|sorry)([^[:alnum:]_]|$)' \
     "$PROJECT_DIR/post-freeze" \
@@ -374,7 +374,7 @@ while IFS= read -r target || [ -n "$target" ]; do
   compile_target "$target"
   compiled=$((compiled + 1))
 done < "$PROOF_MANIFEST"
-[ "$compiled" -eq 166 ] || fail "expected 166 compiled targets, got $compiled"
+[ "$compiled" -eq 167 ] || fail "expected 167 compiled targets, got $compiled"
 
 "$SCRIPT_DIR/check-source-drift.sh" > "$LOG_DIR/source-drift-after.log" 2>&1 \
   || fail "source drift after verification"
