@@ -10,16 +10,16 @@ end-to-end HAETAE claim.
 ## Inventory
 
 - 82 authored EasyCrypt targets remain in the frozen paper manifest.
-- `manifests/post-freeze-proof-targets.txt` adds exactly 165 targets: 161
+- `manifests/post-freeze-proof-targets.txt` adds exactly 166 targets: 162
   theories under `post-freeze/` and four shared NTT/Rq theories under
   `haetae-ntt-verify/easycrypt/`.
 - The numerical layer contains nine Python checkers, seven JSON certificates,
   and two non-invasive C trace extractors under `post-freeze/`.
-- `manifests/post-freeze-claim-map.tsv` maps every one of these 183 proof and
+- `manifests/post-freeze-claim-map.tsv` maps every one of these 184 proof and
   executable artifacts to one contribution ID, evidence status, and permitted
-  paper use.  Its current partition is C1=53, C2=36, C3=78, S2=10, S3=6.
+  paper use.  Its current partition is C1=53, C2=36, C3=79, S2=10, S3=6.
 - `scripts/verify-post-freeze.sh` is the aggregate reproduction boundary for
-  the 165 targets and the executable certificates.  It is intentionally
+  the 166 targets and the executable certificates.  It is intentionally
   separate from the frozen 82-target verifier.
 
 ## Contribution matrix
@@ -106,6 +106,15 @@ artifact unmapped makes the aggregate verifier fail.
   seed index 27 with score 533485; the existing fixed caps give an exact
   diagnostic union `0.3611855361011244... < 1/2`.  This single fixture is not
   a uniform theorem and is marked `FOLLOWUP-ONLY` in the claim map.
+- `Mode2FaithfulSecuritySampledFirstAttemptClassTracePostFreeze` adds the
+  distribution-route carrier requested by that audit.  It preserves the full
+  ordered 2-by-256 trace in `(accepted, score, trace)`, proves exact event
+  equality with the existing sampled-`dseed` first-attempt program, and
+  factors the summary distribution through the existing correlated
+  `((pre_bp, avec), (s1, sampled_s2))` joint carrier under the explicit checked
+  snapshot premise.  The existing all-event `delta_xof` gap is transported
+  through this summary map by data processing.  It introduces no independence
+  or conditional-law claim.
 
 ## Explicit limitations and prohibited promotions
 
@@ -167,7 +176,7 @@ Run:
 The terminal success line is:
 
 ```text
-RESULT PASS post-freeze-theories=165 checkers=9 certificates=7 cache=-no-eco
+RESULT PASS post-freeze-theories=166 checkers=9 certificates=7 cache=-no-eco
 ```
 
 Logical checking trusts EasyCrypt, Why3, and the selected SMT prover.  The

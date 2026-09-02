@@ -1,7 +1,7 @@
 PASS supplied Why3 server socket
-PASS post-freeze proof manifest targets=165
+PASS post-freeze proof manifest targets=166
 PASS post-freeze executable-artifact manifest entries=18
-PASS post-freeze claim map entries=183
+PASS post-freeze claim map entries=184
 PASS post-freeze proof-escape scan
 PASS post-freeze debug/temporary declaration scan
 PASS source drift before verification
@@ -122,6 +122,7 @@ PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySam
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledDSeedJointGapPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptAccumulatorDistributionPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptAccumulatorProbabilityPostFreeze.ec
+PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptClassTracePostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptDSeedScoreTailPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptMassPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecuritySampledFirstAttemptRejectCertificatePostFreeze.ec
@@ -201,4 +202,4 @@ PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackV3ThroughNtt
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackVkM23BoundsPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackVkM23CoefficientsPostFreeze.ec
 PASS source drift after verification
-RESULT PASS post-freeze-theories=165 checkers=9 certificates=7 cache=-no-eco
+RESULT PASS post-freeze-theories=166 checkers=9 certificates=7 cache=-no-eco
