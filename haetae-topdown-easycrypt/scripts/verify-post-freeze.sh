@@ -95,14 +95,14 @@ if ! diff -u "$SORTED_PROOFS" "$DISCOVERED_PROOFS" \
   fail "post-freeze proof manifest drift"
 fi
 proof_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' "$PROOF_MANIFEST")
-[ "$proof_count" -eq 164 ] || fail "expected 164 proof targets, found $proof_count"
-pass "post-freeze proof manifest targets=164"
+[ "$proof_count" -eq 165 ] || fail "expected 165 proof targets, found $proof_count"
+pass "post-freeze proof manifest targets=165"
 
 DISCOVERED_ARTIFACTS="$WORK_DIR/discovered-artifacts.txt"
 SORTED_ARTIFACTS="$WORK_DIR/manifest-artifacts.txt"
 find "$PROJECT_DIR/post-freeze" -maxdepth 1 -type f \
   \( -name 'check-*.py' -o -name '*.json' \
-     -o -name 'extract-mode2-accepted-class-trace.c' \) \
+     -o -name 'extract-mode2-*-class-trace.c' \) \
   | sed "s#^$ROOT_DIR/##" | LC_ALL=C sort > "$DISCOVERED_ARTIFACTS"
 LC_ALL=C sort "$ARTIFACT_MANIFEST" > "$SORTED_ARTIFACTS"
 if ! diff -u "$SORTED_ARTIFACTS" "$DISCOVERED_ARTIFACTS" \
@@ -111,8 +111,8 @@ if ! diff -u "$SORTED_ARTIFACTS" "$DISCOVERED_ARTIFACTS" \
   fail "post-freeze executable-artifact manifest drift"
 fi
 artifact_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' "$ARTIFACT_MANIFEST")
-[ "$artifact_count" -eq 15 ] || fail "expected 15 executable artifacts, found $artifact_count"
-pass "post-freeze executable-artifact manifest entries=15"
+[ "$artifact_count" -eq 18 ] || fail "expected 18 executable artifacts, found $artifact_count"
+pass "post-freeze executable-artifact manifest entries=18"
 
 EXPECTED_CLAIM_ARTIFACTS="$WORK_DIR/expected-claim-artifacts.txt"
 MAPPED_CLAIM_ARTIFACTS="$WORK_DIR/mapped-claim-artifacts.txt"
@@ -136,11 +136,11 @@ if ! awk -F '\t' '
   $2 !~ /^(C1-FAITHFUL-REFINEMENT|C2-CHALLENGE-MODEL|C3-QUANTITATIVE-KEYGEN|S2-SIGN-ROM|S3-PUBLIC-KEY-NMA)$/ { exit 1 }
   seen[$1]++ > 0 { exit 1 }
   { count++ }
-  END { if (count != 179) exit 1 }
+  END { if (count != 183) exit 1 }
 ' "$CLAIM_MAP" > "$LOG_DIR/claim-map-schema.log" 2>&1; then
   fail "post-freeze claim-map schema"
 fi
-pass "post-freeze claim map entries=179"
+pass "post-freeze claim map entries=183"
 
 if rg -ni '^[[:space:]]*axiom[[:space:]]|(^|[^[:alnum:]_])(admit|admitted|abort|sorry)([^[:alnum:]_]|$)' \
     "$PROJECT_DIR/post-freeze" \
@@ -255,26 +255,45 @@ while IFS= read -r artifact || [ -n "$artifact" ]; do
       ;;
     *.c)
       c_source_count=$((c_source_count + 1))
-      class_trace_checker="$PROJECT_DIR/post-freeze/check-mode2-accepted-class-trace.py"
-      class_trace_log="$LOG_DIR/checker-check-mode2-accepted-class-trace.log"
-      if ! rg -F 'extract-mode2-accepted-class-trace.c' \
-          "$class_trace_checker" > /dev/null \
-        || ! rg -F 'build_harness(binary)' "$class_trace_checker" > /dev/null \
-        || ! rg -F 'run_harness(binary)' "$class_trace_checker" > /dev/null \
-        || ! rg -F 'PASS deterministic mode2 accepted class trace' \
-          "$class_trace_log" > /dev/null; then
-        fail "C trace extractor is not compiled and replayed by its checker"
-      fi
+      case "$artifact" in
+        *extract-mode2-accepted-class-trace.c)
+          class_trace_checker="$PROJECT_DIR/post-freeze/check-mode2-accepted-class-trace.py"
+          class_trace_log="$LOG_DIR/checker-check-mode2-accepted-class-trace.log"
+          if ! rg -F 'extract-mode2-accepted-class-trace.c' \
+              "$class_trace_checker" > /dev/null \
+            || ! rg -F 'build_harness(binary)' "$class_trace_checker" > /dev/null \
+            || ! rg -F 'run_harness(binary)' "$class_trace_checker" > /dev/null \
+            || ! rg -F 'PASS deterministic mode2 accepted class trace' \
+              "$class_trace_log" > /dev/null; then
+            fail "accepted-trace C extractor is not compiled and replayed"
+          fi
+          ;;
+        *extract-mode2-first-attempt-class-trace.c)
+          first_checker="$PROJECT_DIR/post-freeze/check-mode2-first-attempt-accepted-context-feasibility.py"
+          first_log="$LOG_DIR/checker-check-mode2-first-attempt-accepted-context-feasibility.log"
+          if ! rg -F 'extract-mode2-first-attempt-class-trace.c' \
+              "$first_checker" > /dev/null \
+            || ! rg -F 'build_harness(binary)' "$first_checker" > /dev/null \
+            || ! rg -F 'first_accepted_fixture(binary)' "$first_checker" > /dev/null \
+            || ! rg -F 'PASS first-attempt accepted-context feasibility audit' \
+              "$first_log" > /dev/null; then
+            fail "first-attempt C extractor is not compiled and replayed"
+          fi
+          ;;
+        *)
+          fail "unrecognized C trace source: $artifact"
+          ;;
+      esac
       ;;
     *)
       fail "unknown executable artifact type: $artifact"
       ;;
   esac
 done < "$ARTIFACT_MANIFEST"
-[ "$checker_count" -eq 8 ] || fail "expected 8 checkers, ran $checker_count"
-[ "$certificate_count" -eq 6 ] || fail "expected 6 certificates, parsed $certificate_count"
-[ "$c_source_count" -eq 1 ] || fail "expected 1 C trace source, found $c_source_count"
-pass "executable certificate totals checkers=8 certificates=6 c-sources=1"
+[ "$checker_count" -eq 9 ] || fail "expected 9 checkers, ran $checker_count"
+[ "$certificate_count" -eq 7 ] || fail "expected 7 certificates, parsed $certificate_count"
+[ "$c_source_count" -eq 2 ] || fail "expected 2 C trace sources, found $c_source_count"
+pass "executable certificate totals checkers=9 certificates=7 c-sources=2"
 
 TOPDOWN_SPECS="$PROJECT_DIR/easycrypt/specs"
 TOPDOWN_SECURITY="$PROJECT_DIR/easycrypt/security"
@@ -355,7 +374,7 @@ while IFS= read -r target || [ -n "$target" ]; do
   compile_target "$target"
   compiled=$((compiled + 1))
 done < "$PROOF_MANIFEST"
-[ "$compiled" -eq 164 ] || fail "expected 164 compiled targets, got $compiled"
+[ "$compiled" -eq 165 ] || fail "expected 165 compiled targets, got $compiled"
 
 "$SCRIPT_DIR/check-source-drift.sh" > "$LOG_DIR/source-drift-after.log" 2>&1 \
   || fail "source drift after verification"

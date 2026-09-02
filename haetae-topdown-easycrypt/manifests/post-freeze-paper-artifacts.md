@@ -10,16 +10,16 @@ end-to-end HAETAE claim.
 ## Inventory
 
 - 82 authored EasyCrypt targets remain in the frozen paper manifest.
-- `manifests/post-freeze-proof-targets.txt` adds exactly 164 targets: 160
+- `manifests/post-freeze-proof-targets.txt` adds exactly 165 targets: 161
   theories under `post-freeze/` and four shared NTT/Rq theories under
   `haetae-ntt-verify/easycrypt/`.
-- The numerical layer contains eight Python checkers, six JSON certificates,
-  and one non-invasive C trace extractor under `post-freeze/`.
-- `manifests/post-freeze-claim-map.tsv` maps every one of these 179 proof and
+- The numerical layer contains nine Python checkers, seven JSON certificates,
+  and two non-invasive C trace extractors under `post-freeze/`.
+- `manifests/post-freeze-claim-map.tsv` maps every one of these 183 proof and
   executable artifacts to one contribution ID, evidence status, and permitted
-  paper use.  Its current partition is C1=53, C2=36, C3=74, S2=10, S3=6.
+  paper use.  Its current partition is C1=53, C2=36, C3=78, S2=10, S3=6.
 - `scripts/verify-post-freeze.sh` is the aggregate reproduction boundary for
-  the 164 targets and the executable certificates.  It is intentionally
+  the 165 targets and the executable certificates.  It is intentionally
   separate from the frozen 82-target verifier.
 
 ## Contribution matrix
@@ -99,6 +99,13 @@ artifact unmapped makes the aggregate verifier fail.
   closes the fixed-context ideal theorem.
   `Mode2FaithfulSecurityActualAccumulatorUpperPrefixTransportPostFreeze.checked_snapshot_accumulator_unsafe_mu_lt_one_half_plus_gap`
   transports it only with the explicit all-event `delta_xof` gap.
+- The follow-up accepted-context feasibility audit proves that context validity
+  alone admits every scalar class 0 through 5 and identifies the missing
+  bridge from accepted first-attempt snapshots to an admissible ordered
+  class-trace set.  Its first reproducible accepted first-attempt fixture is
+  seed index 27 with score 533485; the existing fixed caps give an exact
+  diagnostic union `0.3611855361011244... < 1/2`.  This single fixture is not
+  a uniform theorem and is marked `FOLLOWUP-ONLY` in the claim map.
 
 ## Explicit limitations and prohibited promotions
 
@@ -160,7 +167,7 @@ Run:
 The terminal success line is:
 
 ```text
-RESULT PASS post-freeze-theories=164 checkers=8 certificates=6 cache=-no-eco
+RESULT PASS post-freeze-theories=165 checkers=9 certificates=7 cache=-no-eco
 ```
 
 Logical checking trusts EasyCrypt, Why3, and the selected SMT prover.  The
