@@ -10,16 +10,16 @@ end-to-end HAETAE claim.
 ## Inventory
 
 - 82 authored EasyCrypt targets remain in the frozen paper manifest.
-- `manifests/post-freeze-proof-targets.txt` adds exactly 167 targets: 163
+- `manifests/post-freeze-proof-targets.txt` adds exactly 168 targets: 164
   theories under `post-freeze/` and four shared NTT/Rq theories under
   `haetae-ntt-verify/easycrypt/`.
-- The numerical layer contains nine Python checkers, seven JSON certificates,
+- The numerical layer contains ten Python checkers, eight JSON certificates,
   and two non-invasive C trace extractors under `post-freeze/`.
-- `manifests/post-freeze-claim-map.tsv` maps every one of these 185 proof and
+- `manifests/post-freeze-claim-map.tsv` maps every one of these 188 proof and
   executable artifacts to one contribution ID, evidence status, and permitted
-  paper use.  Its current partition is C1=53, C2=36, C3=80, S2=10, S3=6.
+  paper use.  Its current partition is C1=53, C2=36, C3=83, S2=10, S3=6.
 - `scripts/verify-post-freeze.sh` is the aggregate reproduction boundary for
-  the 167 targets and the executable certificates.  It is intentionally
+  the 168 targets and the executable certificates.  It is intentionally
   separate from the frozen 82-target verifier.
 
 ## Contribution matrix
@@ -28,7 +28,7 @@ end-to-end HAETAE claim.
 | --- | --- | --- | --- |
 | `C1-FAITHFUL-REFINEMENT` | `PROVED` as deterministic/Hoare refinement slices | Full-NTT Montgomery spectral action, generic and mode-2 row products, `Rq`--HAETAE coefficient representation, a faithful 2-by-6 KeyGen carrier satisfying the paper `A s = q j (mod 2q)` equation for the checked parent, and an exact actual Verify trace through unpack, matrix/CRT, recovery, norm, and tail to the public accepted path | No KeyGen sampler distribution or unbounded retry termination; no full Sign refinement; the Verify result is an exact implementation trace, not equality with the legacy paper challenge abstraction |
 | `C2-CHALLENGE-MODEL` | `PROVED`, with an explicit XOF randomness premise for the distributional lift | Byte-faithful Sign/Verify challenge input coupling, deterministic squeeze/rejection/shuffle replay, canonical equal accepted challenges of exact weight 58, exact uniform 58-subset point mass `1 / binomial(256,58)` under the uniform-byte contract, and a mode-2 ROM carrier/programming interface | Deterministic SHAKE output is not proved uniform; the raw Sign API is not refined to an abstract signing oracle; no adversary-wide EUF-CMA advantage bound |
-| `C3-QUANTITATIVE-KEYGEN` | `PROVED-CONDITIONAL` | First-attempt score/reject equivalence, later-retry semantic snapshots, finite-budget outcome-mass decomposition and exhaustion accounting, exact ideal eta laws, eighth-moment FFT certificates, an actual-sample accumulator unsafe bound below `1/2 + delta_xof`, and an accepted ordered-trace P8 mass bridge at `epsilon_p8 + delta_xof` | Progress defects, the first-attempt score tail, the ideal accepted-trace P8 mass, and `delta_xof` are not numerically discharged; no unbounded-loop termination or full `HAETAE.kg` distribution equality |
+| `C3-QUANTITATIVE-KEYGEN` | `PROVED-CONDITIONAL` | First-attempt score/reject equivalence, later-retry semantic snapshots, finite-budget outcome-mass decomposition and exhaustion accounting, exact ideal eta laws, eighth-moment FFT certificates, an actual-sample accumulator unsafe bound below `1/2 + delta_xof`, a concrete order-sensitive trace P8 evaluator, and an accepted ordered-trace P8 mass bridge at `epsilon_p8 + delta_xof` | Progress defects, the first-attempt score tail, the ideal accepted-trace P8 mass, and `delta_xof` are not numerically discharged; the zero-seed and seed-27 evaluator results are deterministic diagnostics, not distribution bounds; no unbounded-loop termination or full `HAETAE.kg` distribution equality |
 | `S1-FROZEN-CORPUS` | `PROVED` at the frozen claim boundary | The 82-target byte/word-level corpus: API key transport, raw mu traces, signature-prefix codec, HBZ/rANS refinement, and selected KeyGen/Sign/Verify procedure slices | See `manifests/paper-artifacts.md`; none of its partial parents is silently upgraded here |
 | `S2-SIGN-ROM` | `PROVED` as an operational interface | Raw Sign challenge observation, exact mode-2 carrier validity, transcript/site logging, and freshness/non-reprogramming invariants for repeated programmed calls and explicit ROM queries | The patched abstract transcript is not claimed to be the raw signature, to verify, or to instantiate the full security game |
 | `S3-PUBLIC-KEY-NMA` | `PROVED` as a public-view adapter | Faithful checked public-key sources and exact NMA wrapper/direct-game equalities | No secret-key semantics, CMA signing interface, total KeyGen, or equality with the original `HAETAE.kg` distribution |
@@ -122,6 +122,15 @@ artifact unmapped makes the aggregate verifier fail.
   only the existing additive `delta_xof` gap.  The theorem supplies the exact
   distribution-weighted bridge but does not invent a numeric `epsilon_p8`;
   that value still requires a new ideal accepted-trace mass certificate.
+- `Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze` fixes the
+  formerly abstract `P8_bad` to the existing signed, root-interval,
+  order-sensitive five-slot component-union calculation.  Invalid shapes or
+  nonpositive residual headrooms are conservatively bad.  The companion
+  checker reproduces the zero-seed value `0.4060052607303988...` and the first
+  accepted seed-27 value `0.3611855361011244...`, both below `1/2`, while a
+  one-position row rotation preserves both histograms but changes the bound.
+  These are deterministic evaluator regressions and do not supply an ideal
+  accepted-trace probability mass.
 
 ## Explicit limitations and prohibited promotions
 
@@ -187,7 +196,7 @@ Run:
 The terminal success line is:
 
 ```text
-RESULT PASS post-freeze-theories=167 checkers=9 certificates=7 cache=-no-eco
+RESULT PASS post-freeze-theories=168 checkers=10 certificates=8 cache=-no-eco
 ```
 
 Logical checking trusts EasyCrypt, Why3, and the selected SMT prover.  The

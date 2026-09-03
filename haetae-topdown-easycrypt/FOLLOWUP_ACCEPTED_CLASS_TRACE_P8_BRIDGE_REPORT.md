@@ -62,16 +62,20 @@ This result does not establish:
 - an accumulator failure bound obtained merely from trace classification; or
 - unbounded retry termination.
 
-## Next research obligation
+## Completed follow-up and remaining obligation
 
-Define `P8_bad` from the existing ordered root-interval recurrence, then
-construct a checked ideal-summary mass certificate (JSON plus checker and its
-EasyCrypt wrapper) for
+`Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze.ec` now defines
+`P8_bad` from the existing ordered root-interval recurrence and instantiates
+this bridge with that concrete predicate.  Its companion checker reproduces
+the zero-seed and seed-27 deterministic diagnostic values and confirms that a
+histogram-preserving row rotation changes the evaluator.
+
+The remaining obligation is a checked ideal-summary mass certificate for
 
 ```text
 mu ideal_summary (accepted and P8_bad(trace)) <= epsilon_p8.
 ```
 
 This requires an ideal accepted-context distribution or an equivalent
-support-and-weight theorem.  A finite seed-family experiment may guide the
-choice of predicate, but it is not a replacement for that distribution law.
+support-and-weight theorem.  The two deterministic fixtures validate the
+evaluator but are not a replacement for that distribution law.

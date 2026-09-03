@@ -1,7 +1,7 @@
 PASS supplied Why3 server socket
-PASS post-freeze proof manifest targets=167
-PASS post-freeze executable-artifact manifest entries=18
-PASS post-freeze claim map entries=185
+PASS post-freeze proof manifest targets=168
+PASS post-freeze executable-artifact manifest entries=20
+PASS post-freeze claim map entries=188
 PASS post-freeze proof-escape scan
 PASS post-freeze debug/temporary declaration scan
 PASS source drift before verification
@@ -27,14 +27,16 @@ PASS executable checker haetae-topdown-easycrypt/post-freeze/check-mode2-accepte
 PASS executable checker haetae-topdown-easycrypt/post-freeze/check-mode2-accepted-p8-union-certificate.py
 PASS executable checker haetae-topdown-easycrypt/post-freeze/check-mode2-accepted-upper-prefix-component-p8-certificate.py
 PASS executable checker haetae-topdown-easycrypt/post-freeze/check-mode2-first-attempt-accepted-context-feasibility.py
+PASS executable checker haetae-topdown-easycrypt/post-freeze/check-mode2-ordered-class-trace-p8-evaluator.py
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-first-attempt-accepted-context-feasibility.json
+PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-first-attempt-seed27-ordered-class-trace-p8.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-all-slot-coordinate-p8-certificate.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-class-trace.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-p8-certificate.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-p8-trace-headroom-certificate.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-p8-union-certificate.json
 PASS JSON certificate haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-upper-prefix-component-p8-certificate.json
-PASS executable certificate totals checkers=9 certificates=7 c-sources=2
+PASS executable certificate totals checkers=10 certificates=8 c-sources=2
 PASS fresh compile haetae-ntt-verify/easycrypt/NTTFullSpectralAction.ec
 PASS fresh compile haetae-ntt-verify/easycrypt/NTTMode2RowSpecializations.ec
 PASS fresh compile haetae-ntt-verify/easycrypt/NTTRowProductSpec.ec
@@ -113,6 +115,7 @@ PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKey
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKeygenRelationPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKeygenViewPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityNMAViewAdapterPostFreeze.ec
+PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRawSeedDistributionPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRetryEtaProgressPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRetryTailInvariantPostFreeze.ec
@@ -203,4 +206,4 @@ PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackV3ThroughNtt
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackVkM23BoundsPostFreeze.ec
 PASS fresh compile haetae-topdown-easycrypt/post-freeze/VerifyUnpackVkM23CoefficientsPostFreeze.ec
 PASS source drift after verification
-RESULT PASS post-freeze-theories=167 checkers=9 certificates=7 cache=-no-eco
+RESULT PASS post-freeze-theories=168 checkers=10 certificates=8 cache=-no-eco

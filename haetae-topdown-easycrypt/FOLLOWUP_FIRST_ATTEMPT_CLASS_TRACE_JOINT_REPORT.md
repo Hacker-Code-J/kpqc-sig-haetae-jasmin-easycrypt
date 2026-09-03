@@ -69,7 +69,9 @@ over the sampled-`dseed` program, with conclusion
 `epsilon_p8 + delta_xof` from an ideal-summary mass certificate at
 `epsilon_p8`.
 
-The remaining obligation is to define the concrete order-sensitive `P8_bad`
-predicate and certify its ideal accepted-trace mass numerically.  Conditioning
+`Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze.ec` now supplies
+the concrete order-sensitive `P8_bad` predicate and checks its deterministic
+zero-seed and seed-27 diagnostics.  The remaining obligation is solely to
+certify the ideal accepted-trace mass of that event numerically.  Conditioning
 or division by the acceptance mass remains postponed until a positive lower
 bound on that mass is available.

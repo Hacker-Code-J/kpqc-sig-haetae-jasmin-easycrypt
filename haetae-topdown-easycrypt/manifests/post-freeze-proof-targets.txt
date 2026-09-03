@@ -76,6 +76,7 @@ haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKeygenPaperLiftPostFre
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKeygenRelationPostFreeze.ec
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityKeygenViewPostFreeze.ec
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityNMAViewAdapterPostFreeze.ec
+haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze.ec
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRawSeedDistributionPostFreeze.ec
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRetryEtaProgressPostFreeze.ec
 haetae-topdown-easycrypt/post-freeze/Mode2FaithfulSecurityRetryTailInvariantPostFreeze.ec
