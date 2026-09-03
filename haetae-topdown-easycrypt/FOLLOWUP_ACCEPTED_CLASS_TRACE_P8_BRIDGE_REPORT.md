@@ -70,12 +70,18 @@ this bridge with that concrete predicate.  Its companion checker reproduces
 the zero-seed and seed-27 deterministic diagnostic values and confirms that a
 histogram-preserving row rotation changes the evaluator.
 
+`Mode2FaithfulSecurityIdealAvecClassTraceLawPostFreeze.ec` additionally proves
+the exact shift-invariant ideal coefficient-class marginal and its canonical
+iid 2-by-256 ordered product.  This closes the unconditional trace-law input,
+but it does not make that trace independent of the acceptance/score event.
+
 The remaining obligation is a checked ideal-summary mass certificate for
 
 ```text
 mu ideal_summary (accepted and P8_bad(trace)) <= epsilon_p8.
 ```
 
-This requires an ideal accepted-context distribution or an equivalent
-support-and-weight theorem.  The two deterministic fixtures validate the
-evaluator but are not a replacement for that distribution law.
+This requires a joint ideal `(accepted, score, ordered trace)` distribution or
+an equivalent support-and-weight theorem that preserves the dependence induced
+by acceptance.  The exact iid trace marginal and the two deterministic
+fixtures are not replacements for that joint law.

@@ -7,11 +7,13 @@ haetae-topdown-easycrypt/post-freeze/check-mode2-accepted-p8-trace-headroom-cert
 haetae-topdown-easycrypt/post-freeze/check-mode2-accepted-p8-union-certificate.py
 haetae-topdown-easycrypt/post-freeze/check-mode2-accepted-upper-prefix-component-p8-certificate.py
 haetae-topdown-easycrypt/post-freeze/check-mode2-first-attempt-accepted-context-feasibility.py
+haetae-topdown-easycrypt/post-freeze/check-mode2-ideal-avec-class-counts.py
 haetae-topdown-easycrypt/post-freeze/check-mode2-ordered-class-trace-p8-evaluator.py
 haetae-topdown-easycrypt/post-freeze/extract-mode2-accepted-class-trace.c
 haetae-topdown-easycrypt/post-freeze/extract-mode2-first-attempt-class-trace.c
 haetae-topdown-easycrypt/post-freeze/mode2-first-attempt-accepted-context-feasibility.json
 haetae-topdown-easycrypt/post-freeze/mode2-first-attempt-seed27-ordered-class-trace-p8.json
+haetae-topdown-easycrypt/post-freeze/mode2-ideal-avec-class-counts.json
 haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-all-slot-coordinate-p8-certificate.json
 haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-class-trace.json
 haetae-topdown-easycrypt/post-freeze/mode2-zero-seed-accepted-p8-certificate.json

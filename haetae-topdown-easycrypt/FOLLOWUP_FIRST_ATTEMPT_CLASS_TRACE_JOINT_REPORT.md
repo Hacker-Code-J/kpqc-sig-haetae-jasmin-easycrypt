@@ -71,7 +71,11 @@ over the sampled-`dseed` program, with conclusion
 
 `Mode2FaithfulSecurityOrderedClassTraceP8EvaluatorPostFreeze.ec` now supplies
 the concrete order-sensitive `P8_bad` predicate and checks its deterministic
-zero-seed and seed-27 diagnostics.  The remaining obligation is solely to
-certify the ideal accepted-trace mass of that event numerically.  Conditioning
-or division by the acceptance mass remains postponed until a positive lower
-bound on that mass is available.
+zero-seed and seed-27 diagnostics.
+
+`Mode2FaithfulSecurityIdealAvecClassTraceLawPostFreeze.ec` now also supplies
+the exact shift-invariant ideal six-class marginal and canonical iid 2-by-256
+ordered trace.  The remaining obligation is solely to combine that trace law
+with acceptance and score in a sound ideal joint summary and certify the mass
+of the concrete event.  Conditioning or division by the acceptance mass
+remains postponed until a positive lower bound on that mass is available.

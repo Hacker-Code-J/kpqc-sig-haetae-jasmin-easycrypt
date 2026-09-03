@@ -78,15 +78,22 @@ not establish:
 
 ## Next research obligation
 
-The predicate is no longer abstract.  The remaining quantitative obligation
-is now exactly
+The predicate is no longer abstract, and the follow-up ideal-`avec` class law
+now supplies the exact shift-invariant marginal
+`(1,1,16127,16128,16128,16128)/64513` together with its canonical iid
+2-by-256 ordered product.  The remaining quantitative obligation is therefore
+the joint accepted-summary law, exactly
 
 ```text
 mu ideal_summary
   (accepted and ordered_class_trace_p8_bad(trace)) <= epsilon_p8.
 ```
 
-Discharging it requires an ideal accepted-context distribution or an
-equivalent support-and-weight theorem.  Only after a positive acceptance-mass
-lower bound is also available may this unconditional mass be divided to form
-a conditional probability.
+The iid trace marginal alone cannot discharge this expression because
+acceptance and score are functions of the same idealized context.  Discharging
+it requires an ideal joint `(accepted, score, ordered trace)` distribution or
+an equivalent support-and-weight theorem, followed by the existing concrete
+P8 evaluator.  Relating that ideal law to actual SHAKE/ExpandVecA remains the
+explicit `delta_xof` boundary.  Only after a positive acceptance-mass lower
+bound is also available may this unconditional mass be divided to form a
+conditional probability.

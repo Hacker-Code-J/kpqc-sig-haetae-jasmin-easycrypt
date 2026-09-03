@@ -95,8 +95,8 @@ if ! diff -u "$SORTED_PROOFS" "$DISCOVERED_PROOFS" \
   fail "post-freeze proof manifest drift"
 fi
 proof_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' "$PROOF_MANIFEST")
-[ "$proof_count" -eq 168 ] || fail "expected 168 proof targets, found $proof_count"
-pass "post-freeze proof manifest targets=168"
+[ "$proof_count" -eq 169 ] || fail "expected 169 proof targets, found $proof_count"
+pass "post-freeze proof manifest targets=169"
 
 DISCOVERED_ARTIFACTS="$WORK_DIR/discovered-artifacts.txt"
 SORTED_ARTIFACTS="$WORK_DIR/manifest-artifacts.txt"
@@ -111,8 +111,8 @@ if ! diff -u "$SORTED_ARTIFACTS" "$DISCOVERED_ARTIFACTS" \
   fail "post-freeze executable-artifact manifest drift"
 fi
 artifact_count=$(awk 'NF && $1 !~ /^#/ { count++ } END { print count + 0 }' "$ARTIFACT_MANIFEST")
-[ "$artifact_count" -eq 20 ] || fail "expected 20 executable artifacts, found $artifact_count"
-pass "post-freeze executable-artifact manifest entries=20"
+[ "$artifact_count" -eq 22 ] || fail "expected 22 executable artifacts, found $artifact_count"
+pass "post-freeze executable-artifact manifest entries=22"
 
 EXPECTED_CLAIM_ARTIFACTS="$WORK_DIR/expected-claim-artifacts.txt"
 MAPPED_CLAIM_ARTIFACTS="$WORK_DIR/mapped-claim-artifacts.txt"
@@ -136,11 +136,11 @@ if ! awk -F '\t' '
   $2 !~ /^(C1-FAITHFUL-REFINEMENT|C2-CHALLENGE-MODEL|C3-QUANTITATIVE-KEYGEN|S2-SIGN-ROM|S3-PUBLIC-KEY-NMA)$/ { exit 1 }
   seen[$1]++ > 0 { exit 1 }
   { count++ }
-  END { if (count != 188) exit 1 }
+  END { if (count != 191) exit 1 }
 ' "$CLAIM_MAP" > "$LOG_DIR/claim-map-schema.log" 2>&1; then
   fail "post-freeze claim-map schema"
 fi
-pass "post-freeze claim map entries=188"
+pass "post-freeze claim map entries=191"
 
 if rg -ni '^[[:space:]]*axiom[[:space:]]|(^|[^[:alnum:]_])(admit|admitted|abort|sorry)([^[:alnum:]_]|$)' \
     "$PROJECT_DIR/post-freeze" \
@@ -290,10 +290,10 @@ while IFS= read -r artifact || [ -n "$artifact" ]; do
       ;;
   esac
 done < "$ARTIFACT_MANIFEST"
-[ "$checker_count" -eq 10 ] || fail "expected 10 checkers, ran $checker_count"
-[ "$certificate_count" -eq 8 ] || fail "expected 8 certificates, parsed $certificate_count"
+[ "$checker_count" -eq 11 ] || fail "expected 11 checkers, ran $checker_count"
+[ "$certificate_count" -eq 9 ] || fail "expected 9 certificates, parsed $certificate_count"
 [ "$c_source_count" -eq 2 ] || fail "expected 2 C trace sources, found $c_source_count"
-pass "executable certificate totals checkers=10 certificates=8 c-sources=2"
+pass "executable certificate totals checkers=11 certificates=9 c-sources=2"
 
 TOPDOWN_SPECS="$PROJECT_DIR/easycrypt/specs"
 TOPDOWN_SECURITY="$PROJECT_DIR/easycrypt/security"
@@ -374,7 +374,7 @@ while IFS= read -r target || [ -n "$target" ]; do
   compile_target "$target"
   compiled=$((compiled + 1))
 done < "$PROOF_MANIFEST"
-[ "$compiled" -eq 168 ] || fail "expected 168 compiled targets, got $compiled"
+[ "$compiled" -eq 169 ] || fail "expected 169 compiled targets, got $compiled"
 
 "$SCRIPT_DIR/check-source-drift.sh" > "$LOG_DIR/source-drift-after.log" 2>&1 \
   || fail "source drift after verification"
