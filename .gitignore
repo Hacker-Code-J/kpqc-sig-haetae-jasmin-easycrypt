@@ -1,76 +1,39 @@
-haetae-ref-profiling/profiling_results/
+# Local agent/editor state and recovery copies
+/.omx/
+/.codex
+/.agents/
+/.vscode/
+/tstex_modules/
 AGENT.md
-.omx
-.codex
-.agents
-tstex_modules/
-
-*.snm
-*.toc
-*.vrb
-*.log
-*.aux
-*.synctex.gz
-*.bbl
-*.blg
-*.lof
-*.lol
-*.lot
-*.xml
 *.claude
+.DS_Store
 
-# Prerequisites
-*.d
-
-# Object files
+# Build output; keep the upstream distribution and committed KAT untouched
+/build/
+/HAETAE-1.2.0/reference_implementation/build/
+__pycache__/
+*.pyc
 *.o
-*.ko
-*.obj
-*.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
 *.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
 *.so
 *.so.*
 *.dylib
-
-# Executables
 *.exe
 *.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+*.eco
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
-*.dwo
+# Generated LaTeX intermediates (selected archive PDFs are intentional)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.lof
+*.lol
+*.lot
+*.log
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.xdv
