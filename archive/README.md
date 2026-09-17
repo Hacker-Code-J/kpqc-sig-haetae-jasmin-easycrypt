@@ -37,19 +37,19 @@ sha256sum --check archive/SHA256SUMS
 | `main-20260917` | 기존 `main`, `4bde1207e2a290952d491d5b41c4bd773081e3c4` |
 | `ntt-foundation-20260917` | NTT 브랜치, `5a7b487be5fd402e21f3919203af42f21c428e81` |
 | `kg-rq-haetae-bridge-20260917` | 마지막 기존 개발 커밋, `ce8b083226596c7c116f1ae95ede95a877117190` |
-| `worktree-20260917` | 위 개발 커밋에 기존 미커밋 20개 파일을 그대로 보존한 스냅샷 |
+| `worktree-20260917` | 기존 미커밋 20개 파일을 그대로 보존한 `6177f8db0a2887314dbff213e5ca04234eece58e` |
 
 `worktree` 스냅샷에는 안내서의 수정 소스·PDF뿐 아니라 `.xdv`,
 `.fdb_latexmk`, 진행 중 로그도 원래 경로로 포함된다. 새 배포본 도입 및
 archive 재배치 이전의 완전한 추적 파일 트리다.
 
 ```sh
-# 별도 디렉터리에서 이전 구조 그대로 열기
+# 태그 없이도 별도 디렉터리에서 이전 구조 그대로 열기
 git worktree add --detach ../haetae-pre-1.2.0 \
-  archive/pre-haetae-1.2.0/worktree-20260917
+  6177f8db0a2887314dbff213e5ca04234eece58e
 
 # 복사할 파일을 먼저 확인하기
-git show archive/pre-haetae-1.2.0/worktree-20260917:haetae-ref-jasmin/jasmin/sampler.jinc
+git show 6177f8db0a2887314dbff213e5ca04234eece58e:haetae-ref-jasmin/jasmin/sampler.jinc
 ```
 
 원래 프로젝트 간 상대경로와 pinned manifest가 연결되어 있으므로 증명 루트
@@ -58,15 +58,16 @@ git show archive/pre-haetae-1.2.0/worktree-20260917:haetae-ref-jasmin/jasmin/sam
 
 추적하지 않았던 로컬 파일과 빌드 산출물은 이 컴퓨터의
 `.omx/restart-backup/haetae-1.2.0-20260917/legacy-tree/`로 옮겨 별도 보존했다.
-그 로컬 백업은 Git에 들어가지 않는다. 영구 복구의 기준은 위 태그다.
+그 로컬 백업은 Git에 들어가지 않는다. 영구 복구의 기준은 위 Git 스냅샷이다.
 
 ## main 정비 범위
 
 기존 `main` → NTT → bridge가 하나의 조상 관계이므로 이력을 유지한 채
-`main`을 전진시켰다. 두 옛 로컬 작업 브랜치는 태그 보존 후 정리한다.
-원격 게시 시에는 `main`과 위 보관 태그를 함께 게시해야 다른 clone에서도
-태그 이름으로 복구할 수 있다. 이번 정리는 로컬 Git에 한정하며 원격 push,
-원격 브랜치 삭제, GitHub 설정 변경은 포함하지 않는다.
+`main`을 전진시켰다. 두 옛 로컬 작업 브랜치는 태그 보존 후 정리했다.
+과거 스냅샷 커밋들은 게시한 `main`의 이력에 포함되므로 다른 clone에서도
+위 커밋 해시로 복구할 수 있다. 보관 태그 4개는 로컬에 유지하며, 현재 사용한
+GitHub 앱 도구가 태그 게시를 지원하지 않아 원격에는 아직 게시하지 않았다.
+원격 브랜치 삭제와 GitHub 설정 변경은 포함하지 않는다.
 
 중복 참조 구현·프로파일링·비교 자료·중간 산출물을 현재 트리에서 덜어냈지만
 기존 이력을 유지하므로 `.git` 용량을 줄이는 이력 재작성은 하지 않았다.
