@@ -106,7 +106,7 @@ losslessness, 확률 1 성공과 일반 정준 입력의 성공은 여전히 별
 1주 최소 논문 범위가 원래 (h) 코덱 권고를 덮어썼으므로
 \claim{OBL-SIG-H-ENCODE-DECODE}는 현재 \statusdeferred 다.
 
-\subsection{KeyGen 종료 관문: STOP-KG-NTT}
+\subsection{KeyGen 관문: 동결 STOP-KG-NTT에서 최신 STOP-KG-AVEC-QJ까지}
 
 Week~16은 실제 \identifier{_kp_m23_matrix}와
 \identifier{_keypair_finalize_m23}를 투명한 두 호출 harness에서 합성했다.
@@ -115,7 +115,7 @@ Week~16은 실제 \identifier{_kp_m23_matrix}와
 mod-\(2q\) 영 등식을 닫는다. 이 결과로 KG-2형 계수 분해와 KG-4의 조정된
 \(s_2\) 성분은 증명되었지만 전체 논문 KeyGen 식은 아니다.
 
-\begin{boundary}[\claim{STOP-KG-NTT}]
+\begin{boundary}[paper-freeze의 \claim{STOP-KG-NTT}]
 \identifier{KeygenM23ArithmeticSpec.output_row}가 표현하는
 full-NTT--점별 곱--inverse-NTT 결과를 보안 모델의 행별 다항식 곱
 \[
@@ -124,17 +124,35 @@ full-NTT--점별 곱--inverse-NTT 결과를 보안 모델의 행별 다항식 �
   s_{\mathrm{gen}}[\mathrm{col}]
 \]
 과 연결하려면 odd-root orthogonality/full-NTT convolution 정리와
-\identifier{Rq.poly}--security-list adapter가 필요하다. 둘 다 현재 checked
-tree에 없으므로 faithful KG-1, KG-3, 전체 KG-4와
+\identifier{Rq.poly}--security-list adapter가 필요했다. 둘 다 82대상 동결
+경계에는 없으므로 그 주장 행렬은 faithful KG-1, KG-3, 전체 KG-4와
 \(As=qj\pmod{2q}\)를 구성하지 않는다.
 \end{boundary}
 
-KeyGen 판정은 \identifier{STOP-KG-NTT}다. \claim{OBL-MINCORE-KEYGEN}은
-KG-2/finalization에서 \statuspartial 로 동결되었다. MINCORE Sign은
-\identifier{STOP-SIGN-CHAL-MODE2}, MINCORE Verify는
-\identifier{STOP-VERIFY-MATRIX-CRT}이며 제한 합성은 \statusspecified 다.
-Verify의 첫 재개 leaf는 \identifier{rq_mul_coeff_foldr_to_bigi}이며, 이어
-2-by-4 NTT row-product와 CRT/freeze 절차 leaf가 남는다.
+post-freeze에는 \identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral
+action, 일반/mode-2 row product와 Rq--HAETAE 계수 표현 adapter가 닫혔다. 이어
+actual mode-2 sampler의 nonce 515/516, SHAKE128 framing, little-endian parsing과
+rejection 의미가 paper \(a\)로 운반되고, 별도 paper \(qj\) correction이 기존
+snapshot 등식과 합성됐다.
+
+\begin{boundary}[최신 \claim{STOP-KG-AVEC-QJ}]
+기존 보안 모델의 \identifier{public_rounding_vector_seed}는 tag 401 기반
+synthetic generator다. 이는 actual sampler와도 paper \(qj\)와도 같지 않으며,
+\identifier{security_named_qj_is_not_paper_qj}가 row~0 coefficient~0에서
+\(401\ne64513\)을 증명한다. all-zero raw seed의 실제 nonce-515 첫 계수도
+44985이므로 이 동일성을 가정할 수 없다. 보안 모델을 actual ExpandVecA 의미로
+교체ㆍ정제하는 \claim{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}가 KG 승격보다 먼저다.
+\end{boundary}
+
+따라서 동결 \claim{OBL-MINCORE-KEYGEN} 상태는 KG-2/finalization의
+\statuspartial 로 유지된다. 최신 보조 전선도 full KG-1--KG-4를 승격하지 않는다.
+MINCORE Sign의 동결 판정은
+\identifier{STOP-SIGN-CHAL-MODE2}다. MINCORE Verify의 동결 판정은
+\identifier{STOP-VERIFY-MATRIX-CRT}이며, 제한 합성은 \statusspecified 다.
+Verify의 순수 NTT 기반은 post-freeze에 닫혔지만 실제
+\identifier{verify_matrix_ntt_acc_}\allowbreak
+\identifier{mode2_cols4_correct}와
+\identifier{verify_crt_freeze_mode2_word_exact} 절차 leaf가 남는다.
 
 \subsection{분리된 기능정확성 경로}
 
@@ -211,19 +229,27 @@ production 전체 HBZ 래퍼에서 zero-size 실패를 보존하고, nonzero-siz
 Week~16 최소 KeyGen 범위가 우선되어 연기된 실제 힌트 코덱 역함수 \\
 \claim{OBL-MINCORE-KEYGEN} & 기능정확성;\newline
 \statuspartial;\newline\identifier{STOP-KG-NTT} &
-실제 snapshot/finalizer는 76대상 기준선에서 증명됨. 마지막
-\identifier{output_row} NTT rewrite와 두 active row consequence는 77번째
-파일에서 개별 컴파일됨. 그래도 odd-root convolution과
-\identifier{Rq.poly}-to-security-list
-adapter가 없어 faithful KG-1/KG-3/전체 KG-4와 논문 식은 동결 \\
+실제 snapshot/finalizer와 마지막 \identifier{output_row} rewrite까지인 동결
+82대상 주장. post-freeze NTT/Rq 보조 정리는 이 역사적 stop을 전진시켰지만
+동결 claim 자체와 full KG 식은 승격하지 않음 \\
+\claim{OBL-KG-}\newline
+\claim{SECURITY-}\newline
+\claim{EXPANDVECA-}\newline
+\claim{SEMANTICS} & 기능정확성;\newline
+\statusblocked;\newline\identifier{STOP-KG-}\newline
+\identifier{AVEC-QJ} & synthetic
+\identifier{public_rounding_vector_seed}를 actual SHAKE128/LE16/rejection 및
+nonce 515/516 의미로 교체ㆍ정제하고 paper \(qj\)를 별도 correction으로 유지한
+actual-array 표현 정리가 필요 \\
 \claim{OBL-MINCORE-SIGN} & 기능정확성;\newline\statuspartial;\newline
-\identifier{STOP-SIGN-CHAL-MODE2} & 실제 round-challenge, z-check, hint helper
+\identifier{STOP-SIGN-}\allowbreak\identifier{CHAL-MODE2} & 실제 round-challenge, z-check, hint helper
 직접 호출과 accepted-branch control만 컴파일; full challenge semantics와
 S-1--S-7 headline은 미증명 \\
 \claim{OBL-MINCORE-VERIFY} & 기능정확성;\newline\statuspartial;\newline
-\identifier{STOP-VERIFY-MATRIX-CRT} & actual helper 순서, V-1/V-2/V-5/V-6
+\identifier{STOP-VERIFY-}\allowbreak\identifier{MATRIX-CRT} & actual helper 순서, V-1/V-2/V-5/V-6
 machine-word 식, W64 norm gate와 tail/mismatch word expression은 컴파일;
-matrix CRT 의미 bridge와 challenge equality는 미증명 \\
+post-freeze 순수 NTT 기반은 증명됐으나 실제 2-by-4 matrix accumulation,
+CRT/freeze 의미 bridge와 challenge equality는 미증명 \\
 \claim{OBL-MINCORE-COMPOSITION} & 기능정확성;\newline\statusspecified &
 decoded-object 경계의 제한 Sign--Verify 합성은 아직 미증명 \\
 \claim{OBL-SIG-SUFFIX-METADATA},\newline
@@ -265,15 +291,24 @@ BST-MSIS 인스턴스(instance)를 추출 \\
   \item Week~14 production 래퍼와 Week~15 고정 all-6 성공 정리를 유지하고
         rANS 반복 불변식을 다시 증명하지 않는다. 고정 입력 종료/losslessness는
         별도 의무로 남긴다.
-  \item KG-NTT-MUL 감사의 \identifier{STOP-KG-NTT}를 유지한다. odd-root
-        직교성/full-NTT convolution과 security-list adapter 없이는
-        \identifier{pre_bp}를 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 바꾸거나
-        faithful KG-1/KG-3/전체 KG-4를 주장하지 않는다.
+  \item 동결 주장 행렬의 \identifier{STOP-KG-NTT}는 역사적 경계로 유지한다.
+        post-freeze에 닫힌 NTT/Rq--HAETAE 정리를 재사용하되 이를 동결 PDF의
+        claim으로 소급 기록하지 않는다.
+  \item 최신 \identifier{STOP-KG-AVEC-QJ}를 먼저 해결한다. synthetic
+        \identifier{public_rounding_vector_seed}를 actual ExpandVecA 의미로
+        교체ㆍ정제하고 paper \(qj\) correction과 분리한 뒤
+        \identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}를 증명한다.
+  \item 보안 \(a\), actual array와 Rq/HAETAE row product를 연결한 뒤 mode-2
+        폭 4/mod-\(q\) 표현을 논문 augmented 폭 6/mod-\(2q\) matrixㆍsecretㆍerror
+        packaging으로 운반한다. 그 전에는 faithful KG-1/KG-3/전체 KG-4를
+        주장하지 않는다.
   \item \identifier{STOP-SIGN-CHAL-MODE2}를 유지한다. full
-        highbits/LSB/\(\mu\)-to-SampleInBall leaf와 기존 convolution 의무 없이
-        S-1--S-7을 주장하지 않는다.
-  \item Verify의 첫 누락 leaf \identifier{rq_mul_coeff_foldr_to_bigi}를 닫고,
-        2-by-4 NTT row-product와 CRT/freeze 절차 leaf를 거쳐 combined matrix
+        highbits/LSB/\(\mu\)-to-SampleInBall leaf, 실제 Sign row-product 적용과
+        response/hint 표현 의무 없이 S-1--S-7을 주장하지 않는다.
+  \item Verify에서는 이미 닫힌 순수 NTT 기반을 실제 2-by-4 accumulation에
+        적용하는 \identifier{verify_matrix_ntt_acc_}\allowbreak
+        \identifier{mode2_cols4_correct}와
+        \identifier{verify_crt_freeze_mode2_word_exact}를 닫아 combined matrix
         theorem을 합성한 다음 downstream challenge leaf를 닫는다.
   \item (h) 코덱은 현재 연기 상태를 유지한다. 범위가 다시 열리면 크기
         메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값

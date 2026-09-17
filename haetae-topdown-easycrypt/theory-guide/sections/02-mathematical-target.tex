@@ -46,7 +46,7 @@ Sign은 비밀키 내부의 검증키 성분을 이용해 \(\mu\)를 만들고, 
 실제 원시 API 호출자가 그 입력에 도달하는 제어/메모리 사실, Sign 출력의
 프레임 조건, 읽는 구간만을 요구하는 해시 동치까지 추적했다. 완료된 추적에
 저장된 두 \(\mu\)를 직접 연결하는 일은 생성/재전달 의미론 경계로 동결되었다.
-현재 주 실행 경로는 실제 서명 코덱의 HBZ rANS 접미부다. 계수/기호 잎, 표,
+Week~8--15의 주 실행 경로는 실제 서명 코덱의 HBZ rANS 접미부였다. 계수/기호 잎, 표,
 순수 단일 단계, 공통 바이트 스택, 실제 접미부 복사와 3회 호출 결합의 제어는
 닫혔다. Week~10에는 실제 인코더의 내부 바이트 쓰기와 성공 시 크기 범위가
 추가되었다. Week~11은 순수 꼬리를 내부 불변식에 보존하는 정확한
@@ -58,9 +58,12 @@ Sign은 비밀키 내부의 검증키 성분을 이용해 \(\mu\)를 만들고, 
 Week~15는 정준 all-zero HBZ가 만드는 all-6 기호열에서 종료한 실제 인코더의
 nonzero-size 성공을 증명했다. Week~16은 KeyGen matrix/finalizer 스냅샷과
 \identifier{output_row}의 마지막 sound NTT 표현 rewrite 및 actual harness의
-두 row consequence를 77번째 대상으로 컴파일했다. 필요한 convolution 층은
-없어 \identifier{STOP-KG-NTT}로 동결했다. 현재
-관문(gate)은 실제 accepted Sign core다.
+두 row consequence를 77번째 대상으로 컴파일했다. 필요한 convolution 층이
+동결 표면에는 없어 \identifier{STOP-KG-NTT}로 고정했고, 뒤이어 Sign/Verify
+제한 결과까지 82개 \identifier{PAPER-FROZEN} 경계에 포함했다. post-freeze에는
+순수 NTT/Rq 표현과 actual-(a)/paper-(qj) 보조 층이 닫혔지만 synthetic
+security object의 의미 불일치 때문에 최신 관문(gate)은
+\identifier{STOP-KG-AVEC-QJ}다.
 
 \subsection{mode-2 서명 코덱(signature codec)의 기능정확성 목표}
 
@@ -535,23 +538,36 @@ bytewise zero로 초기화한
 \identifier{actual_m23_matrix_snapshot_rows_explicit}는 이를 actual two-call
 harness의 두 active row 사후조건으로 운반한다. 이 식을 논문
 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 이름 바꾸지는 않는다. 감사에서 확인한
-첫 누락 잎은 실제 Montgomery 인자를 포함한 odd-root 직교성/full-NTT
+paper-freeze 당시 첫 누락 잎은 실제 Montgomery 인자를 포함한 odd-root 직교성/full-NTT
 spectral-action, 즉 점별 곱의 inverse NTT와 \identifier{Rq.\&*} negacyclic
-convolution을 동일시하는 정리다. 그 뒤에도 \identifier{Rq.poly} 배열을
+convolution을 동일시하는 정리였다. 그 뒤에는 \identifier{Rq.poly} 배열을
 \identifier{HAETAE_Algebra.poly_mul} 정수 목록으로 옮기는 별도 adapter가
-필요하다. 따라서 faithful KG-1, KG-3, 전체 KG-4와
+필요했다. 따라서 동결 주장 행렬에서 faithful KG-1, KG-3, 전체 KG-4와
 \[
   A s=qj\pmod{2q}
 \]
-는 증명되지 않았다. 최종 판정 \identifier{STOP-KG-NTT}는 KeyGen을 KG-2 및
-finalization 경계에서 동결한다. 이후 실제 세 Sign helper의 직접 호출과
-accepted-branch control은 컴파일됐지만
-\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct}가 없어
-\identifier{STOP-SIGN-CHAL-MODE2}로 동결되었다. S-1--S-7 headline 정리는
+는 증명되지 않았다. 동결 판정 \identifier{STOP-KG-NTT}는 KeyGen을 KG-2 및
+finalization 경계에서 고정했다. 이후 실제 세 Sign helper의 직접 호출과
+accepted-branch control은 컴파일됐지만 다음 정리가 없다.
+\begin{center}
+  \small\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct}
+\end{center}
+따라서 \identifier{STOP-SIGN-CHAL-MODE2}로 동결되었다. S-1--S-7 headline 정리는
 미증명이다. 이어진 MINCORE-VERIFY는 helper-local machine-word/control 결과를
-보존했으며, 첫 재개 leaf는 \identifier{rq_mul_coeff_foldr_to_bigi}다. 이후
-2-by-4 NTT row-product와 CRT/freeze leaf를 닫아야 combined theorem을 합성할 수
-있다.
+보존했다.
+
+paper-freeze 이후 \identifier{rq_mul_coeff_foldr_to_bigi},
+\identifier{full_ntt_montgomery_}\allowbreak\identifier{spectral_action},
+일반 row-product와
+Rq--HAETAE 곱 표현 adapter는 별도 보조 트리에서 닫혔다. actual mode-2
+\identifier{avec}도 SHAKE128/rejection 의미를 거쳐 논문 \(a\)로 연결되고,
+논문 \(qj\) 항은 snapshot 식에 독립적으로 더해졌다. 그러나 기존 보안 모델의
+synthetic \identifier{haetae_mode23_qj_vector}가 이 객체들과 다름이 증명되어
+최신 판정은 \identifier{STOP-KG-AVEC-QJ}다. 따라서 KG-1--KG-4 및 위 논문 식은
+여전히 승격되지 않는다. Verify에서는 순수 NTT 기반 대신 실제 2-by-4
+\identifier{verify_matrix_ntt_acc_mode2_cols4_correct}와
+\identifier{verify_crt_freeze_mode2_word_exact}가 combined theorem의 첫 절차
+blocker다.
 
 \subsection{최상위 기능정확성 목표}
 

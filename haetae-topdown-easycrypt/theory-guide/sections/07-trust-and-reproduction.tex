@@ -26,7 +26,12 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
 
 \begin{verbatim}
 ./haetae-topdown-easycrypt/scripts/verify-all.sh
+./haetae-topdown-easycrypt/scripts/check-paper-freeze.sh
+python3 haetae-topdown-easycrypt/post-freeze/check-kg-actual-avec-qj-trace.py
 \end{verbatim}
+
+첫 명령은 동결 82대상 aggregate를, 둘째는 paper-freeze 범위를 명시적으로,
+셋째는 latest post-freeze mismatch의 독립 deterministic witness를 검사한다.
 
 이 스크립트는 다음을 순서대로 검사한다.
 
@@ -50,34 +55,49 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
         과대주장 검사, Week~15 고정 all-six 예산/실패 원인/production 성공 lift,
         Week~16 실제 M23 matrix/finalizer 스냅샷, 마지막 NTT 표현 rewrite,
         직접 Sign/Verify core control과 \identifier{STOP-VERIFY-MATRIX-CRT}
-        표면 검사;
+        동결 표면 검사;
   \item 현재 매니페스트된 82개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
         컴파일;
   \item \identifier{admit}, \identifier{sorry}, 작성 \identifier{axiom},
         디버그/임시(debug/temporary) 선언 부재와 매니페스트(manifest) 완전성;
   \item 선택된 상류 기준선(upstream baseline)의 새 컴파일(fresh compile);
-  \item 기존 주차별(sprint) LaTeX 연구 노트의 참조/인용 오류 없는 빌드.
+  \item 기존 주차별(sprint) LaTeX 연구 노트의 참조/인용 오류 없는 빌드;
+  \item \sourcepath{manifests/paper-artifacts.md}의 동결 PDF, 82대상, 주장 행렬과
+        exact blocker가 변하지 않았는지 확인하는 paper-freeze audit.
 \end{enumerate}
 
+{\small\raggedright
 추출 해시(hash)는 생성물 변동(drift)을 탐지하지만 번역 의미의 정당성을
 대신하지 않는다. 또한 실행 요약은 매 실행 때 덮어쓰므로, 발표용 스냅샷에는
 마지막 \texttt{RESULT PASS} 줄까지 포함된 완전한 로그를 보관해야 한다.
-수정 전 완료 스냅샷의 종료 표식은
+76대상 완료 스냅샷의 종료 표식은
 \sourcepath{logs/verify-all-before-kg-ntt-mul.log}에 보존된
-\texttt{RESULT PASS authored-targets=76}\newline
-\texttt{cache=-no-eco}다. Sign 수정 전 77대상 완료 표식은
+\texttt{RESULT PASS}\newline
+\texttt{authored-targets=76 cache=-no-eco}다. Sign 수정 전 77대상 완료 표식은
 \sourcepath{logs/verify-all-before-week16-sign.log}에 보존되고
 \sourcepath{WEEK16_SIGN_REPORT.md}는 78번째 대상의 직접 actual-call control과
 중단 판정을 설명한다. Verify 수정 전 78/78 완료 로그는
 \sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며
-해시 \texttt{cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75}를
+해시 \hashsplit{cf8056712327dc8211cf93ae427ac505}{3e8a9d2366747f171392468ac3ff0d75}를
 갖는다. \sourcepath{WEEK16_VERIFY_REPORT.md}는 canonical decoded
-\((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-MATRIX-CRT}와 남은 blocker를
-설명한다. 최종 82/82 aggregate 로그는
-\sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에 보존되고 SHA-256은
-\texttt{4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da}이다.
+\((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-}\allowbreak
+\identifier{MATRIX-CRT}와 남은 blocker를
+설명한다. paper-freeze 직전 82/82 aggregate 로그는
+\sourcepath{logs/verify-all-before-paper-freeze.log}에 보존되고 SHA-256은
+\hashsplit{4cd64e5a656be82710bca1410c4d194}{03a3c661d6b91b0319a0ea8f7c91646da}이다.
+\newline
+기준 커밋 \identifier{e87bcc3}에 추적된
+\sourcepath{logs/verify-all-summary.txt}는 paper-freeze audit까지 통과한
+terminal \texttt{RESULT PASS}\newline
+\texttt{authored-targets=82}\newline
+\texttt{cache=-no-eco}와 SHA-256
+\hashsplit{08ef9639dc73d56dba42d02999d07897}{d29bc8e60aa100a648e9437fd64387ad}를
+유지한다.
+동결 논문 PDF 해시는
+\hashsplit{be935948028829556951863b44ceb2e6}{c5b2037820991b3a43a4b461b036e53d}다.
+\par}
 
-\begin{boundary}[78대상 pre-Verify 기준선과 82대상 Verify partial boundary]
+\begin{boundary}[82대상 paper-freeze와 별도 post-freeze 보조 층]
 2026-08-10의 Week~14 완료 실행은 Week~13의 67대상 기준선에 다음 다섯 이론을
 추가해 72대상을 닫았다.
 \begin{itemize}[leftmargin=1.5em,itemsep=0.05em,topsep=0.25em]
@@ -92,12 +112,12 @@ Week~15는 \sourcepath{Mode2RansAllSixBudget.ec}와
 \sourcepath{Mode2RansActualSuccessWitness.ec}를 더해 74대상으로, Week~16은
 \sourcepath{Mode2KeygenSnapshotAlgebra.ec}와
 \sourcepath{Mode2KeygenCoreEquation.ec}를 더해 76대상으로 확장했다.
-KG-NTT-MUL 감사가 추가한 77번째 대상
+KG-NTT-MUL 감사가 추가한 paper-freeze 시점 77번째 대상
 \sourcepath{Mode2Keygen}\allowbreak\sourcepath{NttMulBridge.ec}는 마지막
 \identifier{output_row} 표현
 rewrite와 actual two-call harness의 두 active row consequence를 개별 fresh
-compile한다. 이 대상은 odd-root convolution이나 security-list
-adapter를 가정하지 않으며 최종 판정은 \identifier{STOP-KG-NTT}다.
+compile했다. 이 동결 버전은 odd-root convolution이나 security-list
+adapter를 가정하지 않으며 판정은 \identifier{STOP-KG-NTT}였다.
 \sourcepath{logs/week14-hbz-full-}\allowbreak
 \sourcepath{surface-scan.log}는 production 직접 호출,
 사전조건, 실패/성공 분기와 frame 결론의 정리 표면을 검사한다. Week~13 독립
@@ -111,12 +131,21 @@ adapter를 가정하지 않으며 최종 판정은 \identifier{STOP-KG-NTT}다.
 \identifier{STOP-KG-NTT} 경계를 검사한다.
 \sourcepath{logs/week16-sign-core-surface-scan.log}는 실제 세 helper 호출,
 비순환 precondition과 stop 경계를 검사한다. 실행 중 생성되는
-\sourcepath{logs/verify-all-summary.txt}는 덮어쓰는 중간 로그이므로 보존 증거로
-사용하지 않는다. Verify 수정 전 78/78 완료 로그는
+\sourcepath{logs/verify-all-summary.txt}의 중간 PASS 줄은 완료 증거가 아니며,
+terminal RESULT와 고정 해시가 함께 있을 때만 현재 aggregate 증거로 쓴다.
+Verify 수정 전 78/78 완료 로그는
 \sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며,
-최종 82/82 aggregate는 \sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에
-보존된다. 그 밖의
-중간 또는 중단 실행은 보존된 77대상 Sign 수정 전 기준선을 갱신하지 않는다.
+paper-freeze 직전 82/82 aggregate는
+\sourcepath{logs/verify-all-before-paper-freeze.log}에 보존된다.
+
+post-freeze의 \sourcepath{NTTFullSpectralAction.ec},
+\sourcepath{NTTMode2RowSpecializations.ec},\newline
+\sourcepath{RqHAETAEBridge.ec}는 외부 NTT 트리에서 fresh compile됐고, 강화된
+\newline\sourcepath{Mode2KeygenNttMulBridge.ec}는 현재 82대상 aggregate 안에서 다시
+컴파일된다. 세 \sourcepath{post-freeze/KgActualAvecQj*.ec} 대상은 동결
+매니페스트에 넣지 않고 각각 \identifier{-no-eco}로 별도 컴파일했다. 따라서
+82라는 수는 post-freeze 보조 정리까지 모두 센 수가 아니며, 동결 proof-target
+surface가 유지됐다는 뜻이다.
 \end{boundary}
 
 \subsection{이 문서 빌드}
@@ -139,8 +168,9 @@ prover에는 Alt-Ergo 2.6.0, CVC4 1.8.0, CVC5 1.2.1, Z3 4.12.6이 포함된다.
 \begin{takeaway}{완료 판정 기준}
 이 안내서가 컴파일되는 것과 EasyCrypt 정리가 컴파일되는 것은 서로 다른
 증거다. 문서 배포 전에는 \identifier{build.sh}와 전체
-\identifier{verify-all.sh}를 모두 성공시켜야 한다. 현재 증명 기준선은
-78/78 pre-Verify 로그와 최종 82/82 Verify aggregate 로그가 각각 보존되어 있다.
-Sign 수정 전 77대상 완료 로그가 보존되어 있다. 덮어쓰기 중인 summary의 중간
-PASS 줄은 완료 증거가 아니다. 이 안내서의 별도 빌드도 함께 확인한다.
+\identifier{verify-all.sh}를 모두 성공시켜야 한다. 현재 동결 증명 기준선은
+82/82 aggregate와 paper-freeze audit의 terminal PASS다. post-freeze 주장은 세
+actual-\identifier{avec}/paper-\identifier{qj} 대상의 개별 fresh compile, Rq/NTT 보조
+대상과 deterministic trace까지 별도로 확인해야 한다. 덮어쓰기 중인 summary의
+중간 PASS 줄은 완료 증거가 아니다. 이 안내서의 별도 빌드도 함께 확인한다.
 \end{takeaway}

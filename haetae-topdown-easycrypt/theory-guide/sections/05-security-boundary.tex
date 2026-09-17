@@ -58,14 +58,21 @@ Week~16의 KeyGen 스냅샷 정리도 결정론적 기능정확성 증거지만
 \(\delta_{\mathrm{KeyGen}}=0\)을 뜻하지 않는다. 실제 matrix helper의
 \identifier{output_row}를 full-invNTT/pointwise-word 식으로 펼치는 마지막
 rewrite와 actual harness의 두 active row consequence가 77번째 대상으로
-컴파일됐다. 그러나 odd-root 직교성/full-NTT convolution과
-\identifier{Rq.poly}-to-security-list adapter가 없다. 또한 sampler, retry,
-packer, public API와 분포/종료를 포함하지 않는다. 따라서 KeyGen은
-\identifier{STOP-KG-NTT}로 동결된다. 이후 Sign actual-call control도
-컴파일됐지만 canonical decoded \((x,v,h,c)\) 경계의
-\identifier{STOP-VERIFY-MATRIX-CRT}가 현재 활성 전선이며, V-1/V-2/V-5/V-6,
-W64 norm gate, tail trace/mismatch word expression만 proved로 남고 matrix 및
-challenge blocker는 열려 있다.
+컴파일됐다. 이 82대상 논문 경계에서는 odd-root/full-NTT convolution과
+\identifier{Rq.poly}-to-security-list adapter가 없어
+\identifier{STOP-KG-NTT}로 동결됐다. Sign actual-call control과 canonical
+decoded \((x,v,h,c)\)의 V-1/V-2/V-5/V-6, W64 norm gate 및 tail/mismatch word
+expression도 동결 주장 행렬에 들어가지만 matrix/CRT와 challenge blocker는
+열려 있다.
+
+post-freeze 보조 증명은 순수 NTT spectral action, native Rq row product와
+Rq--HAETAE 표현 보존을 닫고, 종료한 실제 \identifier{avec}를 논문 \(a\)로
+해석해 별도 paper-\(qj\) 항과 snapshot을 합성했다. 그러나 기존 security-side
+객체의 coefficient~0은 401이고 paper \(qj\)는 64513이며, all-zero-seed actual
+trace의 첫 계수는 44985다. 이 불일치는 컴파일된
+\identifier{security_named_qj_is_not_paper_qj}로 고정됐다. 따라서 현재 보조
+전선은 \identifier{STOP-KG-AVEC-QJ}이고, sampler, retry, packer, public API,
+분포/종료 및 최종 KG 식은 여전히 포함하지 않는다.
 
 \subsection{현재 주장 행렬}
 
@@ -167,11 +174,21 @@ SignaturePack/Unpack 경계에서 zero-size 실패 보존 또는 nonzero-size �
 고정 all-6/zero-HBZ 성공 사후조건 & \statusproved & 종료한 실제 all-6
 인코더와 production zero-HBZ pack/unpack이 \(bad=0\), nonzero size, 정확한
 trace/복원/프레임을 만족; 종료, losslessness와 일반 입력 성공은 별도 \\
-KeyGen matrix/finalizer 스냅샷 & \statuspartial & 실제 두 helper의
+동결 KeyGen matrix/finalizer 스냅샷 & \statuspartial & 실제 두 helper의
 matrix/NTT 표현, finalizer 의미, KG-2형 low/high 분해, 조정된 \(s_2\)와
-스냅샷 mod-\(2q\) 영 등식은 증명됨; faithful KG-1/KG-3/전체 KG-4와 논문 식은
-odd-root convolution 및 security-list adapter 부재로
-\identifier{STOP-KG-NTT} \\
+스냅샷 mod-\(2q\) 영 등식은 증명됨; 82대상 paper claim은 faithful
+KG-1/KG-3/전체 KG-4와 논문 식 이전의 \identifier{STOP-KG-NTT} \\
+post-freeze NTT/Rq--HAETAE 다리 & \statusproved &
+\identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral action, 일반 및
+mode-2 2-by-3/2-by-4 row product, Rq 덧셈ㆍ곱셈ㆍdot의 HAETAE 계수 표현 보존;
+동결 논문 주장 행렬 밖의 보조 결과 \\
+post-freeze actual \(a\)/paper \(qj\) & \statusproved & 종료한 actual mode-2
+\identifier{avec}의 SHAKE128/LE16/rejection 의미를 paper \(a\)로 운반하고,
+별도 basis correction \(qj\)를 snapshot과 합성한 부분정확성; 분포/종료는 제외 \\
+security ExpandVecA 정렬 & \statusblocked & 현재 synthetic
+\identifier{haetae_mode23_qj_vector}는 actual \(a\) 및 paper \(qj\)와 다름;
+\identifier{STOP-KG-AVEC-QJ}와
+\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS} \\
 MINCORE Sign & \statuspartial & 실제 세 helper의 직접 호출과 accepted-branch
 control은 컴파일; full challenge semantics와 S-1--S-7 headline은 미증명이라
 \identifier{STOP-SIGN-CHAL-MODE2} \\

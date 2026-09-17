@@ -23,7 +23,10 @@ PASS actual API copy-helper reachability source checks
 PASS focused transcript extraction
 PASS focused mu-hash extraction
 PASS focused packer extraction
+PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
 PASS focused signature codec extraction
+PASS fresh compile easycrypt/refinement/composition/ApiKeyMemoryBridge.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMode2RawMuComposition.ec
 PASS focused HBZ/rANS extraction
 PASS deterministic HBZ symbol certificate regeneration
 PASS generated HBZ certificate hashes
@@ -34,9 +37,6 @@ PASS focused Sign accepted-core extraction
 PASS focused Verify core extraction
 PASS focused extraction regeneration drift
 PASS fresh compile easycrypt/refinement/composition/ExtractedChallengeAbsorb.ec
-PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
-PASS fresh compile easycrypt/refinement/composition/ApiKeyMemoryBridge.ec
-PASS fresh compile easycrypt/refinement/composition/ExactMode2RawMuComposition.ec
 PASS fresh compile easycrypt/refinement/composition/ExactMuTopControl.ec
 PASS fresh compile easycrypt/refinement/composition/Mode2MuChallengeComposition.ec
 PASS fresh compile easycrypt/refinement/composition/RawApiSignOutputFrame.ec
@@ -49,6 +49,38 @@ PASS fresh compile easycrypt/refinement/composition/RawApiKeygenExportCompositio
 PASS fresh compile easycrypt/refinement/composition/RawApiKeygenSequentialExport.ec
 PASS fresh compile easycrypt/refinement/composition/RawApiMuReachability.ec
 PASS fresh compile easycrypt/refinement/composition/RawApiVerifyMuTrace.ec
+PASS fresh compile easycrypt/refinement/composition/ExtractedMuHashPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/ApiKeyMemoryBridge.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMode2RawMuComposition.ec
+PASS fresh compile easycrypt/refinement/composition/ExactMuTopControl.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec
+PASS fresh compile easycrypt/refinement/composition/Mode2MuChallengeComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RegionLocalMuTop.ec
+PASS fresh compile easycrypt/refinement/composition/TranscriptBytes.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiSignOutputFrame.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenCoreEquation.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenNttMulBridge.ec
+PASS fresh compile easycrypt/refinement/keygen/Mode2KeygenSnapshotAlgebra.ec
+PASS fresh compile easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/RegionLocalMuEquivalence.ec
+PASS fresh compile easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
+PASS fresh compile easycrypt/refinement/keygen/PackedKeyPrefix.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiAddressBridge.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixCodec.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiAcceptedMuComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiCallerMuTrace.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiDirectObservedMu.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixPack.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixRoundTrip.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiKeygenExportComposition.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiKeygenSequentialExport.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiMuReachability.ec
+PASS fresh compile easycrypt/refinement/composition/RawApiVerifyMuTrace.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixUnpack.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzCodecSpec.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzPrepare.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzApply.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzLeafRoundTrip.ec
 PASS fresh compile easycrypt/refinement/composition/RawApiVerifyAcceptTrace.ec
 PASS fresh compile easycrypt/refinement/composition/RegionLocalMuTop.ec
 PASS fresh compile easycrypt/refinement/composition/TranscriptBytes.ec
@@ -59,26 +91,32 @@ PASS fresh compile easycrypt/refinement/keygen/ExtractedPackedKeyPrefix.ec
 PASS fresh compile easycrypt/refinement/keygen/ExistingFirstAttemptAdapter.ec
 PASS fresh compile easycrypt/refinement/keygen/PackedKeyPrefix.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixCodec.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzTableCertificate.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixPack.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixRoundTrip.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2SignaturePrefixUnpack.ec
-PASS fresh compile easycrypt/refinement/sign/Mode2HbzCodecSpec.ec
-PASS fresh compile easycrypt/refinement/sign/Mode2HbzPrepare.ec
-PASS fresh compile easycrypt/refinement/sign/Mode2HbzApply.ec
-PASS fresh compile easycrypt/refinement/sign/Mode2HbzLeafRoundTrip.ec
-PASS fresh compile easycrypt/refinement/sign/Mode2HbzTableCertificate.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzSymbolWordsGenerated.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansCore.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansCoreActualInverse.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansCoreCompositionBridge.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzCodecSpec.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzActualBoundary.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzPrepare.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzApply.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzLeafRoundTrip.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansByteStack.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderCursor.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderWordStep.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderNormalization.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzTableCertificate.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderActualWord.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderGeneratedStep.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzSymbolWordsGenerated.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansCore.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderCursorSteps.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansCoreActualInverse.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansCoreCompositionBridge.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzActualBoundary.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderActualTrace.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderTopHoare.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansNormalization.ec
@@ -86,19 +124,65 @@ PASS fresh compile easycrypt/refinement/sign/Mode2RansSuffixCopy.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncodeRefinement.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansDecodeRefinement.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansActualInverse.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansByteStack.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderCursor.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderWordStep.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderNormalization.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansArrayListBridge.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderWordStep.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderActualWord.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderGeneratedStep.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderCursorSteps.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderGeneratedWordStep.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderInnerProgress.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderSerialization.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderSerializationComposition.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderActualTrace.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecoderTopHoare.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderTrace.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderActualInner.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderTailInvariant.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansNormalization.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderFinalization.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderGeneratedFinalization.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansSuffixCopy.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncodeRefinement.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansDecodeRefinement.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansActualInverse.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansArrayListBridge.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderActualTraceClosure.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderOuterRefinement.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderWordStep.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderGeneratedWordStep.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderInnerProgress.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderSerialization.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderSerializationComposition.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansAllSixBudget.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzInternalBoundaries.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderTrace.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullEncodeTrace.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderActualInner.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullDecodeInverse.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderTailInvariant.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullActualInverse.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2HbzSignatureBoundaryLift.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2RansActualSuccessWitness.ec
+PASS fresh compile easycrypt/refinement/sign/Mode2SignAcceptedCore.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyCoreSequence.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderFinalization.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderGeneratedFinalization.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyPrepareNorm.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyRecover.ec
+PASS fresh compile easycrypt/refinement/verify/Mode2VerifyTailChallenge.ec
+PASS fresh compile easycrypt/security/ImplementationSecurityGoals.ec
+PASS fresh compile easycrypt/security/SecurityAssumptions.ec
+PASS fresh compile easycrypt/specs/TopLevelGoals.ec
+PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderActualTraceClosure.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2RansEncoderOuterRefinement.ec
+PASS baseline verification
+PASS LaTeX research notes build
+PASS read-only roots unchanged after verification
 PASS fresh compile easycrypt/refinement/sign/Mode2RansAllSixBudget.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzInternalBoundaries.ec
 PASS fresh compile easycrypt/refinement/sign/Mode2HbzFullEncodeTrace.ec
@@ -118,5 +202,3 @@ PASS fresh compile easycrypt/support/Mode2KeyMemoryBridge.ec
 PASS baseline verification
 PASS LaTeX research notes build
 PASS read-only roots unchanged after verification
-PASS paper-freeze scope and 82-target evidence audit
-RESULT PASS authored-targets=82 cache=-no-eco

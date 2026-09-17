@@ -46,41 +46,62 @@ LaTeX 문서다.
 - Week 16 Verify pass에서 추가한 actual 다섯 helper의 순차 호출, V-1/V-2/V-5/V-6
   machine-word 복원식, W64 norm gate와 tail/mismatch word expression, 그리고
   `STOP-VERIFY-MATRIX-CRT` 판정;
-- 아직 남은 고정 입력 종료/losslessness, odd-root 직교성/full-NTT convolution,
-  `Rq.poly`→보안 모델 list 곱셈 adapter, 그리고 연기된 힌트 (h) 코덱;
+- 위 82개 대상과 논문 PDF, 주장 행렬, 재현 절차를 일치시킨 `PAPER-FROZEN`
+  경계;
+- paper-freeze 이후 닫힌 odd-root/full-NTT spectral action, 2-by-3/2-by-4
+  수학적 row product, `Rq.poly`→`HAETAE_Algebra.poly` 표현 보존;
+- 실제 mode-2 `avec`의 SHAKE128/LE16/rejection 의미를 논문 `a`에 연결하고,
+  독립적인 논문 `qj`를 finalizer 스냅샷과 합성한 보조 증명;
+- 기존 보안 모델의 synthetic `haetae_mode23_qj_vector`가 실제 확장 및 논문
+  `qj`와 다름을 컴파일된 반례로 고정한 최신
+  `STOP-KG-AVEC-QJ — OBL-KG-SECURITY-EXPANDVECA-SEMANTICS` 판정;
+- 아직 남은 고정 입력 종료/losslessness, 보안 모델 ExpandVecA 의미 정렬,
+  절차 수준 Verify matrix/CRT, 그리고 연기된 힌트 (h) 코덱;
 - 생성/재전달(product/replay)로 동결된 저장 관찰 \(\mu\) 간선과 남은 서명
   접미부, 문맥(context), highbits/LSB 및 EUF-CMA 의무.
 
-상태 판정의 운영상 단일 기준(source of truth)은 `../CLAIM_LEDGER.md`이며, 최종
-근거는 `../easycrypt/` 아래의 명명된 EasyCrypt 선언이다. 현재 매니페스트는
-`Mode2SignAcceptedCore.ec`와 `Mode2VerifyCoreSequence.ec`를 포함한 82개 작성
-검증 대상(authored target)이다.
+동결 논문 상태의 운영상 기준(source of truth)은 `../CLAIM_LEDGER.md`와
+`../manifests/paper-artifacts.md`이며, 최종 근거는 명명된 EasyCrypt 선언이다.
+paper-freeze 이후 보조 결과는 동결된 주장 행렬을 소급 변경하지 않고
+`../POST_FREEZE_KG_RQ_HAETAE_REPORT.md`와
+`../POST_FREEZE_KG_ACTUAL_AVEC_QJ_REPORT.md`에 별도로 기록한다. 동결
+매니페스트는 `Mode2SignAcceptedCore.ec`와 `Mode2VerifyCoreSequence.ec`를 포함한
+82개 작성 검증 대상(authored target)으로 유지된다.
 Verify 수정 전 78/78 완료 로그는
 `../logs/verify-all-before-week16-verify.log`에 보존되어 있고 해시
 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`를 가진다.
 77번째 KeyGen 경계는 `../WEEK16_KG_NTT_MUL_REPORT.md`, 78번째 Sign control
 경계는 `../WEEK16_SIGN_REPORT.md`, 82번째 Verify partial boundary는
-`../WEEK16_VERIFY_REPORT.md`에 기록되어 있다. 현재 82개 current manifest의
-aggregate 완료 로그는 `../logs/verify-all-week16-verify-matrix-crt.log`에 보존되어 있고,
-SHA-256은
+`../WEEK16_VERIFY_REPORT.md`에 기록되어 있다. paper-freeze 직전 82/82 로그는
+`../logs/verify-all-before-paper-freeze.log`에 보존되어 있고 SHA-256은
 `4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da`이다.
+기준 커밋 `e87bcc3`에 추적된 82개 aggregate 요약은
+`../logs/verify-all-summary.txt`이며, paper-freeze audit를 포함한 terminal
+`RESULT PASS`와 SHA-256
+`08ef9639dc73d56dba42d02999d07897d29bc8e60aa100a648e9437fd64387ad`를
+유지한다. 동결 논문 PDF의 SHA-256은
+`be935948028829556951863b44ceb2e6c5b2037820991b3a43a4b461b036e53d`이다.
 
 Week 15의 `actual_rans_encode_all_six_success`와
 `signature_pack_unpack_hbz_zero_success_mode2`는 고정 all-6/all-zero 입력에서
 종료한 실제 실행이 반드시 성공함을 보인다. 이는 Hoare 부분정확성이므로 실제
-종료, losslessness, 확률 1 성공이나 비공허 실행을 증명하지 않는다. 현재 운영
-판정은 Week 16의 `STOP-VERIFY-MATRIX-CRT`이며, Verify 쪽은 canonical decoded
-\((x,v,h,c)\) 부분 정리와 남은 blocker만 확보된 상태다.
+종료, losslessness, 확률 1 성공이나 비공허 실행을 증명하지 않는다. 동결 논문
+판정은 `PAPER-FROZEN`이며 그 내부 Verify 중단점은
+`STOP-VERIFY-MATRIX-CRT`다. Verify 쪽은 canonical decoded \((x,v,h,c)\) 부분
+정리와 남은 blocker만 확보된 상태다.
 `actual_m23_matrix_finalize_semantic_snapshot`는 실제 두 KeyGen 보조절차의
 스냅샷 의미를 닫는다. 77번째 파일의 `output_row_from_mode2_ntt_words`와
-`actual_m23_matrix_snapshot_rows_explicit`는 마지막 sound rewrite와 직접
-two-call harness의 두 active row consequence를 컴파일한다. 그러나 논문 식
-`A s = q j (mod 2q)`로 승격할 odd-root
-orthogonality/full-NTT convolution과 `Rq.poly`--security-list adapter가 없다.
-KeyGen은 KG-2/finalization에서 동결되었다. Sign은 actual-call control에서
-동결되었고, Verify의 첫 재개 목표는 `rq_mul_coeff_foldr_to_bigi`다. 그 뒤
-`verify_matrix_ntt_acc_mode2_cols4_correct`와
-`verify_crt_freeze_mode2_word_exact`가 combined matrix theorem을 막는다.
+`actual_m23_matrix_snapshot_rows_explicit`는 마지막 동결 시점 rewrite와 직접
+two-call harness의 두 active row consequence를 컴파일한다. paper-freeze 이후에는
+`rq_mul_coeff_foldr_to_bigi`, full-NTT spectral action, native Rq row product와
+`RqHAETAEBridge.rq_poly_dot3_repr`가 닫혔다. 실제 `avec`도 nonce 515/516의
+SHAKE128, little-endian 16-bit parsing과 `<64513` rejection을 거쳐 논문 `a`로
+해석됨이 증명되었다. 그러나 기존 보안 객체는 첫 계수가 401인 synthetic
+generator이고 논문 `qj[0][0]=64513` 및 all-zero seed의 실제 첫 계수 44985와
+다르다. 따라서 최신 보조 전선은 `STOP-KG-AVEC-QJ`이며, full KG-1--KG-4나
+`A s = q j (mod 2q)`를 주장하지 않는다. Verify에서도 순수 NTT 기반은 닫혔지만
+실제 2-by-4 절차 정리 `verify_matrix_ntt_acc_mode2_cols4_correct`와
+`verify_crt_freeze_mode2_word_exact`가 combined matrix theorem을 계속 막는다.
 
 ## 용어 표기(Terminology)
 
@@ -108,14 +129,17 @@ XeLaTeX, `latexmk`, Noto CJK 글꼴이 필요하다. 성공하면 `main.pdf`가 
 ```
 
 새 안내서의 빌드 성공은 EasyCrypt 검증 성공을 대신하지 않는다. 검증 판정은
-`../WEEK16_SIGN_REPORT.md`, `../WEEK16_KG_NTT_MUL_REPORT.md`, 이전 스냅샷 보고서
-`../WEEK16_KG_REPORT.md`, Week 15/16 surface scan과 보존 로그에서 확인한다.
+`../WEEK16_SIGN_REPORT.md`, `../WEEK16_VERIFY_REPORT.md`,
+`../WEEK16_KG_NTT_MUL_REPORT.md`, `../manifests/paper-artifacts.md`, 두
+`../POST_FREEZE_KG_*.md` 보고서와 보존 로그에서 확인한다.
 Week 14 및 Week 13 기록은 각각 그 아래 full-HBZ와 rANS 핵심 경계의 역사적
-교차검사다. `../logs/verify-all-summary.txt`는 진행 중 실행이 덮어쓰므로 보존
-증거로 쓰지 않는다. Verify 수정 전 78/78 완료 로그는
+교차검사다. `../logs/verify-all-summary.txt`는 terminal `RESULT PASS`와 해시를
+함께 확인할 때만 현재 aggregate 증거로 쓴다. Verify 수정 전 78/78 완료 로그는
 `../logs/verify-all-before-week16-verify.log`에 보존되고 해시
 `cf8056712327dc8211cf93ae427ac5053e8a9d2366747f171392468ac3ff0d75`를 가진다.
-최종 82/82 `-no-eco` aggregate는 `../logs/verify-all-week16-verify-matrix-crt.log`에
-보존되며 해시
-`4cd64e5a656be82710bca1410c4d19403a3c661d6b91b0319a0ea8f7c91646da`를 가진다.
-Sign 수정 전 77대상 완료 로그도 별도로 보존된다.
+paper-freeze 직전 82/82 `-no-eco` aggregate는
+`../logs/verify-all-before-paper-freeze.log`에 보존되며 위의 `4cd64...` 해시를
+가진다. 기준 커밋의 frozen-suite 요약은 `08ef96...` 해시를 유지한다. post-freeze의
+세 `KgActualAvecQj*.ec` 대상은 동결된 82개 매니페스트 밖의 보조 증명이므로
+각각 fresh compile했다는 근거와 deterministic trace는 최신 post-freeze 보고서에서
+별도로 확인한다.

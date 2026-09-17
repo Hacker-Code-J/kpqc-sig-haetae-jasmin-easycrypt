@@ -66,8 +66,58 @@ Week~16 Hoare 정리 \\
 \sourcepath{Mode2KeygenNttMulBridge.ec} & \identifier{output_row}를 기존
 full-invNTT/pointwise-word 식으로 펼치고 기존 slice 표현을 운반하는 77번째
 매니페스트 대상. actual two-call snapshot의 두 active row consequence까지
-개별 컴파일된다. 보안 모델의 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 곱과의 등식은
-제공하지 않으며 \identifier{STOP-KG-NTT} 경계를 고정한다 \\
+개별 컴파일된다. 이것이 paper-freeze의 \identifier{STOP-KG-NTT} 표면이며,
+현재 파일은 아래 post-freeze row-product/Rq--HAETAE 결과도 재사용한다 \\
+\identifier{rq_mul_coeff_foldr_to_bigi},\newline
+\identifier{full_ntt_montgomery_}\newline
+\identifier{spectral_action},\newline
+\identifier{full_ntt_montgomery_}\newline
+\identifier{row_product} &
+\sourcepath{haetae-ntt-verify/}\newline
+\sourcepath{easycrypt/NTTFull}\newline
+\sourcepath{SpectralAction.ec} & checked negacyclic coefficient 합, Montgomery
+factor, 256-term odd-root kernel과 full-NTT spectral action을 닫는 post-freeze
+순수 NTT 기반; legacy \identifier{Rq.ntt}는 사용하지 않음 \\
+\identifier{keygen_mode2_row_}\newline
+\identifier{product_from_reprs},\newline
+\identifier{verify_mode2_row_}\newline
+\identifier{product_from_reprs} &
+\sourcepath{haetae-ntt-verify/}\newline
+\sourcepath{easycrypt/NTTMode2}\newline
+\sourcepath{RowSpecializations.ec} & 일반 row-product를 KeyGen 2-by-3과 Verify
+2-by-4 수학적 표현에 특수화; 실제 Verify procedure leaf 자체는 아님 \\
+\identifier{rq_poly_add_repr},\newline
+\identifier{rq_poly_mul_repr},\newline
+\identifier{rq_poly_dot3_repr} &
+\sourcepath{haetae-ntt-verify/}\newline
+\sourcepath{easycrypt/RqHAETAEBridge.ec} & well-formed coefficient relation 아래
+Rq 덧셈ㆍ곱셈ㆍ3항 dot을 HAETAE list-polynomial 연산으로 운반하는 post-freeze
+표현 adapter \\
+\identifier{keygen_mode2_row_product},\newline
+\identifier{mode2_row_product_}\newline
+\identifier{haetae_dot} &
+\sourcepath{easycrypt/refinement/keygen/}\newline
+\sourcepath{Mode2KeygenNttMulBridge.ec} & native Mode-2 Rq row product 및 여섯
+계수 표현 전제 아래 HAETAE 3항 dot 연결; KG-3/KG-4나 최종 식을 결론내지 않음 \\
+\identifier{mode2_uniform_stream_}\newline
+\identifier{paper_a_flat},\newline
+\identifier{paper_qj_mode2_cases} &
+\sourcepath{post-freeze/}\newline
+\sourcepath{KgActualAvecQjSemantics.ec} & nonce 515/516, SHAKE128 framing,
+LE16/\(<64513\) rejection을 actual \identifier{avec}에서 paper \(a\)로 운반하고
+paper \(qj\)의 basis 위치를 분리한 결정론적 부분정확성 \\
+\identifier{checked_mode2_parent_}\newline
+\identifier{m23_finalize_actual_avec_qj} &
+\sourcepath{post-freeze/}\newline
+\sourcepath{KgActualAvecQjComposition.ec} & checked sampler, actual matrix와
+finalizer의 종료한 실행에서 paper \(a\) 해석과 snapshot \(+qj\) 식을 함께
+내보내며 KG 식, 분포나 종료는 주장하지 않음 \\
+\identifier{security_named_qj_}\newline
+\identifier{is_not_paper_qj} &
+\sourcepath{post-freeze/}\newline
+\sourcepath{KgActualAvecQjBlocker.ec} & security-side synthetic row~0 coefficient
+401과 paper \(qj[0][0]=64513\)의 객체 불일치를 직접 증명하여
+\identifier{STOP-KG-AVEC-QJ}를 정당화 \\
 \identifier{keygen_prefix_memory_relation_is_constructible} &
 \sourcepath{easycrypt/support/Mode2KeyMemoryBridge.ec} & 저장된 VK로부터
 메모리 prefix를 구성하는 역사적 local witness \\
@@ -458,10 +508,10 @@ Week~14 Hoare 부분정확성 \\
 \sourcepath{Mode2RansActual}\allowbreak\sourcepath{SuccessWitness.ec} & 실제
 rANS, full-HBZ 및 production pack/unpack까지 고정 zero 입력의 실패를 배제하고
 성공 사후조건을 운반하는 Hoare 부분정확성; 종료나 losslessness 정리는 아님 \\
-\claim{CLAIM_LEDGER} & \sourcepath{CLAIM_LEDGER.md} & 현재 상태의 운영상 단일
-기준(source of truth) \\
-\claim{THEOREM_GRAPH} & \sourcepath{THEOREM_GRAPH.md} & 부모 보안 목표에서 현재
-seam까지의 의존성 \\
+\claim{CLAIM_LEDGER} & \sourcepath{CLAIM_LEDGER.md} & paper-freeze 주장 상태의
+운영상 기준(source of truth); post-freeze 보조 결과는 별도 보고서가 보충 \\
+\claim{THEOREM_GRAPH} & \sourcepath{THEOREM_GRAPH.md} & 동결 부모 보안 목표에서
+Week~16 stop seam까지의 의존성; post-freeze delta는 소급 반영하지 않음 \\
 \claim{PRODUCT_REPLAY_}\newline\claim{DECISION} &
 \sourcepath{PRODUCT_REPLAY_}\newline\sourcepath{DECISION.md} &
 stored \identifier{observed_mu} transport를 동결한 의미론 근거와 거부한 접근 \\
@@ -574,14 +624,48 @@ matrix/finalizer 스냅샷, KG-2/조정된 KG-4 성분, 76대상 통과와
 \sourcepath{33-week16-kg-ntt-}\newline\sourcepath{mul-stop.tex} & 마지막
 \identifier{output_row} rewrite, 누락된 odd-root convolution/security-list
 adapter, \identifier{STOP-KG-NTT}와 actual accepted Sign core 전환 \\
+\claim{WEEK16_SIGN_REPORT} & \sourcepath{WEEK16_SIGN_REPORT.md} & 실제 세 Sign
+helper 직접 호출, accepted-branch control, 78대상 완료와
+\identifier{STOP-SIGN-CHAL-MODE2}; S-1--S-7은 미증명 \\
+\claim{WEEK16_VERIFY_REPORT} & \sourcepath{WEEK16_VERIFY_REPORT.md} & 실제 다섯
+Verify helper 순서, V-1/V-2/V-5/V-6, W64 norm/tail/mismatch, 82대상 완료와
+\identifier{STOP-VERIFY-MATRIX-CRT} \\
 \claim{Week 16 검증 표면/완료 로그} &
 \sourcepath{logs/week16-keygen-}\newline
 \sourcepath{core-surface-scan.log},\newline
 \sourcepath{logs/verify-all-before-}\newline
 \sourcepath{kg-ntt-mul.log},\newline
-\sourcepath{logs/verify-all-summary.txt} & 실제 두 호출, 비순환 사전조건과 NTT
-경계를 검사한다. 수정 전 76대상 전체 완료 표식은 보존됐고, 덮어쓰기 summary는
-terminal \identifier{RESULT PASS}가 있을 때만 77대상 완료 증거로 사용한다 \\
+\sourcepath{logs/verify-all-week16-}\newline
+\sourcepath{kg-ntt-mul.log} & 실제 두 호출, 비순환 사전조건과 NTT 경계를
+검사한다. 수정 전 76대상과 continuation 77대상 완료 표식은 각각 전용 보존
+로그에 있으므로 mutable summary를 77대상 역사 증거로 쓰지 않는다 \\
+\claim{Sign/Verify 검증 표면/완료 로그} &
+\sourcepath{logs/week16-sign-core-}\newline
+\sourcepath{surface-scan.log},\newline
+\sourcepath{logs/week16-verify-core-}\newline
+\sourcepath{surface-scan.log},\newline
+\sourcepath{logs/verify-all-week16-}\newline
+\sourcepath{verify-matrix-crt.log} & Sign/Verify direct-call, 비순환 precondition과
+stop 표면, 최종 paper-freeze 직전 82/82 aggregate를 보존 \\
+\claim{Paper-freeze artifact manifest} &
+\sourcepath{manifests/paper-artifacts.md} & \identifier{PAPER-FROZEN} 82대상
+주장 행렬, 정확한 KG/Sign/Verify blocker, PDF/summary hash와 재현 절차 \\
+\claim{Post-freeze NTT/Rq--HAETAE 보고서} &
+\sourcepath{POST_FREEZE_KG_RQ_}\newline
+\sourcepath{HAETAE_REPORT.md} & 순수 NTT/Rq 표현 잎의 폐쇄, native KeyGen
+row-product lift와 당시 첫 sampler-semantics blocker \\
+\claim{Post-freeze actual avec/qj 보고서} &
+\sourcepath{POST_FREEZE_KG_ACTUAL_}\newline
+\sourcepath{AVEC_QJ_REPORT.md} & actual SHAKE128/rejection에서 paper \(a\), 별도
+paper \(qj\), synthetic security object 반례와 최신
+\identifier{OBL-KG-SECURITY-}\allowbreak
+\identifier{EXPANDVECA-SEMANTICS} \\
+\claim{현재 frozen-suite 완료 요약} &
+\sourcepath{logs/verify-all-summary.txt},\newline
+\sourcepath{logs/verify-all-post-}\newline
+\sourcepath{freeze-ntt-foundation.log} & paper-freeze audit를 포함한 terminal
+\identifier{RESULT PASS authored-targets=82 cache=-no-eco}; post-freeze 보조
+대상은 82개 수에 포함되지 않음 \\
 \claim{Focused extraction manifest} & \sourcepath{manifests/focused-extraction.md} &
 Jasmin root, 생성 파일, hash, 작성 정리 및 focused HBZ body identity의 대응 \\
 \claim{Generated certificate manifest} &
@@ -673,9 +757,17 @@ certificate generator/output의 pinned hash \\
   부르지 않는다.
   \item[NTT 곱셈 다리(NTT multiplication bridge)]
   \identifier{KeygenM23ArithmeticSpec.output_row}를 full-invNTT/pointwise-word
-  식으로 펼치는 마지막 표현 rewrite는 증명됐다. 이를 보안 모델의 행별
-  다항식 곱과 동일시할 odd-root convolution과 security-list adapter는 없어서
-  \identifier{STOP-KG-NTT}로 동결됐다.
+  식으로 펼치는 마지막 표현 rewrite까지가 paper-freeze의
+  \identifier{STOP-KG-NTT}였다. post-freeze에는 odd-root/full-NTT spectral
+  action, native Rq row product와 Rq--HAETAE 계수 표현 adapter가 증명됐다.
+  보안 ExpandVecA 및 full mod-\(2q\) packaging은 자동으로 따라오지 않는다.
+  \item[paper-freeze] 커밋 \identifier{4bde120}에서 82개 작성 대상, 주장 행렬,
+  정리 그래프, 재현 절차와 논문 PDF를 일치시킨 고정 경계. 이후 보조 정리가
+  동결 PDF의 claim을 소급 확장하지 않는다.
+  \item[post-freeze 보조 층(post-freeze auxiliary layer)] 동결 매니페스트 수를
+  늘리지 않고 외부 NTT/Rq 트리, 강화된 기존 KeyGen 대상 및
+  \sourcepath{post-freeze/}에서 검증한 후속 결과. 최신 판정은
+  \identifier{STOP-KG-AVEC-QJ}다.
   \item[MINCORE] 전체 공개 API, 코덱, sampler/retry와 종료를 제외하고
   KeyGen/Sign/Verify의 논문 핵심 식과 제한된 decoded-object 합성만을 목표로 한
   Week~16 최소 논문 범위. KeyGen은 부분/중단, Sign은 actual-call control에서
@@ -714,14 +806,21 @@ Week~16은 실제 M23 matrix/finalizer 두 호출을 합성해 snapshot low/high
 조정된 \(s_2\)와 snapshot-only mod-\(2q\) 식을 닫았다. 그 뒤 77번째
 매니페스트 대상은 \identifier{output_row}를 기존 full-invNTT/pointwise-word
 표현으로 펼치고 actual snapshot의 두 active row에 적용하는 정리를 개별
-컴파일했다. 하지만 odd-root 직교성/full-NTT convolution과 native
-\identifier{Rq.poly}에서 security-list 곱으로 가는 adapter가 없어 최종 판정은
-\identifier{STOP-KG-NTT}다. 따라서 \identifier{GO-KG}나 전체 KeyGen 정확성을
-주장할 수 없다. KeyGen은 KG-2/finalization에서, Sign은 actual-call control에서
-동결됐다. MINCORE-VERIFY는 V-1/V-2/V-5/V-6 machine-word 식, W64 norm gate와
-tail/mismatch word expression을 보존했으며 첫 blocker는
-\identifier{rq_mul_coeff_foldr_to_bigi}와 그 뒤 2-by-4 NTT/CRT 절차 leaf다. (h) 코덱은
-연기됐으며 제한 합성, 종료, 문맥, highbits/LSB, 확률분포와 게임 기반 보안은
-여전히 별도 의무다. 최종 82/82 aggregate 완료 로그는
-\sourcepath{logs/verify-all-week16-verify-matrix-crt.log}에 보존되어 있다.
+컴파일했다. Sign/Verify의 제한 결과까지 포함한 82개 표면은
+\identifier{PAPER-FROZEN}이고, 그 역사적 중단점은
+\identifier{STOP-KG-NTT}, \identifier{STOP-SIGN-CHAL-MODE2},
+\identifier{STOP-VERIFY-MATRIX-CRT}다.
+
+post-freeze에는 순수 NTT spectral action, KeyGen/Verify 수학적 row product와
+Rq--HAETAE 표현 adapter가 닫혔다. actual mode-2 \identifier{avec}는 paper
+\(a\)로 연결되고 paper \(qj\) correction은 snapshot에 합성됐다. 하지만 기존
+security-side synthetic 객체가 actual \(a\)나 paper \(qj\)와 다름이 컴파일된
+반례로 확인됐으므로 최신 판정은 \identifier{STOP-KG-AVEC-QJ}다. 첫 수리
+의무는 \identifier{OBL-KG-SECURITY-}\allowbreak
+\identifier{EXPANDVECA-SEMANTICS}이며, 그 뒤 full
+mod-\(2q\) 폭-6 packaging이 필요하다. Verify 쪽 순수 NTT 기반도 닫혔지만 실제
+2-by-4 accumulation과 CRT/freeze 절차 leaf는 남아 있다. (h) 코덱, 제한 합성,
+종료, 문맥, highbits/LSB, 확률분포와 게임 기반 보안도 여전히 별도 의무다.
+현재 frozen-suite 82/82 aggregate와 paper-freeze audit는
+\sourcepath{logs/verify-all-summary.txt}에 보존되어 있다.
 \end{takeaway}

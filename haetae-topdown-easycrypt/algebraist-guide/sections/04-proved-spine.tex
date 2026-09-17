@@ -750,7 +750,10 @@ matrix helper와 finalizer의 현재 결과를 한 Hoare 경계에 모은다. �
 \identifier{faithful_augmented_secret_coeff},
 \identifier{actual_faithful_augmented_matrix},
 \identifier{actual_faithful_augmented_secret}로 width-6 carrier를 actual 배열에
-구체화한다. 이어
+구체화한다. \identifier{faithful_middle_matrix_poly}와
+\identifier{faithful_middle_secret_poly}는 그 carrier의 중간 세 열을 다시
+HAETAE polynomial로 복원하므로, 표시된 matrix/secret과 독립적으로 떠다니는
+generated-block 인자가 없다. 이어
 \theoremname{actual_snapshot_paper_qj_to_faithful_augmented},
 \theoremname{generated_product_coeff_from_rq_repr},
 \theoremname{faithful_augmented_As_qj_from_generated_repr},

@@ -389,7 +389,7 @@ encoded/decoded/bad 배열과 정확한
 않는다.
 \end{verified}
 
-\begin{boundary}[\identifier{STOP-KG-NTT}]
+\begin{boundary}[paper-freeze 시점의 \identifier{STOP-KG-NTT}]
 \label{bdry:keygen-ntt-mul}
 \cref{thm:keygen-semantic-snapshot}의 \(\mathsf{pre\_bp}\)는 실제
 \identifier{output_row}다. 77번째 파일의
@@ -399,8 +399,33 @@ full-invNTT/pointwise-word 표현으로 펼치고,
 운반한다. 두 결과 모두 컴파일되지만 그 표현을 보안 모델의
 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 다항식 곱과 식별하지 않는다. odd-root
 직교성/full-NTT convolution과 \identifier{Rq.poly}-to-security-list 곱셈
-adapter가 모두 없으므로 스냅샷 합동식을 논문 \(As=qj\pmod{2q}\)로 승격할 수
-없다. 이 감사 결과로 KeyGen 전선은 KG-2/finalization에서 동결되었다.
+adapter가 동결 대상 안에는 없으므로 스냅샷 합동식을 논문
+\(As=qj\pmod{2q}\)로 승격할 수 없다. 이 감사 결과로 동결 논문의 KeyGen
+전선은 KG-2/finalization에서 멈췄다.
+\end{boundary}
+
+\begin{verified}[post-freeze Rq--HAETAE 표현 보존]
+\label{thm:rq-haetae-post-freeze}
+\identifier{RqHAETAEBridge.rq_poly_repr}는 HAETAE 다항식의 well-formedness와
+활성 256개 계수의 \identifier{incoeff} 등식만을 요구한다. 이 관계에 대해
+\identifier{rq_poly_add_repr}, \identifier{rq_poly_mul_repr},
+\identifier{rq_poly_dot3_repr}가 각각 덧셈, checked negacyclic 곱셈과 3항
+row product를 보존한다. \identifier{Mode2KeygenNttMulBridge}의
+\identifier{keygen_mode2_row_product}와
+\identifier{mode2_row_product_haetae_dot}가 실제 mode-2 NTT 출력에서 이
+관계로 이어진다. 원하는 \(As=qj\) 식은 어느 전제에도 들어 있지 않다.
+\end{verified}
+
+\begin{boundary}[최신 \identifier{STOP-KG-AVEC-QJ}]
+\label{bdry:keygen-avec-qj}
+post-freeze의 actual sampler 정리는 종료한 \identifier{avec}를 nonce 515/516의
+SHAKE128 바이트, little-endian 16-bit 후보와 \(<64513\) rejection으로 해석하여
+논문 \(a\)에 연결한다. 논문 \(qj\)는 row 0, coefficient 0에만 \(q=64513\)이
+있는 별도 basis correction이다. 반면 현재 보안 모델의 이름 붙은 \(qj\)는
+synthetic seed generator라서 같은 위치의 값이 항상 401이다.
+\identifier{security_named_qj_is_not_paper_qj}가 이 부등식을 컴파일하므로 두
+객체를 동일시할 수 없다. 첫 수리 의무는
+\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}다.
 \end{boundary}
 
 \begin{definition}[\(\mu\) 접두부]

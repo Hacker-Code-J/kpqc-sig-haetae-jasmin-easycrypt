@@ -967,8 +967,8 @@ Week~16의 첫 과제는 전체 KeyGen이나 API가 아니라 실제 두 보조�
 그러나 \identifier{pre_bp}는
 \identifier{KeygenM23ArithmeticSpec.output_row}가 표현하는 full-NTT/점별
 곱/inverse-NTT 스냅샷일 뿐이다. 이를 논문의
-\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 다항식 곱과 동일시하는 정리가 없으므로
-현재 상태는 다음과 같다.
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 다항식 곱과 동일시하는 정리가 없었으므로
+당시 상태는 다음과 같았다.
 
 \begin{center}
 \begin{tabularx}{\textwidth}{L{0.57\textwidth}L{0.25\textwidth}}
@@ -1012,22 +1012,22 @@ snapshot theorem의 consequence로 이 표현을 두 active row의 사후조건�
 세 정리와 direct harness import를 포함한 파일은 개별
 \identifier{-no-eco} fresh compile을 통과했다.
 
-\begin{boundary}[KG-NTT-MUL에서 확인된 두 누락 잎]
+\begin{boundary}[paper-freeze 시점 KG-NTT-MUL의 두 누락 잎]
 첫째, 실제 Montgomery 인자를 포함해
 \[
  \operatorname{mont}
   (\operatorname{full\_invntt}(\widehat a\odot\operatorname{full\_ntt}(p)))
  =\operatorname{full\_invntt}(\widehat a)\mathbin{\star_{\!Rq}}p
 \]
-를 보이는 odd-root 직교성/full-NTT convolution 정리가 없다. 둘째, native
+를 보이는 odd-root 직교성/full-NTT convolution 정리가 없었다. 둘째, native
 \identifier{Rq.poly} 배열의 곱을 보안 모델의 정수-list
-\identifier{poly_mul}/\identifier{matrix_vec_mul}로 전사하는 adapter도 없다.
+\identifier{poly_mul}/\identifier{matrix_vec_mul}로 전사하는 adapter도 없었다.
 legacy \identifier{Rq.ntt}는 실제 full transform과 다르므로 이 공백을 메울 수
 없다. 따라서 snapshot의 \identifier{pre_bp}를
 \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 다시 부르는 것은 순환이다.
 \end{boundary}
 
-최종 판정은 \identifier{STOP-KG-NTT}다. KG-2/finalization은
+동결 판정은 \identifier{STOP-KG-NTT}다. KG-2/finalization은
 \statusproved, KG-4의 조정된 \(s_2\) 성분만 \statusproved, faithful KG-1/KG-3와
 전체 KG-4 및 논문 식은 증명되지 않았다. KeyGen 전선은 이 경계에서 동결된다.
 그 뒤 78번째 대상 \identifier{Mode2SignAcceptedCore}가 실제 세 helper의 직접
@@ -1036,5 +1036,104 @@ leaf가 없어 판정은 \identifier{STOP-SIGN-CHAL-MODE2}이며 S-1--S-7은
 미증명이다. 이어진 네 Verify 대상은 actual 다섯 helper의 순차 control,
 V-1/V-2/V-5/V-6의 exact machine-word 식, W64 norm gate와 tail/mismatch word
 expression을 컴파일했다. matrix CRT 의미 bridge가 없으므로 판정은
-\identifier{STOP-VERIFY-MATRIX-CRT}이며 첫 재개 leaf는
-\identifier{rq_mul_coeff_foldr_to_bigi}, 이어 2-by-4 NTT/CRT 절차 leaf다.
+\identifier{STOP-VERIFY-MATRIX-CRT}이며 동결 시점 첫 재개 leaf는
+\identifier{rq_mul_coeff_foldr_to_bigi}, 이어 2-by-4 NTT/CRT 절차 leaf였다.
+
+\subsection{20단계: paper-freeze와 post-freeze KeyGen 의미 정렬}
+\label{subsec:post-freeze-keygen}
+
+커밋 \identifier{4bde1207e2a290952d491d5b41c4bd773081e3c4}는 새 정리를
+추가하지 않고 82개 작성 대상, 주장 원장, 정리 그래프, 재현 절차와 논문 PDF를
+같은 \identifier{PAPER-FROZEN} 경계로 맞췄다. 동결 PDF의 SHA-256은
+\hashsplit{be935948028829556951863b44ceb2e6}{c5b2037820991b3a43a4b461b036e53d}다.
+이후 작업은 이 논문 주장 행렬을 소급 변경하지 않고, 외부 NTT 트리와 기존
+77번째 KeyGen 대상, 그리고 \sourcepath{post-freeze/} 보조 대상에서 진행됐다.
+
+첫 보조 층은 paper-freeze 때 막혔던 순수 NTT와 표현 간선을 닫는다.
+\sourcepath{haetae-ntt-verify/easycrypt/}\allowbreak
+\sourcepath{NTTFullSpectralAction.ec}는
+\identifier{rq_mul_coeff_foldr_to_bigi},
+\identifier{full_ntt_montgomery_spectral_action} 및 일반
+\identifier{full_ntt_montgomery_row_product}를 증명한다. 실제 full transform과
+다른 legacy \identifier{Rq.ntt}를 사용하지 않는다.
+\sourcepath{NTTMode2Row}\allowbreak\sourcepath{Specializations.ec}는 이 결과를 KeyGen의 2-by-3과
+Verify의 2-by-4 수학적 row product에 특수화한다.
+
+\sourcepath{RqHAETAEBridge.ec}는 계수별 표현 관계
+\identifier{rq_poly_repr}를 도입한다. 이 관계의 전제는 HAETAE 다항식의
+well-formedness와 활성 계수 등식뿐이며 원하는 convolution이나 KG 식을 포함하지
+않는다. 다음 정리들이 fresh compile됐다.
+
+\begin{itemize}
+  \item \identifier{rq_poly_add_repr}: \identifier{Rq.\&+}와
+        \identifier{HAETAE_Algebra.poly_add}의 표현 보존;
+  \item \identifier{rq_poly_mul_repr}: checked negacyclic
+        \identifier{Rq.\&*}와 \identifier{HAETAE_Algebra.poly_mul}의 표현 보존;
+  \item \identifier{rq_poly_dot3_repr}: 세 곱의 합을
+        \identifier{HAETAE_Algebra.poly_dot}으로 운반;
+  \item \identifier{keygen_mode2_row_product}와
+        \identifier{mode2_row_product_haetae_dot}: 실제 KeyGen NTT 출력에서
+        native Rq row product와 HAETAE 3항 dot으로 연결.
+\end{itemize}
+
+따라서 paper-freeze 당시의 odd-root/full-NTT 및 Rq--HAETAE 두 순수 잎은 더
+이상 전역 미해결 의무가 아니다. 다만 이 사실만으로 actual matrix words,
+security-side \(A\), secret/error packaging과 논문 mod-\(2q\) 식이 자동으로
+같아지지는 않는다.
+
+두 번째 보조 층은 종료한 실제 mode-2 \identifier{avec} 확장의 결정론적
+의미를 논문 객체와 맞춘다.
+\sourcepath{post-freeze/KgActualAvecQjSemantics.ec}는 다음을 증명한다.
+
+\begin{itemize}
+  \item 두 row nonce는 각각 515와 516이고, SHAKE128 입력은 32바이트 seed 뒤에
+        nonce 두 바이트를 붙인 형태다;
+  \item domain byte 31, 마지막 padding byte 128, 168바이트 squeeze block과
+        최초 네 block의 672바이트 크기가 실제 framing과 일치한다;
+  \item 인접 두 바이트를 little-endian 16-bit 후보로 읽고 \(64513\) 미만만
+        받아들이며, 수락한 계수는 추가 modular reduction 없이 저장된다;
+  \item 이 과정을 통과한 두 256계수 row는 논문 수준 mode-2 벡터 \(a\)다.
+\end{itemize}
+
+논문의 \(j=(1,0)^T\)에서 첫 \(1\)은 상수다항식의 항등원이므로 \(qj\)는 row~0의
+coefficient~0에만 \(q=64513\)을 더하고 나머지 계수는 0이다.
+이 경우는 \identifier{paper_qj_row0_coeff0},
+\identifier{paper_qj_row0_other}, \identifier{paper_qj_remaining_row}가 분리한다.
+
+\sourcepath{post-freeze/}\allowbreak
+\sourcepath{KgActualAvecQjComposition.ec}의 두 보조 정리
+\begin{center}
+\small
+\identifier{mode2_sampler_facts_actual_paper_a},\qquad
+\identifier{actual_snapshot_zero_adds_paper_qj}
+\end{center}
+는 actual sampler 사실과 기존 snapshot mod-\(2q\) 식에 이 두 paper 객체를
+합성한다. 최상위 Hoare 정리
+\begin{center}
+\small
+\identifier{checked_mode2_parent_m23_finalize_actual_avec_qj}
+\end{center}
+는 checked sampler, 실제 matrix helper와 finalizer의 종료한 실행에 대해 두
+결과를 함께 내보낸다. sampler 종료나 분포는 결론이 아니다.
+
+\begin{boundary}[\identifier{STOP-KG-AVEC-QJ}]
+기존 보안 모델의
+\identifier{haetae_mode23_qj_vector}는 실제 ExpandVecA나 논문 \(qj\)가 아니라
+\identifier{public_key_seed_polyveck}에 tag 401을 넣은 synthetic 산술
+generator다. 컴파일된 정리는 모든 seed에서 그 row~0/1의 coefficient~0을 각각
+401과 403으로 계산하지만 paper \(qj[0][0]=64513\)이다.
+\identifier{security_named_qj_is_not_paper_qj}가 이 부등식을 직접 증명한다.
+독립 FIPS-202 all-zero-seed trace에서도 실제 nonce-515 row~0 첫 계수는 44985로,
+synthetic 값 401과 다르다. 원하는 동일성을 전제로 넣으면 구체적으로
+\(44985=401\)을 요구하므로 sound하지 않다.
+\end{boundary}
+
+따라서 최신 최소 수리 의무는
+\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}다. 보안 쪽
+\identifier{public_rounding_vector_seed}를 실제 SHAKE128, little-endian parsing,
+\(<64513\) rejection과 nonce 515/516 의미로 교체하거나 정제하고, paper \(qj\)
+correction은 별도 mod-\(2q\) 객체로 유지한 뒤 actual-array 표현을 증명해야 한다.
+그 다음에도 현재 HAETAE 대수의 mode-2 폭 4/mod-\(q\) 표현과 논문 augmented
+matrix의 폭 \(1+3+2=6\)/mod-\(2q\) packaging을 연결해야 한다. 그러므로 이
+단계는 KG-1--KG-4, \(As=qj\pmod{2q}\), sampler distribution, termination 또는
+\(\delta_{\mathrm{KeyGen}}=0\)을 주장하지 않는다.
