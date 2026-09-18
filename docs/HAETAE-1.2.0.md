@@ -49,7 +49,8 @@ mode 2·3·5 공식 KAT, 실제 C 소스와의 차등·상호운용 테스트를
 새 [EasyCrypt 프로젝트](../haetae-1.2.0-easycrypt/README.md)에서는 CDT·올림 곱셈·
 Horner 계산·단일 Gaussian 시도·유한 소비기의 승인 순서와 제곱합·실제 서명
 offset 소비기·SHAKE 초기화와 스트림·실제 서명용 전체 Gaussian 함수·NTT·
-API 보조함수의 정리를 검증했다. 전체 Gaussian 정리는 종료한 실행에 적용한다.
+API 보조함수의 정리를 검증했다. 이어서 실제 Hyperball 전체 함수와 mode 2·3·5를
+word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실행에 적용한다.
 검증 범위와 남은 전제는 [CLAIMS.md](../haetae-1.2.0-easycrypt/CLAIMS.md)에 있다.
 전체 구현 정확성은 다음 순서로 이어간다.
 
@@ -57,9 +58,11 @@ API 보조함수의 정리를 검증했다. 전체 Gaussian 정리는 종료한 
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와
-   반복 refill을 연속 word 스트림 명세에 연결했다. 다음에는 여러 Gaussian
-   호출의 초기 제곱합 범위를 충족시키고 hyperball scaling·retry를 합성한다.
-   종료성·분포 의무는 따로 유지한다.
+   반복 refill을 연속 word 스트림 명세에 연결했다. 여러 Gaussian 호출의
+   초기 제곱합 조건, Hyperball 고정소수점·scaling·모듈러 norm·retry도 합성했다.
+   정수 반경 보장과 word 승인은 구분한다. 구성한 후보열의 wrap 사례와 전제는
+   [수치 경계 기록](../haetae-1.2.0-easycrypt/docs/hyperball-numerical-boundary.md)에 있다.
+   실수 근사 오차·분포·종료성은 별도 의무다.
 4. NTT·코덱 등 재사용 후보를 태그에서 필요한 만큼 가져와 현재 소스와 비교한다.
    이후 KeyGen/Sign/Verify 합성, 종료성·분포·보안 의무를 구분하여 진행한다.
 

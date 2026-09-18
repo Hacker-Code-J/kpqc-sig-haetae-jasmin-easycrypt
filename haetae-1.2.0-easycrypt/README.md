@@ -6,8 +6,9 @@ EasyCrypt가 실제로 검사한 명세·정리·의존 이론을 보관한다.
 
 현재 증명 범위는 **CDT, 고정소수점 곱셈·다항식, 단일 Gaussian 시도, 유한
 소비기의 정확한 출력·승인 순서·제곱합, 서명용 전체 Gaussian 스트림 함수,
-고정 길이 SHAKE 초기화·반복 블록, NTT, 실제 API 메모리 보조함수**다.
-전체 Gaussian 함수는 종료한 실행의 결과에 대한 Hoare 정리다. 전체 KeyGen/Sign/Verify와
+고정 길이 SHAKE 초기화·반복 블록, 서명용 Hyperball 전체 함수와 mode 2·3·5,
+NTT, 실제 API 메모리 보조함수**다. 전체 Gaussian·Hyperball 정리는 종료한 실행의
+word 결과에 대한 Hoare 정리다. 전체 KeyGen/Sign/Verify와
 Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
 
 ## 검증된 핵심 결과
@@ -26,6 +27,9 @@ Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
 | SHAKE 단일 블록 | 실제 서명 코드의 24라운드 word 순열, 반환 상태의 136바이트 직렬화, 출력 범위 밖 보존·종료 |
 | SHAKE seed 초기화 | seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태 일치·종료 |
 | 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
+| Hyperball 누적합 | 최대 2,818개 승인 후보에서 두 limb의 48비트 범위를 증명하여 연속 Gaussian 호출 연결 |
+| 고정소수점·scaling | 실제 word 곱셈·정규화·반분·Newton 6회 갱신·부호 및 signed32 출력·보존·종료; 수치 fit는 명시적 조건 |
+| 서명용 전체 Hyperball | 실제 전체 함수·mode 2/3/5를 배치 스트림·최초 승인 이력·모듈러 norm·최종 바이트와 카운터에 연결; 반환값 유일성 |
 | NTT·역 NTT | 명시적 계수 범위 아래 256점 수학적 변환과 결과 범위·종료성 |
 | 실제 API 보조함수 | 서명 문맥 prefix, 안전한 겹침의 역방향 복사, 검증 실패 시 영 초기화와 외부 메모리 보존 |
 
@@ -61,10 +65,11 @@ EasyCrypt는 import만 한 파일의 증명 본문을 기본적으로 재검사�
 필요한 그룹만 확인할 수도 있다. 각 그룹의 PASS는 선택한 그룹에 한정된다.
 
 ```sh
-make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 35개
+make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 51개
 make -C haetae-1.2.0-easycrypt verify-ntt        # NTT 지원 이론 11개 + 현재 구현 정리
 make -C haetae-1.2.0-easycrypt verify-generated  # 추출물 102개 로딩/타입 검사
 make -C haetae-1.2.0-easycrypt test-gate         # 미완성 증명 거부 등 검증기 회귀 테스트
+make -C haetae-1.2.0-easycrypt test-hyperball-boundary  # 구성한 후보열의 C/Jasmin 수치 경계 재현
 ```
 
 로그와 실행별 SHA-256·종료 코드는 `logs/`에 기록한다. `latest-<group>.json`은
@@ -93,3 +98,8 @@ word 순열 스트림을 다루며, FIPS bit 명세와의 별도 동치나 임�
 sponge 정리는 포함하지 않는다. 실수 지수함수
 오차, Gaussian 분포 정확성, 전체 거부 루프의 종료·분포, 전체 서명 정확성·보안은
 남아 있다.
+
+Hyperball의 승인 norm은 64비트 모듈러 합이다. 수학적 제곱합의 반경 보장은
+오버플로 조건을 추가로 충족해야 한다. 구성한 후보열에서 C와 Jasmin의 동일한
+wrap 동작을 재현했으며, 실제 SHAKE 시드 도달 가능성을 주장하지 않는다.
+정확한 사례와 검증 명령은 [수치 경계 기록](docs/hyperball-numerical-boundary.md)에 있다.

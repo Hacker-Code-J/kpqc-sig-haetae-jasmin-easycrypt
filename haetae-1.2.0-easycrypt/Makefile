@@ -1,6 +1,6 @@
 PYTHON ?= python3
 
-.PHONY: all verify verify-new verify-ntt verify-generated test-gate extract check-extraction
+.PHONY: all verify verify-new verify-ntt verify-generated test-gate test-hyperball-boundary extract check-extraction
 all: verify
 verify:
 	$(PYTHON) scripts/verify.py
@@ -12,6 +12,9 @@ verify-generated:
 	$(PYTHON) scripts/verify.py --group generated
 test-gate:
 	$(PYTHON) tests/test_verification_gate.py
+	$(PYTHON) tests/test_hyperball_provenance.py
+test-hyperball-boundary:
+	$(PYTHON) tests/hyperball-norm-boundary.py
 extract:
 	$(PYTHON) scripts/extract.py --write
 check-extraction:

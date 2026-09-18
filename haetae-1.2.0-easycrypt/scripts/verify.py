@@ -133,6 +133,10 @@ def check_provenance():
         run([sys.executable, "scripts/reference-constants.py", "--output", str(fresh)])
         if fresh.read_bytes() != (PROJECT / "theories/ReferenceConstants.ec").read_bytes():
             raise ValueError("Reference constants drift")
+        hyperball = Path(tmp) / "HyperballReferenceConstants.ec"
+        run([sys.executable, "scripts/hyperball-reference-constants.py", "--output", str(hyperball)])
+        if hyperball.read_bytes() != (PROJECT / "theories/HyperballReferenceConstants.ec").read_bytes():
+            raise ValueError("Hyperball reference constants drift")
     # Identically named generated array theories must not depend on search order.
     arrays = {}
     for path in sorted(PROJECT.glob("generated/**/*.ec")):

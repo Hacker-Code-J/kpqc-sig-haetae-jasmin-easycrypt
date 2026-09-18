@@ -30,6 +30,14 @@
 | [GaussianRefillCorrectness](proofs/GaussianRefillCorrectness.ec) | `gauss_carry_total`, `gauss_carry_squeeze_layout` | 실제 carry가 첫 블록의 부호 prefix 여부를 반영해 잔여 바이트를 보존하며 종료; carry·블록 직렬화 계약을 결합한 유한 버퍼 배치 |
 | [SHAKEBlockCorrectness](proofs/SHAKEBlockCorrectness.ec) | `keccakf1600_word_total`, `squeeze256_word_total` | 실제 signer의 24라운드 word 순열 대응과 136바이트 출력·외부 영역 보존·종료; 출력 offset `0…8056` |
 | [SHAKESeedInitCorrectness](proofs/SHAKESeedInitCorrectness.ec) | `seed_init_total`, `shake_block_stream_total` | 실제 초기화가 seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태와 일치하며 종료; 각 squeeze가 word 스트림의 정확한 다음 136바이트와 대응 |
+| [HyperballGaussianBounds](proofs/HyperballGaussianBounds.ec) | `hb_sigma76_square_high_bound`, `hb_cumulative_canonical`, `hb_sample_gauss_N_full_at_correct` | square-high `<2^36`으로 범위를 강화; 0에서 최대 2,818개 승인 후보를 누적해도 두 초기 limb `<2^48` 유지; 여러 Gaussian 호출의 전제 연결 |
+| [HyperballFixedPointCorrectness](proofs/HyperballFixedPointCorrectness.ec) | `hb_newton_total`, `hb_half_round_integer_total`, `hb_mul_rnd13_signed_fit` | 곱셈·조건부 부호·정규화·초기 추정과 Newton 6회 반복의 정확한 word 계산과 종료; canonical low에서 정수 올림 반분, 명시적 fit 아래 signed W32 의미 |
+| [HyperballScaleCorrectness](proofs/HyperballScaleCorrectness.ec) / [HyperballNormCorrectness](proofs/HyperballNormCorrectness.ec) | `hb_scale_samples_total`, `hb_scale_and_check_total` | 전역 sample/sign 인덱스, 출력 분할·보존, signed32 제곱합의 mod `2^64` 계산과 unsigned 승인 판정·종료; 정수 norm 해석은 별도 조건부 정리 |
+| [HyperballBatchCorrectness](proofs/HyperballBatchCorrectness.ec) / [HyperballHistoryCorrectness](proofs/HyperballHistoryCorrectness.ec) | `hb_batch_call_correct`, `hb_history_append`, `hb_history_finish` | 처음 두 번 257개·나머지 256개 승인 후보, 정확한 누적합, 실제 호출 연결; 이전 시도의 거부 이력과 최초 승인 결과·카운터 연결 |
+| [HyperballByteCorrectness](proofs/HyperballByteCorrectness.ec) | `hyperball_b_raw_array_total` | 마지막 nonce의 seed SHAKE 첫 바이트와 실제 반환 배열 일치·종료 |
+| [HyperballCorrectness](proofs/HyperballCorrectness.ec) | `hyperball_full_correct`, `hyperball_mode2_correct`, `hyperball_mode3_correct`, `hyperball_mode5_correct` | 실제 전체 함수와 mode 2·3·5의 word 명세에 대한 Hoare 부분 정확성; Gaussian 배치·고정소수점 scaling·모듈러 norm·retry·최종 byte/counter; mode 상수는 C에서 독립 생성 |
+| [HyperballResultUniqueness](proofs/HyperballResultUniqueness.ec) / [HyperballResultProperties](proofs/HyperballResultProperties.ec) | `hb_result_unique`, `hb_result_modular_norm`, `hb_result_integer_norm` | 미사용 scratch 영역·블록 증인과 무관한 전체 반환값 유일성, 출력 보존 및 모듈러 norm; 수학적 norm은 `<2^64` 또는 명시적 좌표 범위에서 연결 |
+| [HyperballNormBoundary](proofs/HyperballNormBoundary.ec) | `hyperball_mode{2,3,5}_prescribed_norm_boundary` | 구성한 좌표 벡터의 정수 제곱합·64비트 나머지·bound 비교를 확인하는 산술 정리; 실제 SHAKE 시드 도달 가능성 주장은 없음 |
 | [SigningSamplerBridge](proofs/SigningSamplerBridge.ec) | `signer_cdt83_total_correct`, `signer_smulh48_total_correct`, `signer_approx_exp_reference_total_correct`, `signer_sigma76_total_correct` | 위 CDT·올림·Horner·단일 시도 결과를 실제 mode 2/3/5 서명 추출물의 내부 함수에 전달 |
 | [NTTCorrectness](proofs/NTTCorrectness.ec) | `target_poly_ntt_jazz_total`, `target_poly_invntt_jazz_total`, `target_poly_invntt_jazz_total18` | 입력 계수 범위와 기록된 산술 가정 아래 `NTTFullSpec.full_ntt/full_invntt` 대응과 종료; 역변환의 Montgomery 인자 포함 |
 | [ApiBoundaryCorrectness](proofs/ApiBoundaryCorrectness.ec) | `api_copy_addr_to_addr_backward_correct`, `api_zero_raw_len64_correct` | canonical/no-wrap 주소, 안전한 alias 조건 아래 원래 byte 복사·영 초기화와 frame; 일반 `_api_prepare_pre_raw` 결과는 현재 사용되지 않는 소스 helper에 한정 |
@@ -61,12 +69,26 @@
   제곱합에 포함되고 출력 슬롯은 보존된다.
 - 호출 간 누적합 정리는 `gauss_stream_acc_ok`의 총 정수 예산을 사용한다.
   상위 limb의 48비트 범위가 매번 유지된다고 가정하지 않는다. 한 Gaussian 호출
-  안의 반복 refill에는 이 불변식을 연결했다. Hyperball에서 여러 polynomial
-  호출에 걸쳐 각 호출의 초기 두 limb 조건을 충족하는 정리는 아직 별도 의무다.
+  안의 반복 refill에는 이 불변식을 연결했다. Hyperball에서는 더 강한 square-high
+  상한과 `256*i + min(i,2)`의 누적 승인 개수로 각 polynomial 호출의 초기 두 limb
+  조건을 증명했다. mode 5의 최대 개수는 2,818이다.
 - 전체 Gaussian 함수 정리는 **종료한 실행의 반환값**에 관한 것이다. 고정된
   seed가 항상 충분한 승인 후보를 공급한다는 전제나 무조건 종료 정리를 추가하지
   않았다. 결과 명세의 유한 prefix 증인은 `gs_stream_result_unique`에 의해
   서로 다른 반환값을 허용하지 않는다.
+- Hyperball 전체 정리도 종료한 실행의 **word 명세 대응**이다. 모든 이전 시도의
+  거부와 마지막 승인을 이력에 기록하고, 미사용 scratch 영역을 제외한 모든 입력을
+  구체적인 Gaussian 스트림에 연결한다. 반환값 유일성은 nonce의 단사성을 가정하지
+  않는다. 실제 내부 카운터는 W64 덧셈이며 SHAKE에는 하위 16비트만 들어간다.
+- Hyperball의 norm 승인은 `N mod 2^64 <= bound`이다. `N`은 저장된 signed32
+  계수의 수학적 제곱합이다. `N < 2^64`가 있어야 정수 반경 판정으로 해석할 수
+  있다. 모든 좌표 절댓값 `<=2^26`, 총 2,816개 이하라는 충분조건도 증명했지만,
+  실제 모든 scaling 출력이 이를 충족한다는 전제는 추가하지 않았다.
+  [수치 경계와 재현](docs/hyperball-numerical-boundary.md)에 구성한 후보열의
+  C/Jasmin 동일 wrap 사례를 기록했다. 실제 SHAKE 시드 반례는 제시하지 않는다.
+- Newton 정리는 초기 추정과 6회 갱신의 정확한 word 계산을 증명한다. 실수
+  역제곱근 수렴·근사 오차나 모든 중간 계산의 무오버플로를 뜻하지 않는다.
+  C 참조 코드도 드물게 첫 추정값이 음수일 수 있음을 명시한다.
 - 단일 SHAKE 블록은 [word 명세](theories/SHAKEBlockSpec.ec)의 24라운드 순열과
   연결했다. [스트림 명세](theories/SHAKEStreamSpec.ec)는 64바이트 seed와 nonce
   하위 2바이트의 흡수·패딩 및 반복 squeeze를 포함한다. 임의 길이 입력의 sponge나
@@ -87,7 +109,7 @@
 | --- | --- |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball | 여러 Gaussian 호출의 초기 제곱합 범위 충족, `_sf_hyperball_full`의 scaling·inverse square root·norm·retry, 분포와 종료 의무 |
+| Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |
