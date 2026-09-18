@@ -1,0 +1,309 @@
+{
+  "checked_at": "2026-09-17T17:41:12.114910+00:00",
+  "scope": "component correctness",
+  "complete_api_correctness": false,
+  "generated_files": 102,
+  "new_local_theories": 27,
+  "ntt_local_theories": 12,
+  "all_local_theories": 39,
+  "generated_replay": {
+    "result": "PASS",
+    "checked_at": "20260917T150034.912595Z"
+  },
+  "new_replay": {
+    "result": "PASS",
+    "checked_at": "20260917T173300.318545Z",
+    "cache": "-no-eco",
+    "proof_mode": "Proofs:check",
+    "eof_completion_guard": true,
+    "targets": [
+      {
+        "target": "proofs/ApiBoundaryCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "929f693d09fdfd2662252ff97793faee6dca3444509ea3724d1c4831c6513c09",
+        "seconds": 43.234,
+        "log": "logs/20260917T173300.318545Z-new/proofs__ApiBoundaryCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/CDTTermination.ec",
+        "exit_code": 0,
+        "sha256": "4aae7678459b13d2e12eb7dd0c878cfe595e8910c1c31b7e47ea6109cc084bfa",
+        "seconds": 2.613,
+        "log": "logs/20260917T173300.318545Z-new/proofs__CDTTermination.ec.log"
+      },
+      {
+        "target": "theories/ReferenceConstants.ec",
+        "exit_code": 0,
+        "sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
+        "seconds": 1.735,
+        "log": "logs/20260917T173300.318545Z-new/theories__ReferenceConstants.ec.log"
+      },
+      {
+        "target": "theories/FixedPointSpec.ec",
+        "exit_code": 0,
+        "sha256": "c5db5999e0ab6e36eb131663ecd75ff36c0dc46ec2defc313eda073585705e89",
+        "seconds": 1.649,
+        "log": "logs/20260917T173300.318545Z-new/theories__FixedPointSpec.ec.log"
+      },
+      {
+        "target": "proofs/SamplerConstants.ec",
+        "exit_code": 0,
+        "sha256": "22081fa38ffe076889b008a6ea7ef8b6f68f9d67e395484bb656e1c87fbd5988",
+        "seconds": 2.271,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SamplerConstants.ec.log"
+      },
+      {
+        "target": "proofs/CDTCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "4ce3e9d49b1d22d9fbadd3cc0f249c74a8dc9eb651aa67847d94a6f4b472610b",
+        "seconds": 16.934,
+        "log": "logs/20260917T173300.318545Z-new/proofs__CDTCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/FixedPointCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "7df52dc190959e9ec3e8d547c9a99703707ed7ce7e01a1f8a41af8e4cd8ab27e",
+        "seconds": 12.121,
+        "log": "logs/20260917T173300.318545Z-new/proofs__FixedPointCorrectness.ec.log"
+      },
+      {
+        "target": "theories/SigmaSpec.ec",
+        "exit_code": 0,
+        "sha256": "775afc9e4bf71187a595c1d6b62cc7142f5ce53a57daf70eff7e33b1d0a1d9de",
+        "seconds": 1.875,
+        "log": "logs/20260917T173300.318545Z-new/theories__SigmaSpec.ec.log"
+      },
+      {
+        "target": "proofs/SigmaCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "1c9fe75b27d463a042688b495766271f0ad456adf658a133cb5db4327d24da45",
+        "seconds": 3.371,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaCorrectness.ec.log"
+      },
+      {
+        "target": "theories/GaussianTraceSpec.ec",
+        "exit_code": 0,
+        "sha256": "1a96a5fa89ea217703b5e5f740c854c9e6ac959fd62fb43181d42eb2b46429ab",
+        "seconds": 2.199,
+        "log": "logs/20260917T173300.318545Z-new/theories__GaussianTraceSpec.ec.log"
+      },
+      {
+        "target": "theories/GaussianConsumerSpec.ec",
+        "exit_code": 0,
+        "sha256": "e1b661a5a755159493dbebc4dd4cf9d774e688f421cf7a48be1c7676c7d0d13d",
+        "seconds": 1.737,
+        "log": "logs/20260917T173300.318545Z-new/theories__GaussianConsumerSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianConsumerCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "15a1657dc23576766091313fdd7b4539713c3a4288234b84145ac088d732d599",
+        "seconds": 27.338,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianConsumerCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianTraceProperties.ec",
+        "exit_code": 0,
+        "sha256": "cef67089d661d67c8aef0c33f01200543c5a87afc315f8ae6c60ebb6abd1919a",
+        "seconds": 17.138,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianTraceProperties.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRoundingCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "7fe1f857554663cedbb81693a3822abff241064fa62e098614ecd11b8914e9aa",
+        "seconds": 7.97,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaRoundingCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaSquareBounds.ec",
+        "exit_code": 0,
+        "sha256": "f959eddfbf767e40a19dedcd2e9c939586394aae8d694c051aed182fc20e21cb",
+        "seconds": 3.871,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaSquareBounds.ec.log"
+      },
+      {
+        "target": "proofs/GaussianAccumulatorCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "f0c8b795b52d4fa9e982eb5610c8bc1c06a5a48124c62bb4e217b1fb92b919c6",
+        "seconds": 5.881,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBufferLemmas.ec",
+        "exit_code": 0,
+        "sha256": "9546466d3574dd505a548ef5a115da3e397719b7013719ea5c527d428a302678",
+        "seconds": 2.71,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianBufferLemmas.ec.log"
+      },
+      {
+        "target": "theories/GaussianWindowSpec.ec",
+        "exit_code": 0,
+        "sha256": "c3236e5ca309ee172a0dc39bb87c3b4df8a57f0d6c0ab542c5f15d5823cb4156",
+        "seconds": 3.346,
+        "log": "logs/20260917T173300.318545Z-new/theories__GaussianWindowSpec.ec.log"
+      },
+      {
+        "target": "proofs/SigningSamplerBridge.ec",
+        "exit_code": 0,
+        "sha256": "9565d6bf9c16090202869cdfaf23272a06a37ca4fbc9d12be24e5bde034564af",
+        "seconds": 5.044,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SigningSamplerBridge.ec.log"
+      },
+      {
+        "target": "proofs/GaussianTraceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "b616a02f66bf0270ec26fe8a246733821a7ffb077306d01d46ecc0be88a47a0a",
+        "seconds": 28.378,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianTraceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianOffsetBridge.ec",
+        "exit_code": 0,
+        "sha256": "aa954866bc0914aae9473056e9140c0fffed4f791222affb15f3f6558c61e78e",
+        "seconds": 8.716,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianOffsetBridge.ec.log"
+      },
+      {
+        "target": "theories/SHAKEBlockSpec.ec",
+        "exit_code": 0,
+        "sha256": "baa6e1d3330e40ecf46fdfff7856c59d84f0638ab92b41f25d674b8732b0eb2f",
+        "seconds": 4.084,
+        "log": "logs/20260917T173300.318545Z-new/theories__SHAKEBlockSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRefillCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "34708c3cd7bba616ce808b11d11887bac3252761b6ae5b0a269953f0b6520c5c",
+        "seconds": 22.085,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianRefillCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSequenceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "469f6bf2659a1466df1dd07c27c7d089b38cae2fbd5241a6bfc2e08735f6ab83",
+        "seconds": 17.129,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianSequenceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianValueCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "1b67556af08fe8b46cbc5724a32d32b89db0a66471a5616f39efb3e3dbb33478",
+        "seconds": 4.677,
+        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianValueCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/ProductionApiCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "4e5cb8bd8212129f224006648716e3cbd679b7045e41e3bfb3b67c63737b31b1",
+        "seconds": 6.051,
+        "log": "logs/20260917T173300.318545Z-new/proofs__ProductionApiCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SHAKEBlockCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "d8a0dbd8d2546670ad57cdcb8a392f81f16ec1c2025d8cb234f663482cb96cbd",
+        "seconds": 182.175,
+        "log": "logs/20260917T173300.318545Z-new/proofs__SHAKEBlockCorrectness.ec.log"
+      }
+    ]
+  },
+  "ntt_replay": [
+    {
+      "target": "theories/ntt/Hpoly_extract.ec",
+      "sha256": "dedbc92e134f426bcf7e0fc5ee9be86babf3aeceb46cf24c4e450c10bb1e152f",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Hpoly_extract.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Hpoly_loop.ec",
+      "sha256": "cb223b76f97797a18c84105f6c17e1eb9d7e49ccd939f2001feba419f9fa7afe",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Hpoly_loop.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Montgomery.ec",
+      "sha256": "f0f5be2fd59f67c5018189e1a4a842a0dd769380b88ea607d56e8ca115da8387",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Montgomery.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Fq.ec",
+      "sha256": "9a74258fb09e829679562b6a940777ef522232d6400d9acba6c3bcead29216b9",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Fq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/GFq.ec",
+      "sha256": "cc7232b90e6850124448a0538822e5a7dabe46e126d8bf691e18279f26426848",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-GFq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Rq.ec",
+      "sha256": "22d6864b50d6daf9141318262a2e269b5e2c5a5f86cda7e9899bab07c6f36b11",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Rq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Fastexp.ec",
+      "sha256": "a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Fastexp.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTT_Fq.ec",
+      "sha256": "62181de33a8ff2e730f7773f0e8148c0eee6f27c7509dfc1e9e60e6258e6d074",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTT_Fq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTTFullSpec.ec",
+      "sha256": "949f925251d048642a3d4d222b59d7acdf85cf27a0fa6016fabf5df4a5645516",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTTFullSpec.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTTFullAlgebra.ec",
+      "sha256": "e5cade55a560aed0112fce32651f1c2c97c1fdf605944fe67034a40234924fdc",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTTFullAlgebra.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/RefJasminNTTLoop.ec",
+      "sha256": "3e26d8f7bac6a2dc14fa86e930218c95f27a7af949bf18f60da7b2c295d82c36",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-RefJasminNTTLoop.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "proofs/NTTCorrectness.ec",
+      "sha256": "8f07f01ac14508102d0c5ed256f6ee95e86ed042a782fe41112fecfd22986146",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-total.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    }
+  ],
+  "open_obligations": "CLAIMS.md",
+  "toolchain": "manifests/toolchain.json",
+  "gate_regression_tests": {
+    "target": "tests/test_verification_gate.py",
+    "tests": 10,
+    "result": "PASS",
+    "sha256": "e40b18776730d38a2c43c978638a04bd5865b40ab48ca4e0a993255bf870630e"
+  },
+  "independent_review": {
+    "result": "PASS for stated component contracts",
+    "remaining_scope": "whole Gaussian stream, SHAKE sponge, hyperball and full API composition remain open"
+  }
+}

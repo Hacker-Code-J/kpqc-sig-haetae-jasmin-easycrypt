@@ -1,0 +1,755 @@
+require "params.jinc"
+
+/* HAETAE-1.2.0, sampler.c: exact 83-bit half-Gaussian CDT. */
+u32[76] jcdt83_hi = {
+  0x063a5, 0x0c718, 0x129f6, 0x18bdf,
+  0x1ec73, 0x24b59, 0x2a83a, 0x302c6,
+  0x35ab6, 0x3afc7, 0x401be, 0x4506a,
+  0x49ba1, 0x4e343, 0x52736, 0x5676c,
+  0x5a3dc, 0x5dc86, 0x61172, 0x642ad,
+  0x6704c, 0x69a68, 0x6c120, 0x6e496,
+  0x704ef, 0x72255, 0x73cf1, 0x754f0,
+  0x76a7c, 0x77dc4, 0x78ef2, 0x79e32,
+  0x7abaf, 0x7b78f, 0x7c1fb, 0x7cb17,
+  0x7d304, 0x7d9e4, 0x7dfd4, 0x7e4f0,
+  0x7e950, 0x7ed0d, 0x7f03b, 0x7f2ec,
+  0x7f531, 0x7f71a, 0x7f8b3, 0x7fa08,
+  0x7fb24, 0x7fc0e, 0x7fccf, 0x7fd6e,
+  0x7fdf0, 0x7fe5a, 0x7feaf, 0x7fef5,
+  0x7ff2c, 0x7ff59, 0x7ff7d, 0x7ff99,
+  0x7ffb0, 0x7ffc2, 0x7ffd0, 0x7ffdb,
+  0x7ffe3, 0x7ffea, 0x7ffef, 0x7fff3,
+  0x7fff6, 0x7fff8, 0x7fffa, 0x7fffb,
+  0x7fffd, 0x7fffd, 0x7fffe, 0x7fffe
+};
+
+u64[166] jcdt83_lo = {
+  0x0aa572bc88db1e28, 0x4f3820e69064b2ee, 0xd68dc44dd1418704, 0x6587a04d9b97b1dd,
+  0x9b843ce0a65d0050, 0x02b62cb869003e7d, 0x0d44f194f8bf43c6, 0xfaa0c7acb211b4db,
+  0xa11387f7f524be80, 0x18526ca6f2ceb77f, 0x42a01a906b7dad17, 0x32e5337a1966b9a7,
+  0x6f00f7ac9735f58a, 0x0e6c48f40642ba60, 0xb6192fa1afb5e4ec, 0x7339dba8ffc2fcf5,
+  0x7746cbe1ac90c9eb, 0xb83004341d78466f, 0x781dcca572bb3d8a, 0xb880376cc82a5384,
+  0x9c68a5c477dfecb9, 0xbe45ceb02a25fef3, 0x7d1a8ccd208dbaa1, 0x452c002b9085e7db,
+  0xd7ef361c5551378d, 0x96b4ff49d9e5a8bb, 0xd337c94ede732d83, 0x28c75b8d3fe83c38,
+  0xe05d7bd130fe20e0, 0x6170e60b76d85108, 0xb0e59892414901ff, 0xff05cf70b911f3de,
+  0x4501460fdfd508c9, 0xf20b1303a2a54906, 0xa7d3badbeb04b20c, 0x05ce666b741b666d,
+  0x826e689fded20430, 0x5155d1354fcf6ff6, 0x55469226a1d318f6, 0x1c8d3820cfa9cabc,
+  0xe68d83bbf700fc40, 0xb1152d8944042803, 0x4c1e741aabe53700, 0x72b94c56e0f9a967,
+  0xe7e5a80a79e4539c, 0x9641c5d11feb4d12, 0xb18b71598b73dde0, 0xd9112fb5a7904d7e,
+  0x3a4f57cbefabc820, 0xb314025fd5022976, 0xf2a2b228aab1981b, 0x996ce1e60378cd98,
+  0x570ec64b38e3ca90, 0x0657269615dcd7c6, 0xc7360038bdc85312, 0x167fa02a57a8ae1a,
+  0xe380fab2ea9b2bef, 0xa36e6abd6509b5a2, 0x62bfcf1d6ba81c37, 0xd4946e8bf96caa93,
+  0x603e6262ea8cda2d, 0x2d18c8b333ae9203, 0x2ccdedb5a7718d61, 0x24333ecab8497c0a,
+  0xb2e06eb33bf2b7d9, 0x59a5f6c550dfe7e2, 0x800548f3927f906e, 0x78cac146b573bc40,
+  0x85e6dadec4b6aff1, 0xdba17dfa17def8ec, 0xa33f84d06ce20a93, 0xfd2fe967c5186746,
+  0x02d37ecd7e9b180f, 0xc7efafa8bd33f0bb, 0x5bda826341e791cc, 0xca6c1c6ce045599f,
+  0x1cc02c0faa9a526e, 0x59d002901a4a4e52, 0x86ecbd139ce07540, 0xa81f9f15ffb47f4c,
+  0xc075b17481687af0, 0xd23ad13e68301c65, 0xdf27955fae1c84cb, 0xe884cdb07368c266,
+  0xef46d4f897fc83f6, 0xf4227e46663ec049, 0xf79d091c1b5aff07, 0xfa183c533c3890a6,
+  0xfbdb8a602066b0f2, 0xfd1af06df3db86b7, 0xfdfc1a818587e2aa, 0xfe9a37a348ac2a93,
+  0xff08d0797970dbfe, 0xff55df73fd7a00bc, 0xff8b5aa573bca5ce, 0xffb053c109f51681,
+  0xffc9c9bd39a036ec, 0xffdb40bd4ee1f846, 0xffe72fa859b20a4a, 0xffef4edda93d266d,
+  0xfff4d07a9fb0d4e0, 0xfff88868ef31b1cc, 0xfffb08c16a3f5f0c, 0xfffcb5d30be5cabf,
+  0xfffdd43465d95fe6, 0xfffe929a538ad2fa, 0xffff10b1c2119732, 0xffff63df8795a2c9,
+  0xffff9a87a0a9f2af, 0xffffbe4df6f0f4a9, 0xffffd5a10f204910, 0xffffe4c6f1668b32,
+  0xffffee939680bfaf, 0xfffff4e4216290db, 0xfffff8f1c044613e, 0xfffffb892dc2b174,
+  0xfffffd2fb4188608, 0xfffffe3bc0a56eba, 0xfffffee523b218c6, 0xffffff4fc31097e3,
+  0xffffff929d76dbeb, 0xffffffbc5e7c0350, 0xffffffd6586c6684, 0xffffffe6716865f7,
+  0xfffffff0613c76e2, 0xfffffff67d62ab64, 0xfffffffa3b6664c0, 0xfffffffc83e13d66,
+  0xfffffffde713ef71, 0xfffffffebe18936f, 0xffffffff3fbfc997, 0xffffffff8d9fa29a,
+  0xffffffffbc372590, 0xffffffffd7fb7dfd, 0xffffffffe87747f9, 0xfffffffff2368b89,
+  0xfffffffff7f44d88, 0xfffffffffb52a49b, 0xfffffffffd4a9ffb, 0xfffffffffe700579,
+  0xffffffffff1a287f, 0xffffffffff7c6f06, 0xffffffffffb4fa99, 0xffffffffffd56300,
+  0xffffffffffe7e364, 0xfffffffffff268d7, 0xfffffffffff85e8e, 0xfffffffffffbbb6f,
+  0xfffffffffffd9f49, 0xfffffffffffeae2c, 0xffffffffffff453d, 0xffffffffffff9928,
+  0xffffffffffffc797, 0xffffffffffffe12f, 0xffffffffffffef3c, 0xfffffffffffff6eb,
+  0xfffffffffffffb1b, 0xfffffffffffffd60, 0xfffffffffffffe9a, 0xffffffffffffff43,
+  0xffffffffffffff9e, 0xffffffffffffffce, 0xffffffffffffffe7, 0xfffffffffffffff4,
+  0xfffffffffffffffb, 0xfffffffffffffffe
+};
+
+fn _sample_gauss83(reg u64 rand_lo, reg u32 rand_hi) -> reg u64
+{
+  reg ptr u32[76] hip;
+  reg ptr u64[166] lop;
+  reg u64 i r lo hi rndhi;
+  reg u32 c;
+  reg bool borrow;
+
+  hip = jcdt83_hi;
+  lop = jcdt83_lo;
+  rndhi = (64u)rand_hi;
+  i = 0;
+  r = 0;
+  while (i < 76)
+  {
+    c = hip[i];
+    hi = (64u)c;
+    lo = lop[i];
+    borrow, lo -= rand_lo;
+    _, hi = hi - rndhi - borrow;
+    hi >>= 63;
+    r += hi;
+    i += 1;
+  }
+  while (i < 166)
+  {
+    hi = 0x7ffff;
+    lo = lop[i];
+    borrow, lo -= rand_lo;
+    _, hi = hi - rndhi - borrow;
+    hi >>= 63;
+    r += hi;
+    i += 1;
+  }
+
+  return r;
+}
+
+/* Signed a times unsigned b, rounded toward positive infinity after /2^48. */
+fn __smulh48(reg u64 a b) -> reg u64
+{
+  reg u64 hi lo r tmp rem rax rdx;
+
+  rax = a;
+  rdx, rax = rax * b;
+  hi = rdx;
+  lo = rax;
+  tmp = a;
+  tmp >>s= 63;
+  tmp &= b;
+  hi -= tmp;
+
+  r = hi;
+  r <<= 16;
+  tmp = lo;
+  tmp >>= 48;
+  r |= tmp;
+  rem = lo;
+  rem &= 0xffffffffffff;
+  tmp = 0;
+  tmp -= rem;
+  rem |= tmp;
+  rem >>= 63;
+  r += rem;
+
+  return r;
+}
+
+/* GALACTICS degree-10 ceiling approximation, with lifted constant term. */
+fn _approx_exp(reg u64 x) -> reg u64
+{
+  reg u64 result;
+
+  result = 55868746;
+  result = __smulh48(result, x);
+  result -= 743564434;
+  result = __smulh48(result, x);
+  result += 6953427278;
+  result = __smulh48(result, x);
+  result -= 55833338892;
+  result = __smulh48(result, x);
+  result += 390932311155;
+  result = __smulh48(result, x);
+  result -= 2345623661771;
+  result = __smulh48(result, x);
+  result += 11728123872951;
+  result = __smulh48(result, x);
+  result -= 46912496106200;
+  result = __smulh48(result, x);
+  result += 140737488354861;
+  result = __smulh48(result, x);
+  result -= 281474976710650;
+  result = __smulh48(result, x);
+  result += 281474976710657;
+
+  return result;
+}
+
+fn __sample_gauss_sigma76_regs(reg const ptr u8[26] randp)
+                                -> reg u64, reg u64, reg u64, reg u64
+{
+  stack u64[2] y;
+  stack u64[2] sqrbuf;
+  reg ptr u64[2] yp;
+  reg ptr u64[2] sqrp;
+  reg u64 rand_gauss83_lo rand_rej x y0 y1 rounded exp_in exp;
+  reg u64 t u accepted sqr0 sqr1;
+  reg u32 rand_gauss83_hi;
+  reg u8 byte;
+  #[msf] reg u64 ms;
+
+  byte = randp[0];
+  rand_gauss83_lo = (64u)byte;
+  byte = randp[1];
+  t = (64u)byte;
+  t <<= 8;
+  rand_gauss83_lo |= t;
+  byte = randp[2];
+  t = (64u)byte;
+  t <<= 16;
+  rand_gauss83_lo |= t;
+  byte = randp[3];
+  t = (64u)byte;
+  t <<= 24;
+  rand_gauss83_lo |= t;
+  byte = randp[4];
+  t = (64u)byte;
+  t <<= 32;
+  rand_gauss83_lo |= t;
+  byte = randp[5];
+  t = (64u)byte;
+  t <<= 40;
+  rand_gauss83_lo |= t;
+  byte = randp[6];
+  t = (64u)byte;
+  t <<= 48;
+  rand_gauss83_lo |= t;
+  byte = randp[7];
+  t = (64u)byte;
+  t <<= 56;
+  rand_gauss83_lo |= t;
+
+  byte = randp[8];
+  u = (64u)byte;
+  byte = randp[9];
+  t = (64u)byte;
+  t <<= 8;
+  u |= t;
+  byte = randp[10];
+  t = (64u)byte;
+  t <<= 16;
+  u |= t;
+
+  u &= 0x7ffff;
+  rand_gauss83_hi = (32u)u;
+  x = _sample_gauss83(rand_gauss83_lo, rand_gauss83_hi);
+
+  byte = randp[11];
+  rand_rej = (64u)byte;
+  byte = randp[12];
+  t = (64u)byte;
+  t <<= 8;
+  rand_rej |= t;
+  byte = randp[13];
+  t = (64u)byte;
+  t <<= 16;
+  rand_rej |= t;
+  byte = randp[14];
+  t = (64u)byte;
+  t <<= 24;
+  rand_rej |= t;
+  byte = randp[15];
+  t = (64u)byte;
+  t <<= 32;
+  rand_rej |= t;
+  byte = randp[16];
+  t = (64u)byte;
+  t <<= 40;
+  rand_rej |= t;
+
+  byte = randp[17];
+  y0 = (64u)byte;
+  byte = randp[18];
+  t = (64u)byte;
+  t <<= 8;
+  y0 |= t;
+  byte = randp[19];
+  t = (64u)byte;
+  t <<= 16;
+  y0 |= t;
+  byte = randp[20];
+  t = (64u)byte;
+  t <<= 24;
+  y0 |= t;
+  byte = randp[21];
+  t = (64u)byte;
+  t <<= 32;
+  y0 |= t;
+  byte = randp[22];
+  t = (64u)byte;
+  t <<= 40;
+  y0 |= t;
+
+  byte = randp[23];
+  y1 = (64u)byte;
+  byte = randp[24];
+  t = (64u)byte;
+  t <<= 8;
+  y1 |= t;
+  byte = randp[25];
+  t = (64u)byte;
+  t <<= 16;
+  y1 |= t;
+
+  t = x;
+  t <<= 24;
+  y1 |= t;
+
+  /* Split rounding preserves the upper bit for CDT samples x >= 128. */
+  rounded = y0;
+  rounded >>= 15;
+  rounded += 1;
+  rounded >>= 1;
+  t = y1;
+  t <<= 32;
+  rounded += t;
+
+  y[0] = y0;
+  y[1] = y1;
+  yp = y;
+  sqrp = sqrbuf;
+  sqrp = _fixpoint_square(sqrp, yp);
+  sqr0 = sqrp[0];
+  sqr1 = sqrp[1];
+
+  exp_in = sqr1;
+  t = x;
+  t *= x;
+  t <<= 20;
+  exp_in -= t;
+  exp_in <<= 20;
+  t = sqr0;
+  t >>= 28;
+  exp_in |= t;
+  exp_in += 1;
+  exp_in >>= 1;
+  () = #declassify(exp_in);
+  ms = #init_msf();
+  exp_in = #protect(exp_in, ms);
+
+  exp = _approx_exp(exp_in);
+  accepted = rand_rej;
+  t = rand_rej;
+  t &= 1;
+  accepted ^= t;
+  accepted -= exp;
+  accepted >>s= 63;
+
+  t = 0;
+  t -= rounded;
+  u = rounded;
+  u |= t;
+  u >>= 63;
+  u |= rand_rej;
+  accepted &= u;
+  accepted &= 1;
+
+  return rounded, sqr0, sqr1, accepted;
+}
+
+fn _sample_gauss_sigma76(reg mut ptr u64[1] rp,
+                         reg mut ptr u64[2] sqrp,
+                         reg mut ptr u32[1] acceptedp,
+                         reg const ptr u8[26] randp)
+                         -> reg ptr u64[1],
+                            reg ptr u64[2],
+                            reg ptr u32[1]
+{
+  reg u64 sample sqr0 sqr1 accepted;
+
+  sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+  rp[0] = sample;
+  sqrp[0] = sqr0;
+  sqrp[1] = sqr1;
+  acceptedp[0] = (32u)accepted;
+
+  return rp, sqrp, acceptedp;
+}
+
+fn _sample_gauss(reg mut ptr u64[512] rp,
+                 reg mut ptr u64[2] sqsump,
+                 reg mut ptr u64[1] coefcntp,
+                 reg const ptr u8[8192] bufp,
+                 reg u64 counts,
+                 reg u64 dont_write_last) -> reg ptr u64[512],
+                                            reg ptr u64[2],
+                                            reg ptr u64[1]
+{
+  stack ptr u64[512] srp;
+  stack ptr u64[2] ssqsump;
+  stack ptr u64[1] scoefcntp;
+  stack ptr u8[8192] sbufp;
+  stack u64 slen sbytecnt spos scoefcnt sdont;
+  stack u8[26] randbuf;
+  reg ptr u64[512] rp_tmp;
+  reg ptr u64[2] sqsum_tmp;
+  reg ptr u64[1] coefcntp_tmp;
+  reg const ptr u8[8192] bufp_tmp;
+  reg ptr u8[26] randp;
+  inline int k;
+  reg u64 len bytecnt pos coefcnt last sample accepted accepted64 dont;
+  reg u64 s0 s1 sqr0 sqr1 mask carry;
+  reg u8 byte;
+  #[msf] reg u64 ms;
+
+  srp = rp;
+  ssqsump = sqsump;
+  scoefcntp = coefcntp;
+  sbufp = bufp;
+  sdont = dont_write_last;
+
+  len = counts;
+  len &= 0xffffffff;
+  bytecnt = counts;
+  bytecnt >>= 32;
+  slen = len;
+  sbytecnt = bytecnt;
+  spos = 0;
+  scoefcnt = 0;
+
+  randp = randbuf;
+
+  while { coefcnt = scoefcnt; len = slen; } (coefcnt < len)
+  {
+    bytecnt = sbytecnt;
+    if (bytecnt < 26)
+    {
+      slen = coefcnt;
+    }
+    else
+    {
+      pos = spos;
+      bufp_tmp = sbufp;
+      for k = 0 to 26
+      {
+        byte = bufp_tmp[pos + k];
+        randp[k] = byte;
+      }
+
+      sample, sqr0, sqr1, accepted = __sample_gauss_sigma76_regs(randp);
+      () = #declassify(coefcnt);
+      () = #declassify(len);
+      () = #declassify(pos);
+      () = #declassify(bytecnt);
+      () = #declassify(accepted);
+      ms = #init_msf();
+      coefcnt = #protect(coefcnt, ms);
+      len = #protect(len, ms);
+      pos = #protect(pos, ms);
+      bytecnt = #protect(bytecnt, ms);
+      accepted = #protect(accepted, ms);
+
+      last = len;
+      last -= 1;
+      dont = sdont;
+      () = #declassify(dont);
+      dont = #protect(dont, ms);
+      rp_tmp = srp;
+      rp_tmp = #protect_ptr(rp_tmp, ms);
+      if (dont != 0)
+      {
+        if (coefcnt == last)
+        {
+          accepted64 = accepted;
+        }
+        else
+        {
+          rp_tmp[coefcnt] = sample;
+          srp = rp_tmp;
+          accepted64 = accepted;
+        }
+      }
+      else
+      {
+        rp_tmp[coefcnt] = sample;
+        srp = rp_tmp;
+        accepted64 = accepted;
+      }
+
+      coefcnt += accepted64;
+      pos += 26;
+      bytecnt -= 26;
+
+      mask = 0;
+      mask -= accepted64;
+      sqr0 &= mask;
+      sqr1 &= mask;
+      sqsum_tmp = ssqsump;
+      ms = #init_msf();
+      sqsum_tmp = #protect_ptr(sqsum_tmp, ms);
+      s0 = sqsum_tmp[0];
+      s1 = sqsum_tmp[1];
+      s0 += sqr0;
+      s1 += sqr1;
+      sqsum_tmp[0] = s0;
+      sqsum_tmp[1] = s1;
+      ssqsump = sqsum_tmp;
+      scoefcnt = coefcnt;
+      spos = pos;
+      sbytecnt = bytecnt;
+    }
+  }
+
+  sqsum_tmp = ssqsump;
+  s0 = sqsum_tmp[0];
+  s1 = sqsum_tmp[1];
+  carry = s0;
+  carry >>= 48;
+  s1 += carry;
+  mask = 0xffffffffffff;
+  s0 &= mask;
+  sqsum_tmp[0] = s0;
+  sqsum_tmp[1] = s1;
+  ssqsump = sqsum_tmp;
+
+  coefcnt = scoefcnt;
+  coefcntp_tmp = scoefcntp;
+  coefcntp_tmp[0] = coefcnt;
+  scoefcntp = coefcntp_tmp;
+
+  rp = srp;
+  sqsump = ssqsump;
+  coefcntp = scoefcntp;
+  return rp, sqsump, coefcntp;
+}
+
+fn _sample_gauss_N_copy_signs(reg mut ptr u8[1024] signsp,
+                              reg const ptr u8[8192] bufp,
+                              reg u64 signbytes) -> reg ptr u8[1024]
+{
+  reg u64 i;
+  reg u8 b;
+
+  i = 0;
+  while (i < signbytes)
+  {
+    b = bufp[i];
+    signsp[i] = b;
+    i += 1;
+  }
+
+  return signsp;
+}
+
+fn _sample_gauss_N_carry(reg mut ptr u8[8192] bufp,
+                         reg u64 bytecnt,
+                         reg u64 signbytes,
+                         reg u64 firstflag,
+                         reg u64 off) -> reg ptr u8[8192]
+{
+  reg u64 i src idx;
+  reg u8 b;
+
+  src = bytecnt;
+  if (firstflag != 0)
+  {
+    src += signbytes;
+  }
+  src -= off;
+
+  i = 0;
+  while (i < off)
+  {
+    idx = src;
+    idx += i;
+    b = bufp[idx];
+    bufp[i] = b;
+    i += 1;
+  }
+
+  return bufp;
+}
+
+fn _rej_uniform(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+                reg u64 len, reg const ptr u8[1024] bp,
+                reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  reg u64 ctr pos rem;
+  reg u8 byte;
+  reg u32 t u;
+  #[msf] reg u64 ms;
+
+  ctr = 0;
+  pos = 0;
+  while (ctr < len)
+  {
+    rem = buflen;
+    rem -= pos;
+    if (rem < 2)
+    {
+      len = ctr;
+    }
+    else
+    {
+      byte = bp[pos];
+      t = (32u)byte;
+      pos += 1;
+      byte = bp[pos];
+      u = (32u)byte;
+      pos += 1;
+      u <<= 8;
+      t |= u;
+      () = #declassify(t);
+      ms = #init_msf();
+      t = #protect_32(t, ms);
+
+      if (t < HAETAE_Q)
+      {
+        ap[ctr] = t;
+        ctr += 1;
+      }
+    }
+  }
+
+  ctrp[0] = (32u)ctr;
+  return ap, ctrp;
+}
+
+inline fn __mod3(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __mod3_leq26(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 4;
+  u = t;
+  u &= 15;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+inline fn __mod3_leq8(reg u32 t) -> reg u32
+{
+  reg u32 r u;
+
+  r = t;
+  r >>= 2;
+  u = t;
+  u &= 3;
+  r += u;
+
+  u = r;
+  u >>= 2;
+  r &= 3;
+  r += u;
+
+  u = r;
+  u >>= 1;
+  u *= 3;
+  r -= u;
+  return r;
+}
+
+fn _rej_eta(reg mut ptr u32[512] ap, reg mut ptr u32[1] ctrp,
+            reg u64 len, reg const ptr u8[1024] bp,
+            reg u64 buflen) -> reg ptr u32[512], reg ptr u32[1]
+{
+  reg u64 ctr pos;
+  reg u8 byte;
+  reg u32 t r;
+  #[msf] reg u64 ms;
+
+  ctr = 0;
+  pos = 0;
+  while (ctr < len)
+  {
+    if (pos < buflen)
+    {
+      byte = bp[pos];
+      t = (32u)byte;
+      pos += 1;
+      () = #declassify(t);
+      ms = #init_msf();
+      t = #protect_32(t, ms);
+      if (t < 243)
+      {
+        r = __mod3(t);
+        ap[ctr] = r;
+        ctr += 1;
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3_leq26(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = __mod3_leq8(t);
+          ap[ctr] = r;
+          ctr += 1;
+        }
+
+        if (ctr < len)
+        {
+          t *= 171;
+          t >>= 9;
+          r = t;
+          r >>= 1;
+          r *= 3;
+          t -= r;
+          ap[ctr] = t;
+          ctr += 1;
+        }
+      }
+    }
+    else
+    {
+      len = ctr;
+    }
+  }
+
+  ctrp[0] = (32u)ctr;
+  return ap, ctrp;
+}

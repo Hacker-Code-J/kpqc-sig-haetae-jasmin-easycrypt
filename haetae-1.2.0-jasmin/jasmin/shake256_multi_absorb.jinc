@@ -1,0 +1,225 @@
+fn __shake256_finalize_fixed_pos(reg mut ptr u64[25] sp,
+                                 reg u64 pos) -> reg ptr u64[25]
+{
+  reg u64 lane t;
+  reg u8 shift;
+  #[msf] reg u64 ms;
+
+  () = #declassify(pos);
+  ms = #init_msf();
+  pos = #protect(pos, ms);
+
+  lane = pos;
+  lane >>= 3;
+  shift = (8u)pos;
+  shift &= 7;
+  shift <<= 3;
+
+  t = 0x1f;
+  t <<= (shift & 63);
+  sp[lane] ^= t;
+
+  t = 1;
+  t <<= 63;
+  sp[16] ^= t;
+
+  return sp;
+}
+
+fn __shake256_absorb_fixed_pos(reg mut ptr u64[25] sp,
+                               reg u64 pos,
+                               reg u64 inp,
+                               reg u64 inlen) -> reg ptr u64[25],
+                                                reg u64
+{
+  reg u64 lane t;
+  reg u8 b shift;
+  #[msf] reg u64 ms;
+
+  () = #declassify(inp);
+  () = #declassify(inlen);
+  () = #declassify(pos);
+  ms = #init_msf();
+  inp = #protect(inp, ms);
+  inlen = #protect(inlen, ms);
+  pos = #protect(pos, ms);
+
+  while (inlen != 0)
+  {
+    lane = pos;
+    lane >>= 3;
+    b = [:u8 inp];
+    t = (64u)b;
+    shift = (8u)pos;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    inp += 1;
+    pos += 1;
+    inlen -= 1;
+
+    if (pos == 136)
+    {
+      () = #spill(inp, inlen, pos);
+      sp = _keccakf1600(sp);
+      () = #unspill(inp, inlen, pos);
+      () = #declassify(inp);
+      () = #declassify(inlen);
+      () = #declassify(pos);
+      ms = #init_msf();
+      inp = #protect(inp, ms);
+      inlen = #protect(inlen, ms);
+      pos = #protect(pos, ms);
+      pos = 0;
+    }
+  }
+
+  return sp, pos;
+}
+
+fn _shake256_absorb_twice(reg mut ptr u64[26] statep,
+                          reg ui64 in1p,
+                          reg u64 in1len,
+                          reg ui64 in2p,
+                          reg u64 in2len) -> reg ptr u64[26]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 in1a in2a pos i;
+
+  sp = s;
+  in1a = (64u)in1p;
+  in2a = (64u)in2p;
+
+  sp = _keccak_init_state(sp);
+  pos = 0;
+  () = #spill(in2a, in2len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in1a, in1len);
+  () = #unspill(in2a, in2len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in2a, in2len);
+  sp = __shake256_finalize_fixed_pos(sp, pos);
+
+  i = 0;
+  while (i < 25)
+  {
+    statep[i] = sp[i];
+    i += 1;
+  }
+  statep.[:u32 200] = 136;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+fn _shake256_absorb_twice_start(reg mut ptr u64[26] statep,
+                                reg ui64 in1p,
+                                reg u64 in1len,
+                                reg ui64 in2p,
+                                reg u64 in2len) -> reg ptr u64[26]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 in1a in2a pos i;
+  reg u32 pos32;
+
+  sp = s;
+  in1a = (64u)in1p;
+  in2a = (64u)in2p;
+
+  sp = _keccak_init_state(sp);
+  pos = 0;
+  () = #spill(in2a, in2len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in1a, in1len);
+  () = #unspill(in2a, in2len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in2a, in2len);
+
+  i = 0;
+  while (i < 25)
+  {
+    statep[i] = sp[i];
+    i += 1;
+  }
+  () = #declassify(pos);
+  pos32 = (32u)pos;
+  statep.[:u32 200] = pos32;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+fn _shake256_absorb_final(reg mut ptr u64[26] statep,
+                          reg ui64 inp,
+                          reg u64 inlen) -> reg ptr u64[26]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 inpa pos i;
+  reg u32 pos32;
+
+  sp = s;
+  i = 0;
+  while (i < 25)
+  {
+    sp[i] = statep[i];
+    i += 1;
+  }
+  inpa = (64u)inp;
+  pos32 = statep.[:u32 200];
+  pos = (64u)pos32;
+
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, inpa, inlen);
+  sp = __shake256_finalize_fixed_pos(sp, pos);
+
+  i = 0;
+  while (i < 25)
+  {
+    statep[i] = sp[i];
+    i += 1;
+  }
+  statep.[:u32 200] = 136;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}
+
+fn _shake256_absorb_thrice_desc(reg mut ptr u64[26] statep,
+                                reg const ptr u64[6] descp) -> reg ptr u64[26]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 in1p in2p in3p;
+  reg u64 in1len in2len in3len;
+  reg u64 pos i;
+
+  in1p = descp[0];
+  in1len = descp[1];
+  in2p = descp[2];
+  in2len = descp[3];
+  in3p = descp[4];
+  in3len = descp[5];
+
+  sp = s;
+
+  sp = _keccak_init_state(sp);
+  pos = 0;
+  () = #spill(in2p, in2len, in3p, in3len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in1p, in1len);
+  () = #unspill(in2p, in2len, in3p, in3len);
+  () = #spill(in3p, in3len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in2p, in2len);
+  () = #unspill(in3p, in3len);
+  sp, pos = __shake256_absorb_fixed_pos(sp, pos, in3p, in3len);
+  sp = __shake256_finalize_fixed_pos(sp, pos);
+
+  i = 0;
+  while (i < 25)
+  {
+    statep[i] = sp[i];
+    i += 1;
+  }
+  statep.[:u32 200] = 136;
+  statep.[:u32 204] = 0;
+
+  return statep;
+}

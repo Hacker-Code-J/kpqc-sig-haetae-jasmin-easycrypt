@@ -1,0 +1,34 @@
+{
+  "jasminc": {
+    "sha256": "cf8dde7cdd8fe7151d33a5948bac8e0ee57419ca1d57b4dfc21dab2569fa0c45",
+    "version_output": "Jasmin Compiler 2026.03.0",
+    "command": "jasminc"
+  },
+  "jasmin2ec": {
+    "sha256": "3a9fde9a1237d791fa4b38b4a908f4d98f637a5fba81f74f8e2417c0190f6196",
+    "version_output": "Jasmin Compiler 2026.03.0",
+    "command": "jasmin2ec"
+  },
+  "easycrypt": {
+    "sha256": "1a943567bc94f43bbf427b52376b5deb5e0d79fd9049529302822c72d7ea4c3e",
+    "version_output": "git-hash: n/a\nload-path:\n  Jasmin@/home/hacker-code-j/jasmin/eclib\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/tactics\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/structure\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/query_counting\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/modules\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/looping\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/encryption\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/distributions\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/datatypes\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/crypto\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/crypto/ske\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/crypto/prp_prf\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/crypto/pke\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/crypto/assumptions\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/core\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/analysis\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/algebra\n  <system>@/home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/theories/prelude\nwhy3 configuration file\n  /home/hacker-code-j/.config/easycrypt/why3.conf\nEasyCrypt system configuration directory\n  /home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/config\nEasyCrypt configuration file\n  /home/hacker-code-j/.config/easycrypt/easycrypt.conf\nknown provers: Alt-Ergo@2.6.0, Alt-Ergo[BV]@2.6.0, Alt-Ergo[counterexamples]@2.6.0, CVC4@1.8.0, CVC4[counterexamples]@1.8.0, CVC4[strings]@1.8.0, CVC4[strings+counterexamples]@1.8.0, CVC5@1.2.1, CVC5[counterexamples]@1.2.1, CVC5[strings]@1.2.1, CVC5[strings+counterexamples]@1.2.1, Z3@4.12.6, Z3[counterexamples]@4.12.6, Z3[noBV]@4.12.6\nCommands PATH: /home/hacker-code-j/.opam/easycrypt-5.2/lib/easycrypt/commands\nSystem PATH:\n  /home/hacker-code-j/.nvm/versions/node/v22.22.2/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path\n  /home/hacker-code-j/.bun/bin\n  /home/hacker-code-j/.bun/bin\n  /opt/st/stm32cubeide_2.0.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.2.300.202508131133/tools/bin\n  /home/hacker-code-j/.gem/bin\n  /home/hacker-code-j/.gem/ruby/3.0.0/bin\n  /home/hacker-code-j/.opam/easycrypt-5.2/bin\n  /home/hacker-code-j/z3-4.12.4-x64-glibc-2.35/bin\n  /usr/lib/jvm/java-11-openjdk-amd64/bin\n  /home/hacker-code-j/.codex/tmp/arg0/codex-arg0OQNeDV\n  /home/hacker-code-j/.nvm/versions/node/v22.22.2/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path\n  /home/hacker-code-j/.bun/bin\n  /home/hacker-code-j/.bun/bin\n  /home/hacker-code-j/.nvm/versions/node/v22.22.2/bin\n  /opt/st/stm32cubeide_2.0.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.2.300.202508131133/tools/bin\n  /home/hacker-code-j/.gem/bin\n  /home/hacker-code-j/.gem/ruby/3.0.0/bin\n  /home/hacker-code-j/.opam/easycrypt-5.2/bin\n  /home/hacker-code-j/z3-4.12.4-x64-glibc-2.35/bin\n  /usr/lib/jvm/java-11-openjdk-amd64/bin\n  /home/hacker-code-j/.cabal/bin\n  /home/hacker-code-j/.ghcup/bin\n  /home/hacker-code-j/.cargo/bin\n  /home/hacker-code-j/.local/bin\n  /home/hacker-code-j/bin\n  /usr/local/sbin\n  /usr/local/bin\n  /usr/sbin\n  /usr/bin\n  /sbin\n  /bin\n  /usr/games\n  /usr/local/games\n  /snap/bin\n  /home/hacker-code-j/clang+llvm-16.0.4-x86_64-linux-gnu-ubuntu-22.04/bin\n  /home/hacker-code-j/jasmin/compiler/_build/install/default/bin\n  /home/hacker-code-j/easycrypt/_build/install/default/bin\n  /home/hacker-code-j/clang+llvm-16.0.4-x86_64-linux-gnu-ubuntu-22.04/bin\n  /home/hacker-code-j/jasmin/compiler/_build/install/default/bin\n  /home/hacker-code-j/easycrypt/_build/install/default/bin",
+    "command": "easycrypt"
+  },
+  "why3": {
+    "sha256": "4511d74d5e937b447c58b94412277fa123a88a097e46e586cf2b3bac728d25fc",
+    "version_output": "Why3 platform, version 1.8.0",
+    "command": "why3"
+  },
+  "model": {
+    "architecture": "x86-64",
+    "calling_convention": "linux",
+    "array_model": "barray",
+    "extraction_stage": "typing",
+    "semantics": "normal"
+  },
+  "verification": {
+    "cache": "-no-eco",
+    "proof_mode": "Proofs:check",
+    "local_dependencies_checked_as_main_targets": true
+  }
+}

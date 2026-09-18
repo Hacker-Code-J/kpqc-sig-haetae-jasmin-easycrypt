@@ -1,0 +1,52 @@
+// SPDX-License-Identifier: MIT
+// Test-only ABI bridges to the production sampler implementation.
+require "../jasmin/fixpoint.jinc"
+require "../jasmin/sampler.jinc"
+
+export fn test_sample_gauss83_jazz(reg u64 lo, reg u32 hi) -> reg u64
+{
+  reg u64 r;
+  r = _sample_gauss83(lo, hi);
+  return r;
+}
+
+export fn test_smulh48_jazz(reg u64 a b) -> reg u64
+{
+  reg u64 r;
+  r = __smulh48(a, b);
+  return r;
+}
+
+export fn test_approx_exp_jazz(reg u64 x) -> reg u64
+{
+  reg u64 r;
+  r = _approx_exp(x);
+  return r;
+}
+
+export fn test_sample_gauss_sigma76_jazz(reg mut ptr u64[1] rp,
+                                        reg mut ptr u64[2] sqrp,
+                                        reg mut ptr u32[1] acceptedp,
+                                        reg const ptr u8[26] randp)
+                                        -> reg ptr u64[1],
+                                           reg ptr u64[2],
+                                           reg ptr u32[1]
+{
+  rp, sqrp, acceptedp = _sample_gauss_sigma76(rp, sqrp, acceptedp, randp);
+  return rp, sqrp, acceptedp;
+}
+
+export fn test_sample_gauss_jazz(reg mut ptr u64[512] rp,
+                                reg mut ptr u64[2] sqsump,
+                                reg mut ptr u64[1] coefcntp,
+                                reg const ptr u8[8192] bufp,
+                                reg u64 counts,
+                                reg u64 dont_write_last)
+                                -> reg ptr u64[512],
+                                   reg ptr u64[2],
+                                   reg ptr u64[1]
+{
+  rp, sqsump, coefcntp = _sample_gauss(rp, sqsump, coefcntp, bufp, counts,
+                                     dont_write_last);
+  return rp, sqsump, coefcntp;
+}

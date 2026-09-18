@@ -1,0 +1,220 @@
+require "params.jinc"
+require "keccak.jinc"
+
+fn _polyfix_add(reg mut ptr u32[4096] cp,
+                reg const ptr u32[4096] ap,
+                reg const ptr u32[2048] bp,
+                reg u64 count) -> reg ptr u32[4096]
+{
+  reg u64 i;
+  reg u32 a b;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    b = bp[i];
+    b *= HAETAE_LN;
+    a += b;
+    cp[i] = a;
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _polyfixfix_sub(reg mut ptr u32[4096] cp,
+                   reg const ptr u32[4096] ap,
+                   reg const ptr u32[4096] bp,
+                   reg u64 count) -> reg ptr u32[4096]
+{
+  reg u64 i;
+  reg u32 a b;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    b = bp[i];
+    a -= b;
+    cp[i] = a;
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _polyfix_double(reg mut ptr u32[4096] cp,
+                   reg const ptr u32[4096] ap,
+                   reg u64 count) -> reg ptr u32[4096]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    a <<= 1;
+    cp[i] = a;
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _polyfix_round(reg mut ptr u32[2048] cp,
+                  reg const ptr u32[4096] ap,
+                  reg u64 count) -> reg ptr u32[2048]
+{
+  reg u64 i;
+  reg u32 a;
+
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    a += HAETAE_LNHALF;
+    a >>s= HAETAE_LNBITS;
+    cp[i] = a;
+    i += 1;
+  }
+
+  return cp;
+}
+
+fn _polyfixveclk_hyperball_b(reg mut ptr u8[1] bp,
+                             reg const ptr u8[64] seed,
+                             reg u64 nonce) -> reg ptr u8[1]
+{
+  stack u64[25] s;
+  reg ptr u64[25] sp;
+  reg u64 i lane t;
+  reg u8 shift;
+  reg u8 b;
+
+  sp = s;
+  sp = _keccak_init_state(sp);
+
+  i = 0;
+  while (i < 64)
+  {
+    b = seed[i];
+    t = (64u)b;
+    lane = i;
+    lane >>= 3;
+    shift = (8u)i;
+    shift &= 7;
+    shift <<= 3;
+    t <<= (shift & 63);
+    sp[lane] ^= t;
+    i += 1;
+  }
+
+  b = (8u)nonce;
+  t = (64u)b;
+  sp[8] ^= t;
+  nonce >>= 8;
+  b = (8u)nonce;
+  t = (64u)b;
+  t <<= 8;
+  sp[8] ^= t;
+
+  t = 0x1f;
+  t <<= 16;
+  sp[8] ^= t;
+  t = 1;
+  t <<= 63;
+  sp[16] ^= t;
+
+  sp = _keccakf1600(sp);
+  t = sp[0];
+  b = (8u)t;
+  bp[0] = b;
+
+  return bp;
+}
+
+fn _polyfix_sqnorm2(reg const ptr u32[4096] ap,
+                    reg u64 count) -> reg u64
+{
+  reg u64 i total coeff prod;
+  reg u32 a;
+
+  total = 0;
+  i = 0;
+  while (i < count)
+  {
+    a = ap[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  return total;
+}
+
+fn _polyfixveclk_sqnorm2(reg const ptr u32[4096] ap,
+                         reg u64 acount,
+                         reg const ptr u32[4096] bp,
+                         reg u64 bcount) -> reg u64
+{
+  reg u64 i total coeff prod;
+  reg u32 a;
+
+  total = 0;
+  i = 0;
+  while (i < acount)
+  {
+    a = ap[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < bcount)
+  {
+    a = bp[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  return total;
+}
+
+fn _polyfixveclk_sqnorm2_2048(reg const ptr u32[2048] ap,
+                              reg u64 acount,
+                              reg const ptr u32[2048] bp,
+                              reg u64 bcount) -> reg u64
+{
+  reg u64 i total coeff prod;
+  reg u32 a;
+
+  total = 0;
+  i = 0;
+  while (i < acount)
+  {
+    a = ap[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < bcount)
+  {
+    a = bp[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    total += prod;
+    i += 1;
+  }
+
+  return total;
+}
