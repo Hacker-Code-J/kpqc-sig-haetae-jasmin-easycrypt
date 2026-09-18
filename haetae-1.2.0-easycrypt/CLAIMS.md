@@ -21,8 +21,15 @@
 | [GaussianOffsetBridge](proofs/GaussianOffsetBridge.ec) | `sample_gauss_at_trace_total_correct` | 실제 signer `__sample_gauss_at`과 입력·출력 window 명세의 정확한 튜플 동치·종료; `bo+b≤8192`, `oo+n≤4096`; 요청 영역 밖 보존 |
 | [GaussianSequenceCorrectness](proofs/GaussianSequenceCorrectness.ec) | `sample_gauss_jazz_sequence_total`, `sample_gauss_jazz_accumulator_exact_total`, `sample_gauss_at_sequence_total` | 공개 유한 소비기와 실제 signer offset 소비기의 승인 개수·저장된 승인 순서, 공개 소비기의 정확한 정수 제곱합 |
 | [GaussianValueCorrectness](proofs/GaussianValueCorrectness.ec) | `sample_gauss_at_value_total` | 실제 signer offset 소비기의 반환 square 버퍼에 정수 합 정리를 전달; 초기 두 limb `<2^48`, 요청 `n≤512`, 유효 window 조건 |
+| [GaussianStreamAccumulator](proofs/GaussianStreamAccumulator.ec) | `gauss_trace_result_stream_accumulator`, `sample_gauss_at_stream_accumulator_correct`, `gauss_stream_finite_partitions` | 누적 승인 개수 `≤512`에 따른 정수 예산으로 호출 간 누적합과 오버플로 여유 보존; 매 호출 후 상위 limb가 48비트라는 가정을 요구하지 않음 |
+| [GaussianStreamSequence](proofs/GaussianStreamSequence.ec) | `gauss_stream_events_append_available`, `gauss_visible_output_concat`, `sample_gauss_at_dummy_last_total` | 연속 byte 함수의 후보열 분할·결합, 승인 순서와 동일 dummy flag 유지, 실제 offset 소비기의 dummy 슬롯 보존 |
+| [GaussianStreamBuffer](proofs/GaussianStreamBuffer.ec) | `gs_stream_advance`, `gs_refill_segment`, `gs_copy_signs_total` | 초기 49블록과 refill의 후보 수·잔여 바이트 대응, 연속 스트림의 버퍼 구간 연결, 실제 32바이트 부호 복사·frame·종료 |
+| [GaussianStreamSpec](theories/GaussianStreamSpec.ec) | `gs_selected_complete_stable`, `gs_stream_result_unique` | 충분한 후보 prefix 이후 처음 `n`개 승인 결과가 불변이며, 같은 초기값과 스트림을 만족하는 전체 반환 튜플은 유일함 |
+| [GaussianStreamComposition](proofs/GaussianStreamComposition.ec) | `gs_progress_consume`, `gs_progress_consume_correct` | 실제 offset 소비 호출을 연속 스트림의 다음 후보 구간에 연결; 승인 개수·저장 순서·dummy·출력 frame·정확한 제곱합 불변식 보존 |
+| [GaussianStreamCorrectness](proofs/GaussianStreamCorrectness.ec) | `sample_gauss_N_full_at_correct` | 실제 `_sf_sample_gauss_N_full_at`가 종료하면 seed·nonce의 word SHAKE 스트림에서 처음 승인된 `n`개 후보와 동일한 결과를 반환; 초기 49블록·부호 복사·반복 refill 전체 포함; `n=256/257`, 유효 offset, 초기 두 limb `<2^48`인 Hoare 부분 정확성 |
 | [GaussianRefillCorrectness](proofs/GaussianRefillCorrectness.ec) | `gauss_carry_total`, `gauss_carry_squeeze_layout` | 실제 carry가 첫 블록의 부호 prefix 여부를 반영해 잔여 바이트를 보존하며 종료; carry·블록 직렬화 계약을 결합한 유한 버퍼 배치 |
 | [SHAKEBlockCorrectness](proofs/SHAKEBlockCorrectness.ec) | `keccakf1600_word_total`, `squeeze256_word_total` | 실제 signer의 24라운드 word 순열 대응과 136바이트 출력·외부 영역 보존·종료; 출력 offset `0…8056` |
+| [SHAKESeedInitCorrectness](proofs/SHAKESeedInitCorrectness.ec) | `seed_init_total`, `shake_block_stream_total` | 실제 초기화가 seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태와 일치하며 종료; 각 squeeze가 word 스트림의 정확한 다음 136바이트와 대응 |
 | [SigningSamplerBridge](proofs/SigningSamplerBridge.ec) | `signer_cdt83_total_correct`, `signer_smulh48_total_correct`, `signer_approx_exp_reference_total_correct`, `signer_sigma76_total_correct` | 위 CDT·올림·Horner·단일 시도 결과를 실제 mode 2/3/5 서명 추출물의 내부 함수에 전달 |
 | [NTTCorrectness](proofs/NTTCorrectness.ec) | `target_poly_ntt_jazz_total`, `target_poly_invntt_jazz_total`, `target_poly_invntt_jazz_total18` | 입력 계수 범위와 기록된 산술 가정 아래 `NTTFullSpec.full_ntt/full_invntt` 대응과 종료; 역변환의 Montgomery 인자 포함 |
 | [ApiBoundaryCorrectness](proofs/ApiBoundaryCorrectness.ec) | `api_copy_addr_to_addr_backward_correct`, `api_zero_raw_len64_correct` | canonical/no-wrap 주소, 안전한 alias 조건 아래 원래 byte 복사·영 초기화와 frame; 일반 `_api_prepare_pre_raw` 결과는 현재 사용되지 않는 소스 helper에 한정 |
@@ -49,10 +56,21 @@
   두 limb가 각각 48비트이면 그 전제를 구체적 범위 정리로 해소한다.
 - 초기 49블록은 `49×136−32=6632=255×26+2`바이트의 후보 입력을 제공한다.
   실제 길이 256·257 요청은 refill이 필요하다. 각 refill에서 남는 0…25바이트와
-  새 136바이트의 배치는 검증했지만, 전체 반복문과 누적 정규화의 합성은 별도 의무다.
+  새 136바이트의 배치를 실제 `_sf_sample_gauss_N_full_at`의 전체 반복문에
+  연결했다. 반환 시 보이는 표본은 256개, 부호는 32바이트이며, 257번째 dummy는
+  제곱합에 포함되고 출력 슬롯은 보존된다.
+- 호출 간 누적합 정리는 `gauss_stream_acc_ok`의 총 정수 예산을 사용한다.
+  상위 limb의 48비트 범위가 매번 유지된다고 가정하지 않는다. 한 Gaussian 호출
+  안의 반복 refill에는 이 불변식을 연결했다. Hyperball에서 여러 polynomial
+  호출에 걸쳐 각 호출의 초기 두 limb 조건을 충족하는 정리는 아직 별도 의무다.
+- 전체 Gaussian 함수 정리는 **종료한 실행의 반환값**에 관한 것이다. 고정된
+  seed가 항상 충분한 승인 후보를 공급한다는 전제나 무조건 종료 정리를 추가하지
+  않았다. 결과 명세의 유한 prefix 증인은 `gs_stream_result_unique`에 의해
+  서로 다른 반환값을 허용하지 않는다.
 - 단일 SHAKE 블록은 [word 명세](theories/SHAKEBlockSpec.ec)의 24라운드 순열과
-  연결했다. 초기 흡수·패딩이나 FIPS 202의 bit 명세·전체 sponge stream과의 동치는
-  아직 포함하지 않는다. 재사용한 정의·증명의 출처는
+  연결했다. [스트림 명세](theories/SHAKEStreamSpec.ec)는 64바이트 seed와 nonce
+  하위 2바이트의 흡수·패딩 및 반복 squeeze를 포함한다. 임의 길이 입력의 sponge나
+  FIPS 202의 bit 명세와의 별도 동치는 포함하지 않는다. 재사용한 정의·증명의 출처는
   [SHAKE 출처 목록](manifests/shake-support-origin.tsv)에 기록했다.
 - rounded 표본에는 새 정수 연결과 무래핑 정리가 있다. 이를 전체 제곱·Horner
   계산의 모든 중간값이나 실수 Gaussian 계산의 무오버플로 정리로 확대하지 않는다.
@@ -67,9 +85,9 @@
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| 전체 SHAKE Gaussian stream | 유한 소비기·offset·carry·단일 블록 정리를 `_sample_gauss_N_full_at`, `_sf_sample_gauss_N_full_at`의 49블록 초기화·sign byte·반복 refill에 합성; 원래 dummy flag 유지와 호출 간 제곱합 범위 연결 |
-| SHAKE sponge | seed/nonce 흡수·패딩과 word 순열의 bit/FIPS 명세 연결, 전체 stream 대응 |
-| Hyperball | `_sf_hyperball_full`의 scaling, inverse square root, norm·retry, 분포와 종료 의무 |
+| 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
+| SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
+| Hyperball | 여러 Gaussian 호출의 초기 제곱합 범위 충족, `_sf_hyperball_full`의 scaling·inverse square root·norm·retry, 분포와 종료 의무 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |

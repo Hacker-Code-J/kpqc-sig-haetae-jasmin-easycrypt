@@ -48,16 +48,18 @@ mode 2·3·5 공식 KAT, 실제 C 소스와의 차등·상호운용 테스트를
 
 새 [EasyCrypt 프로젝트](../haetae-1.2.0-easycrypt/README.md)에서는 CDT·올림 곱셈·
 Horner 계산·단일 Gaussian 시도·유한 소비기의 승인 순서와 제곱합·실제 서명
-offset 소비기·carry·SHAKE 단일 블록·NTT·API 보조함수의 정리를 검증했다.
+offset 소비기·SHAKE 초기화와 스트림·실제 서명용 전체 Gaussian 함수·NTT·
+API 보조함수의 정리를 검증했다. 전체 Gaussian 정리는 종료한 실행에 적용한다.
 검증 범위와 남은 전제는 [CLAIMS.md](../haetae-1.2.0-easycrypt/CLAIMS.md)에 있다.
 전체 구현 정확성은 다음 순서로 이어간다.
 
 1. 아래 기준선 검증을 유지하면서 명세 260904와 함수별 대응표를 작성한다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
-3. 단일 SHAKE 블록과 carry를 검증했다. 다음에는 49블록 초기화, 부호 바이트와
-   전체 stream의 rejection/refill, hyperball scaling·retry를 합성한다.
-   이전 증명의 전제와 상수는 각각 재확인한다.
+3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와
+   반복 refill을 연속 word 스트림 명세에 연결했다. 다음에는 여러 Gaussian
+   호출의 초기 제곱합 범위를 충족시키고 hyperball scaling·retry를 합성한다.
+   종료성·분포 의무는 따로 유지한다.
 4. NTT·코덱 등 재사용 후보를 태그에서 필요한 만큼 가져와 현재 소스와 비교한다.
    이후 KeyGen/Sign/Verify 합성, 종료성·분포·보안 의무를 구분하여 진행한다.
 

@@ -1,18 +1,18 @@
 {
-  "checked_at": "2026-09-17T17:41:12.114910+00:00",
-  "scope": "component correctness",
+  "checked_at": "2026-09-18T02:59:58.125389+00:00",
+  "scope": "component correctness including whole signing Gaussian stream partial correctness",
   "complete_api_correctness": false,
   "generated_files": 102,
-  "new_local_theories": 27,
+  "new_local_theories": 35,
   "ntt_local_theories": 12,
-  "all_local_theories": 39,
+  "all_local_theories": 47,
   "generated_replay": {
     "result": "PASS",
     "checked_at": "20260917T150034.912595Z"
   },
   "new_replay": {
     "result": "PASS",
-    "checked_at": "20260917T173300.318545Z",
+    "checked_at": "20260918T024710.671651Z",
     "cache": "-no-eco",
     "proof_mode": "Proofs:check",
     "eof_completion_guard": true,
@@ -21,190 +21,246 @@
         "target": "proofs/ApiBoundaryCorrectness.ec",
         "exit_code": 0,
         "sha256": "929f693d09fdfd2662252ff97793faee6dca3444509ea3724d1c4831c6513c09",
-        "seconds": 43.234,
-        "log": "logs/20260917T173300.318545Z-new/proofs__ApiBoundaryCorrectness.ec.log"
+        "seconds": 43.45,
+        "log": "logs/20260918T024710.671651Z-new/proofs__ApiBoundaryCorrectness.ec.log"
       },
       {
         "target": "proofs/CDTTermination.ec",
         "exit_code": 0,
         "sha256": "4aae7678459b13d2e12eb7dd0c878cfe595e8910c1c31b7e47ea6109cc084bfa",
-        "seconds": 2.613,
-        "log": "logs/20260917T173300.318545Z-new/proofs__CDTTermination.ec.log"
+        "seconds": 2.662,
+        "log": "logs/20260918T024710.671651Z-new/proofs__CDTTermination.ec.log"
       },
       {
         "target": "theories/ReferenceConstants.ec",
         "exit_code": 0,
         "sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
-        "seconds": 1.735,
-        "log": "logs/20260917T173300.318545Z-new/theories__ReferenceConstants.ec.log"
+        "seconds": 1.771,
+        "log": "logs/20260918T024710.671651Z-new/theories__ReferenceConstants.ec.log"
       },
       {
         "target": "theories/FixedPointSpec.ec",
         "exit_code": 0,
         "sha256": "c5db5999e0ab6e36eb131663ecd75ff36c0dc46ec2defc313eda073585705e89",
-        "seconds": 1.649,
-        "log": "logs/20260917T173300.318545Z-new/theories__FixedPointSpec.ec.log"
+        "seconds": 1.664,
+        "log": "logs/20260918T024710.671651Z-new/theories__FixedPointSpec.ec.log"
       },
       {
         "target": "proofs/SamplerConstants.ec",
         "exit_code": 0,
         "sha256": "22081fa38ffe076889b008a6ea7ef8b6f68f9d67e395484bb656e1c87fbd5988",
-        "seconds": 2.271,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SamplerConstants.ec.log"
+        "seconds": 2.299,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SamplerConstants.ec.log"
       },
       {
         "target": "proofs/CDTCorrectness.ec",
         "exit_code": 0,
         "sha256": "4ce3e9d49b1d22d9fbadd3cc0f249c74a8dc9eb651aa67847d94a6f4b472610b",
-        "seconds": 16.934,
-        "log": "logs/20260917T173300.318545Z-new/proofs__CDTCorrectness.ec.log"
+        "seconds": 17.489,
+        "log": "logs/20260918T024710.671651Z-new/proofs__CDTCorrectness.ec.log"
       },
       {
         "target": "proofs/FixedPointCorrectness.ec",
         "exit_code": 0,
         "sha256": "7df52dc190959e9ec3e8d547c9a99703707ed7ce7e01a1f8a41af8e4cd8ab27e",
-        "seconds": 12.121,
-        "log": "logs/20260917T173300.318545Z-new/proofs__FixedPointCorrectness.ec.log"
+        "seconds": 12.466,
+        "log": "logs/20260918T024710.671651Z-new/proofs__FixedPointCorrectness.ec.log"
       },
       {
         "target": "theories/SigmaSpec.ec",
         "exit_code": 0,
         "sha256": "775afc9e4bf71187a595c1d6b62cc7142f5ce53a57daf70eff7e33b1d0a1d9de",
-        "seconds": 1.875,
-        "log": "logs/20260917T173300.318545Z-new/theories__SigmaSpec.ec.log"
+        "seconds": 1.924,
+        "log": "logs/20260918T024710.671651Z-new/theories__SigmaSpec.ec.log"
       },
       {
         "target": "proofs/SigmaCorrectness.ec",
         "exit_code": 0,
         "sha256": "1c9fe75b27d463a042688b495766271f0ad456adf658a133cb5db4327d24da45",
-        "seconds": 3.371,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaCorrectness.ec.log"
+        "seconds": 3.465,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SigmaCorrectness.ec.log"
       },
       {
         "target": "theories/GaussianTraceSpec.ec",
         "exit_code": 0,
         "sha256": "1a96a5fa89ea217703b5e5f740c854c9e6ac959fd62fb43181d42eb2b46429ab",
-        "seconds": 2.199,
-        "log": "logs/20260917T173300.318545Z-new/theories__GaussianTraceSpec.ec.log"
+        "seconds": 2.27,
+        "log": "logs/20260918T024710.671651Z-new/theories__GaussianTraceSpec.ec.log"
       },
       {
         "target": "theories/GaussianConsumerSpec.ec",
         "exit_code": 0,
         "sha256": "e1b661a5a755159493dbebc4dd4cf9d774e688f421cf7a48be1c7676c7d0d13d",
-        "seconds": 1.737,
-        "log": "logs/20260917T173300.318545Z-new/theories__GaussianConsumerSpec.ec.log"
+        "seconds": 1.748,
+        "log": "logs/20260918T024710.671651Z-new/theories__GaussianConsumerSpec.ec.log"
       },
       {
         "target": "proofs/GaussianConsumerCorrectness.ec",
         "exit_code": 0,
         "sha256": "15a1657dc23576766091313fdd7b4539713c3a4288234b84145ac088d732d599",
-        "seconds": 27.338,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianConsumerCorrectness.ec.log"
+        "seconds": 27.511,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianConsumerCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianTraceProperties.ec",
         "exit_code": 0,
         "sha256": "cef67089d661d67c8aef0c33f01200543c5a87afc315f8ae6c60ebb6abd1919a",
-        "seconds": 17.138,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianTraceProperties.ec.log"
+        "seconds": 17.227,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianTraceProperties.ec.log"
       },
       {
         "target": "proofs/SigmaRoundingCorrectness.ec",
         "exit_code": 0,
         "sha256": "7fe1f857554663cedbb81693a3822abff241064fa62e098614ecd11b8914e9aa",
-        "seconds": 7.97,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaRoundingCorrectness.ec.log"
+        "seconds": 8.036,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SigmaRoundingCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaSquareBounds.ec",
         "exit_code": 0,
         "sha256": "f959eddfbf767e40a19dedcd2e9c939586394aae8d694c051aed182fc20e21cb",
-        "seconds": 3.871,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SigmaSquareBounds.ec.log"
+        "seconds": 3.885,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SigmaSquareBounds.ec.log"
       },
       {
         "target": "proofs/GaussianAccumulatorCorrectness.ec",
         "exit_code": 0,
         "sha256": "f0c8b795b52d4fa9e982eb5610c8bc1c06a5a48124c62bb4e217b1fb92b919c6",
-        "seconds": 5.881,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
+        "seconds": 5.833,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianBufferLemmas.ec",
         "exit_code": 0,
         "sha256": "9546466d3574dd505a548ef5a115da3e397719b7013719ea5c527d428a302678",
-        "seconds": 2.71,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianBufferLemmas.ec.log"
+        "seconds": 2.748,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianBufferLemmas.ec.log"
       },
       {
         "target": "theories/GaussianWindowSpec.ec",
         "exit_code": 0,
         "sha256": "c3236e5ca309ee172a0dc39bb87c3b4df8a57f0d6c0ab542c5f15d5823cb4156",
-        "seconds": 3.346,
-        "log": "logs/20260917T173300.318545Z-new/theories__GaussianWindowSpec.ec.log"
+        "seconds": 3.336,
+        "log": "logs/20260918T024710.671651Z-new/theories__GaussianWindowSpec.ec.log"
       },
       {
         "target": "proofs/SigningSamplerBridge.ec",
         "exit_code": 0,
         "sha256": "9565d6bf9c16090202869cdfaf23272a06a37ca4fbc9d12be24e5bde034564af",
-        "seconds": 5.044,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SigningSamplerBridge.ec.log"
+        "seconds": 5.158,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SigningSamplerBridge.ec.log"
       },
       {
         "target": "proofs/GaussianTraceCorrectness.ec",
         "exit_code": 0,
         "sha256": "b616a02f66bf0270ec26fe8a246733821a7ffb077306d01d46ecc0be88a47a0a",
-        "seconds": 28.378,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianTraceCorrectness.ec.log"
+        "seconds": 28.472,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianTraceCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianOffsetBridge.ec",
         "exit_code": 0,
         "sha256": "aa954866bc0914aae9473056e9140c0fffed4f791222affb15f3f6558c61e78e",
-        "seconds": 8.716,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianOffsetBridge.ec.log"
+        "seconds": 8.895,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianOffsetBridge.ec.log"
       },
       {
         "target": "theories/SHAKEBlockSpec.ec",
         "exit_code": 0,
         "sha256": "baa6e1d3330e40ecf46fdfff7856c59d84f0638ab92b41f25d674b8732b0eb2f",
-        "seconds": 4.084,
-        "log": "logs/20260917T173300.318545Z-new/theories__SHAKEBlockSpec.ec.log"
+        "seconds": 4.11,
+        "log": "logs/20260918T024710.671651Z-new/theories__SHAKEBlockSpec.ec.log"
       },
       {
         "target": "proofs/GaussianRefillCorrectness.ec",
         "exit_code": 0,
         "sha256": "34708c3cd7bba616ce808b11d11887bac3252761b6ae5b0a269953f0b6520c5c",
-        "seconds": 22.085,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianRefillCorrectness.ec.log"
+        "seconds": 21.883,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianRefillCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianSequenceCorrectness.ec",
         "exit_code": 0,
         "sha256": "469f6bf2659a1466df1dd07c27c7d089b38cae2fbd5241a6bfc2e08735f6ab83",
-        "seconds": 17.129,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianSequenceCorrectness.ec.log"
+        "seconds": 17.073,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianSequenceCorrectness.ec.log"
       },
       {
-        "target": "proofs/GaussianValueCorrectness.ec",
+        "target": "proofs/GaussianStreamAccumulator.ec",
         "exit_code": 0,
-        "sha256": "1b67556af08fe8b46cbc5724a32d32b89db0a66471a5616f39efb3e3dbb33478",
-        "seconds": 4.677,
-        "log": "logs/20260917T173300.318545Z-new/proofs__GaussianValueCorrectness.ec.log"
+        "sha256": "9cee6dddc1312246e6f8cedee7b2b3e9854610742ae5bf307c36c49b851ece50",
+        "seconds": 8.331,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianStreamAccumulator.ec.log"
       },
       {
-        "target": "proofs/ProductionApiCorrectness.ec",
+        "target": "proofs/GaussianStreamBuffer.ec",
         "exit_code": 0,
-        "sha256": "4e5cb8bd8212129f224006648716e3cbd679b7045e41e3bfb3b67c63737b31b1",
-        "seconds": 6.051,
-        "log": "logs/20260917T173300.318545Z-new/proofs__ProductionApiCorrectness.ec.log"
+        "sha256": "1bbb799c26501a407fa5ef203866b685cf1ab9ba3e2dc84350de87816b1a21b5",
+        "seconds": 85.046,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianStreamBuffer.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamSequence.ec",
+        "exit_code": 0,
+        "sha256": "3a2b77b83a3e69691cd51ec76a84ae1096c527bec771cf8ade53c0f54a077637",
+        "seconds": 7.058,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianStreamSequence.ec.log"
+      },
+      {
+        "target": "theories/GaussianStreamSpec.ec",
+        "exit_code": 0,
+        "sha256": "f0c742b71979b21b57d7cb9068b4af2718739793f0209de8c45cddd222fe83ae",
+        "seconds": 27.901,
+        "log": "logs/20260918T024710.671651Z-new/theories__GaussianStreamSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamComposition.ec",
+        "exit_code": 0,
+        "sha256": "6383aaefc2ab9012d907c3462201ba0067916037e5245a5a0fc34a2e8fae20ab",
+        "seconds": 41.979,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianStreamComposition.ec.log"
       },
       {
         "target": "proofs/SHAKEBlockCorrectness.ec",
         "exit_code": 0,
         "sha256": "d8a0dbd8d2546670ad57cdcb8a392f81f16ec1c2025d8cb234f663482cb96cbd",
-        "seconds": 182.175,
-        "log": "logs/20260917T173300.318545Z-new/proofs__SHAKEBlockCorrectness.ec.log"
+        "seconds": 182.667,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SHAKEBlockCorrectness.ec.log"
+      },
+      {
+        "target": "theories/SHAKEStreamSpec.ec",
+        "exit_code": 0,
+        "sha256": "2b52cb33ec60a423339cfa930a7b01d60a5a079f10bab6f1edf3bdb884476f56",
+        "seconds": 41.914,
+        "log": "logs/20260918T024710.671651Z-new/theories__SHAKEStreamSpec.ec.log"
+      },
+      {
+        "target": "proofs/SHAKESeedInitCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "9bd601a182a9e0dd404c3cd1c8c09db5564165dd7f2cd57f19ad1d4a2786af8b",
+        "seconds": 6.028,
+        "log": "logs/20260918T024710.671651Z-new/proofs__SHAKESeedInitCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "58c68cce22d3c8425a6223f38252d4f556dda850137858e51765581dc15bc5a7",
+        "seconds": 54.922,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianStreamCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianValueCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "1b67556af08fe8b46cbc5724a32d32b89db0a66471a5616f39efb3e3dbb33478",
+        "seconds": 4.771,
+        "log": "logs/20260918T024710.671651Z-new/proofs__GaussianValueCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/ProductionApiCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "4e5cb8bd8212129f224006648716e3cbd679b7045e41e3bfb3b67c63737b31b1",
+        "seconds": 6.189,
+        "log": "logs/20260918T024710.671651Z-new/proofs__ProductionApiCorrectness.ec.log"
       }
     ]
   },
@@ -303,7 +359,28 @@
     "sha256": "e40b18776730d38a2c43c978638a04bd5865b40ab48ca4e0a993255bf870630e"
   },
   "independent_review": {
-    "result": "PASS for stated component contracts",
-    "remaining_scope": "whole Gaussian stream, SHAKE sponge, hyperball and full API composition remain open"
+    "result": "APPROVE for the stated single-call Hoare scope",
+    "remaining_scope": "caller accumulator entry bounds, hyperball, public APIs, rejection termination/distribution, and separate FIPS bit equivalence"
+  },
+  "fresh_extraction_match": {
+    "files": 102,
+    "result": "PASS",
+    "checked_at": "20260918T024710.671651Z"
+  },
+  "whole_signing_gaussian": {
+    "theorem": "GaussianStreamCorrectness.sample_gauss_N_full_at_correct",
+    "procedure": "ApiTarget.M(Syscall)._sf_sample_gauss_N_full_at",
+    "logic": "Hoare partial correctness",
+    "requested_counts": [
+      256,
+      257
+    ],
+    "preconditions": [
+      "valid sample and sign windows",
+      "both initial accumulator limbs below 2^48"
+    ],
+    "result": "Exact continuous word-SHAKE stream samples, signs, integer square-limb sum, and frames on terminating executions",
+    "unconditional_termination": false,
+    "hyperball_caller_composition": false
   }
 }

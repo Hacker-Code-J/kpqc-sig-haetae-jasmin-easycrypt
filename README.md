@@ -2,8 +2,9 @@
 
 HAETAE-1.2.0의 C 참조 구현과 이에 대응하는 Jasmin 구현을 관리하는 저장소다.
 Jasmin의 mode 2·3·5 KAT, 샘플러 차등 테스트와 C 상호운용 테스트를 포함한다.
-별도 EasyCrypt 프로젝트에서 새 샘플러의 승인 순서·제곱합, 서명 offset 소비기,
-refill 경계·SHAKE 단일 블록, NTT·API 보조함수의 정확성을 검증한다.
+별도 EasyCrypt 프로젝트에서 새 샘플러의 승인 순서·제곱합과 실제 서명용
+Gaussian 함수의 전체 SHAKE/refill 흐름, NTT·API 보조함수를 검증한다.
+전체 Gaussian 함수 정리는 종료한 실행의 반환값에 대한 것이다.
 전체 KeyGen/Sign/Verify 합성의 형식 검증은 아직 완료하지 않았다.
 
 | 경로 | 용도 |

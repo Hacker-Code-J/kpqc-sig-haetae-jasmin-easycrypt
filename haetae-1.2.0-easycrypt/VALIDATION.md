@@ -6,20 +6,28 @@
 | 구분 | 새로 검사한 대상 | 결과 |
 | --- | --- | --- |
 | 추출물 | 배열 이론과 현재 프로그램 102개 | 모두 PASS |
-| 새 명세·증명 | `verify-new`의 27개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
+| NTT 외 명세·증명 | `verify-new`의 35개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
 | NTT | 필요한 지원 이론 11개와 현재 구현 정리 1개 | 각 파일을 주 대상으로 실행하여 모두 PASS |
 | 검증기 회귀 | 미완성 EOF 거부·정상 증명·임시 파일·종료 코드 10개 테스트 | 모두 PASS |
 
-전체 로컬 명세·증명 39개를 각각 주 검증 대상으로 검사했다. import만 된 증명의
+전체 로컬 명세·증명 47개를 각각 주 검증 대상으로 검사했다. import만 된 증명의
 본문이 자동으로 재검사된다고 가정하지 않았다. 새 코드 게이트는 `-no-eco`와
 명시적 `Proofs:check`를 사용하며, 원래 NTT 지원 재검증도 `-no-eco`의 기본
 강한 검사 모드로 개별 실행했다.
 
-이번 단계에서는 정확한 Gaussian trace·승인 순서·제곱합·서명 offset 연결·carry·
-SHAKE 단일 블록을 추가했다. 새 그룹 27개 파일의 최종 통합 검증 시간은 약
-436초였다. 기존 NTT 12개와 추출물 102개는 이전 새 검증 결과를 보존하고,
+이전 단계의 Gaussian trace·승인 순서·제곱합·서명 offset 연결·carry·SHAKE 단일
+블록에 이어, 이번에는 8개 명세·증명 파일을 추가해 실제 전체 Gaussian 함수를
+연속 word 스트림 명세에 연결했다. 35개 파일의 최종 통합 검증 시간은 약
+712초였다. 기존 NTT 12개와 추출물 102개는 이전 새 검증 결과를 보존하고,
 해시 불변 및 현재 소스의 재추출 일치를 다시 확인했다. 변경하지 않은 NTT
 전체를 이번 단계에서 중복 실행한 것으로 기록하지 않는다.
+
+`GaussianStreamCorrectness.sample_gauss_N_full_at_correct`는 실제
+`_sf_sample_gauss_N_full_at`의 seed·nonce 초기화, 49블록, 부호 복사, 반복
+carry/refill/소비를 모두 포함한다. 요청 256/257, 유효 offset, 초기 두 limb
+`<2^48`에서 **종료한 실행의 반환 튜플**이 명세와 일치한다. 명세 결과의 유일성도
+검사했다. 고정 seed의 무조건 종료나 여러 polynomial 호출의 초기 전제 보존을
+가정하지 않았다.
 
 실행 기록은 `logs/latest-generated.json`, `logs/latest-new.json`과 각각의
 실행별 하위 디렉터리에 있다. 같은 작업에서 실행한 NTT 개별 로그는
@@ -66,9 +74,10 @@ make -C haetae-1.2.0-easycrypt test-gate
 독립 검토에서 실제 production 문맥 helper의 연결과 rounded 결과의 정수 의미
 연결 부족을 발견하여 각각 `ProductionApiCorrectness`와
 `SigmaRoundingCorrectness`로 보완했다. 최종 검토는 현재 구성요소 범위를 승인했다.
-이번 단계의 별도 의미 검토에서도 dummy·거부 후보의 임시 쓰기·offset·정수
-오버플로 전제에 문제가 없음을 확인했다. 호출 간 제곱합 범위와 전체 refill 반복문,
-SHAKE 흡수·패딩·sponge, 전체 API 합성은 남은 의무로 유지한다.
+이번 단계의 독립 검토는 실제 전체 함수의 정리를 승인했다. 구체적인 seed·nonce
+스트림, 초기 49블록, 부호와 dummy, 각 refill의 상태·바이트 연속성·누적합,
+종료 조건과 반환 명세의 연결을 확인했다. Hyperball에서 여러 polynomial 호출의
+초기 제곱합 조건, FIPS bit 명세의 별도 동치, 전체 API 합성은 남은 의무다.
 
 ## 판정의 의미
 

@@ -5,8 +5,9 @@
 EasyCrypt가 실제로 검사한 명세·정리·의존 이론을 보관한다.
 
 현재 증명 범위는 **CDT, 고정소수점 곱셈·다항식, 단일 Gaussian 시도, 유한
-소비기의 정확한 출력·승인 순서·제곱합, 서명 offset 소비기, carry, SHAKE 단일
-블록, NTT, 실제 API 메모리 보조함수**다. 전체 KeyGen/Sign/Verify와
+소비기의 정확한 출력·승인 순서·제곱합, 서명용 전체 Gaussian 스트림 함수,
+고정 길이 SHAKE 초기화·반복 블록, NTT, 실제 API 메모리 보조함수**다.
+전체 Gaussian 함수는 종료한 실행의 결과에 대한 Hoare 정리다. 전체 KeyGen/Sign/Verify와
 Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
 
 ## 검증된 핵심 결과
@@ -23,6 +24,8 @@ Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
 | 서명 offset 소비기 | 실제 `__sample_gauss_at`에 출력·순서·정수 제곱합을 연결하고 요청 영역 밖을 보존 |
 | refill 경계 | 실제 carry의 잔여 바이트 보존·종료, carry와 새 136바이트 블록의 결합 배치 |
 | SHAKE 단일 블록 | 실제 서명 코드의 24라운드 word 순열, 반환 상태의 136바이트 직렬화, 출력 범위 밖 보존·종료 |
+| SHAKE seed 초기화 | seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태 일치·종료 |
+| 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
 | NTT·역 NTT | 명시적 계수 범위 아래 256점 수학적 변환과 결과 범위·종료성 |
 | 실제 API 보조함수 | 서명 문맥 prefix, 안전한 겹침의 역방향 복사, 검증 실패 시 영 초기화와 외부 메모리 보존 |
 
@@ -58,7 +61,7 @@ EasyCrypt는 import만 한 파일의 증명 본문을 기본적으로 재검사�
 필요한 그룹만 확인할 수도 있다. 각 그룹의 PASS는 선택한 그룹에 한정된다.
 
 ```sh
-make -C haetae-1.2.0-easycrypt verify-new        # 새 명세와 증명 27개
+make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 35개
 make -C haetae-1.2.0-easycrypt verify-ntt        # NTT 지원 이론 11개 + 현재 구현 정리
 make -C haetae-1.2.0-easycrypt verify-generated  # 추출물 102개 로딩/타입 검사
 make -C haetae-1.2.0-easycrypt test-gate         # 미완성 증명 거부 등 검증기 회귀 테스트
@@ -85,7 +88,8 @@ NTT 지원에는 기록된 산술 가정이 남아 있으므로 전체 프로젝
 
 메모리 정리는 총 byte map과 추출된 배열 객체에 대한 계약이다. 운영체제의 실제
 메모리 할당·접근 가능성, C descriptor 래퍼나 생성된 어셈블리 자체에 대한 별도의
-검증을 의미하지 않는다. SHAKE 단일 블록 정리는 word 순열과 바이트 직렬화의
-연결이며 FIPS sponge·흡수·패딩·전체 stream의 정리가 아니다. 실수 지수함수
+검증을 의미하지 않는다. SHAKE 정리는 고정 길이 seed·nonce의 흡수·패딩과
+word 순열 스트림을 다루며, FIPS bit 명세와의 별도 동치나 임의 길이 입력의
+sponge 정리는 포함하지 않는다. 실수 지수함수
 오차, Gaussian 분포 정확성, 전체 거부 루프의 종료·분포, 전체 서명 정확성·보안은
 남아 있다.
