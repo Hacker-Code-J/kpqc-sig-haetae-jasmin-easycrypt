@@ -10,6 +10,11 @@
 | [SamplerConstants](proofs/SamplerConstants.ec) | `cdt83_hi_matches_reference`, `cdt83_lo_matches_reference`, `approx_exp_matches_reference` | 고정된 C에서 독립 생성한 CDT·다항식 상수와 Jasmin 명세 연결 |
 | [CDTCorrectness](proofs/CDTCorrectness.ec) | `sample_gauss83_jazz_total`, `sample_gauss83_max83_total` | 입력 정수보다 작은 166개 임계값의 개수; 범위와 최대 입력 166; 확률 1 종료·결과 |
 | [CDTTermination](proofs/CDTTermination.ec) | `sample_gauss83_ll` | 실제 두 bounded loop의 종료성 |
+| [CDTDistribution](proofs/CDTDistribution.ec) | `cdt_distribution_mass`, `uniform_cdt_law` | 균등 정수 입력에서 strict 임계값 비교의 정확한 출력 확률: 각 구간 길이/M; 경계 +1, support, 종료 |
+| [CDTDistributionBridge](proofs/CDTDistributionBridge.ec) | `uniform83_jasmin_law`, `uniform83_jasmin_mass`, `uniform83_jasmin_endpoint` | 균등 83비트 입력을 실제 Jasmin CDT에 전달한 확률 실험; 정확한 분포·종료, support 0…166, Pr[166]=2^-83 |
+| [HalfGaussianProperties](proofs/HalfGaussianProperties.ec) | `hg16_pmf_sum`, `hg16_distr_ll`, `hg16_normalizer_truncation256` | 구현과 독립인 rho(k)=exp(-k²/512), k≥0의 무한 정규화·총확률 1·꼬리 상한 |
+| [ExpIntervalCorrectness](proofs/ExpIntervalCorrectness.ec) / [CDTGaussianEnclosure](proofs/CDTGaussianEnclosure.ec) | `ei_square_q_sound`, `ei_weights_sound`, `gi_normalizer_interval`, `gi_pmf_interval` | 실제 실수 지수함수의 유리수 구간과 외향 반올림 인증서의 건전성; 무한 정규화 분모와 각 목표 확률의 수치 구간; 구체적 수치 의무는 검사된 정수 인증서로 해소 |
+| [CDTGaussianApproximation](proofs/CDTGaussianApproximation.ec) | `cdt83_half_gaussian_statistical_distance`, `uniform83_jasmin_half_gaussian_error` | 실제 Jasmin CDT의 균등 83비트 입력 실험과 공식 목표인 비음수 Gaussian(σ=16)의 통계적 거리 <2^-78; 임의 출력 집합에 대한 확률 차이도 같은 상한 |
 | [FixedPointCorrectness](proofs/FixedPointCorrectness.ec) | `smulh48_jazz_total_correct`, `smulh48_jazz_signed_correct`, `approx_exp_jazz_reference_correct` | 모든 word 입력의 올림 결과 modulo 2^64; signed 결과는 명시적 fit 전제; C-derived 10차 word Horner 계산 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
@@ -50,6 +55,16 @@
 
 ## 중요한 전제와 한계
 
+- CDT 분포 정리는 `Uniform83Jasmin.sample`의 명시적 균등 정수 입력에 관한 것이다.
+  비교 대상은 공식 명세 260904 §5.1.1과 그 참고문헌 [21]의 정의에서 가져온
+  `exp(-k²/512)/sum_{j≥0}exp(-j²/512)`이다. 구현 테이블을 사용해 목표 분포를
+  정의하거나 C 주석의 floor-CDF 공식을 가정하지 않았다. 무한 합의 정규화와
+  수치 인증서도 증명했다. [명세 대응과 증명 경계](docs/cdt-distribution-correspondence.md)에
+  출처·해시·연결 과정을 기록한다.
+- 이 단일 CDT의 통계적 거리 상한은 SHAKE의 균등성·독립성이나 sigma76의
+  거부 샘플링 분포를 자동으로 보장하지 않는다. 공식 명세는 별도 CDT 오차
+  예산을 명시하지 않으며, 지수 다항식 거부에 대한 Rényi 경계는 다른 의무다.
+  `RealExp`·`RealSeries`·`Distr`·`SDist`의 표준 분석·확률 기반도 신뢰 범위에 포함된다.
 - NTT의 `poly_repr_bound rp p s`는 각 signed word가 `p`의 계수를 mod 64513으로
   나타내고 `[-2^s,2^s)`에 있다는 뜻이다. 순변환은 `s=16→24`, 역변환은
   `s=16/18→16`이다. 출력 24-bit 범위를 그대로 역변환 전제로 넣는 정리는 없다.
@@ -107,6 +122,7 @@
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
+| Gaussian 분포 합성 | 균등 입력 CDT의 목표 Gaussian 근사 경계를 sigma76의 noise·지수 근사·거부·반올림 및 반복 표본으로 전달; 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

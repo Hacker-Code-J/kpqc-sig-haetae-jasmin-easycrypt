@@ -11,11 +11,18 @@ NTT, 실제 API 메모리 보조함수**다. 전체 Gaussian·Hyperball 정리�
 word 결과에 대한 Hoare 정리다. 전체 KeyGen/Sign/Verify와
 Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
 
+83비트 CDT에는 별도의 수학적 분포 정리가 있다. **균등 83비트 입력에서 실제
+Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거리는
+2^-78보다 작다.** 목표 분포는 공식 명세와 참고문헌의 수식에서 정의했으며,
+그 무한 정규화·꼬리 상한·수치 인증서도 검증한다.
+[명세 대응과 범위](docs/cdt-distribution-correspondence.md)를 참조한다.
+
 ## 검증된 핵심 결과
 
 | 대상 | 결과 |
 | --- | --- |
 | 83비트 CDT | 실제 임계값 개수와 일치, 반환 범위 0…166, 최대 입력에서 166, 종료성 |
+| CDT의 수학적 분포 | 균등 83비트 입력 실험의 정확한 확률 질량; 공식 비음수 Gaussian(σ=16)과 통계적 거리 <2^-78, 모든 출력 집합의 확률 차이 상한 |
 | `smulh48` | 모든 입력에서 `ceil(signed(a) × unsigned(b) / 2^48)`의 64비트 표현과 일치 |
 | `approx_exp` | C에서 독립 추출한 10차 Horner 계산과 일치; 각 곱셈의 정수 올림 의미 연결 |
 | 단일 Gaussian 시도 | 모든 26바이트 입력의 표본·제곱 limbs·승인 비트가 명세와 일치하고 종료 |
@@ -50,7 +57,7 @@ make -C haetae-1.2.0-easycrypt verify
 이 명령은 다음 순서로 진행한다.
 
 1. 고정된 공식 배포본·Jasmin 입력·추출물·NTT 지원 이론의 해시 확인.
-2. 현재 Jasmin에서 재추출하여 생성 파일 전체를 비교하고, C 상수를 다시 생성해 비교.
+2. 현재 Jasmin에서 재추출하여 생성 파일 전체를 비교하고, C 상수와 수학적 구간 인증서를 다시 생성해 비교.
 3. 증명 생략 pragma, 새 가정 선언, 미완성 증명, 디버그 명령 검사.
 4. 생성물과 프로젝트의 **각 이론을 주 검증 대상으로** `-no-eco`, `Proofs:check` 실행.
 
@@ -65,10 +72,10 @@ EasyCrypt는 import만 한 파일의 증명 본문을 기본적으로 재검사�
 필요한 그룹만 확인할 수도 있다. 각 그룹의 PASS는 선택한 그룹에 한정된다.
 
 ```sh
-make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 51개
+make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 65개
 make -C haetae-1.2.0-easycrypt verify-ntt        # NTT 지원 이론 11개 + 현재 구현 정리
 make -C haetae-1.2.0-easycrypt verify-generated  # 추출물 102개 로딩/타입 검사
-make -C haetae-1.2.0-easycrypt test-gate         # 미완성 증명 거부 등 검증기 회귀 테스트
+make -C haetae-1.2.0-easycrypt test-gate         # 미완성 증명·수치 인증서·비교 표 변조 거부
 make -C haetae-1.2.0-easycrypt test-hyperball-boundary  # 구성한 후보열의 C/Jasmin 수치 경계 재현
 ```
 
@@ -81,7 +88,7 @@ Git에서 제외한다. 샌드박스가 Why3의 로컬 Unix 소켓 실행을 막
 
 - `generated/`: 원본 Jasmin에서 자동 추출한 프로그램과 배열 이론. 직접 수정하지 않는다.
 - `theories/`: 명세와 필요한 NTT 수학 이론. C의 CDT·계수는 독립 생성기로 가져온다.
-- `proofs/`: 실제 추출 프로시저에 대한 Hoare/pHoare 정리.
+- `proofs/`: 실제 추출 프로시저의 Hoare/pHoare 정리와 수학적 분포·오차 정리.
 - `scripts/`: 재추출, 상수 생성, 무결성 검사와 검증 게이트.
 - `manifests/`: 입력·추출물·검증 대상·이전 NTT 이론의 출처와 해시.
 
@@ -95,9 +102,9 @@ NTT 지원에는 기록된 산술 가정이 남아 있으므로 전체 프로젝
 메모리 할당·접근 가능성, C descriptor 래퍼나 생성된 어셈블리 자체에 대한 별도의
 검증을 의미하지 않는다. SHAKE 정리는 고정 길이 seed·nonce의 흡수·패딩과
 word 순열 스트림을 다루며, FIPS bit 명세와의 별도 동치나 임의 길이 입력의
-sponge 정리는 포함하지 않는다. 실수 지수함수
-오차, Gaussian 분포 정확성, 전체 거부 루프의 종료·분포, 전체 서명 정확성·보안은
-남아 있다.
+sponge 정리는 포함하지 않는다. CDT 분포 정리의 균등 입력은 확률 실험에 명시되어
+있으며 실제 SHAKE의 성질로 가정하지 않는다. sigma76 지수 근사·거부와의 분포
+합성, 전체 거부 루프의 종료·분포, 전체 서명 정확성·보안은 남아 있다.
 
 Hyperball의 승인 norm은 64비트 모듈러 합이다. 수학적 제곱합의 반경 보장은
 오버플로 조건을 추가로 충족해야 한다. 구성한 후보열에서 C와 Jasmin의 동일한

@@ -1,0 +1,50 @@
+{
+  "sources": [
+    {
+      "id": "haetae-spec-260904",
+      "title": "HAETAE specification 260904",
+      "release_page": "https://kpqc.cryptolab.co.kr/haetae",
+      "url": "https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view",
+      "download_url": "https://drive.usercontent.google.com/download?id=1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx&export=download",
+      "cache_file": "HAETAE_spec_260904.pdf",
+      "relevant_locations": [
+        {
+          "section": "5.1.1 Discrete Gaussian Sampling",
+          "printed_page": 32,
+          "pdf_page": 33
+        }
+      ],
+      "scope": "sigma16 base CDT;166 entries;83 input bits;reference[21] Algorithm12; separate exponential rejection approximation",
+      "sha256": "4ce676c483dd2797f4da01a1e8b65817cb6c9c3711a9cb23e50903e8e8576217",
+      "bytes": 448382,
+      "retrieved_at": "2026-09-20"
+    },
+    {
+      "id": "rossi-thesis-2020",
+      "title": "Extended Security of Lattice-Based Cryptography",
+      "url": "https://www.di.ens.fr/~mrossi/docs/thesis.pdf",
+      "download_url": "https://www.di.ens.fr/~mrossi/docs/thesis.pdf",
+      "cache_file": "Rossi_thesis_2020.pdf",
+      "relevant_locations": [
+        {
+          "section": "2.2.2 Gaussians",
+          "printed_page": 27,
+          "pdf_page": 39
+        },
+        {
+          "section": "Algorithm12 Step1 and its explanatory derivation",
+          "printed_page": 48,
+          "pdf_page": 60
+        }
+      ],
+      "scope": "Definition of D_{S,sigma}; nonnegative base distribution in Algorithm12 Step1",
+      "sha256": "79ce80d5a5009cc93b7536b818aca393f34812fec3e4684de1a648d84d2a2c3d",
+      "bytes": 4022230,
+      "retrieved_at": "2026-09-20"
+    }
+  ],
+  "correspondence_review": "Human-readable source correspondence; not a formal verification of PDF parsing",
+  "local_cache": ".omx/reference-documents/",
+  "target_formula": "rho(k)=exp(-k*k/512) for k>=0; pmf(k)=rho(k)/sum_{j>=0}rho(j)",
+  "cdf_rounding_note": "The C floor-CDF comment is not used as a mathematical premise."
+}

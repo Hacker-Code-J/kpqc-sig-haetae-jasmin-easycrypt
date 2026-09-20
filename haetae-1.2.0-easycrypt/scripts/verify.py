@@ -137,6 +137,10 @@ def check_provenance():
         run([sys.executable, "scripts/hyperball-reference-constants.py", "--output", str(hyperball)])
         if hyperball.read_bytes() != (PROJECT / "theories/HyperballReferenceConstants.ec").read_bytes():
             raise ValueError("Hyperball reference constants drift")
+        gaussian = Path(tmp) / "CDTGaussianCertificate.ec"
+        run([sys.executable, "scripts/gaussian-cdt-certificate.py", "--output", str(gaussian)])
+        if gaussian.read_bytes() != (PROJECT / "theories/CDTGaussianCertificate.ec").read_bytes():
+            raise ValueError("Gaussian mathematical certificate drift")
     # Identically named generated array theories must not depend on search order.
     arrays = {}
     for path in sorted(PROJECT.glob("generated/**/*.ec")):

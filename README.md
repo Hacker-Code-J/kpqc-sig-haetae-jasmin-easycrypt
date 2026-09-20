@@ -8,6 +8,11 @@ NTT·API 보조함수를 검증한다. Gaussian·Hyperball 전체 정리는 종�
 word 반환값에 대한 것이며, Hyperball norm의 정수 해석에는 오버플로가 없다는 조건이 필요하다.
 전체 KeyGen/Sign/Verify 합성의 형식 검증은 아직 완료하지 않았다.
 
+83비트 CDT에 대해서는 균등 입력을 받은 실제 Jasmin 함수와 공식 목표인 비음수
+이산 Gaussian(σ=16)의 **통계적 거리 <2^-78**도 증명한다.
+[수학적 명세 대응과 범위](haetae-1.2.0-easycrypt/docs/cdt-distribution-correspondence.md)에
+출처·인증서·난수 전제를 기록했다.
+
 | 경로 | 용도 |
 | --- | --- |
 | [HAETAE-1.2.0/](HAETAE-1.2.0/) | 수정하지 않은 참조 배포본, 라이선스, KAT |

@@ -55,6 +55,10 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
 전체 구현 정확성은 다음 순서로 이어간다.
 
 1. 아래 기준선 검증을 유지하면서 명세 260904와 함수별 대응표를 작성한다.
+   CDT에는 명세 §5.1.1과 참고문헌 [21]의 Gaussian 정의를 연결했다. 독립적인
+   무한 분포 정의와 실제 Jasmin의 균등 83비트 입력 실험 사이의 통계적 거리가
+   2^-78보다 작다는 정리를 추가했다. 출처·수치 인증서·정확한 난수 범위는
+   [CDT 명세 대응](../haetae-1.2.0-easycrypt/docs/cdt-distribution-correspondence.md)에 있다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

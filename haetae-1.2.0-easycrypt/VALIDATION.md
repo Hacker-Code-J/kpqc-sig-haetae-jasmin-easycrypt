@@ -1,27 +1,38 @@
 # 검증 기록
 
-2026-09-17~18 작업에서 현재 Jasmin 소스로 재추출하고 EasyCrypt를 실제 실행했다.
+2026-09-17~20 작업에서 현재 Jasmin 소스로 재추출하고 EasyCrypt를 실제 실행했다.
 기존 버전의 검증 로그나 KAT 결과를 새 증명의 근거로 대체하지 않았다.
 
 | 구분 | 새로 검사한 대상 | 결과 |
 | --- | --- | --- |
-| 추출물 | 배열 이론과 현재 프로그램 102개 | 모두 PASS |
-| NTT 외 명세·증명 | `verify-new`의 51개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
-| NTT | 필요한 지원 이론 11개와 현재 구현 정리 1개 | 각 파일을 주 대상으로 실행하여 모두 PASS |
-| 검증기 회귀 | 미완성 EOF 거부·정상 증명·임시 파일·종료 코드 10개와 Hyperball 상수 drift 1개 | 11개 모두 PASS |
-| Hyperball 수치 재현 | mode 2·3·5의 고정 후보열을 C/Jasmin으로 실행 | 정확한 word 결과·모듈러 norm 승인 일치, 정수 norm 초과 재현 |
+| 추출물 | 배열 이론과 현재 프로그램 102개 | 앞 단계 모두 PASS; 이번 재추출 일치 확인 |
+| NTT 외 명세·증명 | `verify-new`의 65개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
+| NTT | 필요한 지원 이론 11개와 현재 구현 정리 1개 | 앞 단계 각 파일을 주 대상으로 모두 PASS; 이번 해시 불변 확인 |
+| 검증기 회귀 | 기존 EOF·상수 검사 11개와 새 Gaussian 인증서·표 변조 검사 3개 | 14개 모두 PASS |
+| CDT 수학적 분포 | 실제 Jasmin의 균등 83비트 입력 분포와 비음수 Gaussian(σ=16) | 모든 출력 집합의 확률 차이 <2^-78 증명 |
+| Hyperball 수치 재현 | mode 2·3·5의 고정 후보열을 C/Jasmin으로 실행 | 09-18 재현 PASS 보존; 이번 구현 변경·실행 없음 |
 
-전체 로컬 명세·증명 63개를 각 단계에서 주 검증 대상으로 검사했다. import만 된 증명의
+전체 로컬 명세·증명 77개를 각 단계에서 주 검증 대상으로 검사했다. import만 된 증명의
 본문이 자동으로 재검사된다고 가정하지 않았다. 새 코드 게이트는 `-no-eco`와
 명시적 `Proofs:check`를 사용하며, 원래 NTT 지원 재검증도 `-no-eco`의 기본
 강한 검사 모드로 개별 실행했다.
 
-이전 단계의 전체 Gaussian·연속 word SHAKE 스트림 증명에 이어, 이번에는
-16개 명세·증명 파일을 추가해 실제 전체 Hyperball 함수와 세 mode wrapper를
-검증했다. 51개 파일의 최종 통합 검증 시간 합계는 약 1,053초였다.
+이전 단계의 전체 Gaussian·Hyperball word 증명에 이어, 이번에는 14개 수학
+명세·증명 파일을 추가해 실제 CDT를 공식 Gaussian 목표와 연결했다.
+65개 파일을 최종 통합 실행에서 각각 새로 검사했다. 실행 시간과 소스 해시는
+`manifests/verification-results.json`에 기록했다.
 기존 NTT 12개와 추출물 102개는 이전 새 검증 결과를 보존하고,
 해시 불변 및 현재 소스의 재추출 일치를 다시 확인했다. 변경하지 않은 NTT
 전체를 이번 단계에서 중복 실행한 것으로 기록하지 않는다.
+
+`CDTGaussianApproximation.uniform83_jasmin_half_gaussian_error`는 균등하게 뽑은
+83비트 입력을 실제 `SamplerTarget.M.sample_gauss83_jazz`에 전달하는 실험을
+다룬다. 목표는 `P(k)=exp(-k²/512)/sum_{j≥0}exp(-j²/512)`, `k≥0`이다.
+구현과 무관하게 정의한 이 무한 분포와 실제 출력 분포의 통계적 거리가
+**2^-78보다 작음**을 증명했으며, 모든 출력 집합의 확률 차이도 같은 상한을 갖는다.
+정규화·무한 꼬리·지수함수 구간·수치 인증서를 가정으로 남기지 않고 검증했다.
+공식 PDF와 참고문헌의 출처·수식 대응은
+[별도 기록](docs/cdt-distribution-correspondence.md)에 있다.
 
 `GaussianStreamCorrectness.sample_gauss_N_full_at_correct`는 실제
 `_sf_sample_gauss_N_full_at`의 seed·nonce 초기화, 49블록, 부호 복사, 반복
@@ -78,6 +89,11 @@ make -C haetae-1.2.0-easycrypt test-hyperball-boundary
   GCC 11.4와 Clang 14의 결과가 바이트 단위로 일치했고, 최종 게이트에서도
   재생성 일치를 확인했다. 생성 이론의 scale 상수 한 자리를 바꾸는 음성 검사로
   provenance 게이트의 거부를 확인했다. 테스트는 실제 파일을 수정하지 않는다.
+- 새 Gaussian 인증서는 정수 구간 연산으로 재생성하고 저장된 내용과 비교했다.
+  EasyCrypt에서 외향 반올림 연산의 실수 포함 관계와 모든 필요한 수치 부등식을
+  검사했다. 제곱 단계 또는 비교 대상 CDT 값 하나를 바꾼 임시 인증서는 실제
+  검사 정리에서 실패했고, 변경하지 않은 대조군은 통과했다. 임시 모듈 이름과
+  데이터 식별자를 분리하여 원본 명세가 대신 로딩되는 경우를 방지했다.
 - 증명 게이트가 `Proofs:weak`, `Proofs:report`, 미완성 증명, 새 공리와
   허용되지 않은 constrained declaration을 거부함을 확인했다. NTT 예외는
   이름과 해시로 고정한 특정 지원 파일에만 적용한다.
@@ -94,12 +110,19 @@ make -C haetae-1.2.0-easycrypt test-hyperball-boundary
 독립 검토에서 실제 production 문맥 helper의 연결과 rounded 결과의 정수 의미
 연결 부족을 발견하여 각각 `ProductionApiCorrectness`와
 `SigmaRoundingCorrectness`로 보완했다. 최종 검토는 현재 구성요소 범위를 승인했다.
-이번 단계의 독립 검토는 실제 Hyperball 전체 함수·mode wrapper의 word 부분
+Hyperball 단계의 독립 검토는 실제 전체 함수·mode wrapper의 word 부분
 정확성 범위를 승인했다. 여러 Gaussian 호출의 전제, 실제 고정소수점·scaling·norm
 호출, 최초 승인 이력, 최종 byte/counter와 반환값 유일성을 확인했다. 공개 정리의
 전제에 원하는 결론·수치 fit·수렴·종료 가정을 숨기지 않았음을 확인했다.
 수학적 norm의 무조건 보장, 실수 Newton 수렴·오차, 확률 분포·종료성,
 FIPS bit 명세의 별도 동치, 전체 API 합성은 남은 의무다.
+
+CDT 단계의 최종 독립 검토는 공식 출처의 비음수 Gaussian 정의, 무한 정규화와
+꼬리, 구간 인증서, strict 비교의 +1 경계, 실제 Jasmin 호출, 통계적 거리의 1/2
+계수, 임의 출력 집합에 대한 정리를 확인했다. 최종 변조 테스트의 이름 분리와
+정상 대조군도 별도로 검토했다. 승인은 단일 CDT의 명시적 균등 입력 실험에
+한정한다. 공식 명세의 별도 Rényi 경계, sigma76 거부 샘플링, 실제 SHAKE
+균등성·독립성, Hyperball 및 전체 서명 분포까지 확대하지 않는다.
 
 ## 판정의 의미
 
