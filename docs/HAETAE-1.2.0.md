@@ -65,6 +65,9 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
    실제 xi와 반올림 전 Gaussian 지수 사이의 오차≤2^-49, 두 zero 규칙의
    예외 구간도 연결했다. 명시적인 균등 72+48비트 단일 시도에서 평균 승인 확률
    차이<29/2^48<2^-43을 증명한다. [반올림 전 수락식 연결](../haetae-1.2.0-easycrypt/docs/raw-gaussian-acceptance.md)을 참조한다.
+   이어서 실제 균등 83+72+48비트 실험과 무한 Gaussian CDT 목표 사이에서,
+   모든 출력 집합의 승인·출력 공동 확률 차이<29/2^48+2^-78을 증명한다.
+   [공동 출력 확률](../haetae-1.2.0-easycrypt/docs/joint-accepted-output.md)은 승인 후 정규화 전의 정리다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

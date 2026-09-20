@@ -29,6 +29,11 @@
 | [SigmaRawAcceptanceCorrectness](proofs/SigmaRawAcceptanceCorrectness.ec) | `sr_actual_acceptance_error`, `sr_actual_acceptance_regular` | 고정 후보의 실제 승인 확률과 raw Gaussian 수락식의 차이≤57/(2·2^48)+예외 지시함수/2; 예외 밖에서는 <2^-43 |
 | [ExponentialLipschitz](proofs/ExponentialLipschitz.ec) / [FiniteExpectationError](proofs/FiniteExpectationError.ec) | `exp_neg_lipschitz`, `finite_expectation_error` | 비음수 실수에서 지수함수 오차 전달; 유한 분포의 점별 오차·예외 질량을 평균 오차로 합성 |
 | [SigmaNoise72Bridge](proofs/SigmaNoise72Bridge.ec) / [SigmaRawAverageCorrectness](proofs/SigmaRawAverageCorrectness.ec) | `sigma_noise72_actual_probability`, `sr_average_acceptance_error_strict` | CDT 바이트 고정·독립 균등 72비트 잡음과 48비트 거부 입력을 실제 sigma에 전달; raw Gaussian 수락식의 평균과 승인 확률 차이<29/2^48<2^-43 |
+| [SigmaRoundedOutputCorrectness](proofs/SigmaRoundedOutputCorrectness.ec) / [SigmaCDT83Patch](proofs/SigmaCDT83Patch.ec) | `sj_actual_rounding`, `sj_cdt83_patch_count`, `sj_cdt83_expectation` | 실제 unsigned 출력과 floor((y+2^72x+32768)/65536) 연결; 83비트 실제 byte 입력의 CDT 법칙과 기대값 변환 |
+| [SigmaJointAttemptBridge](proofs/SigmaJointAttemptBridge.ec) / [SigmaJoint203Bridge](proofs/SigmaJoint203Bridge.ec) | `sigma_joint_noise72_law`, `sigma_joint203_law`, `sigma_joint203_ll` | 실제 sigma 호출이 표본과 승인 비트를 함께 반환하는 실험; 독립 균등 83+72+48비트의 모든 출력 집합에 대한 공동 확률·단일 시도 종료 |
+| [DistributionExpectationDistance](proofs/DistributionExpectationDistance.ec) / [SigmaJointKernelCorrectness](proofs/SigmaJointKernelCorrectness.ec) | `distribution_expectation_distance`, `sj_noise_kernel_range`, `sj_kernel_actual` | 무한 지지집합에서 [0,1] 커널의 기댓값 차이≤통계적 거리; 독립 Gaussian 수락식·수학적 반올림과 실제 배열 연결 |
+| [SigmaJointFixedCorrectness](proofs/SigmaJointFixedCorrectness.ec) | `sj_point_error`, `sj_fixed_joint_error` | 출력 집합의 지시함수를 점별 오차에 먼저 적용; 고정 CDT의 승인·출력 공동 확률 오차≤57/(2·2^48)+32767/2^73 |
+| [SigmaJointIdealCorrectness](proofs/SigmaJointIdealCorrectness.ec) / [SigmaJointCorrectness](proofs/SigmaJointCorrectness.ec) | `sj_ideal_joint_law`, `sj_joint_output_error`, `sj_joint_output_error_strict` | 실제 203비트 실험과 독립적인 무한 Gaussian CDT·무제한 정수 반올림 실험의 승인·출력 공동 확률 차이<29/2^48+2^-78<30/2^48<2^-43; 모든 출력 집합, 추가 fit·정확도 전제 없음 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -148,11 +153,17 @@
 균등 72비트 잡음과 독립 균등 48비트 거부 입력의 실제 단일 시도에 관한 것으로,
 승인 후 표본 분포나 실제 SHAKE에 대한 정리가 아니다.
 
+[모든 출력 집합의 공동 확률 정리](docs/joint-accepted-output.md)는 CDT 입력까지
+균등하게 생성한다. 이상적 CDT의 지지집합을 166에서 자르거나 이상적 출력을
+64비트로 감지 않으며, 실제 출력은 unsigned 정수로 읽는다. 최종 비교 사건은
+`accepted /\ S(output)`이고 승인 확률로 나누지 않는다. 따라서 승인된 표본의
+조건부분포, 부호 처리, 거부 반복과 실제 SHAKE의 성질은 별도로 남아 있다.
+
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | CDT 근사·실제 xi의 raw 지수 오차·두 zero 규칙의 예외·명시적 균등 입력의 평균 승인 확률까지 연결. 다음에는 승인된 출력의 부분확률 질량, CDT 분포, 출력 반올림·부호, 거부 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | 독립 균등 83+72+48비트 실제 단일 시도와 무한 Gaussian CDT·수학적 반올림 목표의 모든 출력 집합에 대한 승인·출력 공동 확률까지 연결. 다음에는 승인 확률의 양의 하한, 부호, 승인 후 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

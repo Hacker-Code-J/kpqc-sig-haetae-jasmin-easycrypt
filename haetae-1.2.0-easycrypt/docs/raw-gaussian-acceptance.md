@@ -70,8 +70,10 @@ and calls the actual extracted sigma routine. No concrete SHAKE uniformity is
 assumed or established. The CDT bytes remain fixed, so no CDT distribution
 assumption is needed for these theorems.
 
-The acceptance-rate comparison does not yet establish the distribution of
-accepted outputs. Sample rounding, random signs, rejection normalization,
+The subsequent [joint-output milestone](joint-accepted-output.md) adds uniform83
+CDT sampling and proves an error bound for every accepted-output set, before
+conditioning on acceptance. The acceptance-rate comparison in this document
+does not by itself establish that stronger result or a normalized output law. Sample rounding, random signs, rejection normalization,
 repeated attempts, the official Renyi bound, concrete SHAKE, Hyperball and the
 complete signature APIs remain separate obligations.
 
