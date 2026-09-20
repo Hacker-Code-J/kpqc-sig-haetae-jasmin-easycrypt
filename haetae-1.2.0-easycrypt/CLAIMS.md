@@ -23,6 +23,12 @@
 | [ApproxExpNumericalCorrectness](proofs/ApproxExpNumericalCorrectness.ec) | `approx_exp_signer_numerical_total`, `sigma76_approx_exp_numerical_total` | 실제 Jasmin의 정규화 출력과 실수 지수함수 사이 절대오차≤27/2^48<2^-43 및 종료; 모든 sigma76 입력에서는 별도 범위·fit 전제 없음 |
 | [Rejection48Correctness](proofs/Rejection48Correctness.ec) / [SigmaRejection48Bridge](proofs/SigmaRejection48Bridge.ec) | `rejection48_word_probability`, `sigma_rejection48_actual_probability` | 균등 48비트 거부 입력의 정확한 even 비교·포화·실제 rounded-zero 확률; 실제 sigma 프로시저 호출과 연결 |
 | [SigmaExpAcceptanceCorrectness](proofs/SigmaExpAcceptanceCorrectness.ec) | `sigma_exp_acceptance_error`, `sigma_exp_acceptance_error_strict` | 후보 바이트를 고정한 실제 sigma 호출의 승인 확률과 α(rounded)·exp(-uint(xi)/2^48)의 차이≤α·28/2^48<2^-43; 48비트 거부 입력의 균등성은 실험에 명시 |
+| [SigmaSquareExact](proofs/SigmaSquareExact.ec) / [SigmaRawExponentCorrectness](proofs/SigmaRawExponentCorrectness.ec) | `sigma_square_word_exact`, `sigma_raw_exponent_exact`, `sigma_raw_exponent_error` | 실제 square limbs의 정수 의미와 모든 26바이트 입력에서 xi=floor((y(y+2^73x)+2^104)/2^105); 반올림 전 지수 대비 정규화 오차≤2^-49 |
+| [SigmaRawDensityIdentity](proofs/SigmaRawDensityIdentity.ec) | `sr_gaussian_weight_identity`, `sr_gaussian_density_ratio` | 독립적인 비음수 Gaussian σ=16의 비정규화 가중치와 exp(-E)의 곱이 Z=y+2^72x의 σ=2^76 Gaussian 비정규화 가중치와 일치 |
+| [SigmaRawZeroCorrectness](proofs/SigmaRawZeroCorrectness.ec) / [SigmaRawNoiseSpec](theories/SigmaRawNoiseSpec.ec) | `sr_zero_tests_differ`, `sr_zero_factor_difference`, `sr_noise_mismatch_probability` | rounded-zero와 raw-zero가 달라지는 조건은 x=0·1≤y<32768; 균등 72비트 잡음의 예외 확률과 최대 반 보정 효과<2^-58 |
+| [SigmaRawAcceptanceCorrectness](proofs/SigmaRawAcceptanceCorrectness.ec) | `sr_actual_acceptance_error`, `sr_actual_acceptance_regular` | 고정 후보의 실제 승인 확률과 raw Gaussian 수락식의 차이≤57/(2·2^48)+예외 지시함수/2; 예외 밖에서는 <2^-43 |
+| [ExponentialLipschitz](proofs/ExponentialLipschitz.ec) / [FiniteExpectationError](proofs/FiniteExpectationError.ec) | `exp_neg_lipschitz`, `finite_expectation_error` | 비음수 실수에서 지수함수 오차 전달; 유한 분포의 점별 오차·예외 질량을 평균 오차로 합성 |
+| [SigmaNoise72Bridge](proofs/SigmaNoise72Bridge.ec) / [SigmaRawAverageCorrectness](proofs/SigmaRawAverageCorrectness.ec) | `sigma_noise72_actual_probability`, `sr_average_acceptance_error_strict` | CDT 바이트 고정·독립 균등 72비트 잡음과 48비트 거부 입력을 실제 sigma에 전달; raw Gaussian 수락식의 평균과 승인 확률 차이<29/2^48<2^-43 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -80,8 +86,8 @@
   부르지는 않는다.
 - 승인 확률 정리는 실제 sigma 함수를 호출하며 거부 바이트만 균등하게 바꾼다.
   비교 대상은 실제 양자화된 xi와 실제 반올림 출력이 0일 때의 α=1/2 보정을
-  유지한다. 이상적인 raw 지수·raw-zero 보정과의 관계, C 주석의 단방향 ceiling,
-  공식 Rényi 오차, 승인된 전체 Gaussian 표본 분포는 아직 별도 의무다.
+  유지한다. 이후 raw 지수 오차와 raw-zero 보정 차이는 아래 새 정리로 연결했다. C 주석의
+  단방향 ceiling, 공식 Rényi 오차, 승인된 전체 Gaussian 표본 분포는 별도 의무다.
 - NTT의 `poly_repr_bound rp p s`는 각 signed word가 `p`의 계수를 mod 64513으로
   나타내고 `[-2^s,2^s)`에 있다는 뜻이다. 순변환은 `s=16→24`, 역변환은
   `s=16/18→16`이다. 출력 24-bit 범위를 그대로 역변환 전제로 넣는 정리는 없다.
@@ -135,11 +141,18 @@
 - NTT의 남은 산술 가정은 [별도 목록](manifests/ntt-assumptions.md)에 명시한다.
   새 샘플러/API 정리에 알고리즘 정확성을 가정하는 공리는 추가하지 않았다.
 
+반올림 전 수락식 정리는 [별도 수식 기록](docs/raw-gaussian-acceptance.md)의
+`Z=y+2^72x`, `E=y(y+2^73x)/2^153`을 비교 대상으로 사용한다. 고정 후보가
+예외 구간에 있으면 승인 확률 차이가 약 1/2일 수 있으므로, 모든 고정 후보에서
+작은 raw-reference 오차가 성립한다고 주장하지 않는다. 평균 정리는 명시적인
+균등 72비트 잡음과 독립 균등 48비트 거부 입력의 실제 단일 시도에 관한 것으로,
+승인 후 표본 분포나 실제 SHAKE에 대한 정리가 아니다.
+
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | CDT 근사·지수함수 수치 오차·고정 후보의 승인 확률까지 연결; 다음에는 실제 xi와 raw 지수, rounded-zero와 raw-zero, 표본 반올림·거부 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | CDT 근사·실제 xi의 raw 지수 오차·두 zero 규칙의 예외·명시적 균등 입력의 평균 승인 확률까지 연결. 다음에는 승인된 출력의 부분확률 질량, CDT 분포, 출력 반올림·부호, 거부 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

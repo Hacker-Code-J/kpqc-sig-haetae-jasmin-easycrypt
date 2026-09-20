@@ -62,6 +62,9 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
    Listing 1의 지수함수 근사에는 실제 입력 범위와 signed Horner 의미를 연결하여
    정규화 출력 오차≤27/2^48<2^-43을 증명했다. 실제 양자화 지수·rounded-zero를
    유지한 조건부 승인 확률도 다룬다. [수치 증명 경계](../haetae-1.2.0-easycrypt/docs/approx-exp-mathematical-bound.md)를 참조한다.
+   실제 xi와 반올림 전 Gaussian 지수 사이의 오차≤2^-49, 두 zero 규칙의
+   예외 구간도 연결했다. 명시적인 균등 72+48비트 단일 시도에서 평균 승인 확률
+   차이<29/2^48<2^-43을 증명한다. [반올림 전 수락식 연결](../haetae-1.2.0-easycrypt/docs/raw-gaussian-acceptance.md)을 참조한다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

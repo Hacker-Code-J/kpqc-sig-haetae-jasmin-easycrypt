@@ -54,5 +54,15 @@
     "coefficients": "The11 integer coefficients in Listing1 match the pinned C and the checked Jasmin integer Horner evaluator",
     "independent_error_proof": "Three-cell Bernstein certificates plus finite-grid exponential comparison; coefficient accuracy is not assumed",
     "excluded": "one-sided ceiling claim, raw ideal sigma exponent/zero-rule equivalence, and published Renyi bound"
+  },
+  "raw_acceptance_correspondence": {
+    "source_id": "rossi-thesis-2020",
+    "location": "Algorithm 12 and following density-ratio derivation, printed page 48 / PDF page 60",
+    "scaling": "k=2^72, sigma=2^76; CDT base sigma=sigma/k=16; y uniform integer in [0,k)",
+    "candidate": "Z=y+k*x",
+    "acceptance_target": "(if Z=0 then 1/2 else 1)*exp(-y*(y+2*k*x)/(2*sigma^2))",
+    "direction_note": "Uses the acceptance direction from the following ratio derivation and official specification wording; Algorithm 12 Step 4 has the opposite reject/accept wording.",
+    "zero_rule": "Algorithm 12 Step 5 tests unrounded z=0. Actual code tests rounded output; the exceptional nonzero interval is accounted for explicitly.",
+    "excluded": "Normalized accepted-output distribution, concrete SHAKE randomness, and published Renyi guarantee"
   }
 }

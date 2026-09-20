@@ -104,9 +104,12 @@ fixed candidate input `p`,
 - The numerical function bound needs no randomness assumption. Uniformity is
   explicit only in the separate 48-bit conditional acceptance experiment.
 - The acceptance reference retains the **actual quantized exponent** and the
-  **actual rounded-zero rule**. Accuracy against the ideal raw exponent
-  `y*(y+2^73*x_CDT)/2^153`, and the relation of rounded zero to raw-candidate zero,
-  remain separate obligations.
+  **actual rounded-zero rule**. The subsequent
+  [raw-acceptance proof](raw-gaussian-acceptance.md) separately establishes the
+  error against `y*(y+2^73*x_CDT)/2^153` and the exact event where rounded zero
+  differs from raw-candidate zero. Its small bound against the raw-zero target
+  averages over explicit uniform 72-bit noise; it is not valid for every fixed
+  candidate in that exceptional event.
 - Neither the C comment's one-sided ceiling claim nor the specification's
   Renyi-divergence bound is assumed or established by this absolute-error result.
 - This is not the output-distribution theorem for the complete sigma76 rejection
