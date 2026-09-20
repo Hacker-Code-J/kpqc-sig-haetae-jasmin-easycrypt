@@ -13,6 +13,11 @@ word 반환값에 대한 것이며, Hyperball norm의 정수 해석에는 오버
 [수학적 명세 대응과 범위](haetae-1.2.0-easycrypt/docs/cdt-distribution-correspondence.md)에
 출처·인증서·난수 전제를 기록했다.
 
+실제 지수함수 근사에도 수학적 오차 정리가 있다. 모든 sigma76 입력에서
+`approx_exp`의 정규화 출력 오차는 **27/2^48 이하, 2^-43 미만**이다.
+[수치·승인 확률 증명의 범위](haetae-1.2.0-easycrypt/docs/approx-exp-mathematical-bound.md)에
+실제 입력 범위와 조건부 승인 실험을 설명한다.
+
 | 경로 | 용도 |
 | --- | --- |
 | [HAETAE-1.2.0/](HAETAE-1.2.0/) | 수정하지 않은 참조 배포본, 라이선스, KAT |

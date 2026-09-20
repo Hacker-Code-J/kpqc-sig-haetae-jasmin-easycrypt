@@ -16,6 +16,13 @@
 | [ExpIntervalCorrectness](proofs/ExpIntervalCorrectness.ec) / [CDTGaussianEnclosure](proofs/CDTGaussianEnclosure.ec) | `ei_square_q_sound`, `ei_weights_sound`, `gi_normalizer_interval`, `gi_pmf_interval` | 실제 실수 지수함수의 유리수 구간과 외향 반올림 인증서의 건전성; 무한 정규화 분모와 각 목표 확률의 수치 구간; 구체적 수치 의무는 검사된 정수 인증서로 해소 |
 | [CDTGaussianApproximation](proofs/CDTGaussianApproximation.ec) | `cdt83_half_gaussian_statistical_distance`, `uniform83_jasmin_half_gaussian_error` | 실제 Jasmin CDT의 균등 83비트 입력 실험과 공식 목표인 비음수 Gaussian(σ=16)의 통계적 거리 <2^-78; 임의 출력 집합에 대한 확률 차이도 같은 상한 |
 | [FixedPointCorrectness](proofs/FixedPointCorrectness.ec) | `smulh48_jazz_total_correct`, `smulh48_jazz_signed_correct`, `approx_exp_jazz_reference_correct` | 모든 word 입력의 올림 결과 modulo 2^64; signed 결과는 명시적 fit 전제; C-derived 10차 word Horner 계산 |
+| [SigmaExpInputBounds](proofs/SigmaExpInputBounds.ec) | `sigma_exp_argument_bound`, `sigma_exp_argument_two_thirds` | 모든 26바이트 입력에서 실제 지수 인자 uint(xi)≤183103063064576, 3·uint(xi)≤2·2^48; 차감·병합·반올림 범위 의무 해소 |
+| [ApproxExpWordCorrectness](proofs/ApproxExpWordCorrectness.ec) | `ae_intermediate_signed64`, `ae_rounding_error3`, `ae_sigma_approx_exp_total` | 정수 ceil-Horner와 실제 word 실행 연결; 모든 Horner prefix·올림 곱셈 결과의 signed64 적합성, 최종 unsigned 해석; 다항식 대비 올림 오차 0…3/2^48 |
+| [Bernstein10Correctness](proofs/Bernstein10Correctness.ec) / [ApproxExpCertificateChecks](proofs/ApproxExpCertificateChecks.ec) | `bernstein10_checked_nonnegative`, `aec_upper_0_identity` 등 | 정수 인증서의 기저 변환·부호와 실제 계수 다항식의 6개 구간 부등식; 66개 제어 계수 검사 |
+| [ExponentialGridComparison](proofs/ExponentialGridComparison.ec) / [ApproxExpPolynomialBound](proofs/ApproxExpPolynomialBound.ec) | `eg_exp_grid_abs`, `approx_exp_polynomial_error` | 입력 정수 격자에서 실제 계수 다항식과 exp(-x/2^48)의 오차≤24/2^48; 분석적 점화 조건을 인증서로 해소 |
+| [ApproxExpNumericalCorrectness](proofs/ApproxExpNumericalCorrectness.ec) | `approx_exp_signer_numerical_total`, `sigma76_approx_exp_numerical_total` | 실제 Jasmin의 정규화 출력과 실수 지수함수 사이 절대오차≤27/2^48<2^-43 및 종료; 모든 sigma76 입력에서는 별도 범위·fit 전제 없음 |
+| [Rejection48Correctness](proofs/Rejection48Correctness.ec) / [SigmaRejection48Bridge](proofs/SigmaRejection48Bridge.ec) | `rejection48_word_probability`, `sigma_rejection48_actual_probability` | 균등 48비트 거부 입력의 정확한 even 비교·포화·실제 rounded-zero 확률; 실제 sigma 프로시저 호출과 연결 |
+| [SigmaExpAcceptanceCorrectness](proofs/SigmaExpAcceptanceCorrectness.ec) | `sigma_exp_acceptance_error`, `sigma_exp_acceptance_error_strict` | 후보 바이트를 고정한 실제 sigma 호출의 승인 확률과 α(rounded)·exp(-uint(xi)/2^48)의 차이≤α·28/2^48<2^-43; 48비트 거부 입력의 균등성은 실험에 명시 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -65,6 +72,16 @@
   거부 샘플링 분포를 자동으로 보장하지 않는다. 공식 명세는 별도 CDT 오차
   예산을 명시하지 않으며, 지수 다항식 거부에 대한 Rényi 경계는 다른 의무다.
   `RealExp`·`RealSeries`·`Distr`·`SDist`의 표준 분석·확률 기반도 신뢰 범위에 포함된다.
+- 지수함수 오차 정리는 실제 고정소수점 입력 xi/2^48의 정수 격자를 대상으로 한다.
+  실제 C 계수 다항식의 오차와 실행 중 올림 오차를 함께 포함한다.
+  [수학적 경계와 연결](docs/approx-exp-mathematical-bound.md)에 입력 범위,
+  인증서와 실제 프로시저 정리를 기록했다. Horner 중간 결과의 signed64 의미를
+  정당화했지만, smulh48 내부의 의도된 unsigned word 연산까지 무래핑이라고
+  부르지는 않는다.
+- 승인 확률 정리는 실제 sigma 함수를 호출하며 거부 바이트만 균등하게 바꾼다.
+  비교 대상은 실제 양자화된 xi와 실제 반올림 출력이 0일 때의 α=1/2 보정을
+  유지한다. 이상적인 raw 지수·raw-zero 보정과의 관계, C 주석의 단방향 ceiling,
+  공식 Rényi 오차, 승인된 전체 Gaussian 표본 분포는 아직 별도 의무다.
 - NTT의 `poly_repr_bound rp p s`는 각 signed word가 `p`의 계수를 mod 64513으로
   나타내고 `[-2^s,2^s)`에 있다는 뜻이다. 순변환은 `s=16→24`, 역변환은
   `s=16/18→16`이다. 출력 24-bit 범위를 그대로 역변환 전제로 넣는 정리는 없다.
@@ -122,7 +139,7 @@
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 균등 입력 CDT의 목표 Gaussian 근사 경계를 sigma76의 noise·지수 근사·거부·반올림 및 반복 표본으로 전달; 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | CDT 근사·지수함수 수치 오차·고정 후보의 승인 확률까지 연결; 다음에는 실제 xi와 raw 지수, rounded-zero와 raw-zero, 표본 반올림·거부 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

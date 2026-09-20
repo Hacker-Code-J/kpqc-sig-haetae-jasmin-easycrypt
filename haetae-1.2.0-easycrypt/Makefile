@@ -14,6 +14,7 @@ test-gate:
 	$(PYTHON) tests/test_verification_gate.py
 	$(PYTHON) tests/test_hyperball_provenance.py
 	$(PYTHON) tests/test_gaussian_certificate.py
+	$(PYTHON) tests/test_approx_exp_certificate.py
 test-hyperball-boundary:
 	$(PYTHON) tests/hyperball-norm-boundary.py
 extract:

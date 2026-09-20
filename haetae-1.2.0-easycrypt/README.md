@@ -17,6 +17,12 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 그 무한 정규화·꼬리 상한·수치 인증서도 검증한다.
 [명세 대응과 범위](docs/cdt-distribution-correspondence.md)를 참조한다.
 
+또한 모든 sigma76 입력에서 실제 지수 인자의 범위를 증명하고, 실제 Jasmin
+`approx_exp`의 정규화 출력과 `exp(-xi/2^48)` 사이 오차가 **27/2^48 이하,
+2^-43 미만**임을 연결했다. 고정 후보에 대한 균등 48비트 거부 입력의 조건부
+승인 확률도 검증한다. [정확한 비교 대상과 경계](docs/approx-exp-mathematical-bound.md)에
+양자화·rounded-zero·미완료 분포 의무를 명시한다.
+
 ## 검증된 핵심 결과
 
 | 대상 | 결과 |
@@ -25,6 +31,8 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 | CDT의 수학적 분포 | 균등 83비트 입력 실험의 정확한 확률 질량; 공식 비음수 Gaussian(σ=16)과 통계적 거리 <2^-78, 모든 출력 집합의 확률 차이 상한 |
 | `smulh48` | 모든 입력에서 `ceil(signed(a) × unsigned(b) / 2^48)`의 64비트 표현과 일치 |
 | `approx_exp` | C에서 독립 추출한 10차 Horner 계산과 일치; 각 곱셈의 정수 올림 의미 연결 |
+| 지수함수 수치 오차 | 실제 sigma76 인자는 [0,2/3] 격자에 포함; Horner prefix·올림 곱셈의 signed64 의미와 실수 exp 대비 오차≤27/2^48<2^-43·종료 |
+| 조건부 승인 확률 | 후보를 고정하고 거부 48비트만 균등하게 생성한 실제 sigma 호출; 실제 양자화 지수와 rounded-zero 보정을 사용한 확률 차이≤α·28/2^48<2^-43 |
 | 단일 Gaussian 시도 | 모든 26바이트 입력의 표본·제곱 limbs·승인 비트가 명세와 일치하고 종료 |
 | 표본 반올림 | 실제 결과와 정수식의 일치 및 `0…12033618204333965312 < 2^64`; CDT 166 포함 |
 | 유한 Gaussian 소비기 | 26바이트 후보열을 처리한 전체 반환값과 명세 fold의 일치; 승인 개수·저장된 승인 순서·dummy 슬롯 보존·종료성 |
@@ -72,7 +80,7 @@ EasyCrypt는 import만 한 파일의 증명 본문을 기본적으로 재검사�
 필요한 그룹만 확인할 수도 있다. 각 그룹의 PASS는 선택한 그룹에 한정된다.
 
 ```sh
-make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 65개
+make -C haetae-1.2.0-easycrypt verify-new        # NTT 외 로컬 명세와 증명 79개
 make -C haetae-1.2.0-easycrypt verify-ntt        # NTT 지원 이론 11개 + 현재 구현 정리
 make -C haetae-1.2.0-easycrypt verify-generated  # 추출물 102개 로딩/타입 검사
 make -C haetae-1.2.0-easycrypt test-gate         # 미완성 증명·수치 인증서·비교 표 변조 거부
@@ -103,8 +111,9 @@ NTT 지원에는 기록된 산술 가정이 남아 있으므로 전체 프로젝
 검증을 의미하지 않는다. SHAKE 정리는 고정 길이 seed·nonce의 흡수·패딩과
 word 순열 스트림을 다루며, FIPS bit 명세와의 별도 동치나 임의 길이 입력의
 sponge 정리는 포함하지 않는다. CDT 분포 정리의 균등 입력은 확률 실험에 명시되어
-있으며 실제 SHAKE의 성질로 가정하지 않는다. sigma76 지수 근사·거부와의 분포
-합성, 전체 거부 루프의 종료·분포, 전체 서명 정확성·보안은 남아 있다.
+있으며 실제 SHAKE의 성질로 가정하지 않는다. 지수함수 점별 오차와 조건부 승인
+확률을 전체 Gaussian 분포로 합성하려면 raw 지수·zero·반올림·거부 정규화를
+연결해야 한다. 전체 거부 루프의 종료·분포와 전체 서명 정확성·보안도 남아 있다.
 
 Hyperball의 승인 norm은 64비트 모듈러 합이다. 수학적 제곱합의 반경 보장은
 오버플로 조건을 추가로 충족해야 한다. 구성한 후보열에서 C와 Jasmin의 동일한

@@ -141,6 +141,10 @@ def check_provenance():
         run([sys.executable, "scripts/gaussian-cdt-certificate.py", "--output", str(gaussian)])
         if gaussian.read_bytes() != (PROJECT / "theories/CDTGaussianCertificate.ec").read_bytes():
             raise ValueError("Gaussian mathematical certificate drift")
+        exponential = Path(tmp) / "ApproxExpCertificate.ec"
+        run([sys.executable, "scripts/approx-exp-certificate.py", "--output", str(exponential)])
+        if exponential.read_bytes() != (PROJECT / "theories/ApproxExpCertificate.ec").read_bytes():
+            raise ValueError("Approximate exponential certificate drift")
     # Identically named generated array theories must not depend on search order.
     arrays = {}
     for path in sorted(PROJECT.glob("generated/**/*.ec")):

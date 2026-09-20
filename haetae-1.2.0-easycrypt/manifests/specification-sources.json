@@ -46,5 +46,13 @@
   "correspondence_review": "Human-readable source correspondence; not a formal verification of PDF parsing",
   "local_cache": ".omx/reference-documents/",
   "target_formula": "rho(k)=exp(-k*k/512) for k>=0; pmf(k)=rho(k)/sum_{j>=0}rho(j)",
-  "cdf_rounding_note": "The C floor-CDF comment is not used as a mathematical premise."
+  "cdf_rounding_note": "The C floor-CDF comment is not used as a mathematical premise.",
+  "approximate_exponential_correspondence": {
+    "source_id": "haetae-spec-260904",
+    "location": "section5.1.1 Listing1, printedpage32, PDFpage33",
+    "target": "exp(-X/2^48) at the actual integer input X",
+    "coefficients": "The11 integer coefficients in Listing1 match the pinned C and the checked Jasmin integer Horner evaluator",
+    "independent_error_proof": "Three-cell Bernstein certificates plus finite-grid exponential comparison; coefficient accuracy is not assumed",
+    "excluded": "one-sided ceiling claim, raw ideal sigma exponent/zero-rule equivalence, and published Renyi bound"
+  }
 }
