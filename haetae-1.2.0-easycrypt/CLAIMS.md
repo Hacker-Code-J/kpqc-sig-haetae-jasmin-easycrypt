@@ -42,6 +42,12 @@
 | [GaussianBlockReindex](proofs/GaussianBlockReindex.ec) / [Gaussian76Kernel](proofs/Gaussian76Kernel.ec) | `gb_block_sum`, `g76_full_contribution` | 절대수렴과 support 조건 아래 몫·나머지 블록 합 재색인; 모든 이상적 x≥0의 Gaussian 가중치 상쇄와 정확한 1/(N·H16) 계수 |
 | [Gaussian76Folding](proofs/Gaussian76Folding.ec) / [Gaussian76Rounding](proofs/Gaussian76Rounding.ec) | `g76_accept_weight_sum`, `g76_rounded_event_law`, `g76_rounded_mass`, `g76_rounded_zero_ties` | 0은 한 번·양수 크기는 두 번 세는 절댓값 가중치와 반올림 구간 PMF; raw 수락 가중치 합=Z/2; ±32768→1 |
 | [Gaussian76Identification](proofs/Gaussian76Identification.ec) | `g76_ideal_conditioned_eq`, `g76_gaussian_mass`, `g76_actual_gaussian_correct`, `g76_actual_rounded_mass_error` | 기존 이상적 조건부분포와 명시적 정수 Gaussian 절댓값 반올림 분포의 정확한 동치; 실제 승인 표본 크기 분포와의 통계적 거리<2^-39 및 각 출력값의 구간 합 오차 |
+| [GaussianRetryCore](proofs/GaussianRetryCore.ec) / [GaussianRetryAttempt](proofs/GaussianRetryAttempt.ec) / [GaussianRetryActual](proofs/GaussianRetryActual.ec) | `gr_retry_total`, `gr_actual_pair_equiv`, `gr_actual_retry_law`, `gr_actual_retry_ll` | 승인·거절 모두의 실제 시도 분포 연결; 독립 균등 83·72·48비트로 실제 시도를 반복 호출하는 실험의 확률 1 종료와 첫 승인값의 정확한 조건부분포 |
+| [GaussianRetryTail](proofs/GaussianRetryTail.ec) / [GaussianRetryBatchTail](proofs/GaussianRetryBatchTail.ec) | `gaussian_retry_tail_bound`, `grbt_prefix_shortfall_1m7`, `grbt_all_prefix_shortfall_limit` | 독립 시도 t회 모두 거절될 확률≤(6/7)^t; n·t개에서 n개 미만 승인될 확률≤n·(6/7)^t; 모든 유한 접두 길이의 부족 확률→0 |
+| [GaussianRetryBatch](proofs/GaussianRetryBatch.ec) / [GaussianBatchDistance](proofs/GaussianBatchDistance.ec) / [GaussianRetryBatchCorrectness](proofs/GaussianRetryBatchCorrectness.ec) | `gra_batch_joint_law`, `gra_batch_256_gaussian`, `gra_batch_257_gaussian`, `gra_prefix256_law` | 실제 시도 호출 반복의 전체 승인 목록이 독립 조건부분포 목록과 일치; 256개 Gaussian 거리<2^-31, 257개<257·2^-39; 마지막 값 생성 후 앞 256개 사영 |
+| [GaussianRetryInputs](proofs/GaussianRetryInputs.ec) / [GaussianRetryPrefixCorrectness](proofs/GaussianRetryPrefixCorrectness.ec) | `gr_candidate_stream_pairs_iid`, `gr_prefix_failure_law`, `gr_block_prefix_failure_limit` | 203비트의 canonical 26바이트 후보와 실제 word 사건열·승인 개수 연결; 실제 블록별 후보 수에서 충분하지 않은 iid 접두 구간의 확률→0; 무한 균등 함수나 SHAKE 독립성 가정 없음 |
+| [GaussianRetryRank](proofs/GaussianRetryRank.ec) / [GaussianRetryConsumerTotal](proofs/GaussianRetryConsumerTotal.ec) / [GaussianRetryBufferTotal](proofs/GaussianRetryBufferTotal.ec) | `grr_rank_step_bounded`, `gs_progress_consume_total` | 유한 최대 호환 블록 번호로 감소량 구성; 실제 bounded 소비기의 정확한 진행 조건과 확률 1 종료 |
+| [GaussianRetryStreamBridge](proofs/GaussianRetryStreamBridge.ec) / [GaussianRetryStreamTermination](proofs/GaussianRetryStreamTermination.ec) | `gr_sample_gauss_N_prefix_total`, `gr_prefix_result_dummy`, `gr_prefix_result_squares` | 구체적 SHAKE 스트림의 충분한 유한 접두 구간·기존 offset/limb 전제 아래 실제 서명용 전체 버퍼 함수의 종료와 정확한 첫 256개·부호 복사·257번째 dummy 포함 제곱합·frame |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -123,10 +129,10 @@
   안의 반복 refill에는 이 불변식을 연결했다. Hyperball에서는 더 강한 square-high
   상한과 `256*i + min(i,2)`의 누적 승인 개수로 각 polynomial 호출의 초기 두 limb
   조건을 증명했다. mode 5의 최대 개수는 2,818이다.
-- 전체 Gaussian 함수 정리는 **종료한 실행의 반환값**에 관한 것이다. 고정된
-  seed가 항상 충분한 승인 후보를 공급한다는 전제나 무조건 종료 정리를 추가하지
-  않았다. 결과 명세의 유한 prefix 증인은 `gs_stream_result_unique`에 의해
-  서로 다른 반환값을 허용하지 않는다.
+- 전체 Gaussian의 기본 Hoare 정리는 **종료한 실행의 반환값**을 다룬다.
+  후속 `gr_sample_gauss_N_prefix_total`은 구체적 seed의 스트림에 충분한
+  승인 후보를 담은 유한 구간이 있다는 조건 아래 실제 함수의 종료까지 증명한다.
+  모든 seed가 그 조건을 만족한다거나 SHAKE 출력이 독립 균등하다고 가정하지 않는다.
 - Hyperball 전체 정리도 종료한 실행의 **word 명세 대응**이다. 모든 이전 시도의
   거부와 마지막 승인을 이력에 기록하고, 미사용 scratch 영역을 제외한 모든 입력을
   구체적인 Gaussian 스트림에 연결한다. 반환값 유일성은 nonce의 단사성을 가정하지
@@ -165,8 +171,8 @@
 균등하게 생성한다. 이상적 CDT의 지지집합을 166에서 자르거나 이상적 출력을
 64비트로 감지 않으며, 실제 출력은 unsigned 정수로 읽는다. 최종 비교 사건은
 `accepted /\ S(output)`이고 승인 확률로 나누지 않는다. 따라서 승인된 표본의
-조건부분포는 후속 정규화 정리로 연결했다. 부호 처리, 거부 반복과 실제 SHAKE의
-성질은 별도로 남아 있다.
+조건부분포는 후속 정규화 정리로 연결했다. 독립 난수에서의 거부 반복은 아래
+후속 정리로 다루며, 실제 부호 처리와 구체적 SHAKE의 확률 성질은 별도로 남아 있다.
 
 [조건부분포 정리](docs/conditional-accepted-output.md)는 각 실험의 서로 다른
 승인 확률로 나누며, 실제≥1/7·이상적≥1/8을 증명해 분모가 0인 경우를 배제한다.
@@ -181,11 +187,19 @@
 반올림된 확률은 각 구간의 Gaussian 가중치를 합한 값이다. 이 수학적 G에 부호가
 있다는 사실을 실제 구현의 부호 처리 증명으로 해석하지 않는다.
 
+[거절 반복과 승인 목록](docs/gaussian-retries-and-batches.md)은 실제 추출 시도를
+매번 호출하는 독립 난수 실험의 종료와 전체 결합분포를 증명한다. 승인 확률≥1/7을
+이용해 양수성 전제를 해소하며, 반복 때문에 기존 표본 오차가 추가로 커지지 않는다.
+목록 오차는 표본 개수에 따른 독립 곱분포 상한을 사용한다. 후보 스트림의 입력
+모형은 사용하지 않는 상위 5비트를 0으로 둔 203비트 인코딩이다.
+유한 접두 구간의 부족 확률이 0으로 수렴한다는 사실을 구체적인 SHAKE가
+독립 균등 난수를 생성한다는 증명이나 모든 seed의 종료 보장으로 사용하지 않는다.
+
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 실제 승인 표본 크기의 조건부분포와 명시적인 정수 Gaussian 절댓값 반올림 분포를 연결하여 통계적 거리<2^-39까지 증명. 다음에는 실제 부호 처리, 반복 표본·거부 종료와 전체 스트림을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | 독립 균등 입력의 실제 시도 반복은 확률 1 종료하며, n개 승인 표본의 결합분포와 유한 후보 접두 구간을 연결. 남은 범위는 실제 부호 처리, 구체적 SHAKE 또는 명시적인 iid 바이트 공급 버퍼 드라이버에 확률 보장 전달, 공식 Rényi 오차와 이상적 XOF 연결 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

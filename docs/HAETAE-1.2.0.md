@@ -50,7 +50,8 @@ mode 2·3·5 공식 KAT, 실제 C 소스와의 차등·상호운용 테스트를
 Horner 계산·단일 Gaussian 시도·유한 소비기의 승인 순서와 제곱합·실제 서명
 offset 소비기·SHAKE 초기화와 스트림·실제 서명용 전체 Gaussian 함수·NTT·
 API 보조함수의 정리를 검증했다. 이어서 실제 Hyperball 전체 함수와 mode 2·3·5를
-word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실행에 적용한다.
+word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용한다. Gaussian에는
+구체적 입력 스트림의 충분한 유한 접두 구간 전제 아래 종료 정리를 추가했다.
 검증 범위와 남은 전제는 [CLAIMS.md](../haetae-1.2.0-easycrypt/CLAIMS.md)에 있다.
 전체 구현 정확성은 다음 순서로 이어간다.
 
@@ -73,7 +74,10 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
    이전 이상적 실험을 정규화한 목표다. 후속 [Gaussian 질량식 식별](../haetae-1.2.0-easycrypt/docs/gaussian-magnitude-identification.md)에서
    이를 exp(-k²/2^153)로 정의한 정수 Gaussian의 절댓값 반올림 분포와 정확히
    연결했다. 실제 조건부분포의 거리<2^-39가 이 명시적인 목표에도 그대로 적용된다.
-   부호·반복·실제 SHAKE 연결은 남아 있다.
+   독립 균등 입력으로 실제 시도를 반복 호출하는 실험의 확률 1 종료와 첫 승인값의
+   정확한 조건부분포도 증명했다. 256·257개 승인 목록의 결합분포 및 유한 후보
+   스트림과의 연결은 [반복·목록 증명](../haetae-1.2.0-easycrypt/docs/gaussian-retries-and-batches.md)에 있다.
+   실제 부호 처리와 구체적인 SHAKE로의 확률 보장 전달은 남아 있다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

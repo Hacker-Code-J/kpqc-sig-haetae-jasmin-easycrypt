@@ -4,8 +4,9 @@ HAETAE-1.2.0의 C 참조 구현과 이에 대응하는 Jasmin 구현을 관리�
 Jasmin의 mode 2·3·5 KAT, 샘플러 차등 테스트와 C 상호운용 테스트를 포함한다.
 별도 EasyCrypt 프로젝트에서 새 샘플러의 승인 순서·제곱합과 실제 서명용
 Gaussian 함수의 전체 SHAKE/refill 흐름, Hyperball 전체 흐름과 mode 2·3·5,
-NTT·API 보조함수를 검증한다. Gaussian·Hyperball 전체 정리는 종료한 실행의
-word 반환값에 대한 것이며, Hyperball norm의 정수 해석에는 오버플로가 없다는 조건이 필요하다.
+NTT·API 보조함수를 검증한다. Gaussian·Hyperball의 기본 전체 정리는 종료한 실행의
+word 반환값에 관한 것이다. Gaussian에는 충분한 승인 후보를 담은 유한 입력 구간이
+있을 때의 종료 정리를 추가했다. Hyperball norm의 정수 해석에는 오버플로가 없다는 조건이 필요하다.
 전체 KeyGen/Sign/Verify 합성의 형식 검증은 아직 완료하지 않았다.
 
 83비트 CDT에 대해서는 균등 입력을 받은 실제 Jasmin 함수와 공식 목표인 비음수
@@ -38,7 +39,14 @@ CDT 입력까지 균등하게 생성한 실제 실험에서는, **모든 출력 
 정확히 식별했다. `Pr[G=k]∝exp(-k²/2^153)`의 무한 정규화와 반올림 구간별
 확률도 증명했으므로, 실제 승인 표본 크기와 이 명시적 Gaussian 목표의
 **통계적 거리 <2^-39**가 직접 성립한다. [Gaussian 질량식과 증명](haetae-1.2.0-easycrypt/docs/gaussian-magnitude-identification.md)에
-0·반올림 경계와 남은 부호·반복·SHAKE 범위를 기록했다.
+0·반올림 경계와 그 단계의 증명 범위를 기록했다.
+
+독립 균등 83·72·48비트 입력으로 실제 Jasmin 시도를 반복 호출하는 실험은
+**확률 1로 종료**하며, 첫 승인값은 위 조건부분포와 정확히 같다.
+승인된 256개 값의 결합분포는 독립 Gaussian 목표 목록과 **거리 <2^-31**,
+257개는 **거리 <257·2^-39**다. 후보 바이트열과 승인 순서, 충분한 유한
+접두 구간을 얻을 확률도 연결했다. [반복·표본 목록 증명](haetae-1.2.0-easycrypt/docs/gaussian-retries-and-batches.md)은
+이 명시적 난수 모형과 구체적인 SHAKE의 성질을 구분한다.
 
 | 경로 | 용도 |
 | --- | --- |

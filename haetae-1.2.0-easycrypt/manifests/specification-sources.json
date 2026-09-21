@@ -90,5 +90,18 @@
     "exact_identity": "SigmaConditionalSpec.sc_ideal_conditioned=Gaussian76Spec.g76_rounded",
     "returned_mass": "Finite Gaussian bin sum: zero weight once, positive magnitudes twice; absolute value before rounding",
     "excluded": "Actual implementation sign handling, repeated sampling, concrete SHAKE, Renyi and complete APIs"
+  },
+  "gaussian_retry_correspondence": {
+    "target": "Same independent g76_rounded Gaussian magnitude law; no new target distribution",
+    "operational_model": "Fresh independent uniform83/72/48 inputs on every actual extracted attempt; repeat until accepted, then repeat for n samples",
+    "standard_library_reuse": [
+      "Dexcepted.WhileSampling fully instantiated",
+      "DList.Program chronological append sampling",
+      "SDist.sdist_dlist"
+    ],
+    "candidate_layout": "Canonical203-bit encoding in26 bytes, unused top5bits zero; no uniform208 claim",
+    "batch_scope": "Full ordered magnitude joint law;257th accepted value generated before first256 projection",
+    "concrete_buffer_scope": "Actual seeded SHAKE loop totality conditional on adequate finite prefix and existing memory/limb bounds; no assumption of SHAKE iid",
+    "remaining": "Actual signs, concrete SHAKE randomness, buffered iid-controller probability coupling, Renyi, Hyperball mathematical distribution and full APIs"
   }
 }

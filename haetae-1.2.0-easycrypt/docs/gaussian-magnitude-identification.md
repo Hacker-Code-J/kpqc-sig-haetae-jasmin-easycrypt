@@ -98,17 +98,24 @@ probability difference for every integer output set. The base template p is
 unrestricted. A separate theorem exposes the per-value error against the finite
 bin formula above.
 
+The subsequent [retry and batch proofs](gaussian-retries-and-batches.md)
+connect this law to an operational loop calling the extracted attempt with
+fresh independent inputs. They establish almost-sure termination, exact
+first-accepted and ordered-batch laws, finite candidate-prefix bounds, and
+conditional concrete buffered termination under an adequate-prefix premise.
+
 ## Scope and reproduction
 
 The mathematical Gaussian G is signed so that its absolute value can define
 the magnitude target. This does not prove the implementation's later sign
-handling. Repeated rejection, whole Gaussian-stream distributions, concrete
-SHAKE randomness, the published Renyi guarantee, Hyperball mathematics and
-complete signature APIs remain separate obligations.
+handling. The later retry proofs cover explicit independent inputs. Concrete SHAKE
+randomness, a buffered iid-controller probability law, the published Renyi
+guarantee, Hyperball mathematics and complete signature APIs remain separate
+obligations.
 
 The seven new files cover the independent Gaussian definition and normalization,
 block reindexing, folding, kernel cancellation, rounding bins and final
-identification/actual transfer. All 113 current non-NTT files passed fresh
+identification/actual transfer. At the Gaussian-identification milestone, all 113 non-NTT files passed fresh
 integrated checking as independent main targets with `-no-eco`, `Proofs:check`
 and the EOF completion guard. All 18 gate regression tests passed. Previous NTT
 records remain pinned with unchanged hashes; every prior proof, implementation

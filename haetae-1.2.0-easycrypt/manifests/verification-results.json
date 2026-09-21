@@ -1,18 +1,18 @@
 {
-  "checked_at": "2026-09-21T03:08:55.148684+00:00",
-  "scope": "Component correctness including exact Gaussian identification and actual conditional magnitude error against an independent normalized Gaussian formula",
+  "checked_at": "2026-09-21T05:53:17.626799+00:00",
+  "scope": "Component correctness including iid actual-attempt retry and ordered batch laws, finite canonical byte prefixes, and concrete buffered Gaussian totality under an adequate-prefix premise",
   "complete_api_correctness": false,
   "generated_files": 102,
-  "new_local_theories": 113,
+  "new_local_theories": 128,
   "ntt_local_theories": 12,
-  "all_local_theories": 125,
+  "all_local_theories": 140,
   "generated_replay": {
     "result": "PASS",
     "checked_at": "20260917T150034.912595Z"
   },
   "new_replay": {
     "result": "PASS",
-    "checked_at": "20260921T023636.682966Z",
+    "checked_at": "20260921T053211.708475Z",
     "cache": "-no-eco",
     "proof_mode": "Proofs:check",
     "targets": [
@@ -20,796 +20,910 @@
         "target": "proofs/ApiBoundaryCorrectness.ec",
         "exit_code": 0,
         "sha256": "929f693d09fdfd2662252ff97793faee6dca3444509ea3724d1c4831c6513c09",
-        "seconds": 43.522,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ApiBoundaryCorrectness.ec.log"
+        "seconds": 45.43,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ApiBoundaryCorrectness.ec.log"
       },
       {
         "target": "theories/ReferenceConstants.ec",
         "exit_code": 0,
         "sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
-        "seconds": 1.801,
-        "log": "logs/20260921T023636.682966Z-new/theories__ReferenceConstants.ec.log"
+        "seconds": 1.948,
+        "log": "logs/20260921T050223.230152Z-new/theories__ReferenceConstants.ec.log"
       },
       {
         "target": "theories/ApproxExpSpec.ec",
         "exit_code": 0,
         "sha256": "81ac19dab1ecd6100f92e15aa8de4cd4169a73f93ca291f1636e4e64b87ae188",
-        "seconds": 1.816,
-        "log": "logs/20260921T023636.682966Z-new/theories__ApproxExpSpec.ec.log"
+        "seconds": 2.046,
+        "log": "logs/20260921T050223.230152Z-new/theories__ApproxExpSpec.ec.log"
       },
       {
         "target": "theories/ApproxExpCertificate.ec",
         "exit_code": 0,
         "sha256": "d2e3e3aa004f9d01fca6a40f2c00c766de49546afc53994e09fb26f9da2873b9",
-        "seconds": 0.379,
-        "log": "logs/20260921T023636.682966Z-new/theories__ApproxExpCertificate.ec.log"
+        "seconds": 0.404,
+        "log": "logs/20260921T050223.230152Z-new/theories__ApproxExpCertificate.ec.log"
       },
       {
         "target": "theories/Bernstein10Spec.ec",
         "exit_code": 0,
         "sha256": "aedbb63b6027d7cc2253b444bef89ea35386c8bba81e0d8203084b7c5d92e249",
-        "seconds": 0.373,
-        "log": "logs/20260921T023636.682966Z-new/theories__Bernstein10Spec.ec.log"
+        "seconds": 0.394,
+        "log": "logs/20260921T050223.230152Z-new/theories__Bernstein10Spec.ec.log"
       },
       {
         "target": "proofs/Bernstein10Correctness.ec",
         "exit_code": 0,
         "sha256": "6b43902a36c7fc6a625b3f437b21d5a41c684fa26119cd3af3da57c58925c131",
-        "seconds": 1.816,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Bernstein10Correctness.ec.log"
+        "seconds": 1.984,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Bernstein10Correctness.ec.log"
       },
       {
         "target": "proofs/ApproxExpCertificateChecks.ec",
         "exit_code": 0,
         "sha256": "a28aa1b7eab5e11efa169cff6c9664a6d6412e09dda1bba6d9881de471f5d21a",
-        "seconds": 1.887,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ApproxExpCertificateChecks.ec.log"
+        "seconds": 2.133,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ApproxExpCertificateChecks.ec.log"
       },
       {
         "target": "theories/FixedPointSpec.ec",
         "exit_code": 0,
         "sha256": "c5db5999e0ab6e36eb131663ecd75ff36c0dc46ec2defc313eda073585705e89",
-        "seconds": 1.712,
-        "log": "logs/20260921T023636.682966Z-new/theories__FixedPointSpec.ec.log"
+        "seconds": 1.84,
+        "log": "logs/20260921T050223.230152Z-new/theories__FixedPointSpec.ec.log"
       },
       {
         "target": "proofs/SamplerConstants.ec",
         "exit_code": 0,
         "sha256": "22081fa38ffe076889b008a6ea7ef8b6f68f9d67e395484bb656e1c87fbd5988",
-        "seconds": 2.33,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SamplerConstants.ec.log"
+        "seconds": 2.561,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SamplerConstants.ec.log"
       },
       {
         "target": "proofs/FixedPointCorrectness.ec",
         "exit_code": 0,
         "sha256": "7df52dc190959e9ec3e8d547c9a99703707ed7ce7e01a1f8a41af8e4cd8ab27e",
-        "seconds": 12.487,
-        "log": "logs/20260921T023636.682966Z-new/proofs__FixedPointCorrectness.ec.log"
+        "seconds": 13.215,
+        "log": "logs/20260921T050223.230152Z-new/proofs__FixedPointCorrectness.ec.log"
       },
       {
         "target": "proofs/CDTTermination.ec",
         "exit_code": 0,
         "sha256": "4aae7678459b13d2e12eb7dd0c878cfe595e8910c1c31b7e47ea6109cc084bfa",
-        "seconds": 2.671,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTTermination.ec.log"
+        "seconds": 3.057,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTTermination.ec.log"
       },
       {
         "target": "proofs/CDTCorrectness.ec",
         "exit_code": 0,
         "sha256": "4ce3e9d49b1d22d9fbadd3cc0f249c74a8dc9eb651aa67847d94a6f4b472610b",
-        "seconds": 17.424,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTCorrectness.ec.log"
+        "seconds": 19.888,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTCorrectness.ec.log"
       },
       {
         "target": "theories/SigmaSpec.ec",
         "exit_code": 0,
         "sha256": "775afc9e4bf71187a595c1d6b62cc7142f5ce53a57daf70eff7e33b1d0a1d9de",
-        "seconds": 1.946,
-        "log": "logs/20260921T023636.682966Z-new/theories__SigmaSpec.ec.log"
+        "seconds": 2.128,
+        "log": "logs/20260921T050223.230152Z-new/theories__SigmaSpec.ec.log"
       },
       {
         "target": "proofs/SigmaCorrectness.ec",
         "exit_code": 0,
         "sha256": "1c9fe75b27d463a042688b495766271f0ad456adf658a133cb5db4327d24da45",
-        "seconds": 3.382,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaCorrectness.ec.log"
+        "seconds": 3.753,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaCorrectness.ec.log"
       },
       {
         "target": "proofs/SigningSamplerBridge.ec",
         "exit_code": 0,
         "sha256": "9565d6bf9c16090202869cdfaf23272a06a37ca4fbc9d12be24e5bde034564af",
-        "seconds": 5.159,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigningSamplerBridge.ec.log"
+        "seconds": 5.714,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigningSamplerBridge.ec.log"
       },
       {
         "target": "proofs/SigmaRoundingCorrectness.ec",
         "exit_code": 0,
         "sha256": "7fe1f857554663cedbb81693a3822abff241064fa62e098614ecd11b8914e9aa",
-        "seconds": 8.146,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRoundingCorrectness.ec.log"
+        "seconds": 8.901,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRoundingCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaSquareBounds.ec",
         "exit_code": 0,
         "sha256": "f959eddfbf767e40a19dedcd2e9c939586394aae8d694c051aed182fc20e21cb",
-        "seconds": 3.983,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaSquareBounds.ec.log"
+        "seconds": 4.589,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaSquareBounds.ec.log"
       },
       {
         "target": "theories/GaussianTraceSpec.ec",
         "exit_code": 0,
         "sha256": "1a96a5fa89ea217703b5e5f740c854c9e6ac959fd62fb43181d42eb2b46429ab",
-        "seconds": 2.223,
-        "log": "logs/20260921T023636.682966Z-new/theories__GaussianTraceSpec.ec.log"
+        "seconds": 2.453,
+        "log": "logs/20260921T050223.230152Z-new/theories__GaussianTraceSpec.ec.log"
       },
       {
         "target": "theories/GaussianConsumerSpec.ec",
         "exit_code": 0,
         "sha256": "e1b661a5a755159493dbebc4dd4cf9d774e688f421cf7a48be1c7676c7d0d13d",
-        "seconds": 1.757,
-        "log": "logs/20260921T023636.682966Z-new/theories__GaussianConsumerSpec.ec.log"
+        "seconds": 1.914,
+        "log": "logs/20260921T050223.230152Z-new/theories__GaussianConsumerSpec.ec.log"
       },
       {
         "target": "proofs/GaussianConsumerCorrectness.ec",
         "exit_code": 0,
         "sha256": "15a1657dc23576766091313fdd7b4539713c3a4288234b84145ac088d732d599",
-        "seconds": 27.473,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianConsumerCorrectness.ec.log"
+        "seconds": 27.981,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianConsumerCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianTraceProperties.ec",
         "exit_code": 0,
         "sha256": "cef67089d661d67c8aef0c33f01200543c5a87afc315f8ae6c60ebb6abd1919a",
-        "seconds": 17.418,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianTraceProperties.ec.log"
+        "seconds": 18.112,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianTraceProperties.ec.log"
       },
       {
         "target": "proofs/GaussianBufferLemmas.ec",
         "exit_code": 0,
         "sha256": "9546466d3574dd505a548ef5a115da3e397719b7013719ea5c527d428a302678",
-        "seconds": 2.755,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianBufferLemmas.ec.log"
+        "seconds": 3.03,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianBufferLemmas.ec.log"
       },
       {
         "target": "theories/GaussianWindowSpec.ec",
         "exit_code": 0,
         "sha256": "c3236e5ca309ee172a0dc39bb87c3b4df8a57f0d6c0ab542c5f15d5823cb4156",
-        "seconds": 3.331,
-        "log": "logs/20260921T023636.682966Z-new/theories__GaussianWindowSpec.ec.log"
+        "seconds": 3.706,
+        "log": "logs/20260921T050223.230152Z-new/theories__GaussianWindowSpec.ec.log"
       },
       {
         "target": "proofs/GaussianTraceCorrectness.ec",
         "exit_code": 0,
         "sha256": "b616a02f66bf0270ec26fe8a246733821a7ffb077306d01d46ecc0be88a47a0a",
-        "seconds": 28.485,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianTraceCorrectness.ec.log"
+        "seconds": 29.378,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianTraceCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianOffsetBridge.ec",
         "exit_code": 0,
         "sha256": "aa954866bc0914aae9473056e9140c0fffed4f791222affb15f3f6558c61e78e",
-        "seconds": 8.936,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianOffsetBridge.ec.log"
+        "seconds": 9.6,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianOffsetBridge.ec.log"
       },
       {
         "target": "proofs/GaussianStreamSequence.ec",
         "exit_code": 0,
         "sha256": "3a2b77b83a3e69691cd51ec76a84ae1096c527bec771cf8ade53c0f54a077637",
-        "seconds": 7.063,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianStreamSequence.ec.log"
+        "seconds": 7.768,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianStreamSequence.ec.log"
       },
       {
         "target": "proofs/GaussianAccumulatorCorrectness.ec",
         "exit_code": 0,
         "sha256": "f0c8b795b52d4fa9e982eb5610c8bc1c06a5a48124c62bb4e217b1fb92b919c6",
-        "seconds": 5.88,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
+        "seconds": 6.481,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianSequenceCorrectness.ec",
         "exit_code": 0,
         "sha256": "469f6bf2659a1466df1dd07c27c7d089b38cae2fbd5241a6bfc2e08735f6ab83",
-        "seconds": 17.179,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianSequenceCorrectness.ec.log"
+        "seconds": 17.657,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianSequenceCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianStreamAccumulator.ec",
         "exit_code": 0,
         "sha256": "9cee6dddc1312246e6f8cedee7b2b3e9854610742ae5bf307c36c49b851ece50",
-        "seconds": 8.54,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianStreamAccumulator.ec.log"
+        "seconds": 9.328,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianStreamAccumulator.ec.log"
       },
       {
         "target": "theories/SHAKEBlockSpec.ec",
         "exit_code": 0,
         "sha256": "baa6e1d3330e40ecf46fdfff7856c59d84f0638ab92b41f25d674b8732b0eb2f",
-        "seconds": 4.15,
-        "log": "logs/20260921T023636.682966Z-new/theories__SHAKEBlockSpec.ec.log"
+        "seconds": 4.775,
+        "log": "logs/20260921T050223.230152Z-new/theories__SHAKEBlockSpec.ec.log"
       },
       {
         "target": "proofs/GaussianRefillCorrectness.ec",
         "exit_code": 0,
         "sha256": "34708c3cd7bba616ce808b11d11887bac3252761b6ae5b0a269953f0b6520c5c",
-        "seconds": 22.349,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianRefillCorrectness.ec.log"
+        "seconds": 23.531,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianRefillCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianStreamBuffer.ec",
         "exit_code": 0,
         "sha256": "1bbb799c26501a407fa5ef203866b685cf1ab9ba3e2dc84350de87816b1a21b5",
-        "seconds": 85.872,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianStreamBuffer.ec.log"
+        "seconds": 89.646,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianStreamBuffer.ec.log"
       },
       {
         "target": "theories/GaussianStreamSpec.ec",
         "exit_code": 0,
         "sha256": "f0c742b71979b21b57d7cb9068b4af2718739793f0209de8c45cddd222fe83ae",
-        "seconds": 28.109,
-        "log": "logs/20260921T023636.682966Z-new/theories__GaussianStreamSpec.ec.log"
+        "seconds": 28.733,
+        "log": "logs/20260921T050223.230152Z-new/theories__GaussianStreamSpec.ec.log"
       },
       {
         "target": "proofs/SHAKEBlockCorrectness.ec",
         "exit_code": 0,
         "sha256": "d8a0dbd8d2546670ad57cdcb8a392f81f16ec1c2025d8cb234f663482cb96cbd",
-        "seconds": 184.172,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SHAKEBlockCorrectness.ec.log"
+        "seconds": 190.599,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SHAKEBlockCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianStreamComposition.ec",
         "exit_code": 0,
         "sha256": "6383aaefc2ab9012d907c3462201ba0067916037e5245a5a0fc34a2e8fae20ab",
-        "seconds": 42.015,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianStreamComposition.ec.log"
+        "seconds": 43.19,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianStreamComposition.ec.log"
       },
       {
         "target": "theories/SHAKEStreamSpec.ec",
         "exit_code": 0,
         "sha256": "2b52cb33ec60a423339cfa930a7b01d60a5a079f10bab6f1edf3bdb884476f56",
-        "seconds": 42.281,
-        "log": "logs/20260921T023636.682966Z-new/theories__SHAKEStreamSpec.ec.log"
+        "seconds": 43.087,
+        "log": "logs/20260921T050223.230152Z-new/theories__SHAKEStreamSpec.ec.log"
       },
       {
         "target": "proofs/SHAKESeedInitCorrectness.ec",
         "exit_code": 0,
         "sha256": "9bd601a182a9e0dd404c3cd1c8c09db5564165dd7f2cd57f19ad1d4a2786af8b",
-        "seconds": 6.182,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SHAKESeedInitCorrectness.ec.log"
+        "seconds": 6.627,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SHAKESeedInitCorrectness.ec.log"
       },
       {
         "target": "proofs/GaussianStreamCorrectness.ec",
         "exit_code": 0,
         "sha256": "58c68cce22d3c8425a6223f38252d4f556dda850137858e51765581dc15bc5a7",
-        "seconds": 55.186,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianStreamCorrectness.ec.log"
+        "seconds": 56.099,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianStreamCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballGaussianBounds.ec",
         "exit_code": 0,
         "sha256": "fc556bfd6d28528653d1065dd48358fa5d6758f783e37627f1f5e19d14daa3ea",
-        "seconds": 10.238,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballGaussianBounds.ec.log"
+        "seconds": 11.212,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballGaussianBounds.ec.log"
       },
       {
         "target": "proofs/SigmaExpInputBounds.ec",
         "exit_code": 0,
         "sha256": "140c75001d314620df700396c4602bbc82ab00fa9a1c3e03310454f17996a3b6",
-        "seconds": 19.216,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaExpInputBounds.ec.log"
+        "seconds": 20.21,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaExpInputBounds.ec.log"
       },
       {
         "target": "proofs/ApproxExpWordCorrectness.ec",
         "exit_code": 0,
         "sha256": "c9d57562b6e5d11ed99660a1a9090a18ef5e796681560f3257e88ed074d3a4a6",
-        "seconds": 68.986,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ApproxExpWordCorrectness.ec.log"
+        "seconds": 69.415,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ApproxExpWordCorrectness.ec.log"
       },
       {
         "target": "theories/ExpIntervalSpec.ec",
         "exit_code": 0,
         "sha256": "a45a8fb736ca147a25ce91d12a507bb32d7f598ea9cabf8db4af9067da312139",
-        "seconds": 0.642,
-        "log": "logs/20260921T023636.682966Z-new/theories__ExpIntervalSpec.ec.log"
+        "seconds": 0.697,
+        "log": "logs/20260921T050223.230152Z-new/theories__ExpIntervalSpec.ec.log"
       },
       {
         "target": "proofs/ExpIntervalCorrectness.ec",
         "exit_code": 0,
         "sha256": "04ea4a5a2240b7b54fdfda28ba8b8b627c3c295424166581ba45e84900d0ce63",
-        "seconds": 2.675,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ExpIntervalCorrectness.ec.log"
+        "seconds": 2.891,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ExpIntervalCorrectness.ec.log"
       },
       {
         "target": "proofs/ExponentialGridComparison.ec",
         "exit_code": 0,
         "sha256": "612c610d4da8127c939cce5362cb095a29c1b1d819128239b784b6dc09caa599",
-        "seconds": 1.142,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ExponentialGridComparison.ec.log"
+        "seconds": 1.269,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ExponentialGridComparison.ec.log"
       },
       {
         "target": "proofs/ApproxExpPolynomialBound.ec",
         "exit_code": 0,
         "sha256": "64bae21468cdd3020c77cc249283a416e755fbfc74839b2534d419de049a0e53",
-        "seconds": 17.466,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ApproxExpPolynomialBound.ec.log"
+        "seconds": 18.183,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ApproxExpPolynomialBound.ec.log"
       },
       {
         "target": "proofs/ApproxExpNumericalCorrectness.ec",
         "exit_code": 0,
         "sha256": "c29d3d5917dafcf0a7e8e9d0ffbf965825f102211bdcb5e718ebebb1866cb7eb",
-        "seconds": 5.273,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ApproxExpNumericalCorrectness.ec.log"
+        "seconds": 5.508,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ApproxExpNumericalCorrectness.ec.log"
       },
       {
         "target": "theories/CDTDistributionSpec.ec",
         "exit_code": 0,
         "sha256": "3dd5e6ab147467b01ec3bee46a06a4f59588cc1124454670e40282327bb764bd",
-        "seconds": 0.829,
-        "log": "logs/20260921T023636.682966Z-new/theories__CDTDistributionSpec.ec.log"
+        "seconds": 0.905,
+        "log": "logs/20260921T050223.230152Z-new/theories__CDTDistributionSpec.ec.log"
       },
       {
         "target": "proofs/CDTDistribution.ec",
         "exit_code": 0,
         "sha256": "7cc09e5e690b8faa0847adc04609ce2900c374eb338278c44d93d85d9353c255",
-        "seconds": 13.91,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTDistribution.ec.log"
+        "seconds": 13.98,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTDistribution.ec.log"
       },
       {
         "target": "proofs/CDTDistributionBridge.ec",
         "exit_code": 0,
         "sha256": "7f4159a5b2a95df8b24e311b1f8de684b33b1f86807e68d121a8e0de6edf8a5a",
-        "seconds": 7.267,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTDistributionBridge.ec.log"
+        "seconds": 7.717,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTDistributionBridge.ec.log"
       },
       {
         "target": "theories/HalfGaussianSpec.ec",
         "exit_code": 0,
         "sha256": "4aabd63ca9d874e311bc2b893ee1608057c131515fe32c40115a073ee8851646",
-        "seconds": 0.821,
-        "log": "logs/20260921T023636.682966Z-new/theories__HalfGaussianSpec.ec.log"
+        "seconds": 0.876,
+        "log": "logs/20260921T050223.230152Z-new/theories__HalfGaussianSpec.ec.log"
       },
       {
         "target": "proofs/HalfGaussianProperties.ec",
         "exit_code": 0,
         "sha256": "42e6721a80d93367bde24bdeb96764cf13c8c7fc1ca947d454059a376900b5b9",
-        "seconds": 2.77,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HalfGaussianProperties.ec.log"
+        "seconds": 2.813,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HalfGaussianProperties.ec.log"
       },
       {
         "target": "theories/CDTGaussianCertificate.ec",
         "exit_code": 0,
         "sha256": "e52546426e23f29e384790238cadbcceffd571ae7baed608b9cd8f69888a6379",
-        "seconds": 0.705,
-        "log": "logs/20260921T023636.682966Z-new/theories__CDTGaussianCertificate.ec.log"
+        "seconds": 0.702,
+        "log": "logs/20260921T050223.230152Z-new/theories__CDTGaussianCertificate.ec.log"
       },
       {
         "target": "proofs/GaussianIntervalBounds.ec",
         "exit_code": 0,
         "sha256": "1d8ac7b2858e248e70edde6285b4f9772f02f97d1963684f96781b9026ee6c12",
-        "seconds": 1.915,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianIntervalBounds.ec.log"
+        "seconds": 1.968,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianIntervalBounds.ec.log"
       },
       {
         "target": "proofs/CDTGaussianCertificateChecks.ec",
         "exit_code": 0,
         "sha256": "710dbc4f3df1fd8f65f354e4e46448a6d28287d5d80fcdd8c501df6b9162823e",
-        "seconds": 10.733,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTGaussianCertificateChecks.ec.log"
+        "seconds": 10.965,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTGaussianCertificateChecks.ec.log"
       },
       {
         "target": "proofs/CDTGaussianEnclosure.ec",
         "exit_code": 0,
         "sha256": "50196b83ca4fa753a9821ede67b2be7e10cc8ab2a93fd8f735582f402f3f5f7b",
-        "seconds": 3.537,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTGaussianEnclosure.ec.log"
+        "seconds": 3.719,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTGaussianEnclosure.ec.log"
       },
       {
         "target": "proofs/DistributionIntervalBounds.ec",
         "exit_code": 0,
         "sha256": "5e27c935050752d0a49de9e3d84ab7916c58ac514dcde0cb3cdf68137eb454f9",
-        "seconds": 1.733,
-        "log": "logs/20260921T023636.682966Z-new/proofs__DistributionIntervalBounds.ec.log"
+        "seconds": 1.86,
+        "log": "logs/20260921T050223.230152Z-new/proofs__DistributionIntervalBounds.ec.log"
       },
       {
         "target": "proofs/CDTGaussianTableBridge.ec",
         "exit_code": 0,
         "sha256": "69711e982544578f6cb7d9af95fea4f01fa350274d79db8c846093d763ba4d2b",
-        "seconds": 3.844,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTGaussianTableBridge.ec.log"
+        "seconds": 3.875,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTGaussianTableBridge.ec.log"
       },
       {
         "target": "proofs/CDTGaussianApproximation.ec",
         "exit_code": 0,
         "sha256": "22c06e8346bc40b9892e93c02a70563221a3b1b293935fbe16b475fdf0b6ad6f",
-        "seconds": 2.988,
-        "log": "logs/20260921T023636.682966Z-new/proofs__CDTGaussianApproximation.ec.log"
+        "seconds": 2.995,
+        "log": "logs/20260921T050223.230152Z-new/proofs__CDTGaussianApproximation.ec.log"
       },
       {
         "target": "proofs/ConditionalRatioBound.ec",
         "exit_code": 0,
         "sha256": "f15fce635a626453342eaedc92f59d1fe0ebf7a66f82f95f627b71a2b0e9d633",
-        "seconds": 0.912,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ConditionalRatioBound.ec.log"
+        "seconds": 0.916,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ConditionalRatioBound.ec.log"
       },
       {
         "target": "proofs/DistributionExpectationDistance.ec",
         "exit_code": 0,
         "sha256": "72a49e31513d61c3c5fb988aef57992639474d7ec927c85be5bfa0091fe60a86",
-        "seconds": 1.504,
-        "log": "logs/20260921T023636.682966Z-new/proofs__DistributionExpectationDistance.ec.log"
+        "seconds": 1.537,
+        "log": "logs/20260921T050223.230152Z-new/proofs__DistributionExpectationDistance.ec.log"
       },
       {
         "target": "proofs/ExponentialLipschitz.ec",
         "exit_code": 0,
         "sha256": "632727b3610a09cc54a99478ca93eb974bb6b34ec800613aafcb06112d0ff9a0",
-        "seconds": 1.214,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ExponentialLipschitz.ec.log"
+        "seconds": 1.21,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ExponentialLipschitz.ec.log"
       },
       {
         "target": "proofs/FiniteExpectationError.ec",
         "exit_code": 0,
         "sha256": "6d55672be3d130663a9759227191cdba836381d0653dffc088f3ae523705e168",
-        "seconds": 1.094,
-        "log": "logs/20260921T023636.682966Z-new/proofs__FiniteExpectationError.ec.log"
+        "seconds": 1.081,
+        "log": "logs/20260921T050223.230152Z-new/proofs__FiniteExpectationError.ec.log"
       },
       {
         "target": "theories/Gaussian76Spec.ec",
         "exit_code": 0,
         "sha256": "4f8a2a1e1f04aa2def0dfe06707cf7443e3f6da863102667b824a274cd10018b",
-        "seconds": 0.86,
-        "log": "logs/20260921T023636.682966Z-new/theories__Gaussian76Spec.ec.log"
+        "seconds": 0.84,
+        "log": "logs/20260921T050223.230152Z-new/theories__Gaussian76Spec.ec.log"
       },
       {
         "target": "proofs/Gaussian76Properties.ec",
         "exit_code": 0,
         "sha256": "6be244673a7289581ee5cf0adb6caba045c8f5cd0107d1cc966004d17fc6e780",
-        "seconds": 1.569,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Gaussian76Properties.ec.log"
+        "seconds": 1.581,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Gaussian76Properties.ec.log"
       },
       {
         "target": "proofs/Gaussian76Folding.ec",
         "exit_code": 0,
         "sha256": "34a2003d9b37e714d0065ed6b556a5daffc781b38716cea1fb78b9089fd3a6c5",
-        "seconds": 2.173,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Gaussian76Folding.ec.log"
+        "seconds": 2.222,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Gaussian76Folding.ec.log"
       },
       {
         "target": "proofs/GaussianBlockReindex.ec",
         "exit_code": 0,
         "sha256": "5fc4a655a4d7c6415b9faaa72ad84f802d2343e2ac0bf68e36a1099ee3962705",
-        "seconds": 1.03,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianBlockReindex.ec.log"
+        "seconds": 1.035,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianBlockReindex.ec.log"
       },
       {
         "target": "theories/SigmaRawSpec.ec",
         "exit_code": 0,
         "sha256": "575fcec7719f2589deb37bf0f9fe60a1f4fabb7588593833500a8dd0b8d4dcda",
-        "seconds": 2.233,
-        "log": "logs/20260921T023636.682966Z-new/theories__SigmaRawSpec.ec.log"
+        "seconds": 2.249,
+        "log": "logs/20260921T050223.230152Z-new/theories__SigmaRawSpec.ec.log"
       },
       {
         "target": "theories/SigmaRawNoiseSpec.ec",
         "exit_code": 0,
         "sha256": "9f9b9aa3cabed71abe5bbf44558a3e1063360f77abd602d6bfb70af05a412d51",
-        "seconds": 1.361,
-        "log": "logs/20260921T023636.682966Z-new/theories__SigmaRawNoiseSpec.ec.log"
+        "seconds": 1.407,
+        "log": "logs/20260921T050223.230152Z-new/theories__SigmaRawNoiseSpec.ec.log"
       },
       {
         "target": "theories/SigmaJointSpec.ec",
         "exit_code": 0,
         "sha256": "7d0e5bdadf21e95360ec9dd034a4fa9c8c433d5745277dd9b8764664f90464df",
-        "seconds": 2.283,
-        "log": "logs/20260921T023636.682966Z-new/theories__SigmaJointSpec.ec.log"
+        "seconds": 2.302,
+        "log": "logs/20260921T050223.230152Z-new/theories__SigmaJointSpec.ec.log"
       },
       {
         "target": "proofs/Gaussian76Kernel.ec",
         "exit_code": 0,
         "sha256": "e0d3db2e92fa394d2ba2136bb7acdf27131083289c56219b1e7a11ee64a48b49",
-        "seconds": 3.051,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Gaussian76Kernel.ec.log"
+        "seconds": 3.119,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Gaussian76Kernel.ec.log"
       },
       {
         "target": "proofs/Gaussian76Rounding.ec",
         "exit_code": 0,
         "sha256": "6caec2779359c5fe3984538a9b850e3766d9b78053e4a6841336ab656896295b",
-        "seconds": 1.692,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Gaussian76Rounding.ec.log"
+        "seconds": 1.691,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Gaussian76Rounding.ec.log"
       },
       {
         "target": "theories/Rejection48Spec.ec",
         "exit_code": 0,
         "sha256": "5a1056d429633a8b6412730773b44647d72b62586d168777a31dc31226e062fc",
-        "seconds": 2.414,
-        "log": "logs/20260921T023636.682966Z-new/theories__Rejection48Spec.ec.log"
+        "seconds": 2.49,
+        "log": "logs/20260921T050223.230152Z-new/theories__Rejection48Spec.ec.log"
       },
       {
         "target": "proofs/Rejection48Correctness.ec",
         "exit_code": 0,
         "sha256": "649ea5bb71dfec0d9321693a67d2645e5326245e5abd8b6ffc59a2f37b6249c8",
-        "seconds": 3.505,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Rejection48Correctness.ec.log"
+        "seconds": 3.631,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Rejection48Correctness.ec.log"
       },
       {
         "target": "proofs/SigmaRejection48Bridge.ec",
         "exit_code": 0,
         "sha256": "50fce507b4149352de2ce30dffe143f4a41aebc49b6743e275c16539f7ef39d6",
-        "seconds": 5.925,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRejection48Bridge.ec.log"
+        "seconds": 5.98,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRejection48Bridge.ec.log"
       },
       {
         "target": "proofs/SigmaExpAcceptanceCorrectness.ec",
         "exit_code": 0,
         "sha256": "c2c69ff88e5696b84e3d1c90dd95da955ea576cc3ec99c432bc9d41860da0cbc",
-        "seconds": 5.937,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaExpAcceptanceCorrectness.ec.log"
+        "seconds": 6.257,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaExpAcceptanceCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaNoise72Bridge.ec",
         "exit_code": 0,
         "sha256": "f09b2cdc8f98ea8610ac02eaefeeb034fd359e08279d6d9117168c1aa496a265",
-        "seconds": 10.014,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaNoise72Bridge.ec.log"
+        "seconds": 10.036,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaNoise72Bridge.ec.log"
       },
       {
         "target": "proofs/SigmaCDT83Patch.ec",
         "exit_code": 0,
         "sha256": "0d50396403cb558e2cd91cc3ed82f5714404ac424122d409401acd29127395a4",
-        "seconds": 6.743,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaCDT83Patch.ec.log"
+        "seconds": 6.71,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaCDT83Patch.ec.log"
       },
       {
         "target": "theories/SigmaConditionalSpec.ec",
         "exit_code": 0,
         "sha256": "d38e29cef5378742635dc97e0575e4a6f24a839da2360cda581a2fc882b72cd7",
-        "seconds": 5.37,
-        "log": "logs/20260921T023636.682966Z-new/theories__SigmaConditionalSpec.ec.log"
+        "seconds": 4.989,
+        "log": "logs/20260921T050223.230152Z-new/theories__SigmaConditionalSpec.ec.log"
       },
       {
         "target": "proofs/SigmaSquareExact.ec",
         "exit_code": 0,
         "sha256": "5ae1dc6e0fa7cd3377e64ed87cc8822d84a028c66ff0bd6b1d3e53488a258472",
-        "seconds": 77.485,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaSquareExact.ec.log"
+        "seconds": 77.347,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaSquareExact.ec.log"
       },
       {
         "target": "proofs/SigmaRawExponentCorrectness.ec",
         "exit_code": 0,
         "sha256": "c421f6a08f6b4cba73345854d62ed5bd20136edf8441866be4478ce0fbb21cee",
-        "seconds": 48.653,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRawExponentCorrectness.ec.log"
+        "seconds": 48.727,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRawExponentCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaRoundedOutputCorrectness.ec",
         "exit_code": 0,
         "sha256": "68fe00b69d1508c55ad9f4ea2f87d0f18455e3d3ee243b4710b01bc2ab0ff823",
-        "seconds": 4.958,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRoundedOutputCorrectness.ec.log"
+        "seconds": 4.929,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRoundedOutputCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaJointKernelCorrectness.ec",
         "exit_code": 0,
         "sha256": "488a96075856ead4677b50266d72466f4a2f86e8a5a28c328752ec4e63383174",
-        "seconds": 6.404,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJointKernelCorrectness.ec.log"
+        "seconds": 6.284,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJointKernelCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaJointIdealCorrectness.ec",
         "exit_code": 0,
         "sha256": "57f6e9012275b2dedac79f5c6da2085257c4ae80f726ec4dd6ef28796e7f70d5",
-        "seconds": 5.673,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJointIdealCorrectness.ec.log"
+        "seconds": 5.348,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJointIdealCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaConditionalIdeal.ec",
         "exit_code": 0,
         "sha256": "ef1fdc6c2dc161a36eb18c84dd6614fd37c3394d3d969bba80ae0b8226085a22",
-        "seconds": 5.558,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaConditionalIdeal.ec.log"
+        "seconds": 5.36,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaConditionalIdeal.ec.log"
       },
       {
         "target": "proofs/SigmaRawZeroCorrectness.ec",
         "exit_code": 0,
         "sha256": "44cf88cd2f02830bbef3f7d8ecccb287ac7a2acadff91c797e6df64c23442133",
-        "seconds": 36.883,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRawZeroCorrectness.ec.log"
+        "seconds": 36.858,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRawZeroCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaRawAcceptanceCorrectness.ec",
         "exit_code": 0,
         "sha256": "493f18c1fa022888a0d48101c1ebed61797c821a66b9be2eff55d7a4ead98d22",
-        "seconds": 58.221,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRawAcceptanceCorrectness.ec.log"
+        "seconds": 57.965,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRawAcceptanceCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaJointAttemptBridge.ec",
         "exit_code": 0,
         "sha256": "903ec1bd47294402e464ca424944f260bf6e4f786138f42c4bd33b535e6cafa6",
-        "seconds": 16.226,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJointAttemptBridge.ec.log"
+        "seconds": 15.956,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJointAttemptBridge.ec.log"
       },
       {
         "target": "proofs/SigmaJoint203Bridge.ec",
         "exit_code": 0,
         "sha256": "d05c04c63d95ee5dff1487d8c79b127901516261a201134ff089afecd42037f6",
-        "seconds": 5.722,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJoint203Bridge.ec.log"
+        "seconds": 5.45,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJoint203Bridge.ec.log"
       },
       {
         "target": "proofs/SigmaConditionalActual.ec",
         "exit_code": 0,
         "sha256": "f8471632aeb5bb509484568d3ba010eff61dd7dae8d8674a4a84f3426908033b",
-        "seconds": 5.491,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaConditionalActual.ec.log"
+        "seconds": 5.323,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaConditionalActual.ec.log"
       },
       {
         "target": "proofs/SigmaJointFixedCorrectness.ec",
         "exit_code": 0,
         "sha256": "5df1db278b0988f3fc0a5ab58c9c1b034abea2305842be012cefd66074923186",
-        "seconds": 17.122,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJointFixedCorrectness.ec.log"
+        "seconds": 16.756,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJointFixedCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaJointCorrectness.ec",
         "exit_code": 0,
         "sha256": "0b73f992d237ea3bb974b746206f7e0774e787469b2d0c2218d26bc99a610247",
-        "seconds": 76.81,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaJointCorrectness.ec.log"
+        "seconds": 75.919,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaJointCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaAcceptanceLowerBound.ec",
         "exit_code": 0,
         "sha256": "dfa1993645d58ef78a5ccd3c2265dc9646906dc7e36ffb633970cce86c96d536",
-        "seconds": 6.792,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaAcceptanceLowerBound.ec.log"
+        "seconds": 6.467,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaAcceptanceLowerBound.ec.log"
       },
       {
         "target": "proofs/SigmaConditionalCorrectness.ec",
         "exit_code": 0,
         "sha256": "c0d75baab02a78a2abb0021644afc5343f8c4552e0d932fcf0bc22a770f2601c",
-        "seconds": 20.285,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaConditionalCorrectness.ec.log"
+        "seconds": 20.115,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaConditionalCorrectness.ec.log"
       },
       {
         "target": "proofs/Gaussian76Identification.ec",
         "exit_code": 0,
         "sha256": "8b00939c94289170d08b173091707da722ac1c527005d37e0d5aa1eda3a834b3",
-        "seconds": 6.929,
-        "log": "logs/20260921T023636.682966Z-new/proofs__Gaussian76Identification.ec.log"
+        "seconds": 6.98,
+        "log": "logs/20260921T050223.230152Z-new/proofs__Gaussian76Identification.ec.log"
       },
       {
         "target": "proofs/GaussianValueCorrectness.ec",
         "exit_code": 0,
         "sha256": "1b67556af08fe8b46cbc5724a32d32b89db0a66471a5616f39efb3e3dbb33478",
-        "seconds": 5.214,
-        "log": "logs/20260921T023636.682966Z-new/proofs__GaussianValueCorrectness.ec.log"
+        "seconds": 5.076,
+        "log": "logs/20260921T050223.230152Z-new/proofs__GaussianValueCorrectness.ec.log"
       },
       {
         "target": "theories/HyperballFixedPointSpec.ec",
         "exit_code": 0,
         "sha256": "76a3cb601bc8c3b38fa213f07cb8d6e66c7198f1eac93964ac64a77532e8e02f",
-        "seconds": 1.905,
-        "log": "logs/20260921T023636.682966Z-new/theories__HyperballFixedPointSpec.ec.log"
+        "seconds": 1.957,
+        "log": "logs/20260921T050223.230152Z-new/theories__HyperballFixedPointSpec.ec.log"
       },
       {
         "target": "theories/HyperballNormSpec.ec",
         "exit_code": 0,
         "sha256": "b737e7941e27135648f5f21a57cd1586022d1e375f436cd78971da1874471d05",
-        "seconds": 12.949,
-        "log": "logs/20260921T023636.682966Z-new/theories__HyperballNormSpec.ec.log"
+        "seconds": 12.943,
+        "log": "logs/20260921T050223.230152Z-new/theories__HyperballNormSpec.ec.log"
       },
       {
         "target": "theories/HyperballScaleSpec.ec",
         "exit_code": 0,
         "sha256": "95584269d8a50bc2f132a979633b3936e518f41376869f459a01c4a1ed9481e4",
-        "seconds": 43.397,
-        "log": "logs/20260921T023636.682966Z-new/theories__HyperballScaleSpec.ec.log"
+        "seconds": 43.975,
+        "log": "logs/20260921T050223.230152Z-new/theories__HyperballScaleSpec.ec.log"
       },
       {
         "target": "theories/HyperballSpec.ec",
         "exit_code": 0,
         "sha256": "0fa04c57ed9f5398a8648ff9fcc6a8a7470b4483676441f9b7145ab21b59e06b",
-        "seconds": 4.556,
-        "log": "logs/20260921T023636.682966Z-new/theories__HyperballSpec.ec.log"
+        "seconds": 4.842,
+        "log": "logs/20260921T050223.230152Z-new/theories__HyperballSpec.ec.log"
       },
       {
         "target": "proofs/HyperballBatchCorrectness.ec",
         "exit_code": 0,
         "sha256": "2765ab8989e4d8c03f1f55547a8be72ea31ed69be5ef430df6eaeae4faa8ef88",
-        "seconds": 19.211,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballBatchCorrectness.ec.log"
+        "seconds": 20.308,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballBatchCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballByteCorrectness.ec",
         "exit_code": 0,
         "sha256": "29b1e11f1a806357380f91271c307c89dc60aed9d1347e60c723136042f4e514",
-        "seconds": 4.511,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballByteCorrectness.ec.log"
+        "seconds": 5.106,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballByteCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballFixedPointCorrectness.ec",
         "exit_code": 0,
         "sha256": "446406e55ef53cdc61f9c6648f6df3ceaad7e1f06b40e591caf67343dccdc351",
-        "seconds": 27.295,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballFixedPointCorrectness.ec.log"
+        "seconds": 27.871,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballFixedPointCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballHistoryCorrectness.ec",
         "exit_code": 0,
         "sha256": "bc93274d3eb7398e961e79cbd40cd0d2d6a414a58304df52a5defe898626eae6",
-        "seconds": 20.281,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballHistoryCorrectness.ec.log"
+        "seconds": 20.82,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballHistoryCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballNormCorrectness.ec",
         "exit_code": 0,
         "sha256": "97629eaa80c4b197d9eeb2b5c24696780ad57daf4c97f87f399ed731ee274afb",
-        "seconds": 6.043,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballNormCorrectness.ec.log"
+        "seconds": 6.267,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballNormCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballScaleCorrectness.ec",
         "exit_code": 0,
         "sha256": "76dac2aa2df4e5b82a77f401826646a1fa55b12233bb445fab786fa8c6916eb3",
-        "seconds": 25.757,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballScaleCorrectness.ec.log"
+        "seconds": 26.636,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballScaleCorrectness.ec.log"
       },
       {
         "target": "theories/HyperballReferenceConstants.ec",
         "exit_code": 0,
         "sha256": "b573e24bf4a517087802e9fddd8867dcbc0bacff16abd6646aa19033dd5d39d8",
-        "seconds": 1.78,
-        "log": "logs/20260921T023636.682966Z-new/theories__HyperballReferenceConstants.ec.log"
+        "seconds": 1.889,
+        "log": "logs/20260921T050223.230152Z-new/theories__HyperballReferenceConstants.ec.log"
       },
       {
         "target": "proofs/HyperballCorrectness.ec",
         "exit_code": 0,
         "sha256": "412f38750ea42d61f83b9c38489aaaa9d78031060ef3955b56d396f00ad53d1f",
-        "seconds": 24.238,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballCorrectness.ec.log"
+        "seconds": 24.653,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballCorrectness.ec.log"
       },
       {
         "target": "proofs/HyperballNormBoundary.ec",
         "exit_code": 0,
         "sha256": "1a2642441f7b4fb08bf230d5b1a9695d4f87430c00501027194abf926c7e8d12",
-        "seconds": 0.709,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballNormBoundary.ec.log"
+        "seconds": 0.822,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballNormBoundary.ec.log"
       },
       {
         "target": "proofs/HyperballResultProperties.ec",
         "exit_code": 0,
         "sha256": "da02813b5027cd2c34de24f52745b1db84bdc63f8f92fbe0f662a5a866ed59e4",
-        "seconds": 106.146,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballResultProperties.ec.log"
+        "seconds": 102.361,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballResultProperties.ec.log"
       },
       {
         "target": "proofs/HyperballResultUniqueness.ec",
         "exit_code": 0,
         "sha256": "73a95f1ac63de768c774e2784cb7e58804bb56d280ac18d773a3001b3efa62d2",
-        "seconds": 16.083,
-        "log": "logs/20260921T023636.682966Z-new/proofs__HyperballResultUniqueness.ec.log"
+        "seconds": 17.085,
+        "log": "logs/20260921T050223.230152Z-new/proofs__HyperballResultUniqueness.ec.log"
       },
       {
         "target": "proofs/ProductionApiCorrectness.ec",
         "exit_code": 0,
         "sha256": "4e5cb8bd8212129f224006648716e3cbd679b7045e41e3bfb3b67c63737b31b1",
-        "seconds": 6.745,
-        "log": "logs/20260921T023636.682966Z-new/proofs__ProductionApiCorrectness.ec.log"
+        "seconds": 7.226,
+        "log": "logs/20260921T050223.230152Z-new/proofs__ProductionApiCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaRawAverageCorrectness.ec",
         "exit_code": 0,
         "sha256": "20116595cde261a7aa9c1cad0d59c8b5fd899c1551b4436a510dca465abea265",
-        "seconds": 6.802,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRawAverageCorrectness.ec.log"
+        "seconds": 7.351,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRawAverageCorrectness.ec.log"
       },
       {
         "target": "proofs/SigmaRawDensityIdentity.ec",
         "exit_code": 0,
         "sha256": "cf0763950428cdf15b644cc2892b41a3f5b3c953fe4f68fcecc43d6f35807aa4",
-        "seconds": 2.796,
-        "log": "logs/20260921T023636.682966Z-new/proofs__SigmaRawDensityIdentity.ec.log"
+        "seconds": 3.17,
+        "log": "logs/20260921T050223.230152Z-new/proofs__SigmaRawDensityIdentity.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBatchDistance.ec",
+        "exit_code": 0,
+        "sha256": "c96dd41c1465fa97574543d62b3e13826355ecc179d70416bf6f6da3d7ab4c2f",
+        "seconds": 1.47,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianBatchDistance.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryCore.ec",
+        "exit_code": 0,
+        "sha256": "436bb6f35fccfc806657a8c001e85fb8dd6eec6ee63eed2ded94c908b5c59b4a",
+        "seconds": 0.958,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryCore.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryAttempt.ec",
+        "exit_code": 0,
+        "sha256": "dd9bdc401317ac723f38987b1e7d0def5199a8797d8aee721a20da6db62babb6",
+        "seconds": 6.087,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryAttempt.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryActual.ec",
+        "exit_code": 0,
+        "sha256": "5a1691d299b238feef9a4fa17bd126f7b9ee5e94d81b385c013d8d8593dc8fdd",
+        "seconds": 6.039,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryActual.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatch.ec",
+        "exit_code": 0,
+        "sha256": "da4ea3b1aee02f2e9177790224e163bd4bcfa2ddf885a802d7f6c9e7fd34b313",
+        "seconds": 1.527,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryBatch.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryTail.ec",
+        "exit_code": 0,
+        "sha256": "f8c4b4b17760a978ee0e83fe14fed6dbb3add753e0b08476ad438e8c9eb836cb",
+        "seconds": 1.092,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryTail.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatchCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "60ca7cb988b7c545906df4bdb526c699c3ad2c6970470239300712c33538ed4d",
+        "seconds": 6.214,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryBatchCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatchTail.ec",
+        "exit_code": 0,
+        "sha256": "e6bc9a11aa8c0e269ce37702bffd451c2277799b1ab3dd70214b9fe412a9b5a5",
+        "seconds": 1.967,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryBatchTail.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBufferTotal.ec",
+        "exit_code": 0,
+        "sha256": "30857769dc441c7e6712e33c7a9e323463b40e49916e3a43faca62cd06828021",
+        "seconds": 5.575,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryBufferTotal.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryConsumerTotal.ec",
+        "exit_code": 0,
+        "sha256": "4bccc49ea863eb6a8ab85b27bb2741d2b0d1c9a1e0405e3235e50116f058baa0",
+        "seconds": 5.077,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryConsumerTotal.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryInputs.ec",
+        "exit_code": 0,
+        "sha256": "72bd130027407f0152fbf5f62192ee800963b6ae3e215fd53b8b448a171e59b3",
+        "seconds": 6.764,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryInputs.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryStreamBridge.ec",
+        "exit_code": 0,
+        "sha256": "303b6ac539e7718542f07e4f94873b42884feb6f8cfc634661e182550cef368a",
+        "seconds": 7.12,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryStreamBridge.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryPrefixCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "b5e849ac3baec436d3c59f005f9caf00a5d0f861cc9b16650e96b7b425c4c261",
+        "seconds": 6.982,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryPrefixCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryRank.ec",
+        "exit_code": 0,
+        "sha256": "1c58c5ad121dca6836b45fb776d8b707711a8c7ef43bd7bca3f0ff5484a7d535",
+        "seconds": 1.214,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryRank.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryStreamTermination.ec",
+        "exit_code": 0,
+        "sha256": "1a4be8145e27cdd09563905d8f704063a0bf2867d3a92ce3bf54d6e80aca3d65",
+        "seconds": 58.588,
+        "log": "logs/20260921T053211.708475Z-new/proofs__GaussianRetryStreamTermination.ec.log"
       }
     ],
+    "command": "python3 .omx/publish-haetae120-20260918/gaussian-retries/resume-gate.py",
+    "strategy": "Unchanged113 independent main targets, then15 frozen new main targets; shared verification script and final complete inventory/hash checks",
+    "complete_inventory_checked": true,
+    "final_source_hashes_match": true,
+    "resume_of": "20260921T050223.230152Z",
+    "collection_commands": [
+      "python3 .omx/publish-haetae120-20260918/gaussian-retries/run-gate.py",
+      "python3 .omx/publish-haetae120-20260918/gaussian-retries/resume-gate.py"
+    ],
     "eof_completion_guard": true,
-    "total_target_seconds": 1685.394
+    "total_target_seconds": 1839.539
   },
   "ntt_replay": [
     {
@@ -904,9 +1018,9 @@
     "tests": 18,
     "result": "PASS",
     "exit_code": 0,
-    "exec_session": 34577,
-    "checked_at": "2026-09-21T02:30:51.140833+00:00",
-    "log": "logs/gaussian-identification-gate-regressions.log",
+    "exec_session": 48488,
+    "checked_at": "2026-09-21T04:39:45.770033+00:00",
+    "log": "logs/gaussian-retries-gate-regressions.log",
     "targets": [
       {
         "target": "tests/test_verification_gate.py",
@@ -931,18 +1045,44 @@
     ]
   },
   "independent_review": {
-    "result": "APPROVE independent Gaussian normalization, exact ideal identification and actual magnitude error; no blocking findings",
-    "checked_at": "2026-09-21T03:08:54.634749+00:00",
-    "reviewer": "independent read-only architect lane",
-    "checked": "Independent all-integer exponential normalizer and summability, supported Euclidean block reindexing, generic unbounded ideal kernel cancellation, zero-once folding and Z/2 acceptance weights, abs-before-rounding ties and exact ideal bin PMF, exact sc_ideal_conditioned=g76_rounded, actual SDist/event error transferred without added error, final113-target PASS and seven frozen source hashes, explicit ideal-exact versus actual-approximate documentation",
-    "hidden_finite_cutoff_word_wrap_or_new_accuracy_premise": false,
-    "remaining_scope": "Actual implementation signs, repeated rejection and full streams, concrete SHAKE randomness, Renyi guarantee, Hyperball mathematics and complete APIs",
-    "no_source_edits_or_test_reruns_in_review": true
+    "result": "APPROVE",
+    "reviewer": "independent architect / haetae120_delta_audit",
+    "checked_at": "2026-09-21T05:53:17.326677+00:00",
+    "integrated_gate_pass": true,
+    "non_ntt_targets": 128,
+    "target_seconds": 1839.539,
+    "proof_hashes": {
+      "proofs/GaussianRetryCore.ec": "436bb6f35fccfc806657a8c001e85fb8dd6eec6ee63eed2ded94c908b5c59b4a",
+      "proofs/GaussianRetryTail.ec": "f8c4b4b17760a978ee0e83fe14fed6dbb3add753e0b08476ad438e8c9eb836cb",
+      "proofs/GaussianBatchDistance.ec": "c96dd41c1465fa97574543d62b3e13826355ecc179d70416bf6f6da3d7ab4c2f",
+      "proofs/GaussianRetryBatch.ec": "da4ea3b1aee02f2e9177790224e163bd4bcfa2ddf885a802d7f6c9e7fd34b313",
+      "proofs/GaussianRetryRank.ec": "1c58c5ad121dca6836b45fb776d8b707711a8c7ef43bd7bca3f0ff5484a7d535",
+      "proofs/GaussianRetryConsumerTotal.ec": "4bccc49ea863eb6a8ab85b27bb2741d2b0d1c9a1e0405e3235e50116f058baa0",
+      "proofs/GaussianRetryInputs.ec": "72bd130027407f0152fbf5f62192ee800963b6ae3e215fd53b8b448a171e59b3",
+      "proofs/GaussianRetryBatchTail.ec": "e6bc9a11aa8c0e269ce37702bffd451c2277799b1ab3dd70214b9fe412a9b5a5",
+      "proofs/GaussianRetryStreamBridge.ec": "303b6ac539e7718542f07e4f94873b42884feb6f8cfc634661e182550cef368a",
+      "proofs/GaussianRetryAttempt.ec": "dd9bdc401317ac723f38987b1e7d0def5199a8797d8aee721a20da6db62babb6",
+      "proofs/GaussianRetryActual.ec": "5a1691d299b238feef9a4fa17bd126f7b9ee5e94d81b385c013d8d8593dc8fdd",
+      "proofs/GaussianRetryBatchCorrectness.ec": "60ca7cb988b7c545906df4bdb526c699c3ad2c6970470239300712c33538ed4d",
+      "proofs/GaussianRetryPrefixCorrectness.ec": "b5e849ac3baec436d3c59f005f9caf00a5d0f861cc9b16650e96b7b425c4c261",
+      "proofs/GaussianRetryBufferTotal.ec": "30857769dc441c7e6712e33c7a9e323463b40e49916e3a43faca62cd06828021",
+      "proofs/GaussianRetryStreamTermination.ec": "1a4be8145e27cdd09563905d8f704063a0bf2867d3a92ce3bf54d6e80aca3d65"
+    },
+    "findings": "No blocking findings. Exact iid actual-attempt retry and ordered batch laws, finite canonical candidate-prefix bounds, and conditional concrete buffered totality are justified. Final docs preserve scope and disclose both verification phases.",
+    "scope": "Magnitude laws under fresh independent83/72/48 inputs; concrete seeded SHAKE totality only under explicit adequate finite prefix plus existing mode/offset/limb bounds.",
+    "not_approved_as_proved": [
+      "Concrete SHAKE independence",
+      "Termination for every seed",
+      "Buffered iid-controller probability law",
+      "Implementation signed-output distribution",
+      "Hyperball mathematical distribution",
+      "Complete APIs"
+    ]
   },
   "fresh_extraction_match": {
     "files": 102,
     "result": "PASS",
-    "checked_at": "20260921T023636.682966Z"
+    "checked_at": "20260921T053211.708475Z"
   },
   "whole_signing_gaussian": {
     "theorem": "GaussianStreamCorrectness.sample_gauss_N_full_at_correct",
@@ -960,7 +1100,7 @@
     "unconditional_termination": false,
     "hyperball_caller_composition": true
   },
-  "ntt_replay_note": "Prior individual fresh checks retained; all 12 sources hash-unchanged in the Gaussian identification milestone; not rerun in this milestone.",
+  "ntt_replay_note": "Prior individual fresh NTT checks retained; all12 pinned sources unchanged and not rerun in this retry milestone.",
   "whole_signing_hyperball": {
     "theorem": "HyperballCorrectness.hyperball_full_correct",
     "procedure": "ApiTarget.M(Syscall)._sf_hyperball_full",
@@ -1273,6 +1413,55 @@
     "new_axioms_or_numerical_oracles": false,
     "actual_signed_output_retry_or_complete_api_proved": false,
     "returned_law_is_pointwise_gaussian_sigma2pow60": false,
-    "source_correspondence": "docs/gaussian-magnitude-identification.md"
+    "source_correspondence": "docs/gaussian-magnitude-identification.md",
+    "subsequent_retry_result": "See gaussian_retries_and_batches for the later explicit iid actual-attempt retry law; the identification-stage scope remains historical."
+  },
+  "gaussian_retries_and_batches": {
+    "proof_files_added": [
+      "proofs/GaussianBatchDistance.ec",
+      "proofs/GaussianRetryActual.ec",
+      "proofs/GaussianRetryAttempt.ec",
+      "proofs/GaussianRetryBatch.ec",
+      "proofs/GaussianRetryBatchCorrectness.ec",
+      "proofs/GaussianRetryBatchTail.ec",
+      "proofs/GaussianRetryBufferTotal.ec",
+      "proofs/GaussianRetryConsumerTotal.ec",
+      "proofs/GaussianRetryCore.ec",
+      "proofs/GaussianRetryInputs.ec",
+      "proofs/GaussianRetryPrefixCorrectness.ec",
+      "proofs/GaussianRetryRank.ec",
+      "proofs/GaussianRetryStreamBridge.ec",
+      "proofs/GaussianRetryStreamTermination.ec",
+      "proofs/GaussianRetryTail.ec"
+    ],
+    "actual_attempt_pair_law": "GaussianRetryAttempt.gr_actual_pair_equiv includes accepted and rejected outcomes",
+    "operational_retry": "GaussianRetryActual.sample calls SigmaJoint203Experiment.sample on each fresh independent83/72/48-bit attempt",
+    "retry_theorems": [
+      "GaussianRetryActual.gr_actual_retry_ll",
+      "GaussianRetryActual.gr_actual_retry_law",
+      "GaussianRetryActual.gr_actual_retry_gaussian"
+    ],
+    "retry_output_law": "exactly sc_actual_conditioned(p); unchanged Gaussian magnitude SDist<2^-39",
+    "acceptance_premise_discharged": "actual acceptance>=1/7; retry islossless has no caller premise",
+    "consecutive_rejection_bound": "t independent trials all reject with exact mass(1-a)^t<=(6/7)^t for t>=0",
+    "batch_module": "GaussianRetryActualBatch.sample",
+    "batch_joint_law": "for n>=0, probability-one termination with full ordered dlist(sc_actual_conditioned(p),n) law",
+    "batch_256_sdist": "<2^-31 against dlist(g76_rounded,256)",
+    "batch_257_sdist": "<257/2^39 against dlist(g76_rounded,257)",
+    "dummy_projection": "all257 accepted calls complete before take256; exact dlist256 law and<2^-31 bound",
+    "candidate_model": "canonical203-bit encoding in26 bytes; unused high5bits zero; no uniform208 claim",
+    "finite_prefix": "gr_candidate_stream reconstruction and entire iid finite pair/accepted-sequence laws",
+    "adequacy_probability": "same gr_adequate predicate; failure after n*t candidates<=n*(6/7)^t; tends0 for allprefix lengths and A(B)=floor((136B-32)/26)",
+    "concrete_stream_totality": "GaussianRetryStreamTermination.gr_sample_gauss_N_prefix_total, conditional on finite adequate prefix of the concrete seeded SHAKE word stream and existing memory/limb bounds",
+    "termination_rank": "finite maximum compatible block witness; adequate cap excludes unfinished states; every iteration advances the maximum witness",
+    "concrete_stream_outputs": "first256 accepted magnitude words, retained signs, full selected-event square sum including257th dummy and external frame",
+    "all_prior_sources_preserved": true,
+    "new_project_axioms": false,
+    "concrete_shake_iid_proved": false,
+    "every_seed_terminates_proved": false,
+    "buffered_iid_controller_probability_law_proved": false,
+    "signed_or_hyperball_distribution_proved": false,
+    "complete_api_correctness": false,
+    "documentation": "docs/gaussian-retries-and-batches.md"
   }
 }
