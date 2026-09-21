@@ -72,5 +72,14 @@
     "output": "Unbounded integer floor((y+2^72*x+32768)/65536); actual implementation matched through W64.to_uint",
     "event": "accepted and event(output), for arbitrary integer-output predicate",
     "excluded": "Conditioning on acceptance, random signs, retry normalization/termination and concrete SHAKE uniformity"
+  },
+  "conditional_output_correspondence": {
+    "reference": "The preceding independent ideal joint experiment, conditioned on its own acceptance event",
+    "definition": "Native dmap(dcond(pair_distribution,accepted),integer_projection)",
+    "actual_acceptance_lower": "1/7",
+    "ideal_acceptance_lower": "1/8",
+    "normalization_error": "<=16*(29/2^48+2^-78)<2^-39",
+    "infinite_ideal_support_and_unbounded_output_preserved": true,
+    "not_a_new_closed_form_gaussian_identification": true
   }
 }

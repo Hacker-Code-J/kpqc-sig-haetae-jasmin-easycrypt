@@ -68,6 +68,9 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
    이어서 실제 균등 83+72+48비트 실험과 무한 Gaussian CDT 목표 사이에서,
    모든 출력 집합의 승인·출력 공동 확률 차이<29/2^48+2^-78을 증명한다.
    [공동 출력 확률](../haetae-1.2.0-easycrypt/docs/joint-accepted-output.md)은 승인 후 정규화 전의 정리다.
+   실제·이상적 승인 확률의 하한 1/7·1/8을 증명하고, 승인 후 조건부분포를
+   비교해 통계적 거리<2^-39까지 연결했다. [조건부분포 범위](../haetae-1.2.0-easycrypt/docs/conditional-accepted-output.md)는
+   이전 이상적 실험을 정규화한 목표이며, 별도 Gaussian 질량식 식별·부호·반복은 남아 있다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

@@ -34,6 +34,10 @@
 | [DistributionExpectationDistance](proofs/DistributionExpectationDistance.ec) / [SigmaJointKernelCorrectness](proofs/SigmaJointKernelCorrectness.ec) | `distribution_expectation_distance`, `sj_noise_kernel_range`, `sj_kernel_actual` | 무한 지지집합에서 [0,1] 커널의 기댓값 차이≤통계적 거리; 독립 Gaussian 수락식·수학적 반올림과 실제 배열 연결 |
 | [SigmaJointFixedCorrectness](proofs/SigmaJointFixedCorrectness.ec) | `sj_point_error`, `sj_fixed_joint_error` | 출력 집합의 지시함수를 점별 오차에 먼저 적용; 고정 CDT의 승인·출력 공동 확률 오차≤57/(2·2^48)+32767/2^73 |
 | [SigmaJointIdealCorrectness](proofs/SigmaJointIdealCorrectness.ec) / [SigmaJointCorrectness](proofs/SigmaJointCorrectness.ec) | `sj_ideal_joint_law`, `sj_joint_output_error`, `sj_joint_output_error_strict` | 실제 203비트 실험과 독립적인 무한 Gaussian CDT·무제한 정수 반올림 실험의 승인·출력 공동 확률 차이<29/2^48+2^-78<30/2^48<2^-43; 모든 출력 집합, 추가 fit·정확도 전제 없음 |
+| [SigmaAcceptanceLowerBound](proofs/SigmaAcceptanceLowerBound.ec) | `sc_actual_point_lower`, `sc_actual_acceptance_lower`, `sc_ideal_acceptance_lower` | 후보 고정·거부 48비트 균등 실험 및 전체 203비트 시도의 승인 확률≥1/7; 이상적 승인 확률≥1/8; 추가 범위·양수성 전제 없음 |
+| [SigmaConditionalActual](proofs/SigmaConditionalActual.ec) / [SigmaConditionalIdeal](proofs/SigmaConditionalIdeal.ec) | `sc_actual_conditioned_law`, `sc_ideal_conditioned_law` | native dcond·정수 사영 분포의 사건 확률을 각 실제/이상적 프로시저의 공동 확률÷승인 확률로 연결; 이상적 무한 지지와 무제한 정수 출력 유지 |
+| [ConditionalRatioBound](proofs/ConditionalRatioBound.ec) | `conditional_ratio_error_lower` | 분자·분모 오차≤δ와 승인 확률 하한 l>0에서 정규화 오차≤2δ/l; 실제/이상적 분모를 같다고 가정하지 않음 |
+| [SigmaConditionalCorrectness](proofs/SigmaConditionalCorrectness.ec) | `sc_conditioned_distributions_correct`, `sc_conditioned_event_error`, `sc_conditioned_sdist_strict` | 실제 및 이전 이상적 실험의 승인 후 표본 크기 조건부분포는 질량 1, 모든 사건 오차·통계적 거리≤16·(29/2^48+2^-78)<2^-39; 양수성 전제는 수치 하한으로 해소 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -157,13 +161,20 @@
 균등하게 생성한다. 이상적 CDT의 지지집합을 166에서 자르거나 이상적 출력을
 64비트로 감지 않으며, 실제 출력은 unsigned 정수로 읽는다. 최종 비교 사건은
 `accepted /\ S(output)`이고 승인 확률로 나누지 않는다. 따라서 승인된 표본의
-조건부분포, 부호 처리, 거부 반복과 실제 SHAKE의 성질은 별도로 남아 있다.
+조건부분포는 후속 정규화 정리로 연결했다. 부호 처리, 거부 반복과 실제 SHAKE의
+성질은 별도로 남아 있다.
+
+[조건부분포 정리](docs/conditional-accepted-output.md)는 각 실험의 서로 다른
+승인 확률로 나누며, 실제≥1/7·이상적≥1/8을 증명해 분모가 0인 경우를 배제한다.
+모든 사건에 대한 공통 비엄격 상한을 먼저 세워 통계적 거리를 제한한 뒤,
+수치 여유로 <2^-39를 얻는다. 비교 대상은 이전 독립적 이상 실험의 조건부분포이며,
+별도의 반올림 Gaussian 확률 질량식과 같다는 식별은 아직 포함하지 않는다.
 
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 독립 균등 83+72+48비트 실제 단일 시도와 무한 Gaussian CDT·수학적 반올림 목표의 모든 출력 집합에 대한 승인·출력 공동 확률까지 연결. 다음에는 승인 확률의 양의 하한, 부호, 승인 후 정규화·반복 표본을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | 실제·이상적 승인 확률 하한과 각자의 native 조건부분포를 연결하여 승인된 표본 크기 분포의 통계적 거리<2^-39까지 증명. 다음에는 이상적 조건부분포와 수학적 Gaussian 확률 질량식의 식별, 부호, 반복 표본·거부 종료를 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

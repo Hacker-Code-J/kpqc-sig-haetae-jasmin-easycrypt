@@ -72,10 +72,14 @@ assumption is needed for these theorems.
 
 The subsequent [joint-output milestone](joint-accepted-output.md) adds uniform83
 CDT sampling and proves an error bound for every accepted-output set, before
-conditioning on acceptance. The acceptance-rate comparison in this document
-does not by itself establish that stronger result or a normalized output law. Sample rounding, random signs, rejection normalization,
-repeated attempts, the official Renyi bound, concrete SHAKE, Hyperball and the
-complete signature APIs remain separate obligations.
+conditioning on acceptance. The following
+[conditional-distribution milestone](conditional-accepted-output.md) proves
+positive acceptance bounds and compares the two normalized distributions.
+Those results use additional proofs beyond the acceptance-rate comparison in
+this document. Identification of the ideal conditional law with a separately
+proved rounded Gaussian mass function, random signs, repeated attempts, the
+official Renyi bound, concrete SHAKE, Hyperball mathematics and the complete
+signature APIs remain separate obligations.
 
 The following final contracts passed fresh EasyCrypt checking with the EOF
 completion guard:
@@ -93,8 +97,8 @@ completion guard:
 | `SigmaRawAcceptanceCorrectness` | `sr_actual_acceptance_error`, `sr_actual_acceptance_regular` |
 | `SigmaRawAverageCorrectness` | `sr_average_acceptance_error_strict` |
 
-All 90 current non-NTT files passed individually as main targets in the final
-integrated run; all 18 existing gate regression tests passed. The 11 new files
+At that milestone, all 90 non-NTT files passed individually as main targets
+in the final integrated run; all 18 existing gate regression tests passed. The 11 new files
 include the independent `SigmaRawSpec` definitions. Existing NTT proof records
 are retained with unchanged hashes. No project axioms, proof escapes, numerical
 oracles, or new dependencies were introduced. Production and extracted sources

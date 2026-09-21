@@ -81,18 +81,20 @@ The distinction between unsigned and unbounded outputs matters:
 
 ## Scope and reproduction
 
-Both experiments have checked single-attempt losslessness. The final result
-compares unconditioned accepted-output masses for every S. It does not yet
-establish the normalized distribution given acceptance, random signs, retry
-termination, the output distribution of the whole Gaussian stream,
-the joint law of rejected output values,
-concrete SHAKE uniformity, the published Renyi guarantee or complete APIs.
+Both experiments have checked single-attempt losslessness. This result compares
+unconditioned accepted-output masses for every S. The subsequent
+[conditional-distribution proof](conditional-accepted-output.md) derives positive
+acceptance bounds and compares the two native distributions after acceptance.
+Identification with a separately proved closed-form rounded Gaussian law, random
+signs, retry termination, the output distribution of the whole Gaussian stream,
+the joint law of rejected output values, concrete SHAKE uniformity, the published
+Renyi guarantee and complete APIs remain separate obligations.
 
 The 10 new local files comprise the independent specification, exact rounding,
 CDT byte patch, actual returned-pair experiments, bounded-expectation contraction,
 ideal-kernel properties, fixed-CDT event bound and complete joint comparison.
-All 100 current non-NTT files passed fresh integrated checking as independent
-main targets with `-no-eco`, `Proofs:check` and the EOF completion guard.
+At that milestone, all 100 non-NTT files passed fresh integrated checking as
+independent main targets with `-no-eco`, `Proofs:check` and the EOF completion guard.
 All 18 gate regression tests passed. Previous NTT records are retained with
 unchanged hashes; all prior proof, implementation and extraction sources are
 unchanged. See `../VALIDATION.md` and `../manifests/verification-results.json`.
