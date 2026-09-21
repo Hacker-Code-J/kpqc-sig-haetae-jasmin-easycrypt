@@ -48,6 +48,14 @@
 | [GaussianRetryInputs](proofs/GaussianRetryInputs.ec) / [GaussianRetryPrefixCorrectness](proofs/GaussianRetryPrefixCorrectness.ec) | `gr_candidate_stream_pairs_iid`, `gr_prefix_failure_law`, `gr_block_prefix_failure_limit` | 203비트의 canonical 26바이트 후보와 실제 word 사건열·승인 개수 연결; 실제 블록별 후보 수에서 충분하지 않은 iid 접두 구간의 확률→0; 무한 균등 함수나 SHAKE 독립성 가정 없음 |
 | [GaussianRetryRank](proofs/GaussianRetryRank.ec) / [GaussianRetryConsumerTotal](proofs/GaussianRetryConsumerTotal.ec) / [GaussianRetryBufferTotal](proofs/GaussianRetryBufferTotal.ec) | `grr_rank_step_bounded`, `gs_progress_consume_total` | 유한 최대 호환 블록 번호로 감소량 구성; 실제 bounded 소비기의 정확한 진행 조건과 확률 1 종료 |
 | [GaussianRetryStreamBridge](proofs/GaussianRetryStreamBridge.ec) / [GaussianRetryStreamTermination](proofs/GaussianRetryStreamTermination.ec) | `gr_sample_gauss_N_prefix_total`, `gr_prefix_result_dummy`, `gr_prefix_result_squares` | 구체적 SHAKE 스트림의 충분한 유한 접두 구간·기존 offset/limb 전제 아래 실제 서명용 전체 버퍼 함수의 종료와 정확한 첫 256개·부호 복사·257번째 dummy 포함 제곱합·frame |
+| [MixedRadixUniform](proofs/MixedRadixUniform.ec) / [GaussianUnusedBits](proofs/GaussianUnusedBits.ec) / [GaussianUniformBytes](proofs/GaussianUniformBytes.ec) | `mru_join_uniform`, `gub_sigma76_spec`, `gbc_candidate_sigma_law`, `gbc_candidate_observer_law` | 균등 26바이트의 canonical 203비트 사영과 정확한 분포; 모든 입력에서 미사용 상위 5비트를 지워도 반환 네 워드 보존 |
+| [GaussianBlockSampling](proofs/GaussianBlockSampling.ec) | `gbs_joint_law`, `gbs_total` | 양수 크기 후보 묶음을 순서대로 처리하는 실제 확률 루프의 종료와 전체 독립 승인 목록 법칙 |
+| [GaussianByteCarryDistribution](proofs/GaussianByteCarryDistribution.ec) / [GaussianIidKernel](proofs/GaussianIidKernel.ec) | `gbc_fixed_tail_refill`, `gik_refill_event`, `gik_initial_event` | 이미 알려진 잔여 바이트를 고정한 완료 분포; 새 136바이트와 초기 6,664바이트의 정확한 기대값 불변식 |
+| [GaussianIidBufferSpec](theories/GaussianIidBufferSpec.ec) / [GaussianIidBufferPath](proofs/GaussianIidBufferPath.ec) | `gib_actual_functional` | 실제 sign-copy·carry·소비기를 호출하는 iid 버퍼 모형과 목록 표현의 전체 반환 튜플 동치; `gib_bounds` 외 초기 제곱 워드 조건 없음 |
+| [GaussianIidVisible](proofs/GaussianIidVisible.ec) / [GaussianIidStep](proofs/GaussianIidStep.ec) | `giv_consume_fold`, `gis_initial`, `gis_refill` | 물리적 가시 접두와 순서대로 승인한 크기 목록의 대응; 요청 257의 미기록 더미를 가시 값으로 읽지 않음 |
+| [GaussianIidInitial](proofs/GaussianIidInitial.ec) / [GaussianIidNormalization](proofs/GaussianIidNormalization.ec) | `gib_initial_law`, `gid_functional_uniform` | 초기 49개 블록 추출과 하나의 균등 6,664바이트 추출의 정확한 동치 |
+| [GaussianIidProgress](proofs/GaussianIidProgress.ec) / [GaussianIidTermination](proofs/GaussianIidTermination.ec) | `gip_refill_progress`, `git_functional_lossless` | 임의의 고정 잔여 바이트 뒤에서도 새 블록의 온전한 후보가 진행 확률≥1/7 보장; 충분한 접두 구간 전제 없는 확률 1 종료 |
+| [GaussianIidEventLaw](proofs/GaussianIidEventLaw.ec) / [GaussianIidDistribution](proofs/GaussianIidDistribution.ec) | `gii_actual_correct`, `gii_actual_joint_law`, `gii_actual_gaussian_event` | `gib_bounds` 아래 실제 함수 호출 iid 버퍼 모형의 확률 1 종료, 요청 256/257의 가시 256개 정확한 독립 결합분포와 Gaussian 거리<2^-31 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -195,11 +203,20 @@
 유한 접두 구간의 부족 확률이 0으로 수렴한다는 사실을 구체적인 SHAKE가
 독립 균등 난수를 생성한다는 증명이나 모든 seed의 종료 보장으로 사용하지 않는다.
 
+[전체 iid 바이트 버퍼 정리](docs/gaussian-iid-buffer.md)는 위 반복 실험을 넘어
+실제 소비·carry·sign-copy 함수를 호출하는 운영 모형에 분포를 전달한다.
+각 블록은 명시적으로 독립 균등 136바이트를 뽑으며, 이미 고정된 잔여 바이트에
+새 균등 분포를 가정하지 않는다. 초기 49블록, 부분 후보, 요청 257의 더미를
+포함한 제어 흐름 아래 확률 1 종료와 저장되는 256개 크기의 정확한 목록 법칙을
+증명한다. 초기 배열들은 임의의 word 값이며, 제곱 누적합의 정수/no-wrap 해석에는
+이전 limb·범위 조건이 계속 필요하다. 새 확률 법칙은 크기 목록에 한정하며
+부호의 독립성·적용이나 반환 배열 전체의 Gaussian 공동 법칙을 뜻하지 않는다.
+
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 독립 균등 입력의 실제 시도 반복은 확률 1 종료하며, n개 승인 표본의 결합분포와 유한 후보 접두 구간을 연결. 남은 범위는 실제 부호 처리, 구체적 SHAKE 또는 명시적인 iid 바이트 공급 버퍼 드라이버에 확률 보장 전달, 공식 Rényi 오차와 이상적 XOF 연결 |
+| Gaussian 분포 합성 | 독립 균등 바이트 공급 버퍼 모형의 종료·가시 256개 결합분포까지 연결. 남은 범위는 실제 부호 분포·적용, 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 합성 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

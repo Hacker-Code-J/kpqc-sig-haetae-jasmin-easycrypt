@@ -103,5 +103,15 @@
     "batch_scope": "Full ordered magnitude joint law;257th accepted value generated before first256 projection",
     "concrete_buffer_scope": "Actual seeded SHAKE loop totality conditional on adequate finite prefix and existing memory/limb bounds; no assumption of SHAKE iid",
     "remaining": "Actual signs, concrete SHAKE randomness, buffered iid-controller probability coupling, Renyi, Hyperball mathematical distribution and full APIs"
+  },
+  "iid_byte_buffer_correspondence": {
+    "reference": "Same independent rounded-absolute Gaussian target from gaussian_magnitude_identification_correspondence",
+    "input": "All208 bits of26 bytes uniform; exact canonical203-bit observation law by ignored-bit invariance",
+    "controller": "Explicit iid136-byte source with actual Jasmin sign-copy/carry/finite-consumer calls and49-block initialization",
+    "carry": "Continuation conditional on each literal carried byte list; only new missing suffix/block bytes randomized",
+    "output": "256 stored unsigned magnitudes for both requested256/257; dummy is not an additional stored coefficient",
+    "error": "Exact dlist(sc_actual_conditioned(p),256) law; Gaussian target statistical distance<2^-31",
+    "initial_arrays": "Arbitrary words; no adequate-prefix or canonical-square premise for this word-model law",
+    "remaining": "Concrete SHAKE/ideal XOF relation, sign distribution/application, integer accumulator interpretation without prior bounds, Renyi, Hyperball and full APIs"
   }
 }

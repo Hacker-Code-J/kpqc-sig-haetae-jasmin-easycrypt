@@ -109,9 +109,10 @@ conditional concrete buffered termination under an adequate-prefix premise.
 The mathematical Gaussian G is signed so that its absolute value can define
 the magnitude target. This does not prove the implementation's later sign
 handling. The later retry proofs cover explicit independent inputs. Concrete SHAKE
-randomness, a buffered iid-controller probability law, the published Renyi
-guarantee, Hyperball mathematics and complete signature APIs remain separate
-obligations.
+randomness, the published Renyi guarantee, Hyperball mathematics and complete
+signature APIs remain separate obligations. The subsequent
+[uniform-byte buffer result](gaussian-iid-buffer.md) supplies the explicit
+iid controller's magnitude law.
 
 The seven new files cover the independent Gaussian definition and normalization,
 block reindexing, folding, kernel cancellation, rounding bins and final

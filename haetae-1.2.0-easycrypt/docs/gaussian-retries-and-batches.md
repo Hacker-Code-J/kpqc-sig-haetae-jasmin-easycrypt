@@ -156,9 +156,10 @@ This does not require different SHAKE blocks to have different internal states.
 
 The independent-input retry/batch law, finite canonical-prefix probabilities
 and this conditional concrete-SHAKE theorem are separate statements. This
-stage does not establish an independent-input distribution law for the entire
-buffered controller, independence of concrete SHAKE outputs, or termination
-for every seed. It also does not identify the implementation's later sign
+retry milestone alone did not establish an independent-input distribution law
+for the entire buffered controller. The later [uniform-byte buffer proof](gaussian-iid-buffer.md)
+now supplies that law for its explicit iid controller. Neither result establishes
+independence of concrete SHAKE outputs or termination for every seed. It also does not identify the implementation's later sign
 handling, Hyperball distribution or complete signature APIs.
 
 ## Proof map and verification status
