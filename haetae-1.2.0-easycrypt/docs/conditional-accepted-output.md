@@ -92,16 +92,18 @@ when taking this supremum. S is any set of integer magnitudes.
 
 ## Scope and reproduction
 
-The reference is precisely the **previous independent ideal experiment
-conditioned on acceptance**. This stage does not identify that conditioned
-law with a separately proved closed-form rounded Gaussian distribution.
+The reference in this milestone is the **previous independent ideal experiment
+conditioned on acceptance**. The subsequent
+[Gaussian identification](gaussian-magnitude-identification.md) proves that it
+is exactly the rounded absolute value of the independent integer Gaussian
+with weights exp(-k²/2^153), preserving the existing actual error bound.
 Random signs, repeated rejection, the distribution of the whole Gaussian
 stream, concrete SHAKE randomness, the published Renyi guarantee, Hyperball
 mathematics and complete APIs remain separate obligations.
 
 Six new specification/proof files provide native conditionals, actual and
 ideal execution links, acceptance lower bounds, a generic ratio estimate,
-and the final event/SDist composition. All 106 current non-NTT files passed
+and the final event/SDist composition. At that milestone, all 106 non-NTT files passed
 fresh integrated checks as separate main targets using `-no-eco`, `Proofs:check`
 and the EOF completion guard. All 18 gate regression tests passed. The 12 NTT
 records are retained with unchanged hashes; all prior proof, production and

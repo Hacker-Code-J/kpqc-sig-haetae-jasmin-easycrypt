@@ -38,6 +38,10 @@
 | [SigmaConditionalActual](proofs/SigmaConditionalActual.ec) / [SigmaConditionalIdeal](proofs/SigmaConditionalIdeal.ec) | `sc_actual_conditioned_law`, `sc_ideal_conditioned_law` | native dcond·정수 사영 분포의 사건 확률을 각 실제/이상적 프로시저의 공동 확률÷승인 확률로 연결; 이상적 무한 지지와 무제한 정수 출력 유지 |
 | [ConditionalRatioBound](proofs/ConditionalRatioBound.ec) | `conditional_ratio_error_lower` | 분자·분모 오차≤δ와 승인 확률 하한 l>0에서 정규화 오차≤2δ/l; 실제/이상적 분모를 같다고 가정하지 않음 |
 | [SigmaConditionalCorrectness](proofs/SigmaConditionalCorrectness.ec) | `sc_conditioned_distributions_correct`, `sc_conditioned_event_error`, `sc_conditioned_sdist_strict` | 실제 및 이전 이상적 실험의 승인 후 표본 크기 조건부분포는 질량 1, 모든 사건 오차·통계적 거리≤16·(29/2^48+2^-78)<2^-39; 양수성 전제는 수치 하한으로 해소 |
+| [Gaussian76Properties](proofs/Gaussian76Properties.ec) | `g76_rho_summable`, `g76_normalizer_ge1`, `g76_distr_mu1`, `g76_distr_ll` | 모든 정수의 rho(k)=exp(-k²/2^153) 무한 합 수렴과 독립적인 정규화; 독립 Gaussian 확률 질량·질량 1·무한 지지 |
+| [GaussianBlockReindex](proofs/GaussianBlockReindex.ec) / [Gaussian76Kernel](proofs/Gaussian76Kernel.ec) | `gb_block_sum`, `g76_full_contribution` | 절대수렴과 support 조건 아래 몫·나머지 블록 합 재색인; 모든 이상적 x≥0의 Gaussian 가중치 상쇄와 정확한 1/(N·H16) 계수 |
+| [Gaussian76Folding](proofs/Gaussian76Folding.ec) / [Gaussian76Rounding](proofs/Gaussian76Rounding.ec) | `g76_accept_weight_sum`, `g76_rounded_event_law`, `g76_rounded_mass`, `g76_rounded_zero_ties` | 0은 한 번·양수 크기는 두 번 세는 절댓값 가중치와 반올림 구간 PMF; raw 수락 가중치 합=Z/2; ±32768→1 |
+| [Gaussian76Identification](proofs/Gaussian76Identification.ec) | `g76_ideal_conditioned_eq`, `g76_gaussian_mass`, `g76_actual_gaussian_correct`, `g76_actual_rounded_mass_error` | 기존 이상적 조건부분포와 명시적 정수 Gaussian 절댓값 반올림 분포의 정확한 동치; 실제 승인 표본 크기 분포와의 통계적 거리<2^-39 및 각 출력값의 구간 합 오차 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -168,13 +172,20 @@
 승인 확률로 나누며, 실제≥1/7·이상적≥1/8을 증명해 분모가 0인 경우를 배제한다.
 모든 사건에 대한 공통 비엄격 상한을 먼저 세워 통계적 거리를 제한한 뒤,
 수치 여유로 <2^-39를 얻는다. 비교 대상은 이전 독립적 이상 실험의 조건부분포이며,
-별도의 반올림 Gaussian 확률 질량식과 같다는 식별은 아직 포함하지 않는다.
+그 조건부분포를 별도의 반올림 Gaussian 확률 질량식으로 식별하는 후속 정리는 아래에 기록한다.
+
+[Gaussian 질량식 식별](docs/gaussian-magnitude-identification.md)은 G의 분모를
+구현과 무관한 모든 정수의 지수함수 합으로 정의하고 수렴·양수성을 증명한다.
+기존 이상적 조건부분포는 floor((|G|+32768)/65536)의 분포와 정확히 같으므로,
+실제 승인 표본 크기와의 기존 통계적 거리 상한은 오차 추가 없이 이전된다.
+반올림된 확률은 각 구간의 Gaussian 가중치를 합한 값이다. 이 수학적 G에 부호가
+있다는 사실을 실제 구현의 부호 처리 증명으로 해석하지 않는다.
 
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 실제·이상적 승인 확률 하한과 각자의 native 조건부분포를 연결하여 승인된 표본 크기 분포의 통계적 거리<2^-39까지 증명. 다음에는 이상적 조건부분포와 수학적 Gaussian 확률 질량식의 식별, 부호, 반복 표본·거부 종료를 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
+| Gaussian 분포 합성 | 실제 승인 표본 크기의 조건부분포와 명시적인 정수 Gaussian 절댓값 반올림 분포를 연결하여 통계적 거리<2^-39까지 증명. 다음에는 실제 부호 처리, 반복 표본·거부 종료와 전체 스트림을 합성. 공식 Rényi 오차와 이상적 XOF 연결은 별도 증명 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |

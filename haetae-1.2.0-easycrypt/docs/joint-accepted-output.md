@@ -85,8 +85,9 @@ Both experiments have checked single-attempt losslessness. This result compares
 unconditioned accepted-output masses for every S. The subsequent
 [conditional-distribution proof](conditional-accepted-output.md) derives positive
 acceptance bounds and compares the two native distributions after acceptance.
-Identification with a separately proved closed-form rounded Gaussian law, random
-signs, retry termination, the output distribution of the whole Gaussian stream,
+The subsequent [Gaussian identification](gaussian-magnitude-identification.md)
+also identifies the normalized ideal target with an explicit rounded absolute
+Gaussian law. Random signs, retry termination, the output distribution of the whole Gaussian stream,
 the joint law of rejected output values, concrete SHAKE uniformity, the published
 Renyi guarantee and complete APIs remain separate obligations.
 

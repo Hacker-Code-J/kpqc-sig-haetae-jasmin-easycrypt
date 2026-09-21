@@ -70,7 +70,10 @@ word 명세에 연결했다. 전체 Gaussian·Hyperball 정리는 종료한 실�
    [공동 출력 확률](../haetae-1.2.0-easycrypt/docs/joint-accepted-output.md)은 승인 후 정규화 전의 정리다.
    실제·이상적 승인 확률의 하한 1/7·1/8을 증명하고, 승인 후 조건부분포를
    비교해 통계적 거리<2^-39까지 연결했다. [조건부분포 범위](../haetae-1.2.0-easycrypt/docs/conditional-accepted-output.md)는
-   이전 이상적 실험을 정규화한 목표이며, 별도 Gaussian 질량식 식별·부호·반복은 남아 있다.
+   이전 이상적 실험을 정규화한 목표다. 후속 [Gaussian 질량식 식별](../haetae-1.2.0-easycrypt/docs/gaussian-magnitude-identification.md)에서
+   이를 exp(-k²/2^153)로 정의한 정수 Gaussian의 절댓값 반올림 분포와 정확히
+   연결했다. 실제 조건부분포의 거리<2^-39가 이 명시적인 목표에도 그대로 적용된다.
+   부호·반복·실제 SHAKE 연결은 남아 있다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와

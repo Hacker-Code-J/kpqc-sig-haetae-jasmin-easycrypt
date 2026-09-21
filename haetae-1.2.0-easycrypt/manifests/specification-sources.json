@@ -80,6 +80,15 @@
     "ideal_acceptance_lower": "1/8",
     "normalization_error": "<=16*(29/2^48+2^-78)<2^-39",
     "infinite_ideal_support_and_unbounded_output_preserved": true,
-    "not_a_new_closed_form_gaussian_identification": true
+    "not_a_new_closed_form_gaussian_identification": true,
+    "subsequent_gaussian_identification": "Exact law identification is proved in Gaussian76Identification; the historical conditional-stage flag refers only to that earlier milestone."
+  },
+  "gaussian_magnitude_identification_correspondence": {
+    "parameter_source": "haetae-spec-260904 section5.1.1: sigma2^76 and k2^72; raw acceptance interpretation retained from Rossi Algorithm12 following derivation",
+    "independent_target": "G on allZ with rho(k)=exp(-k*k/2^153), probability rho(k)/sum_ALLZrho; R=floor((abs(G)+32768)/65536)",
+    "normalizer": "Independent all-integer summable Gaussian series; not defined via acceptance probability",
+    "exact_identity": "SigmaConditionalSpec.sc_ideal_conditioned=Gaussian76Spec.g76_rounded",
+    "returned_mass": "Finite Gaussian bin sum: zero weight once, positive magnitudes twice; absolute value before rounding",
+    "excluded": "Actual implementation sign handling, repeated sampling, concrete SHAKE, Renyi and complete APIs"
   }
 }

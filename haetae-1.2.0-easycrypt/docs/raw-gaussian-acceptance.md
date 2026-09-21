@@ -76,10 +76,11 @@ conditioning on acceptance. The following
 [conditional-distribution milestone](conditional-accepted-output.md) proves
 positive acceptance bounds and compares the two normalized distributions.
 Those results use additional proofs beyond the acceptance-rate comparison in
-this document. Identification of the ideal conditional law with a separately
-proved rounded Gaussian mass function, random signs, repeated attempts, the
-official Renyi bound, concrete SHAKE, Hyperball mathematics and the complete
-signature APIs remain separate obligations.
+this document. The subsequent [Gaussian identification](gaussian-magnitude-identification.md)
+connects that normalized reference to an explicit rounded absolute Gaussian
+mass function. Random signs, repeated attempts, the official Renyi bound,
+concrete SHAKE, Hyperball mathematics and the complete signature APIs remain
+separate obligations.
 
 The following final contracts passed fresh EasyCrypt checking with the EOF
 completion guard:
