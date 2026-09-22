@@ -22,14 +22,32 @@ Gaussian 배치의 동일한 승인 이력에서 가시 벡터와 정수 S를 �
 실제 호출·offset과 초기 제곱합 0을 사용해 D=1538·2306·2818개 전체 이력의 법칙과
 안전 구간 사건의 정확한 확률식을 얻었다. 표본·부호까지 0으로 초기화하는 것은
 `hip_initial`의 모형 선택이며 생산 코드는 제곱합만 초기화한다. 아래 전체 배열
-ghost 동치는 이 iid 모형 안의 결과다. 구간 이탈의 수치 상한이나 이상적인 S 법칙,
-구체적 SHAKE·외부 Hyperball retry·전체 API 정확성은 포함하지 않는다.
+ghost 동치는 해당 iid 모형 안의 결과다. 그 단계에서는 구간 이탈의 수치 상한이나
+이상적인 S 법칙, 구체적 SHAKE·외부 Hyperball retry·전체 API 정확성을 포함하지 않았다.
 <!-- gaussian-payload:overview:end -->
+
+<!-- hyperball-tail:overview:start -->
+[후속 iid 꼬리 경계](docs/hyperball-iid-tail-bound.md)는 실제 승인 raw 제곱의 지수
+모멘트에서 모드 2·3·5의 안전 구간 이탈 확률 <2^-29/2^-44/2^-54를 도출한다.
+실제 Gaussian·수치 helper를 합성한 단일 iid 시도의 승인 AND 정수 제곱 노름 초과
+사건에도 같은 상계를 전달했다. 아래 공개 endpoint는 모드 외에 원하는 모멘트나
+꼬리 상계를 전제로 남기지 않는다. 승인 후 조건부 확률·외부 retry 전체·SHAKE는 제외하며,
+표본·부호 0 초기화가 proof-model 선택이라는 앞 단계의 구분을 유지한다.
+<!-- hyperball-tail:overview:end -->
 
 ## 현재 정리
 
 | 정리 파일 | 대표 정리 | 정확한 범위 |
 | --- | --- | --- |
+| [HyperballTailSpec](theories/HyperballTailSpec.ec) / [RawSquareMomentSpec](theories/RawSquareMomentSpec.ec) | `ht_raw_square`, `ht_weight_plus`, `ht_weight_minus` | Q=2^76, 구현의 floor raw 제곱과 승인 가중 기대값, 양쪽 지수 인자·모드별 수치 경계의 정의 |
+| [GaussianRawSquare](proofs/GaussianRawSquare.ec) / [GaussianPayloadMoments](proofs/GaussianPayloadMoments.ec) | `gps_square_exact`, `gpm_raw_conditioned_moment` | 실제 payload의 q=floor(Z²/Q) 및 raw 가중 승인 확률/분모와 accepted payload 모멘트의 정확한 대응 |
+| [RawSquareAcceptance](proofs/RawSquareAcceptance.ec) / [RawSquareIdealMoments](proofs/RawSquareIdealMoments.ec) | `rsa_weighted_upper`, `rsi_ideal_expectation` | 범위가 제한된 실제 가중 승인 오차와 독립 Gaussian 가중 합의 연결; 이상적 무한 지지를 구현 범위로 가정하지 않음 |
+| [GaussianLatticeSum](proofs/GaussianLatticeSum.ec) / [GaussianLatticeMgf](proofs/GaussianLatticeMgf.ec) | 정수 Gaussian 합·모멘트 상계 | 이상적 격자 합의 수렴과 유리수 인자에 대한 지수 모멘트 비교; 실제 S의 chi-square 법칙은 주장하지 않음 |
+| [GaussianSquareMoments](proofs/GaussianSquareMoments.ec) | `gsm_plus_bound`, `gsm_minus_bound`, `gsm_centered_plus`, `gsm_centered_minus` | 실제 accepted q/Q의 지수 모멘트≤10/9+2^-18 및 7/8+2^-18; centered 기대값≤3947/4000 및 1963/2000 |
+| [HyperballTailCertificate](theories/HyperballTailCertificate.ec) / [HyperballTailCertificateChecks](proofs/HyperballTailCertificateChecks.ec) / [HyperballTailConstants](proofs/HyperballTailConstants.ec) | `ht_factor_plus`, `ht_factor_minus`, `ht_mode_power_bound` | 유리수 seed·32회 구간 제곱·binary 거듭제곱의 정수 검사와 실제 exp 해석; 세 모드의 두 거듭제곱 합<epsilon |
+| [IidExponentialTail](proofs/IidExponentialTail.ec) | `iet_iid_exponential_outside` | 유한 iid 목록의 기대값 곱셈·비음수 Markov 부등식에서 양쪽 지수 꼬리 상계 |
+| [HyperballIidAttemptSafety](proofs/HyperballIidAttemptSafety.ec) | `hia_unsafe_probability`, `hia_terminates` | 실제 Gaussian 배치와 실제 수치 tail을 합성한 iid 단일 시도의 종료와 unsafe 결합 사건⊆입력 안전 구간 밖 사건 |
+| [HyperballIidTailCorrectness](proofs/HyperballIidTailCorrectness.ec) | `ht_iid_list_tail`, `ht_iid_square_tail`, `ht_iid_unsafe_acceptance` | 전체 raw 제곱합의 구간 이탈 및 단일 시도의 승인 AND 정수 노름 초과 확률 <2^-29/2^-44/2^-54; 공개 전제는 모드뿐, 승인 조건부/외부 retry/SHAKE 제외 |
 | [GaussianPayloadSpec](theories/GaussianPayloadSpec.ec) / [GaussianPayloadEncoding](proofs/GaussianPayloadEncoding.ec) | `gpd_pack_magnitude`, `gpd_pack_square`, `gpd_accepted_ll`, `gpd_scan_selected` | 실제 표본·raw 제곱의 손실 없는 정수 인코딩, q≤2^84−1, 승인 확률≥1/7과 조건부분포 질량 1; 필요한 전체 승인 목록과 개수 |
 | [GaussianPayloadBufferSpec](theories/GaussianPayloadBufferSpec.ec) / [GaussianPayloadBufferPath](proofs/GaussianPayloadBufferPath.ec) | `gpb_actual_projection`, `gpb_history_projection`, `gpb_buffer_terminates` | gib_bounds 아래 실제 iid 버퍼와 ghost 이력 모형의 반환 세 배열 동치; 더미를 포함한 전체 이력 사영·종료 |
 | [GaussianPayloadTrace](proofs/GaussianPayloadTrace.ec) / [GaussianPayloadBufferTrace](proofs/GaussianPayloadBufferTrace.ec) | `gpt_consume`, `gpt_buffer_correct`, `gpt_buffer_total` | 이전 누적 예산과 총 승인≤2818에서 실제 소비·전체 버퍼의 가시 값과 raw 제곱 정수 합을 같은 이력에 연결; 정규형·범위·종료 |
@@ -290,7 +308,7 @@ hbs_good에서 fit·norm 무오버플로를 도출했으며, 구간 발생 확�
 | Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball의 수학·확률 의미 | 지정 후보 반례·입력 안전 구간의 수치 보장과 iid Gaussian 배치의 가시 벡터·raw 제곱합 결합분포 및 안전 구간 확률 항등식까지 증명. 남은 범위는 구간 이탈의 수치 상한·실제 seed 연결·실제 역제곱근 오차·이상적 S 법칙·외부 retry 종료; 모든 입력/seed의 반경 보장으로 확대하지 않음 |
+| Hyperball의 수학·확률 의미 | iid raw 제곱합의 안전 구간 이탈 및 단일 실제-call 시도의 승인 AND 정수 노름 초과 확률 <2^-29/2^-44/2^-54까지 증명. 남은 범위는 승인 조건부 unsafe 확률·실제 seed 연결·실제 역제곱근 오차·이상적 S/최종 출력 법칙·외부 retry 종료와 전체 실행 경계; 모든 입력/seed의 반경 보장으로 확대하지 않음 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |

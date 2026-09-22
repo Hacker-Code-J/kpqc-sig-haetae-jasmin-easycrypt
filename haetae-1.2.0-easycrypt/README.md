@@ -100,8 +100,22 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 선택으로 명시한다. 생산 코드는 제곱합만 0으로 초기화하며, 이 단계는 생산
 stack 전체 상태나 concrete SHAKE 실행과의 동치를 주장하지 않는다. 실제 Gaussian
 호출 순서·offset·가시 출력·S를 연결했고, iid 모형 안의 ghost 제거는 반환 세 배열을
-모두 보존한다. 안전 구간 이탈의 수치 상한·이상적 S 법칙·외부 Hyperball retry는 남아 있다.
+모두 보존한다. 그 단계에서는 안전 구간 이탈의 수치 상한·이상적 S 법칙·외부 Hyperball retry를 후속 의무로 남겼다.
 <!-- gaussian-payload:overview:end -->
+
+<!-- hyperball-tail:overview:start -->
+[iid 제곱합 꼬리 경계](docs/hyperball-iid-tail-bound.md)에서 실제 승인 raw 제곱
+q=floor(Z²/Q), Q=2^76의 지수 모멘트를 검증했다. 지수 인자 19/200과 -15/98에서
+각각 10/9+2^-18, 7/8+2^-18의 상계를 얻고, 정규화 계수 3947/4000과 1963/2000을
+검사된 지수 구간·거듭제곱 인증서로 연결했다. 그 결과 모드 2·3·5의 전체 S가
+[3DQ/4,5DQ/4]를 벗어날 확률은 각각 **2^-29·2^-44·2^-54 미만**이다.
+
+`ht_iid_unsafe_acceptance`는 실제 iid Gaussian 배치와 실제 수치 계산을 잇는
+단일 시도에서, 승인하면서 반환 signed32 계수의 정수 제곱 노름이 모드 경계를
+넘는 사건에 같은 상계를 준다. 확률은 무조건부 결합 사건이며 `Pr[bad | accepted]`가
+아니다. 기존 scratch 초기화 모형과 명시적 균등 바이트를 유지한다. 이상적인 S의
+chi-square 법칙·외부 retry 전체·구체적 SHAKE·전체 API는 여전히 별도 의무다.
+<!-- hyperball-tail:overview:end -->
 
 ## 검증된 핵심 결과
 
@@ -138,6 +152,7 @@ stack 전체 상태나 concrete SHAKE 실행과의 동치를 주장하지 않는
 | 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
 | 서명용 Gaussian의 조건부 종료 | 실제 seed의 스트림에 충분한 승인 후보가 있는 유한 접두 구간 전제 아래 종료와 정확한 출력·부호 복사·더미 포함 제곱합·외부 영역 보존; 모든 seed의 충분성은 별도 |
 | Hyperball 누적합 | 최대 2,818개 승인 후보에서 두 limb의 48비트 범위를 증명하여 연속 Gaussian 호출 연결 |
+| Hyperball iid 꼬리·단일 시도 | 실제 승인 raw 제곱 모멘트와 안전 구간 이탈 확률 <2^-29/2^-44/2^-54; 실제 수치 호출의 단일 iid 시도에서 승인 AND 정수 제곱 노름 초과 사건에도 같은 무조건부 상계 |
 | Hyperball iid 전체 payload·제곱합 | 실제 Gaussian 호출 모형의 D=1538/2306/2818 승인 이력과 가시 벡터·raw 제곱합의 정확한 결합분포; 두 더미는 S에 포함; 안전 구간 사건의 확률식·배치 확률 1 종료 |
 | Hyperball 입력 안전 구간 | canonical 입력 제곱합 S∈[3D/4,5D/4]·2^76에서 실제 Newton6·scale·반올림 크기≤2^26과 N<2^64 도출; 임의 표본/부호의 승인 iff 정수 반경 조건 |
 | Hyperball 수치 반례의 실제 호출 | 지정 후보에서 두 더미를 포함한 소비·Newton6·scaling·norm 종료와 정확한 결과; 실제 정수 노름 초과에도 승인1. SHAKE seed·전체 seeded 경로는 제외 |

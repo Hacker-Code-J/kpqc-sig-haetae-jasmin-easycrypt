@@ -122,10 +122,25 @@ seeded 실행과의 동치를 주장하지 않는다.
 
 D=1538·2306·2818개의 승인 payload 이력에서 0부터 센 위치 256·513은 가시
 벡터에서만 빠지고, 모든 raw 제곱은 S에 남는다. 이 동일한 이력의 사영으로
-가시 벡터·S의 결합분포와 안전 구간 사건의 정확한 확률식을 증명했다. 구간 이탈의
-수치 상한, raw 제곱의 이상적 Gaussian·chi-square 법칙, SHAKE·외부 Hyperball
-retry·전체 API 연결은 별도 의무다. 생산 변경이 없어 이번 단계에서 KAT를 재실행하지 않았다.
+가시 벡터·S의 결합분포와 안전 구간 사건의 정확한 확률식을 증명했다. 그 단계에서는
+구간 이탈의 수치 상한, raw 제곱의 이상적 Gaussian·chi-square 법칙, SHAKE·외부 Hyperball
+retry·전체 API 연결을 후속 의무로 남겼다. 생산 변경이 없어 해당 단계에서 KAT를 재실행하지 않았다.
 <!-- gaussian-payload:milestone:end -->
+
+<!-- hyperball-tail:milestone:start -->
+후속 [iid 제곱합 꼬리·단일 시도 경계](../haetae-1.2.0-easycrypt/docs/hyperball-iid-tail-bound.md)는
+D=1538·2306·2818개의 실제 승인 payload에 대해 안전 구간 이탈 확률을 각각
+2^-29·2^-44·2^-54 미만으로 증명한다. q=floor(Z²/2^76)의 지수 모멘트와
+검사된 실수 지수 계수·정수 거듭제곱 인증서를 사용한다. q는 rounded 표본의 제곱이 아니다.
+실제 Gaussian 배치와 실제 Newton·scaling·norm 호출을 합성한 한 번의 iid 시도에서,
+승인과 정수 제곱 노름 초과의 결합 사건에도 같은 상계를 얻는다.
+
+초기 제곱합은 0이며, 표본·부호까지 0으로 두는 기존 `hip_initial`은 증명 모형의
+선택이다. 생산 코드는 제곱합만 초기화한다. 이 결과는 승인 조건부 확률,
+외부 retry 전체나 구체적 SHAKE/seeded Hyperball의 확률 보장을 뜻하지 않는다.
+기존 단계 기록의 수치 꼬리 경계 의무를 iid 모형에서 해소한 후속 결과이며,
+생산 변경 없이 추가한 증명이므로 이번 단계에서 KAT를 재실행하지 않았다.
+<!-- hyperball-tail:milestone:end -->
 
 ## 재현과 검증 한계
 
