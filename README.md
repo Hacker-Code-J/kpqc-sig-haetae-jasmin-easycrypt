@@ -79,6 +79,17 @@ signed32 변환의 정확성 및 정수 노름의 무오버플로를 얻는다. 
 [입력 안전 구간 증명](haetae-1.2.0-easycrypt/docs/hyperball-safe-domain.md)에 정확한
 전제와 실제 호출 계약을 기록했다.
 
+<!-- gaussian-payload:overview:start -->
+후속 [전체 승인 payload·제곱합 증명](haetae-1.2.0-easycrypt/docs/gaussian-payload-and-squares.md)은
+독립 균등 바이트를 사용하는 Gaussian 배치의 **가시 표본 벡터와 정수 제곱합 S의
+정확한 결합분포**를 다룬다. 모드 2·3·5의 전체 승인 이력은 각각
+D=1538·2306·2818개다. 같은 이력에서 두 더미는 가시 벡터에서만 제외하고
+S에는 포함한다. S는 반올림된 표본의 제곱합이 아니라 실제 raw 제곱 limbs의 합이다.
+초기 제곱합 0과 실제 호출 순서·offset에서 안전 구간 사건의 정확한 확률식을 얻었다.
+표본·부호 배열도 0으로 두는 것은 증명 모형의 선택이며, 생산 코드는 제곱합만
+0으로 초기화한다. 구간 이탈 확률의 수치 상한과 전체 seeded 흐름은 아직 남아 있다.
+<!-- gaussian-payload:overview:end -->
+
 | 경로 | 용도 |
 | --- | --- |
 | [HAETAE-1.2.0/](HAETAE-1.2.0/) | 수정하지 않은 참조 배포본, 라이선스, KAT |

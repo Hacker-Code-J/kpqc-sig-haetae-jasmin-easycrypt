@@ -140,6 +140,81 @@
     "result": "Computed scale<=2^85 and full M<=2^26 for arbitrary samples/signs; exact signed32 conversion, N<2^64 and accepted iff true integer mode bound",
     "scope": "Finite actual numerical helper composition from input-only predicate; no output-fit/norm premise or runtime guard change",
     "remaining": "Input-domain probability, concreteSHAKE/fullseededHyperball, outerretrytermination, realinverseaccuracy, idealdistribution andcompleteAPIs",
-    "documentation": "docs/hyperball-safe-domain.md"
+    "documentation": "docs/hyperball-safe-domain.md",
+    "subsequent_exact_probability_identity": "The Gaussian full-payload milestone identifies the explicit iid batch's integer square law and exact safe-interval event probability. A numeric tail bound remains unproved. See gaussian_full_payload_square_correspondence and docs/gaussian-payload-and-squares.md."
+  },
+  "gaussian_full_payload_square_correspondence": {
+    "documentation": "docs/gaussian-payload-and-squares.md",
+    "proof_files_added": [
+      "proofs/GaussianPayloadBufferPath.ec",
+      "proofs/GaussianPayloadBufferTrace.ec",
+      "proofs/GaussianPayloadDraw.ec",
+      "proofs/GaussianPayloadEncoding.ec",
+      "proofs/GaussianPayloadEventLaw.ec",
+      "proofs/GaussianPayloadKernel.ec",
+      "proofs/GaussianPayloadTrace.ec",
+      "proofs/HyperballIidPayloadBatch.ec",
+      "proofs/HyperballIidSquareLaw.ec",
+      "theories/GaussianPayloadBufferSpec.ec",
+      "theories/GaussianPayloadSpec.ec",
+      "theories/HyperballIidPayloadSpec.ec"
+    ],
+    "public_contracts": [
+      "gpe_history_law",
+      "gpd_buffer_draw",
+      "gpt_buffer_correct",
+      "gpt_buffer_total",
+      "hip_batch_history_law",
+      "hip_payload_observe_total",
+      "hips_actual_joint_law",
+      "hips_actual_square_law",
+      "hips_actual_safe_probability",
+      "hips_actual_terminates"
+    ],
+    "random_source": "Explicit independent uniform bytes: 49 initial 136-byte blocks, a 32-byte sign prefix, 26-byte candidates and 136-byte refills; observed carry bytes remain fixed.",
+    "payload": "m + 2^64*q, where m=uint(sample) and q=uint(square_low)+2^48*uint(square_high); exact integer encoding, not rounded m squared.",
+    "accepted_law": "gpd_accepted conditions the actual uniform 26-byte sigma payload on acceptance; acceptance probability >= 1/7 and total mass 1.",
+    "buffer_history": "For 0<=n<=512 the full history is dlist gpd_accepted n; under gib_bounds, ghost erasure preserves all three arrays of the actual-call iid buffer model.",
+    "batch": "HyperballIidGaussian.sample uses requests 257,257,256,... and sample/sign offsets 256*i,32*i, with a zero initial square accumulator.",
+    "initialization_scope": "hip_initial also zeros sample/sign arrays as a proof-model choice. Production sign.jazz:1201-1202 zeros only sqsum. No whole production-state or seeded-state equivalence is claimed; whole-triple ghost erasure is within the explicit iid model.",
+    "modes": {
+      "2": {
+        "visible": 1536,
+        "accepted": 1538
+      },
+      "3": {
+        "visible": 2304,
+        "accepted": 2306
+      },
+      "5": {
+        "visible": 2816,
+        "accepted": 2818
+      }
+    },
+    "joint_law": "dmap (dlist gpd_accepted D) hip_projection; the same history determines the active vector and S, without an independence assertion between them.",
+    "dummy_projection": "Zero-based positions 256 and 513 are omitted only from visible magnitudes; their raw squares remain in S.",
+    "integer_accumulator": "Each q<=2^84-1; the cumulative-count invariant and 2818*(2^84-1)<2^96 yield canonical limbs and exact ordinary integer addition from zero.",
+    "safe_interval": "Pr[hbs_good mode (hb_load returned_squares)] equals the mass of D-payload histories with 3*D*2^74<=gpd_sum history<=5*D*2^74.",
+    "exact_safe_event_probability_identity_proved": true,
+    "iid_gaussian_batch_probability_one_termination_proved": true,
+    "numeric_safe_domain_tail_bound_proved": false,
+    "raw_square_ideal_gaussian_or_chi_square_law_proved": false,
+    "unsafe_acceptance_bound_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "outer_hyperball_retry_termination_proved": false,
+    "complete_api_correctness": false,
+    "production_changed": false,
+    "kat_rerun": false,
+    "verification": {
+      "result": "PASS",
+      "checked_at": "20260922T054034.419769Z",
+      "fresh_non_ntt_targets": 180,
+      "all_local_targets": 192,
+      "retained_ntt_targets": 12,
+      "gate_regressions": 18,
+      "fresh_extraction_matches": 102,
+      "unchanged_pinned_sources": 484,
+      "evidence": "manifests/verification-results.json"
+    }
   }
 }

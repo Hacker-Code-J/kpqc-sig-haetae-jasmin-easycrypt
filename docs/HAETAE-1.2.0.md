@@ -112,6 +112,21 @@ word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용�
 과거 검증 로그를 새 Jasmin 소스의 증명 결과로 사용하지 않는다. 재사용한 NTT
 지원 이론도 새 디렉터리에서 각각 주 검증 대상으로 다시 검사했다.
 
+<!-- gaussian-payload:milestone:start -->
+후속 [전체 승인 payload·제곱합 단계](../haetae-1.2.0-easycrypt/docs/gaussian-payload-and-squares.md)는
+명시적 iid 바이트와 초기 제곱합 0에서 모드 2·3·5의 Gaussian 배치 전체를 연결한다.
+요청 `257, 257, 256, ...`, 표본 offset `256*i`, 부호 offset `32*i`를 따라
+실제 sign-copy·carry·유한 소비기를 호출한다. `hip_initial`의 표본·부호 0 초기화는
+증명 모형의 선택이다. 생산 코드가 초기화하는 배열은 제곱합이며, 전체 생산 상태나
+seeded 실행과의 동치를 주장하지 않는다.
+
+D=1538·2306·2818개의 승인 payload 이력에서 0부터 센 위치 256·513은 가시
+벡터에서만 빠지고, 모든 raw 제곱은 S에 남는다. 이 동일한 이력의 사영으로
+가시 벡터·S의 결합분포와 안전 구간 사건의 정확한 확률식을 증명했다. 구간 이탈의
+수치 상한, raw 제곱의 이상적 Gaussian·chi-square 법칙, SHAKE·외부 Hyperball
+retry·전체 API 연결은 별도 의무다. 생산 변경이 없어 이번 단계에서 KAT를 재실행하지 않았다.
+<!-- gaussian-payload:milestone:end -->
+
 ## 재현과 검증 한계
 
 ```sh

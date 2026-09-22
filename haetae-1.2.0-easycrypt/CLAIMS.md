@@ -16,10 +16,27 @@
 구간과 low limb 정규형에서 실제 수치 안전성을 도출한다. 표본·부호 배열과 출력
 fit는 가정하지 않는다. 구간에 도달할 확률이나 외부 retry 종료는 별도 의무다.
 
+<!-- gaussian-payload:overview:start -->
+후속 [전체 승인 payload·제곱합 단계](docs/gaussian-payload-and-squares.md)는 iid
+Gaussian 배치의 동일한 승인 이력에서 가시 벡터와 정수 S를 함께 결정한다.
+실제 호출·offset과 초기 제곱합 0을 사용해 D=1538·2306·2818개 전체 이력의 법칙과
+안전 구간 사건의 정확한 확률식을 얻었다. 표본·부호까지 0으로 초기화하는 것은
+`hip_initial`의 모형 선택이며 생산 코드는 제곱합만 초기화한다. 아래 전체 배열
+ghost 동치는 이 iid 모형 안의 결과다. 구간 이탈의 수치 상한이나 이상적인 S 법칙,
+구체적 SHAKE·외부 Hyperball retry·전체 API 정확성은 포함하지 않는다.
+<!-- gaussian-payload:overview:end -->
+
 ## 현재 정리
 
 | 정리 파일 | 대표 정리 | 정확한 범위 |
 | --- | --- | --- |
+| [GaussianPayloadSpec](theories/GaussianPayloadSpec.ec) / [GaussianPayloadEncoding](proofs/GaussianPayloadEncoding.ec) | `gpd_pack_magnitude`, `gpd_pack_square`, `gpd_accepted_ll`, `gpd_scan_selected` | 실제 표본·raw 제곱의 손실 없는 정수 인코딩, q≤2^84−1, 승인 확률≥1/7과 조건부분포 질량 1; 필요한 전체 승인 목록과 개수 |
+| [GaussianPayloadBufferSpec](theories/GaussianPayloadBufferSpec.ec) / [GaussianPayloadBufferPath](proofs/GaussianPayloadBufferPath.ec) | `gpb_actual_projection`, `gpb_history_projection`, `gpb_buffer_terminates` | gib_bounds 아래 실제 iid 버퍼와 ghost 이력 모형의 반환 세 배열 동치; 더미를 포함한 전체 이력 사영·종료 |
+| [GaussianPayloadTrace](proofs/GaussianPayloadTrace.ec) / [GaussianPayloadBufferTrace](proofs/GaussianPayloadBufferTrace.ec) | `gpt_consume`, `gpt_buffer_correct`, `gpt_buffer_total` | 이전 누적 예산과 총 승인≤2818에서 실제 소비·전체 버퍼의 가시 값과 raw 제곱 정수 합을 같은 이력에 연결; 정규형·범위·종료 |
+| [GaussianPayloadKernel](proofs/GaussianPayloadKernel.ec) / [GaussianPayloadEventLaw](proofs/GaussianPayloadEventLaw.ec) | `gpk_refill_event`, `gpk_initial_event`, `gpe_history_law` | 알려진 carry 바이트를 고정한 정확한 완료 분포; 0≤n≤512에서 전체 승인 이력=dlist gpd_accepted n |
+| [GaussianPayloadDraw](proofs/GaussianPayloadDraw.ec) | `gpd_buffer_draw` | 실제 버퍼 ghost의 전체 이력 사영과 독립 승인 payload 목록 추출의 동치; 초기 배열에 조건 없음 |
+| [HyperballIidPayloadSpec](theories/HyperballIidPayloadSpec.ec) / [HyperballIidPayloadBatch](proofs/HyperballIidPayloadBatch.ec) | `hip_batch_history_law`, `hip_payload_observe_total` | 모드별 요청·offset과 초기 제곱합 0에서 전체 D개 이력의 법칙·동일 이력의 가시 벡터와 S·정규형; 표본·부호 0 초기화는 모형 선택 |
+| [HyperballIidSquareLaw](proofs/HyperballIidSquareLaw.ec) | `hips_actual_joint_law`, `hips_actual_square_law`, `hips_actual_safe_probability`, `hips_actual_terminates` | 명시적 iid 실제 호출 배치의 가시 벡터·S 결합분포, 두 더미 포함 raw 제곱합, 안전 구간 확률 항등식과 확률 1 종료; 수치 꼬리 상한 제외 |
 | [SamplerConstants](proofs/SamplerConstants.ec) | `cdt83_hi_matches_reference`, `cdt83_lo_matches_reference`, `approx_exp_matches_reference` | 고정된 C에서 독립 생성한 CDT·다항식 상수와 Jasmin 명세 연결 |
 | [CDTCorrectness](proofs/CDTCorrectness.ec) | `sample_gauss83_jazz_total`, `sample_gauss83_max83_total` | 입력 정수보다 작은 166개 임계값의 개수; 범위와 최대 입력 166; 확률 1 종료·결과 |
 | [CDTTermination](proofs/CDTTermination.ec) | `sample_gauss83_ll` | 실제 두 bounded loop의 종료성 |
@@ -273,7 +290,7 @@ hbs_good에서 fit·norm 무오버플로를 도출했으며, 구간 발생 확�
 | Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball의 수학·확률 의미 | 지정 후보 반례와 canonical 입력 제곱합 안전 구간의 수치 보장까지 증명. 남은 범위는 구간 발생 확률·실제 seed 연결, 실제 역제곱근 오차·이상적 분포·외부 retry 종료; 모든 입력/seed에 대한 반경 보장으로 확대하지 않음 |
+| Hyperball의 수학·확률 의미 | 지정 후보 반례·입력 안전 구간의 수치 보장과 iid Gaussian 배치의 가시 벡터·raw 제곱합 결합분포 및 안전 구간 확률 항등식까지 증명. 남은 범위는 구간 이탈의 수치 상한·실제 seed 연결·실제 역제곱근 오차·이상적 S 법칙·외부 retry 종료; 모든 입력/seed의 반경 보장으로 확대하지 않음 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |

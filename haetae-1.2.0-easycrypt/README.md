@@ -87,6 +87,22 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 이는 충분한 입력 구간의 조건부 보장으로, 항상 승인하거나 외부 retry가 종료한다는
 주장이 아니다. 구간 발생 확률·SHAKE·이상적 분포는 남은 의무다.
 
+<!-- gaussian-payload:overview:start -->
+[전체 승인 payload와 제곱합](docs/gaussian-payload-and-squares.md)은 명시적 iid
+바이트의 Gaussian 배치에서 가시 벡터와 S의 **정확한 결합분포**를 증명한다.
+모드 2·3·5의 D=1538·2306·2818개 승인 이력은 `dlist gpd_accepted D`이고,
+같은 이력에서 두 더미를 가시 벡터에서만 제외하며 raw 제곱은 모두 누적한다.
+`hips_actual_joint_law`, `hips_actual_square_law`, `hips_actual_safe_probability`는
+이 결합분포·정수 합·안전 구간 사건의 정확한 확률식을, `hips_actual_terminates`는
+해당 iid 배치의 확률 1 종료를 진술한다. raw 제곱은 rounded 표본의 제곱이 아니다.
+
+초기 제곱합은 0이다. `hip_initial`의 표본·부호 배열 0 초기화도 증명 모형의
+선택으로 명시한다. 생산 코드는 제곱합만 0으로 초기화하며, 이 단계는 생산
+stack 전체 상태나 concrete SHAKE 실행과의 동치를 주장하지 않는다. 실제 Gaussian
+호출 순서·offset·가시 출력·S를 연결했고, iid 모형 안의 ghost 제거는 반환 세 배열을
+모두 보존한다. 안전 구간 이탈의 수치 상한·이상적 S 법칙·외부 Hyperball retry는 남아 있다.
+<!-- gaussian-payload:overview:end -->
+
 ## 검증된 핵심 결과
 
 | 대상 | 결과 |
@@ -122,6 +138,7 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 | 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
 | 서명용 Gaussian의 조건부 종료 | 실제 seed의 스트림에 충분한 승인 후보가 있는 유한 접두 구간 전제 아래 종료와 정확한 출력·부호 복사·더미 포함 제곱합·외부 영역 보존; 모든 seed의 충분성은 별도 |
 | Hyperball 누적합 | 최대 2,818개 승인 후보에서 두 limb의 48비트 범위를 증명하여 연속 Gaussian 호출 연결 |
+| Hyperball iid 전체 payload·제곱합 | 실제 Gaussian 호출 모형의 D=1538/2306/2818 승인 이력과 가시 벡터·raw 제곱합의 정확한 결합분포; 두 더미는 S에 포함; 안전 구간 사건의 확률식·배치 확률 1 종료 |
 | Hyperball 입력 안전 구간 | canonical 입력 제곱합 S∈[3D/4,5D/4]·2^76에서 실제 Newton6·scale·반올림 크기≤2^26과 N<2^64 도출; 임의 표본/부호의 승인 iff 정수 반경 조건 |
 | Hyperball 수치 반례의 실제 호출 | 지정 후보에서 두 더미를 포함한 소비·Newton6·scaling·norm 종료와 정확한 결과; 실제 정수 노름 초과에도 승인1. SHAKE seed·전체 seeded 경로는 제외 |
 | 고정소수점·scaling | 실제 word 곱셈·정규화·반분·Newton 6회 갱신·부호 및 signed32 출력·보존·종료; 수치 fit는 명시적 조건 |

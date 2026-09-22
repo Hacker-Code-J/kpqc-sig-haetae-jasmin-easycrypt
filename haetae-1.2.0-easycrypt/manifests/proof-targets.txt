@@ -1,4 +1,4 @@
-# Every local theory is checked as a main target; imports alone are insufficient.
+# Every local specification/proof is checked as a main target.
 proofs/ApiBoundaryCorrectness.ec
 theories/ReferenceConstants.ec
 theories/ApproxExpSpec.ec
@@ -115,6 +115,15 @@ proofs/GaussianIidTermination.ec
 proofs/GaussianRetryAttempt.ec
 proofs/GaussianRetryActual.ec
 proofs/GaussianIidDistribution.ec
+theories/GaussianPayloadSpec.ec
+theories/GaussianPayloadBufferSpec.ec
+proofs/GaussianPayloadBufferPath.ec
+proofs/GaussianPayloadEncoding.ec
+proofs/GaussianPayloadTrace.ec
+proofs/GaussianPayloadBufferTrace.ec
+proofs/GaussianPayloadKernel.ec
+proofs/GaussianPayloadEventLaw.ec
+proofs/GaussianPayloadDraw.ec
 proofs/GaussianRetryBatch.ec
 proofs/GaussianRetryTail.ec
 proofs/GaussianRetryBatchCorrectness.ec
@@ -143,7 +152,10 @@ proofs/HyperballNormCorrectness.ec
 proofs/HyperballScaleCorrectness.ec
 theories/HyperballReferenceConstants.ec
 proofs/HyperballCorrectness.ec
+theories/HyperballIidPayloadSpec.ec
+proofs/HyperballIidPayloadBatch.ec
 theories/HyperballSafeSpec.ec
+proofs/HyperballIidSquareLaw.ec
 proofs/HyperballWordEvaluation.ec
 proofs/HyperballMulBounds.ec
 proofs/HyperballNewtonBarrier.ec
