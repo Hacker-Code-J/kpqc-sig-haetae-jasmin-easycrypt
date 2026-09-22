@@ -112,6 +112,16 @@
     "output": "256 stored unsigned magnitudes for both requested256/257; dummy is not an additional stored coefficient",
     "error": "Exact dlist(sc_actual_conditioned(p),256) law; Gaussian target statistical distance<2^-31",
     "initial_arrays": "Arbitrary words; no adequate-prefix or canonical-square premise for this word-model law",
-    "remaining": "Concrete SHAKE/ideal XOF relation, sign distribution/application, integer accumulator interpretation without prior bounds, Renyi, Hyperball and full APIs"
+    "remaining": "Concrete SHAKE/ideal XOF relation, integer accumulator interpretation without prior bounds, Renyi, Hyperball and full APIs; subsequent signed_gaussian_correspondence covers the sign stage"
+  },
+  "signed_gaussian_correspondence": {
+    "target": "Sign-preserving rounding of the independent all-integer exp(-k^2/2^153) Gaussian; ties away from zero",
+    "sign_source": "The first32 of49 initial iid136-byte blocks; little-endian256fairbits, independent of the complete unsigned output/square state",
+    "raw_observation": "Unbounded integer plus/minus W64.to_uint of each of256 visible magnitudes",
+    "error": "Exact iid signed implementation law; statistical distance<2^-31 to256 independent signed Gaussian target observations",
+    "actual_application": "Implemented fixed-point multiplication and rounding precede sign application modulo2^32; signed32 reading retains magnitude<=2147483647",
+    "alignment": "sample_offset=8*sign_offset in local-to-global scale coefficient corollaries",
+    "remaining": "Concrete SHAKE/ideal XOF relation, integer accumulator bounds, full scaling fit/accuracy, Renyi, Hyperball and complete APIs",
+    "documentation": "docs/gaussian-signed-output.md"
   }
 }

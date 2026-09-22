@@ -220,3 +220,8 @@ The `verify-new` gate checks each selected local theory or proof as an
 independent main target. A focused replay does not replace that complete check.
 Consult the final verification manifest and [VALIDATION.md](../VALIDATION.md)
 for the published result and exact inventory.
+
+The subsequent [signed-output milestone](gaussian-signed-output.md) proves fair
+sign bits, independence from the complete unsigned word state, the signed256
+observation law and actual sign application under the stated signed32 fit
+condition. The sign exclusions above describe this earlier magnitude milestone.

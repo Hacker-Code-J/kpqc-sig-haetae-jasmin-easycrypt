@@ -80,7 +80,13 @@ word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용�
    [전체 iid 버퍼 모형](../haetae-1.2.0-easycrypt/docs/gaussian-iid-buffer.md)은
    균등 바이트 공급과 실제 소비·carry 함수를 합성해, 충분한 접두 구간 전제 없이
    확률 1 종료와 저장되는 256개 크기의 정확한 결합분포·Gaussian 거리<2^-31을 증명한다.
-   실제 부호 처리와 구체적인 SHAKE로의 확률 보장 전달은 남아 있다.
+   후속 [부호 출력 단계](../haetae-1.2.0-easycrypt/docs/gaussian-signed-output.md)는
+   명시적 iid 바이트 모형에서 256개 공정 부호와 전체 표본 배열·제곱 워드 상태의
+   독립성을 증명한다. 실제 반환값의 `±W64.to_uint` 관측을
+   `sign(G)·floor((|G|+32768)/65536)` 목표에 연결해 256개 벡터 거리<2^-31을 얻는다.
+   0은 0으로 남고 ±32768은 각각 ±1로 반올림한다. 실제 scaling 뒤 부호 연산도
+   word 단위로 정확하며, signed32 해석은 명시적 fit 조건을 유지한다.
+   구체적인 SHAKE로의 확률 보장 전달은 별도로 남아 있다.
 2. 단일 Gaussian 시도에서 유한 소비기의 전체 출력·승인 표본열·제곱합 누적
    fold까지 연결했다. 초기 limb 범위를 포함한 정확한 전제는 정리에 명시한다.
 3. 실제 `_sf_sample_gauss_N_full_at`의 seed/nonce 초기화, 49블록, 부호 바이트와
@@ -88,7 +94,10 @@ word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용�
    초기 제곱합 조건, Hyperball 고정소수점·scaling·모듈러 norm·retry도 합성했다.
    정수 반경 보장과 word 승인은 구분한다. 구성한 후보열의 wrap 사례와 전제는
    [수치 경계 기록](../haetae-1.2.0-easycrypt/docs/hyperball-numerical-boundary.md)에 있다.
-   실수 근사 오차·분포·종료성은 별도 의무다.
+   부호 단계의 scaling 연결은 정확한 word 부호 계산과, 반올림 크기가
+   2147483647 이하일 때의 signed32 해석을 다룬다. 국소 Gaussian 창을 전역
+   scaling 인덱스에 연결할 때는 `sample_offset=8*sign_offset`를 명시한다.
+   Hyperball 전체의 실수 근사 오차·분포·종료성은 별도 의무다.
 4. NTT·코덱 등 재사용 후보를 태그에서 필요한 만큼 가져와 현재 소스와 비교한다.
    이후 KeyGen/Sign/Verify 합성, 종료성·분포·보안 의무를 구분하여 진행한다.
 

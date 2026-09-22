@@ -3,6 +3,11 @@
 이 문서는 함수별 정리의 범위를 기록한다. 추출물의 로딩 성공, KAT 성공,
 구성요소 정리와 전체 API 정확성을 구분한다.
 
+[부호 출력 단계](docs/gaussian-signed-output.md)는 부호 비트, 전체 비부호 상태와의
+독립성, 실제 반환 관측의 signed Gaussian 분포, 조건부 signed32 적용까지 증명했다.
+새 파일을 포함한 전체 비NTT 검증이 통과했으며, 정확한 대상 수와 소스 해시는
+[VALIDATION.md](VALIDATION.md)와 검증 manifest에 기록했다.
+
 ## 현재 정리
 
 | 정리 파일 | 대표 정리 | 정확한 범위 |
@@ -56,6 +61,13 @@
 | [GaussianIidInitial](proofs/GaussianIidInitial.ec) / [GaussianIidNormalization](proofs/GaussianIidNormalization.ec) | `gib_initial_law`, `gid_functional_uniform` | 초기 49개 블록 추출과 하나의 균등 6,664바이트 추출의 정확한 동치 |
 | [GaussianIidProgress](proofs/GaussianIidProgress.ec) / [GaussianIidTermination](proofs/GaussianIidTermination.ec) | `gip_refill_progress`, `git_functional_lossless` | 임의의 고정 잔여 바이트 뒤에서도 새 블록의 온전한 후보가 진행 확률≥1/7 보장; 충분한 접두 구간 전제 없는 확률 1 종료 |
 | [GaussianIidEventLaw](proofs/GaussianIidEventLaw.ec) / [GaussianIidDistribution](proofs/GaussianIidDistribution.ec) | `gii_actual_correct`, `gii_actual_joint_law`, `gii_actual_gaussian_event` | `gib_bounds` 아래 실제 함수 호출 iid 버퍼 모형의 확률 1 종료, 요청 256/257의 가시 256개 정확한 독립 결합분포와 Gaussian 거리<2^-31 |
+| [GaussianSignedTarget](proofs/GaussianSignedTarget.ec) | `gst_target_eq`, `gst_round_signed_ties`, `gst_target_zero_mass`, `gst_target_symmetry` | 독립적인 signed 반올림 목표=공정 부호를 절댓값 반올림 분포에 적용한 법칙; 0 질량 보존, ±32768→±1, 대칭성 |
+| [GaussianSignBits](proofs/GaussianSignBits.ec) | `gsb_uniform256`, `gsb_result_bits_nth`, `gsb_hb_sign_bit` | 32개 균등 바이트→256개 공정 비트; 실제 복사 창의 low-bit-first 순서와 전역 부호 인덱스 8·signoff+i 연결 |
+| [GaussianSignedVector](proofs/GaussianSignedVector.ec) | `gsv_actual_law`, `gsv_ideal_law`, `gsv_actual_gaussian` | 독립 곱분포의 부호·크기 목록을 결합한 256개 signed 정수의 정확한 iid 법칙 및 signed Gaussian 목표와 거리<2^-31 |
+| [IndependentSignSampling](proofs/IndependentSignSampling.ec) | `IndependentSign.rectangle`, `IndependentSign.output_marginal` | 임의 계산 뒤 독립 부호 추출의 사건 확률 곱셈 법칙; 계산의 종료 전제 없음, 출력 주변분포 유지에는 부호 분포의 질량 1만 요구 |
+| [GaussianSignIndependence](proofs/GaussianSignIndependence.ec) | `gsi_actual_redraw`, `gsi_sign_state_independent` | 명시적 iid 바이트 모형에서 부호 창과 전체 표본 배열·제곱 워드 상태를 분리; 후자 상태를 보존한 공정 부호 재추출 동치 |
+| [GaussianSignedCorrectness](proofs/GaussianSignedCorrectness.ec) | `gsc_actual_joint_law`, `gsc_actual_signed_law`, `gsc_actual_gaussian_event`, `gsc_actual_correct` | `gib_bounds` 아래 실제 반환 부호와 가시 크기의 결합 및 ±W64.to_uint 관측의 signed 256개 법칙·거리<2^-31 |
+| [HyperballSignedScale](proofs/HyperballSignedScale.ec) | `hss_scalar_word_total`, `hss_coeff_signed_fit`, `hss_scale_samples_signed_total` | 실제 scalar/vector scaling 부호의 정확한 word 의미; 반올림 크기≤2147483647인 좌표의 signed32 해석; 국소→전역 연결은 sample_offset=8·signoff 조건 |
 | [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
 | [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
 | [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
@@ -180,7 +192,8 @@
 64비트로 감지 않으며, 실제 출력은 unsigned 정수로 읽는다. 최종 비교 사건은
 `accepted /\ S(output)`이고 승인 확률로 나누지 않는다. 따라서 승인된 표본의
 조건부분포는 후속 정규화 정리로 연결했다. 독립 난수에서의 거부 반복은 아래
-후속 정리로 다루며, 실제 부호 처리와 구체적 SHAKE의 확률 성질은 별도로 남아 있다.
+후속 정리로 다룬다. 이 단계가 다루지 않았던 부호 처리는 아래 부호 단계에서
+별도로 합성하며, 구체적 SHAKE의 확률 성질은 남아 있다.
 
 [조건부분포 정리](docs/conditional-accepted-output.md)는 각 실험의 서로 다른
 승인 확률로 나누며, 실제≥1/7·이상적≥1/8을 증명해 분모가 0인 경우를 배제한다.
@@ -209,14 +222,32 @@
 새 균등 분포를 가정하지 않는다. 초기 49블록, 부분 후보, 요청 257의 더미를
 포함한 제어 흐름 아래 확률 1 종료와 저장되는 256개 크기의 정확한 목록 법칙을
 증명한다. 초기 배열들은 임의의 word 값이며, 제곱 누적합의 정수/no-wrap 해석에는
-이전 limb·범위 조건이 계속 필요하다. 새 확률 법칙은 크기 목록에 한정하며
-부호의 독립성·적용이나 반환 배열 전체의 Gaussian 공동 법칙을 뜻하지 않는다.
+이전 limb·범위 조건이 계속 필요하다. 이 iid 크기 단계의 확률 법칙은 크기 목록에
+한정했다. 부호 독립성과 적용은 이어지는 부호 단계의 별도 계약이다.
+
+[부호 출력 단계](docs/gaussian-signed-output.md)의 비부호 상태는 단순한 가시 크기
+목록이 아니라 `(전체 표본 배열, 제곱 워드 배열)`이다. 명시적인 iid 바이트 모형에서
+이 상태와 256개 공정 부호 비트의 독립성을 증명했고, 실제 버퍼와 부호 재추출
+절차의 동치를 통해 반환값의 공동 사건에 전달했다. 새 소스를 각각 주 대상으로
+검사한 최종 통합 게이트도 통과했다.
+signed 관측은 각 `W64.to_uint` 크기에 부호를 붙인 정수이고 `W64.to_sint`가 아니다.
+목표 `gst_target`은 `sign(G)·floor((|G|+32768)/65536)`의 분포다. 0은 0으로
+남고 양쪽 tie ±32768은 각각 ±1이 된다. 독립 부호 벡터 정리는 기존 256개 거리
+`<2^-31`을 그대로 유지한다. 이 결과가 제곱 워드를 포함한 반환 튜플 전체의
+Gaussian 법칙을 추가하는 것은 아니다.
+
+scaling 연결은 전역 좌표 i의 부호 비트와 같은 좌표의 표본을 사용한 정확한
+word 계산을 유지한다. signed32 해석에는 각 반올림 크기≤2147483647을 명시한다.
+국소 부호 비트 i는 전역 인덱스 `8*signoff+i`에 대응하므로, 국소 Gaussian 샘플
+창과 scaling의 전역 표본 창을 연결할 때는 `sample_offset=8*signoff`가 필요하다.
+이는 국소 signed 관측의 분포 정리에는 요구하지 않는 추가 정렬 조건이다.
+이 연결로 Hyperball의 수치 fit·norm 오버플로·분포 의무가 자동으로 해소되지는 않는다.
 
 ## 아직 증명하지 않은 부분
 
 | 의무 | 현재 경계와 다음 연결 |
 | --- | --- |
-| Gaussian 분포 합성 | 독립 균등 바이트 공급 버퍼 모형의 종료·가시 256개 결합분포까지 연결. 남은 범위는 실제 부호 분포·적용, 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 합성 |
+| Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
 | Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |
