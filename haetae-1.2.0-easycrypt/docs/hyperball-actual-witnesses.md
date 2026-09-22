@@ -151,3 +151,8 @@ with probability one. `hbw_sampling_total` supplies the actual finite-consumer
 outputs, including both dummy squares; expected intermediates are not premises
 of the final replay theorem. Source hashes, exact commands and timing are
 recorded in [VALIDATION.md](../VALIDATION.md) and the verification manifest.
+
+The subsequent [input safe-domain proof](hyperball-safe-domain.md) derives numerical
+safety from a sufficient canonical entry-square interval. The prescribed
+examples above are formally shown to lie outside that interval. This does not
+classify every outside input or bound the probability of leaving the interval.

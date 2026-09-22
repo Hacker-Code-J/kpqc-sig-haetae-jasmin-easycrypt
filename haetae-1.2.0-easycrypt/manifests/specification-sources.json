@@ -132,5 +132,14 @@
     "computation": "Every concrete word transition checked using universal modular integer representations, not a numerical oracle",
     "scope": "Deterministic prescribed-byte helper experiment; no SHAKE seed/full seeded Hyperball reachability or formal C execution",
     "documentation": "docs/hyperball-actual-witnesses.md"
+  },
+  "hyperball_input_safe_domain_correspondence": {
+    "input": "hbs_good: mode2/3/5, canonical low<2^48,3D*2^74<=S<=5D*2^74; S=uint(low)+2^48*uint(high),D=stored+2",
+    "constants": "Pinned C-derived HyperballReferenceConstants; exact integer certificates for H and all endpoint margins",
+    "semantics": "Actual word multiplication/square bounds, positive arithmetic, initial low<2R, integer cubic barrier through six updates",
+    "result": "Computed scale<=2^85 and full M<=2^26 for arbitrary samples/signs; exact signed32 conversion, N<2^64 and accepted iff true integer mode bound",
+    "scope": "Finite actual numerical helper composition from input-only predicate; no output-fit/norm premise or runtime guard change",
+    "remaining": "Input-domain probability, concreteSHAKE/fullseededHyperball, outerretrytermination, realinverseaccuracy, idealdistribution andcompleteAPIs",
+    "documentation": "docs/hyperball-safe-domain.md"
   }
 }

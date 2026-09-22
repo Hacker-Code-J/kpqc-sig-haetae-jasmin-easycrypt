@@ -12,6 +12,10 @@
 실제 유한 소비·제곱 누적·Newton·scaling·norm 호출의 결과를 증명한다. 세 모드에서
 정수 반경 초과와 word 승인1을 함께 얻으며, 구체적인 SHAKE seed 도달성은 포함하지 않는다.
 
+[Hyperball 입력 안전 구간](docs/hyperball-safe-domain.md)은 초기 제곱합의 구체적인
+구간과 low limb 정규형에서 실제 수치 안전성을 도출한다. 표본·부호 배열과 출력
+fit는 가정하지 않는다. 구간에 도달할 확률이나 외부 retry 종료는 별도 의무다.
+
 ## 현재 정리
 
 | 정리 파일 | 대표 정리 | 정확한 범위 |
@@ -98,6 +102,13 @@
 | [HyperballByteCorrectness](proofs/HyperballByteCorrectness.ec) | `hyperball_b_raw_array_total` | 마지막 nonce의 seed SHAKE 첫 바이트와 실제 반환 배열 일치·종료 |
 | [HyperballCorrectness](proofs/HyperballCorrectness.ec) | `hyperball_full_correct`, `hyperball_mode2_correct`, `hyperball_mode3_correct`, `hyperball_mode5_correct` | 실제 전체 함수와 mode 2·3·5의 word 명세에 대한 Hoare 부분 정확성; Gaussian 배치·고정소수점 scaling·모듈러 norm·retry·최종 byte/counter; mode 상수는 C에서 독립 생성 |
 | [HyperballResultUniqueness](proofs/HyperballResultUniqueness.ec) / [HyperballResultProperties](proofs/HyperballResultProperties.ec) | `hb_result_unique`, `hb_result_modular_norm`, `hb_result_integer_norm` | 미사용 scratch 영역·블록 증인과 무관한 전체 반환값 유일성, 출력 보존 및 모듈러 norm; 수학적 norm은 `<2^64` 또는 명시적 좌표 범위에서 연결 |
+| [HyperballSafeSpec](theories/HyperballSafeSpec.ec) / [HyperballSafeConstants](proofs/HyperballSafeConstants.ec) | `hbs_mode_certificate`, `hbs_initial_numeric_bound`, `hbs_center_good` | Q=2^76, canonical 입력 S∈[3D/4,5D/4]·Q; 모드별 상한·초기 양수 차이 인증서와 비어 있지 않은 구간 |
+| [HyperballMulBounds](proofs/HyperballMulBounds.ec) | `hmb_mul_floor_bounds`, `hmb_mul_error`, `hmb_square_floor` | low<2R,value≤2^88 피연산자의 실제 곱셈/제곱 정수 오차·정규화; masked shift의 wrap과 필요한 headroom을 검증 |
+| [HyperballPositiveArithmetic](proofs/HyperballPositiveArithmetic.ec) | `hpa_sub_exact`, `hpa_threehalves_exact`, `hpa_signed_mul_positive` | 초기 빼기의 비정규형 low<2R를 유지한 정확한 양수 차이; 보정항과 signed 곱셈의 양수 경로 연결 |
+| [HyperballNewtonBarrier](proofs/HyperballNewtonBarrier.ec) | `hnb_error_bound`, `hnb_z_bound` | 세 반올림 오차의 전파와 정수 cubic 상한; 고정밀 단위256의 여유를 흡수하는 한 단계 범위 보존 |
+| [HyperballSafeNewton](proofs/HyperballSafeNewton.ec) | `hbs_safe_newton`, `hbs_safe_newton_total` | hbs_good에서 초기 상태와 여섯 갱신의 상한·최종 정규형 및 실제 Newton 호출 종료 도출; 출력 범위 전제 없음 |
+| [HyperballSafeScale](proofs/HyperballSafeScale.ec) | `hsa_mode_scale_bound`, `hsa_rnd13_bound`, `hsa_scale_result_safe` | 역수 상한→scale≤2^85→모든 W64 표본의 M≤2^26; 임의 부호의 signed32·노름 안전성과 정확한 정수 승인 판정 |
+| [HyperballSafeCorrectness](proofs/HyperballSafeCorrectness.ec) | `hsc_total`, `hsc_full_magnitude`, `hsc_accepted_radius_total` | 모드와 입력 hbs_good만 전제로 실제 수치 실행의 종료·계수 범위·N<2^64·정확한 norm word·승인 iff 반경 조건; 표본/부호 제한·출력 fit 전제 없음 |
 | [HyperballWitnessSpec](theories/HyperballWitnessSpec.ec) / [HyperballWitnessArithmetic](proofs/HyperballWitnessArithmetic.ec) | `hbw_sum_exact`, `hbw_fixture_norm` | 입력·기대 관측의 정의, 모드별 정수 합·나머지·범위; 기대값 정의 자체는 실행 결과 가정이 아님 |
 | [HyperballWordEvaluation](proofs/HyperballWordEvaluation.ec) | `hwe_mul48`, `hwe_mulu`, `hwe_norm` | 입력·출력 word wrap을 보존하는 정수 div/mod 표현; 초기 low limb 정규형·high 양수 전제 없음 |
 | [HyperballWitnessCandidate](proofs/HyperballWitnessCandidate.ec) | `hbw_candidate_spec`, `hbw_candidate_total` | 고정26바이트의 실제 CDT·표본·제곱 limbs·승인1 계산과 실제 sigma 호출 종료 |
@@ -252,7 +263,8 @@ word 계산을 유지한다. signed32 해석에는 각 반올림 크기≤214748
 국소 부호 비트 i는 전역 인덱스 `8*signoff+i`에 대응하므로, 국소 Gaussian 샘플
 창과 scaling의 전역 표본 창을 연결할 때는 `sample_offset=8*signoff`가 필요하다.
 이는 국소 signed 관측의 분포 정리에는 요구하지 않는 추가 정렬 조건이다.
-이 연결로 Hyperball의 수치 fit·norm 오버플로·분포 의무가 자동으로 해소되지는 않는다.
+이 부호 연결만으로 Hyperball의 수치 조건을 해소하지는 않는다. 후속 입력 안전 구간에서는
+hbs_good에서 fit·norm 무오버플로를 도출했으며, 구간 발생 확률·분포 의무는 남아 있다.
 
 ## 아직 증명하지 않은 부분
 
@@ -261,7 +273,7 @@ word 계산을 유지한다. signed32 해석에는 각 반올림 크기≤214748
 | Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball의 수학·확률 의미 | 지정 후보의 실제 helper 반례는 증명 완료. 남은 범위는 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |
+| Hyperball의 수학·확률 의미 | 지정 후보 반례와 canonical 입력 제곱합 안전 구간의 수치 보장까지 증명. 남은 범위는 구간 발생 확률·실제 seed 연결, 실제 역제곱근 오차·이상적 분포·외부 retry 종료; 모든 입력/seed에 대한 반경 보장으로 확대하지 않음 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |

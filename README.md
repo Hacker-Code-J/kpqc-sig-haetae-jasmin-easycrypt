@@ -71,6 +71,14 @@ Hyperball 수치 경계도 실제 추출 함수에 연결했다. 지정한 후�
 [실제 함수 반례 증명](haetae-1.2.0-easycrypt/docs/hyperball-actual-witnesses.md)에
 정확한 입력·결과·범위를 기록했다.
 
+Hyperball의 입력 제곱합에 대한 충분한 안전 구간도 증명했다. low limb가 정규형이고
+`3D/4 ≤ S/2^76 ≤ 5D/4`이면 실제 Newton·scaling에서 전체 반올림 크기≤2^26,
+signed32 변환의 정확성 및 정수 노름의 무오버플로를 얻는다. 여기서 D는 두 더미를
+포함한 이벤트 수다. 표본·부호 배열은 제한하지 않으며 **승인되면 실제 반경 이내**임을
+증명한다. 이 구간에 들어갈 확률과 전체 seeded 흐름은 별도로 남아 있다.
+[입력 안전 구간 증명](haetae-1.2.0-easycrypt/docs/hyperball-safe-domain.md)에 정확한
+전제와 실제 호출 계약을 기록했다.
+
 | 경로 | 용도 |
 | --- | --- |
 | [HAETAE-1.2.0/](HAETAE-1.2.0/) | 수정하지 않은 참조 배포본, 라이선스, KAT |

@@ -6,7 +6,7 @@
 | 구분 | 새로 검사한 대상 | 결과 |
 | --- | --- | --- |
 | 추출물 | 배열 이론과 현재 프로그램 102개 | 앞 단계 모두 PASS; 이번 재추출 일치 확인 |
-| NTT 외 명세·증명 | `verify-new`의 160개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
+| NTT 외 명세·증명 | `verify-new`의 168개 파일 | EOF 확인을 포함한 새 통합 실행 모두 PASS |
 | NTT | 필요한 지원 이론 11개와 현재 구현 정리 1개 | 앞 단계 각 파일을 주 대상으로 모두 PASS; 이번 해시 불변 확인 |
 | 검증기 회귀 | 기존 EOF·상수·Gaussian 인증서 검사 14개와 지수 다항식 인증서 검사 4개 | 18개 모두 PASS |
 | CDT 수학적 분포 | 실제 Jasmin의 균등 83비트 입력 분포와 비음수 Gaussian(σ=16) | 모든 출력 집합의 확률 차이 <2^-78 증명 |
@@ -21,41 +21,42 @@
 | 균등 바이트와 전체 iid 버퍼 | 실제 함수 호출 모형의 49블록·carry·소비·136바이트 재충전 | `gib_bounds` 아래 확률 1 종료; 요청 256/257의 가시 256개 결합분포 및 Gaussian 거리<2^-31 |
 | 부호와 비부호 상태 | 실제 iid 버퍼의 부호 창과 전체 표본·제곱 워드 | 256개 공정 비트의 독립성; signed 관측의 Gaussian 거리<2^-31 |
 | 실제 부호 적용 | scaling·반올림 뒤 XOR/add·W32 절단 | 정확한 word 결과; 반올림 크기≤2147483647 아래 스칼라·벡터 signed32 의미 |
+| Hyperball 입력 안전 구간 | canonical S∈[3D/4,5D/4]·2^76에서 실제 수치 호출 | 임의 표본/부호의 M≤2^26·N<2^64·정확한 norm word·승인 iff 반경 조건; 구간 발생 확률 제외 |
 | Hyperball 실제 helper 반례 | 고정 후보→실제 소비·두 더미 누적→Newton6→scaling→norm | 세 모드의 종료·승인1과 반환 배열의 정수 반경 초과; SHAKE seed 도달성 제외 |
-| Hyperball 수치 재현 | mode 2·3·5의 고정 후보열을 C/Jasmin으로 실행 | 09-22 새 재현 세 모드 PASS; 구현 변경 없음 |
+| Hyperball 수치 재현 | mode 2·3·5의 고정 후보열을 C/Jasmin으로 실행 | 앞 반례 단계의 09-22 재현 PASS 보존; 이번 구현 변경 없음 |
 
-전체 로컬 명세·증명 172개를 각 단계에서 주 검증 대상으로 검사했다. import만 된 증명의
+전체 로컬 명세·증명 180개를 각 단계에서 주 검증 대상으로 검사했다. import만 된 증명의
 본문이 자동으로 재검사된다고 가정하지 않았다. 새 코드 게이트는 `-no-eco`와
 명시적 `Proofs:check`를 사용하며, 원래 NTT 지원 재검증도 `-no-eco`의 기본
 강한 검사 모드로 개별 실행했다.
 
-이번에는 지정된 Hyperball 후보열의 실제 helper 실행을 검증하는 명세·증명
-파일 9개를 추가했다. `hbw_candidate_total`은 고정26바이트에서 실제 sigma의
-승인·표본·제곱값을 증명한다. `hbw_sampling_total`은 실제 유한 소비기 호출을
-257,257,256,… 순서로 합성하여 활성 표본과 두 더미를 포함한 제곱합을 얻는다.
+이번에는 입력 제곱합 안전 구간을 다루는 명세·증명 파일 8개를 추가했다.
+공개 전제 hbs_good는 모드2/3/5, 입력 low<2^48, S∈[3D*2^74,5D*2^74]만 포함한다.
+S는 두 더미를 포함한 raw 제곱 limbs의 정수 값이며 D=저장 개수+2다. 중심 S=D*2^76의
+정규형 입력을 증명해 구간이 비어 있지 않음을 확인했다.
 
-`HyperballWitnessNewton`의 모든 중간 word 값과 여섯 갱신을 정수 div/mod로
-검사했다. 첫 high limb의 signed 해석이 음수이고, 최종 반올림 크기는
-412929335944226/448613294232468/545876826280812로 signed32 fit를 초과한다.
-정수 수렴·양수성·signed fit를 가정하지 않고 실제 wrap을 보존했다.
+실제 곱셈은 floor(XY/Q)…floor+1, 제곱은 정확한 floor(X²/Q)로 연결한다. 필요한
+덧셈·high shift·최종 정규화의 headroom을 증명하고 masked shift의 wrap은 유지한다.
+초기 빼기의 low<2R를 허용하며, 정수 cubic 여유와 반올림 오차로 여섯 갱신의
+상한을 보존한다. hbs_safe_newton은 입력 조건에서 최종 역수값의 정규형·상한을 도출한다.
 
-`hbwr_total`은 모드와 직접 구성한 후보 입력에서 실제 half·Newton·scale·norm
-호출 결과를 증명한다. `hbwr_accepted_outside_radius_total`은 실제 반환 배열의
-정수 노름이 모드 경계를 넘는데도 승인1을 반환하며 종료한다고 직접 진술한다.
-N은 반환 배열에서 계산하며, 기록된 중간 결과를 전제로 가정하지 않는다.
+hsc_full_magnitude는 같은 입력 조건에서 임의 W64 표본의 실제 반올림 크기≤2^26을
+증명한다. hsc_total은 실제 half/Newton/mul-high/scale-check/norm 호출의 종료와,
+임의 표본·부호 배열에 대한 signed32 계수 범위·N<2^64·정확한 norm word 해석·
+승인 iff 정수 반경 조건을 증명한다. hsc_accepted_radius_total은 그 승인 함의를
+직접 진술한다. 출력 fit·norm 범위를 다시 가정하지 않았다.
 
-기존 비NTT 151개를 먼저 새로 검사하고 새 9개는 고정 후 같은 EOF 방어 검증기로
-검사했다. 최종 전체 목록과 해시를 대조한 뒤 160/160 PASS를 기록했다.
-이전 163개 로컬 명세·증명과 생산·참조·archive·추출물·검증기·기존 테스트는
+기존 비NTT 160개를 먼저 새로 검사하고 새 8개는 소스 고정 후 같은 EOF 방어
+검증기로 검사했다. 최종 전체 목록과 해시를 대조한 뒤 168/168 PASS를 기록했다.
+이전 172개 로컬 명세·증명과 생산·참조·archive·추출물·기존 검증기/테스트는
 변경하지 않았다. 검증기 회귀18개 PASS, 추출물102개 새 추출 일치를 확인했다.
-NTT12개는 이전 결과와 해시를 보존했으며 이번 재실행에 포함하지 않았다.
-새 공리·수치 오라클은 없다. 생산 변경이 없어 KAT는 다시 실행하지 않았다.
+NTT12개는 앞 단계의 결과와 해시를 보존했으며 이번 재실행에 포함하지 않았다.
+생산 변경이 없어 KAT를 재실행하지 않았다. 새 공리·수치 오라클은 없다.
 
-기존 C/Jasmin 수치 재현을 새로 실행하여 세 모드의 모든 관측값이 일치했다.
-이는 C 실행의 형식 증명과 구분한다. 직접 공급하는 유한 후보 버퍼는 원래
-seeded 함수의6632바이트 시작·refill 스케줄과도 구분한다. producing SHAKE seed,
-전체 seeded Hyperball 도달성·retry·예외 확률·이상적 scaling 정확성은 남아 있다.
-[실제 호출 증명 기록](docs/hyperball-actual-witnesses.md)에 구체적 수치와 범위를 적었다.
+입력 구간은 충분조건이며 runtime guard를 새로 추가한 것은 아니다. 항상 승인되거나
+외부 retry가 종료함을 뜻하지 않는다. 구간 발생 확률·실제 SHAKE/seeded Hyperball
+연결·최종 역제곱근 오차·이상적 분포·전체 API는 남아 있다.
+[입력 안전 구간 기록](docs/hyperball-safe-domain.md)에 수치와 정확한 계약을 적었다.
 
 `CDTGaussianApproximation.uniform83_jasmin_half_gaussian_error`는 균등하게 뽑은
 83비트 입력을 실제 `SamplerTarget.M.sample_gauss83_jazz`에 전달하는 실험을

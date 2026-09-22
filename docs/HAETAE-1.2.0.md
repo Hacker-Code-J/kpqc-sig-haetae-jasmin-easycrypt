@@ -102,6 +102,10 @@ word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용�
    지정 후보열에서 실제 소비·두 더미 제곱 누적·Newton6·scaling·norm을 합성했다.
    세 모드 모두 정수 반경 초과에도 승인1을 반환하는 결과를 증명한다.
    SHAKE seed나 전체 seeded Hyperball 경로의 도달성, 예외 사건 확률은 별도다.
+   [입력 안전 구간](../haetae-1.2.0-easycrypt/docs/hyperball-safe-domain.md)은 canonical
+   제곱합 S∈[3D/4,5D/4]·2^76에서 실제 Newton·scaling 계수≤2^26과 정수 노름의
+   무오버플로를 도출한다. 임의 표본·부호에 대한 승인⇒반경 보장이며, 구간 발생
+   확률과 실제 seed·외부 retry·이상적 분포는 별도로 남아 있다.
 4. NTT·코덱 등 재사용 후보를 태그에서 필요한 만큼 가져와 현재 소스와 비교한다.
    이후 KeyGen/Sign/Verify 합성, 종료성·분포·보안 의무를 구분하여 진행한다.
 
