@@ -123,5 +123,14 @@
     "alignment": "sample_offset=8*sign_offset in local-to-global scale coefficient corollaries",
     "remaining": "Concrete SHAKE/ideal XOF relation, integer accumulator bounds, full scaling fit/accuracy, Renyi, Hyperball and complete APIs",
     "documentation": "docs/gaussian-signed-output.md"
+  },
+  "hyperball_prescribed_witness_correspondence": {
+    "input": "Fixed26-byte candidates and zero sign bytes from tests/hyperball-norm-boundary.py; fixture definitions are not output assumptions",
+    "producer": "Actual __sample_gauss_at calls with257,257,256,... requested events; both unstored squares retained",
+    "pipeline": "Actual half-round,newton-invsqrt,mul-high,scale-and-check,sqnorm2 procedures; mode constants from the pinned C-derived HyperballReferenceConstants",
+    "observations": "Mode2/3/5 exact recorded coefficient,integer norm,residue and accepted1; integer norm defined from returned arrays",
+    "computation": "Every concrete word transition checked using universal modular integer representations, not a numerical oracle",
+    "scope": "Deterministic prescribed-byte helper experiment; no SHAKE seed/full seeded Hyperball reachability or formal C execution",
+    "documentation": "docs/hyperball-actual-witnesses.md"
   }
 }

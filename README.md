@@ -63,6 +63,14 @@ signed32 정수 해석은 반올림 크기≤2147483647 조건을 유지한다.
 0·반올림 경계, 정확한 입력 조건과 전역 인덱스 정렬은
 [부호 출력 증명](haetae-1.2.0-easycrypt/docs/gaussian-signed-output.md)에 기록한다.
 
+Hyperball 수치 경계도 실제 추출 함수에 연결했다. 지정한 후보열을 실제 유한
+소비기·Newton·scaling·norm 함수들에 전달한 실행은 mode 2·3·5 모두 종료하고,
+**실제 정수 노름이 경계를 넘는데도 word 승인값 1을 반환**한다. 두 더미의 제곱
+누적과 signed32 변환의 넘침을 포함한 결과다. 이 실행에 대응하는 SHAKE seed나
+전체 서명 API의 도달 가능성을 주장하지 않는다.
+[실제 함수 반례 증명](haetae-1.2.0-easycrypt/docs/hyperball-actual-witnesses.md)에
+정확한 입력·결과·범위를 기록했다.
+
 | 경로 | 용도 |
 | --- | --- |
 | [HAETAE-1.2.0/](HAETAE-1.2.0/) | 수정하지 않은 참조 배포본, 라이선스, KAT |

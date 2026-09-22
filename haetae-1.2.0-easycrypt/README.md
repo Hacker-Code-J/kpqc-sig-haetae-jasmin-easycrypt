@@ -72,6 +72,13 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 해석에는 각 반올림 크기≤2147483647 조건을 유지한다.
 최종 통합 결과·대상 수·해시는 [검증 기록](VALIDATION.md)과 manifest에 있다.
 
+[Hyperball 후보열 재현 증명](docs/hyperball-actual-witnesses.md)은 고정 후보 바이트에서
+실제 유한 소비기의 표본·두 더미 포함 제곱합, 실제 Newton·scaling·norm 호출까지
+연결한다. 모드만 주는 `HyperballWitnessReplay.run`은 세 모드 모두 확률1로 종료하며,
+반환 배열의 정수 노름이 반경 경계를 초과해도 승인값1을 반환한다. 중간값을 결과
+가정으로 넘기지 않는다. 이는 직접 후보 버퍼를 공급한 실행이며, SHAKE seed나
+원래 seeded Hyperball 전체의 도달 가능성·예외 확률은 별도다.
+
 ## 검증된 핵심 결과
 
 | 대상 | 결과 |
@@ -107,6 +114,7 @@ Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거
 | 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
 | 서명용 Gaussian의 조건부 종료 | 실제 seed의 스트림에 충분한 승인 후보가 있는 유한 접두 구간 전제 아래 종료와 정확한 출력·부호 복사·더미 포함 제곱합·외부 영역 보존; 모든 seed의 충분성은 별도 |
 | Hyperball 누적합 | 최대 2,818개 승인 후보에서 두 limb의 48비트 범위를 증명하여 연속 Gaussian 호출 연결 |
+| Hyperball 수치 반례의 실제 호출 | 지정 후보에서 두 더미를 포함한 소비·Newton6·scaling·norm 종료와 정확한 결과; 실제 정수 노름 초과에도 승인1. SHAKE seed·전체 seeded 경로는 제외 |
 | 고정소수점·scaling | 실제 word 곱셈·정규화·반분·Newton 6회 갱신·부호 및 signed32 출력·보존·종료; 수치 fit는 명시적 조건 |
 | 서명용 전체 Hyperball | 실제 전체 함수·mode 2/3/5를 배치 스트림·최초 승인 이력·모듈러 norm·최종 바이트와 카운터에 연결; 반환값 유일성 |
 | NTT·역 NTT | 명시적 계수 범위 아래 256점 수학적 변환과 결과 범위·종료성 |

@@ -8,6 +8,10 @@
 새 파일을 포함한 전체 비NTT 검증이 통과했으며, 정확한 대상 수와 소스 해시는
 [VALIDATION.md](VALIDATION.md)와 검증 manifest에 기록했다.
 
+[Hyperball 실제 함수 반례](docs/hyperball-actual-witnesses.md)는 지정된 후보열에서
+실제 유한 소비·제곱 누적·Newton·scaling·norm 호출의 결과를 증명한다. 세 모드에서
+정수 반경 초과와 word 승인1을 함께 얻으며, 구체적인 SHAKE seed 도달성은 포함하지 않는다.
+
 ## 현재 정리
 
 | 정리 파일 | 대표 정리 | 정확한 범위 |
@@ -94,6 +98,13 @@
 | [HyperballByteCorrectness](proofs/HyperballByteCorrectness.ec) | `hyperball_b_raw_array_total` | 마지막 nonce의 seed SHAKE 첫 바이트와 실제 반환 배열 일치·종료 |
 | [HyperballCorrectness](proofs/HyperballCorrectness.ec) | `hyperball_full_correct`, `hyperball_mode2_correct`, `hyperball_mode3_correct`, `hyperball_mode5_correct` | 실제 전체 함수와 mode 2·3·5의 word 명세에 대한 Hoare 부분 정확성; Gaussian 배치·고정소수점 scaling·모듈러 norm·retry·최종 byte/counter; mode 상수는 C에서 독립 생성 |
 | [HyperballResultUniqueness](proofs/HyperballResultUniqueness.ec) / [HyperballResultProperties](proofs/HyperballResultProperties.ec) | `hb_result_unique`, `hb_result_modular_norm`, `hb_result_integer_norm` | 미사용 scratch 영역·블록 증인과 무관한 전체 반환값 유일성, 출력 보존 및 모듈러 norm; 수학적 norm은 `<2^64` 또는 명시적 좌표 범위에서 연결 |
+| [HyperballWitnessSpec](theories/HyperballWitnessSpec.ec) / [HyperballWitnessArithmetic](proofs/HyperballWitnessArithmetic.ec) | `hbw_sum_exact`, `hbw_fixture_norm` | 입력·기대 관측의 정의, 모드별 정수 합·나머지·범위; 기대값 정의 자체는 실행 결과 가정이 아님 |
+| [HyperballWordEvaluation](proofs/HyperballWordEvaluation.ec) | `hwe_mul48`, `hwe_mulu`, `hwe_norm` | 입력·출력 word wrap을 보존하는 정수 div/mod 표현; 초기 low limb 정규형·high 양수 전제 없음 |
+| [HyperballWitnessCandidate](proofs/HyperballWitnessCandidate.ec) | `hbw_candidate_spec`, `hbw_candidate_total` | 고정26바이트의 실제 CDT·표본·제곱 limbs·승인1 계산과 실제 sigma 호출 종료 |
+| [HyperballWitnessSampling](proofs/HyperballWitnessSampling.ec) | `hbw_sampling_total`, `hbw_sampling_correct` | 실제 유한 소비기257/257/256… 호출; 활성 표본, 부호0, 저장되지 않는 두 더미 포함 정확한 raw 제곱합·종료 |
+| [HyperballWitnessNewton](proofs/HyperballWitnessNewton.ec) | `hbw_newton_exact`, `hbw_scale_exact`, `hbw_magnitude_overflow` | 초기 빼기와 여섯 갱신, scale·계수의 정확한 word 값; 계산된 초기 high의 음수 해석 및 M>2^31−1 |
+| [HyperballWitnessNorm](proofs/HyperballWitnessNorm.ec) | `hbw_scale_and_check_repeated_total`, `hbw_actual_norm_total` | 실제 scale·norm 호출의 정확한 계수 prefix·나머지·승인1과 반환 배열의 큰 정수 노름; scalar 전제는 수치 정리로 해소 |
+| [HyperballWitnessExecution](proofs/HyperballWitnessExecution.ec) / [HyperballWitnessReplay](proofs/HyperballWitnessReplay.ec) | `hbwr_total`, `hbwr_accepted_outside_radius_total` | 모드만 받는 지정 후보 실행의 종료·실제 승인1·반경 초과; 중간 기대값 전제 없이 실제 helper를 합성. SHAKE/전체 seeded 경로 제외 |
 | [HyperballNormBoundary](proofs/HyperballNormBoundary.ec) | `hyperball_mode{2,3,5}_prescribed_norm_boundary` | 구성한 좌표 벡터의 정수 제곱합·64비트 나머지·bound 비교를 확인하는 산술 정리; 실제 SHAKE 시드 도달 가능성 주장은 없음 |
 | [SigningSamplerBridge](proofs/SigningSamplerBridge.ec) | `signer_cdt83_total_correct`, `signer_smulh48_total_correct`, `signer_approx_exp_reference_total_correct`, `signer_sigma76_total_correct` | 위 CDT·올림·Horner·단일 시도 결과를 실제 mode 2/3/5 서명 추출물의 내부 함수에 전달 |
 | [NTTCorrectness](proofs/NTTCorrectness.ec) | `target_poly_ntt_jazz_total`, `target_poly_invntt_jazz_total`, `target_poly_invntt_jazz_total18` | 입력 계수 범위와 기록된 산술 가정 아래 `NTTFullSpec.full_ntt/full_invntt` 대응과 종료; 역변환의 Montgomery 인자 포함 |
@@ -250,7 +261,7 @@ word 계산을 유지한다. signed32 해석에는 각 반올림 크기≤214748
 | Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
 | 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
 | SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball의 수학·확률 의미 | 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |
+| Hyperball의 수학·확률 의미 | 지정 후보의 실제 helper 반례는 증명 완료. 남은 범위는 실제 seed에 대한 수치 범위/예외 사건, 실수 Newton 수렴·오차, 이상적인 분포와 종료성; word 승인을 무조건적인 기하학적 반경 보장으로 승격하지 않음 |
 | KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
 | Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
 | Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |

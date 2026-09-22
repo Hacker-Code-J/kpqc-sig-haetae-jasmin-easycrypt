@@ -57,6 +57,23 @@ the corresponding compiled Jasmin library. No random search is performed.
 sum/residue/bound facts. It introduces no assumptions about SHAKE or sampling,
 and is not a formal proof of reachability or of the whole numerical replay.
 
+## Subsequent formal helper replay
+
+The [actual-helper witness proof](hyperball-actual-witnesses.md) now derives
+these outcomes from the prescribed candidate bytes in EasyCrypt. It calls the
+actual finite consumer for requests257,257,256,..., includes both unstored
+squares, and composes actual half/Newton/scaling/norm calls. Its final theorem
+has no expected sample, square, scale or coefficient premise. It proves
+accepted word1 while the mathematical norm of the returned arrays exceeds
+the bound for modes2/3/5.
+
+This is a deterministic supplied-buffer experiment. The actual finite-consumer
+calls receive6656 or6682 candidate bytes, rather than reproducing the seeded
+controller's initial6632-byte candidate region and refill schedule. No producing
+SHAKE seed, full seeded-Hyperball reachability or formal C execution is claimed.
+The original `HyperballNormBoundary.ec` remains the smaller arithmetic result
+described above; the new replay supplies the additional source linkage.
+
 ## Reproduction
 
 From the repository root:

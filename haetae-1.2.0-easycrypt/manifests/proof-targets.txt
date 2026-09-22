@@ -147,6 +147,15 @@ proofs/HyperballNormBoundary.ec
 proofs/HyperballResultProperties.ec
 proofs/HyperballResultUniqueness.ec
 proofs/HyperballSignedScale.ec
+theories/HyperballWitnessSpec.ec
+proofs/HyperballWitnessArithmetic.ec
+proofs/HyperballWitnessCandidate.ec
+proofs/HyperballWitnessExecution.ec
+proofs/HyperballWordEvaluation.ec
+proofs/HyperballWitnessNewton.ec
+proofs/HyperballWitnessNorm.ec
+proofs/HyperballWitnessSampling.ec
+proofs/HyperballWitnessReplay.ec
 theories/ntt/Hpoly_extract.ec
 theories/ntt/Hpoly_loop.ec
 theories/ntt/Montgomery.ec

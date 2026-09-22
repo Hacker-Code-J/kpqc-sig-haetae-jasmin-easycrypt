@@ -98,6 +98,10 @@ word 명세에 연결했다. 기본 전체 정리는 종료한 실행에 적용�
    2147483647 이하일 때의 signed32 해석을 다룬다. 국소 Gaussian 창을 전역
    scaling 인덱스에 연결할 때는 `sample_offset=8*sign_offset`를 명시한다.
    Hyperball 전체의 실수 근사 오차·분포·종료성은 별도 의무다.
+   [실제 helper 반례 증명](../haetae-1.2.0-easycrypt/docs/hyperball-actual-witnesses.md)은
+   지정 후보열에서 실제 소비·두 더미 제곱 누적·Newton6·scaling·norm을 합성했다.
+   세 모드 모두 정수 반경 초과에도 승인1을 반환하는 결과를 증명한다.
+   SHAKE seed나 전체 seeded Hyperball 경로의 도달성, 예외 사건 확률은 별도다.
 4. NTT·코덱 등 재사용 후보를 태그에서 필요한 만큼 가져와 현재 소스와 비교한다.
    이후 KeyGen/Sign/Verify 합성, 종료성·분포·보안 의무를 구분하여 진행한다.
 
