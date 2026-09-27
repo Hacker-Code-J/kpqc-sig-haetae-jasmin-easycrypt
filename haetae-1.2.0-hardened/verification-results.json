@@ -1,0 +1,671 @@
+{
+  "result": "PASS",
+  "checked_at": "2026-09-27T08:01:04.246247+00:00",
+  "variant": "HAETAE-1.2.0 separate checked Hyperball arithmetic",
+  "baseline_commit": "924d1826868e356fc313a148f7a2eb263b735b61",
+  "preserved_original_files": 542,
+  "proof_report_sha256": "00d67a6018481b29c81e5388b1d15d0637fde39de5d893f5075c1de9229f56a3",
+  "formal": {
+    "new_targets": 7,
+    "new_lemmas": 91,
+    "fresh_dependency_targets": 40,
+    "fresh_total_targets": 47,
+    "target_seconds": 1004.852,
+    "cache": "-no-eco",
+    "proof_mode": "Proofs:check",
+    "eof_guard": true,
+    "new_project_axioms": 0,
+    "targets": [
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/FixedPointSpec.ec",
+        "sha256": "c5db5999e0ab6e36eb131663ecd75ff36c0dc46ec2defc313eda073585705e89",
+        "exit_code": 0,
+        "seconds": 1.904,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__FixedPointSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/SigmaSpec.ec",
+        "sha256": "775afc9e4bf71187a595c1d6b62cc7142f5ce53a57daf70eff7e33b1d0a1d9de",
+        "exit_code": 0,
+        "seconds": 2.098,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__SigmaSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/HyperballFixedPointSpec.ec",
+        "sha256": "76a3cb601bc8c3b38fa213f07cb8d6e66c7198f1eac93964ac64a77532e8e02f",
+        "exit_code": 0,
+        "seconds": 1.983,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__HyperballFixedPointSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/ReferenceConstants.ec",
+        "sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
+        "exit_code": 0,
+        "seconds": 1.939,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__ReferenceConstants.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SamplerConstants.ec",
+        "sha256": "22081fa38ffe076889b008a6ea7ef8b6f68f9d67e395484bb656e1c87fbd5988",
+        "exit_code": 0,
+        "seconds": 2.472,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SamplerConstants.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/FixedPointCorrectness.ec",
+        "sha256": "7df52dc190959e9ec3e8d547c9a99703707ed7ce7e01a1f8a41af8e4cd8ab27e",
+        "exit_code": 0,
+        "seconds": 13.359,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__FixedPointCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/CDTTermination.ec",
+        "sha256": "4aae7678459b13d2e12eb7dd0c878cfe595e8910c1c31b7e47ea6109cc084bfa",
+        "exit_code": 0,
+        "seconds": 3.024,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__CDTTermination.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/CDTCorrectness.ec",
+        "sha256": "4ce3e9d49b1d22d9fbadd3cc0f249c74a8dc9eb651aa67847d94a6f4b472610b",
+        "exit_code": 0,
+        "seconds": 19.948,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__CDTCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SigmaCorrectness.ec",
+        "sha256": "1c9fe75b27d463a042688b495766271f0ad456adf658a133cb5db4327d24da45",
+        "exit_code": 0,
+        "seconds": 3.742,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SigmaCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/GaussianTraceSpec.ec",
+        "sha256": "1a96a5fa89ea217703b5e5f740c854c9e6ac959fd62fb43181d42eb2b46429ab",
+        "exit_code": 0,
+        "seconds": 2.525,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__GaussianTraceSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/GaussianConsumerSpec.ec",
+        "sha256": "e1b661a5a755159493dbebc4dd4cf9d774e688f421cf7a48be1c7676c7d0d13d",
+        "exit_code": 0,
+        "seconds": 1.943,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__GaussianConsumerSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianConsumerCorrectness.ec",
+        "sha256": "15a1657dc23576766091313fdd7b4539713c3a4288234b84145ac088d732d599",
+        "exit_code": 0,
+        "seconds": 28.058,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianConsumerCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianTraceProperties.ec",
+        "sha256": "cef67089d661d67c8aef0c33f01200543c5a87afc315f8ae6c60ebb6abd1919a",
+        "exit_code": 0,
+        "seconds": 18.101,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianTraceProperties.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SigmaRoundingCorrectness.ec",
+        "sha256": "7fe1f857554663cedbb81693a3822abff241064fa62e098614ecd11b8914e9aa",
+        "exit_code": 0,
+        "seconds": 9.171,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SigmaRoundingCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SigmaSquareBounds.ec",
+        "sha256": "f959eddfbf767e40a19dedcd2e9c939586394aae8d694c051aed182fc20e21cb",
+        "exit_code": 0,
+        "seconds": 4.335,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SigmaSquareBounds.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianAccumulatorCorrectness.ec",
+        "sha256": "f0c8b795b52d4fa9e982eb5610c8bc1c06a5a48124c62bb4e217b1fb92b919c6",
+        "exit_code": 0,
+        "seconds": 6.571,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianAccumulatorCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/HyperballFixedPointCorrectness.ec",
+        "sha256": "446406e55ef53cdc61f9c6648f6df3ceaad7e1f06b40e591caf67343dccdc351",
+        "exit_code": 0,
+        "seconds": 27.55,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__HyperballFixedPointCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/theories/CheckedScaleSpec.ec",
+        "sha256": "dad3d0a5a438386bc03b1b00810ed7b818945c82cd1c08292b1d882b31148ca6",
+        "exit_code": 0,
+        "seconds": 1.94,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__theories__CheckedScaleSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/Rejection48Spec.ec",
+        "sha256": "5a1056d429633a8b6412730773b44647d72b62586d168777a31dc31226e062fc",
+        "exit_code": 0,
+        "seconds": 2.604,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__Rejection48Spec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/Rejection48Correctness.ec",
+        "sha256": "649ea5bb71dfec0d9321693a67d2645e5326245e5abd8b6ffc59a2f37b6249c8",
+        "exit_code": 0,
+        "seconds": 3.999,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__Rejection48Correctness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedScalarCorrectness.ec",
+        "sha256": "73f084293b7ba41840ebcbcfd3a45b7b537053e79916bfcd7883824f3d90f241",
+        "exit_code": 0,
+        "seconds": 6.002,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedScalarCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/HyperballNormSpec.ec",
+        "sha256": "b737e7941e27135648f5f21a57cd1586022d1e375f436cd78971da1874471d05",
+        "exit_code": 0,
+        "seconds": 12.939,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__HyperballNormSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/HyperballNormCorrectness.ec",
+        "sha256": "97629eaa80c4b197d9eeb2b5c24696780ad57daf4c97f87f399ed731ee274afb",
+        "exit_code": 0,
+        "seconds": 6.095,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__HyperballNormCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedNormCorrectness.ec",
+        "sha256": "df1142d15c2ad198eb43de998fb8464b7ffd9f1690a197f8e543202842fbfc0d",
+        "exit_code": 0,
+        "seconds": 131.424,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedNormCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/HyperballScaleSpec.ec",
+        "sha256": "95584269d8a50bc2f132a979633b3936e518f41376869f459a01c4a1ed9481e4",
+        "exit_code": 0,
+        "seconds": 44.11,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__HyperballScaleSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedAcceptanceCorrectness.ec",
+        "sha256": "6cfd767ce151abaefded04a82256d2a78f2102e5ac091ec8ad1945162ea0d037",
+        "exit_code": 0,
+        "seconds": 11.47,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedAcceptanceCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedProductionBridge.ec",
+        "sha256": "83e106a4da305896967d42e0c4002f4cf1329bc8e279bef525df698f7731594f",
+        "exit_code": 0,
+        "seconds": 3.832,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedProductionBridge.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedProductionCorrectness.ec",
+        "sha256": "0b44a94802eb2d26a49de9caaab67b26fd47b326eadd3b699e98bd8b81cfb69f",
+        "exit_code": 0,
+        "seconds": 8.189,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedProductionCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/GaussianWindowSpec.ec",
+        "sha256": "c3236e5ca309ee172a0dc39bb87c3b4df8a57f0d6c0ab542c5f15d5823cb4156",
+        "exit_code": 0,
+        "seconds": 3.791,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__GaussianWindowSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SigningSamplerBridge.ec",
+        "sha256": "9565d6bf9c16090202869cdfaf23272a06a37ca4fbc9d12be24e5bde034564af",
+        "exit_code": 0,
+        "seconds": 5.833,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SigningSamplerBridge.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianBufferLemmas.ec",
+        "sha256": "9546466d3574dd505a548ef5a115da3e397719b7013719ea5c527d428a302678",
+        "exit_code": 0,
+        "seconds": 3.065,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianBufferLemmas.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianTraceCorrectness.ec",
+        "sha256": "b616a02f66bf0270ec26fe8a246733821a7ffb077306d01d46ecc0be88a47a0a",
+        "exit_code": 0,
+        "seconds": 29.583,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianTraceCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianOffsetBridge.ec",
+        "sha256": "aa954866bc0914aae9473056e9140c0fffed4f791222affb15f3f6558c61e78e",
+        "exit_code": 0,
+        "seconds": 9.634,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianOffsetBridge.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/SHAKEBlockSpec.ec",
+        "sha256": "baa6e1d3330e40ecf46fdfff7856c59d84f0638ab92b41f25d674b8732b0eb2f",
+        "exit_code": 0,
+        "seconds": 4.778,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__SHAKEBlockSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianRefillCorrectness.ec",
+        "sha256": "34708c3cd7bba616ce808b11d11887bac3252761b6ae5b0a269953f0b6520c5c",
+        "exit_code": 0,
+        "seconds": 23.556,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianRefillCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SHAKEBlockCorrectness.ec",
+        "sha256": "d8a0dbd8d2546670ad57cdcb8a392f81f16ec1c2025d8cb234f663482cb96cbd",
+        "exit_code": 0,
+        "seconds": 188.408,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SHAKEBlockCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianStreamBuffer.ec",
+        "sha256": "1bbb799c26501a407fa5ef203866b685cf1ab9ba3e2dc84350de87816b1a21b5",
+        "exit_code": 0,
+        "seconds": 87.025,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianStreamBuffer.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianStreamSequence.ec",
+        "sha256": "3a2b77b83a3e69691cd51ec76a84ae1096c527bec771cf8ade53c0f54a077637",
+        "exit_code": 0,
+        "seconds": 7.266,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianStreamSequence.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianSequenceCorrectness.ec",
+        "sha256": "469f6bf2659a1466df1dd07c27c7d089b38cae2fbd5241a6bfc2e08735f6ab83",
+        "exit_code": 0,
+        "seconds": 17.42,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianSequenceCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianStreamAccumulator.ec",
+        "sha256": "9cee6dddc1312246e6f8cedee7b2b3e9854610742ae5bf307c36c49b851ece50",
+        "exit_code": 0,
+        "seconds": 9.122,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianStreamAccumulator.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/GaussianStreamSpec.ec",
+        "sha256": "f0c742b71979b21b57d7cb9068b4af2718739793f0209de8c45cddd222fe83ae",
+        "exit_code": 0,
+        "seconds": 28.349,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__GaussianStreamSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianStreamComposition.ec",
+        "sha256": "6383aaefc2ab9012d907c3462201ba0067916037e5245a5a0fc34a2e8fae20ab",
+        "exit_code": 0,
+        "seconds": 42.598,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianStreamComposition.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/theories/SHAKEStreamSpec.ec",
+        "sha256": "2b52cb33ec60a423339cfa930a7b01d60a5a079f10bab6f1edf3bdb884476f56",
+        "exit_code": 0,
+        "seconds": 43.306,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__theories__SHAKEStreamSpec.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/SHAKESeedInitCorrectness.ec",
+        "sha256": "9bd601a182a9e0dd404c3cd1c8c09db5564165dd7f2cd57f19ad1d4a2786af8b",
+        "exit_code": 0,
+        "seconds": 6.634,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__SHAKESeedInitCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/GaussianStreamCorrectness.ec",
+        "sha256": "58c68cce22d3c8425a6223f38252d4f556dda850137858e51765581dc15bc5a7",
+        "exit_code": 0,
+        "seconds": 56.298,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__GaussianStreamCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-easycrypt/proofs/HyperballScaleCorrectness.ec",
+        "sha256": "76dac2aa2df4e5b82a77f401826646a1fa55b12233bb445fab786fa8c6916eb3",
+        "exit_code": 0,
+        "seconds": 26.086,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-easycrypt__proofs__HyperballScaleCorrectness.ec.log"
+      },
+      {
+        "target": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedVectorCorrectness.ec",
+        "sha256": "e0a07d5904ad2974933da0b0b7d9d36968c26b8d84cbcdaba278a02e13bb81e7",
+        "exit_code": 0,
+        "seconds": 30.773,
+        "log": "logs/20260927T074355.194700Z/haetae-1.2.0-hardened__easycrypt__proofs__CheckedVectorCorrectness.ec.log"
+      }
+    ]
+  },
+  "claims": {
+    "accepted_implies_true_integer_norm_at_most_bound": true,
+    "accepted_implies_all_active_final_round_magnitudes_fit_symmetric_int32": true,
+    "finite_check_termination": true,
+    "whole_retry_return_safety_modes": [
+      2,
+      3,
+      5
+    ],
+    "whole_retry_termination": false,
+    "whole_api_formal_correctness": false,
+    "real_accuracy_before_final_rounding": false,
+    "official_gaussian_rejection_or_renyi_bound": false
+  },
+  "extraction": {
+    "fresh_files": 54,
+    "sources": [
+      "jasmin/sign.jazz",
+      "jasmin/hyperball.jazz",
+      "jasmin/hpoly.jazz"
+    ],
+    "namespace": "distinct Hardened*Target",
+    "array_model": "barray",
+    "shared_arrays_match_original": true
+  },
+  "runtime": {
+    "official_kat_cases": 300,
+    "official_kat_files": [
+      {
+        "mode": 2,
+        "kind": "req",
+        "cases": 100,
+        "sha256": "d0880518f50098443b49bebc8e0d0530ff1bb1f8a2b1f36c3d83bef5169e064d"
+      },
+      {
+        "mode": 2,
+        "kind": "rsp",
+        "cases": 100,
+        "sha256": "508e9664a36eb992d011702cfdbb4816d17b3ea5755c0728ffa84219b8244348"
+      },
+      {
+        "mode": 3,
+        "kind": "req",
+        "cases": 100,
+        "sha256": "d0880518f50098443b49bebc8e0d0530ff1bb1f8a2b1f36c3d83bef5169e064d"
+      },
+      {
+        "mode": 3,
+        "kind": "rsp",
+        "cases": 100,
+        "sha256": "bb388a12deeb953205429ad1281b38467678f9ebc21aa9d8c8486f20bd02d31a"
+      },
+      {
+        "mode": 5,
+        "kind": "req",
+        "cases": 100,
+        "sha256": "d0880518f50098443b49bebc8e0d0530ff1bb1f8a2b1f36c3d83bef5169e064d"
+      },
+      {
+        "mode": 5,
+        "kind": "rsp",
+        "cases": 100,
+        "sha256": "3923b6a811942205accb75fff688bbe6cbc4bf3ee031ff1b190ca1e80f7a79d1"
+      }
+    ],
+    "sign_api_interop_sampler": "PASS in all three modes",
+    "boundary_cases": 308,
+    "boundary_checks": 1834,
+    "production_witnesses_rejected": [
+      2,
+      3,
+      5
+    ],
+    "boundary_report": {
+      "suite": "checked-hyperball",
+      "result": "PASS",
+      "seed": 325407429524476192,
+      "passed_cases": 308,
+      "assertions": 1834,
+      "categories": {
+        "cast_boundary": 12,
+        "round_add_carry": 6,
+        "norm_boundary": 13,
+        "scale_sticky": 8,
+        "combined_boundary": 10,
+        "designated_fixture": 3,
+        "random_scalar": 128,
+        "random_norm": 64,
+        "random_safe_compatibility": 64
+      },
+      "fixtures": [
+        {
+          "mode": 2,
+          "legacy_accepted": 1,
+          "checked_accepted": 0,
+          "production_accepted": 0,
+          "integer_norm": 4464117257937700460544,
+          "residue": 5192099988969472,
+          "bound": 6505809026482176,
+          "cast_bad": 18446744073709551615,
+          "norm_overflow": 18446744073709551615
+        },
+        {
+          "mode": 3,
+          "legacy_accepted": 1,
+          "checked_accepted": 0,
+          "production_accepted": 0,
+          "integer_norm": 258260884883511054336,
+          "residue": 6467851577331712,
+          "bound": 22510896139993088,
+          "cast_bad": 18446744073709551615,
+          "norm_overflow": 18446744073709551615
+        },
+        {
+          "mode": 5,
+          "legacy_accepted": 1,
+          "checked_accepted": 0,
+          "production_accepted": 0,
+          "integer_norm": 1125272442323279360000,
+          "residue": 21053826996711424,
+          "bound": 33503371683954688,
+          "cast_bad": 18446744073709551615,
+          "norm_overflow": 18446744073709551615
+        }
+      ],
+      "sha256": {
+        "wrapper_source": "b2198dffba37232e631f50028c7c62826da63ec6edc1ee48d6206edacc3a95c6",
+        "test_script": "ee5d7d03dab8e388434df3acc350f55b08f8c37ba95bebe8725dfb017407d135",
+        "checked_phase_source": "c854562b35d9c8c276ef230cb38c23fd5ea69680662f1f985f2f83a7285bd49c",
+        "checked_test_library": "644b011c0fc4cc7c3485c849b25a5210cb7cd7ce4e7b620a34226a0fe76b8b22",
+        "baseline_fixture_source": "0f4cff80a0d0fb6747b8dc36296c2072ccb7d45a49f64fdf7eb4d90b79905716",
+        "baseline_mode2_library": "0600ce998a5885444d6c46431c0b853ee738ebc34365675bfece303a1ee211d6",
+        "hardened_mode2_library": "43e624244b04e3ce0edff055b23dde9fa5afbe7c80d5ac4c0eae64aca28cc41a",
+        "baseline_mode3_library": "6f20b7389f8459873c3fe5af69619e3ba86b3af8fb0caa3419f75a2956c1634c",
+        "hardened_mode3_library": "77d94309033c6d30a16aa8abcdfccf8f8fcfab040bc388b70d7e4b479d5ccfc5",
+        "baseline_mode5_library": "6ad598e46519bc8a0a0325fab0a149f91b0a7b6fef2cd6b55ffdfdc361be2f8d",
+        "hardened_mode5_library": "a2a9bd0f3f8d15feab83b2613e2b4663f4a9b11cbd5a859bc19a3fe906d9c484"
+      },
+      "scope": "Deterministic helper and production-export regressions using prescribed candidates; no SHAKE seed reachability or exploit claim."
+    }
+  },
+  "ct_sct": {
+    "result": "PASS",
+    "helper_paths": 6,
+    "standalone_modes": [
+      2,
+      3,
+      5
+    ],
+    "signer_modes": [
+      2,
+      3,
+      5
+    ],
+    "declassification": "structural counts/bound and final accepted bit; not the norm or error masks"
+  },
+  "gate_regressions": {
+    "result": "PASS",
+    "materialization": 5,
+    "proof_runner": 10
+  },
+  "toolchain": {
+    "jasminc": {
+      "sha256": "cf8dde7cdd8fe7151d33a5948bac8e0ee57419ca1d57b4dfc21dab2569fa0c45",
+      "version": "Jasmin Compiler 2026.03.0"
+    },
+    "jasmin2ec": {
+      "sha256": "3a9fde9a1237d791fa4b38b4a908f4d98f637a5fba81f74f8e2417c0190f6196",
+      "version": "Jasmin Compiler 2026.03.0"
+    },
+    "jasmin-ct": {
+      "sha256": "f392ddeed07add71865f30f5a0ba2ca772d7bd48eb4c2b579f434978c9210f3e",
+      "version": "Jasmin Compiler 2026.03.0"
+    },
+    "easycrypt": {
+      "sha256": "1a943567bc94f43bbf427b52376b5deb5e0d79fd9049529302822c72d7ea4c3e",
+      "version": "git-hash: n/a"
+    },
+    "cc": {
+      "sha256": "821af3c74506283c179ca413bb33e6b528805a4dd8a5c09df125e5ad560a9e89",
+      "version": "x86_64-linux-gnu-gcc-11 (Ubuntu 11.4.0-1ubuntu1~22.04.3) 11.4.0"
+    }
+  },
+  "artifact_sha256": {
+    "haetae-1.2.0-hardened/overlay/checked_hyperball.jinc": "5ddeec7211dd845eb10a7fb560618873cd92393ca24154bc55a75f55c788d38e",
+    "haetae-1.2.0-hardened/overlay/hyperball-phase-wrappers.jinc": "00a87eb03cf440bb7608a4af05bc564fb99b69c4308ad8ead24ced4923ac8ad6",
+    "haetae-1.2.0-hardened/overlay/sign-scale-and-check.jinc": "99fc3f9c02565fdb49ebaa9345df5b312a4cb946db1635b3014071c275ce59e1",
+    "haetae-1.2.0-hardened/scripts/check-ct.sh": "64712e724aa3085b6076c8a04bbc49f288ac54fdba4253ba829d9968ee446d05",
+    "haetae-1.2.0-hardened/scripts/extract.py": "e88c2a7a02b275768596652190cf5dbfccbc16d993f9e0a21373001e6ca986cb",
+    "haetae-1.2.0-hardened/scripts/materialize.py": "3b96fbd9ede332e255484009a04747e647edb7917e63adc6f39b8ff1660d33c4",
+    "haetae-1.2.0-hardened/scripts/verify-one.sh": "6d8c7a56fd76a0244da4890bf31106370773e94edb94f737314a58977dd93967",
+    "haetae-1.2.0-hardened/scripts/verify.py": "9b84a594d0c165cd6df27e4ff54a3663c109807212a7ff508c58a47b774997a2",
+    "haetae-1.2.0-hardened/tests/checked-hyperball-ct.jazz": "740159732081eea67bd19cd9c40f53fc97070904612aeb64842262add65fe7d7",
+    "haetae-1.2.0-hardened/tests/checked-hyperball.jazz": "b2198dffba37232e631f50028c7c62826da63ec6edc1ee48d6206edacc3a95c6",
+    "haetae-1.2.0-hardened/tests/checked-hyperball.py": "ee5d7d03dab8e388434df3acc350f55b08f8c37ba95bebe8725dfb017407d135",
+    "haetae-1.2.0-hardened/tests/materialize.py": "bdacfe10479208209425e898745444b618211662c4dfe05127ca3ed02a7cd34e",
+    "haetae-1.2.0-hardened/tests/verification-gate.py": "8e8692604a1f76a863866101e977a103540372570e3f7c180e553d61d19a29ed",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array1.ec": "04ba3a3d4df770cc17cbba8d5ab1f53a2b2f21fd3d26202a3fda5d8f4baead56",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array1024.ec": "94e3460af4dcd76d6189e396e5e243f6c0e8ad4fabb9f51df3db2587d15546e2",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array1152.ec": "fcab2c98ad1fcfc3fd7bcd37f2baed693c234eb31d121ff21ac9bf439d37fba2",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array132.ec": "005249ae425c9770b359c030dfd92911f36c43a9790aeab47c5dcc409a893921",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array136.ec": "6109aa8cec2cb20195d6552d61f5da3429d6e4f739c475f90df7ecc36964f1bb",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array166.ec": "534b8705c5a12ccd12ebca71d67c63603a4cfcf968ef0b48e2fb47273157a671",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array2.ec": "f4e764f3fc58104308335fb45391929fba1872046ca43e8c4f2e9f21e30cdf81",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array2048.ec": "4504f4d333c91c769800ce405853c9ee0e166d1bb0d5107d0881e9e5265a6f27",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array24.ec": "24ce8ef5c2008ca4464948f5614847a7ff768ae20ecf6855712a401c69537f2c",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array25.ec": "93028dcc30026f11b72b8f5340ef07aaa8deed5b7c3c44bd327cb2178b283605",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array256.ec": "6cb195d84c963639b4b52d2bffc9bd3b1de0bf11b2850ec20870b76106371db8",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array257.ec": "ffe7d54213bb023af3878ce1a197a554f896dbc334ddf1ff1cb91841a77b10ec",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array26.ec": "10881d02fcdef785b0a17ebfc7a923888b56c0710ef7ba2c88a4e47005591904",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array2752.ec": "f77220fc99f816f5c25dc0e05bc611437b5eb045fca0dae3d409689ca219da2a",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array2948.ec": "beab037c6dd21d409957bddeb25b641ddea72ea62b12a647acf9f4a40f730545",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array32.ec": "f19dae6383154def68caa9787be02019ad13d51da4c3f25e4356e14b2bfa82eb",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array4.ec": "01638fa96a1b529cbaa242428239a5183403523657d162ce02f1488a19d3ed0f",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array4096.ec": "bcd969ebc44518aa4853f27a52ba49946cfbbe94110f5a327baa6ce947efe6df",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array5.ec": "f4d684618dc3ac6916fc46a8a4a18f250e40dad46a8bb5466e8fdd6471b5bfbb",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array512.ec": "ce6d36d1e3f49f3ba3f122b384a8121e0e291998359de4b949730b22e078c3f2",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array64.ec": "7c419ee9189a6ea1dd54221c576f7166e5805e15ec0eccd135e3993607f3bb65",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array76.ec": "2abe84568651918b3a315046ade49c57c138031223b4d6acfafdf671efa69bf9",
+    "haetae-1.2.0-hardened/easycrypt/generated/Array8192.ec": "a1e52ed1a705527407ee577709c0d4ad31e09de7a8a79b9ea2493a97d0a5f2d6",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray1.ec": "d1911fa462f807c55d3c6131267537870826f5c49030f9f88ea820a991426ade",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray1024.ec": "1261a544037b034d0d519b7b4906f0b17d57cdadd566f914b1531923eb1bf302",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray1152.ec": "20233fc147ce1ea382d0e06b457d1fe2672b7babaded9f42403a96968ff83f18",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray1328.ec": "89f57d70ddbc7a348d9546d413d91aa90d2eeb4351c834c01332a94df9eb2542",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray136.ec": "cdfc02f7614db10f8f083f7bc9043c255893a62f79dc2a7df5471ec9e949d148",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray16.ec": "b2446f2e1c0deaa482dc387220dca7068b1dfe4ec7ed7a0dc01d41aa00034e16",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray192.ec": "fed37666ad21084cbf033d524407239a40b0a1fe767f9274de750af3973ba847",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray200.ec": "fa54b0400728a07e2ca6f51ff9eaea2652f5c7840755731befb338ed31c6761f",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray2048.ec": "3a38e946092ce1389c54e97bc73f77dabcf0484078cabc4204eaf3ed9f640997",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray257.ec": "6122773bd311fda0a1718efe1bf1d11fb2a043a86fdff9caa3d111a27b7aff9f",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray26.ec": "6b64b88a906ff80822bffe773646e54ca0d0049bed0597245ea6cc5d27023cb6",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray2752.ec": "c0449c45b0e65ce4893c571e833185f3299fc56e9f679f044e1394f347846684",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray2948.ec": "0ac899fe4c37f75bf605d24616c53def9ee302a4d064f606577a005de788d8ed",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray304.ec": "f843945ee29de24531f8138d0e8e9bd58977480837ddbf76415c398195d76740",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray32.ec": "2fffb58a62913db4e48a10150e4cc936f3265fd747c8cae2d528284f3ccea74c",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray32768.ec": "01fd5d42560a0c3a7e31b30af27fc5d4982082fa6a5d7265ae408c47932f5e71",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray40.ec": "ce2a0e6758ee0158d74a5482eee5bb0947ddf3d8bf26f65d2a95a8355f82bb42",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray512.ec": "ea51229692aad0866cbfb1dbbaec2209409a0b95f43b040041de8e30149d7c66",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray528.ec": "d7cacff4bfe63f9999785b51c3922c7d6c733871770f06fe576f60ca88628ce3",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray64.ec": "abe9c86026b998022cf0c108076cba6283ed83950ef17d31ec7222d25b3d5f0d",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray8.ec": "0a4f7800b0a43b6b9336e2f779213808dc2a21812e778bad28a5fdf8b6fa1c47",
+    "haetae-1.2.0-hardened/easycrypt/generated/BArray8192.ec": "46e6249389bcf877c541dd830eb9871b8e1841e88d43e8add9f086e95f76cbd8",
+    "haetae-1.2.0-hardened/easycrypt/generated/HardenedHyperballTarget.ec": "3386b3dce5721c2e5048c79363f7e2d8a59fb15626bbb8d1cc4f4a77d69a9098",
+    "haetae-1.2.0-hardened/easycrypt/generated/HardenedPhaseTarget.ec": "870123278c013a89417208a0c221a3754144bd86d83868f58186d7d473aa04e4",
+    "haetae-1.2.0-hardened/easycrypt/generated/HardenedSignerTarget.ec": "8f6b025f8a9b71fb0efc9d54af08358e12ae167162e0b4655b15ac1e21b51f98",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray1024.ec": "1f8f583ebe2fddcc9767aff75634dc5de6b4ea96feabb3c6069f8021a2297df1",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray1328.ec": "de034a390c40589e6ac2ad41fd86c5efcf7c60ac364121a0359447e9d6ff5cee",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray192.ec": "c5c87f6059ef8fce50ff0d3af2204a8cd834fdaeac8ab93369676e3fe6a11c60",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray2048.ec": "c177d9656c397adbdcd030b9653e087ee11f748ab805e107519390f94898fdbb",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray304.ec": "5e4ae4c5ec50aa1bea307fc7cd07c75f1fa0d5f3a629fe6b9a88eb28bd4efc6e",
+    "haetae-1.2.0-hardened/easycrypt/generated/WArray528.ec": "0f9a53ef38bfbd43ddcd9514bf5ce500f14d8b77d2983e3e3e20a037fa9a31e4",
+    "haetae-1.2.0-hardened/easycrypt/proof-targets.txt": "2e790fdbc56d7341ee282ea1229379f1dafda45abb86a9f8cad5e012f59097df",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedAcceptanceCorrectness.ec": "6cfd767ce151abaefded04a82256d2a78f2102e5ac091ec8ad1945162ea0d037",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedNormCorrectness.ec": "df1142d15c2ad198eb43de998fb8464b7ffd9f1690a197f8e543202842fbfc0d",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedProductionBridge.ec": "83e106a4da305896967d42e0c4002f4cf1329bc8e279bef525df698f7731594f",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedProductionCorrectness.ec": "0b44a94802eb2d26a49de9caaab67b26fd47b326eadd3b699e98bd8b81cfb69f",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedScalarCorrectness.ec": "73f084293b7ba41840ebcbcfd3a45b7b537053e79916bfcd7883824f3d90f241",
+    "haetae-1.2.0-hardened/easycrypt/proofs/CheckedVectorCorrectness.ec": "e0a07d5904ad2974933da0b0b7d9d36968c26b8d84cbcdaba278a02e13bb81e7",
+    "haetae-1.2.0-hardened/easycrypt/theories/CheckedScaleSpec.ec": "dad3d0a5a438386bc03b1b00810ed7b818945c82cd1c08292b1d882b31148ca6",
+    "haetae-1.2.0-hardened/Makefile": "8bc2767aa906dbcb14a2b6c9310c35342ca5d2c9fd61db7185bfc5b9b18adc8c",
+    "haetae-1.2.0-hardened/.gitignore": "ac6d7c1ffe8c2cd209a904278abcc012975d901c474377d27fabc9170ff77fc0",
+    "haetae-1.2.0-hardened/LICENSE": "2e785334ce49fd9b5ed8cae8af2fca7c614d5ca290ecaac8ba3fade5a79fe0d0",
+    "haetae-1.2.0-hardened/baseline-lock.json": "7cf4d8654932d2ad5ace5f14d51fbd44c2d6d4e77f0b2bd32cf8b4c406d7d54c",
+    "haetae-1.2.0-hardened/build/runtime.log": "1b9e25accc46724ddff580802831bbfcf855b85a4bd8eef5f83e7b43c564cae4",
+    "haetae-1.2.0-hardened/build/ct-gate.log": "36264b605865d472dbd0ab5287ee0103671d1b09b97c49f3932d08c758a1ddec",
+    "haetae-1.2.0-hardened/build/verification-gate-tests.log": "b5fa84e13cb2101adbd809fd3307f501381932b3048bcfc7900f46759d6ce136",
+    "haetae-1.2.0-hardened/build/materialization-tests.log": "d03ce458f2a6cd2b4f27522f3aacad03ce1872c028853507c3ad02ca621bdcad",
+    "haetae-1.2.0-hardened/build/test/checked-hyperball-results.json": "0446db199f5d91933fb49e7a8bf4d3e90b0e0256b6480a104cb15e8b7557cde9",
+    "haetae-1.2.0-hardened/build/materialization.json": "3836861f2b33013ee1ed57f2547d224fd7a1bcaefdc59e84c600ede8efed0dcd",
+    "haetae-1.2.0-hardened/build/toolchain.json": "9e9b2091094387f27e9d2fbe94e12175e6a96eb6a20deffbee6fbece485da6d2",
+    "haetae-1.2.0-hardened/build/checked-hyperball-ct-version.log": "97ac3a1b055bf17e3bd116207d5263968da429974498d6a5f7acd9d237078561",
+    "haetae-1.2.0-hardened/build/checked-hyperball-ct.log": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "haetae-1.2.0-hardened/build/checked-hyperball-materialization.log": "bb0b74291bc7bb0f3c201fecb565c6d79544415fc980c6bf38f07344d05bd413",
+    "haetae-1.2.0-hardened/build/checked-hyperball-sct.log": "ee05a7f283f498704b2e2a987fa24422467c0f746d6195632b36a7dffc555819",
+    "haetae-1.2.0-hardened/build/checked-hyperball-signer-ct.log": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "haetae-1.2.0-hardened/build/checked-hyperball-signer-sct.log": "166469eaa59223f247b8bf884122e94df80822280ad5ad2ed68c1a6e8c4bd1f6",
+    "haetae-1.2.0-hardened/build/checked-hyperball-standalone-ct.log": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "haetae-1.2.0-hardened/build/checked-hyperball-standalone-sct.log": "3416b9d7501c3d92b944666d81dff86540bf43513675f31a7d3fb9311d775b2d",
+    "haetae-1.2.0-hardened/build/checked-hyperball-test.log": "0446db199f5d91933fb49e7a8bf4d3e90b0e0256b6480a104cb15e8b7557cde9",
+    "haetae-1.2.0-hardened/build/checked-hyperball-ct.command": "9345f721894cae872239a6532cabb6f3b6e67199fcd218f55d91fb6e964a1e43",
+    "haetae-1.2.0-hardened/build/checked-hyperball-sct.command": "0f9ae927797c54eb76978c0e2d524f6dc95aab0b2e007ecad4d91c339bd5d935",
+    "haetae-1.2.0-hardened/build/checked-hyperball-signer-ct.command": "d339c80eb9a6d66e5889769b546d1a0b1d4e6bde60a4c881c618eab567416ab6",
+    "haetae-1.2.0-hardened/build/checked-hyperball-signer-sct.command": "fb948d94ec3abc22467ec8547f89823dd11cd2d4e0d698defaab0a53a6172918",
+    "haetae-1.2.0-hardened/build/checked-hyperball-standalone-ct.command": "9b6b720254de25ea505e3d2e43082e786e3d6823c3e4552b02d8cc3ada33c1e2",
+    "haetae-1.2.0-hardened/build/checked-hyperball-standalone-sct.command": "f8a4cfb81ea20522bf99bb71dfa50da8f0dee4901350dba42a5416b0873deee8",
+    "haetae-1.2.0-hardened/build/jasmin/challenge_sampler.s": "af28efbc473f07de8fa209370ffa82141d8e7d8eeeafade2d1dbe663670081f2",
+    "haetae-1.2.0-hardened/build/jasmin/encoding.s": "15f87180066d541441163d2c3f601fc4ac2a109c421a746d414f4b910fa340b7",
+    "haetae-1.2.0-hardened/build/jasmin/expand.s": "ba5285feade52ade6ab9ceb91a08d1727e7effd99fe859747ca433db5fa250a4",
+    "haetae-1.2.0-hardened/build/jasmin/fft.s": "4c30e9813110e6351163d41e3dab9826af7bc234f4b4def2c48d9835436250fb",
+    "haetae-1.2.0-hardened/build/jasmin/fips202.s": "9f24151b6626a7e2dfce949e1748717fe21416203498035f44fb3f6b9e84a9fd",
+    "haetae-1.2.0-hardened/build/jasmin/gaussian_sampler.s": "83e29602a59820fc0206678d06d7fb33c107eb63b6351d3ccd46a2229afef658",
+    "haetae-1.2.0-hardened/build/jasmin/hpoly.s": "e3bffd75d336a15bc0cb7e089e715931a81c0941236f0c6eb311af1a562d6159",
+    "haetae-1.2.0-hardened/build/jasmin/hyperball.s": "1368c68e86f00ff1b7a4658953fdb0c4ab2aa69b20cd4c83d58d03535949c63a",
+    "haetae-1.2.0-hardened/build/jasmin/keypair.s": "c3810531dbd5567c0e80a63741e2e009c0d7d2ed838c42f2c4debc7d29675af1",
+    "haetae-1.2.0-hardened/build/jasmin/keypair_matrix.s": "365d72bab2541a6969fadcfab6ab57e06431dfc237fb1dee093bc61708214630",
+    "haetae-1.2.0-hardened/build/jasmin/polynomial_sampler.s": "bf2bf12ffe98e0709c1ccfec82a9baed291151c824fe3f85cf7df67c561af080",
+    "haetae-1.2.0-hardened/build/jasmin/public_key_unpack.s": "7eb1589d67b541e0ff19a2fb0d49b9e6350724c3caf91f757894cd56192347db",
+    "haetae-1.2.0-hardened/build/jasmin/shake256_multi_absorb.s": "24f93ca8868980bebe0e4a346f78f8129825ae1fec42ce8ee05e8fc68fc0c2f0",
+    "haetae-1.2.0-hardened/build/jasmin/sign.s": "0c9b2f57fe9f87ceb34abe2696439bae39913e4690af6751370f2490e194342e",
+    "haetae-1.2.0-hardened/build/jasmin/signature_pack.s": "8f592705dae194cc9dddf5543b3ca0d761fdbce94e51957294d11562f49c0b84",
+    "haetae-1.2.0-hardened/build/jasmin/signature_pack_finalize.s": "6e72034c2165cf7c741fdf3404ae572f8f9611ac0d71885259ca9a40de333bb2",
+    "haetae-1.2.0-hardened/build/jasmin/signature_unpack.s": "71cc85faa8a78f30c5b2db739854dfbf4fc5407b7cefbd3db3814cb1c566094a",
+    "haetae-1.2.0-hardened/build/jasmin/signing_challenge.s": "bf41879b91497bc660342128e4bd206dbcd3876a1e963c7eb54f50fa75cb6bdd",
+    "haetae-1.2.0-hardened/build/jasmin/signing_challenge_product.s": "692346c111dadaa62098b3a612464b1b20e37fc34086c577913555772d5c76bd",
+    "haetae-1.2.0-hardened/build/jasmin/signing_round.s": "a8420f64167a58f3d05b7d04d840646af99b16eaafd5e56a035c4f8d4ff7ba9b",
+    "haetae-1.2.0-hardened/build/jasmin/singular_values.s": "7cccdd2a989684afeef6cdf72cdd5893af99ff9270a6c402d7f47ac70109d869",
+    "haetae-1.2.0-hardened/build/jasmin/verification_matrix.s": "75a3fdf720d83124b59a08cd7cebee92c173e253ef1e6232b33b5e3dae8b7055",
+    "haetae-1.2.0-hardened/build/jasmin/verification_transcript.s": "a7dadc9e5d0086288f38a0511f730e2cbf7b300b3ddbe63e16dd24948162ed04",
+    "haetae-1.2.0-hardened/build/jasmin/verify.s": "bcb887cf7bec399530efc5254ce9a1612ae37f025c7bf2315815e9834b27f2f1",
+    "haetae-1.2.0-hardened/build/mode2/lib/libhaetae-mode2-hardened-jazz.so": "43e624244b04e3ce0edff055b23dde9fa5afbe7c80d5ac4c0eae64aca28cc41a",
+    "haetae-1.2.0-hardened/build/mode3/lib/libhaetae-mode3-hardened-jazz.so": "77d94309033c6d30a16aa8abcdfccf8f8fcfab040bc388b70d7e4b479d5ccfc5",
+    "haetae-1.2.0-hardened/build/mode5/lib/libhaetae-mode5-hardened-jazz.so": "a2a9bd0f3f8d15feab83b2613e2b4663f4a9b11cbd5a859bc19a3fe906d9c484"
+  },
+  "limits": [
+    "Earlier fixed-point multiplication retains original word semantics.",
+    "Magnitude 2^31 is conservatively rejected for either sign.",
+    "Whole Hyperball theorems are conditional on return, not termination.",
+    "barray model and valid array/pointer contracts; no arbitrary-pointer memory-safety claim.",
+    "Existing witnesses prescribe helper inputs; SHAKE seed reachability is not asserted.",
+    "Unrelated original proofs are preserved by hash, not freshly replayed in this gate."
+  ]
+}

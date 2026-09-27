@@ -1,0 +1,71 @@
+// SPDX-License-Identifier: MIT
+// Test-only ABI bridges. Arithmetic and guards remain in production helpers.
+require "../jasmin/fixpoint.jinc"
+require "../jasmin/polyfix.jinc"
+require "../jasmin/hyperball_phase.jinc"
+
+export fn test_checked_scalar(reg mut ptr u64[2] outp,
+                              reg u64 x y0 y1 sign) -> reg ptr u64[2]
+{
+  reg u32 coefficient;
+  reg u64 bad word;
+
+  coefficient, bad = _hb_checked_mul_rnd13_regs(x, y0, y1, sign);
+  word = (64u)coefficient;
+  outp[0] = word;
+  outp[1] = bad;
+  return outp;
+}
+
+export fn test_checked_norm(reg mut ptr u64[2] outp,
+                            reg const ptr u32[2048] ap,
+                            reg u64 acount,
+                            reg const ptr u32[2048] bp,
+                            reg u64 bcount) -> reg ptr u64[2]
+{
+  reg u64 norm overflow;
+
+  norm, overflow = _hb_checked_sqnorm2_2048(ap, acount, bp, bcount);
+  outp[0] = norm;
+  outp[1] = overflow;
+  return outp;
+}
+
+// state = [left_count, total_count, returned_bad].
+export fn test_checked_scale(reg mut ptr u32[2048] y1p,
+                             reg mut ptr u32[2048] y2p,
+                             reg mut ptr u64[3] statep,
+                             reg const ptr u64[4096] samplesp,
+                             reg const ptr u8[512] signsp,
+                             reg const ptr u64[2] scalep)
+                             -> reg ptr u32[2048], reg ptr u32[2048], reg ptr u64[3]
+{
+  reg u64 counts bad;
+
+  counts = statep[1];
+  counts <<= 32;
+  counts |= statep[0];
+  y1p, y2p, bad = _hb_checked_scale_samples(y1p, y2p, samplesp, signsp, scalep, counts);
+  statep[2] = bad;
+  return y1p, y2p, statep;
+}
+
+// state = [left_count, total_count, bound, returned_acceptance].
+export fn test_checked_combined(reg mut ptr u32[2048] y1p,
+                                reg mut ptr u32[2048] y2p,
+                                reg mut ptr u64[4] statep,
+                                reg const ptr u64[4096] samplesp,
+                                reg const ptr u8[512] signsp,
+                                reg const ptr u64[2] scalep)
+                                -> reg ptr u32[2048], reg ptr u32[2048], reg ptr u64[4]
+{
+  reg u64 accepted lcount total bound;
+
+  lcount = statep[0];
+  total = statep[1];
+  bound = statep[2];
+  y1p, y2p, accepted = _hb_checked_scale_and_check_values(
+    y1p, y2p, samplesp, signsp, scalep, lcount, total, bound);
+  statep[3] = accepted;
+  return y1p, y2p, statep;
+}

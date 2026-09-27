@@ -1,0 +1,46 @@
+fn _polyfixveclk_scale_and_check(reg mut ptr u32[2048] y1p,
+                                 reg mut ptr u32[2048] y2p,
+                                 reg mut ptr u64[4] statep,
+                                 reg const ptr u64[4096] samplesp,
+                                 reg const ptr u8[512] signsp,
+                                 reg const ptr u64[2] scalep)
+                                 -> reg ptr u32[2048],
+                                    reg ptr u32[2048],
+                                    reg ptr u64[4]
+{
+  stack ptr u64[4] sstatep;
+  reg u64 lcount total bound accepted;
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  sstatep = statep;
+  lcount = statep[0];
+  total = statep[1];
+  bound = statep[2];
+  y1p, y2p, accepted = _hb_checked_scale_and_check_values
+    (y1p, y2p, samplesp, signsp, scalep, lcount, total, bound);
+  statep = sstatep;
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  statep[3] = accepted;
+  return y1p, y2p, statep;
+}
+
+fn _polyfixveclk_scale_and_check_values(reg mut ptr u32[2048] y1p,
+                                        reg mut ptr u32[2048] y2p,
+                                        reg const ptr u64[4096] samplesp,
+                                        reg const ptr u8[512] signsp,
+                                        reg const ptr u64[2] scalep,
+                                        reg u64 lcount,
+                                        reg u64 total,
+                                        reg u64 bound)
+                                        -> reg ptr u32[2048],
+                                           reg ptr u32[2048],
+                                           reg u64
+{
+  reg u64 accepted;
+  y1p, y2p, accepted = _hb_checked_scale_and_check_values
+    (y1p, y2p, samplesp, signsp, scalep, lcount, total, bound);
+  return y1p, y2p, accepted;
+}

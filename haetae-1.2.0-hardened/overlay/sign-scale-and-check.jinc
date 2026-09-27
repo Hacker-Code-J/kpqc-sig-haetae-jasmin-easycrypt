@@ -1,0 +1,16 @@
+fn _sf_scale_and_check(reg mut ptr u32[2048] y1p,
+                       reg mut ptr u32[2048] y2p,
+                       reg const ptr u64[4096] samplesp,
+                       reg const ptr u8[512] signsp,
+                       reg const ptr u64[2] scalep,
+                       reg u64 lcount,
+                       reg u64 total,
+                       reg u64 bound) -> reg ptr u32[2048],
+                                         reg ptr u32[2048],
+                                         reg u64
+{
+  reg u64 accepted;
+  y1p, y2p, accepted = _hb_checked_scale_and_check_values
+    (y1p, y2p, samplesp, signsp, scalep, lcount, total, bound);
+  return y1p, y2p, accepted;
+}

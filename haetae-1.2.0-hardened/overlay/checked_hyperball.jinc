@@ -1,0 +1,255 @@
+/* Keep the existing word multiplication. Only its final rounding and
+   conversion check use the unwrapped magnitude, which is at most 2^49. */
+inline fn _hb_checked_mul_rnd13_regs(reg u64 x y0 y1 sign)
+                                     -> reg u32, reg u64
+{
+  reg u64 x0 x1 r0 r1 magnitude roundbit mask bad;
+  reg u32 ret;
+
+  x1 = x;
+  x1 >>= 32;
+  x0 = x;
+  x0 &= 0xffffffff;
+  x0 <<= 16;
+  r0, r1 = __fixpoint_mul_regs(x0, x1, y0, y1);
+
+  magnitude = r1;
+  magnitude >>= 15;
+  roundbit = r1;
+  roundbit >>= 14;
+  roundbit &= 1;
+  magnitude += roundbit;
+
+  bad = 2147483647;
+  bad -= magnitude;
+  bad >>s= 63;
+
+  mask = 0;
+  mask -= sign;
+  magnitude ^= mask;
+  magnitude += sign;
+  ret = (32u)magnitude;
+  return ret, bad;
+}
+
+fn _hb_checked_mul_rnd13(reg u64 x,
+                          reg const ptr u64[2] yp,
+                          reg u8 sign) -> reg u32, reg u64
+{
+  reg u64 y0 y1 s bad;
+  reg u32 ret;
+  #[msf] reg u64 ms;
+
+  ms = #init_msf();
+  yp = #protect_ptr(yp, ms);
+  y0 = yp[0];
+  y1 = yp[1];
+  s = (64u)sign;
+  ret, bad = _hb_checked_mul_rnd13_regs(x, y0, y1, s);
+  return ret, bad;
+}
+
+fn _hb_checked_scale_samples(reg mut ptr u32[2048] y1p,
+                              reg mut ptr u32[2048] y2p,
+                              reg const ptr u64[4096] samplesp,
+                              reg const ptr u8[512] signsp,
+                              reg const ptr u64[2] scalep,
+                              reg u64 counts) -> reg ptr u32[2048],
+                                                reg ptr u32[2048],
+                                                reg u64
+{
+  reg u64 i j lcount total byte_idx sample bad item_bad;
+  reg u32 sign32 r;
+  reg u8 shift sign8;
+  #[msf] reg u64 ms;
+
+  lcount = counts;
+  lcount &= 0xffffffff;
+  total = counts;
+  total >>= 32;
+  () = #declassify(lcount);
+  () = #declassify(total);
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  samplesp = #protect_ptr(samplesp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  scalep = #protect_ptr(scalep, ms);
+  lcount = #protect(lcount, ms);
+  total = #protect(total, ms);
+
+  bad = 0;
+  i = 0;
+  while (i < lcount)
+  {
+    byte_idx = i;
+    byte_idx >>= 3;
+    sign32 = (32u)signsp[byte_idx];
+    shift = (8u)i;
+    shift &= 7;
+    sign8 = __bit_at_u8(sign32, shift);
+
+    sample = samplesp[i];
+    () = #spill(y1p, y2p, samplesp, signsp, scalep, lcount, total, i, bad);
+    r, item_bad = _hb_checked_mul_rnd13(sample, scalep, sign8);
+    () = #unspill(y1p, y2p, samplesp, signsp, scalep, lcount, total, i, bad);
+    bad |= item_bad;
+    ms = #init_msf();
+    y1p = #protect_ptr(y1p, ms);
+    y2p = #protect_ptr(y2p, ms);
+    samplesp = #protect_ptr(samplesp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    scalep = #protect_ptr(scalep, ms);
+    lcount = #protect(lcount, ms);
+    total = #protect(total, ms);
+    i = #protect(i, ms);
+    y1p[i] = r;
+
+    i += 1;
+  }
+
+  j = 0;
+  while (i < total)
+  {
+    byte_idx = i;
+    byte_idx >>= 3;
+    sign32 = (32u)signsp[byte_idx];
+    shift = (8u)i;
+    shift &= 7;
+    sign8 = __bit_at_u8(sign32, shift);
+
+    sample = samplesp[i];
+    () = #spill(y1p, y2p, samplesp, signsp, scalep, total, i, j, bad);
+    r, item_bad = _hb_checked_mul_rnd13(sample, scalep, sign8);
+    () = #unspill(y1p, y2p, samplesp, signsp, scalep, total, i, j, bad);
+    bad |= item_bad;
+    ms = #init_msf();
+    y1p = #protect_ptr(y1p, ms);
+    y2p = #protect_ptr(y2p, ms);
+    samplesp = #protect_ptr(samplesp, ms);
+    signsp = #protect_ptr(signsp, ms);
+    scalep = #protect_ptr(scalep, ms);
+    total = #protect(total, ms);
+    i = #protect(i, ms);
+    j = #protect(j, ms);
+    y2p[j] = r;
+
+    i += 1;
+    j += 1;
+  }
+
+  return y1p, y2p, bad;
+}
+
+/* Each signed 32-bit square fits in 64 bits. A carry from the sum is
+   materialized immediately and remains sticky across both input arrays. */
+fn _hb_checked_sqnorm2_2048(reg const ptr u32[2048] ap,
+                            reg u64 acount,
+                            reg const ptr u32[2048] bp,
+                            reg u64 bcount) -> reg u64, reg u64
+{
+  reg u64 i total coeff prod overflow;
+  reg u32 a;
+  reg bool carry;
+  #[msf] reg u64 ms;
+
+  () = #declassify(acount);
+  () = #declassify(bcount);
+  ms = #init_msf();
+  ap = #protect_ptr(ap, ms);
+  bp = #protect_ptr(bp, ms);
+  acount = #protect(acount, ms);
+  bcount = #protect(bcount, ms);
+  total = 0;
+  overflow = 0;
+  i = 0;
+  while (i < acount)
+  {
+    a = ap[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    carry, total += prod;
+    _, prod = prod - prod - carry;
+    overflow |= prod;
+    i += 1;
+  }
+
+  i = 0;
+  while (i < bcount)
+  {
+    a = bp[i];
+    coeff = (64s)a;
+    prod = coeff * coeff;
+    carry, total += prod;
+    _, prod = prod - prod - carry;
+    overflow |= prod;
+    i += 1;
+  }
+
+  return total, overflow;
+}
+
+fn _hb_checked_scale_and_check_values(reg mut ptr u32[2048] y1p,
+                                       reg mut ptr u32[2048] y2p,
+                                       reg const ptr u64[4096] samplesp,
+                                       reg const ptr u8[512] signsp,
+                                       reg const ptr u64[2] scalep,
+                                       reg u64 lcount,
+                                       reg u64 total,
+                                       reg u64 bound) -> reg ptr u32[2048],
+                                                         reg ptr u32[2048],
+                                                         reg u64
+{
+  stack ptr u32[2048] sy1p sy2p;
+  stack u64 slcount stotal sbound sbad;
+  reg u64 counts kcount norm bad overflow compare accepted;
+  reg bool borrow;
+  #[msf] reg u64 ms;
+
+  () = #declassify(lcount);
+  () = #declassify(total);
+  () = #declassify(bound);
+  ms = #init_msf();
+  y1p = #protect_ptr(y1p, ms);
+  y2p = #protect_ptr(y2p, ms);
+  samplesp = #protect_ptr(samplesp, ms);
+  signsp = #protect_ptr(signsp, ms);
+  scalep = #protect_ptr(scalep, ms);
+  lcount = #protect(lcount, ms);
+  total = #protect(total, ms);
+  bound = #protect(bound, ms);
+  slcount = lcount;
+  stotal = total;
+  sbound = bound;
+
+  counts = total;
+  counts <<= 32;
+  counts |= lcount;
+  y1p, y2p, bad = _hb_checked_scale_samples(y1p, y2p, samplesp, signsp, scalep, counts);
+  sy1p = y1p;
+  sy2p = y2p;
+  sbad = bad;
+
+  lcount = slcount;
+  kcount = stotal;
+  kcount -= lcount;
+  norm, overflow = _hb_checked_sqnorm2_2048(y1p, lcount, y2p, kcount);
+  bad = sbad;
+  bad |= overflow;
+  compare = sbound;
+  borrow, compare -= norm;
+  _, compare = compare - compare - borrow;
+  bad |= compare;
+  bad ^= 0xffffffffffffffff;
+  accepted = bad;
+  accepted &= 1;
+  /* The retry controller observes this single decision bit. Keep the
+     norm and both error masks private. */
+  () = #declassify(accepted);
+  ms = #init_msf();
+  accepted = #protect(accepted, ms);
+
+  y1p = sy1p;
+  y2p = sy2p;
+  return y1p, y2p, accepted;
+}

@@ -1,0 +1,12 @@
+/build/
+/logs/
+/jasmin/
+/include/
+/test/
+/kat/
+/benchmark/
+*.eco
+*.o
+*.d
+*.so
+__pycache__/

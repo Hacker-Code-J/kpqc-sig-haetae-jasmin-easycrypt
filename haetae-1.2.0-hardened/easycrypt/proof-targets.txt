@@ -1,0 +1,7 @@
+easycrypt/theories/CheckedScaleSpec.ec
+easycrypt/proofs/CheckedScalarCorrectness.ec
+easycrypt/proofs/CheckedNormCorrectness.ec
+easycrypt/proofs/CheckedAcceptanceCorrectness.ec
+easycrypt/proofs/CheckedProductionBridge.ec
+easycrypt/proofs/CheckedProductionCorrectness.ec
+easycrypt/proofs/CheckedVectorCorrectness.ec

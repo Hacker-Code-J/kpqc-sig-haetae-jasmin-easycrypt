@@ -1,0 +1,96 @@
+/* Check the helpers and delegates from the materialized production source.
+   Sample, scale, coefficient, sign, norm and error masks remain secret.
+   Only the final acceptance bit is released to the retry controller. */
+require "../jasmin/sign.jazz"
+
+#[ct = "x * y0 * y1 * sign -> {x, y0, y1, sign} * {x, y0, y1, sign}"]
+export
+fn checked_scalar_ct_jazz(reg u64 x y0 y1 sign) -> reg u32, reg u64
+{
+  reg u32 coefficient;
+  reg u64 bad;
+  coefficient, bad = _hb_checked_mul_rnd13_regs(x, y0, y1, sign);
+  return coefficient, bad;
+}
+
+#[ct = "ap * public * bp * public -> {ap, bp} * {ap, bp}"]
+export
+fn checked_norm_ct_jazz(reg const ptr u32[2048] ap, reg u64 acount,
+                        reg const ptr u32[2048] bp, reg u64 bcount)
+                        -> reg u64, reg u64
+{
+  reg u64 norm bad;
+  norm, bad = _hb_checked_sqnorm2_2048(ap, acount, bp, bcount);
+  return norm, bad;
+}
+
+#[ct = "y1p * y2p * samplesp * signsp * scalep * public -> {y1p, samplesp, scalep, signsp} * {y2p, samplesp, scalep, signsp} * {samplesp, scalep, signsp}"]
+export
+fn checked_vector_ct_jazz(reg mut ptr u32[2048] y1p, reg mut ptr u32[2048] y2p,
+                          reg const ptr u64[4096] samplesp,
+                          reg const ptr u8[512] signsp,
+                          reg const ptr u64[2] scalep, reg u64 counts)
+                          -> reg ptr u32[2048], reg ptr u32[2048], reg u64
+{
+  reg u64 bad;
+  y1p, y2p, bad = _hb_checked_scale_samples
+    (y1p, y2p, samplesp, signsp, scalep, counts);
+  return y1p, y2p, bad;
+}
+
+#[ct = "y1p * y2p * statep * samplesp * signsp * scalep -> {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep}"]
+export
+fn checked_phase_ct_jazz(reg mut ptr u32[2048] y1p, reg mut ptr u32[2048] y2p,
+                         reg mut ptr u64[4] statep,
+                         reg const ptr u64[4096] samplesp,
+                         reg const ptr u8[512] signsp,
+                         reg const ptr u64[2] scalep)
+                         -> reg ptr u32[2048], reg ptr u32[2048], reg ptr u64[4]
+{
+  y1p, y2p, statep = _polyfixveclk_scale_and_check
+    (y1p, y2p, statep, samplesp, signsp, scalep);
+  return y1p, y2p, statep;
+}
+
+#[ct = "y1p * y2p * statep * samplesp * signsp * scalep -> {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep}"]
+export
+fn checked_phase_values_ct_jazz(reg mut ptr u32[2048] y1p,
+                                reg mut ptr u32[2048] y2p,
+                                reg const ptr u64[4] statep,
+                                reg const ptr u64[4096] samplesp,
+                                reg const ptr u8[512] signsp,
+                                reg const ptr u64[2] scalep)
+                                -> reg ptr u32[2048], reg ptr u32[2048], reg u64
+{
+  reg u64 accepted left total bound;
+  #[msf] reg u64 ms;
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  left = statep[0];
+  total = statep[1];
+  bound = statep[2];
+  y1p, y2p, accepted = _polyfixveclk_scale_and_check_values
+    (y1p, y2p, samplesp, signsp, scalep, left, total, bound);
+  return y1p, y2p, accepted;
+}
+
+#[ct = "y1p * y2p * statep * samplesp * signsp * scalep -> {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep} * {y1p, y2p, statep, samplesp, signsp, scalep}"]
+export
+fn checked_sign_ct_jazz(reg mut ptr u32[2048] y1p, reg mut ptr u32[2048] y2p,
+                        reg const ptr u64[4] statep,
+                        reg const ptr u64[4096] samplesp,
+                        reg const ptr u8[512] signsp,
+                        reg const ptr u64[2] scalep)
+                        -> reg ptr u32[2048], reg ptr u32[2048], reg u64
+{
+  reg u64 accepted left total bound;
+  #[msf] reg u64 ms;
+  ms = #init_msf();
+  statep = #protect_ptr(statep, ms);
+  left = statep[0];
+  total = statep[1];
+  bound = statep[2];
+  y1p, y2p, accepted = _sf_scale_and_check
+    (y1p, y2p, samplesp, signsp, scalep, left, total, bound);
+  return y1p, y2p, accepted;
+}
