@@ -11,3 +11,9 @@ easycrypt/proofs/GaussianAcceptanceIdeal.ec
 easycrypt/proofs/GaussianAcceptanceProduction.ec
 easycrypt/proofs/GaussianAttemptExpectation.ec
 easycrypt/proofs/GaussianAttemptProduction.ec
+easycrypt/proofs/GaussianRenyiActual.ec
+easycrypt/proofs/GaussianRenyiConditioning.ec
+easycrypt/proofs/GaussianRenyiKernelBounds.ec
+easycrypt/proofs/GaussianRenyiMoment.ec
+easycrypt/proofs/GaussianRenyiProduction.ec
+easycrypt/theories/GaussianRenyiSpec.ec

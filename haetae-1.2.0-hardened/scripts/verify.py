@@ -14,7 +14,11 @@ import time
 from materialize import PROJECT, ROOT, read_baseline
 
 BASELINE = ROOT / "haetae-1.2.0-easycrypt"
-GROUPS = ("all", "gaussian-rate")
+GROUP_PREFIXES = {
+    "gaussian-rate": ("GaussianAcceptance", "GaussianAttempt"),
+    "gaussian-renyi": ("GaussianRenyi",),
+}
+GROUPS = ("all", *GROUP_PREFIXES)
 spec = importlib.util.spec_from_file_location("baseline_verification", BASELINE / "scripts/verify.py")
 baseline_gate = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(baseline_gate)
@@ -72,7 +76,7 @@ def proof_closure(group="all"):
         ordered.append(path)
 
     roots = new if group == "all" else [
-        path for path in new if path.stem.startswith(("GaussianAcceptance", "GaussianAttempt"))]
+        path for path in new if path.stem.startswith(GROUP_PREFIXES[group])]
     if not roots:
         raise ValueError(f"No verification roots for group {group}")
     for path in roots:
