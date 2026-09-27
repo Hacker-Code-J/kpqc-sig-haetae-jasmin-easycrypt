@@ -17,3 +17,16 @@ easycrypt/proofs/GaussianRenyiKernelBounds.ec
 easycrypt/proofs/GaussianRenyiMoment.ec
 easycrypt/proofs/GaussianRenyiProduction.ec
 easycrypt/theories/GaussianRenyiSpec.ec
+
+# Hyperball single-attempt exponential Renyi composition
+easycrypt/proofs/HyperballRenyiArithmetic.ec
+easycrypt/proofs/HyperballRenyiBatch.ec
+easycrypt/proofs/HyperballRenyiBatchBounds.ec
+easycrypt/proofs/HyperballRenyiBuffer.ec
+easycrypt/proofs/HyperballRenyiHardened.ec
+easycrypt/proofs/HyperballRenyiJoint.ec
+easycrypt/proofs/HyperballRenyiMap.ec
+easycrypt/proofs/HyperballRenyiPayload.ec
+easycrypt/proofs/HyperballRenyiProduct.ec
+easycrypt/proofs/HyperballRenyiProduction.ec
+easycrypt/proofs/HyperballRenyiSchedule.ec

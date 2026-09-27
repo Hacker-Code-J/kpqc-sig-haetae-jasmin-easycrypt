@@ -17,6 +17,7 @@ BASELINE = ROOT / "haetae-1.2.0-easycrypt"
 GROUP_PREFIXES = {
     "gaussian-rate": ("GaussianAcceptance", "GaussianAttempt"),
     "gaussian-renyi": ("GaussianRenyi",),
+    "hyperball-renyi": ("HyperballRenyi",),
 }
 GROUPS = ("all", *GROUP_PREFIXES)
 spec = importlib.util.spec_from_file_location("baseline_verification", BASELINE / "scripts/verify.py")
