@@ -5,3 +5,9 @@ easycrypt/proofs/CheckedAcceptanceCorrectness.ec
 easycrypt/proofs/CheckedProductionBridge.ec
 easycrypt/proofs/CheckedProductionCorrectness.ec
 easycrypt/proofs/CheckedVectorCorrectness.ec
+easycrypt/proofs/GaussianAcceptanceActual.ec
+easycrypt/proofs/GaussianAcceptanceConstants.ec
+easycrypt/proofs/GaussianAcceptanceIdeal.ec
+easycrypt/proofs/GaussianAcceptanceProduction.ec
+easycrypt/proofs/GaussianAttemptExpectation.ec
+easycrypt/proofs/GaussianAttemptProduction.ec

@@ -4,6 +4,10 @@
 오버플로를 검사하는 별도 구현이다. **보강안이 승인한 벡터의 실제 정수 제곱합은
 모드의 상한 이하**라는 성질을 EasyCrypt로 검증한다.
 
+후속 [Gaussian 거부율·평균 횟수 증명](gaussian-acceptance.md)은 독립 균등 난수
+모형에서 실제 후보 거부 확률 `<5%`와 성공까지의 평균 후보 시도 횟수 `<20/19`를
+연결한다. Hyperball 외부 재시도의 종료와 구분한다.
+
 `N = Σ signed32(y1[i])² + Σ signed32(y2[j])²`에서 합과 제곱은 무제한 정수
 계산이다. 검사 전에 `N < 2^64`나 Gaussian 입력의 안전 구간을 가정하지 않는다.
 
@@ -88,6 +92,6 @@ admit, 검증 우회 pragma를 허용하지 않는다. 그 밖의 기존 증명�
 달라지거나 출력 경로에 심볼릭 링크가 있으면 중단한다. 생성한 `jasmin/`, `include/`,
 `test/`, `kat/`와 `build/`는 Git에 중복 저장하지 않는다.
 
-전체 KeyGen/Sign/Verify 정확성, 전체 재시도의 종료, 실제 SHAKE의 확률분포,
-공식 Gaussian 거부율·Rényi 경계는 이 보강 증명의 범위에 포함되지 않는다.
+전체 KeyGen/Sign/Verify 정확성, Hyperball 외부 재시도의 종료, 실제 SHAKE의
+확률분포와 공식 Rényi 경계는 별도 과제다. Gaussian 거부율은 위 후속 증명에서 다룬다.
 기반 코드의 MIT 라이선스와 저작권은 [LICENSE](LICENSE)에 유지한다.
