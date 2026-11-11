@@ -1,0 +1,40 @@
+{
+  "result": "PASS",
+  "verified_at": "2026-11-11T13:20:34.274466+00:00",
+  "tested_source_commit": "88a543fd07ef268fcbea78d488726cc7652a552f",
+  "source_manifest_sha256": "c8aeb5cadd9c56f04f3461123f7bfedacd9183e2690f0dac2b4e249063cb6be5",
+  "source_files": 1829,
+  "source_files_still_match_tested_and_repository_bytes": true,
+  "full_runner_steps": 28,
+  "stage_log_hashes_verified": 28,
+  "proofs": [
+    {
+      "project": "haetae-easycrypt",
+      "summary": "haetae-easycrypt/logs/20261111T114217.179657Z-all/summary.json",
+      "targets": 277,
+      "sha256": "2d902bba0d8f89a428ef879fe7e3b803e05aa1bd5710a36559b4b01917eae7ae"
+    },
+    {
+      "project": "haetae-hardened",
+      "summary": "haetae-hardened/logs/20261111T124115.342600Z-all/summary.json",
+      "targets": 177,
+      "sha256": "ff44d6700e9ea1ce340408bb12f57ec08505e0adaae2e804f110c5aa85d4fec8"
+    }
+  ],
+  "fresh_main_executions": 454,
+  "unique_target_files": 307,
+  "shared_dependency_targets": 147,
+  "proof_target_source_hashes_verified": 454,
+  "proof_logs_present": 454,
+  "hardened_source_and_tool_snapshot_verified": true,
+  "wall_seconds": 5753.527,
+  "maximum_rss_kib": 3536252,
+  "mode": "one full runner invocation using separately bootstrapped tools on the same Linux host",
+  "scope": "component claims and tests; not complete signature correctness or security",
+  "not_claimed": [
+    "whole signature API correctness or UF-CMA",
+    "independent machine or OS replay",
+    "hosted CI",
+    "published release or DOI"
+  ]
+}
