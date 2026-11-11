@@ -20,3 +20,18 @@ Jasmin, EasyCrypt, Why3, SMT 프로버, OpenSSL은 재현에 사용하는 외부
 참고 PDF의 링크·해시·사용 위치를 기록한 것이 그 PDF 자체를 이 저장소에
 재배포한다는 뜻은 아니다. 역사 파일의 경로나 버전 표기는 원래 자료를 식별하기
 위해 보존한다.
+
+## 이전 지원 이론의 추가 출처 확인
+
+`haetae-easycrypt/theories/ntt/Fastexp.ec`는 Formosa ML-KEM의 고정 커밋
+`475b87434506280fdfa1a1ba5da0af3787e00579`에 있는
+[`proof/eclib/Fastexp.ec`](https://github.com/formosa-crypto/formosa-mlkem/blob/475b87434506280fdfa1a1ba5da0af3787e00579/proof/eclib/Fastexp.ec)와
+바이트 동일하다. SHA-256은
+`a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3`이다.
+기존 출처 TSV는 이전 로컬 연구 스냅샷까지의 경로와 해시를 보존한다.
+
+동일한 바이트만으로 원저자나 복사 방향을 확정할 수는 없다. 확인한 Formosa
+고지에서는 이 지원 파일에 적용되는 이용 조건을 확정하지 못했으므로, 원출처와
+적용 조건은 추가 확인 사항으로 남긴다. 별도 저장소인 `crypto-specs`의 CC0
+고지를 Formosa의 `proof/eclib`에 자동으로 적용하지 않는다. 이 확인 메모는
+원본 지원 이론, 역사적 출처 TSV 또는 증명 해시를 변경하지 않는다.
