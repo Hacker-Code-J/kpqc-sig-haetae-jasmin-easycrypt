@@ -1,0 +1,65 @@
+{
+  "result": "PASS_FOR_DOCUMENT_PIN_REPAIR",
+  "full_replay_completed": false,
+  "root_cause": "Two reviewed public-evidence link changes in haetae-easycrypt/README.md were absent from the exact publication migration ledger.",
+  "before_sha256": "19df9a976859e15f652fcf1e4fc2c171e0c6203b4c74773e9fa22ffc2d3598de",
+  "after_sha256": "e812752acd2f51c3efe6f3ba2652c204cfcb0f4e3b6951b0e1a8138da0800ca3",
+  "tests": [
+    {
+      "suite": "materialize.py",
+      "tests": 23,
+      "result": "PASS",
+      "log": "materialize.py.log"
+    },
+    {
+      "suite": "layout-migration.py",
+      "tests": 2,
+      "result": "PASS",
+      "log": "layout-migration.py.log"
+    },
+    {
+      "suite": "publication-migration.py",
+      "tests": 6,
+      "result": "PASS",
+      "log": "publication-migration.py.log"
+    },
+    {
+      "suite": "extraction-provenance.py",
+      "tests": 3,
+      "result": "PASS",
+      "log": "extraction-provenance.py.log"
+    },
+    {
+      "suite": "verification-gate.py",
+      "tests": 10,
+      "result": "PASS",
+      "log": "verification-gate-configured.log"
+    },
+    {
+      "suite": "gaussian-rate-gate.py",
+      "tests": 18,
+      "result": "PASS",
+      "log": "gaussian-rate-gate.py.log"
+    },
+    {
+      "suite": "gaussian-renyi-gate.py",
+      "tests": 10,
+      "result": "PASS",
+      "log": "gaussian-renyi-gate.py.log"
+    },
+    {
+      "suite": "hyperball-renyi-gate.py",
+      "tests": 12,
+      "result": "PASS",
+      "log": "hyperball-renyi-gate.py.log"
+    }
+  ],
+  "total_tests": 84,
+  "generated_implementation_outputs_unchanged": true,
+  "hardened_outputs": 79,
+  "fresh_extractions": 25,
+  "historical_baseline_toolchain_layout_locks_unchanged": true,
+  "python_ast": "PASS",
+  "ruff_focused": "PASS",
+  "initial_unconfigured_verifier_test": "Failed to find easycrypt on PATH; rerun after activating the prepared environment passed all 10 tests."
+}

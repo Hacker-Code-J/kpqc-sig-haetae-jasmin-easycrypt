@@ -1,0 +1,7 @@
+{
+  "haetae-hardened/baseline-lock.json": "7cf4d8654932d2ad5ace5f14d51fbd44c2d6d4e77f0b2bd32cf8b4c406d7d54c",
+  "haetae-hardened/toolchain-migration-lock.json": "19ae01e962dcb7de596d8f2fe9f9e930621b32739249bf057e09c97e1c2a732c",
+  "haetae-hardened/layout-migration.json": "cddcaa784b1c62d06b1c8f787cd43951e0d7842f9f3cd42627ed493809f7fe23",
+  "haetae-hardened/publication-migration.json": "bc486e1d421a93f8bdd72a10a73783becc6ee2e738b35dab03b757b74fe801fa",
+  "haetae-hardened/scripts/materialize.py": "8ab8fb8e4c2d04dcf08a00ffe529a88380b07fe2d920496747e28d4382a6357d"
+}

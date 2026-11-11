@@ -8,6 +8,7 @@ import unittest
 from unittest.mock import patch
 
 PROJECT = Path(__file__).resolve().parents[1]
+ROOT = PROJECT.parent
 spec = importlib.util.spec_from_file_location("materialize", PROJECT / "scripts/materialize.py")
 materialize = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(materialize)
@@ -71,6 +72,25 @@ class PublicationMigrationTests(unittest.TestCase):
         self.publication.write_bytes(self.publication.read_bytes() + b"\n")
         with patch.object(materialize, "PUBLICATION_SHA256", expected):
             with self.assertRaisesRegex(SystemExit, "publication migration"):
+                materialize.read_baseline()
+
+
+class PublicationSnapshotTests(unittest.TestCase):
+    def test_current_publication_snapshot_materializes(self):
+        name = "haetae-easycrypt/README.md"
+        _, files = materialize.read_baseline()
+        self.assertEqual(files[name], (ROOT / name).read_bytes())
+
+    def test_further_readme_drift_is_rejected(self):
+        read_bytes = Path.read_bytes
+        readme = ROOT / "haetae-easycrypt/README.md"
+
+        def altered_bytes(path):
+            data = read_bytes(path)
+            return data + b"\nUnreviewed change.\n" if path == readme else data
+
+        with patch.object(Path, "read_bytes", altered_bytes):
+            with self.assertRaisesRegex(SystemExit, "Pinned baseline drift: haetae-easycrypt/README.md"):
                 materialize.read_baseline()
 
 

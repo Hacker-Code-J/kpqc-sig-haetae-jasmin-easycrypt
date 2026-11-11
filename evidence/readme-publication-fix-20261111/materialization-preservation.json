@@ -1,0 +1,9 @@
+{
+  "result": "PASS",
+  "outputs": 79,
+  "identical_output_files": 78,
+  "changed_provenance_only": [
+    "build/materialization.json"
+  ],
+  "generated_implementation_hashes_unchanged": true
+}

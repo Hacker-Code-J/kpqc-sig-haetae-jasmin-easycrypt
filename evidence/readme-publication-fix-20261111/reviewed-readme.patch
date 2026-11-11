@@ -1,0 +1,13 @@
+--- reviewed-layout/haetae-easycrypt/README.md
++++ publication/haetae-easycrypt/README.md
+@@ -191,8 +191,8 @@
+ 검증하여 **260/260 PASS**를 확인했다. `-no-eco`, `Proofs:check`, EOF 완료
+ 검사와 기본 프로버 선택을 유지했고, 실행 기록의 모든 주 대상 해시가 현재
+ 소스와 일치한다. [현재 검증 manifest](manifests/2026.09-migration.json)에
+-전체 목록·해시와 [보존된 전체 실행 기록](<../../[졸업] 석사학위논문/handoff/verification/toolchain-202609-migration/haetae-full-proof-result.json>)을 연결했다.
+-진단 로그에 남은 옛 `/tmp` 경로는 [보존 위치 색인](<../../[졸업] 석사학위논문/handoff/verification/toolchain-202609-migration/proof-port-diagnostics/archive-index.json>)에서 실제 보관 파일과 해시를 찾을 수 있다.
++전체 목록·해시와 [보존된 전체 실행 기록](../evidence/toolchain-migration/haetae-full-proof-result.json)을 연결했다.
++진단 로그에 남은 옛 `/tmp` 경로는 [보존 위치 색인](../evidence/toolchain-migration/index.json)에서 공개 사본의 경로와 해시를 찾을 수 있다.
+ 
+ 원래 NTT·SHAKE 출처 TSV는 변경하지 않는다. 검증기는 해당 TSV의 이전 pin을
+ 먼저 확인하고, 검토한 지원 파일 5개의 정확한 이전·현재 SHA-256 쌍만 추가로
