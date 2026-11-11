@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "checked_on": "2026-11-12",
+  "status": "EXACT_BYTES_IN_LATER_EXPLICITLY_LICENSED_UPSTREAM",
+  "local_path": "haetae-easycrypt/theories/ntt/Fastexp.ec",
+  "local_sha256": "a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3",
+  "local_git_blob": "f7c412959f8d359619e592b8152e9537fc227495",
+  "bytes": 2852,
+  "license_expression": "CC0-1.0 OR Apache-2.0",
+  "license_scope": "This exact Fastexp.ec file as distributed in the later explicitly licensed upstream revision. No retroactive license assertion for the older audit pin and no blanket coverage assertion for other support files.",
+  "upstream": {
+    "repository": "formosa-crypto/formosa-libjade",
+    "revision": "589038bbae572525ff6a8281f6bc07fa5a31ff7b",
+    "path": "proofs/mlkem/eclib/Fastexp.ec",
+    "git_blob": "f7c412959f8d359619e592b8152e9537fc227495",
+    "url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/proofs/mlkem/eclib/Fastexp.ec",
+    "readme_license_url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/README.md#license",
+    "license_introduction_commit": "b301e356c3fc52fa6522be5445534d228e809548"
+  },
+  "history": [
+    {
+      "commit": "b94dc0d4f553e82a656d2382f56d2edbc9ce3282",
+      "path": "proof/correctness/eclib/Fastexp.ec",
+      "event": "file_addition",
+      "commit_author": "Manuel Barbosa",
+      "author_date": "2022-04-21T19:08:18+01:00",
+      "subject": "Merging NTT",
+      "git_blob": "863335b565a98861ff8fb84bc73399829438ebd6",
+      "sha256": "604742e40de0825db1326cad3249cb0cb14b3e840d7200ea6ad8c24939eda3e8",
+      "url": "https://github.com/formosa-crypto/formosa-libjade/commit/b94dc0d4f553e82a656d2382f56d2edbc9ce3282"
+    },
+    {
+      "commit": "3ad502b30e3f8205043564760b1be51e8efda8c1",
+      "path": "proof/eclib/Fastexp.ec",
+      "event": "byte_preserving_rename",
+      "commit_author": "Manuel Barbosa",
+      "author_date": "2022-04-28T18:03:14+01:00",
+      "subject": "Small refactoring so that NTT properties are available at spec level",
+      "git_blob": "863335b565a98861ff8fb84bc73399829438ebd6",
+      "sha256": "604742e40de0825db1326cad3249cb0cb14b3e840d7200ea6ad8c24939eda3e8",
+      "url": "https://github.com/formosa-crypto/formosa-libjade/commit/3ad502b30e3f8205043564760b1be51e8efda8c1"
+    },
+    {
+      "commit": "875080867bc7c457f19a7602eb047ad1c9a8f093",
+      "path": "proof/eclib/Fastexp.ec",
+      "event": "comments_added",
+      "commit_author": "Antoine Séré",
+      "author_date": "2022-07-05T19:31:22+02:00",
+      "subject": "NTTAlgebra partially transformed to accomodate AVX",
+      "git_blob": "f7c412959f8d359619e592b8152e9537fc227495",
+      "sha256": "a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3",
+      "url": "https://github.com/formosa-crypto/formosa-libjade/commit/875080867bc7c457f19a7602eb047ad1c9a8f093"
+    },
+    {
+      "commit": "475b87434506280fdfa1a1ba5da0af3787e00579",
+      "path": "proof/eclib/Fastexp.ec",
+      "event": "existing_audit_pin",
+      "commit_author": "Vincent Laporte",
+      "author_date": "2026-05-26T08:30:46+02:00",
+      "subject": "Remove legacy generated files",
+      "git_blob": "f7c412959f8d359619e592b8152e9537fc227495",
+      "sha256": "a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3",
+      "url": "https://github.com/formosa-crypto/formosa-libjade/commit/475b87434506280fdfa1a1ba5da0af3787e00579"
+    }
+  ],
+  "ancestor_comparison": {
+    "base": "475b87434506280fdfa1a1ba5da0af3787e00579",
+    "head": "589038bbae572525ff6a8281f6bc07fa5a31ff7b",
+    "status": "ahead",
+    "ahead_by": 735,
+    "behind_by": 0,
+    "merge_base": "475b87434506280fdfa1a1ba5da0af3787e00579",
+    "url": "https://api.github.com/repos/formosa-crypto/formosa-libjade/compare/475b87434506280fdfa1a1ba5da0af3787e00579...589038bbae572525ff6a8281f6bc07fa5a31ff7b?per_page=1"
+  },
+  "repository_move": {
+    "stub_repository": "formosa-crypto/formosa-mlkem",
+    "commit": "d1e64d5fee2157b47e5030c4f0bdc07bb36a7bde",
+    "message": "README: moved to formosa-libjade",
+    "readme_blob": "b56db27ab881303c190a65fc5d6d359d6dccce66",
+    "readme_url": "https://github.com/formosa-crypto/formosa-mlkem/blob/d1e64d5fee2157b47e5030c4f0bdc07bb36a7bde/README.md"
+  },
+  "preserved_notices": [
+    {
+      "local_path": "LICENSES/formosa-libjade/UPSTREAM-LICENSE.txt",
+      "upstream_path": "LICENSE",
+      "git_blob": "59ff3e164365b232ee84415b676a0613bdea69e7",
+      "sha256": "86792d7738a5103541121138e3904aa8a8b01a3cade9d48963803546f28989c8",
+      "bytes": 47,
+      "source_url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/LICENSE"
+    },
+    {
+      "local_path": "LICENSES/formosa-libjade/Apache-2.0.txt",
+      "upstream_path": "LICENSES/Apache-2.0.txt",
+      "git_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358,
+      "source_url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/LICENSES/Apache-2.0.txt"
+    },
+    {
+      "local_path": "LICENSES/formosa-libjade/CC0-1.0.txt",
+      "upstream_path": "LICENSES/CC0-1.0.txt",
+      "git_blob": "0e259d42c996742e9e3cba14c677129b2c1b6311",
+      "sha256": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+      "bytes": 7048,
+      "source_url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/LICENSES/CC0-1.0.txt"
+    },
+    {
+      "local_path": "LICENSES/formosa-libjade/CONTRIBUTORS.md",
+      "upstream_path": "CONTRIBUTORS.md",
+      "git_blob": "39b72b1aff775a138d932d6c35dd1a09b846d7a0",
+      "sha256": "d5ad6f42fb1e90340cf0760d21f896b36b59b5392fc4ccfbf8d65a7f4e74b49f",
+      "bytes": 738,
+      "source_url": "https://github.com/formosa-crypto/formosa-libjade/blob/589038bbae572525ff6a8281f6bc07fa5a31ff7b/CONTRIBUTORS.md"
+    }
+  ],
+  "earlier_origin": "No occurrence of abstract theory Fastexp or fastexp_nbits_aux was found in the inspected parent of the file-addition commit; this does not establish original authorship.",
+  "authorship_boundary": "Commit-author fields and the project-wide CONTRIBUTORS list are evidence of recorded contributions, not a determination of all copyright owners.",
+  "protected_files_unchanged": [
+    "haetae-easycrypt/theories/ntt/Fastexp.ec",
+    "haetae-easycrypt/manifests/ntt-support-origin.tsv",
+    "haetae-hardened/baseline-lock.json",
+    "haetae-hardened/layout-migration.json",
+    "haetae-hardened/toolchain-migration-lock.json",
+    "haetae-hardened/publication-migration.json",
+    "LICENSE"
+  ]
+}

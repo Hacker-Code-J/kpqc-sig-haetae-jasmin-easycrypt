@@ -5,12 +5,13 @@
 
 | 대상 | 출처와 고지 | 저장소의 근거 |
 | --- | --- | --- |
-| 프로젝트 문서와 EasyCrypt 연구 코드 | Ji, Yonghyeon의 MIT 고지 | [루트 LICENSE](../LICENSE), [EasyCrypt LICENSE](../haetae-easycrypt/LICENSE) |
+| 직접 작성한 프로젝트 문서와 EasyCrypt 연구 코드 | Ji, Yonghyeon의 MIT 고지 | [루트 LICENSE](../LICENSE), [EasyCrypt LICENSE](../haetae-easycrypt/LICENSE) |
 | HAETAE 참조 구현·공식 KAT | Team HAETAE 배포본; 기존 MIT 고지 보존 | [원본 LICENSE](../HAETAE/LICENSE), [배포 출처](HAETAE.md), [파일별 SHA-256](UPSTREAM-SHA256SUMS) |
 | Jasmin 구현과 보강안에 포함된 참조 코드 | Team HAETAE 기반 코드의 기존 고지 보존 | [Jasmin LICENSE](../haetae-jasmin/LICENSE), [보강안 LICENSE](../haetae-hardened/LICENSE) |
 | KAT 생성 코드 | NIST-developed software 고지가 파일 머리에 포함됨 | [PQCgenKAT_sign.c](../haetae-jasmin/kat/PQCgenKAT_sign.c), [kat_api.h](../haetae-jasmin/kat/kat_api.h) |
 | 참조 SHAKE/Keccak 코드 | Ronny Van Keer의 SUPERCOP 구현 및 Gilles Van Assche·Daniel J. Bernstein·Peter Schwabe의 TweetFips202 기반이라는 원본 고지 | [fips202.c](../HAETAE/reference_implementation/src/fips202.c) |
 | 이전 NTT·SHAKE 지원 이론 | 기존 연구 스냅샷의 파일·커밋·이식 해시와 변경 내역 | [NTT 출처](../haetae-easycrypt/manifests/ntt-support-origin.tsv), [SHAKE 출처](../haetae-easycrypt/manifests/shake-support-origin.tsv) |
+| `theories/ntt/Fastexp.ec` 지원 이론 | 동일 바이트를 배포하는 공식 후속 Formosa 리비전의 `CC0-1.0 OR Apache-2.0` 고지; 기존 pin은 그대로 유지 | [파일별 출처·라이선스 근거](provenance/fastexp.md), [보존한 업스트림 고지](../LICENSES/formosa-libjade/UPSTREAM-LICENSE.txt) |
 | 수학적 명세와 분포 정의의 참고문헌 | HAETAE 명세와 논문·학위논문에서 정의한 수식의 대응 | [명세 출처 목록](../haetae-easycrypt/manifests/specification-sources.json) |
 
 Jasmin, EasyCrypt, Why3, SMT 프로버, OpenSSL은 재현에 사용하는 외부 도구다.
