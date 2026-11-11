@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "primary_targets": 290,
+  "groups": {
+    "haetae-original": 260,
+    "haetae-hardened": 30
+  },
+  "authored_unique": 237,
+  "generated_original_primary": 53,
+  "all_primary_hashes_match_current_sources": true,
+  "validated_at": "2026-10-10T21:11:28.143925+00:00",
+  "summary": "proofs/summary.json"
+}

@@ -1,0 +1,4 @@
+make: Entering directory '/tmp/haetae-public-source-bootstrap/haetae-easycrypt'
+python3 scripts/extract.py --check
+PASS: 58 generated files match fresh Jasmin extraction
+make: Leaving directory '/tmp/haetae-public-source-bootstrap/haetae-easycrypt'

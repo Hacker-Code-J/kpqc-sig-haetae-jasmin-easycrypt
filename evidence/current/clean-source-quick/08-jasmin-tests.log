@@ -1,0 +1,509 @@
+make: Entering directory '/tmp/haetae-public-source-final/haetae-jasmin'
+mkdir -p build/mode2/test
+mkdir -p build/mode2/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/main.o test/main.c
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/randombytes.o test/randombytes.c
+mkdir -p build/jasmin
+jasminc -o build/jasmin/hpoly.s jasmin/hpoly.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/polynomial_sampler.s jasmin/polynomial_sampler.jazz
+"jasmin/hyperball_phase.jinc", line 79 (2-13)
+warning: Instruction only assigns dead variables
+"jasmin/hyperball_phase.jinc", line 80 (2-13)
+warning: Instruction only assigns dead variables
+mkdir -p build/jasmin
+jasminc -o build/jasmin/shake256_multi_absorb.s jasmin/shake256_multi_absorb.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/challenge_sampler.s jasmin/challenge_sampler.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/expand.s jasmin/expand.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/public_key_unpack.s jasmin/public_key_unpack.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/encoding.s jasmin/encoding.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/fips202.s jasmin/fips202.jazz
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/gaussian_sampler.s jasmin/gaussian_sampler.jazz
+warning: automatic spilling is experimental
+mkdir -p build/jasmin
+jasminc -o build/jasmin/fft.s jasmin/fft.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signature_pack_finalize.s jasmin/signature_pack_finalize.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signature_pack.s jasmin/signature_pack.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signature_unpack.s jasmin/signature_unpack.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/verification_transcript.s jasmin/verification_transcript.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/verification_matrix.s jasmin/verification_matrix.jazz
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/verify.s jasmin/verify.jazz
+warning: automatic spilling is experimental
+"jasmin/verify.jazz", line 570 (4-74)
+warning: export function will be inlined
+"jasmin/verify.jazz", line 609 (4-74)
+warning: export function will be inlined
+"jasmin/verify.jazz", line 648 (4-74)
+warning: export function will be inlined
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/singular_values.s jasmin/singular_values.jazz
+warning: automatic spilling is experimental
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signing_challenge.s jasmin/signing_challenge.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signing_round.s jasmin/signing_round.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/signing_challenge_product.s jasmin/signing_challenge_product.jazz
+mkdir -p build/jasmin
+jasminc -o build/jasmin/keypair_matrix.s jasmin/keypair_matrix.jazz
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/keypair.s jasmin/keypair.jazz
+warning: automatic spilling is experimental
+"jasmin/keypair.jazz", line 1458 (2-70)
+warning: export function will be inlined
+"jasmin/keypair.jazz", line 1497 (2-70)
+warning: export function will be inlined
+"jasmin/keypair.jazz", line 1536 (2-70)
+warning: export function will be inlined
+"jasmin/keypair.jazz", line 1566 (2-54)
+warning: export function will be inlined
+"jasmin/keypair.jazz", line 1596 (2-54)
+warning: export function will be inlined
+"jasmin/keypair.jazz", line 1626 (2-54)
+warning: export function will be inlined
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/hyperball.s jasmin/hyperball.jazz
+warning: automatic spilling is experimental
+"jasmin/hyperball_phase.jinc", line 79 (2-13)
+warning: Instruction only assigns dead variables
+"jasmin/hyperball_phase.jinc", line 80 (2-13)
+warning: Instruction only assigns dead variables
+mkdir -p build/jasmin
+jasminc -auto-spill-all -o build/jasmin/sign.s jasmin/sign.jazz
+warning: automatic spilling is experimental
+"jasmin/sign.jazz", line 2496 (4) to line 2497 (59)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 2596 (4) to line 2597 (59)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 2696 (4) to line 2697 (59)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 2955 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 2997 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3039 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3094 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3137 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3180 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3224 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3273 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3322 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3378 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3428 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3478 (2-75)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3528 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3579 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3630 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3693 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3758 (4-62)
+warning: export function will be inlined
+"jasmin/sign.jazz", line 3823 (4-62)
+warning: export function will be inlined
+"jasmin/hyperball_phase.jinc", line 79 (2-13)
+warning: Instruction only assigns dead variables
+"jasmin/hyperball_phase.jinc", line 80 (2-13)
+warning: Instruction only assigns dead variables
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/main.o test/main.c
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/randombytes.o test/randombytes.c
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/polynomial_sampler.o build/jasmin/polynomial_sampler.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/shake256_multi_absorb.o build/jasmin/shake256_multi_absorb.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/challenge_sampler.o build/jasmin/challenge_sampler.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/public_key_unpack.o build/jasmin/public_key_unpack.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/encoding.o build/jasmin/encoding.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/fips202.o build/jasmin/fips202.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/gaussian_sampler.o build/jasmin/gaussian_sampler.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/fft.o build/jasmin/fft.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signature_pack_finalize.o build/jasmin/signature_pack_finalize.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signature_pack.o build/jasmin/signature_pack.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signature_unpack.o build/jasmin/signature_unpack.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verification_transcript.o build/jasmin/verification_transcript.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verification_matrix.o build/jasmin/verification_matrix.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/verify.o build/jasmin/verify.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/singular_values.o build/jasmin/singular_values.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signing_challenge.o build/jasmin/signing_challenge.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signing_round.o build/jasmin/signing_round.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/signing_challenge_product.o build/jasmin/signing_challenge_product.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/keypair.o build/jasmin/keypair.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/hyperball.o build/jasmin/hyperball.s
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/main.o test/main.c
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/randombytes.o test/randombytes.c
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/polynomial_sampler.o build/jasmin/polynomial_sampler.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/shake256_multi_absorb.o build/jasmin/shake256_multi_absorb.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/challenge_sampler.o build/jasmin/challenge_sampler.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/public_key_unpack.o build/jasmin/public_key_unpack.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/encoding.o build/jasmin/encoding.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/fips202.o build/jasmin/fips202.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/gaussian_sampler.o build/jasmin/gaussian_sampler.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/fft.o build/jasmin/fft.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signature_pack_finalize.o build/jasmin/signature_pack_finalize.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signature_pack.o build/jasmin/signature_pack.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signature_unpack.o build/jasmin/signature_unpack.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verification_transcript.o build/jasmin/verification_transcript.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verification_matrix.o build/jasmin/verification_matrix.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/verify.o build/jasmin/verify.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/singular_values.o build/jasmin/singular_values.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signing_challenge.o build/jasmin/signing_challenge.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signing_round.o build/jasmin/signing_round.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/signing_challenge_product.o build/jasmin/signing_challenge_product.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/keypair.o build/jasmin/keypair.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/hyperball.o build/jasmin/hyperball.s
+mkdir -p build/mode2/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/api.o test/api.c
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/api.o test/api.c
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/api.o test/api.c
+cd .. && sha256sum --check --status docs/UPSTREAM-SHA256SUMS
+PASS: pinned HAETAE reference source and KAT hashes
+mkdir -p build/mode2/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/test/interop.o test/interop.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/decompose.o ../HAETAE/reference_implementation/src/decompose.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/encoding.o ../HAETAE/reference_implementation/src/encoding.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/fft.o ../HAETAE/reference_implementation/src/fft.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/fips202.o ../HAETAE/reference_implementation/src/fips202.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/fixpoint.o ../HAETAE/reference_implementation/src/fixpoint.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/ntt.o ../HAETAE/reference_implementation/src/ntt.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/packing.o ../HAETAE/reference_implementation/src/packing.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/poly.o ../HAETAE/reference_implementation/src/poly.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/polyfix.o ../HAETAE/reference_implementation/src/polyfix.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/polymat.o ../HAETAE/reference_implementation/src/polymat.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/polyvec.o ../HAETAE/reference_implementation/src/polyvec.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/reduce.o ../HAETAE/reference_implementation/src/reduce.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/sampler.o ../HAETAE/reference_implementation/src/sampler.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/sign.o ../HAETAE/reference_implementation/src/sign.c
+mkdir -p build/mode2/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode2/reference/symmetric-shake.o ../HAETAE/reference_implementation/src/symmetric-shake.c
+mkdir -p build/mode3/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/test/interop.o test/interop.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/decompose.o ../HAETAE/reference_implementation/src/decompose.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/encoding.o ../HAETAE/reference_implementation/src/encoding.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/fft.o ../HAETAE/reference_implementation/src/fft.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/fips202.o ../HAETAE/reference_implementation/src/fips202.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/fixpoint.o ../HAETAE/reference_implementation/src/fixpoint.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/ntt.o ../HAETAE/reference_implementation/src/ntt.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/packing.o ../HAETAE/reference_implementation/src/packing.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/poly.o ../HAETAE/reference_implementation/src/poly.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/polyfix.o ../HAETAE/reference_implementation/src/polyfix.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/polymat.o ../HAETAE/reference_implementation/src/polymat.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/polyvec.o ../HAETAE/reference_implementation/src/polyvec.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/reduce.o ../HAETAE/reference_implementation/src/reduce.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/sampler.o ../HAETAE/reference_implementation/src/sampler.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/sign.o ../HAETAE/reference_implementation/src/sign.c
+mkdir -p build/mode3/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode3/reference/symmetric-shake.o ../HAETAE/reference_implementation/src/symmetric-shake.c
+mkdir -p build/mode5/test
+cc -Iinclude -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/test/interop.o test/interop.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/decompose.o ../HAETAE/reference_implementation/src/decompose.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/encoding.o ../HAETAE/reference_implementation/src/encoding.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/fft.o ../HAETAE/reference_implementation/src/fft.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/fips202.o ../HAETAE/reference_implementation/src/fips202.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/fixpoint.o ../HAETAE/reference_implementation/src/fixpoint.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/ntt.o ../HAETAE/reference_implementation/src/ntt.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/packing.o ../HAETAE/reference_implementation/src/packing.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/poly.o ../HAETAE/reference_implementation/src/poly.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/polyfix.o ../HAETAE/reference_implementation/src/polyfix.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/polymat.o ../HAETAE/reference_implementation/src/polymat.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/polyvec.o ../HAETAE/reference_implementation/src/polyvec.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/reduce.o ../HAETAE/reference_implementation/src/reduce.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/sampler.o ../HAETAE/reference_implementation/src/sampler.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/sign.o ../HAETAE/reference_implementation/src/sign.c
+mkdir -p build/mode5/reference
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -DHAETAE_CONFIG_NAMESPACE_PREFIX=reference_haetae_ -c -o build/mode5/reference/symmetric-shake.o ../HAETAE/reference_implementation/src/symmetric-shake.c
+mkdir -p build/test
+jasminc -auto-spill-all -o build/test/sampler.s test/sampler.jazz
+warning: automatic spilling is experimental
+mkdir -p build/test
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/test/gaussian_sampler.o build/jasmin/gaussian_sampler.s
+mkdir -p build/mode2/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/kat/PQCgenKAT_sign.o kat/PQCgenKAT_sign.c
+mkdir -p build/mode2/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/kat/kat_sign.o kat/kat_sign.c
+mkdir -p build/mode2/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/kat/rng.o kat/rng.c
+mkdir -p build/mode2/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE2 -c -o build/mode2/kat/jasmin_randombytes.o kat/jasmin_randombytes.c
+mkdir -p build/mode3/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/kat/PQCgenKAT_sign.o kat/PQCgenKAT_sign.c
+mkdir -p build/mode3/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/kat/kat_sign.o kat/kat_sign.c
+mkdir -p build/mode3/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/kat/rng.o kat/rng.c
+mkdir -p build/mode3/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE3 -c -o build/mode3/kat/jasmin_randombytes.o kat/jasmin_randombytes.c
+mkdir -p build/mode5/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/kat/PQCgenKAT_sign.o kat/PQCgenKAT_sign.c
+mkdir -p build/mode5/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/kat/kat_sign.o kat/kat_sign.c
+mkdir -p build/mode5/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/kat/rng.o kat/rng.c
+mkdir -p build/mode5/kat
+cc -Iinclude -Ikat -O3 -g -fPIC -std=c11 -MMD -MP -DHAETAE_CONFIG_MODE=HAETAE_MODE5 -c -o build/mode5/kat/jasmin_randombytes.o kat/jasmin_randombytes.c
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/hpoly.o build/jasmin/hpoly.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/polynomial_sampler.o build/jasmin/polynomial_sampler.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/shake256_multi_absorb.o build/jasmin/shake256_multi_absorb.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/challenge_sampler.o build/jasmin/challenge_sampler.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/expand.o build/jasmin/expand.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/public_key_unpack.o build/jasmin/public_key_unpack.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/encoding.o build/jasmin/encoding.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/fips202.o build/jasmin/fips202.s
+mkdir -p build/mode2/jasmin
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/gaussian_sampler.o build/jasmin/gaussian_sampler.s
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/fft.o build/jasmin/fft.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signature_pack_finalize.o build/jasmin/signature_pack_finalize.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signature_pack.o build/jasmin/signature_pack.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signature_unpack.o build/jasmin/signature_unpack.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verification_transcript.o build/jasmin/verification_transcript.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verification_matrix.o build/jasmin/verification_matrix.s
+mkdir -p build/mode2/jasmin
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/verify.o build/jasmin/verify.s
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/singular_values.o build/jasmin/singular_values.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signing_challenge.o build/jasmin/signing_challenge.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signing_round.o build/jasmin/signing_round.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/signing_challenge_product.o build/jasmin/signing_challenge_product.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/keypair_matrix.o build/jasmin/keypair_matrix.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/keypair.o build/jasmin/keypair.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/hyperball.o build/jasmin/hyperball.s
+mkdir -p build/mode2/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode2/jasmin/sign.o build/jasmin/sign.s
+mkdir -p build/mode3/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode3/jasmin/sign.o build/jasmin/sign.s
+mkdir -p build/mode5/jasmin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/mode5/jasmin/sign.o build/jasmin/sign.s
+cc -O3 -g -fPIC -std=c11 -MMD -MP -c -o build/test/sampler.o build/test/sampler.s
+mkdir -p build/mode2/lib
+cc -shared  -Wl,-soname,libhaetae-mode2-jazz.so -o build/mode2/lib/libhaetae-mode2-jazz.so build/mode2/jasmin/hpoly.o build/mode2/jasmin/polynomial_sampler.o build/mode2/jasmin/shake256_multi_absorb.o build/mode2/jasmin/challenge_sampler.o build/mode2/jasmin/expand.o build/mode2/jasmin/public_key_unpack.o build/mode2/jasmin/encoding.o build/mode2/jasmin/fips202.o build/mode2/jasmin/gaussian_sampler.o build/mode2/jasmin/fft.o build/mode2/jasmin/signature_pack_finalize.o build/mode2/jasmin/signature_pack.o build/mode2/jasmin/signature_unpack.o build/mode2/jasmin/verification_transcript.o build/mode2/jasmin/verification_matrix.o build/mode2/jasmin/verify.o build/mode2/jasmin/singular_values.o build/mode2/jasmin/signing_challenge.o build/mode2/jasmin/signing_round.o build/mode2/jasmin/signing_challenge_product.o build/mode2/jasmin/keypair_matrix.o build/mode2/jasmin/keypair.o build/mode2/jasmin/hyperball.o build/mode2/jasmin/sign.o 
+mkdir -p build/mode3/lib
+cc -shared  -Wl,-soname,libhaetae-mode3-jazz.so -o build/mode3/lib/libhaetae-mode3-jazz.so build/mode3/jasmin/hpoly.o build/mode3/jasmin/polynomial_sampler.o build/mode3/jasmin/shake256_multi_absorb.o build/mode3/jasmin/challenge_sampler.o build/mode3/jasmin/expand.o build/mode3/jasmin/public_key_unpack.o build/mode3/jasmin/encoding.o build/mode3/jasmin/fips202.o build/mode3/jasmin/gaussian_sampler.o build/mode3/jasmin/fft.o build/mode3/jasmin/signature_pack_finalize.o build/mode3/jasmin/signature_pack.o build/mode3/jasmin/signature_unpack.o build/mode3/jasmin/verification_transcript.o build/mode3/jasmin/verification_matrix.o build/mode3/jasmin/verify.o build/mode3/jasmin/singular_values.o build/mode3/jasmin/signing_challenge.o build/mode3/jasmin/signing_round.o build/mode3/jasmin/signing_challenge_product.o build/mode3/jasmin/keypair_matrix.o build/mode3/jasmin/keypair.o build/mode3/jasmin/hyperball.o build/mode3/jasmin/sign.o 
+mkdir -p build/mode5/lib
+cc -shared  -Wl,-soname,libhaetae-mode5-jazz.so -o build/mode5/lib/libhaetae-mode5-jazz.so build/mode5/jasmin/hpoly.o build/mode5/jasmin/polynomial_sampler.o build/mode5/jasmin/shake256_multi_absorb.o build/mode5/jasmin/challenge_sampler.o build/mode5/jasmin/expand.o build/mode5/jasmin/public_key_unpack.o build/mode5/jasmin/encoding.o build/mode5/jasmin/fips202.o build/mode5/jasmin/gaussian_sampler.o build/mode5/jasmin/fft.o build/mode5/jasmin/signature_pack_finalize.o build/mode5/jasmin/signature_pack.o build/mode5/jasmin/signature_unpack.o build/mode5/jasmin/verification_transcript.o build/mode5/jasmin/verification_matrix.o build/mode5/jasmin/verify.o build/mode5/jasmin/singular_values.o build/mode5/jasmin/signing_challenge.o build/mode5/jasmin/signing_round.o build/mode5/jasmin/signing_challenge_product.o build/mode5/jasmin/keypair_matrix.o build/mode5/jasmin/keypair.o build/mode5/jasmin/hyperball.o build/mode5/jasmin/sign.o 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode2-api-test build/mode2/test/api.o build/mode2/test/randombytes.o -Lbuild/mode2/lib -lhaetae-mode2-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode2/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode3-api-test build/mode3/test/api.o build/mode3/test/randombytes.o -Lbuild/mode3/lib -lhaetae-mode3-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode3/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode5-api-test build/mode5/test/api.o build/mode5/test/randombytes.o -Lbuild/mode5/lib -lhaetae-mode5-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode5/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode2-interop-test build/mode2/test/interop.o build/mode2/test/randombytes.o build/mode2/reference/decompose.o build/mode2/reference/encoding.o build/mode2/reference/fft.o build/mode2/reference/fips202.o build/mode2/reference/fixpoint.o build/mode2/reference/ntt.o build/mode2/reference/packing.o build/mode2/reference/poly.o build/mode2/reference/polyfix.o build/mode2/reference/polymat.o build/mode2/reference/polyvec.o build/mode2/reference/reduce.o build/mode2/reference/sampler.o build/mode2/reference/sign.o build/mode2/reference/symmetric-shake.o -Lbuild/mode2/lib -lhaetae-mode2-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode2/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode3-interop-test build/mode3/test/interop.o build/mode3/test/randombytes.o build/mode3/reference/decompose.o build/mode3/reference/encoding.o build/mode3/reference/fft.o build/mode3/reference/fips202.o build/mode3/reference/fixpoint.o build/mode3/reference/ntt.o build/mode3/reference/packing.o build/mode3/reference/poly.o build/mode3/reference/polyfix.o build/mode3/reference/polymat.o build/mode3/reference/polyvec.o build/mode3/reference/reduce.o build/mode3/reference/sampler.o build/mode3/reference/sign.o build/mode3/reference/symmetric-shake.o -Lbuild/mode3/lib -lhaetae-mode3-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode3/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode5-interop-test build/mode5/test/interop.o build/mode5/test/randombytes.o build/mode5/reference/decompose.o build/mode5/reference/encoding.o build/mode5/reference/fft.o build/mode5/reference/fips202.o build/mode5/reference/fixpoint.o build/mode5/reference/ntt.o build/mode5/reference/packing.o build/mode5/reference/poly.o build/mode5/reference/polyfix.o build/mode5/reference/polymat.o build/mode5/reference/polyvec.o build/mode5/reference/reduce.o build/mode5/reference/sampler.o build/mode5/reference/sign.o build/mode5/reference/symmetric-shake.o -Lbuild/mode5/lib -lhaetae-mode5-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode5/lib 
+mkdir -p build/bin
+cc -O3 -g -fPIC -std=c11 -MMD -MP -I../HAETAE/reference_implementation/include -DHAETAE_CONFIG_MODE=HAETAE_MODE2 \
+  test/sampler.c build/test/sampler.o build/test/gaussian_sampler.o \
+  ../HAETAE/reference_implementation/src/fixpoint.c ../HAETAE/reference_implementation/src/fips202.c \
+  ../HAETAE/reference_implementation/src/symmetric-shake.c   -o build/bin/haetae-sampler-test
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode2-kat-jazz build/mode2/kat/PQCgenKAT_sign.o build/mode2/kat/kat_sign.o build/mode2/kat/rng.o build/mode2/kat/jasmin_randombytes.o -Lbuild/mode2/lib -lhaetae-mode2-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode2/lib  -lcrypto
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode3-kat-jazz build/mode3/kat/PQCgenKAT_sign.o build/mode3/kat/kat_sign.o build/mode3/kat/rng.o build/mode3/kat/jasmin_randombytes.o -Lbuild/mode3/lib -lhaetae-mode3-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode3/lib  -lcrypto
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode5-kat-jazz build/mode5/kat/PQCgenKAT_sign.o build/mode5/kat/kat_sign.o build/mode5/kat/rng.o build/mode5/kat/jasmin_randombytes.o -Lbuild/mode5/lib -lhaetae-mode5-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode5/lib  -lcrypto
+mkdir -p build/kat/mode2
+cd build/kat/mode2 && ../../bin/haetae-mode2-kat-jazz && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode2.req" PQCsignKAT_haetae_mode2.req && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode2.rsp" PQCsignKAT_haetae_mode2.rsp
+mkdir -p build/kat/mode3
+cd build/kat/mode3 && ../../bin/haetae-mode3-kat-jazz && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode3.req" PQCsignKAT_haetae_mode3.req && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode3.rsp" PQCsignKAT_haetae_mode3.rsp
+PASS: mode2 official request and response KAT vectors
+mkdir -p build/kat/mode5
+cd build/kat/mode5 && ../../bin/haetae-mode5-kat-jazz && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode5.req" PQCsignKAT_haetae_mode5.req && cmp "/tmp/haetae-public-source-final/HAETAE/kat/PQCsignKAT_haetae_mode5.rsp" PQCsignKAT_haetae_mode5.rsp
+PASS: mode3 official request and response KAT vectors
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode2-main-jazz build/mode2/test/main.o build/mode2/test/randombytes.o -Lbuild/mode2/lib -lhaetae-mode2-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode2/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode3-main-jazz build/mode3/test/main.o build/mode3/test/randombytes.o -Lbuild/mode3/lib -lhaetae-mode3-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode3/lib 
+mkdir -p build/bin
+cc  -o build/bin/haetae-mode5-main-jazz build/mode5/test/main.o build/mode5/test/randombytes.o -Lbuild/mode5/lib -lhaetae-mode5-jazz -Wl,-rpath,/tmp/haetae-public-source-final/haetae-jasmin/build/mode5/lib 
+build/bin/haetae-mode2-api-test
+haetae_mode2 API: deterministic, context, overlap, and rejection checks passed
+build/bin/haetae-mode3-api-test
+haetae_mode3 API: deterministic, context, overlap, and rejection checks passed
+build/bin/haetae-mode5-api-test
+haetae_mode5 API: deterministic, context, overlap, and rejection checks passed
+build/bin/haetae-mode2-interop-test
+haetae_mode2 C/Jasmin interoperability: keys, fixed-randomness signatures, cross-verification, attached messages, and rejection checks passed
+build/bin/haetae-mode3-interop-test
+haetae_mode3 C/Jasmin interoperability: keys, fixed-randomness signatures, cross-verification, attached messages, and rejection checks passed
+build/bin/haetae-mode5-interop-test
+haetae_mode5 C/Jasmin interoperability: keys, fixed-randomness signatures, cross-verification, attached messages, and rejection checks passed
+build/bin/haetae-sampler-test
+PASS 83-bit CDT thresholds, equality and high-word borrows
+PASS smulh48 signed ceiling and full-width unsigned multipliers
+PASS production degree-10 exponential fixed vectors and random inputs
+PASS 26-byte sigma76, rejection, masked bits and tails through x=166
+PASS sample_gauss byte lengths, accumulated squares and dummy outputs
+  sample_N: 4355 refill blocks, 31 cases with repeated refills
+PASS sample_N deterministic SHAKE streams, sign bytes and refill carry
+build/bin/haetae-mode2-main-jazz
+HAETAE mode = haetae_mode2
+CRYPTO_ALGNAME: haetae_mode2
+CRYPTO_SECRETKEYBYTES: 1408
+CRYPTO_PUBLICKEYBYTES: 992
+CRYPTO_BYTES: 1474
+
+>> sign and verify test
+...10%...20%...30%...40%...50%PASS: mode5 official request and response KAT vectors
+build/bin/haetae-mode3-main-jazz
+HAETAE mode = haetae_mode3
+CRYPTO_ALGNAME: haetae_mode3
+CRYPTO_SECRETKEYBYTES: 2112
+CRYPTO_PUBLICKEYBYTES: 1472
+CRYPTO_BYTES: 2349
+
+>> sign and verify test
+...10%...60%...70%...20%...80%...90%...30%...100%...40%
+build/bin/haetae-mode5-main-jazz
+HAETAE mode = haetae_mode5
+CRYPTO_ALGNAME: haetae_mode5
+CRYPTO_SECRETKEYBYTES: 2752
+CRYPTO_PUBLICKEYBYTES: 2080
+CRYPTO_BYTES: 2948
+
+>> sign and verify test
+...10%...50%...20%...60%...30%...70%...40%...80%...50%...90%...60%...100%
+...70%...80%...90%...100%
+make: Leaving directory '/tmp/haetae-public-source-final/haetae-jasmin'

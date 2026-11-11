@@ -1,0 +1,7 @@
+/_opam/
+/.opam-root/
+/provers/
+/downloads/
+/config/
+/installed-packages.txt
+/bootstrap.log

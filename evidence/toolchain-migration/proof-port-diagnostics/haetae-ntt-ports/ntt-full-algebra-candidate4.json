@@ -1,0 +1,24 @@
+{
+  "target": "/tmp/haetae-ntt-ports/candidates/NTTFullAlgebra.ec",
+  "sha256_before": "a11ae0c7de30934f6cb810e042a45ea1d55d3981033402797c83114b85ab5bd8",
+  "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+  "argv": [
+    "bash",
+    "scripts/verify-one.sh",
+    "/tmp/haetae-ntt-ports/candidates/NTTFullAlgebra.ec"
+  ],
+  "environment": {
+    "PATH": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin:/usr/local/bin:/usr/bin:/bin",
+    "EASYCRYPT": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+    "EC_TIMEOUT": "10",
+    "EC_MAX_PROVERS": "1"
+  },
+  "started_at": "2026-10-10T20:13:28.440184+00:00",
+  "log": "/tmp/haetae-ntt-ports/ntt-full-algebra-candidate4.log",
+  "status": "PASS",
+  "exit_code": 0,
+  "seconds": 156.531,
+  "finished_at": "2026-10-10T20:16:04.971614+00:00",
+  "sha256_after": "a11ae0c7de30934f6cb810e042a45ea1d55d3981033402797c83114b85ab5bd8",
+  "log_sha256": "5c2103243b17f19d7fdb27dbbf5f70e3c3d65be5d52cea66594d9e70c37e1f8a"
+}

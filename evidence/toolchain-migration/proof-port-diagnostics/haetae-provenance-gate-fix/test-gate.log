@@ -1,0 +1,31 @@
+python3 tests/test_verification_gate.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 2.288s
+
+OK
+python3 tests/test_hyperball_provenance.py
+PASS: 53 generated files match fresh Jasmin extraction
+C compiler __VERSION__: 11.4.0
+....PASS: 53 generated files match fresh Jasmin extraction
+C compiler __VERSION__: 11.4.0
+Generated outward-rounded CDT/Gaussian certificate; numeric checks pass; analytic proof required
+Generated six exact Bernstein certificates; all66 controls nonnegative; analytic proof required
+.....
+----------------------------------------------------------------------
+Ran 9 tests in 4.414s
+
+OK
+python3 tests/test_gaussian_certificate.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 10.023s
+
+OK
+python3 tests/test_approx_exp_certificate.py
+....
+----------------------------------------------------------------------
+Ran 4 tests in 9.081s
+
+OK
+

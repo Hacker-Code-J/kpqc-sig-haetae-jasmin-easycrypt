@@ -1,16 +1,20 @@
 # Local agent/editor state and recovery copies
-/.omx/
-/.codex
-/.agents/
-/.vscode/
-/tstex_modules/
+.omx/
+.codex
+.agents/
+.vscode/
+.aws/
+.env
+.env.*
+!.env.example
+tstex_modules/
 AGENT.md
 *.claude
 .DS_Store
 
 # Build output; keep the upstream distribution and committed KAT untouched
 /build/
-/HAETAE-1.2.0/reference_implementation/build/
+/HAETAE/reference_implementation/build/
 __pycache__/
 *.pyc
 *.o

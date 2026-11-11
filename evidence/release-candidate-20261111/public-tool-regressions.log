@@ -1,0 +1,15 @@
+...............RUN bad -> /tmp/tmpyjj54td_/build/results/01-bad.log
+
+RESULT FAIL: /tmp/tmpyjj54td_/build/results/summary.json
+...RUN missing -> /tmp/tmpyr2hm2a7/build/results/01-missing.log
+RESULT FAIL: /tmp/tmpyr2hm2a7/build/results/summary.json
+..RUN mutate -> /tmp/tmpop2yibiu/build/results/01-mutate.log
+RESULT FAIL: /tmp/tmpop2yibiu/build/results/summary.json
+.RUN first -> /tmp/tmpvennnibo/build/results/01-first.log
+RUN second -> /tmp/tmpvennnibo/build/results/02-second.log
+RESULT PASS: /tmp/tmpvennnibo/build/results/summary.json
+.
+----------------------------------------------------------------------
+Ran 22 tests in 0.153s
+
+OK

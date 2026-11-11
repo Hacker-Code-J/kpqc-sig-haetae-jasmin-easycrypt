@@ -1,0 +1,79 @@
+{
+  "result": "PASS",
+  "tests": 71,
+  "approved_port_subtests": 25,
+  "environment": {
+    "EASYCRYPT": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+    "JASMIN2EC": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/jasmin2ec",
+    "WHY3": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/why3",
+    "EC_MAX_PROVERS": "1",
+    "EC_TIMEOUT": "10",
+    "WHY3_SERVER_SOCKET": "",
+    "PATH": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.162.1-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0jAozqD:/home/hacker-code-j/.codex/tmp/arg0/codex-arg06nNz9A:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.162.0-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0eE6VHD:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.161.0-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0fskGRV:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.160.1-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0VXmogA:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.160.0-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0gbOdcz:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.159.3-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0GI5fr7:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.159.2-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0jY8W6r:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.159.1-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0Y1udjU:/home/hacker-code-j/.codex/packages/app-server-daemon/releases/0.159.0-x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.codex/tmp/arg0/codex-arg0fSph4r:/home/hacker-code-j/.nvm/versions/node/v22.22.2/lib/node_modules/@openai/codex/node_modules/@openai/codex-linux-x64/vendor/x86_64-unknown-linux-musl/codex-path:/home/hacker-code-j/.bun/bin:/home/hacker-code-j/.bun/bin:/home/hacker-code-j/.nvm/versions/node/v22.22.2/bin:/opt/st/stm32cubeide_2.0.0/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.2.300.202508131133/tools/bin:/home/hacker-code-j/.gem/bin:/home/hacker-code-j/.gem/ruby/3.0.0/bin:/home/hacker-code-j/.opam/easycrypt-5.2/bin:/home/hacker-code-j/z3-4.12.4-x64-glibc-2.35/bin:/usr/lib/jvm/java-11-openjdk-amd64/bin:/home/hacker-code-j/.cabal/bin:/home/hacker-code-j/.ghcup/bin:/home/hacker-code-j/.cargo/bin:/home/hacker-code-j/.local/bin:/home/hacker-code-j/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/home/hacker-code-j/clang+llvm-16.0.4-x86_64-linux-gnu-ubuntu-22.04/bin:/home/hacker-code-j/jasmin/compiler/_build/install/default/bin:/home/hacker-code-j/easycrypt/_build/install/default/bin"
+  },
+  "results": [
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tests/materialize.py"
+      ],
+      "tests": 21,
+      "exit_code": 0,
+      "log": "logs/2026.09-provenance-finalization/materialize.log",
+      "log_sha256": "ed64a125da8702b82e0272c1440cbfdb5245904418c567a4647baf1489d09758"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tests/verification-gate.py"
+      ],
+      "tests": 10,
+      "exit_code": 0,
+      "log": "logs/2026.09-provenance-finalization/verification-gate.log",
+      "log_sha256": "4c0ab84c288e5e6d85f1eff37c5780add49a70c4185248311d09c18483df545f"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tests/gaussian-rate-gate.py"
+      ],
+      "tests": 18,
+      "exit_code": 0,
+      "log": "logs/2026.09-provenance-finalization/gaussian-rate-gate.log",
+      "log_sha256": "9bfbe3fac4383b386600ab93e20cc4f84f292ec2f33ed2e5cfcee98e3f27f150"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tests/gaussian-renyi-gate.py"
+      ],
+      "tests": 10,
+      "exit_code": 0,
+      "log": "logs/2026.09-provenance-finalization/gaussian-renyi-gate.log",
+      "log_sha256": "a63cbc31fe4fe2f2f45c4f72ea410b87fba528ea6afc0d2a1de86917d713186c"
+    },
+    {
+      "argv": [
+        "/usr/bin/python3",
+        "tests/hyperball-renyi-gate.py"
+      ],
+      "tests": 12,
+      "exit_code": 0,
+      "log": "logs/2026.09-provenance-finalization/hyperball-renyi-gate.log",
+      "log_sha256": "7e5726ec9b6ac4a61f9bdb566fd233714523d9220d5ed82ff82364d1e5d66766"
+    }
+  ],
+  "completed_at": "2026-10-10T21:43:57.993661+00:00",
+  "current_control_sha256": {
+    "haetae-1.2.0-hardened/scripts/verify.py": "87967a6ea8ae39d70e675da8b45db41aa2a44489ba92b5a0f2bcc2ee672ccbef",
+    "haetae-1.2.0-hardened/scripts/verify-one.sh": "3fb3488eec191b57fff649e44859825c457962561ebd983f757c51ea66e4ac34",
+    "haetae-1.2.0-hardened/scripts/materialize.py": "ac4f5eb004f9500d7045d9f465ade19732e32b501f324b9b0d0d72961c33790b",
+    "haetae-1.2.0-hardened/scripts/extract.py": "ca3c377e1bc819bf1b5621eed59fb07b7fbd5dc85c4f0dd219693e346ab990e5",
+    "haetae-1.2.0-hardened/baseline-lock.json": "7cf4d8654932d2ad5ace5f14d51fbd44c2d6d4e77f0b2bd32cf8b4c406d7d54c",
+    "haetae-1.2.0-hardened/easycrypt/proof-targets.txt": "b2300df1455ab3af5c8982f93881c1fbc540561fcc5583a27e868a3444ab89ac",
+    "haetae-1.2.0-easycrypt/scripts/verify.py": "e913380fd7078495a29f4d5d3d1caef6162c281d2e532f8a52067440a8b2e746",
+    "haetae-1.2.0-hardened/toolchain-migration-lock.json": "95638882310f0ba8189da209f819c74cdf74fe52336095feec4186d79d714c33",
+    "haetae-1.2.0-hardened/extraction-manifest.json": "90046b28767e6c85500e879bbf838269786cf10f2a7bc5f61200b890d3ec8a37",
+    "haetae-1.2.0-easycrypt/tests/test_hyperball_provenance.py": "6c5a4f9f9332291c167edfe1b5b89231b1412621ff0e508a9f5099358b3c684d"
+  }
+}

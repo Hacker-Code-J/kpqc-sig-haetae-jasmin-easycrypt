@@ -1,0 +1,10 @@
+make: Entering directory '/tmp/haetae-public-source-bootstrap/haetae-easycrypt'
+python3 tests/hyperball-norm-boundary.py
+PASS mode 2: integer=4464117257937700460544; residue=5192099988969472; bound=6505809026482176
+  Jasmin library SHA256: 2a017d46018fabfea1a7087ea9dde359cd573001a84563c9c9c37b87a0451f4d
+PASS mode 3: integer=258260884883511054336; residue=6467851577331712; bound=22510896139993088
+  Jasmin library SHA256: 1ff5e0ff024f839da6197886f9c98ba54539747a021805d6bb6f4819752bd7a6
+PASS mode 5: integer=1125272442323279360000; residue=21053826996711424; bound=33503371683954688
+  Jasmin library SHA256: f2aad75cceaf82fc3deae21a7f338fcde386a9556ce8244fe0449c954e08e334
+PASS prescribed candidate streams; no SHAKE seed reachability or exploit claim.
+make: Leaving directory '/tmp/haetae-public-source-bootstrap/haetae-easycrypt'

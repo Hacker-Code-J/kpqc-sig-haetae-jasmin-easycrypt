@@ -1,0 +1,7 @@
+{
+  "returncode": 1,
+  "socket_exists": false,
+  "stdout": "",
+  "stderr": "",
+  "why3server.log": "error binding socket\n"
+}

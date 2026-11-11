@@ -1,0 +1,112 @@
+The following actions will be performed:
+  ↻ recompile re        1.14.0
+  ↻ recompile angstrom  0.16.1
+  ↻ recompile tyxml     5.0.0
+  ↻ recompile jasmin    2026.09.0*
+  ↻ recompile markdown  0.2.1
+  ↻ recompile easycrypt 2026.09*
+===== ↻ 6 =====
+
+<><> Processing actions <><><><><><><><><><><><><><><><><><><><><><><><><><><><>
+⬇ retrieved angstrom.0.16.1  (cached)
+⬇ retrieved markdown.0.2.1  (cached)
+⬇ retrieved re.1.14.0  (cached)
+⬇ retrieved jasmin.2026.09.0  (cached)
+⬇ retrieved tyxml.5.0.0  (cached)
+[NOTE] While removing jasmin.2026.09.0: not removing non-empty directories:
+         - lib/easycrypt/config
+
+⊘ removed   jasmin.2026.09.0
+⊘ removed   angstrom.0.16.1
+∗ installed angstrom.0.16.1
+⬇ retrieved easycrypt.2026.09  (no changes)
+⊘ removed   easycrypt.2026.09
+⊘ removed   markdown.0.2.1
+⊘ removed   tyxml.5.0.0
+⊘ removed   re.1.14.0
+∗ installed re.1.14.0
+∗ installed jasmin.2026.09.0
+∗ installed tyxml.5.0.0
+∗ installed markdown.0.2.1
+∗ installed easycrypt.2026.09
+Done.
+
+<><> easycrypt.2026.09 installed successfully <><><><><><><><><><><><><><><><><>
+=> EasyCrypt needs external provers to be installed. From opam, you
+   can install AltErgo (package: alt-ergo).
+
+   The required steps for configuring the provers are listed on:
+     https://github.com/EasyCrypt/easycrypt#configuring-why3
+[NOTE] Package z3 is already installed (current version is 4.12.6).
+[NOTE] Package alt-ergo is already installed (current version is 2.6.0).
+[NOTE] Package ocaml-base-compiler is already installed (current version is 5.2.1).
+/tmp/haetae-public-bootstrap-59clrfn2/env/downloads/cvc5.zip: OK
+Executing: why3 config detect -C /tmp/haetae-public-bootstrap-59clrfn2/env/config/easycrypt/why3.conf
+warning: cannot read config file /tmp/haetae-public-bootstrap-59clrfn2/env/config/easycrypt/why3.conf:
+  /tmp/haetae-public-bootstrap-59clrfn2/env/config/easycrypt/why3.conf: No such file or directory
+Found prover Alt-Ergo version 2.6.0, OK.
+Found prover Alt-Ergo version 2.6.0 (alternative: counterexamples)
+Found prover Alt-Ergo version 2.6.0 (alternative: BV)
+Found prover CVC5 version 1.2.1 (alternative: strings+counterexamples)
+Found prover CVC5 version 1.2.1 (alternative: strings)
+Found prover CVC5 version 1.2.1 (alternative: counterexamples)
+Found prover CVC5 version 1.2.1, OK.
+Found prover CVC4 version 1.8 (alternative: strings+counterexamples)
+Found prover CVC4 version 1.8 (alternative: strings)
+Found prover CVC4 version 1.8 (alternative: counterexamples)
+Found prover CVC4 version 1.8, OK.
+Found prover Z3 version 4.12.6 (alternative: counterexamples)
+Found prover Z3 version 4.12.6, OK.
+Found prover Z3 version 4.12.6 (alternative: noBV)
+14 prover(s) added
+Save config to /tmp/haetae-public-bootstrap-59clrfn2/env/config/easycrypt/why3.conf
+{
+  "result": "PASS",
+  "platform": "Linux-5.15.0-179-generic-x86_64-with-glibc2.35",
+  "tools": {
+    "jasminc": {
+      "version": "Jasmin Compiler 2026.09.0",
+      "sha256": "168b97ea004fed4e32bcf83206c863e32727e6a409c4c29978391c56830f1b59"
+    },
+    "jasmin2ec": {
+      "version": "Jasmin Compiler 2026.09.0",
+      "sha256": "ac0c29012352dcf0f65d84e72451043338158c6b7862f55c01bf32cc5f1a3ca6"
+    },
+    "jasmin-ct": {
+      "version": "Jasmin Compiler 2026.09.0",
+      "sha256": "0fe0c8e0e20638e50817991ae276f9a5e726909aee8c403af8f36df206012b1d"
+    },
+    "why3": {
+      "version": "Why3 platform, version 1.8.2",
+      "sha256": "a7bb9243062edafc51236466ed9c625f4f37be48a673479083765f854574fab6"
+    },
+    "alt-ergo": {
+      "version": "v2.6.0",
+      "sha256": "f08076a002886958c88acccfeea06375d08b3584b6a6d1fdfeea85e2bc411ce0"
+    },
+    "cvc4": {
+      "version": "This is CVC4 version 1.8",
+      "sha256": "e20482494cb65d364624716f24c07bb4ec87bd164909a6c2263ed925b40ad406"
+    },
+    "cvc5": {
+      "version": "This is cvc5 version 1.2.1 [git tag 1.2.1 branch HEAD]",
+      "sha256": "ee4c6787a95218a571080a599bdf579aca5b0f1e4f27687f70f46d4d12148974"
+    },
+    "z3": {
+      "version": "Z3 version 4.12.6 - 64 bit",
+      "sha256": "574aa7f011ef3c34c4ea1fd7255251d5054107124da0bcbbb3de82d12bfaa2d5"
+    },
+    "easycrypt": {
+      "sha256": "a7a6921941fc23ae0e3999e7341a3a17345267c583b3fd5c4cf0413c8dba188d",
+      "known_provers": "Alt-Ergo@2.6.0, Alt-Ergo[BV]@2.6.0, Alt-Ergo[counterexamples]@2.6.0, CVC4@1.8.0, CVC4[counterexamples]@1.8.0, CVC4[strings]@1.8.0, CVC4[strings+counterexamples]@1.8.0, CVC5@1.2.1, CVC5[counterexamples]@1.2.1, CVC5[strings]@1.2.1, CVC5[strings+counterexamples]@1.2.1, Z3@4.12.6, Z3[counterexamples]@4.12.6, Z3[noBV]@4.12.6"
+    },
+    "opam_packages": {
+      "ocaml": "5.4.0",
+      "easycrypt": "2026.09",
+      "jasmin": "2026.09.0",
+      "why3": "1.8.2"
+    }
+  },
+  "errors": []
+}
+Environment ready. Run: source env/activate.sh

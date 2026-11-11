@@ -1,0 +1,3 @@
+PASS: 79 hardened outputs materialized from pinned baseline and overlay
+EXTRACTION_COMPILER {"version": "Jasmin Compiler 2026.09.0", "sha256": "ac0c29012352dcf0f65d84e72451043338158c6b7862f55c01bf32cc5f1a3ca6"}
+PASS: 25 hardened extracted files match fresh compiler output

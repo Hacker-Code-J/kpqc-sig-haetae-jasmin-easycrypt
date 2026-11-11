@@ -1,0 +1,155 @@
+{
+  "status": "PASS",
+  "scope": "Four original Hyperball files; seven /= proof-normalization tokens only",
+  "source_hole_guard": "PASS",
+  "ports": [
+    {
+      "path": "haetae-1.2.0-easycrypt/proofs/HyperballMulBounds.ec",
+      "old_sha256": "3a4e08c2860a199c154f3ec1a33dd542cfc448ad5dfc930ae7d472a25af2d61f",
+      "new_sha256": "8cbcea5892139e39e787fba436d86971cc1eac54e9922a0931ae726fca5cdc0f",
+      "outside_proof_sha256": "39a29f8f4827ff223791c9325cc8954e6f2733b457e7364b2f5e3e0b8b6f4cd8",
+      "outside_proof_bytes_unchanged": true,
+      "status": "PASS",
+      "proof_result": {
+        "id": "hyperball-probe-2-HyperballMulBounds",
+        "group": "haetae-original",
+        "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+        "source": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt/proofs/HyperballMulBounds.ec",
+        "argv": [
+          "bash",
+          "scripts/verify-one.sh",
+          "proofs/HyperballMulBounds.ec"
+        ],
+        "environment_overrides": {
+          "WHY3_SERVER_SOCKET": ""
+        },
+        "input_digest": "74186478d4ac7c03a61bc0358b9de29cddaa3281a27e88e2f87f69d1ee8982f7",
+        "source_sha256": "8cbcea5892139e39e787fba436d86971cc1eac54e9922a0931ae726fca5cdc0f",
+        "command": [
+          "bash",
+          "scripts/verify-one.sh",
+          "/tmp/haetae-hyperball-mul-ports/matrix-2/main-sources/hyperball-probe-2-HyperballMulBounds/8cbcea5892139e39e787fba436d86971cc1eac54e9922a0931ae726fca5cdc0f/HyperballMulBounds.ec"
+        ],
+        "started_at": "2026-10-10T20:11:33.032598+00:00",
+        "log": "/tmp/haetae-hyperball-mul-ports/matrix-2/hyperball-probe-2-HyperballMulBounds-20261010T201106.log",
+        "status": "PASS",
+        "exit_code": 0,
+        "seconds": 34.047,
+        "completed_at": "2026-10-10T20:12:07.097106+00:00"
+      },
+      "summary": "/tmp/haetae-hyperball-mul-ports/matrix-2/summary.json",
+      "diff": "/tmp/haetae-hyperball-mul-ports/HyperballMulBounds.diff"
+    },
+    {
+      "path": "haetae-1.2.0-easycrypt/proofs/HyperballSafeScale.ec",
+      "old_sha256": "6f6238b1ecdae2a356ca6f2ad5ace2252c58e96ec5c578448229128d2a3bab8f",
+      "new_sha256": "7b5bdbe53e5481fc7e23b8f6397284f5ad8f138a561b97c13809cd8ec86ac9db",
+      "outside_proof_sha256": "246028a0a364a64ca60ecf5dabf5d18e7c75972cfd3ffcd92eeed31504b8364c",
+      "outside_proof_bytes_unchanged": true,
+      "status": "PASS",
+      "proof_result": {
+        "id": "hyperball-probe-3-HyperballSafeScale",
+        "group": "haetae-original",
+        "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+        "source": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt/proofs/HyperballSafeScale.ec",
+        "argv": [
+          "bash",
+          "scripts/verify-one.sh",
+          "proofs/HyperballSafeScale.ec"
+        ],
+        "environment_overrides": {
+          "WHY3_SERVER_SOCKET": ""
+        },
+        "input_digest": "bafd58fcec1649084021ae524a543f4320a642698e8d83a8c62975c55670cae4",
+        "source_sha256": "7b5bdbe53e5481fc7e23b8f6397284f5ad8f138a561b97c13809cd8ec86ac9db",
+        "command": [
+          "bash",
+          "scripts/verify-one.sh",
+          "/tmp/haetae-hyperball-mul-ports/matrix-3/main-sources/hyperball-probe-3-HyperballSafeScale/7b5bdbe53e5481fc7e23b8f6397284f5ad8f138a561b97c13809cd8ec86ac9db/HyperballSafeScale.ec"
+        ],
+        "started_at": "2026-10-10T20:14:42.064954+00:00",
+        "log": "/tmp/haetae-hyperball-mul-ports/matrix-3/hyperball-probe-3-HyperballSafeScale-20261010T201442.log",
+        "status": "PASS",
+        "exit_code": 0,
+        "seconds": 58.078,
+        "completed_at": "2026-10-10T20:15:40.142256+00:00"
+      },
+      "summary": "/tmp/haetae-hyperball-mul-ports/matrix-3/summary.json",
+      "diff": "/tmp/haetae-hyperball-mul-ports/HyperballSafeScale.diff"
+    },
+    {
+      "path": "haetae-1.2.0-easycrypt/proofs/HyperballSafeCorrectness.ec",
+      "old_sha256": "8542b133d3c0861e1e707dc6bd5826220251cbca67287b9199063774b66fa1cd",
+      "new_sha256": "a28cec3b2bbbb78600b07c3616bb2a10d43e5926c04c2271ae676230a11b9157",
+      "outside_proof_sha256": "cd77b9a2c05d486a6224be4430af232671bcfeca992da96b3fd1e5e0288fa9eb",
+      "outside_proof_bytes_unchanged": true,
+      "status": "PASS",
+      "proof_result": {
+        "id": "hyperball-probe-2-HyperballSafeCorrectness",
+        "group": "haetae-original",
+        "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+        "source": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt/proofs/HyperballSafeCorrectness.ec",
+        "argv": [
+          "bash",
+          "scripts/verify-one.sh",
+          "proofs/HyperballSafeCorrectness.ec"
+        ],
+        "environment_overrides": {
+          "WHY3_SERVER_SOCKET": ""
+        },
+        "input_digest": "74186478d4ac7c03a61bc0358b9de29cddaa3281a27e88e2f87f69d1ee8982f7",
+        "source_sha256": "a28cec3b2bbbb78600b07c3616bb2a10d43e5926c04c2271ae676230a11b9157",
+        "command": [
+          "bash",
+          "scripts/verify-one.sh",
+          "/tmp/haetae-hyperball-mul-ports/matrix-2/main-sources/hyperball-probe-2-HyperballSafeCorrectness/a28cec3b2bbbb78600b07c3616bb2a10d43e5926c04c2271ae676230a11b9157/HyperballSafeCorrectness.ec"
+        ],
+        "started_at": "2026-10-10T20:13:39.556425+00:00",
+        "log": "/tmp/haetae-hyperball-mul-ports/matrix-2/hyperball-probe-2-HyperballSafeCorrectness-20261010T201106.log",
+        "status": "PASS",
+        "exit_code": 0,
+        "seconds": 6.51,
+        "completed_at": "2026-10-10T20:13:46.065625+00:00"
+      },
+      "summary": "/tmp/haetae-hyperball-mul-ports/matrix-2/summary.json",
+      "diff": "/tmp/haetae-hyperball-mul-ports/HyperballSafeCorrectness.diff"
+    },
+    {
+      "path": "haetae-1.2.0-easycrypt/proofs/HyperballResultProperties.ec",
+      "old_sha256": "da02813b5027cd2c34de24f52745b1db84bdc63f8f92fbe0f662a5a866ed59e4",
+      "new_sha256": "2239d4a3d388a5c4a30759693bb6bb8e18438f456eac38baa5492da2c149823b",
+      "outside_proof_sha256": "9096a63d908d42c3b8f8db1f6e90e77770408f145992b15ef31f5b93ccb27378",
+      "outside_proof_bytes_unchanged": true,
+      "status": "PASS",
+      "proof_result": {
+        "id": "hyperball-probe-3-HyperballResultProperties",
+        "group": "haetae-original",
+        "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+        "source": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt/proofs/HyperballResultProperties.ec",
+        "argv": [
+          "bash",
+          "scripts/verify-one.sh",
+          "proofs/HyperballResultProperties.ec"
+        ],
+        "environment_overrides": {
+          "WHY3_SERVER_SOCKET": ""
+        },
+        "input_digest": "bafd58fcec1649084021ae524a543f4320a642698e8d83a8c62975c55670cae4",
+        "source_sha256": "2239d4a3d388a5c4a30759693bb6bb8e18438f456eac38baa5492da2c149823b",
+        "command": [
+          "bash",
+          "scripts/verify-one.sh",
+          "/tmp/haetae-hyperball-mul-ports/matrix-3/main-sources/hyperball-probe-3-HyperballResultProperties/2239d4a3d388a5c4a30759693bb6bb8e18438f456eac38baa5492da2c149823b/HyperballResultProperties.ec"
+        ],
+        "started_at": "2026-10-10T20:15:40.644094+00:00",
+        "log": "/tmp/haetae-hyperball-mul-ports/matrix-3/hyperball-probe-3-HyperballResultProperties-20261010T201442.log",
+        "status": "PASS",
+        "exit_code": 0,
+        "seconds": 8.51,
+        "completed_at": "2026-10-10T20:15:49.153664+00:00"
+      },
+      "summary": "/tmp/haetae-hyperball-mul-ports/matrix-3/summary.json",
+      "diff": "/tmp/haetae-hyperball-mul-ports/HyperballResultProperties.diff"
+    }
+  ]
+}

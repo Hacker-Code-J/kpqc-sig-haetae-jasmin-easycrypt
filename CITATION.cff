@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use these research artifacts, cite this repository and the exact commit or archived release used."
+type: software
+title: "HAETAE Jasmin / EasyCrypt Research Artifacts"
+authors:
+  - family-names: "Ji"
+    given-names: "Yonghyeon"
+repository-code: "https://github.com/Hacker-Code-J/kpqc-sig-haetae-jasmin-easycrypt"
+url: "https://github.com/Hacker-Code-J/kpqc-sig-haetae-jasmin-easycrypt"
+license: MIT
+keywords:
+  - HAETAE
+  - Jasmin
+  - EasyCrypt
+  - formal verification
+  - post-quantum signatures

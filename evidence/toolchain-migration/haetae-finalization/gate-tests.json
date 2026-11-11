@@ -1,0 +1,57 @@
+{
+  "result": "PASS",
+  "tests": 71,
+  "approved_port_subtests": 23,
+  "results": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/materialize.py"
+      ],
+      "tests": 21,
+      "exit_code": 0,
+      "log": "logs/2026.09-finalization/materialize.log",
+      "log_sha256": "8742056f56b5143cea07fad7b957592adc3c5180cced4e9364a3f5060cbb949c"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/gaussian-rate-gate.py"
+      ],
+      "tests": 18,
+      "exit_code": 0,
+      "log": "logs/2026.09-finalization/gaussian-rate-gate.log",
+      "log_sha256": "fd73e338aa64313f01136ce43020327f0fe3ad82896cc8b531f5a36e9e7958f7"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/gaussian-renyi-gate.py"
+      ],
+      "tests": 10,
+      "exit_code": 0,
+      "log": "logs/2026.09-finalization/gaussian-renyi-gate.log",
+      "log_sha256": "f918efa37ed0b37de7d6962563a3ed3eea08e3d01efb02095597688853314d03"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "tests/hyperball-renyi-gate.py"
+      ],
+      "tests": 12,
+      "exit_code": 0,
+      "log": "logs/2026.09-finalization/hyperball-renyi-gate.log",
+      "log_sha256": "c108f7e4223893b923baeba277cc8f300fae2e952c78e1eb01e9c4e6c506739f"
+    },
+    {
+      "command": [
+        "python3",
+        "tests/verification-gate.py"
+      ],
+      "tests": 10,
+      "exit_code": 0,
+      "result": "logs/2026.09-finalization/native-eof-result.json",
+      "result_sha256": "887b452d6f0decc4ba4433e073448388d8409ff40ff80f460f4683eb8360ba1c"
+    }
+  ]
+}

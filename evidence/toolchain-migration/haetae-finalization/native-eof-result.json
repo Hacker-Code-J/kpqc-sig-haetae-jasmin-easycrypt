@@ -1,0 +1,15 @@
+{
+  "command": [
+    "python3",
+    "tests/verification-gate.py"
+  ],
+  "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-hardened",
+  "environment": {
+    "EASYCRYPT": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+    "EC_MAX_PROVERS": "1"
+  },
+  "exit_code": 0,
+  "tests": 10,
+  "output": "..........\n----------------------------------------------------------------------\nRan 10 tests in 2.292s\n\nOK\n",
+  "evidence": "Native exec_command/write_stdin output; the existing regression suite was run directly."
+}

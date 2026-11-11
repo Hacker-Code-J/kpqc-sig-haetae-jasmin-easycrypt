@@ -1,0 +1,25 @@
+{
+  "target": "proofs/GaussianSignBits.ec",
+  "sha256_before": "27ab5e5df9fe5bc960df87e7d2edb98b047bdb2784b764801ce15600e5e82a58",
+  "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+  "argv": [
+    "bash",
+    "scripts/verify-one.sh",
+    "proofs/GaussianSignBits.ec"
+  ],
+  "environment": {
+    "PATH": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin:/usr/local/bin:/usr/bin:/bin",
+    "EASYCRYPT": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+    "EC_TIMEOUT": "10",
+    "EC_MAX_PROVERS": "1"
+  },
+  "started_at": "2026-10-10T19:46:38.995761+00:00",
+  "log": "/tmp/haetae-sign-batch-ports/GaussianSignBits-tactic1-timeout10.log",
+  "status": "PASS",
+  "verification_scope": "whole file with EOF sentinel, no-eco and Proofs:check",
+  "exit_code": 0,
+  "seconds": 7.796,
+  "finished_at": "2026-10-10T19:46:46.791689+00:00",
+  "sha256_after": "27ab5e5df9fe5bc960df87e7d2edb98b047bdb2784b764801ce15600e5e82a58",
+  "log_sha256": "ce009431c603e68c1646dd0a2ee6b47e63ceb36044396425e0da26ea60cb67ee"
+}

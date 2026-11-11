@@ -1,0 +1,13 @@
+{
+  "scope": "Documentation-only publication edits after the recorded naming transition; no implementation, theorem, or historical result bytes are authorized by this ledger.",
+  "files": {
+    "README.md": {
+      "before_sha256": "2c4250e5e6c509bfe7740c13df1787467102143e652e3db3455bcb11e59236e5",
+      "after_sha256": "b841b0219ec344e2223bfe69acc617d237339322ad82cc4edb09693d75d68c4d"
+    },
+    "haetae-easycrypt/VALIDATION.md": {
+      "before_sha256": "8c94744901539f2b9768fa8d64c2d6bd906c24a0b1ca57534010d6173c615525",
+      "after_sha256": "33687245634bac2481439b4ee182832e2f5c036a89e21edaa60bba7aee99977f"
+    }
+  }
+}

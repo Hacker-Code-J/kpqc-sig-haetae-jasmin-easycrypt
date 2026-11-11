@@ -1,0 +1,5 @@
+PASS: 53 generated files match fresh Jasmin extraction
+C compiler __VERSION__: 11.4.0
+Generated outward-rounded CDT/Gaussian certificate; numeric checks pass; analytic proof required
+Generated six exact Bernstein certificates; all66 controls nonnegative; analytic proof required
+PASS: native original provenance and 207 proof-source guards

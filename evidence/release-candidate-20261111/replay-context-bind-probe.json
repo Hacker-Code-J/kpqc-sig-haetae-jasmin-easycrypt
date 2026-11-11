@@ -1,0 +1,14 @@
+[
+  {
+    "family": "AF_UNIX",
+    "result": "FAIL",
+    "error": "[Errno 1] Operation not permitted",
+    "errno": 1
+  },
+  {
+    "family": "AF_INET",
+    "result": "FAIL",
+    "error": "[Errno 1] Operation not permitted",
+    "errno": 1
+  }
+]

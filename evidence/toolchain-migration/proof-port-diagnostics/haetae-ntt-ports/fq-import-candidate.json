@@ -1,0 +1,24 @@
+{
+  "target": "/tmp/haetae-ntt-ports/candidates/Fq.ec",
+  "sha256_before": "e280e74e4942c3678120aa66b8e7b38bb0ed900cf69e67785a855e9c5a4ef5a3",
+  "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+  "argv": [
+    "bash",
+    "scripts/verify-one.sh",
+    "/tmp/haetae-ntt-ports/candidates/Fq.ec"
+  ],
+  "environment": {
+    "PATH": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin:/usr/local/bin:/usr/bin:/bin",
+    "EASYCRYPT": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+    "EC_TIMEOUT": "10",
+    "EC_MAX_PROVERS": "1"
+  },
+  "started_at": "2026-10-10T19:56:23.056643+00:00",
+  "log": "/tmp/haetae-ntt-ports/fq-import-candidate.log",
+  "status": "PASS",
+  "exit_code": 0,
+  "seconds": 49.052,
+  "finished_at": "2026-10-10T19:57:12.108832+00:00",
+  "sha256_after": "e280e74e4942c3678120aa66b8e7b38bb0ed900cf69e67785a855e9c5a4ef5a3",
+  "log_sha256": "8daf8a42c539b53a07302595f031c689599405efde886bac5638627f26f1753a"
+}

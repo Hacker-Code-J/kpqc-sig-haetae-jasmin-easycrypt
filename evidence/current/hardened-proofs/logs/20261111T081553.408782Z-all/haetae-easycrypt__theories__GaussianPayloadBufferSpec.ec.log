@@ -1,0 +1,6 @@
+[-] [0002] 2.3% (-1.0B / [frag -1.0B])[\] [0003] 4.1% (-1.0B / [frag -1.0B])[|] [0004] 7.9% (-1.0B / [frag -1.0B])* In [lemmas or axioms]:
+
+(* StdOrder.RealOrder.ler_def (shorten name: ler_def) *)
+lemma ler_def: forall (x y : real), x <= y <=> `|y - x| = y - x.
+
+[/] [0006] 9.9% (-1.0B / [frag -1.0B])[-] [0036] 67.2% (-1.0B / [frag -1.0B])[\] [0056] 96.7% (-1.0B / [frag -1.0B])[|] [0058] 99.0% (-1.0B / [frag -1.0B])[/] [0058] 99.3% (-1.0B / [frag -1.0B])[-] [0058] 99.8% (-1.0B / [frag -1.0B])[\] [0059] 100.0% (-1.0B / [frag -1.0B])[|] [0059] 100.0% (-1.0B / [frag -1.0B])                                                   

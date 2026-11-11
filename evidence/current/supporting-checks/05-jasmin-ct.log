@@ -1,0 +1,678 @@
+make: Entering directory '/tmp/haetae-public-source-bootstrap/haetae-jasmin'
+jasmin-ct --slice sample_gauss83_jazz --slice smulh48_jazz --slice approx_exp_jazz --slice sample_gauss_sigma76_jazz --slice sample_gauss_jazz jasmin/hpoly.jazz
+
+jasmin-ct --sct --slice sample_gauss83_jazz --slice smulh48_jazz --slice approx_exp_jazz --slice sample_gauss_sigma76_jazz --slice sample_gauss_jazz jasmin/hpoly.jazz
+/* Security types:
+modmsf sample_gauss83_jazz : #poly = { n = ?105, s = secret} *
+                                                #poly = { n = ?105, s = secret} ->
+                   #poly = { n = ?105, s = secret}
+                   output corruption: #public
+ constraints:
+
+
+modmsf smulh48_jazz : #poly = { n = ?162, s = secret} *
+                      #poly = { n = ?164, s = secret} ->
+#poly = { n = ?160, s = ?159}
+output corruption: #public
+ constraints:
+?164 <= ?159 ?160, ?162 <= ?159 ?160, 
+
+modmsf approx_exp_jazz : #secret ->
+#public
+output corruption: #public
+ constraints:
+
+
+modmsf sample_gauss_sigma76_jazz : #[ptr = transient, val = { n = ?908, s = secret}] *
+                                   #[ptr = transient, val = secret] *
+                                   #[ptr = transient, val = { n = ?916, s = secret}] *
+                                   #[ptr = transient, val = { n = ?920, s = secret}] ->
+#[ptr = public, val = { n = ?896, s = ?895}] *
+#[ptr = public, val = secret] * #[ptr = public, val = { n = ?904, s = ?903}]
+output corruption: #public
+ constraints:
+?920 <= ?895 ?904 ?903 ?896, ?916 <= ?904 ?903, ?908 <= ?895 ?896, 
+
+modmsf sample_gauss_jazz : #[ptr = transient, val = secret] *
+                           #[ptr = transient, val = secret] *
+                           #[ptr = transient, val = { n = ?1407, s = secret}] *
+                           #[ptr = transient, val = secret] * #transient *
+                           #secret ->
+#[ptr = public, val = secret] * #[ptr = public, val = secret] *
+#[ptr = public, val = { n = ?1407, s = ?1407}]
+output corruption: #transient
+ constraints:
+
+*/
+jasmin-ct jasmin/gaussian_sampler.jazz
+
+jasmin-ct --sct jasmin/gaussian_sampler.jazz
+/* Security types:
+nomodmsf _keccak_load64 : #[ptr = public, val = { n = ?7, s = ?6}] ->
+                   #poly = { n = ?7, s = ?6}
+                   output corruption: #public
+ constraints:
+
+
+nomodmsf _keccak_store64 : #[ptr = public, val = { n = ?91, s = ?90}] *
+                           #poly = { n = ?91, s = ?90} ->
+#[ptr = public, val = { n = ?91, s = ?90}]
+output corruption: #public
+ constraints:
+
+
+modmsf _keccak_init_state : #[ptr = public, val = { n = ?147, s = ?146}] ->
+#[ptr = public, val = { n = ?147, s = ?146}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf _shake_store_nonce : #[ptr = public, val = { n = ?185, s = ?184}] *
+                              #poly = { n = ?185, s = ?184} ->
+#[ptr = public, val = { n = ?185, s = ?184}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf _keccak_finalize : #[ptr = public, val = { n = ?205, s = secret}] *
+                            #public * #public *
+                            #poly = { n = ?205, s = secret} ->
+#[ptr = public, val = { n = ?205, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+nomodmsf __keccakf1600_index : #public * #public ->
+#public
+output corruption: #public
+ constraints:
+
+
+modmsf __keccakf1600_rho_offset : #public ->
+#public
+output corruption: #public
+ constraints:
+
+
+modmsf __keccakf1600_rho : #public * #public ->
+#public
+output corruption: #public
+ constraints:
+
+
+modmsf __rol_u64 : #poly = { n = ?345, s = ?344} * #public ->
+#poly = { n = ?345, s = ?344}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __andn_u64 : #poly = { n = ?359, s = ?358} *
+                      #poly = { n = ?359, s = ?358} ->
+#poly = { n = ?359, s = ?358}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __keccak_theta_sum : #[ptr = public, val = secret] ->
+#secret
+output corruption: #public
+ constraints:
+
+
+modmsf __keccak_theta_rol : #secret ->
+#secret
+output corruption: #public
+ constraints:
+
+
+modmsf __keccak_rol_sum : #[ptr = public, val = secret] * #secret * #public ->
+#secret
+output corruption: #public
+ constraints:
+
+
+nomodmsf __keccak_set_row : #[ptr = public, val = { n = ?539, s = ?538}] *
+                            #poly = { n = ?539, s = ?542} * #public ->
+#[ptr = public, val = { n = ?539, s = ?538}]
+output corruption: #poly = { n = public, s = ?542}
+ constraints:
+?542 <= ?538, 
+
+modmsf _keccak_pround : #[ptr = public, val = secret] *
+                        #[ptr = public, val = secret] ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf __keccakf1600_statepermute : #[ptr = public, val = { n = ?680, s = secret}] ->
+#[ptr = public, val = { n = ?680, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _keccakf1600 : #[ptr = public, val = { n = ?748, s = secret}] ->
+#[ptr = public, val = { n = ?748, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _keccak_absorb_once : #[ptr = transient, val = secret] * #secret *
+                             #secret * #secret * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf _keccak_squeezeblocks : #secret * #secret *
+                               #[ptr = transient, val = { n = ?981, s = secret}] *
+                               #secret ->
+#[ptr = public, val = { n = ?981, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _keccak_absorb : #[ptr = transient, val = secret] *
+                        #[ptr = transient, val = { n = ?1082, s = secret}] *
+                        #secret * #secret ->
+#[ptr = public, val = secret] *
+#[ptr = public, val = { n = ?1082, s = ?1082}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _keccak_squeeze : #[ptr = transient, val = { n = ?1279, s = secret}] *
+                         #[ptr = transient, val = { n = ?1283, s = secret}] *
+                         #secret * #secret ->
+#[ptr = public, val = { n = ?1279, s = ?1279}] *
+#[ptr = public, val = { n = ?1283, s = ?1283}]
+output corruption: #transient
+ constraints:
+
+
+nomodmsf _keccak_absorb_nonce16 : #[ptr = public, val = { n = ?1452, s = secret}] *
+                                  #[ptr = public, val = public] *
+                                  #poly = { n = ?1452, s = secret} ->
+#[ptr = public, val = { n = ?1452, s = secret}] *
+#[ptr = public, val = transient]
+output corruption: #transient
+ constraints:
+
+
+modmsf _shake_stream_init : #[ptr = public, val = secret] * #public *
+                            #public * #public * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf _shake_state_init : #[ptr = public, val = { n = ?1757, s = ?1756}] ->
+#[ptr = public, val = { n = ?1757, s = ?1756}]
+output corruption: #public
+ constraints:
+
+
+modmsf _shake_state_absorb : #[ptr = transient, val = secret] * #secret *
+                             #secret * #public ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+nomodmsf _shake_state_finalize : #[ptr = public, val = public] * #public ->
+#[ptr = public, val = transient]
+output corruption: #transient
+ constraints:
+
+
+modmsf _shake_state_squeeze : #[ptr = transient, val = { n = ?1893, s = secret}] *
+                              #secret * #secret * #public ->
+#[ptr = public, val = { n = ?1893, s = ?1893}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _shake_state_absorb_once : #[ptr = public, val = secret] * #secret *
+                                  #secret * #public ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf _shake_state_squeezeblocks : #[ptr = public, val = { n = ?1999, s = secret}] *
+                                    #secret * #secret * #public ->
+#[ptr = public, val = { n = ?1999, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+nomodmsf _fixpoint_add : #[ptr = public, val = { n = ?2034, s = ?2033}] *
+                         #[ptr = public, val = { n = ?2034, s = ?2033}] *
+                         #[ptr = public, val = { n = ?2034, s = ?2033}] ->
+#[ptr = public, val = { n = ?2034, s = ?2033}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf __mul48 : #poly = { n = ?2068, s = ?2067} *
+                   #poly = { n = ?2070, s = ?2069} ->
+#poly = { n = ?2064, s = ?2063} * #poly = { n = ?2066, s = ?2065}
+output corruption: #public
+ constraints:
+?2070 <= ?2066 ?2064, ?2069 <= ?2065 ?2063, ?2068 <= ?2066 ?2064,
+?2067 <= ?2065 ?2063, 
+
+nomodmsf __renormalize48 : #poly = { n = ?2094, s = ?2093} *
+                           #poly = { n = ?2096, s = ?2095} ->
+#poly = { n = ?2094, s = ?2093} * #poly = { n = ?2096, s = ?2095}
+output corruption: #public
+ constraints:
+?2094 <= ?2096, ?2093 <= ?2095, 
+
+modmsf __bit_at_u8 : #poly = { n = ?2112, s = ?2111} * #public ->
+#poly = { n = ?2112, s = ?2111}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __copy_cneg_regs : #poly = { n = ?2196, s = ?2195} *
+                            #poly = { n = ?2198, s = ?2197} *
+                            #poly = { n = ?2200, s = ?2199} ->
+#poly = { n = ?2192, s = ?2191} * #poly = { n = ?2198, s = ?2197}
+output corruption: #public
+ constraints:
+?2200 <= ?2198 ?2192, ?2199 <= ?2197 ?2191, ?2196 <= ?2198 ?2192,
+?2195 <= ?2197 ?2191, 
+
+nomodmsf __sub_regs : #poly = { n = ?2230, s = ?2229} *
+                      #poly = { n = ?2232, s = ?2231} *
+                      #poly = { n = ?2234, s = ?2233} *
+                      #poly = { n = ?2232, s = ?2231} ->
+#poly = { n = ?2230, s = ?2229} * #poly = { n = ?2232, s = ?2231}
+output corruption: #public
+ constraints:
+?2234 <= ?2232 ?2230, ?2233 <= ?2231 ?2229, 
+
+nomodmsf __sub_from_threehalves_regs : #poly = { n = ?2266, s = ?2265} *
+                                       #poly = { n = ?2268, s = ?2267} ->
+#poly = { n = ?2266, s = ?2265} * #poly = { n = ?2268, s = ?2267}
+output corruption: #public
+ constraints:
+?2266 <= ?2268, ?2265 <= ?2267, 
+
+nomodmsf __fixpoint_mul_regs : #poly = { n = ?2306, s = ?2305} *
+                               #poly = { n = ?2308, s = ?2307} *
+                               #poly = { n = ?2310, s = ?2309} *
+                               #poly = { n = ?2312, s = ?2311} ->
+#poly = { n = ?2302, s = ?2301} * #poly = { n = ?2304, s = ?2303}
+output corruption: #public
+ constraints:
+?2312 <= ?2302 ?2304, ?2311 <= ?2303 ?2301, ?2310 <= ?2302 ?2304,
+?2309 <= ?2303 ?2301, ?2308 <= ?2302 ?2304, ?2307 <= ?2303 ?2301,
+?2306 <= ?2302 ?2304, ?2305 <= ?2303 ?2301, 
+
+nomodmsf __fixpoint_square_regs : #poly = { n = ?2454, s = ?2453} *
+                                  #poly = { n = ?2456, s = ?2455} ->
+#poly = { n = ?2450, s = ?2449} * #poly = { n = ?2452, s = ?2451}
+output corruption: #public
+ constraints:
+?2456 <= ?2452 ?2450, ?2455 <= ?2451 ?2449, ?2454 <= ?2452 ?2450,
+?2453 <= ?2451 ?2449, 
+
+nomodmsf __fixpoint_unsigned_signed_mul_regs : #poly = { n = ?2558, s = ?2557} *
+                                               #poly = { n = ?2560, s = ?2559} *
+                                               #poly = { n = ?2562, s = ?2561} *
+                                               #poly = { n = ?2564, s = ?2563} ->
+#poly = { n = ?2554, s = ?2553} * #poly = { n = ?2556, s = ?2555}
+output corruption: #public
+ constraints:
+?2559 <= ?2555 ?2553, ?2558 <= ?2556 ?2554, ?2557 <= ?2555 ?2553,
+?2564 <= ?2556 ?2554, ?2563 <= ?2555 ?2553, ?2562 <= ?2556 ?2554,
+?2561 <= ?2555 ?2553, ?2560 <= ?2556 ?2554, 
+
+nomodmsf _fixpoint_square : #[ptr = public, val = { n = ?2634, s = ?2633}] *
+                            #[ptr = public, val = { n = ?2634, s = ?2633}] ->
+#[ptr = public, val = { n = ?2634, s = ?2633}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf __fixpoint_mul_rnd13_regs : #poly = { n = ?2670, s = ?2669} *
+                                     #poly = { n = ?2670, s = ?2669} *
+                                     #poly = { n = ?2670, s = ?2669} *
+                                     #poly = { n = ?2670, s = ?2669} ->
+#poly = { n = ?2670, s = ?2669}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __fixpoint_mul_high_regs : #poly = { n = ?2734, s = ?2733} *
+                                    #poly = { n = ?2736, s = ?2735} *
+                                    #poly = { n = ?2738, s = ?2737} ->
+#poly = { n = ?2730, s = ?2729} * #poly = { n = ?2732, s = ?2731}
+output corruption: #public
+ constraints:
+?2738 <= ?2732 ?2730, ?2737 <= ?2731 ?2729, ?2736 <= ?2732 ?2730,
+?2735 <= ?2731 ?2729, ?2734 <= ?2732 ?2730, ?2733 <= ?2731 ?2729, 
+
+nomodmsf _fixpoint_mul_rnd13 : #poly = { n = ?2820, s = ?2819} *
+                               #[ptr = public, val = { n = ?2820, s = ?2819}] *
+                               #poly = { n = ?2820, s = ?2819} ->
+#poly = { n = ?2820, s = ?2819}
+output corruption: #public
+ constraints:
+
+
+nomodmsf _fixpoint_mul : #[ptr = public, val = { n = ?2850, s = ?2849}] *
+                         #[ptr = public, val = { n = ?2850, s = ?2849}] *
+                         #[ptr = public, val = { n = ?2850, s = ?2849}] ->
+#[ptr = public, val = { n = ?2850, s = ?2849}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf _fixpoint_mul_high : #[ptr = public, val = { n = ?2912, s = ?2903}] *
+                              #[ptr = public, val = { n = ?2912, s = ?2903}] *
+                              #poly = { n = ?2912, s = ?2903} ->
+#[ptr = public, val = { n = ?2912, s = ?2903}]
+output corruption: #public
+ constraints:
+
+
+nomodmsf _fixpoint_half_round : #[ptr = public, val = { n = ?2948, s = ?2947}] ->
+#[ptr = public, val = { n = ?2948, s = ?2947}]
+output corruption: #public
+ constraints:
+
+
+modmsf _fixpoint_newton_invsqrt : #[ptr = public, val = { n = ?3008, s = ?3011}] *
+                                  #[ptr = public, val = { n = ?3008, s = ?3011}] *
+                                  #[ptr = public, val = { n = ?3008, s = ?3011}] *
+                                  #[ptr = public, val = { n = ?3008, s = ?3011}] ->
+#[ptr = public, val = { n = ?3008, s = ?3011}]
+output corruption: #public
+ constraints:
+
+
+modmsf _polyfixveclk_scale_samples : #[ptr = transient, val = { n = ?3220, s = secret}] *
+                                     #[ptr = transient, val = { n = ?3224, s = secret}] *
+                                     #[ptr = transient, val = { n = ?3228, s = secret}] *
+                                     #[ptr = transient, val = { n = ?3232, s = secret}] *
+                                     #[ptr = transient, val = { n = ?3236, s = secret}] *
+                                     #secret ->
+#[ptr = public, val = { n = ?3212, s = ?3211}] *
+#[ptr = public, val = { n = ?3216, s = ?3215}]
+output corruption: #poly = { n = public, s = ?3209}
+ constraints:
+?3228 <= ?3216 ?3215 ?3212 ?3211 ?3209, ?3224 <= ?3216 ?3215,
+?3220 <= ?3212 ?3211, ?3236 <= ?3216 ?3215 ?3212 ?3211 ?3209,
+?3232 <= ?3216 ?3215 ?3212 ?3211 ?3209, 
+
+modmsf _sample_gauss83 : #poly = { n = ?3572, s = secret} *
+                         #poly = { n = ?3572, s = secret} ->
+#poly = { n = ?3572, s = secret}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __smulh48 : #poly = { n = ?3670, s = ?3669} *
+                     #poly = { n = ?3670, s = ?3669} ->
+#poly = { n = ?3670, s = ?3669}
+output corruption: #public
+ constraints:
+
+
+nomodmsf _approx_exp : #poly = { n = ?3714, s = ?3713} ->
+#poly = { n = ?3714, s = ?3713}
+output corruption: #public
+ constraints:
+
+
+modmsf __sample_gauss_sigma76_regs : #[ptr = public, val = { n = ?3828, s = secret}] ->
+#poly = { n = ?3828, s = ?3828} * #secret * #secret *
+#poly = { n = ?3828, s = ?3828}
+output corruption: #public
+ constraints:
+
+
+modmsf _sample_gauss_sigma76 : #[ptr = public, val = { n = ?4213, s = ?4212}] *
+                               #[ptr = public, val = secret] *
+                               #[ptr = public, val = { n = ?4221, s = ?4220}] *
+                               #[ptr = public, val = { n = ?4225, s = secret}] ->
+#[ptr = public, val = { n = ?4213, s = ?4212}] *
+#[ptr = public, val = secret] *
+#[ptr = public, val = { n = ?4221, s = ?4220}]
+output corruption: #public
+ constraints:
+?4225 <= ?4221 ?4220 ?4213 ?4212, 
+
+modmsf _sample_gauss : #[ptr = { n = public, s = ?4269}, val = secret] *
+                       #[ptr = public, val = secret] *
+                       #[ptr = public, val = { n = ?4276, s = ?4275}] *
+                       #[ptr = public, val = secret] * #public * #secret ->
+#[ptr = { n = public, s = ?4269}, val = secret] *
+#[ptr = public, val = secret] *
+#[ptr = public, val = { n = ?4276, s = ?4275}]
+output corruption: #transient
+ constraints:
+?4276 <= ?4275, 
+
+modmsf _sample_gauss_N_copy_signs : #[ptr = public, val = { n = ?4704, s = secret}] *
+                                    #[ptr = public, val = { n = ?4704, s = secret}] *
+                                    #public ->
+#[ptr = public, val = { n = ?4704, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _sample_gauss_N_carry : #[ptr = public, val = { n = ?4758, s = secret}] *
+                               #public * #public * #public * #public ->
+#[ptr = public, val = { n = ?4758, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _rej_uniform : #[ptr = { n = public, s = ?4831}, val = { n = ?4830, s = ?4829}] *
+                      #[ptr = public, val = { n = ?4834, s = ?4833}] *
+                      #public * #[ptr = public, val = secret] * #public ->
+#[ptr = { n = public, s = ?4831}, val = { n = ?4830, s = ?4829}] *
+#[ptr = public, val = { n = ?4834, s = ?4833}]
+output corruption: #public
+ constraints:
+?4830 <= ?4829, ?4834 <= ?4833, 
+
+nomodmsf __mod3 : #poly = { n = ?4984, s = ?4983} ->
+#poly = { n = ?4984, s = ?4983}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __mod3_leq26 : #poly = { n = ?5040, s = ?5039} ->
+#poly = { n = ?5040, s = ?5039}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __mod3_leq8 : #poly = { n = ?5086, s = ?5085} ->
+#poly = { n = ?5086, s = ?5085}
+output corruption: #public
+ constraints:
+
+
+modmsf _rej_eta : #[ptr = { n = public, s = ?5129}, val = { n = ?5128, s = ?5127}] *
+                  #[ptr = public, val = { n = ?5132, s = ?5131}] * #public *
+                  #[ptr = public, val = secret] * #public ->
+#[ptr = { n = public, s = ?5129}, val = { n = ?5128, s = ?5127}] *
+#[ptr = public, val = { n = ?5132, s = ?5131}]
+output corruption: #public
+ constraints:
+?5132 <= ?5131, ?5128 <= ?5127, 
+
+modmsf __poly_sample_squeeze128 : #[ptr = transient, val = { n = ?5628, s = secret}] *
+                                  #transient *
+                                  #[ptr = public, val = { n = ?5634, s = secret}] ->
+#[ptr = public, val = { n = ?5628, s = secret}] *
+#[ptr = public, val = { n = ?5634, s = secret}]
+output corruption: #transient
+ constraints:
+?5634 <= ?5628, 
+
+modmsf __poly_sample_squeeze256 : #[ptr = transient, val = { n = ?5749, s = secret}] *
+                                  #transient *
+                                  #[ptr = public, val = { n = ?5755, s = secret}] ->
+#[ptr = public, val = { n = ?5749, s = secret}] *
+#[ptr = public, val = { n = ?5755, s = secret}]
+output corruption: #transient
+ constraints:
+?5755 <= ?5749, 
+
+modmsf __poly_sample_shake128_init : #[ptr = public, val = secret] *
+                                     #public * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf __poly_sample_shake256_init : #[ptr = public, val = secret] *
+                                     #public * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+nomodmsf __poly_sample_mod3 : #poly = { n = ?6216, s = ?6215} ->
+#poly = { n = ?6216, s = ?6215}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __poly_sample_mod3_leq26 : #poly = { n = ?6272, s = ?6271} ->
+#poly = { n = ?6272, s = ?6271}
+output corruption: #public
+ constraints:
+
+
+nomodmsf __poly_sample_mod3_leq8 : #poly = { n = ?6318, s = ?6317} ->
+#poly = { n = ?6318, s = ?6317}
+output corruption: #public
+ constraints:
+
+
+modmsf __poly_uniform_consume : #[ptr = { n = public, s = ?6359}, val = { n = ?6358, s = ?6357}] *
+                                #transient * #public *
+                                #[ptr = public, val = secret] * #public ->
+#[ptr = { n = public, s = ?6359}, val = { n = ?6358, s = ?6357}] * #public
+output corruption: #public
+ constraints:
+?6358 <= ?6357, 
+
+modmsf __poly_uniform_eta_consume : #[ptr = { n = public, s = ?6537}, val = { n = ?6536, s = ?6535}] *
+                                    #transient * #public *
+                                    #[ptr = public, val = secret] * #public ->
+#[ptr = { n = public, s = ?6537}, val = { n = ?6536, s = ?6535}] * #public
+output corruption: #public
+ constraints:
+?6536 <= ?6535, 
+
+modmsf _poly_uniform_at : #[ptr = transient, val = { n = ?7052, s = secret}] *
+                          #transient * #public * #secret ->
+#[ptr = public, val = { n = ?7052, s = ?7052}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _poly_uniform_eta_at : #[ptr = transient, val = { n = ?7336, s = secret}] *
+                              #transient * #public * #secret ->
+#[ptr = public, val = { n = ?7336, s = ?7336}]
+output corruption: #transient
+ constraints:
+
+
+modmsf __poly_sample_shake128_init_addr : #[ptr = public, val = secret] *
+                                          #public * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf __poly_sample_shake256_init_addr : #[ptr = public, val = secret] *
+                                          #public * #secret ->
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf _poly_uniform_at_addr : #[ptr = transient, val = { n = ?7840, s = secret}] *
+                               #transient * #public * #secret ->
+#[ptr = public, val = { n = ?7840, s = ?7840}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _poly_uniform_eta_at_addr : #[ptr = transient, val = { n = ?8124, s = secret}] *
+                                   #transient * #public * #secret ->
+#[ptr = public, val = { n = ?8124, s = ?8124}]
+output corruption: #transient
+ constraints:
+
+
+modmsf __sample_full_squeeze256 : #[ptr = transient, val = { n = ?8284, s = secret}] *
+                                  #transient *
+                                  #[ptr = public, val = { n = ?8290, s = secret}] ->
+#[ptr = public, val = { n = ?8284, s = secret}] *
+#[ptr = public, val = { n = ?8290, s = secret}]
+output corruption: #transient
+ constraints:
+?8290 <= ?8284, 
+
+modmsf __sample_gauss_at : #[ptr = { n = public, s = ?8410}, val = secret] *
+                           #[ptr = public, val = secret] *
+                           #[ptr = public, val = { n = ?8417, s = ?8416}] *
+                           #[ptr = public, val = secret] * #public *
+                           #secret * #public * #transient ->
+#[ptr = { n = public, s = ?8410}, val = secret] *
+#[ptr = public, val = secret] *
+#[ptr = public, val = { n = ?8417, s = ?8416}]
+output corruption: #transient
+ constraints:
+?8417 <= ?8416, 
+
+modmsf __sample_gauss_N_copy_signs_at : #[ptr = public, val = { n = ?8897, s = secret}] *
+                                        #[ptr = public, val = { n = ?8897, s = secret}] *
+                                        #public * #public ->
+#[ptr = public, val = { n = ?8897, s = secret}]
+output corruption: #transient
+ constraints:
+
+
+modmsf _sample_gauss_N_full_at : #[ptr = transient, val = secret] *
+                                 #[ptr = public, val = secret] *
+                                 #[ptr = public, val = secret] * #public *
+                                 #secret * #public * #transient * #public ->
+#[ptr = public, val = secret] * #[ptr = public, val = secret] *
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf _sample_gauss_N_full : #[ptr = transient, val = secret] *
+                              #[ptr = public, val = secret] *
+                              #[ptr = public, val = secret] * #public *
+                              #secret * #public ->
+#[ptr = public, val = secret] * #[ptr = public, val = secret] *
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+
+modmsf sample_gauss_N_full_jazz : #[ptr = transient, val = secret] *
+                                  #[ptr = transient, val = secret] *
+                                  #[ptr = transient, val = secret] *
+                                  #transient * #secret * #transient ->
+#[ptr = public, val = secret] * #[ptr = public, val = secret] *
+#[ptr = public, val = secret]
+output corruption: #transient
+ constraints:
+
+*/
+make: Leaving directory '/tmp/haetae-public-source-bootstrap/haetae-jasmin'

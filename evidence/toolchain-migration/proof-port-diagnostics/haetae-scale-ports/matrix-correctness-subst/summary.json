@@ -1,0 +1,66 @@
+{
+  "targets": {
+    "scale-correctness-subst": {
+      "id": "scale-correctness-subst",
+      "group": "haetae-original",
+      "cwd": "/tmp/thesis-202609-migration/kpqc-sig-haetae-jasmin-easycrypt/haetae-1.2.0-easycrypt",
+      "source": "/tmp/haetae-scale-ports/correctness-subst/HyperballScaleCorrectness.ec",
+      "argv": [
+        "bash",
+        "scripts/verify-one.sh",
+        "proofs/HyperballScaleCorrectness.ec"
+      ],
+      "input_digest": "e52eabed9c00d2fffc981e54cf08988e8e2019e9fcee793a25346d685853627e",
+      "source_sha256": "807683fd5595817c806aaf2fc19d487340c2f5c3bffb3860c581a804d16edbf9",
+      "command": [
+        "bash",
+        "scripts/verify-one.sh",
+        "/tmp/haetae-scale-ports/matrix-correctness-subst/main-sources/scale-correctness-subst/807683fd5595817c806aaf2fc19d487340c2f5c3bffb3860c581a804d16edbf9/HyperballScaleCorrectness.ec"
+      ],
+      "started_at": "2026-10-10T20:10:22.659220+00:00",
+      "log": "/tmp/haetae-scale-ports/matrix-correctness-subst/scale-correctness-subst-20261010T201022.log",
+      "status": "PASS",
+      "exit_code": 0,
+      "seconds": 19.523,
+      "completed_at": "2026-10-10T20:10:42.181276+00:00"
+    }
+  },
+  "status": "PASS",
+  "total": 1,
+  "started_at": "2026-10-10T20:10:22.362321+00:00",
+  "verified_tool_identities": {
+    "jasminc": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/jasminc",
+      "sha256": "d17844ca514d73b459d2a99dcaa886b2b07bccfd2f90925b1cc400e475e62b53"
+    },
+    "jasmin2ec": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/jasmin2ec",
+      "sha256": "9a32cb80dc839e9feb2d6eff519b2df65d7d0517da5e6e801c889697b85d7660"
+    },
+    "jasmin-ct": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/jasmin-ct",
+      "sha256": "1b5af3a2fdb018afae6e45e4b1655b8eeddf71c0510f7dc46a0e088e7ee10680"
+    },
+    "jasmin-checksafety": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/jasmin-checksafety",
+      "sha256": "f73beba55df9236aa74e8f15a255fe71f7188ed3b5cfbb70ca30242caefb51e1"
+    },
+    "easycrypt": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/easycrypt",
+      "sha256": "f3a956f5a71af7a38e722c8364cc91b54d699c09c5e5108d4dd7c6bb261d565e"
+    },
+    "why3": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/why3",
+      "sha256": "59981bbdf5225aa1fc1a3f321abc98987ef8ac4d6e0f25f8f0642cb19f7a4d21"
+    },
+    "z3": {
+      "path": "/home/hacker-code-j/.opam/cryptotools-2026.09/bin/z3",
+      "sha256": "574aa7f011ef3c34c4ea1fd7255251d5054107124da0bcbbb3de82d12bfaa2d5"
+    }
+  },
+  "passed": 1,
+  "failed": 0,
+  "running": [],
+  "pending": 0,
+  "completed_at": "2026-10-10T20:10:42.682604+00:00"
+}

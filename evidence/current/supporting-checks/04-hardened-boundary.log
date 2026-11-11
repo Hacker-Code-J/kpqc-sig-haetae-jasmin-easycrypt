@@ -1,0 +1,67 @@
+{
+  "suite": "checked-hyperball",
+  "result": "PASS",
+  "seed": 325407429524476192,
+  "passed_cases": 308,
+  "assertions": 1834,
+  "categories": {
+    "cast_boundary": 12,
+    "round_add_carry": 6,
+    "norm_boundary": 13,
+    "scale_sticky": 8,
+    "combined_boundary": 10,
+    "designated_fixture": 3,
+    "random_scalar": 128,
+    "random_norm": 64,
+    "random_safe_compatibility": 64
+  },
+  "fixtures": [
+    {
+      "mode": 2,
+      "legacy_accepted": 1,
+      "checked_accepted": 0,
+      "production_accepted": 0,
+      "integer_norm": 4464117257937700460544,
+      "residue": 5192099988969472,
+      "bound": 6505809026482176,
+      "cast_bad": 18446744073709551615,
+      "norm_overflow": 18446744073709551615
+    },
+    {
+      "mode": 3,
+      "legacy_accepted": 1,
+      "checked_accepted": 0,
+      "production_accepted": 0,
+      "integer_norm": 258260884883511054336,
+      "residue": 6467851577331712,
+      "bound": 22510896139993088,
+      "cast_bad": 18446744073709551615,
+      "norm_overflow": 18446744073709551615
+    },
+    {
+      "mode": 5,
+      "legacy_accepted": 1,
+      "checked_accepted": 0,
+      "production_accepted": 0,
+      "integer_norm": 1125272442323279360000,
+      "residue": 21053826996711424,
+      "bound": 33503371683954688,
+      "cast_bad": 18446744073709551615,
+      "norm_overflow": 18446744073709551615
+    }
+  ],
+  "sha256": {
+    "wrapper_source": "b2198dffba37232e631f50028c7c62826da63ec6edc1ee48d6206edacc3a95c6",
+    "test_script": "3e2eca76945a163bdc9b0d43c01afe6a9871f23e8c1c7cf264db8472e4ccc25e",
+    "checked_phase_source": "c854562b35d9c8c276ef230cb38c23fd5ea69680662f1f985f2f83a7285bd49c",
+    "checked_test_library": "eff32b30c46c4566f100a0bae203435fa79f5a31511bf636673a170007773b91",
+    "baseline_fixture_source": "076e8bda3db03db34878552e471a37791cc65af25b4b5d88df1ef6076d8d0cfd",
+    "baseline_mode2_library": "2a017d46018fabfea1a7087ea9dde359cd573001a84563c9c9c37b87a0451f4d",
+    "hardened_mode2_library": "28afafa61eccf1c8765a237e82a471a0d1b157ca24b8d427102cd349111af0d8",
+    "baseline_mode3_library": "1ff5e0ff024f839da6197886f9c98ba54539747a021805d6bb6f4819752bd7a6",
+    "hardened_mode3_library": "a1db2a88ef336a6a2d6f3e0cc0b795192eecc146e12f7497f43f2dc64a2f3367",
+    "baseline_mode5_library": "f2aad75cceaf82fc3deae21a7f338fcde386a9556ce8244fe0449c954e08e334",
+    "hardened_mode5_library": "e964dabc2ad7287a7af489ade7a83b55b1b47ad6946cf0898500694b8b308fa8"
+  },
+  "scope": "Deterministic helper and production-export regressions using prescribed candidates; no SHAKE seed reachability or exploit claim."
+}

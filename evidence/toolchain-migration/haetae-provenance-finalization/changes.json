@@ -1,0 +1,332 @@
+[
+  {
+    "path": "haetae-1.2.0-hardened/README.md",
+    "old_sha256": "a1e8e09857453b9945f6f8736bfd619977d3c229cc429f4e917b67bb9e38326a",
+    "new_sha256": "98d3904822f7bc45fab0c83cb0a2368956717096b7604d8f674d3889805c943b"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array1.ec",
+    "old_sha256": "04ba3a3d4df770cc17cbba8d5ab1f53a2b2f21fd3d26202a3fda5d8f4baead56",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array1024.ec",
+    "old_sha256": "94e3460af4dcd76d6189e396e5e243f6c0e8ad4fabb9f51df3db2587d15546e2",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array1152.ec",
+    "old_sha256": "fcab2c98ad1fcfc3fd7bcd37f2baed693c234eb31d121ff21ac9bf439d37fba2",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array132.ec",
+    "old_sha256": "005249ae425c9770b359c030dfd92911f36c43a9790aeab47c5dcc409a893921",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array136.ec",
+    "old_sha256": "6109aa8cec2cb20195d6552d61f5da3429d6e4f739c475f90df7ecc36964f1bb",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array166.ec",
+    "old_sha256": "534b8705c5a12ccd12ebca71d67c63603a4cfcf968ef0b48e2fb47273157a671",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array2.ec",
+    "old_sha256": "f4e764f3fc58104308335fb45391929fba1872046ca43e8c4f2e9f21e30cdf81",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array2048.ec",
+    "old_sha256": "4504f4d333c91c769800ce405853c9ee0e166d1bb0d5107d0881e9e5265a6f27",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array24.ec",
+    "old_sha256": "24ce8ef5c2008ca4464948f5614847a7ff768ae20ecf6855712a401c69537f2c",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array25.ec",
+    "old_sha256": "93028dcc30026f11b72b8f5340ef07aaa8deed5b7c3c44bd327cb2178b283605",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array256.ec",
+    "old_sha256": "6cb195d84c963639b4b52d2bffc9bd3b1de0bf11b2850ec20870b76106371db8",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array257.ec",
+    "old_sha256": "ffe7d54213bb023af3878ce1a197a554f896dbc334ddf1ff1cb91841a77b10ec",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array26.ec",
+    "old_sha256": "10881d02fcdef785b0a17ebfc7a923888b56c0710ef7ba2c88a4e47005591904",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array2752.ec",
+    "old_sha256": "f77220fc99f816f5c25dc0e05bc611437b5eb045fca0dae3d409689ca219da2a",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array2948.ec",
+    "old_sha256": "beab037c6dd21d409957bddeb25b641ddea72ea62b12a647acf9f4a40f730545",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array32.ec",
+    "old_sha256": "f19dae6383154def68caa9787be02019ad13d51da4c3f25e4356e14b2bfa82eb",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array4.ec",
+    "old_sha256": "01638fa96a1b529cbaa242428239a5183403523657d162ce02f1488a19d3ed0f",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array4096.ec",
+    "old_sha256": "bcd969ebc44518aa4853f27a52ba49946cfbbe94110f5a327baa6ce947efe6df",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array5.ec",
+    "old_sha256": "f4d684618dc3ac6916fc46a8a4a18f250e40dad46a8bb5466e8fdd6471b5bfbb",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array512.ec",
+    "old_sha256": "ce6d36d1e3f49f3ba3f122b384a8121e0e291998359de4b949730b22e078c3f2",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array64.ec",
+    "old_sha256": "7c419ee9189a6ea1dd54221c576f7166e5805e15ec0eccd135e3993607f3bb65",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array76.ec",
+    "old_sha256": "2abe84568651918b3a315046ade49c57c138031223b4d6acfafdf671efa69bf9",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/Array8192.ec",
+    "old_sha256": "a1e52ed1a705527407ee577709c0d4ad31e09de7a8a79b9ea2493a97d0a5f2d6",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray1.ec",
+    "old_sha256": "d1911fa462f807c55d3c6131267537870826f5c49030f9f88ea820a991426ade",
+    "new_sha256": "6172d0e92b3739ea182854b3c1ba54b79ed3d563cb356bc166d8db49e8dbf6ed"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray1024.ec",
+    "old_sha256": "1261a544037b034d0d519b7b4906f0b17d57cdadd566f914b1531923eb1bf302",
+    "new_sha256": "6a2e98152fc3a6818d066131a889f816b659bb3a367f9ba91cef436a00612a0a"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray1152.ec",
+    "old_sha256": "20233fc147ce1ea382d0e06b457d1fe2672b7babaded9f42403a96968ff83f18",
+    "new_sha256": "26c696e2fcf29342e44ca4fb8fe470fd239f6ff55ef688cbb86804268eb3c8f9"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray1328.ec",
+    "old_sha256": "89f57d70ddbc7a348d9546d413d91aa90d2eeb4351c834c01332a94df9eb2542",
+    "new_sha256": "7a35d0887258cb42df0cb41183ac80574c4486ba39e7493ea710e030ae60273e"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray136.ec",
+    "old_sha256": "cdfc02f7614db10f8f083f7bc9043c255893a62f79dc2a7df5471ec9e949d148",
+    "new_sha256": "e495cd45ae36c2b482775bb4ad84c0a2a37df1187049b3529af5fb25c06fc0f3"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray16.ec",
+    "old_sha256": "b2446f2e1c0deaa482dc387220dca7068b1dfe4ec7ed7a0dc01d41aa00034e16",
+    "new_sha256": "df1e922861aa2d428a3af7f2c762cd74395a4a2de365b4abe0e52bfd571a82d9"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray192.ec",
+    "old_sha256": "fed37666ad21084cbf033d524407239a40b0a1fe767f9274de750af3973ba847",
+    "new_sha256": "0cd7569254e06230553c51882ad12376a80a6868027920e8d3025bf24bfd3132"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray200.ec",
+    "old_sha256": "fa54b0400728a07e2ca6f51ff9eaea2652f5c7840755731befb338ed31c6761f",
+    "new_sha256": "844f305f6e34ca45136c88baf886ef71f7302b553f60421e6bd6c3eaeadbd426"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray2048.ec",
+    "old_sha256": "3a38e946092ce1389c54e97bc73f77dabcf0484078cabc4204eaf3ed9f640997",
+    "new_sha256": "c777a83a23a23306a1f467bd38dfb427fa929b82af4f083cd5f42feb8c607a88"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray257.ec",
+    "old_sha256": "6122773bd311fda0a1718efe1bf1d11fb2a043a86fdff9caa3d111a27b7aff9f",
+    "new_sha256": "7d246dfb839a1048892e5a35edf15c08dc2a9fff8d9cfa03eafce1c56c480b3c"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray26.ec",
+    "old_sha256": "6b64b88a906ff80822bffe773646e54ca0d0049bed0597245ea6cc5d27023cb6",
+    "new_sha256": "1e621a3af54087ce1ae0c3a2d3cb83c470ea6e0c382c30bb2448c2b70046057d"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray2752.ec",
+    "old_sha256": "c0449c45b0e65ce4893c571e833185f3299fc56e9f679f044e1394f347846684",
+    "new_sha256": "ab5fb8645b99a87cdce6de1b2f82d45797b3daecc45da51ca1b81659f2ccac06"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray2948.ec",
+    "old_sha256": "0ac899fe4c37f75bf605d24616c53def9ee302a4d064f606577a005de788d8ed",
+    "new_sha256": "5631105eb9fb5465e9ec4dd5fe01e17f80ef9da449e1ad7e4aacf61648922549"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray304.ec",
+    "old_sha256": "f843945ee29de24531f8138d0e8e9bd58977480837ddbf76415c398195d76740",
+    "new_sha256": "accc534a3dbfb3ef32b40a384ef85e4ce6123a1053e817d1cb86294d9521fb08"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray32.ec",
+    "old_sha256": "2fffb58a62913db4e48a10150e4cc936f3265fd747c8cae2d528284f3ccea74c",
+    "new_sha256": "a67fec7f620b5a0c75ede4bc259500c429682950e39543f9cf51cf4ebe991287"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray32768.ec",
+    "old_sha256": "01fd5d42560a0c3a7e31b30af27fc5d4982082fa6a5d7265ae408c47932f5e71",
+    "new_sha256": "5437857ef9c93ca28eb5bd37219037dae7522092895bc0d78d32f9a2b29a6ade"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray40.ec",
+    "old_sha256": "ce2a0e6758ee0158d74a5482eee5bb0947ddf3d8bf26f65d2a95a8355f82bb42",
+    "new_sha256": "4e7aef098c2d3f7bf5459d326ec87f773fed9c3f701b2e0daaf2957c2e0cd2ea"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray512.ec",
+    "old_sha256": "ea51229692aad0866cbfb1dbbaec2209409a0b95f43b040041de8e30149d7c66",
+    "new_sha256": "bb569b2ad7d094fdb3228b1ee8e40d8fca33c941a397b7a8417455c6a4a0d35c"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray528.ec",
+    "old_sha256": "d7cacff4bfe63f9999785b51c3922c7d6c733871770f06fe576f60ca88628ce3",
+    "new_sha256": "726fbd1d9ad91fa00e4f0898148fca66af621e8181137ad95eaf75a600c589ef"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray64.ec",
+    "old_sha256": "abe9c86026b998022cf0c108076cba6283ed83950ef17d31ec7222d25b3d5f0d",
+    "new_sha256": "500cca4248159acc35192497bb11844f997fa3613091ab334b1a4507813e3d66"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray8.ec",
+    "old_sha256": "0a4f7800b0a43b6b9336e2f779213808dc2a21812e778bad28a5fdf8b6fa1c47",
+    "new_sha256": "0199774e9f0e9d355c74c3b6f63b0e25414bed8ee84690344dcda381f50f727c"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/BArray8192.ec",
+    "old_sha256": "46e6249389bcf877c541dd830eb9871b8e1841e88d43e8add9f086e95f76cbd8",
+    "new_sha256": "4e8ed9d2142758cfdbd0eb04155b4589c29ea697d269ebf50cdc4ce46ba2cc1b"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/HardenedHyperballTarget.ec",
+    "old_sha256": "3386b3dce5721c2e5048c79363f7e2d8a59fb15626bbb8d1cc4f4a77d69a9098",
+    "new_sha256": "ae95676b2b4539376a9928e35bee5fe85ff0cba0da32e94fabe5e8f26727ce86"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/HardenedPhaseTarget.ec",
+    "old_sha256": "870123278c013a89417208a0c221a3754144bd86d83868f58186d7d473aa04e4",
+    "new_sha256": "7e6b89170aed6a3874f3cb3ee49208d5ab9b6aee4697970a094c73dbeaa15c45"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/HardenedSignerTarget.ec",
+    "old_sha256": "8f6b025f8a9b71fb0efc9d54af08358e12ae167162e0b4655b15ac1e21b51f98",
+    "new_sha256": "30eb0d531eefc551569f2033b1cc9c069871567921c52651741adfa001bae5c4"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray1024.ec",
+    "old_sha256": "1f8f583ebe2fddcc9767aff75634dc5de6b4ea96feabb3c6069f8021a2297df1",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray1328.ec",
+    "old_sha256": "de034a390c40589e6ac2ad41fd86c5efcf7c60ac364121a0359447e9d6ff5cee",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray192.ec",
+    "old_sha256": "c5c87f6059ef8fce50ff0d3af2204a8cd834fdaeac8ab93369676e3fe6a11c60",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray2048.ec",
+    "old_sha256": "c177d9656c397adbdcd030b9653e087ee11f748ab805e107519390f94898fdbb",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray304.ec",
+    "old_sha256": "5e4ae4c5ec50aa1bea307fc7cd07c75f1fa0d5f3a629fe6b9a88eb28bd4efc6e",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/generated/WArray528.ec",
+    "old_sha256": "0f9a53ef38bfbd43ddcd9514bf5ce500f14d8b77d2983e3e3e20a037fa9a31e4",
+    "new_sha256": null
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedAcceptanceCorrectness.ec",
+    "old_sha256": "6cfd767ce151abaefded04a82256d2a78f2102e5ac091ec8ad1945162ea0d037",
+    "new_sha256": "96004885b177a8eef8f71a344d3c4dd19cd482f8745205fe2ed2adae42e3d8f1"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/proofs/CheckedNormCorrectness.ec",
+    "old_sha256": "df1142d15c2ad198eb43de998fb8464b7ffd9f1690a197f8e543202842fbfc0d",
+    "new_sha256": "ab266955d258f496ea806efd42b6a616fb3ab02477030c5069b11b75c5deb956"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/easycrypt/proofs/HyperballRenyiBatch.ec",
+    "old_sha256": "e0fd2bb4b9b179de75fcb14ed38ad6c115cde2ca9467fd8e0247f8832a032647",
+    "new_sha256": "47ed777994bb69e91cd914d3f9b3cae6a58a9fba5a8313e8e53c6aed2b2c2507"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/scripts/extract.py",
+    "old_sha256": "e88c2a7a02b275768596652190cf5dbfccbc16d993f9e0a21373001e6ca986cb",
+    "new_sha256": "ca3c377e1bc819bf1b5621eed59fb07b7fbd5dc85c4f0dd219693e346ab990e5"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/scripts/materialize.py",
+    "old_sha256": "3b96fbd9ede332e255484009a04747e647edb7917e63adc6f39b8ff1660d33c4",
+    "new_sha256": "ac4f5eb004f9500d7045d9f465ade19732e32b501f324b9b0d0d72961c33790b"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/scripts/verify-one.sh",
+    "old_sha256": "6d8c7a56fd76a0244da4890bf31106370773e94edb94f737314a58977dd93967",
+    "new_sha256": "3fb3488eec191b57fff649e44859825c457962561ebd983f757c51ea66e4ac34"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/scripts/verify.py",
+    "old_sha256": "92017f68584432aee29b7024d8b628865a26a268d762ebe67fcc91794286a9fb",
+    "new_sha256": "87967a6ea8ae39d70e675da8b45db41aa2a44489ba92b5a0f2bcc2ee672ccbef"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/tests/gaussian-rate-gate.py",
+    "old_sha256": "dea3f7c6ccf6681faff792e0df7eb7c5ae1dc20f3d4a24e6dcb39e622d9b3c65",
+    "new_sha256": "10dbf790475cb10f6363858c900eaa1a2680be1e85027dd9768cf188321d7bf0"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/tests/materialize.py",
+    "old_sha256": "bdacfe10479208209425e898745444b618211662c4dfe05127ca3ed02a7cd34e",
+    "new_sha256": "e8faf438770c695390acb13fdc2c7169919fa3a9485fa5e7f466854f5834f0ea"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/extraction-manifest.json",
+    "old_sha256": null,
+    "new_sha256": "90046b28767e6c85500e879bbf838269786cf10f2a7bc5f61200b890d3ec8a37"
+  },
+  {
+    "path": "haetae-1.2.0-hardened/toolchain-migration-lock.json",
+    "old_sha256": null,
+    "new_sha256": "95638882310f0ba8189da209f819c74cdf74fe52336095feec4186d79d714c33"
+  }
+]

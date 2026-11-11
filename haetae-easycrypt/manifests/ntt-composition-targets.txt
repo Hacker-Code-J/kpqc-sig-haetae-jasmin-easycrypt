@@ -1,0 +1,13 @@
+# NTT composition theories; exact coverage enforced by verify.py.
+theories/NTTVectorSpec.ec
+proofs/NTTMontgomeryBounds.ec
+proofs/NTTPointwiseCorrectness.ec
+theories/NTTProductExpansion.ec
+theories/NTTTransformAlgebra.ec
+theories/NTTComposition.ec
+proofs/NTTCompositionInstance.ec
+proofs/NTTMatrixCorrectness.ec
+proofs/NTTVectorCorrectness.ec
+proofs/NTTVectorTotal.ec
+proofs/NTTMatrixProductCorrectness.ec
+proofs/NTTProductCorrectness.ec

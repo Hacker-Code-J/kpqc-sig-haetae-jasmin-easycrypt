@@ -1,0 +1,2320 @@
+{
+  "checked_at": "2026-09-22T08:07:16.041337+00:00",
+  "scope": "Quantitative raw-square safe-domain escape and unconditional one-attempt unsafe-acceptance bounds in the explicit iid-byte model; no concrete SHAKE or outer-retry claim",
+  "complete_api_correctness": false,
+  "generated_files": 102,
+  "new_local_theories": 195,
+  "ntt_local_theories": 12,
+  "all_local_theories": 207,
+  "generated_replay": {
+    "result": "PASS",
+    "checked_at": "20260917T150034.912595Z"
+  },
+  "new_replay": {
+    "result": "PASS",
+    "checked_at": "20260922T065900.431316Z",
+    "cache": "-no-eco",
+    "proof_mode": "Proofs:check",
+    "targets": [
+      {
+        "target": "proofs/ApiBoundaryCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "929f693d09fdfd2662252ff97793faee6dca3444509ea3724d1c4831c6513c09",
+        "seconds": 45.651,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ApiBoundaryCorrectness.ec.log"
+      },
+      {
+        "target": "theories/ReferenceConstants.ec",
+        "exit_code": 0,
+        "sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
+        "seconds": 1.944,
+        "log": "logs/20260922T065900.431316Z-new/theories__ReferenceConstants.ec.log"
+      },
+      {
+        "target": "theories/ApproxExpSpec.ec",
+        "exit_code": 0,
+        "sha256": "81ac19dab1ecd6100f92e15aa8de4cd4169a73f93ca291f1636e4e64b87ae188",
+        "seconds": 2.03,
+        "log": "logs/20260922T065900.431316Z-new/theories__ApproxExpSpec.ec.log"
+      },
+      {
+        "target": "theories/ApproxExpCertificate.ec",
+        "exit_code": 0,
+        "sha256": "d2e3e3aa004f9d01fca6a40f2c00c766de49546afc53994e09fb26f9da2873b9",
+        "seconds": 0.41,
+        "log": "logs/20260922T065900.431316Z-new/theories__ApproxExpCertificate.ec.log"
+      },
+      {
+        "target": "theories/Bernstein10Spec.ec",
+        "exit_code": 0,
+        "sha256": "aedbb63b6027d7cc2253b444bef89ea35386c8bba81e0d8203084b7c5d92e249",
+        "seconds": 0.41,
+        "log": "logs/20260922T065900.431316Z-new/theories__Bernstein10Spec.ec.log"
+      },
+      {
+        "target": "proofs/Bernstein10Correctness.ec",
+        "exit_code": 0,
+        "sha256": "6b43902a36c7fc6a625b3f437b21d5a41c684fa26119cd3af3da57c58925c131",
+        "seconds": 1.922,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Bernstein10Correctness.ec.log"
+      },
+      {
+        "target": "proofs/ApproxExpCertificateChecks.ec",
+        "exit_code": 0,
+        "sha256": "a28aa1b7eab5e11efa169cff6c9664a6d6412e09dda1bba6d9881de471f5d21a",
+        "seconds": 2.067,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ApproxExpCertificateChecks.ec.log"
+      },
+      {
+        "target": "theories/FixedPointSpec.ec",
+        "exit_code": 0,
+        "sha256": "c5db5999e0ab6e36eb131663ecd75ff36c0dc46ec2defc313eda073585705e89",
+        "seconds": 1.82,
+        "log": "logs/20260922T065900.431316Z-new/theories__FixedPointSpec.ec.log"
+      },
+      {
+        "target": "proofs/SamplerConstants.ec",
+        "exit_code": 0,
+        "sha256": "22081fa38ffe076889b008a6ea7ef8b6f68f9d67e395484bb656e1c87fbd5988",
+        "seconds": 2.433,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SamplerConstants.ec.log"
+      },
+      {
+        "target": "proofs/FixedPointCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "7df52dc190959e9ec3e8d547c9a99703707ed7ce7e01a1f8a41af8e4cd8ab27e",
+        "seconds": 13.226,
+        "log": "logs/20260922T065900.431316Z-new/proofs__FixedPointCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/CDTTermination.ec",
+        "exit_code": 0,
+        "sha256": "4aae7678459b13d2e12eb7dd0c878cfe595e8910c1c31b7e47ea6109cc084bfa",
+        "seconds": 3.638,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTTermination.ec.log"
+      },
+      {
+        "target": "proofs/CDTCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "4ce3e9d49b1d22d9fbadd3cc0f249c74a8dc9eb651aa67847d94a6f4b472610b",
+        "seconds": 19.255,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTCorrectness.ec.log"
+      },
+      {
+        "target": "theories/SigmaSpec.ec",
+        "exit_code": 0,
+        "sha256": "775afc9e4bf71187a595c1d6b62cc7142f5ce53a57daf70eff7e33b1d0a1d9de",
+        "seconds": 2.02,
+        "log": "logs/20260922T065900.431316Z-new/theories__SigmaSpec.ec.log"
+      },
+      {
+        "target": "proofs/SigmaCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "1c9fe75b27d463a042688b495766271f0ad456adf658a133cb5db4327d24da45",
+        "seconds": 3.656,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigningSamplerBridge.ec",
+        "exit_code": 0,
+        "sha256": "9565d6bf9c16090202869cdfaf23272a06a37ca4fbc9d12be24e5bde034564af",
+        "seconds": 5.973,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigningSamplerBridge.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRoundingCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "7fe1f857554663cedbb81693a3822abff241064fa62e098614ecd11b8914e9aa",
+        "seconds": 9.875,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRoundingCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaSquareBounds.ec",
+        "exit_code": 0,
+        "sha256": "f959eddfbf767e40a19dedcd2e9c939586394aae8d694c051aed182fc20e21cb",
+        "seconds": 4.125,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaSquareBounds.ec.log"
+      },
+      {
+        "target": "theories/GaussianTraceSpec.ec",
+        "exit_code": 0,
+        "sha256": "1a96a5fa89ea217703b5e5f740c854c9e6ac959fd62fb43181d42eb2b46429ab",
+        "seconds": 2.448,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianTraceSpec.ec.log"
+      },
+      {
+        "target": "theories/GaussianConsumerSpec.ec",
+        "exit_code": 0,
+        "sha256": "e1b661a5a755159493dbebc4dd4cf9d774e688f421cf7a48be1c7676c7d0d13d",
+        "seconds": 2.023,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianConsumerSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianConsumerCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "15a1657dc23576766091313fdd7b4539713c3a4288234b84145ac088d732d599",
+        "seconds": 27.81,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianConsumerCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianTraceProperties.ec",
+        "exit_code": 0,
+        "sha256": "cef67089d661d67c8aef0c33f01200543c5a87afc315f8ae6c60ebb6abd1919a",
+        "seconds": 17.938,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianTraceProperties.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBufferLemmas.ec",
+        "exit_code": 0,
+        "sha256": "9546466d3574dd505a548ef5a115da3e397719b7013719ea5c527d428a302678",
+        "seconds": 3.771,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianBufferLemmas.ec.log"
+      },
+      {
+        "target": "theories/GaussianWindowSpec.ec",
+        "exit_code": 0,
+        "sha256": "c3236e5ca309ee172a0dc39bb87c3b4df8a57f0d6c0ab542c5f15d5823cb4156",
+        "seconds": 4.422,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianWindowSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianTraceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "b616a02f66bf0270ec26fe8a246733821a7ffb077306d01d46ecc0be88a47a0a",
+        "seconds": 29.096,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianTraceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianOffsetBridge.ec",
+        "exit_code": 0,
+        "sha256": "aa954866bc0914aae9473056e9140c0fffed4f791222affb15f3f6558c61e78e",
+        "seconds": 9.288,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianOffsetBridge.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamSequence.ec",
+        "exit_code": 0,
+        "sha256": "3a2b77b83a3e69691cd51ec76a84ae1096c527bec771cf8ade53c0f54a077637",
+        "seconds": 7.553,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianStreamSequence.ec.log"
+      },
+      {
+        "target": "proofs/GaussianAccumulatorCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "f0c8b795b52d4fa9e982eb5610c8bc1c06a5a48124c62bb4e217b1fb92b919c6",
+        "seconds": 6.133,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianAccumulatorCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSequenceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "469f6bf2659a1466df1dd07c27c7d089b38cae2fbd5241a6bfc2e08735f6ab83",
+        "seconds": 17.875,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSequenceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamAccumulator.ec",
+        "exit_code": 0,
+        "sha256": "9cee6dddc1312246e6f8cedee7b2b3e9854610742ae5bf307c36c49b851ece50",
+        "seconds": 8.923,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianStreamAccumulator.ec.log"
+      },
+      {
+        "target": "theories/SHAKEBlockSpec.ec",
+        "exit_code": 0,
+        "sha256": "baa6e1d3330e40ecf46fdfff7856c59d84f0638ab92b41f25d674b8732b0eb2f",
+        "seconds": 4.398,
+        "log": "logs/20260922T065900.431316Z-new/theories__SHAKEBlockSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRefillCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "34708c3cd7bba616ce808b11d11887bac3252761b6ae5b0a269953f0b6520c5c",
+        "seconds": 22.975,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRefillCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamBuffer.ec",
+        "exit_code": 0,
+        "sha256": "1bbb799c26501a407fa5ef203866b685cf1ab9ba3e2dc84350de87816b1a21b5",
+        "seconds": 89.354,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianStreamBuffer.ec.log"
+      },
+      {
+        "target": "theories/GaussianStreamSpec.ec",
+        "exit_code": 0,
+        "sha256": "f0c742b71979b21b57d7cb9068b4af2718739793f0209de8c45cddd222fe83ae",
+        "seconds": 28.775,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianStreamSpec.ec.log"
+      },
+      {
+        "target": "proofs/SHAKEBlockCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "d8a0dbd8d2546670ad57cdcb8a392f81f16ec1c2025d8cb234f663482cb96cbd",
+        "seconds": 199.34,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SHAKEBlockCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamComposition.ec",
+        "exit_code": 0,
+        "sha256": "6383aaefc2ab9012d907c3462201ba0067916037e5245a5a0fc34a2e8fae20ab",
+        "seconds": 46.062,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianStreamComposition.ec.log"
+      },
+      {
+        "target": "theories/SHAKEStreamSpec.ec",
+        "exit_code": 0,
+        "sha256": "2b52cb33ec60a423339cfa930a7b01d60a5a079f10bab6f1edf3bdb884476f56",
+        "seconds": 44.285,
+        "log": "logs/20260922T065900.431316Z-new/theories__SHAKEStreamSpec.ec.log"
+      },
+      {
+        "target": "proofs/SHAKESeedInitCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "9bd601a182a9e0dd404c3cd1c8c09db5564165dd7f2cd57f19ad1d4a2786af8b",
+        "seconds": 7.412,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SHAKESeedInitCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianStreamCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "58c68cce22d3c8425a6223f38252d4f556dda850137858e51765581dc15bc5a7",
+        "seconds": 57.953,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianStreamCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballGaussianBounds.ec",
+        "exit_code": 0,
+        "sha256": "fc556bfd6d28528653d1065dd48358fa5d6758f783e37627f1f5e19d14daa3ea",
+        "seconds": 10.954,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballGaussianBounds.ec.log"
+      },
+      {
+        "target": "proofs/SigmaExpInputBounds.ec",
+        "exit_code": 0,
+        "sha256": "140c75001d314620df700396c4602bbc82ab00fa9a1c3e03310454f17996a3b6",
+        "seconds": 21.788,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaExpInputBounds.ec.log"
+      },
+      {
+        "target": "proofs/ApproxExpWordCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "c9d57562b6e5d11ed99660a1a9090a18ef5e796681560f3257e88ed074d3a4a6",
+        "seconds": 69.898,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ApproxExpWordCorrectness.ec.log"
+      },
+      {
+        "target": "theories/ExpIntervalSpec.ec",
+        "exit_code": 0,
+        "sha256": "a45a8fb736ca147a25ce91d12a507bb32d7f598ea9cabf8db4af9067da312139",
+        "seconds": 0.726,
+        "log": "logs/20260922T065900.431316Z-new/theories__ExpIntervalSpec.ec.log"
+      },
+      {
+        "target": "proofs/ExpIntervalCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "04ea4a5a2240b7b54fdfda28ba8b8b627c3c295424166581ba45e84900d0ce63",
+        "seconds": 2.974,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ExpIntervalCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/ExponentialGridComparison.ec",
+        "exit_code": 0,
+        "sha256": "612c610d4da8127c939cce5362cb095a29c1b1d819128239b784b6dc09caa599",
+        "seconds": 1.643,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ExponentialGridComparison.ec.log"
+      },
+      {
+        "target": "proofs/ApproxExpPolynomialBound.ec",
+        "exit_code": 0,
+        "sha256": "64bae21468cdd3020c77cc249283a416e755fbfc74839b2534d419de049a0e53",
+        "seconds": 20.178,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ApproxExpPolynomialBound.ec.log"
+      },
+      {
+        "target": "proofs/ApproxExpNumericalCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "c29d3d5917dafcf0a7e8e9d0ffbf965825f102211bdcb5e718ebebb1866cb7eb",
+        "seconds": 5.656,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ApproxExpNumericalCorrectness.ec.log"
+      },
+      {
+        "target": "theories/CDTDistributionSpec.ec",
+        "exit_code": 0,
+        "sha256": "3dd5e6ab147467b01ec3bee46a06a4f59588cc1124454670e40282327bb764bd",
+        "seconds": 0.879,
+        "log": "logs/20260922T065900.431316Z-new/theories__CDTDistributionSpec.ec.log"
+      },
+      {
+        "target": "proofs/CDTDistribution.ec",
+        "exit_code": 0,
+        "sha256": "7cc09e5e690b8faa0847adc04609ce2900c374eb338278c44d93d85d9353c255",
+        "seconds": 14.376,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTDistribution.ec.log"
+      },
+      {
+        "target": "proofs/CDTDistributionBridge.ec",
+        "exit_code": 0,
+        "sha256": "7f4159a5b2a95df8b24e311b1f8de684b33b1f86807e68d121a8e0de6edf8a5a",
+        "seconds": 8.085,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTDistributionBridge.ec.log"
+      },
+      {
+        "target": "theories/HalfGaussianSpec.ec",
+        "exit_code": 0,
+        "sha256": "4aabd63ca9d874e311bc2b893ee1608057c131515fe32c40115a073ee8851646",
+        "seconds": 0.926,
+        "log": "logs/20260922T065900.431316Z-new/theories__HalfGaussianSpec.ec.log"
+      },
+      {
+        "target": "proofs/HalfGaussianProperties.ec",
+        "exit_code": 0,
+        "sha256": "42e6721a80d93367bde24bdeb96764cf13c8c7fc1ca947d454059a376900b5b9",
+        "seconds": 3.078,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HalfGaussianProperties.ec.log"
+      },
+      {
+        "target": "theories/CDTGaussianCertificate.ec",
+        "exit_code": 0,
+        "sha256": "e52546426e23f29e384790238cadbcceffd571ae7baed608b9cd8f69888a6379",
+        "seconds": 0.739,
+        "log": "logs/20260922T065900.431316Z-new/theories__CDTGaussianCertificate.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIntervalBounds.ec",
+        "exit_code": 0,
+        "sha256": "1d8ac7b2858e248e70edde6285b4f9772f02f97d1963684f96781b9026ee6c12",
+        "seconds": 2.119,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIntervalBounds.ec.log"
+      },
+      {
+        "target": "proofs/CDTGaussianCertificateChecks.ec",
+        "exit_code": 0,
+        "sha256": "710dbc4f3df1fd8f65f354e4e46448a6d28287d5d80fcdd8c501df6b9162823e",
+        "seconds": 11.453,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTGaussianCertificateChecks.ec.log"
+      },
+      {
+        "target": "proofs/CDTGaussianEnclosure.ec",
+        "exit_code": 0,
+        "sha256": "50196b83ca4fa753a9821ede67b2be7e10cc8ab2a93fd8f735582f402f3f5f7b",
+        "seconds": 3.914,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTGaussianEnclosure.ec.log"
+      },
+      {
+        "target": "proofs/DistributionIntervalBounds.ec",
+        "exit_code": 0,
+        "sha256": "5e27c935050752d0a49de9e3d84ab7916c58ac514dcde0cb3cdf68137eb454f9",
+        "seconds": 2.633,
+        "log": "logs/20260922T065900.431316Z-new/proofs__DistributionIntervalBounds.ec.log"
+      },
+      {
+        "target": "proofs/CDTGaussianTableBridge.ec",
+        "exit_code": 0,
+        "sha256": "69711e982544578f6cb7d9af95fea4f01fa350274d79db8c846093d763ba4d2b",
+        "seconds": 5.952,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTGaussianTableBridge.ec.log"
+      },
+      {
+        "target": "proofs/CDTGaussianApproximation.ec",
+        "exit_code": 0,
+        "sha256": "22c06e8346bc40b9892e93c02a70563221a3b1b293935fbe16b475fdf0b6ad6f",
+        "seconds": 3.205,
+        "log": "logs/20260922T065900.431316Z-new/proofs__CDTGaussianApproximation.ec.log"
+      },
+      {
+        "target": "proofs/ConditionalRatioBound.ec",
+        "exit_code": 0,
+        "sha256": "f15fce635a626453342eaedc92f59d1fe0ebf7a66f82f95f627b71a2b0e9d633",
+        "seconds": 0.995,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ConditionalRatioBound.ec.log"
+      },
+      {
+        "target": "proofs/DistributionExpectationDistance.ec",
+        "exit_code": 0,
+        "sha256": "72a49e31513d61c3c5fb988aef57992639474d7ec927c85be5bfa0091fe60a86",
+        "seconds": 1.623,
+        "log": "logs/20260922T065900.431316Z-new/proofs__DistributionExpectationDistance.ec.log"
+      },
+      {
+        "target": "proofs/ExponentialLipschitz.ec",
+        "exit_code": 0,
+        "sha256": "632727b3610a09cc54a99478ca93eb974bb6b34ec800613aafcb06112d0ff9a0",
+        "seconds": 1.261,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ExponentialLipschitz.ec.log"
+      },
+      {
+        "target": "proofs/FiniteExpectationError.ec",
+        "exit_code": 0,
+        "sha256": "6d55672be3d130663a9759227191cdba836381d0653dffc088f3ae523705e168",
+        "seconds": 1.152,
+        "log": "logs/20260922T065900.431316Z-new/proofs__FiniteExpectationError.ec.log"
+      },
+      {
+        "target": "theories/Gaussian76Spec.ec",
+        "exit_code": 0,
+        "sha256": "4f8a2a1e1f04aa2def0dfe06707cf7443e3f6da863102667b824a274cd10018b",
+        "seconds": 0.876,
+        "log": "logs/20260922T065900.431316Z-new/theories__Gaussian76Spec.ec.log"
+      },
+      {
+        "target": "proofs/Gaussian76Properties.ec",
+        "exit_code": 0,
+        "sha256": "6be244673a7289581ee5cf0adb6caba045c8f5cd0107d1cc966004d17fc6e780",
+        "seconds": 1.749,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Gaussian76Properties.ec.log"
+      },
+      {
+        "target": "proofs/Gaussian76Folding.ec",
+        "exit_code": 0,
+        "sha256": "34a2003d9b37e714d0065ed6b556a5daffc781b38716cea1fb78b9089fd3a6c5",
+        "seconds": 2.446,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Gaussian76Folding.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBlockReindex.ec",
+        "exit_code": 0,
+        "sha256": "5fc4a655a4d7c6415b9faaa72ad84f802d2343e2ac0bf68e36a1099ee3962705",
+        "seconds": 1.106,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianBlockReindex.ec.log"
+      },
+      {
+        "target": "theories/SigmaRawSpec.ec",
+        "exit_code": 0,
+        "sha256": "575fcec7719f2589deb37bf0f9fe60a1f4fabb7588593833500a8dd0b8d4dcda",
+        "seconds": 2.618,
+        "log": "logs/20260922T065900.431316Z-new/theories__SigmaRawSpec.ec.log"
+      },
+      {
+        "target": "theories/SigmaRawNoiseSpec.ec",
+        "exit_code": 0,
+        "sha256": "9f9b9aa3cabed71abe5bbf44558a3e1063360f77abd602d6bfb70af05a412d51",
+        "seconds": 1.538,
+        "log": "logs/20260922T065900.431316Z-new/theories__SigmaRawNoiseSpec.ec.log"
+      },
+      {
+        "target": "theories/SigmaJointSpec.ec",
+        "exit_code": 0,
+        "sha256": "7d0e5bdadf21e95360ec9dd034a4fa9c8c433d5745277dd9b8764664f90464df",
+        "seconds": 2.602,
+        "log": "logs/20260922T065900.431316Z-new/theories__SigmaJointSpec.ec.log"
+      },
+      {
+        "target": "proofs/Gaussian76Kernel.ec",
+        "exit_code": 0,
+        "sha256": "e0d3db2e92fa394d2ba2136bb7acdf27131083289c56219b1e7a11ee64a48b49",
+        "seconds": 3.469,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Gaussian76Kernel.ec.log"
+      },
+      {
+        "target": "proofs/Gaussian76Rounding.ec",
+        "exit_code": 0,
+        "sha256": "6caec2779359c5fe3984538a9b850e3766d9b78053e4a6841336ab656896295b",
+        "seconds": 1.775,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Gaussian76Rounding.ec.log"
+      },
+      {
+        "target": "theories/Rejection48Spec.ec",
+        "exit_code": 0,
+        "sha256": "5a1056d429633a8b6412730773b44647d72b62586d168777a31dc31226e062fc",
+        "seconds": 2.679,
+        "log": "logs/20260922T065900.431316Z-new/theories__Rejection48Spec.ec.log"
+      },
+      {
+        "target": "proofs/Rejection48Correctness.ec",
+        "exit_code": 0,
+        "sha256": "649ea5bb71dfec0d9321693a67d2645e5326245e5abd8b6ffc59a2f37b6249c8",
+        "seconds": 4.084,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Rejection48Correctness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRejection48Bridge.ec",
+        "exit_code": 0,
+        "sha256": "50fce507b4149352de2ce30dffe143f4a41aebc49b6743e275c16539f7ef39d6",
+        "seconds": 6.661,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRejection48Bridge.ec.log"
+      },
+      {
+        "target": "proofs/SigmaExpAcceptanceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "c2c69ff88e5696b84e3d1c90dd95da955ea576cc3ec99c432bc9d41860da0cbc",
+        "seconds": 6.846,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaExpAcceptanceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaNoise72Bridge.ec",
+        "exit_code": 0,
+        "sha256": "f09b2cdc8f98ea8610ac02eaefeeb034fd359e08279d6d9117168c1aa496a265",
+        "seconds": 10.472,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaNoise72Bridge.ec.log"
+      },
+      {
+        "target": "proofs/SigmaCDT83Patch.ec",
+        "exit_code": 0,
+        "sha256": "0d50396403cb558e2cd91cc3ed82f5714404ac424122d409401acd29127395a4",
+        "seconds": 6.915,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaCDT83Patch.ec.log"
+      },
+      {
+        "target": "theories/SigmaConditionalSpec.ec",
+        "exit_code": 0,
+        "sha256": "d38e29cef5378742635dc97e0575e4a6f24a839da2360cda581a2fc882b72cd7",
+        "seconds": 5.459,
+        "log": "logs/20260922T065900.431316Z-new/theories__SigmaConditionalSpec.ec.log"
+      },
+      {
+        "target": "proofs/SigmaSquareExact.ec",
+        "exit_code": 0,
+        "sha256": "5ae1dc6e0fa7cd3377e64ed87cc8822d84a028c66ff0bd6b1d3e53488a258472",
+        "seconds": 78.699,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaSquareExact.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRawExponentCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "c421f6a08f6b4cba73345854d62ed5bd20136edf8441866be4478ce0fbb21cee",
+        "seconds": 49.232,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRawExponentCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRoundedOutputCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "68fe00b69d1508c55ad9f4ea2f87d0f18455e3d3ee243b4710b01bc2ab0ff823",
+        "seconds": 4.993,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRoundedOutputCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJointKernelCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "488a96075856ead4677b50266d72466f4a2f86e8a5a28c328752ec4e63383174",
+        "seconds": 6.394,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJointKernelCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJointIdealCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "57f6e9012275b2dedac79f5c6da2085257c4ae80f726ec4dd6ef28796e7f70d5",
+        "seconds": 5.478,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJointIdealCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaConditionalIdeal.ec",
+        "exit_code": 0,
+        "sha256": "ef1fdc6c2dc161a36eb18c84dd6614fd37c3394d3d969bba80ae0b8226085a22",
+        "seconds": 5.374,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaConditionalIdeal.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRawZeroCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "44cf88cd2f02830bbef3f7d8ecccb287ac7a2acadff91c797e6df64c23442133",
+        "seconds": 36.871,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRawZeroCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRawAcceptanceCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "493f18c1fa022888a0d48101c1ebed61797c821a66b9be2eff55d7a4ead98d22",
+        "seconds": 58.349,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRawAcceptanceCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJointAttemptBridge.ec",
+        "exit_code": 0,
+        "sha256": "903ec1bd47294402e464ca424944f260bf6e4f786138f42c4bd33b535e6cafa6",
+        "seconds": 17.847,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJointAttemptBridge.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJoint203Bridge.ec",
+        "exit_code": 0,
+        "sha256": "d05c04c63d95ee5dff1487d8c79b127901516261a201134ff089afecd42037f6",
+        "seconds": 5.488,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJoint203Bridge.ec.log"
+      },
+      {
+        "target": "proofs/SigmaConditionalActual.ec",
+        "exit_code": 0,
+        "sha256": "f8471632aeb5bb509484568d3ba010eff61dd7dae8d8674a4a84f3426908033b",
+        "seconds": 5.297,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaConditionalActual.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJointFixedCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "5df1db278b0988f3fc0a5ab58c9c1b034abea2305842be012cefd66074923186",
+        "seconds": 16.719,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJointFixedCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaJointCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "0b73f992d237ea3bb974b746206f7e0774e787469b2d0c2218d26bc99a610247",
+        "seconds": 77.36,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaJointCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaAcceptanceLowerBound.ec",
+        "exit_code": 0,
+        "sha256": "dfa1993645d58ef78a5ccd3c2265dc9646906dc7e36ffb633970cce86c96d536",
+        "seconds": 7.561,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaAcceptanceLowerBound.ec.log"
+      },
+      {
+        "target": "proofs/SigmaConditionalCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "c0d75baab02a78a2abb0021644afc5343f8c4552e0d932fcf0bc22a770f2601c",
+        "seconds": 21.662,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaConditionalCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/Gaussian76Identification.ec",
+        "exit_code": 0,
+        "sha256": "8b00939c94289170d08b173091707da722ac1c527005d37e0d5aa1eda3a834b3",
+        "seconds": 7.376,
+        "log": "logs/20260922T065900.431316Z-new/proofs__Gaussian76Identification.ec.log"
+      },
+      {
+        "target": "proofs/GaussianValueCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "1b67556af08fe8b46cbc5724a32d32b89db0a66471a5616f39efb3e3dbb33478",
+        "seconds": 5.372,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianValueCorrectness.ec.log"
+      },
+      {
+        "target": "theories/HyperballFixedPointSpec.ec",
+        "exit_code": 0,
+        "sha256": "76a3cb601bc8c3b38fa213f07cb8d6e66c7198f1eac93964ac64a77532e8e02f",
+        "seconds": 2.059,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballFixedPointSpec.ec.log"
+      },
+      {
+        "target": "theories/HyperballNormSpec.ec",
+        "exit_code": 0,
+        "sha256": "b737e7941e27135648f5f21a57cd1586022d1e375f436cd78971da1874471d05",
+        "seconds": 13.047,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballNormSpec.ec.log"
+      },
+      {
+        "target": "theories/HyperballScaleSpec.ec",
+        "exit_code": 0,
+        "sha256": "95584269d8a50bc2f132a979633b3936e518f41376869f459a01c4a1ed9481e4",
+        "seconds": 44.523,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballScaleSpec.ec.log"
+      },
+      {
+        "target": "theories/HyperballSpec.ec",
+        "exit_code": 0,
+        "sha256": "0fa04c57ed9f5398a8648ff9fcc6a8a7470b4483676441f9b7145ab21b59e06b",
+        "seconds": 4.881,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballSpec.ec.log"
+      },
+      {
+        "target": "proofs/HyperballBatchCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "2765ab8989e4d8c03f1f55547a8be72ea31ed69be5ef430df6eaeae4faa8ef88",
+        "seconds": 20.139,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballBatchCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballByteCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "29b1e11f1a806357380f91271c307c89dc60aed9d1347e60c723136042f4e514",
+        "seconds": 4.913,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballByteCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballFixedPointCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "446406e55ef53cdc61f9c6648f6df3ceaad7e1f06b40e591caf67343dccdc351",
+        "seconds": 28.016,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballFixedPointCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballHistoryCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "bc93274d3eb7398e961e79cbd40cd0d2d6a414a58304df52a5defe898626eae6",
+        "seconds": 20.926,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballHistoryCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballNormCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "97629eaa80c4b197d9eeb2b5c24696780ad57daf4c97f87f399ed731ee274afb",
+        "seconds": 6.253,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballNormCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballScaleCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "76dac2aa2df4e5b82a77f401826646a1fa55b12233bb445fab786fa8c6916eb3",
+        "seconds": 25.521,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballScaleCorrectness.ec.log"
+      },
+      {
+        "target": "theories/HyperballReferenceConstants.ec",
+        "exit_code": 0,
+        "sha256": "b573e24bf4a517087802e9fddd8867dcbc0bacff16abd6646aa19033dd5d39d8",
+        "seconds": 1.905,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballReferenceConstants.ec.log"
+      },
+      {
+        "target": "proofs/HyperballCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "412f38750ea42d61f83b9c38489aaaa9d78031060ef3955b56d396f00ad53d1f",
+        "seconds": 24.413,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballNormBoundary.ec",
+        "exit_code": 0,
+        "sha256": "1a2642441f7b4fb08bf230d5b1a9695d4f87430c00501027194abf926c7e8d12",
+        "seconds": 0.719,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballNormBoundary.ec.log"
+      },
+      {
+        "target": "proofs/HyperballResultProperties.ec",
+        "exit_code": 0,
+        "sha256": "da02813b5027cd2c34de24f52745b1db84bdc63f8f92fbe0f662a5a866ed59e4",
+        "seconds": 106.395,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballResultProperties.ec.log"
+      },
+      {
+        "target": "proofs/HyperballResultUniqueness.ec",
+        "exit_code": 0,
+        "sha256": "73a95f1ac63de768c774e2784cb7e58804bb56d280ac18d773a3001b3efa62d2",
+        "seconds": 15.651,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballResultUniqueness.ec.log"
+      },
+      {
+        "target": "proofs/ProductionApiCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "4e5cb8bd8212129f224006648716e3cbd679b7045e41e3bfb3b67c63737b31b1",
+        "seconds": 6.483,
+        "log": "logs/20260922T065900.431316Z-new/proofs__ProductionApiCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRawAverageCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "20116595cde261a7aa9c1cad0d59c8b5fd899c1551b4436a510dca465abea265",
+        "seconds": 6.47,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRawAverageCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/SigmaRawDensityIdentity.ec",
+        "exit_code": 0,
+        "sha256": "cf0763950428cdf15b644cc2892b41a3f5b3c953fe4f68fcecc43d6f35807aa4",
+        "seconds": 2.773,
+        "log": "logs/20260922T065900.431316Z-new/proofs__SigmaRawDensityIdentity.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBatchDistance.ec",
+        "exit_code": 0,
+        "sha256": "c96dd41c1465fa97574543d62b3e13826355ecc179d70416bf6f6da3d7ab4c2f",
+        "seconds": 1.506,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianBatchDistance.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryCore.ec",
+        "exit_code": 0,
+        "sha256": "436bb6f35fccfc806657a8c001e85fb8dd6eec6ee63eed2ded94c908b5c59b4a",
+        "seconds": 0.997,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryCore.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryAttempt.ec",
+        "exit_code": 0,
+        "sha256": "dd9bdc401317ac723f38987b1e7d0def5199a8797d8aee721a20da6db62babb6",
+        "seconds": 6.149,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryAttempt.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryActual.ec",
+        "exit_code": 0,
+        "sha256": "5a1691d299b238feef9a4fa17bd126f7b9ee5e94d81b385c013d8d8593dc8fdd",
+        "seconds": 6.029,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryActual.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatch.ec",
+        "exit_code": 0,
+        "sha256": "da4ea3b1aee02f2e9177790224e163bd4bcfa2ddf885a802d7f6c9e7fd34b313",
+        "seconds": 1.53,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryBatch.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryTail.ec",
+        "exit_code": 0,
+        "sha256": "f8c4b4b17760a978ee0e83fe14fed6dbb3add753e0b08476ad438e8c9eb836cb",
+        "seconds": 1.14,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryTail.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatchCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "60ca7cb988b7c545906df4bdb526c699c3ad2c6970470239300712c33538ed4d",
+        "seconds": 6.483,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryBatchCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBatchTail.ec",
+        "exit_code": 0,
+        "sha256": "e6bc9a11aa8c0e269ce37702bffd451c2277799b1ab3dd70214b9fe412a9b5a5",
+        "seconds": 2.018,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryBatchTail.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryBufferTotal.ec",
+        "exit_code": 0,
+        "sha256": "30857769dc441c7e6712e33c7a9e323463b40e49916e3a43faca62cd06828021",
+        "seconds": 5.623,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryBufferTotal.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryConsumerTotal.ec",
+        "exit_code": 0,
+        "sha256": "4bccc49ea863eb6a8ab85b27bb2741d2b0d1c9a1e0405e3235e50116f058baa0",
+        "seconds": 5.235,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryConsumerTotal.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryInputs.ec",
+        "exit_code": 0,
+        "sha256": "72bd130027407f0152fbf5f62192ee800963b6ae3e215fd53b8b448a171e59b3",
+        "seconds": 6.876,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryInputs.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryStreamBridge.ec",
+        "exit_code": 0,
+        "sha256": "303b6ac539e7718542f07e4f94873b42884feb6f8cfc634661e182550cef368a",
+        "seconds": 7.119,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryStreamBridge.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryPrefixCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "b5e849ac3baec436d3c59f005f9caf00a5d0f861cc9b16650e96b7b425c4c261",
+        "seconds": 7.039,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryPrefixCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryRank.ec",
+        "exit_code": 0,
+        "sha256": "1c58c5ad121dca6836b45fb776d8b707711a8c7ef43bd7bca3f0ff5484a7d535",
+        "seconds": 1.214,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryRank.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRetryStreamTermination.ec",
+        "exit_code": 0,
+        "sha256": "1a4be8145e27cdd09563905d8f704063a0bf2867d3a92ce3bf54d6e80aca3d65",
+        "seconds": 58.848,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRetryStreamTermination.ec.log"
+      },
+      {
+        "target": "proofs/GaussianBlockSampling.ec",
+        "exit_code": 0,
+        "sha256": "bcc07a3cdea8d7983f048d965f4971731047f366a096a6b304e7d1d242e19b32",
+        "seconds": 25.993,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianBlockSampling.ec.log"
+      },
+      {
+        "target": "proofs/MixedRadixUniform.ec",
+        "exit_code": 0,
+        "sha256": "e73d8ac91dfeaa82630983bd7c7c950cbffd3cc1e8c59679ef8a9fd07bc29965",
+        "seconds": 12.197,
+        "log": "logs/20260922T065900.431316Z-new/proofs__MixedRadixUniform.ec.log"
+      },
+      {
+        "target": "proofs/GaussianUnusedBits.ec",
+        "exit_code": 0,
+        "sha256": "e58d83e1f11a570b52eb4d34f1c220e9d57e98b6e5e5764fc9cf2a4cf8cf6436",
+        "seconds": 98.838,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianUnusedBits.ec.log"
+      },
+      {
+        "target": "proofs/GaussianUniformBytes.ec",
+        "exit_code": 0,
+        "sha256": "754ce4cf8f9cf806d354df9b74c535fdc8b217fb35f64caf921156a4ba1aef12",
+        "seconds": 10.394,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianUniformBytes.ec.log"
+      },
+      {
+        "target": "proofs/GaussianByteCarryDistribution.ec",
+        "exit_code": 0,
+        "sha256": "226189dd82e405eec2cd4c6607784823e8c5d2f6e393389fa8408c3771b6c2c9",
+        "seconds": 9.559,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianByteCarryDistribution.ec.log"
+      },
+      {
+        "target": "theories/GaussianIidBufferSpec.ec",
+        "exit_code": 0,
+        "sha256": "f16bd02aedfc75d6f4008aa3fedb29c7cb808d5df3c3c5e716b7e0ef190da20e",
+        "seconds": 4.031,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianIidBufferSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidBufferPath.ec",
+        "exit_code": 0,
+        "sha256": "e4d9222a948580b7aab807b9b627de6b7230945ea6c71b724ad8ef846d0f3e36",
+        "seconds": 67.489,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidBufferPath.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidInitial.ec",
+        "exit_code": 0,
+        "sha256": "64e3e4c939b245a6baa11fcd780a7df8d75ed17ac38add57400dbc8248d25dc0",
+        "seconds": 6.684,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidInitial.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidKernel.ec",
+        "exit_code": 0,
+        "sha256": "2e596c43d01bf769491671b7dc8712dd9dd95c3d195697ec749ac97752c8d8b5",
+        "seconds": 8.333,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidKernel.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidProgress.ec",
+        "exit_code": 0,
+        "sha256": "22bdbf38935e21d44279f9c65161b33d800505afc2745c6c267538698bf65687",
+        "seconds": 19.129,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidProgress.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidVisible.ec",
+        "exit_code": 0,
+        "sha256": "a87cf8b793fd9409e6dc7783af48a61cdf0cb3305b13ad9561747d9dba7ec565",
+        "seconds": 114.308,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidVisible.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidNormalization.ec",
+        "exit_code": 0,
+        "sha256": "abfbe65621c5854680f76e1a89af0df96d1d3c8ef682f848b7e1b5ae951a4caf",
+        "seconds": 6.729,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidNormalization.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidStep.ec",
+        "exit_code": 0,
+        "sha256": "5a0964fd386d56cf376c7d28c8888d3dd0da1aba50d19f76ce51ae6561aae8e9",
+        "seconds": 18.98,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidStep.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidEventLaw.ec",
+        "exit_code": 0,
+        "sha256": "361950f920b5f3f74d1520849e7053aa0c80fb0b259c7b90b6ae75aec1e53026",
+        "seconds": 8.216,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidEventLaw.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidTermination.ec",
+        "exit_code": 0,
+        "sha256": "4ad43e92d0fd6fe406cbf6a66bf1d9f25ca731c2ca6c8bd67cfc5d91a9c61830",
+        "seconds": 21.009,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidTermination.ec.log"
+      },
+      {
+        "target": "proofs/GaussianIidDistribution.ec",
+        "exit_code": 0,
+        "sha256": "8e11ad0eca43a121cc64da31ad1fbc02bdfecede252fc57c4ccfb13fd304467b",
+        "seconds": 7.472,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianIidDistribution.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSignBits.ec",
+        "exit_code": 0,
+        "sha256": "1959b48191b9f5d47cca00d7b4ec44541479ea7ab2ca4f226050867d70dca530",
+        "seconds": 7.738,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSignBits.ec.log"
+      },
+      {
+        "target": "proofs/IndependentSignSampling.ec",
+        "exit_code": 0,
+        "sha256": "4f4b520ca97fbe6b1fb6206d71c64bbb4356b6c3e03a101563dad51d1d2f15fa",
+        "seconds": 0.969,
+        "log": "logs/20260922T065900.431316Z-new/proofs__IndependentSignSampling.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSignIndependence.ec",
+        "exit_code": 0,
+        "sha256": "164491fd7e7646241b54e2ca3ecdd2aedbb4f1139821ccf231c23aa7e77be4a7",
+        "seconds": 10.499,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSignIndependence.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSignedTarget.ec",
+        "exit_code": 0,
+        "sha256": "b3141cef12d4e9f99f5063564fc350b39c79653a7c409f6e8602fa8dfbed2660",
+        "seconds": 2.3,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSignedTarget.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSignedVector.ec",
+        "exit_code": 0,
+        "sha256": "7faab425cb2d14a8b4e2215fdb43fafda526ec08934606305977e779c899bcd2",
+        "seconds": 7.361,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSignedVector.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSignedCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "895d5f9c087a2c47097300f4aa0008f9520168e7e9691aaf0000e9abb888dc7a",
+        "seconds": 8.982,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSignedCorrectness.ec.log"
+      },
+      {
+        "target": "proofs/HyperballSignedScale.ec",
+        "exit_code": 0,
+        "sha256": "a38a39e91b4c1b0c8f34c7c666c6fd24a6f29aed61b6c49028d832b1f4fb03e4",
+        "seconds": 42.514,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballSignedScale.ec.log"
+      },
+      {
+        "target": "theories/HyperballWitnessSpec.ec",
+        "exit_code": 0,
+        "sha256": "759e5218f0fc9492fd397362c55535f9017b88c9fa23c238fa55f14e0c1cfae8",
+        "seconds": 2.007,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballWitnessSpec.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessArithmetic.ec",
+        "exit_code": 0,
+        "sha256": "b644bb99c435b3b0fdad3fcbb693fda14e85041363c6a8c70a8d535b2418eae0",
+        "seconds": 2.083,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessArithmetic.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessCandidate.ec",
+        "exit_code": 0,
+        "sha256": "e7b2e21227e1d6b6b789c212581d7801c0405387904d37feae25e3430a054750",
+        "seconds": 18.413,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessCandidate.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessExecution.ec",
+        "exit_code": 0,
+        "sha256": "9fffe115feb206774e618b4d92768e30acb9d3107d1988040391f0afcbbff0ae",
+        "seconds": 5.272,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessExecution.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWordEvaluation.ec",
+        "exit_code": 0,
+        "sha256": "a4ba273f595ced0e270fd57582df106101df6ef4c1c1918123a71e489d7df3b6",
+        "seconds": 2.177,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWordEvaluation.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessNewton.ec",
+        "exit_code": 0,
+        "sha256": "adaac4225000429e0f67546a7ba415ec47c8c713a61881015bdf35123d147926",
+        "seconds": 40.57,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessNewton.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessNorm.ec",
+        "exit_code": 0,
+        "sha256": "bf0a99be5dfa823694ce6587e3ec3203db884e8c369de712c9da4bcc9bc88360",
+        "seconds": 9.375,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessNorm.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessSampling.ec",
+        "exit_code": 0,
+        "sha256": "8f9069676fdfa9c78d80f61831fde4cbab335914a18baf64d3484c7ae64ce7bc",
+        "seconds": 57.497,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessSampling.ec.log"
+      },
+      {
+        "target": "proofs/HyperballWitnessReplay.ec",
+        "exit_code": 0,
+        "sha256": "2a9a0f4899db17e4f64a1307c5b03048f9f3436b897ffe945a74d26a4febc9ae",
+        "seconds": 7.319,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballWitnessReplay.ec.log"
+      },
+      {
+        "target": "theories/HyperballSafeSpec.ec",
+        "exit_code": 0,
+        "sha256": "122fc9d3c7a61c952d8ae4c36ee7bdecb780a7f3f0ba8b53a64982fae2ccd2fc",
+        "seconds": 1.91,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballSafeSpec.ec.log"
+      },
+      {
+        "target": "proofs/HyperballMulBounds.ec",
+        "exit_code": 0,
+        "sha256": "3a4e08c2860a199c154f3ec1a33dd542cfc448ad5dfc930ae7d472a25af2d61f",
+        "seconds": 111.254,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballMulBounds.ec.log"
+      },
+      {
+        "target": "proofs/HyperballNewtonBarrier.ec",
+        "exit_code": 0,
+        "sha256": "0b442001cd96d409b39dae9701a95963df0a633558fdcfc7fc1a8b8bd54284fa",
+        "seconds": 2.349,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballNewtonBarrier.ec.log"
+      },
+      {
+        "target": "proofs/HyperballPositiveArithmetic.ec",
+        "exit_code": 0,
+        "sha256": "ddf0b26584abc6ebfea875fb0e54dde09d4618a29f6d1b6326f5b2b07b687be2",
+        "seconds": 26.522,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballPositiveArithmetic.ec.log"
+      },
+      {
+        "target": "proofs/HyperballSafeConstants.ec",
+        "exit_code": 0,
+        "sha256": "3f5bd3ab8626bfc25aa7a2a6d343b748fa88a0584b2ad309fe40a8bdd4f513da",
+        "seconds": 2.447,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballSafeConstants.ec.log"
+      },
+      {
+        "target": "proofs/HyperballSafeScale.ec",
+        "exit_code": 0,
+        "sha256": "6f6238b1ecdae2a356ca6f2ad5ace2252c58e96ec5c578448229128d2a3bab8f",
+        "seconds": 134.529,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballSafeScale.ec.log"
+      },
+      {
+        "target": "proofs/HyperballSafeNewton.ec",
+        "exit_code": 0,
+        "sha256": "d64dacf928b014b071d8d36af86596451d0e930523efa5e0f94f6c12c1ba063f",
+        "seconds": 22.091,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballSafeNewton.ec.log"
+      },
+      {
+        "target": "proofs/HyperballSafeCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "8542b133d3c0861e1e707dc6bd5826220251cbca67287b9199063774b66fa1cd",
+        "seconds": 31.595,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballSafeCorrectness.ec.log"
+      },
+      {
+        "target": "theories/GaussianPayloadSpec.ec",
+        "exit_code": 0,
+        "sha256": "41f5e0701a1a63b706d80896fa5b30b065603807257b30320cfd5dcae92c30a2",
+        "seconds": 6.219,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianPayloadSpec.ec.log"
+      },
+      {
+        "target": "theories/GaussianPayloadBufferSpec.ec",
+        "exit_code": 0,
+        "sha256": "a87a372196e7a6658d3579d713dbab3e7c48bfcc61c81a5a7b34fbbcece800b7",
+        "seconds": 6.391,
+        "log": "logs/20260922T065900.431316Z-new/theories__GaussianPayloadBufferSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadBufferPath.ec",
+        "exit_code": 0,
+        "sha256": "5e511bbf1d3739bd27120dea5d8c1374fd7e94da3ea70738c07eb78555572654",
+        "seconds": 31.089,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadBufferPath.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadEncoding.ec",
+        "exit_code": 0,
+        "sha256": "52492b603ab0337986c896ed02b12b7db309ac4de4cf7c8727aba2192d2dc0f3",
+        "seconds": 18.924,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadEncoding.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadTrace.ec",
+        "exit_code": 0,
+        "sha256": "cc0cf8fb6fa5ab3120926719991107ce697978c76c590ef52ec40313e833a737",
+        "seconds": 82.944,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadTrace.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadBufferTrace.ec",
+        "exit_code": 0,
+        "sha256": "a6e9fba7d0de0258fd061663f4f2adcc687226e2c47786613f47efa81a88c4b8",
+        "seconds": 39.764,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadBufferTrace.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadKernel.ec",
+        "exit_code": 0,
+        "sha256": "b6c4c4eaf31d20165d90f362e7a64379b58f959922064b28a2b5a81e294b8266",
+        "seconds": 7.962,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadKernel.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadEventLaw.ec",
+        "exit_code": 0,
+        "sha256": "61420ad295624f2b6d0ea8f7f90faff145b6a63e58c8b9a485ceaa60f259cd5b",
+        "seconds": 8.4,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadEventLaw.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadDraw.ec",
+        "exit_code": 0,
+        "sha256": "2cc1c798869a3d61acc9f9f2ec5672a87444102fab255b59e0347e3afb5cea46",
+        "seconds": 7.81,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadDraw.ec.log"
+      },
+      {
+        "target": "theories/HyperballIidPayloadSpec.ec",
+        "exit_code": 0,
+        "sha256": "aa05db3b39597934a4f708d376a2f79d084a3b7e1ee543310b3963220c6db2b5",
+        "seconds": 6.608,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballIidPayloadSpec.ec.log"
+      },
+      {
+        "target": "proofs/HyperballIidPayloadBatch.ec",
+        "exit_code": 0,
+        "sha256": "5ab0fbed2682b935f1a3aa33babd2a6bb9b1a9ed3e249d5ebd534d90c4257b4f",
+        "seconds": 58.131,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballIidPayloadBatch.ec.log"
+      },
+      {
+        "target": "proofs/HyperballIidSquareLaw.ec",
+        "exit_code": 0,
+        "sha256": "3d4f8fd4b70874fb54ed88cb00a7feba4aea1d873aad8997b51324d3f37c15d8",
+        "seconds": 8.412,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballIidSquareLaw.ec.log"
+      },
+      {
+        "target": "proofs/GaussianLatticeSum.ec",
+        "exit_code": 0,
+        "sha256": "fecd1259a84f32aeb61ea3fe7c81ab92b1218e6e15e589ecd73d4aebcb40f4f8",
+        "seconds": 53.71,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianLatticeSum.ec.log"
+      },
+      {
+        "target": "theories/HyperballTailSpec.ec",
+        "exit_code": 0,
+        "sha256": "2914760f57466c8df02cf06ce801581cc9d8f8f11d62f7bf9e541157b7d7c202",
+        "seconds": 6.524,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballTailSpec.ec.log"
+      },
+      {
+        "target": "theories/RawSquareMomentSpec.ec",
+        "exit_code": 0,
+        "sha256": "5f95e6847a12102e4fc7c638c665b971602c018c5dce79253db1c985df657a3c",
+        "seconds": 6.608,
+        "log": "logs/20260922T065900.431316Z-new/theories__RawSquareMomentSpec.ec.log"
+      },
+      {
+        "target": "proofs/GaussianLatticeMgf.ec",
+        "exit_code": 0,
+        "sha256": "cefc8173a1430421579b1b548d790e260734a3422d258caf62d3689641335fd0",
+        "seconds": 102.0,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianLatticeMgf.ec.log"
+      },
+      {
+        "target": "proofs/GaussianPayloadMoments.ec",
+        "exit_code": 0,
+        "sha256": "e9ec7ed574a50bf49bb7b339a45f4abee86c5bc246c715f60cdcc75e351843fb",
+        "seconds": 7.602,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianPayloadMoments.ec.log"
+      },
+      {
+        "target": "proofs/GaussianRawSquare.ec",
+        "exit_code": 0,
+        "sha256": "d28c4693d65d71ba69a7ca08d5966b5cfd9547aa78aefbcfcdc57ea571a93834",
+        "seconds": 41.334,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianRawSquare.ec.log"
+      },
+      {
+        "target": "theories/HyperballTailCertificate.ec",
+        "exit_code": 0,
+        "sha256": "4e417614c45b407d026aef43055fcc457cf3e9aff9fbbe7be2e2016439bdbf27",
+        "seconds": 0.731,
+        "log": "logs/20260922T065900.431316Z-new/theories__HyperballTailCertificate.ec.log"
+      },
+      {
+        "target": "proofs/HyperballTailCertificateChecks.ec",
+        "exit_code": 0,
+        "sha256": "51e39c15bfb3d99d629999fc729d849ab6b89b626c2efff0949f1fad28c93186",
+        "seconds": 0.781,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballTailCertificateChecks.ec.log"
+      },
+      {
+        "target": "proofs/HyperballTailConstants.ec",
+        "exit_code": 0,
+        "sha256": "a8b274aac8f4c827e9790d150b8063fa32e087fcefffda26ade0ef8281684a1b",
+        "seconds": 10.377,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballTailConstants.ec.log"
+      },
+      {
+        "target": "proofs/RawSquareAcceptance.ec",
+        "exit_code": 0,
+        "sha256": "2b779dddf3024ca02d57dd6426e950c471d27e6bc1ff6bf29e5231e4df0d3ebd",
+        "seconds": 41.875,
+        "log": "logs/20260922T065900.431316Z-new/proofs__RawSquareAcceptance.ec.log"
+      },
+      {
+        "target": "proofs/RawSquareIdealMoments.ec",
+        "exit_code": 0,
+        "sha256": "9e95febcd633402b7a7f5b620d7dad4934cea4f4e71456d2c4d87206a460fb98",
+        "seconds": 97.151,
+        "log": "logs/20260922T065900.431316Z-new/proofs__RawSquareIdealMoments.ec.log"
+      },
+      {
+        "target": "proofs/GaussianSquareMoments.ec",
+        "exit_code": 0,
+        "sha256": "fafacc607f3fe6625695c77ee5183b243bd97f34d6c85b689e1e4886256a7aed",
+        "seconds": 85.471,
+        "log": "logs/20260922T065900.431316Z-new/proofs__GaussianSquareMoments.ec.log"
+      },
+      {
+        "target": "proofs/HyperballIidAttemptSafety.ec",
+        "exit_code": 0,
+        "sha256": "1d8210e8be0d5208cca9c5940c5568be88388fc4f21040f46d1706a3b1163c8b",
+        "seconds": 9.797,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballIidAttemptSafety.ec.log"
+      },
+      {
+        "target": "proofs/IidExponentialTail.ec",
+        "exit_code": 0,
+        "sha256": "f2ea25753bc7796dc8f5890954251d8b9ced9557244ad94ee67a5c12c041b8a5",
+        "seconds": 2.011,
+        "log": "logs/20260922T065900.431316Z-new/proofs__IidExponentialTail.ec.log"
+      },
+      {
+        "target": "proofs/HyperballIidTailCorrectness.ec",
+        "exit_code": 0,
+        "sha256": "6e46c59eae72ab21b7bb04afe974fd6a118df7e6542b94747edff7067656aacd",
+        "seconds": 20.925,
+        "log": "logs/20260922T065900.431316Z-new/proofs__HyperballIidTailCorrectness.ec.log"
+      }
+    ],
+    "command": "python3 .omx/publish-haetae120-20260918/hyperball-tail/run-gate.py",
+    "strategy": "Unchanged180 independent main targets, then every frozen new main target; shared verification script and final complete inventory/hash checks",
+    "complete_inventory_checked": true,
+    "final_source_hashes_match": true,
+    "eof_completion_guard": true,
+    "total_target_seconds": 3645.441
+  },
+  "ntt_replay": [
+    {
+      "target": "theories/ntt/Hpoly_extract.ec",
+      "sha256": "dedbc92e134f426bcf7e0fc5ee9be86babf3aeceb46cf24c4e450c10bb1e152f",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Hpoly_extract.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Hpoly_loop.ec",
+      "sha256": "cb223b76f97797a18c84105f6c17e1eb9d7e49ccd939f2001feba419f9fa7afe",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Hpoly_loop.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Montgomery.ec",
+      "sha256": "f0f5be2fd59f67c5018189e1a4a842a0dd769380b88ea607d56e8ca115da8387",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Montgomery.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Fq.ec",
+      "sha256": "9a74258fb09e829679562b6a940777ef522232d6400d9acba6c3bcead29216b9",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Fq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/GFq.ec",
+      "sha256": "cc7232b90e6850124448a0538822e5a7dabe46e126d8bf691e18279f26426848",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-GFq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Rq.ec",
+      "sha256": "22d6864b50d6daf9141318262a2e269b5e2c5a5f86cda7e9899bab07c6f36b11",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Rq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/Fastexp.ec",
+      "sha256": "a1f7a3562c743eab602cf98f6380339c63aa3824448380e570b1dcbbb3e450b3",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-Fastexp.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTT_Fq.ec",
+      "sha256": "62181de33a8ff2e730f7773f0e8148c0eee6f27c7509dfc1e9e60e6258e6d074",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTT_Fq.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTTFullSpec.ec",
+      "sha256": "949f925251d048642a3d4d222b59d7acdf85cf27a0fa6016fabf5df4a5645516",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTTFullSpec.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/NTTFullAlgebra.ec",
+      "sha256": "e5cade55a560aed0112fce32651f1c2c97c1fdf605944fe67034a40234924fdc",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-NTTFullAlgebra.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "theories/ntt/RefJasminNTTLoop.ec",
+      "sha256": "3e26d8f7bac6a2dc14fa86e930218c95f27a7af949bf18f60da7b2c295d82c36",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-RefJasminNTTLoop.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    },
+    {
+      "target": "proofs/NTTCorrectness.ec",
+      "sha256": "8f07f01ac14508102d0c5ed256f6ee95e86ed042a782fe41112fecfd22986146",
+      "evidence_log": "logs/ntt-support-replay/haetae120-ntt-total.log",
+      "result": "PASS",
+      "verification": "individual fresh -no-eco run; exit 0 confirmed by NTT lane"
+    }
+  ],
+  "open_obligations": "CLAIMS.md",
+  "toolchain": "manifests/toolchain.json",
+  "gate_regression_tests": {
+    "command": "make -C haetae-1.2.0-easycrypt test-gate",
+    "tests": 18,
+    "result": "PASS",
+    "exit_code": 0,
+    "exec_session": 79704,
+    "checked_at": "2026-09-22T07:00:27.655338+00:00",
+    "log": "logs/hyperball-tail-gate-regressions.log",
+    "targets": [
+      {
+        "target": "tests/test_verification_gate.py",
+        "tests": 10,
+        "sha256": "e40b18776730d38a2c43c978638a04bd5865b40ab48ca4e0a993255bf870630e"
+      },
+      {
+        "target": "tests/test_hyperball_provenance.py",
+        "tests": 1,
+        "sha256": "6a73110aec7538f18432fafc6be00696a74b155105d6c123c454750fe9f25eb1"
+      },
+      {
+        "target": "tests/test_gaussian_certificate.py",
+        "tests": 3,
+        "sha256": "895f9787b3658978e20a5d8ba78fac6c412ca28dc130aa51f4546705cc52ec30"
+      },
+      {
+        "target": "tests/test_approx_exp_certificate.py",
+        "tests": 4,
+        "sha256": "640f415b474f08eca80ba9ed44f0ddcf2a0231bd4694ba831d2f50e52f86c42b"
+      }
+    ]
+  },
+  "independent_review": {
+    "result": "APPROVE",
+    "reviewer": "/root/haetae120_delta_audit",
+    "checked_at": "2026-09-22T08:07:15.739804+00:00",
+    "proof_hashes": {
+      "proofs/GaussianLatticeMgf.ec": "cefc8173a1430421579b1b548d790e260734a3422d258caf62d3689641335fd0",
+      "proofs/GaussianLatticeSum.ec": "fecd1259a84f32aeb61ea3fe7c81ab92b1218e6e15e589ecd73d4aebcb40f4f8",
+      "proofs/GaussianPayloadMoments.ec": "e9ec7ed574a50bf49bb7b339a45f4abee86c5bc246c715f60cdcc75e351843fb",
+      "proofs/GaussianRawSquare.ec": "d28c4693d65d71ba69a7ca08d5966b5cfd9547aa78aefbcfcdc57ea571a93834",
+      "proofs/GaussianSquareMoments.ec": "fafacc607f3fe6625695c77ee5183b243bd97f34d6c85b689e1e4886256a7aed",
+      "proofs/HyperballIidAttemptSafety.ec": "1d8210e8be0d5208cca9c5940c5568be88388fc4f21040f46d1706a3b1163c8b",
+      "proofs/HyperballIidTailCorrectness.ec": "6e46c59eae72ab21b7bb04afe974fd6a118df7e6542b94747edff7067656aacd",
+      "proofs/HyperballTailCertificateChecks.ec": "51e39c15bfb3d99d629999fc729d849ab6b89b626c2efff0949f1fad28c93186",
+      "proofs/HyperballTailConstants.ec": "a8b274aac8f4c827e9790d150b8063fa32e087fcefffda26ade0ef8281684a1b",
+      "proofs/IidExponentialTail.ec": "f2ea25753bc7796dc8f5890954251d8b9ced9557244ad94ee67a5c12c041b8a5",
+      "proofs/RawSquareAcceptance.ec": "2b779dddf3024ca02d57dd6426e950c471d27e6bc1ff6bf29e5231e4df0d3ebd",
+      "proofs/RawSquareIdealMoments.ec": "9e95febcd633402b7a7f5b620d7dad4934cea4f4e71456d2c4d87206a460fb98",
+      "theories/HyperballTailCertificate.ec": "4e417614c45b407d026aef43055fcc457cf3e9aff9fbbe7be2e2016439bdbf27",
+      "theories/HyperballTailSpec.ec": "2914760f57466c8df02cf06ce801581cc9d8f8f11d62f7bf9e541157b7d7c202",
+      "theories/RawSquareMomentSpec.ec": "5f95e6847a12102e4fc7c638c665b971602c018c5dce79253db1c985df657a3c"
+    },
+    "prior_files_unchanged": 496,
+    "integrated_gate_pass": true,
+    "final_docs_pending": false,
+    "blocking_findings": [],
+    "scope": "Strict explicit-iid safe-interval escape and unconditional one-attempt unsafe-acceptance probability bounds <2^-29/<2^-44/<2^-54; full normalizers, clipped numerator, floor correction retained; no acceptance-conditioned/outer-retry/SHAKE claim",
+    "non_ntt_targets": 195,
+    "all_local_targets": 207,
+    "gate_regressions": 18,
+    "total_target_seconds": 3645.441,
+    "tool_hashes_checked": 4,
+    "fresh_extraction_matches": 102,
+    "certificate_reproducibility": "PASS",
+    "final_docs_hashes": {
+      "README.md": "84e79956d98f11f81f55553810573def31fb237ecdeb32f0164d1af1490e39fb",
+      "docs/HAETAE-1.2.0.md": "80d9509f4c6cde0ba7c47908be7141926250579718c6ab27f0efef03f8909c5b",
+      "haetae-1.2.0-easycrypt/README.md": "8485fb2532a2806375ce7b80a1e264d7b72782e300abdf7c3e7508de113f8942",
+      "haetae-1.2.0-easycrypt/CLAIMS.md": "8c06fdf1089c870f93469089c9b21519825ebd8b093cae04b2cf684236318cf9",
+      "haetae-1.2.0-easycrypt/VALIDATION.md": "cafbbb44c75850d9b08acc95d7b1345267ef8ff8559f3519fa44db307f8a5f13",
+      "haetae-1.2.0-easycrypt/docs/hyperball-iid-tail-bound.md": "9c3e1cf3ae1c8b4275ce84d17147d7bac5da9b7212bc8a4b19446fd46b7b8bc7",
+      "haetae-1.2.0-easycrypt/manifests/specification-sources.json": "268b5721e1e66cd6d771fb9701cea15e28cb6d87aff257ed46dcf84c864b62f7"
+    },
+    "commit_message_format": "[260922] update: ..."
+  },
+  "fresh_extraction_match": {
+    "files": 102,
+    "result": "PASS",
+    "checked_at": "20260922T065900.431316Z"
+  },
+  "whole_signing_gaussian": {
+    "theorem": "GaussianStreamCorrectness.sample_gauss_N_full_at_correct",
+    "procedure": "ApiTarget.M(Syscall)._sf_sample_gauss_N_full_at",
+    "logic": "Hoare partial correctness",
+    "requested_counts": [
+      256,
+      257
+    ],
+    "preconditions": [
+      "valid sample and sign windows",
+      "both initial accumulator limbs below 2^48"
+    ],
+    "result": "Exact continuous word-SHAKE stream samples, signs, integer square-limb sum, and frames on terminating executions",
+    "unconditional_termination": false,
+    "hyperball_caller_composition": true
+  },
+  "ntt_replay_note": "All12 prior NTT source hashes retained unchanged; not rerun in this quantitative iid Hyperball tail milestone.",
+  "whole_signing_hyperball": {
+    "theorem": "HyperballCorrectness.hyperball_full_correct",
+    "procedure": "ApiTarget.M(Syscall)._sf_hyperball_full",
+    "mode_theorems": [
+      "HyperballCorrectness.hyperball_mode2_correct",
+      "HyperballCorrectness.hyperball_mode3_correct",
+      "HyperballCorrectness.hyperball_mode5_correct"
+    ],
+    "logic": "Hoare partial correctness",
+    "result": "Exact concrete word-SHAKE Gaussian batches, word fixedpoint and scaling, first accepted attempt after all prior rejections, output frames, final SHAKE byte, and W64 counter on terminating executions",
+    "cumulative_accepted_bound": 2818,
+    "sigma_square_high_bound": "<2^36",
+    "result_unique": true,
+    "norm_acceptance": "N mod 2^64 <= unsigned bound, where N is the mathematical sum of squared signed32 output coefficients",
+    "integer_norm_corollary": "Conditional on N < 2^64; abs(coordinate) <= 2^26 for at most 2816 coordinates is a proved sufficient condition, not asserted for all actual outputs",
+    "unconditional_termination": false,
+    "real_newton_error_or_convergence": false,
+    "ideal_hyperball_distribution": false,
+    "counter_semantics": "W64 arithmetic; SHAKE encodes only the low 16 bits"
+  },
+  "hyperball_reference_constants": {
+    "generator": "scripts/hyperball-reference-constants.py",
+    "generator_sha256": "dbb4734e4b80c8b2773940b5a619e8bf42ad046adfeef76752bdb06f8d1503d3",
+    "theory": "theories/HyperballReferenceConstants.ec",
+    "theory_sha256": "b573e24bf4a517087802e9fddd8867dcbc0bacff16abd6646aa19033dd5d39d8",
+    "method": "Compile independent emitters against pinned reference C expressions for modes 2, 3, and 5, including floating-to-uint64 casts",
+    "compiler_cross_check": "GCC 11.4 and Clang 14 byte-identical output",
+    "fresh_gate_regeneration": "PASS",
+    "negative_scale_drift_guard": "PASS"
+  },
+  "hyperball_numerical_boundary_replay": {
+    "command": "make -C haetae-1.2.0-easycrypt test-hyperball-boundary",
+    "result": "PASS",
+    "modes": [
+      2,
+      3,
+      5
+    ],
+    "scope": "Prescribed accepted candidate lists and signs; C and compiled Jasmin word outputs agree, with modular norm acceptance despite mathematical norm above the mode bound",
+    "actual_shake_seed_reachability_demonstrated": false,
+    "artifacts": [
+      {
+        "path": "tests/hyperball-norm-boundary.c",
+        "sha256": "1a681ddc7a8f49c5ffa4461ced2abf827b4f862f74889f9c475168311c146eb0"
+      },
+      {
+        "path": "tests/hyperball-norm-boundary.py",
+        "sha256": "0f4cff80a0d0fb6747b8dc36296c2072ccb7d45a49f64fdf7eb4d90b79905716"
+      },
+      {
+        "path": "proofs/HyperballNormBoundary.ec",
+        "sha256": "1a2642441f7b4fb08bf230d5b1a9695d4f87430c00501027194abf926c7e8d12"
+      },
+      {
+        "path": "docs/hyperball-numerical-boundary.md",
+        "sha256": "c8b8bc4e16fab1c396e7cbbfd5a7b80f38b06bf3a3df0e1b47c938074fa6f386"
+      }
+    ],
+    "jasmin_library_sha256": {
+      "2": "0600ce998a5885444d6c46431c0b853ee738ebc34365675bfece303a1ee211d6",
+      "3": "6f20b7389f8459873c3fe5af69619e3ba86b3af8fb0caa3419f75a2956c1634c",
+      "5": "6ad598e46519bc8a0a0325fab0a149f91b0a7b6fef2cd6b55ffdfdc361be2f8d"
+    },
+    "checked_stage": "2026-09-18; retained unchanged, not rerun during the CDT distribution milestone",
+    "subsequent_formal_helper_result": "hyperball_prescribed_witnesses connects the fixed inputs to actual extracted helper executions; no producing SHAKE seed or formal C execution is claimed"
+  },
+  "mathematical_cdt": {
+    "theorem": "CDTGaussianApproximation.uniform83_jasmin_half_gaussian_error",
+    "distance_theorem": "CDTGaussianApproximation.cdt83_half_gaussian_statistical_distance",
+    "experiment": "CDTDistributionBridge.Uniform83Jasmin.sample",
+    "actual_procedure": "SamplerTarget.M.sample_gauss83_jazz",
+    "experiment_randomness": "Uniform integer U in [0,2^83-1], split into low64/high19 bits",
+    "independent_target": "P(k)=exp(-k*k/512)/sum_{j>=0}exp(-j*j/512) for k>=0, zero otherwise",
+    "sources": "manifests/specification-sources.json",
+    "source_correspondence": "docs/cdt-distribution-correspondence.md; reviewed transcription of official spec260904 section5.1.1 and Rossi2020 section2.2.2/Algorithm12 step1",
+    "statistical_distance": "<32/2^83=2^-78",
+    "arbitrary_event_probability_error": "<2^-78 for every integer-output predicate",
+    "exact_output_support": [
+      0,
+      166
+    ],
+    "endpoint_probability": "Pr[166]=2^-83",
+    "lossless_experiment": true,
+    "infinite_normalizer_and_tail_proved": true,
+    "numeric_oracle_used": false,
+    "cdf_floor_comment_assumed": false,
+    "concrete_shake_uniformity_proved": false,
+    "full_gaussian_or_hyperball_distribution": false,
+    "proof_files_added": [
+      "proofs/CDTDistribution.ec",
+      "proofs/CDTDistributionBridge.ec",
+      "proofs/CDTGaussianApproximation.ec",
+      "proofs/CDTGaussianCertificateChecks.ec",
+      "proofs/CDTGaussianEnclosure.ec",
+      "proofs/CDTGaussianTableBridge.ec",
+      "proofs/DistributionIntervalBounds.ec",
+      "proofs/ExpIntervalCorrectness.ec",
+      "proofs/GaussianIntervalBounds.ec",
+      "proofs/HalfGaussianProperties.ec",
+      "theories/CDTDistributionSpec.ec",
+      "theories/CDTGaussianCertificate.ec",
+      "theories/ExpIntervalSpec.ec",
+      "theories/HalfGaussianSpec.ec"
+    ],
+    "standard_analytic_foundation": [
+      "RealExp",
+      "RealSeries",
+      "Distr",
+      "SDist"
+    ],
+    "certificate": {
+      "generator": "scripts/gaussian-cdt-certificate.py",
+      "generator_sha256": "f50c5bcd2246333fdec8c3cd785fbbbdbe60ea41b0acf614b4a52ccbefbacd56",
+      "theory": "theories/CDTGaussianCertificate.ec",
+      "theory_sha256": "e52546426e23f29e384790238cadbcceffd571ae7baed608b9cd8f69888a6379",
+      "method": "Outward integer intervals at scale2^320; seed denominator2^137;128 squarings; Gaussian weights0..256; infinite tail starting256; point-mass L1 bound",
+      "regeneration": "PASS",
+      "mutated_squaring_rejected": true,
+      "mutated_implementation_table_rejected": true,
+      "list_opacity": "Defined [opaque] lists explicitly unfolded in numeric/provenance checks; no new project axiom"
+    }
+  },
+  "approximate_exponential": {
+    "theorem": "ApproxExpNumericalCorrectness.sigma76_approx_exp_numerical_total",
+    "actual_procedure": "SigningSamplerBridge.Signer._approx_exp",
+    "general_input_domain": "0<=uint(input), 3*uint(input)<=2*2^48",
+    "sigma_input_theorem": "SigmaExpInputBounds.sigma_exp_argument_bound",
+    "sigma_argument_upper": 183103063064576,
+    "sigma_domain_requires_extra_premise": false,
+    "independent_target": "RealExp.exp(-uint(input)/2^48)",
+    "normalized_absolute_error": "<=27/2^48<2^-43",
+    "polynomial_grid_error": "<=24/2^48",
+    "rounding_error": "0<=A/2^48-P(uint(input)/2^48)<=3/2^48",
+    "signed_word_fit": "Every Horner prefix and rounded multiply result; intentional internal unsigned word operations retain their verified modular semantics",
+    "actual_total_correctness": true,
+    "proof_files_added": [
+      "proofs/ApproxExpCertificateChecks.ec",
+      "proofs/ApproxExpNumericalCorrectness.ec",
+      "proofs/ApproxExpPolynomialBound.ec",
+      "proofs/ApproxExpWordCorrectness.ec",
+      "proofs/Bernstein10Correctness.ec",
+      "proofs/ExponentialGridComparison.ec",
+      "proofs/Rejection48Correctness.ec",
+      "proofs/SigmaExpAcceptanceCorrectness.ec",
+      "proofs/SigmaExpInputBounds.ec",
+      "proofs/SigmaRejection48Bridge.ec",
+      "theories/ApproxExpCertificate.ec",
+      "theories/ApproxExpSpec.ec",
+      "theories/Bernstein10Spec.ec",
+      "theories/Rejection48Spec.ec"
+    ],
+    "source_correspondence": "docs/approx-exp-mathematical-bound.md; official specification260904 section5.1.1 Listing1",
+    "certificate": {
+      "generator": "scripts/approx-exp-certificate.py",
+      "generator_sha256": "6bb105432a1dd488717259b6c81cffe86ef2fc24eee4fd94cc6b677ea672aeef",
+      "theory": "theories/ApproxExpCertificate.ec",
+      "theory_sha256": "d2e3e3aa004f9d01fca6a40f2c00c766de49546afc53994e09fb26f9da2873b9",
+      "method": "Exact integer Bernstein checks on three cells for six polynomial grid-recurrence residuals;66 nonnegative controls; analytic integer-grid induction",
+      "independent_exact_replay": "All66 controls agree with an independent Fraction calculation",
+      "numeric_exponential_oracle_used": false,
+      "regeneration": "PASS",
+      "negative_consistent_controls_rejected": true,
+      "positive_consistent_wrong_polynomial_rejected": true,
+      "changed_coefficient_rejected": true
+    },
+    "one_sided_ceiling_or_renyi_proved": false
+  },
+  "conditional_sigma_acceptance": {
+    "theorem": "SigmaExpAcceptanceCorrectness.sigma_exp_acceptance_error_strict",
+    "experiment": "SigmaRejection48Bridge.SigmaRejection48Experiment.sample",
+    "actual_procedure": "SamplerTarget.M.__sample_gauss_sigma76_regs",
+    "randomness": "Explicit uniform48-bit U; only bytes11..16 replaced; CDT and noise bytes fixed",
+    "exact_law": "alpha(r)*min(2^47,max(0,ceil(T/2)))/2^47",
+    "comparison_target": "alpha(actualrounded)*exp(-uint(actualxi)/2^48)",
+    "alpha": "1/2 if the actual rounded64-bit candidate word is zero;1 otherwise",
+    "probability_error": "<=alpha*28/2^48<2^-43",
+    "threshold_fit_derived": true,
+    "ideal_raw_exponent_or_zero_equivalence_proved": false,
+    "full_gaussian_distribution_or_concrete_shake_uniformity_proved": false,
+    "raw_comparison_note": "The raw exponent error and the discrepancy between zero rules are now proved in raw_gaussian_acceptance. The zero rules are not equivalent. The earlier quantized-target theorem is unchanged."
+  },
+  "raw_gaussian_acceptance": {
+    "proof_files_added": [
+      "proofs/ExponentialLipschitz.ec",
+      "proofs/FiniteExpectationError.ec",
+      "proofs/SigmaNoise72Bridge.ec",
+      "proofs/SigmaRawAcceptanceCorrectness.ec",
+      "proofs/SigmaRawAverageCorrectness.ec",
+      "proofs/SigmaRawDensityIdentity.ec",
+      "proofs/SigmaRawExponentCorrectness.ec",
+      "proofs/SigmaRawZeroCorrectness.ec",
+      "proofs/SigmaSquareExact.ec",
+      "theories/SigmaRawNoiseSpec.ec",
+      "theories/SigmaRawSpec.ec"
+    ],
+    "definitions": "theories/SigmaRawSpec.ec; independent raw noise y, CDT x and candidate Z=y+2^72*x",
+    "density_identity": "SigmaRawDensityIdentity.sr_gaussian_weight_identity: hg16_rho(x)*exp(-E)=exp(-Z^2/2^153)",
+    "square_identity": "SigmaSquareExact.sigma_square_word_exact: low+2^48*high=floor(Z^2/2^76)",
+    "exact_exponent": "SigmaRawExponentCorrectness.sigma_raw_exponent_exact: uint(xi)=floor((y*(y+2^73*x)+2^104)/2^105)",
+    "exponent_error": "abs(uint(xi)/2^48-y*(y+2^73*x)/2^153)<=2^-49 for every 26-byte input; no fit assumption",
+    "zero_discrepancy": "SigmaRawZeroCorrectness.sr_zero_tests_differ: x=0 and 1<=y<32768",
+    "conditional_actual_theorem": "SigmaRawAcceptanceCorrectness.sr_actual_acceptance_error",
+    "conditional_error": "<=57/(2*2^48)+(if zero discrepancy then1/2 else0)",
+    "uniform72_discrepancy_mass": "if x=0 then32767/2^72 else0",
+    "average_actual_theorem": "SigmaRawAverageCorrectness.sr_average_acceptance_error_strict",
+    "actual_experiment": "SigmaNoise72Experiment.sample calls SigmaRejection48Experiment.sample, which calls SamplerTarget.M.__sample_gauss_sigma76_regs",
+    "randomness": "Explicit independent uniform72 noise and uniform48 rejection integer; CDT bytes fixed; no concrete SHAKE assumption",
+    "average_target": "E_y[(if y+2^72*x=0 then1/2 else1)*exp(-y*(y+2^73*x)/2^153)]",
+    "average_error": "<=57/(2*2^48)+(if x=0 then32767/2^73 else0)<29/2^48<2^-43",
+    "all_fixed_candidates_have_small_raw_zero_error": false,
+    "full_accepted_output_distribution_proved": false,
+    "one_sided_ceiling_or_renyi_proved": false,
+    "source_correspondence": "docs/raw-gaussian-acceptance.md; pinned Rossi Algorithm12 and its following density-ratio derivation"
+  },
+  "joint_accepted_output": {
+    "proof_files_added": [
+      "proofs/DistributionExpectationDistance.ec",
+      "proofs/SigmaCDT83Patch.ec",
+      "proofs/SigmaJoint203Bridge.ec",
+      "proofs/SigmaJointAttemptBridge.ec",
+      "proofs/SigmaJointCorrectness.ec",
+      "proofs/SigmaJointFixedCorrectness.ec",
+      "proofs/SigmaJointIdealCorrectness.ec",
+      "proofs/SigmaJointKernelCorrectness.ec",
+      "proofs/SigmaRoundedOutputCorrectness.ec",
+      "theories/SigmaJointSpec.ec"
+    ],
+    "actual_experiment": "SigmaJoint203Bridge.SigmaJoint203Experiment.sample",
+    "actual_procedure": "SamplerTarget.M.__sample_gauss_sigma76_regs",
+    "actual_output": "int*bool: W64.to_uint rounded magnitude and actual acceptance bit",
+    "randomness": "Explicit independent uniform83 CDT, uniform72 noise and uniform48 rejection integers; unused high5 CDT bits zero; no concrete SHAKE claim",
+    "ideal_experiment": "SigmaJointIdealCorrectness.SigmaJointIdeal.sample",
+    "ideal_cdt": "Independent hg16_distr over the entire nonnegative infinite integer support",
+    "ideal_rounding": "Unbounded integer floor((y+2^72*x+32768)/65536); never converted to a word",
+    "ideal_acceptance": "Raw Gaussian weight ratio with half correction only at unrounded zero",
+    "event": "accepted and event(output), for EVERY predicate event:int->bool",
+    "theorem": "SigmaJointCorrectness.sj_joint_output_error_strict",
+    "decomposition": "Implementation error under the actual finite CDT law, then independent bounded-kernel CDT contraction",
+    "pointwise_event_weighting": "SigmaJointFixedCorrectness.sj_point_error applies the output indicator before noise averaging",
+    "implementation_error": "<=eta=57/(2*2^48)+32767/2^73<29/2^48",
+    "cdt_kernel_error": "<=SDist(actualCDT,hg16_distr)<2^-78, coefficient1 without finite ideal support",
+    "joint_error": "<29/2^48+2^-78<30/2^48<2^-43",
+    "public_input_fit_accuracy_or_event_restriction_premise": false,
+    "single_attempt_losslessness": true,
+    "conditioned_accepted_output_distribution_proved": true,
+    "random_signs_or_retry_termination_proved": false,
+    "ideal_rejected_output_tuple_law_proved": false,
+    "source_correspondence": "docs/joint-accepted-output.md and preceding independently defined Gaussian source correspondence",
+    "conditioning_note": "Proved in the subsequent conditional_accepted_output record. The joint theorem itself remains an unconditioned accepted-output mass comparison."
+  },
+  "conditional_accepted_output": {
+    "proof_files_added": [
+      "proofs/ConditionalRatioBound.ec",
+      "proofs/SigmaAcceptanceLowerBound.ec",
+      "proofs/SigmaConditionalActual.ec",
+      "proofs/SigmaConditionalCorrectness.ec",
+      "proofs/SigmaConditionalIdeal.ec",
+      "theories/SigmaConditionalSpec.ec"
+    ],
+    "actual_distribution": "SigmaConditionalSpec.sc_actual_conditioned(p)",
+    "ideal_distribution": "SigmaConditionalSpec.sc_ideal_conditioned",
+    "native_definition": "dmap(dcond(pair_distribution,sc_accepted),sc_output)",
+    "actual_connection": "Accepted-event and total-acceptance masses equal probabilities of the actual SigmaJoint203Experiment; exact ratios use its own denominator",
+    "ideal_connection": "Same probability laws for the preceding independent SigmaJointIdeal experiment, preserving infinite support and unbounded integer outputs",
+    "actual_acceptance_lower": ">=1/7 for fixed CDT/noise with uniform48 rejection, and for the complete uniform203 experiment",
+    "ideal_acceptance_lower": ">=1/8 transferred through the joint-event error",
+    "positive_lower_bound_premise_left_in_final_contracts": false,
+    "actual_conditioned_lossless": true,
+    "ideal_conditioned_lossless": true,
+    "joint_delta": "29/2^48+2^-78",
+    "normalization_lemma": "ConditionalRatioBound.conditional_ratio_error_lower: <=2*delta/lower, accounting for numerator and denominator errors",
+    "common_denominator_lower": "1/8",
+    "conditional_event_bound": "<=16*(29/2^48+2^-78)<2^-39 for every integer output predicate",
+    "statistical_distance_bound": "<=16*(29/2^48+2^-78)<2^-39",
+    "supremum_method": "Uniform non-strict event bound first, then a separately proved strict numerical margin",
+    "main_theorem": "SigmaConditionalCorrectness.sc_conditioned_distributions_correct",
+    "sdist_theorem": "SigmaConditionalCorrectness.sc_conditioned_sdist_strict",
+    "target": "The previous independent ideal experiment conditioned on its acceptance event",
+    "closed_form_rounded_gaussian_identification_proved": true,
+    "randomness": "Explicit independent uniform83/72/48 inputs in the actual experiment; not a property of concrete SHAKE",
+    "random_signs_retry_termination_or_complete_api_proved": false,
+    "source_correspondence": "docs/conditional-accepted-output.md",
+    "gaussian_identification_note": "Exact law identification is supplied by the subsequent gaussian_magnitude_identification record; the earlier conditional theorem is unchanged."
+  },
+  "gaussian_magnitude_identification": {
+    "proof_files_added": [
+      "proofs/Gaussian76Folding.ec",
+      "proofs/Gaussian76Identification.ec",
+      "proofs/Gaussian76Kernel.ec",
+      "proofs/Gaussian76Properties.ec",
+      "proofs/Gaussian76Rounding.ec",
+      "proofs/GaussianBlockReindex.ec",
+      "theories/Gaussian76Spec.ec"
+    ],
+    "independent_gaussian": "Gaussian76Spec.g76_distr: rho(k)=exp(-k*k/2^153), all k in Z, normalized by Z=sum_ALLZrho",
+    "normalizer_method": "Geometric domination on the nonnegative half and its reflection; absolute summability, Z>=1, pmf sum1 and every-integer support proved independently",
+    "target_output": "Gaussian76Spec.g76_rounded: R=floor((abs(G)+32768)/65536), unbounded integer arithmetic",
+    "kernel_identity": "hg16_rho(x)*raw_accept(x,y)=alpha(N*x+y)*rho(N*x+y), for all x>=0 and0<=y<N, N=2^72",
+    "series_reindexing": "GaussianBlockReindex.gb_block_sum: quotient fibres, translated summable series, explicit nonnegative support, no enumeration",
+    "zero_folding": "Zero weight counted once; positive magnitudes twice; sum acceptance weights=Z/2",
+    "ideal_acceptance_formula": "Z/(2*N*hg16_normalizer)",
+    "exact_identity": "Gaussian76Identification.g76_ideal_conditioned_eq: sc_ideal_conditioned=g76_rounded",
+    "signed_gaussian_pmf": "Gaussian76Identification.g76_gaussian_mass",
+    "rounded_pmf": "Gaussian76Rounding.g76_rounded_mass: folded finite sum on[max0(65536*r-32768),65536*r+32768)/Z forr>=0;0 forr<0",
+    "zero_bin": "Signed lattice values -32767..32767; \u00b132768 both map to1",
+    "actual_theorem": "Gaussian76Identification.g76_actual_gaussian_correct",
+    "point_mass_theorem": "Gaussian76Identification.g76_actual_rounded_mass_error",
+    "actual_error": "SDist(actual accepted magnitude conditional distribution,law(R))<2^-39; no extra approximation term because identification is exact",
+    "randomness": "Actual preceding uniform83/72/48 experiment; concrete SHAKE not assumed uniform",
+    "actual_and_target_distributions_lossless": true,
+    "new_axioms_or_numerical_oracles": false,
+    "actual_signed_output_retry_or_complete_api_proved": false,
+    "returned_law_is_pointwise_gaussian_sigma2pow60": false,
+    "source_correspondence": "docs/gaussian-magnitude-identification.md",
+    "subsequent_retry_result": "See gaussian_retries_and_batches for the later explicit iid actual-attempt retry law; the identification-stage scope remains historical."
+  },
+  "gaussian_retries_and_batches": {
+    "proof_files_added": [
+      "proofs/GaussianBatchDistance.ec",
+      "proofs/GaussianRetryActual.ec",
+      "proofs/GaussianRetryAttempt.ec",
+      "proofs/GaussianRetryBatch.ec",
+      "proofs/GaussianRetryBatchCorrectness.ec",
+      "proofs/GaussianRetryBatchTail.ec",
+      "proofs/GaussianRetryBufferTotal.ec",
+      "proofs/GaussianRetryConsumerTotal.ec",
+      "proofs/GaussianRetryCore.ec",
+      "proofs/GaussianRetryInputs.ec",
+      "proofs/GaussianRetryPrefixCorrectness.ec",
+      "proofs/GaussianRetryRank.ec",
+      "proofs/GaussianRetryStreamBridge.ec",
+      "proofs/GaussianRetryStreamTermination.ec",
+      "proofs/GaussianRetryTail.ec"
+    ],
+    "actual_attempt_pair_law": "GaussianRetryAttempt.gr_actual_pair_equiv includes accepted and rejected outcomes",
+    "operational_retry": "GaussianRetryActual.sample calls SigmaJoint203Experiment.sample on each fresh independent83/72/48-bit attempt",
+    "retry_theorems": [
+      "GaussianRetryActual.gr_actual_retry_ll",
+      "GaussianRetryActual.gr_actual_retry_law",
+      "GaussianRetryActual.gr_actual_retry_gaussian"
+    ],
+    "retry_output_law": "exactly sc_actual_conditioned(p); unchanged Gaussian magnitude SDist<2^-39",
+    "acceptance_premise_discharged": "actual acceptance>=1/7; retry islossless has no caller premise",
+    "consecutive_rejection_bound": "t independent trials all reject with exact mass(1-a)^t<=(6/7)^t for t>=0",
+    "batch_module": "GaussianRetryActualBatch.sample",
+    "batch_joint_law": "for n>=0, probability-one termination with full ordered dlist(sc_actual_conditioned(p),n) law",
+    "batch_256_sdist": "<2^-31 against dlist(g76_rounded,256)",
+    "batch_257_sdist": "<257/2^39 against dlist(g76_rounded,257)",
+    "dummy_projection": "all257 accepted calls complete before take256; exact dlist256 law and<2^-31 bound",
+    "candidate_model": "canonical203-bit encoding in26 bytes; unused high5bits zero; no uniform208 claim",
+    "finite_prefix": "gr_candidate_stream reconstruction and entire iid finite pair/accepted-sequence laws",
+    "adequacy_probability": "same gr_adequate predicate; failure after n*t candidates<=n*(6/7)^t; tends0 for allprefix lengths and A(B)=floor((136B-32)/26)",
+    "concrete_stream_totality": "GaussianRetryStreamTermination.gr_sample_gauss_N_prefix_total, conditional on finite adequate prefix of the concrete seeded SHAKE word stream and existing memory/limb bounds",
+    "termination_rank": "finite maximum compatible block witness; adequate cap excludes unfinished states; every iteration advances the maximum witness",
+    "concrete_stream_outputs": "first256 accepted magnitude words, retained signs, full selected-event square sum including257th dummy and external frame",
+    "all_prior_sources_preserved": true,
+    "new_project_axioms": false,
+    "concrete_shake_iid_proved": false,
+    "every_seed_terminates_proved": false,
+    "buffered_iid_controller_probability_law_proved": false,
+    "signed_or_hyperball_distribution_proved": false,
+    "complete_api_correctness": false,
+    "documentation": "docs/gaussian-retries-and-batches.md",
+    "subsequent_iid_buffer_result": "The later uniform_byte_iid_buffer milestone closes the actual-helper iid byte-buffer magnitude-law gap; the earlier stage's false flag is historical."
+  },
+  "uniform_byte_iid_buffer": {
+    "proof_files_added": [
+      "proofs/GaussianBlockSampling.ec",
+      "proofs/GaussianByteCarryDistribution.ec",
+      "proofs/GaussianIidBufferPath.ec",
+      "proofs/GaussianIidDistribution.ec",
+      "proofs/GaussianIidEventLaw.ec",
+      "proofs/GaussianIidInitial.ec",
+      "proofs/GaussianIidKernel.ec",
+      "proofs/GaussianIidNormalization.ec",
+      "proofs/GaussianIidProgress.ec",
+      "proofs/GaussianIidStep.ec",
+      "proofs/GaussianIidTermination.ec",
+      "proofs/GaussianIidVisible.ec",
+      "proofs/GaussianUniformBytes.ec",
+      "proofs/GaussianUnusedBits.ec",
+      "proofs/MixedRadixUniform.ec",
+      "theories/GaussianIidBufferSpec.ec"
+    ],
+    "uniform_input": "BArray26.darray: all208 bits uniform; canonical projection clears unused high5 bits without changing the full sigma76 tuple",
+    "input_law": "gbc_candidate_observer_law: dmap(uniform26,word observer)=sc_actual_pair(p), for every p",
+    "controller": "GaussianIidBuffer.sample:49 initial iid136-byte draws, actual sign-copy, actual finite consumer, actual carry and subsequent iid136-byte refills",
+    "operational_equivalence": "gib_actual_functional: equality of the complete returned word arrays under the same block draws",
+    "initialization": "49 blocks equal one uniform6664-byte draw; first32 bytes copied as signs",
+    "tail_method": "gik_kernel conditions on each literal carried prefix; only missing suffix and new block bytes are randomized",
+    "progress": "Every fixed tail shorter than26 has refill acceptance probability>=1/7 via a wholly fresh candidate",
+    "termination": "gii_actual_total and gii_actual_lossless: probability-one termination under gib_bounds only",
+    "event_method": "Native expectation-Hoare upper bounds for event and complement plus independently proved losslessness",
+    "exact_law": "gii_actual_joint_law: visible256 projection has gid_target=dlist(sc_actual_conditioned(p),256) for requests256 and257",
+    "gaussian_error": "gii_actual_gaussian_event and gii_actual_correct: all visible-vector event errors and target SDist<2^-31 against dlist(g76_rounded,256)",
+    "public_input_condition": "n=256 or257;0<=sample_offset and sample_offset+n<=4096;0<=sign_offset and sign_offset+32<=512",
+    "initial_arrays": "arbitrary words, including square limbs; no adequate-prefix or canonical-square premise",
+    "dummy257": "257th accepted event contributes word square limbs and is counted, but its output slot is not written; physical observable still has256 values",
+    "accumulator_scope": "exact word-level pathwise behavior only; prior initial-limb/range hypotheses remain necessary for unbounded integer/no-wrap interpretation",
+    "buffered_iid_controller_probability_law_proved": true,
+    "sign_distribution_or_application_proved": false,
+    "full_returned_triple_gaussian_joint_law_proved": false,
+    "concrete_shake_independence_or_every_seed_termination_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "documentation": "docs/gaussian-iid-buffer.md",
+    "subsequent_signed_result": "The later signed_gaussian milestone closes sign independence and signed-observation laws and proves conditional signed32 application; the earlier false sign flag is historical."
+  },
+  "signed_gaussian": {
+    "proof_files_added": [
+      "proofs/GaussianSignBits.ec",
+      "proofs/GaussianSignIndependence.ec",
+      "proofs/GaussianSignedCorrectness.ec",
+      "proofs/GaussianSignedTarget.ec",
+      "proofs/GaussianSignedVector.ec",
+      "proofs/HyperballSignedScale.ec",
+      "proofs/IndependentSignSampling.ec"
+    ],
+    "sign_bits": "gsb_uniform256: 32 independent uniform bytes decode exactly to256 independent fair bits in actual little-endian bit order",
+    "full_state_independence": "gsi_sign_state_independent: signs independent of the complete returned sample array and square-word array, under gib_bounds and arbitrary initial arrays",
+    "factorization": "gsi_actual_redraw: full returned-tuple law unchanged by an independent replacement of the32 copied sign bytes after the entire unsigned loop",
+    "joint_observation": "gsc_actual_joint_law: exact product of fair256bits and gid_target for the actual-helper iid buffer",
+    "signed_observation": "gsc_actual_signed_law: unbounded integer plus/minus unsigned W64 magnitude, exact gsv_actual law",
+    "independent_target": "gst_target=dmap(g76_distr,gst_round_signed), where gst_round_signed(k)=sign-preserving floor((abs(k)+32768)/65536)",
+    "zero_and_ties": "zero mass preserved; +/-32767 round to0 and +/-32768 to+/-1",
+    "vector_error": "gsc_actual_gaussian_event and gsc_actual_correct: every signed256 event error and target SDist<2^-31",
+    "sign_application": "HyperballSignedScale: actual multiplication/rounding precedes modular32-bit sign application; exact word equality for both signs",
+    "signed32_premise": "Full hb_rnd13_magnitude<=2147483647 retained for signed32 integer interpretation, including per-coefficient vector theorem",
+    "local_global_alignment": "sample_offset=8*sign_offset for connecting a local fresh sign to the actual global scaled coefficient",
+    "dummy257": "Only256 visible signed values; the257th accepted dummy still contributes to unsigned square-word state",
+    "scale_scope": "Implemented word scaling and rounding only; no ideal real scaling, inverse-square-root accuracy or universal fit claim",
+    "concrete_shake_independence_or_every_seed_termination_proved": false,
+    "full_returned_triple_gaussian_joint_law_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "documentation": "docs/gaussian-signed-output.md"
+  },
+  "hyperball_prescribed_witnesses": {
+    "proof_files_added": [
+      "proofs/HyperballWitnessArithmetic.ec",
+      "proofs/HyperballWitnessCandidate.ec",
+      "proofs/HyperballWitnessExecution.ec",
+      "proofs/HyperballWitnessNewton.ec",
+      "proofs/HyperballWitnessNorm.ec",
+      "proofs/HyperballWitnessReplay.ec",
+      "proofs/HyperballWitnessSampling.ec",
+      "proofs/HyperballWordEvaluation.ec",
+      "theories/HyperballWitnessSpec.ec"
+    ],
+    "public_theorems": [
+      "HyperballWitnessReplay.hbwr_total",
+      "HyperballWitnessReplay.hbwr_accepted_outside_radius_total"
+    ],
+    "entrypoint": "HyperballWitnessReplay.run(mode): the selected mode is its only argument",
+    "input_condition": "mode=2 or3 or5; the driver constructs fixed repeated candidate bytes and zero initial sample/sign/square arrays",
+    "producer": "Actual __sample_gauss_at calls with requests257,257,256,...; byte counts26*requested; output offsets256*i",
+    "events_and_dummies": "Stored/event counts1536/1538,2304/2306,2816/2818; both unstored dummy squares are included",
+    "candidate": "hbw_candidate_spec and hbw_candidate_total derive exact sample/square limbs and acceptance1 from the fixed26 bytes",
+    "accumulator": "hbw_sampling_total derives every active sample,zero signs and canonical hb_pack(hbw_sum), including exact integer raw-limb sum",
+    "word_evaluation": "Universal modular integer div/mod forms; no canonical-low or nonnegative-high assumption; every concrete Newton transition checked in EasyCrypt",
+    "arithmetic_calls": "Actual half-round,newton-invsqrt (initial subtraction plus6updates),mul-high,scale-and-check and sqnorm2 helpers",
+    "actual_observation": "Returned accepted word=1; returned norm word is the prescribed residue; mathematical hyperball_sqnorm of the returned arrays equals the prescribed total and exceeds the mode bound",
+    "first_iterate": "Computed initial Newton high limb has negative signed interpretation in all3 cases",
+    "signed32_fit": "Actual full rounded magnitudes412929335944226/448613294232468/545876826280812 exceed2147483647; final coefficients follow modular W32 conversion",
+    "modes": {
+      "2": {
+        "stored": 1536,
+        "events": 1538,
+        "coefficient": -1704795102,
+        "integer_norm": 4464117257937700460544,
+        "norm_word_uint": 5192099988969472,
+        "bound": 6505809026482176
+      },
+      "3": {
+        "stored": 2304,
+        "events": 2306,
+        "coefficient": -334802028,
+        "integer_norm": 258260884883511054336,
+        "norm_word_uint": 6467851577331712,
+        "bound": 22510896139993088
+      },
+      "5": {
+        "stored": 2816,
+        "events": 2818,
+        "coefficient": -632138900,
+        "integer_norm": 1125272442323279360000,
+        "norm_word_uint": 21053826996711424,
+        "bound": 33503371683954688
+      }
+    },
+    "numerical_replay": {
+      "command": "python3 haetae-1.2.0-easycrypt/tests/hyperball-norm-boundary.py",
+      "checked_at": "2026-09-22T02:59:49.476858+00:00",
+      "result": "PASS",
+      "exit_code": 0,
+      "log": "logs/hyperball-witness-numerical-replay.log",
+      "modes": [
+        2,
+        3,
+        5
+      ],
+      "concrete_shake_seed_reachability": false,
+      "formal_c_execution": false,
+      "source_hashes": {
+        "tests/hyperball-norm-boundary.py": "0f4cff80a0d0fb6747b8dc36296c2072ccb7d45a49f64fdf7eb4d90b79905716",
+        "tests/hyperball-norm-boundary.c": "1a681ddc7a8f49c5ffa4461ced2abf827b4f862f74889f9c475168311c146eb0"
+      },
+      "library_sha256": {
+        "2": "0600ce998a5885444d6c46431c0b853ee738ebc34365675bfece303a1ee211d6",
+        "3": "6f20b7389f8459873c3fe5af69619e3ba86b3af8fb0caa3419f75a2956c1634c",
+        "5": "6ad598e46519bc8a0a0325fab0a149f91b0a7b6fef2cd6b55ffdfdc361be2f8d"
+      }
+    },
+    "formal_c_execution_proved": false,
+    "shake_seed_or_full_seeded_hyperball_reachability_proved": false,
+    "exception_probability_bound_proved": false,
+    "ideal_scaling_accuracy_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "documentation": "docs/hyperball-actual-witnesses.md",
+    "subsequent_safe_domain": "hyperball_input_safe_domain derives numerical safety from a sufficient canonical input interval; it does not assert reachability or occurrence probability"
+  },
+  "hyperball_input_safe_domain": {
+    "proof_files_added": [
+      "proofs/HyperballMulBounds.ec",
+      "proofs/HyperballNewtonBarrier.ec",
+      "proofs/HyperballPositiveArithmetic.ec",
+      "proofs/HyperballSafeConstants.ec",
+      "proofs/HyperballSafeCorrectness.ec",
+      "proofs/HyperballSafeNewton.ec",
+      "proofs/HyperballSafeScale.ec",
+      "theories/HyperballSafeSpec.ec"
+    ],
+    "public_contracts": [
+      "hsc_total",
+      "hsc_accepted_radius_total",
+      "hsc_full_magnitude"
+    ],
+    "actual_execution": "HyperballSafeExecution aliases the existing generic actual half/Newton/mul-high/scale-check/norm-observer composition",
+    "input": "hbs_good mode (hb_load squares): mode2/3/5, canonical low<2^48, and3D*2^74<=S<=5D*2^74 with S=hb_value(hb_load squares),D=stored_count+2",
+    "no_output_premises": "No assumed inverse, scale, coefficient, signed-fit or norm bounds; sample and sign arrays are unrestricted",
+    "modes": {
+      "2": {
+        "D": 1538,
+        "S_min": 87155995807842172063973376,
+        "S_max": 145259993013070286773288960,
+        "inverse_cap": 2361183241434822606848
+      },
+      "3": {
+        "D": 2306,
+        "S_min": 130677325313968822353395712,
+        "S_max": 217795542189948037255659520,
+        "inverse_cap": 2066035336255469780992
+      },
+      "5": {
+        "D": 2818,
+        "S_min": 159691544984719922546343936,
+        "S_max": 266152574974533204243906560,
+        "inverse_cap": 1697100454781278748672
+      }
+    },
+    "nonempty": "hbs_center_good: S=D*2^76 has a canonical word representation inside each domain",
+    "arithmetic": "Mul gives floor(product/Q)..floor+1, square gives exactfloor(square/Q); scaled absolute error<=Q. Required additions, high shifts and final normalization have proved headroom; masked shifts retain their word wrap, and all representation rewrites are checked",
+    "newton": "Positive initial difference>=2^48; first low<2R, six subsequent actual updates bounded via integer cubic barrier and derived multiplication errors; final inverse canonical and <=modeH",
+    "scale": "Actual high multiplication yields canonical scale withvalue<=2^85",
+    "coefficient": "Every W64 sample has full pre-conversion rounded magnitude<=2^26; actual sign extraction and signed32 interpretation follow",
+    "norm": "At most2816 coefficients imply strict integer norm<2^64; actual returned norm word decodes exactly tothat norm",
+    "acceptance": "Actual accepted word=1 iff true integer norm<=uint(modebound); no claim every safe-domain input is accepted",
+    "prior_witnesses": "hsc_prescribed_witness_outside proves the3 earlier overflow sums are outside this sufficient input interval",
+    "safe_domain_occurrence_probability_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "outer_retry_termination_proved": false,
+    "inverse_square_root_accuracy_or_distribution_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "documentation": "docs/hyperball-safe-domain.md",
+    "subsequent_exact_probability_identity": "gaussian_full_payload_square_law identifies the actual iid batch square distribution and exact safe-event probability; no numeric tail bound",
+    "subsequent_numeric_tail_bound": "hyperball_iid_tail_bounds proves explicit iid batch escape and one-attempt unconditional unsafe-acceptance probability<2^-29,-44,-54 for modes2,3,5; no concreteSHAKE or outerretry claim"
+  },
+  "gaussian_full_payload_square_law": {
+    "proof_files_added": [
+      "proofs/GaussianPayloadBufferPath.ec",
+      "proofs/GaussianPayloadBufferTrace.ec",
+      "proofs/GaussianPayloadDraw.ec",
+      "proofs/GaussianPayloadEncoding.ec",
+      "proofs/GaussianPayloadEventLaw.ec",
+      "proofs/GaussianPayloadKernel.ec",
+      "proofs/GaussianPayloadTrace.ec",
+      "proofs/HyperballIidPayloadBatch.ec",
+      "proofs/HyperballIidSquareLaw.ec",
+      "theories/GaussianPayloadBufferSpec.ec",
+      "theories/GaussianPayloadSpec.ec",
+      "theories/HyperballIidPayloadSpec.ec"
+    ],
+    "public_contracts": [
+      "gpe_history_law",
+      "gpd_buffer_draw",
+      "gpt_buffer_correct",
+      "gpt_buffer_total",
+      "hip_batch_history_law",
+      "hip_payload_observe_total",
+      "hips_actual_joint_law",
+      "hips_actual_square_law",
+      "hips_actual_safe_probability",
+      "hips_actual_terminates"
+    ],
+    "random_source": "Explicit independent uniform bytes: initial49x136-byte blocks,32signbytes,26-byte candidates,and136-byte refills with the observed literal carry retained",
+    "accepted_payload": "uint(sample)+2^64*(uint(square_low)+2^48*uint(square_high)); exact lossless decoding, not rounded_sample squared",
+    "accepted_distribution": "gpd_accepted conditions the actual26-byte sigma observation on acceptance; acceptance>=1/7 and total mass1",
+    "single_buffer": "Whole output triple preserved by ghost erasure undergib_bounds; fullhistory=dlist gpd_accepted n and probability1termination for0<=n<=512",
+    "batch": "HyperballIidGaussian.sample calls the actual GaussianIidBuffer at offsets256*i,32*i; starts fromzeroarrays and requests257,257,256,...",
+    "initialization_scope": "Production zeroes only sqsum; zero initial sample/sign arrays are a choice of this explicit iid model, not a whole seeded-state equivalence",
+    "modes": {
+      "2": {
+        "visible": 1536,
+        "D": 1538
+      },
+      "3": {
+        "visible": 2304,
+        "D": 2306
+      },
+      "5": {
+        "visible": 2816,
+        "D": 2818
+      }
+    },
+    "history": "Exact dlist gpd_accepted D; visible projection omits zero-based256and513; square sum includes allD accepted payloads",
+    "joint_law": "dmap(dlist gpd_accepted D)hip_projection; same history drives both vector andS, with no independence assumption between them",
+    "accumulator": "Each raw square<=2^84-1; cumulative accepted-count invariant and2818*(2^84-1)<2^96 prove canonical limbs and exact ordinary integer sum",
+    "safe_interval": "Actual hbs_good event probability exactly equals the mass of histories whose full raw-square sum lies in[3D*2^74,5D*2^74]",
+    "exact_safe_event_probability_identity_proved": true,
+    "numeric_safe_domain_tail_bound_proved": false,
+    "raw_square_ideal_gaussian_or_chi_square_law_proved": false,
+    "unsafe_acceptance_bound_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "outer_retry_termination_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "production_changed": false,
+    "kat_rerun": false,
+    "documentation": "docs/gaussian-payload-and-squares.md",
+    "subsequent_numeric_tail_bound": "hyperball_iid_tail_bounds supplies quantitative mode bounds from this exact full-payload law; original milestone scope is retained"
+  },
+  "hyperball_iid_tail_bounds": {
+    "proof_files_added": [
+      "proofs/GaussianLatticeMgf.ec",
+      "proofs/GaussianLatticeSum.ec",
+      "proofs/GaussianPayloadMoments.ec",
+      "proofs/GaussianRawSquare.ec",
+      "proofs/GaussianSquareMoments.ec",
+      "proofs/HyperballIidAttemptSafety.ec",
+      "proofs/HyperballIidTailCorrectness.ec",
+      "proofs/HyperballTailCertificateChecks.ec",
+      "proofs/HyperballTailConstants.ec",
+      "proofs/IidExponentialTail.ec",
+      "proofs/RawSquareAcceptance.ec",
+      "proofs/RawSquareIdealMoments.ec",
+      "theories/HyperballTailCertificate.ec",
+      "theories/HyperballTailSpec.ec",
+      "theories/RawSquareMomentSpec.ec"
+    ],
+    "public_contracts": [
+      "gps_square_exact",
+      "glm_plus_bound",
+      "glm_minus_bound",
+      "gsm_plus_bound",
+      "gsm_minus_bound",
+      "gsm_centered_plus",
+      "gsm_centered_minus",
+      "ht_mode_power_bound",
+      "ht_iid_list_tail",
+      "ht_iid_square_tail",
+      "ht_iid_square_interval",
+      "ht_iid_unsafe_acceptance",
+      "ht_iid_accepted_outside_radius"
+    ],
+    "random_source": "Explicit independent uniform bytes in the existing operational Gaussian buffer; same full accepted history including both dummy payloads",
+    "raw_square": "q=floor(Z^2/Q),Q=2^76; actual raw square limbs rather than rounded magnitude squared;0<=Z<167*2^72,q<109Q",
+    "raw_transport": "Bounded weighted pointwise raw acceptance error, including the averaged zero mismatch; clipped0<=CDT<=166 kernel permits scaledCDT-TV comparison; actual acceptance denominator>=1/7 and full ideal denominator retained",
+    "lattice": "Summability and monotone integer-block comparison with half-weight atzero; rational-square tilts yield full discrete Gaussian MGF bounds10/9+17/(9Q),7/8+13/(8Q); normalizer>=Q is derived",
+    "floor_correction": "Negative tilt retains factor1+2^-64; positive tilt uses q<=Z^2/Q",
+    "actual_moments": {
+      "positive_tilt": "19/200",
+      "positive_upper": "10/9+2^-18",
+      "negative_tilt": "-15/98",
+      "negative_upper": "7/8+2^-18"
+    },
+    "centered_factors": {
+      "upper": "3947/4000",
+      "lower": "1963/2000"
+    },
+    "concentration": "Finite iid product expectation and Markov: two-sided tail<=rplus^D+rminus^D; each mode sum strictly below its epsilon",
+    "modes": {
+      "2": {
+        "D": 1538,
+        "strict_upper": "2^-29",
+        "denominator": 536870912
+      },
+      "3": {
+        "D": 2306,
+        "strict_upper": "2^-44",
+        "denominator": 17592186044416
+      },
+      "5": {
+        "D": 2818,
+        "strict_upper": "2^-54",
+        "denominator": 18014398509481984
+      }
+    },
+    "square_event": "S<3D*2^74 or S>5D*2^74; equivalent to nothbs_good for the canonical actual iid batch output",
+    "one_attempt": "HyperballIidAttempt.sample calls the actual iid Gaussian batch then the existing actual finite numerical helper composition",
+    "unsafe_event": "accepted word=1 AND true integer squared norm exceeds modebound; unconditional joint probability for one attempt, bounded by the same strict modeepsilon",
+    "initialization_scope": "Zero sample/sign scratch arrays are a proof-model choice; production explicitly zeroes only square accumulator. No arbitrary-scratch whole-batch or seeded-state equivalence is claimed",
+    "certificate": {
+      "result": "PASS",
+      "exit_code": 0,
+      "command": "python3 scripts/hyperball-tail-certificate.py --check",
+      "checked_at": "2026-09-22T07:26:01.926904+00:00",
+      "targets": [
+        {
+          "target": "scripts/hyperball-tail-certificate.py",
+          "sha256": "fc58cc5d6f2b2cb7e6220d1dfd46ba5a2d0c7aefabf00183c32603d5dc03c0f4"
+        },
+        {
+          "target": "theories/HyperballTailCertificate.ec",
+          "sha256": "4e417614c45b407d026aef43055fcc457cf3e9aff9fbbe7be2e2016439bdbf27"
+        }
+      ]
+    },
+    "certificate_method": "128-bit outward integer intervals, rational exp seeds, checked repeated squarings and binary ratio-power chains; analytic linkage proved separately inEasyCrypt",
+    "numeric_safe_domain_tail_bound_proved": true,
+    "one_attempt_unconditional_unsafe_acceptance_bound_proved": true,
+    "probability_one_one_attempt_termination_proved": true,
+    "failure_conditioned_on_acceptance_bound_proved": false,
+    "outer_retry_termination_or_eventual_failure_bound_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "actual_raw_square_exact_gaussian_or_chi_square_law_proved": false,
+    "complete_api_correctness": false,
+    "new_project_axioms": false,
+    "production_changed": false,
+    "kat_rerun": false,
+    "documentation": "docs/hyperball-iid-tail-bound.md"
+  }
+}

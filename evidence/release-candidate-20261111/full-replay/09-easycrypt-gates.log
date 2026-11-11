@@ -1,0 +1,57 @@
+make: Entering directory '/home/hacker-code-j/Desktop/2026/HAETAE/artifact-release-preparation/haetae/source-candidate/haetae-easycrypt'
+python3 tests/test_verification_gate.py
+..........
+----------------------------------------------------------------------
+Ran 10 tests in 2.835s
+
+OK
+python3 tests/test_hyperball_provenance.py
+PASS: 58 generated files match fresh Jasmin extraction
+C compiler __VERSION__: 11.4.0
+....PASS: 58 generated files match fresh Jasmin extraction
+C compiler __VERSION__: 11.4.0
+Generated outward-rounded CDT/Gaussian certificate; numeric checks pass; analytic proof required
+Generated six exact Bernstein certificates; all66 controls nonnegative; analytic proof required
+.....
+----------------------------------------------------------------------
+Ran 9 tests in 5.425s
+
+OK
+python3 tests/test_gaussian_certificate.py
+.F
+======================================================================
+FAIL: test_original_certificate_and_table_identity (__main__.GaussianCertificateTests) (proof='CDTGaussianCertificateChecks.ec')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hacker-code-j/Desktop/2026/HAETAE/artifact-release-preparation/haetae/source-candidate/haetae-easycrypt/tests/test_gaussian_certificate.py", line 64, in test_original_certificate_and_table_identity
+    self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+AssertionError: 1 != 0 : [-] [0002] 0.7% (-1.0B / [frag -1.0B])
+[\] [0003] 1.8% (-1.0B / [frag -1.0B])
+[|] [0010] 8.7% (-1.0B / [frag -1.0B])
+[/] [0011] 8.8% (-1.0B / [frag -1.0B])
+[-] [0013] 12.6% (-1.0B / [frag -1.0B])
+[\] [0014] 12.7% (-1.0B / [frag -1.0B])
+[|] [0017] 14.2% (-1.0B / [frag -1.0B])
+[/] [0018] 14.3% (-1.0B / [frag -1.0B])
+[-] [0019] 15.7% (-1.0B / [frag -1.0B])
+                                                   
+                                                   
+[critical] [/tmp/haetae120-ec-eof.RXjV9yG8/CDTGaussianCertificateChecks.ec:19] Connection error: cannot start & connect to why3server
+[\] [0019] 15.7% (-1.0B / [frag -1.0B])
+[|] [0019] 15.7% (-1.0B / [frag -1.0B])
+
+
+======================================================================
+FAIL: test_wrong_squaring_step_is_rejected_by_the_proof (__main__.GaussianCertificateTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/hacker-code-j/Desktop/2026/HAETAE/artifact-release-preparation/haetae/source-candidate/haetae-easycrypt/tests/test_gaussian_certificate.py", line 72, in test_wrong_squaring_step_is_rejected_by_the_proof
+    self.assertIn("cannot close goals", result.stdout + result.stderr)
+AssertionError: 'cannot close goals' not found in '[-] [0002] 0.7% (-1.0B / [frag -1.0B])\n[\\] [0003] 1.8% (-1.0B / [frag -1.0B])\n[|] [0010] 8.7% (-1.0B / [frag -1.0B])\n[/] [0011] 8.8% (-1.0B / [frag -1.0B])\n[-] [0013] 12.6% (-1.0B / [frag -1.0B])\n[\\] [0014] 12.7% (-1.0B / [frag -1.0B])\n[|] [0017] 14.2% (-1.0B / [frag -1.0B])\n[/] [0018] 14.3% (-1.0B / [frag -1.0B])\n[-] [0019] 15.7% (-1.0B / [frag -1.0B])\n                                                   \n                                                   \n[critical] [/tmp/haetae120-ec-eof.eyraaKBh/CDTGaussianCertificateChecks.ec:19] Connection error: cannot start & connect to why3server\n[\\] [0019] 15.7% (-1.0B / [frag -1.0B])\n[|] [0019] 15.7% (-1.0B / [frag -1.0B])\n'
+
+----------------------------------------------------------------------
+Ran 3 tests in 15.075s
+
+FAILED (failures=2)
+make: *** [Makefile:16: test-gate] Error 1
+make: Leaving directory '/home/hacker-code-j/Desktop/2026/HAETAE/artifact-release-preparation/haetae/source-candidate/haetae-easycrypt'

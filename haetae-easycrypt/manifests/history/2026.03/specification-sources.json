@@ -1,0 +1,314 @@
+{
+  "sources": [
+    {
+      "id": "haetae-spec-260904",
+      "title": "HAETAE specification 260904",
+      "release_page": "https://kpqc.cryptolab.co.kr/haetae",
+      "url": "https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view",
+      "download_url": "https://drive.usercontent.google.com/download?id=1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx&export=download",
+      "cache_file": "HAETAE_spec_260904.pdf",
+      "relevant_locations": [
+        {
+          "section": "5.1.1 Discrete Gaussian Sampling",
+          "printed_page": 32,
+          "pdf_page": 33
+        }
+      ],
+      "scope": "sigma16 base CDT;166 entries;83 input bits;reference[21] Algorithm12; separate exponential rejection approximation",
+      "sha256": "4ce676c483dd2797f4da01a1e8b65817cb6c9c3711a9cb23e50903e8e8576217",
+      "bytes": 448382,
+      "retrieved_at": "2026-09-20"
+    },
+    {
+      "id": "rossi-thesis-2020",
+      "title": "Extended Security of Lattice-Based Cryptography",
+      "url": "https://www.di.ens.fr/~mrossi/docs/thesis.pdf",
+      "download_url": "https://www.di.ens.fr/~mrossi/docs/thesis.pdf",
+      "cache_file": "Rossi_thesis_2020.pdf",
+      "relevant_locations": [
+        {
+          "section": "2.2.2 Gaussians",
+          "printed_page": 27,
+          "pdf_page": 39
+        },
+        {
+          "section": "Algorithm12 Step1 and its explanatory derivation",
+          "printed_page": 48,
+          "pdf_page": 60
+        }
+      ],
+      "scope": "Definition of D_{S,sigma}; nonnegative base distribution in Algorithm12 Step1",
+      "sha256": "79ce80d5a5009cc93b7536b818aca393f34812fec3e4684de1a648d84d2a2c3d",
+      "bytes": 4022230,
+      "retrieved_at": "2026-09-20"
+    }
+  ],
+  "correspondence_review": "Human-readable source correspondence; not a formal verification of PDF parsing",
+  "local_cache": ".omx/reference-documents/",
+  "target_formula": "rho(k)=exp(-k*k/512) for k>=0; pmf(k)=rho(k)/sum_{j>=0}rho(j)",
+  "cdf_rounding_note": "The C floor-CDF comment is not used as a mathematical premise.",
+  "approximate_exponential_correspondence": {
+    "source_id": "haetae-spec-260904",
+    "location": "section5.1.1 Listing1, printedpage32, PDFpage33",
+    "target": "exp(-X/2^48) at the actual integer input X",
+    "coefficients": "The11 integer coefficients in Listing1 match the pinned C and the checked Jasmin integer Horner evaluator",
+    "independent_error_proof": "Three-cell Bernstein certificates plus finite-grid exponential comparison; coefficient accuracy is not assumed",
+    "excluded": "one-sided ceiling claim, raw ideal sigma exponent/zero-rule equivalence, and published Renyi bound"
+  },
+  "raw_acceptance_correspondence": {
+    "source_id": "rossi-thesis-2020",
+    "location": "Algorithm 12 and following density-ratio derivation, printed page 48 / PDF page 60",
+    "scaling": "k=2^72, sigma=2^76; CDT base sigma=sigma/k=16; y uniform integer in [0,k)",
+    "candidate": "Z=y+k*x",
+    "acceptance_target": "(if Z=0 then 1/2 else 1)*exp(-y*(y+2*k*x)/(2*sigma^2))",
+    "direction_note": "Uses the acceptance direction from the following ratio derivation and official specification wording; Algorithm 12 Step 4 has the opposite reject/accept wording.",
+    "zero_rule": "Algorithm 12 Step 5 tests unrounded z=0. Actual code tests rounded output; the exceptional nonzero interval is accounted for explicitly.",
+    "excluded": "Normalized accepted-output distribution, concrete SHAKE randomness, and published Renyi guarantee"
+  },
+  "joint_output_correspondence": {
+    "base_gaussian": "Independent hg16_distr over every integer x>=0, normalized exp(-x*x/512)",
+    "noise": "Independent uniform y in 0..2^72-1",
+    "raw_acceptance": "Same Gaussian acceptance formula and source interpretation as raw_acceptance_correspondence",
+    "output": "Unbounded integer floor((y+2^72*x+32768)/65536); actual implementation matched through W64.to_uint",
+    "event": "accepted and event(output), for arbitrary integer-output predicate",
+    "excluded": "Conditioning on acceptance, random signs, retry normalization/termination and concrete SHAKE uniformity"
+  },
+  "conditional_output_correspondence": {
+    "reference": "The preceding independent ideal joint experiment, conditioned on its own acceptance event",
+    "definition": "Native dmap(dcond(pair_distribution,accepted),integer_projection)",
+    "actual_acceptance_lower": "1/7",
+    "ideal_acceptance_lower": "1/8",
+    "normalization_error": "<=16*(29/2^48+2^-78)<2^-39",
+    "infinite_ideal_support_and_unbounded_output_preserved": true,
+    "not_a_new_closed_form_gaussian_identification": true,
+    "subsequent_gaussian_identification": "Exact law identification is proved in Gaussian76Identification; the historical conditional-stage flag refers only to that earlier milestone."
+  },
+  "gaussian_magnitude_identification_correspondence": {
+    "parameter_source": "haetae-spec-260904 section5.1.1: sigma2^76 and k2^72; raw acceptance interpretation retained from Rossi Algorithm12 following derivation",
+    "independent_target": "G on allZ with rho(k)=exp(-k*k/2^153), probability rho(k)/sum_ALLZrho; R=floor((abs(G)+32768)/65536)",
+    "normalizer": "Independent all-integer summable Gaussian series; not defined via acceptance probability",
+    "exact_identity": "SigmaConditionalSpec.sc_ideal_conditioned=Gaussian76Spec.g76_rounded",
+    "returned_mass": "Finite Gaussian bin sum: zero weight once, positive magnitudes twice; absolute value before rounding",
+    "excluded": "Actual implementation sign handling, repeated sampling, concrete SHAKE, Renyi and complete APIs"
+  },
+  "gaussian_retry_correspondence": {
+    "target": "Same independent g76_rounded Gaussian magnitude law; no new target distribution",
+    "operational_model": "Fresh independent uniform83/72/48 inputs on every actual extracted attempt; repeat until accepted, then repeat for n samples",
+    "standard_library_reuse": [
+      "Dexcepted.WhileSampling fully instantiated",
+      "DList.Program chronological append sampling",
+      "SDist.sdist_dlist"
+    ],
+    "candidate_layout": "Canonical203-bit encoding in26 bytes, unused top5bits zero; no uniform208 claim",
+    "batch_scope": "Full ordered magnitude joint law;257th accepted value generated before first256 projection",
+    "concrete_buffer_scope": "Actual seeded SHAKE loop totality conditional on adequate finite prefix and existing memory/limb bounds; no assumption of SHAKE iid",
+    "remaining": "Actual signs, concrete SHAKE randomness, buffered iid-controller probability coupling, Renyi, Hyperball mathematical distribution and full APIs"
+  },
+  "iid_byte_buffer_correspondence": {
+    "reference": "Same independent rounded-absolute Gaussian target from gaussian_magnitude_identification_correspondence",
+    "input": "All208 bits of26 bytes uniform; exact canonical203-bit observation law by ignored-bit invariance",
+    "controller": "Explicit iid136-byte source with actual Jasmin sign-copy/carry/finite-consumer calls and49-block initialization",
+    "carry": "Continuation conditional on each literal carried byte list; only new missing suffix/block bytes randomized",
+    "output": "256 stored unsigned magnitudes for both requested256/257; dummy is not an additional stored coefficient",
+    "error": "Exact dlist(sc_actual_conditioned(p),256) law; Gaussian target statistical distance<2^-31",
+    "initial_arrays": "Arbitrary words; no adequate-prefix or canonical-square premise for this word-model law",
+    "remaining": "Concrete SHAKE/ideal XOF relation, integer accumulator interpretation without prior bounds, Renyi, Hyperball and full APIs; subsequent signed_gaussian_correspondence covers the sign stage"
+  },
+  "signed_gaussian_correspondence": {
+    "target": "Sign-preserving rounding of the independent all-integer exp(-k^2/2^153) Gaussian; ties away from zero",
+    "sign_source": "The first32 of49 initial iid136-byte blocks; little-endian256fairbits, independent of the complete unsigned output/square state",
+    "raw_observation": "Unbounded integer plus/minus W64.to_uint of each of256 visible magnitudes",
+    "error": "Exact iid signed implementation law; statistical distance<2^-31 to256 independent signed Gaussian target observations",
+    "actual_application": "Implemented fixed-point multiplication and rounding precede sign application modulo2^32; signed32 reading retains magnitude<=2147483647",
+    "alignment": "sample_offset=8*sign_offset in local-to-global scale coefficient corollaries",
+    "remaining": "Concrete SHAKE/ideal XOF relation, integer accumulator bounds, full scaling fit/accuracy, Renyi, Hyperball and complete APIs",
+    "documentation": "docs/gaussian-signed-output.md"
+  },
+  "hyperball_prescribed_witness_correspondence": {
+    "input": "Fixed26-byte candidates and zero sign bytes from tests/hyperball-norm-boundary.py; fixture definitions are not output assumptions",
+    "producer": "Actual __sample_gauss_at calls with257,257,256,... requested events; both unstored squares retained",
+    "pipeline": "Actual half-round,newton-invsqrt,mul-high,scale-and-check,sqnorm2 procedures; mode constants from the pinned C-derived HyperballReferenceConstants",
+    "observations": "Mode2/3/5 exact recorded coefficient,integer norm,residue and accepted1; integer norm defined from returned arrays",
+    "computation": "Every concrete word transition checked using universal modular integer representations, not a numerical oracle",
+    "scope": "Deterministic prescribed-byte helper experiment; no SHAKE seed/full seeded Hyperball reachability or formal C execution",
+    "documentation": "docs/hyperball-actual-witnesses.md"
+  },
+  "hyperball_input_safe_domain_correspondence": {
+    "input": "hbs_good: mode2/3/5, canonical low<2^48,3D*2^74<=S<=5D*2^74; S=uint(low)+2^48*uint(high),D=stored+2",
+    "constants": "Pinned C-derived HyperballReferenceConstants; exact integer certificates for H and all endpoint margins",
+    "semantics": "Actual word multiplication/square bounds, positive arithmetic, initial low<2R, integer cubic barrier through six updates",
+    "result": "Computed scale<=2^85 and full M<=2^26 for arbitrary samples/signs; exact signed32 conversion, N<2^64 and accepted iff true integer mode bound",
+    "scope": "Finite actual numerical helper composition from input-only predicate; no output-fit/norm premise or runtime guard change",
+    "remaining": "Input-domain probability, concreteSHAKE/fullseededHyperball, outerretrytermination, realinverseaccuracy, idealdistribution andcompleteAPIs",
+    "documentation": "docs/hyperball-safe-domain.md",
+    "subsequent_exact_probability_identity": "The Gaussian full-payload milestone identifies the explicit iid batch's integer square law and exact safe-interval event probability. A numeric tail bound remains unproved. See gaussian_full_payload_square_correspondence and docs/gaussian-payload-and-squares.md.",
+    "subsequent_quantitative_iid_tail_bound": "The subsequent hyperball_iid_tail_correspondence supplies strict mode-specific 2^-29/2^-44/2^-54 safe-domain escape bounds and the same unconditional one-iid-attempt unsafe-acceptance bounds. Earlier stage flags retain their historical scope. No acceptance-conditioned, outer-retry or concrete SHAKE bound is claimed."
+  },
+  "gaussian_full_payload_square_correspondence": {
+    "documentation": "docs/gaussian-payload-and-squares.md",
+    "proof_files_added": [
+      "proofs/GaussianPayloadBufferPath.ec",
+      "proofs/GaussianPayloadBufferTrace.ec",
+      "proofs/GaussianPayloadDraw.ec",
+      "proofs/GaussianPayloadEncoding.ec",
+      "proofs/GaussianPayloadEventLaw.ec",
+      "proofs/GaussianPayloadKernel.ec",
+      "proofs/GaussianPayloadTrace.ec",
+      "proofs/HyperballIidPayloadBatch.ec",
+      "proofs/HyperballIidSquareLaw.ec",
+      "theories/GaussianPayloadBufferSpec.ec",
+      "theories/GaussianPayloadSpec.ec",
+      "theories/HyperballIidPayloadSpec.ec"
+    ],
+    "public_contracts": [
+      "gpe_history_law",
+      "gpd_buffer_draw",
+      "gpt_buffer_correct",
+      "gpt_buffer_total",
+      "hip_batch_history_law",
+      "hip_payload_observe_total",
+      "hips_actual_joint_law",
+      "hips_actual_square_law",
+      "hips_actual_safe_probability",
+      "hips_actual_terminates"
+    ],
+    "random_source": "Explicit independent uniform bytes: 49 initial 136-byte blocks, a 32-byte sign prefix, 26-byte candidates and 136-byte refills; observed carry bytes remain fixed.",
+    "payload": "m + 2^64*q, where m=uint(sample) and q=uint(square_low)+2^48*uint(square_high); exact integer encoding, not rounded m squared.",
+    "accepted_law": "gpd_accepted conditions the actual uniform 26-byte sigma payload on acceptance; acceptance probability >= 1/7 and total mass 1.",
+    "buffer_history": "For 0<=n<=512 the full history is dlist gpd_accepted n; under gib_bounds, ghost erasure preserves all three arrays of the actual-call iid buffer model.",
+    "batch": "HyperballIidGaussian.sample uses requests 257,257,256,... and sample/sign offsets 256*i,32*i, with a zero initial square accumulator.",
+    "initialization_scope": "hip_initial also zeros sample/sign arrays as a proof-model choice. Production sign.jazz:1201-1202 zeros only sqsum. No whole production-state or seeded-state equivalence is claimed; whole-triple ghost erasure is within the explicit iid model.",
+    "modes": {
+      "2": {
+        "visible": 1536,
+        "accepted": 1538
+      },
+      "3": {
+        "visible": 2304,
+        "accepted": 2306
+      },
+      "5": {
+        "visible": 2816,
+        "accepted": 2818
+      }
+    },
+    "joint_law": "dmap (dlist gpd_accepted D) hip_projection; the same history determines the active vector and S, without an independence assertion between them.",
+    "dummy_projection": "Zero-based positions 256 and 513 are omitted only from visible magnitudes; their raw squares remain in S.",
+    "integer_accumulator": "Each q<=2^84-1; the cumulative-count invariant and 2818*(2^84-1)<2^96 yield canonical limbs and exact ordinary integer addition from zero.",
+    "safe_interval": "Pr[hbs_good mode (hb_load returned_squares)] equals the mass of D-payload histories with 3*D*2^74<=gpd_sum history<=5*D*2^74.",
+    "exact_safe_event_probability_identity_proved": true,
+    "iid_gaussian_batch_probability_one_termination_proved": true,
+    "numeric_safe_domain_tail_bound_proved": false,
+    "raw_square_ideal_gaussian_or_chi_square_law_proved": false,
+    "unsafe_acceptance_bound_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "outer_hyperball_retry_termination_proved": false,
+    "complete_api_correctness": false,
+    "production_changed": false,
+    "kat_rerun": false,
+    "verification": {
+      "result": "PASS",
+      "checked_at": "20260922T054034.419769Z",
+      "fresh_non_ntt_targets": 180,
+      "all_local_targets": 192,
+      "retained_ntt_targets": 12,
+      "gate_regressions": 18,
+      "fresh_extraction_matches": 102,
+      "unchanged_pinned_sources": 484,
+      "evidence": "manifests/verification-results.json"
+    },
+    "subsequent_quantitative_iid_tail_bound": "The subsequent hyperball_iid_tail_correspondence supplies strict mode-specific 2^-29/2^-44/2^-54 safe-domain escape bounds and the same unconditional one-iid-attempt unsafe-acceptance bounds. Earlier stage flags retain their historical scope. No acceptance-conditioned, outer-retry or concrete SHAKE bound is claimed."
+  },
+  "hyperball_iid_tail_correspondence": {
+    "documentation": "docs/hyperball-iid-tail-bound.md",
+    "proof_files_added": [
+      "proofs/GaussianLatticeMgf.ec",
+      "proofs/GaussianLatticeSum.ec",
+      "proofs/GaussianPayloadMoments.ec",
+      "proofs/GaussianRawSquare.ec",
+      "proofs/GaussianSquareMoments.ec",
+      "proofs/HyperballIidAttemptSafety.ec",
+      "proofs/HyperballIidTailCorrectness.ec",
+      "proofs/HyperballTailCertificateChecks.ec",
+      "proofs/HyperballTailConstants.ec",
+      "proofs/IidExponentialTail.ec",
+      "proofs/RawSquareAcceptance.ec",
+      "proofs/RawSquareIdealMoments.ec",
+      "theories/HyperballTailCertificate.ec",
+      "theories/HyperballTailSpec.ec",
+      "theories/RawSquareMomentSpec.ec"
+    ],
+    "public_contracts": [
+      "gsm_plus_bound",
+      "gsm_minus_bound",
+      "gsm_centered_plus",
+      "gsm_centered_minus",
+      "ht_factor_plus",
+      "ht_factor_minus",
+      "ht_mode_power_bound",
+      "ht_iid_list_tail",
+      "ht_iid_square_tail",
+      "ht_iid_square_interval",
+      "ht_iid_unsafe_acceptance",
+      "ht_iid_accepted_outside_radius",
+      "ht_iid_unsafe_mode2",
+      "ht_iid_unsafe_mode3",
+      "ht_iid_unsafe_mode5",
+      "hia_terminates"
+    ],
+    "random_source": "Explicit independent uniform bytes, with the actual Gaussian sign-copy/carry/consumer calls and retained literal carry; no concrete SHAKE distribution premise.",
+    "raw_square": "Q=2^76; q=uint(low)+2^48*uint(high)=floor(Z^2/Q), Z=2^72*x+y; X=q/Q. This is not the square of the rounded magnitude.",
+    "accepted_moments": {
+      "plus": "E[gpd_accepted, exp((19/200)*X)] <= 10/9+2^-18",
+      "minus": "E[gpd_accepted, exp(-(15/98)*X)] <= 7/8+2^-18",
+      "centered_plus": "E[exp((19/200)*(X-5/4))] <= 3947/4000",
+      "centered_minus": "E[exp((15/98)*(3/4-X))] <= 1963/2000"
+    },
+    "moment_scope": "Actual accepted payload moments, with floor and acceptance denominator accounted for; no assumed ideal square or chi-square law.",
+    "numeric_certificate": "128-bit outward intervals, rational seeds and 32 squarings; exp reciprocal identity and binary integer-power chains; every operation and final inequality checked in EasyCrypt.",
+    "generator": "scripts/hyperball-tail-certificate.py",
+    "generator_reproduction": "--check PASS with current generator and certificate hashes",
+    "iid_tail": "For the complete accepted history H~dlist gpd_accepted D, Pr[gpd_sum H outside [3DQ/4,5DQ/4]] <= (3947/4000)^D+(1963/2000)^D < epsilon(mode).",
+    "modes": {
+      "2": {
+        "accepted": 1538,
+        "strict_bound": "2^-29"
+      },
+      "3": {
+        "accepted": 2306,
+        "strict_bound": "2^-44"
+      },
+      "5": {
+        "accepted": 2818,
+        "strict_bound": "2^-54"
+      }
+    },
+    "dummy_scope": "Zero-based payload positions 256 and 513 remain in the raw square sum; they are omitted only from the visible magnitudes.",
+    "initialization_scope": "Square accumulator starts at zero. hip_initial also zeros sample/sign arrays as a proof-model choice; production zeros only sqsum. Whole-triple ghost erasure stays within the explicit iid model, not a seeded production-state equivalence.",
+    "attempt": "HyperballIidAttempt.sample calls HyperballIidGaussian.sample then the actual numerical-tail composition HyperballSafeExecution.run.",
+    "unsafe_event": "Returned acceptance word=W64.one AND the returned signed32 coefficients' integer squared norm hsc_norm exceeds uint(hb_ref_bound mode). Its probability is < the same mode epsilon.",
+    "probability_scope": "Unconditional joint event in one iid attempt; not Pr[bad|accepted], an outer-retry bound or an unbounded-run bound.",
+    "numeric_safe_domain_tail_bound_proved": true,
+    "unconditional_one_iid_attempt_unsafe_acceptance_bound_proved": true,
+    "iid_one_attempt_probability_one_termination_proved": true,
+    "conditional_on_hyperball_acceptance_bound_proved": false,
+    "raw_square_ideal_gaussian_or_chi_square_law_proved": false,
+    "outer_retry_or_unbounded_run_bound_proved": false,
+    "concrete_shake_or_full_seeded_hyperball_proved": false,
+    "complete_api_correctness": false,
+    "production_changed": false,
+    "kat_rerun": false,
+    "verification": {
+      "result": "PASS",
+      "checked_at": "20260922T065900.431316Z",
+      "fresh_non_ntt_targets": 195,
+      "all_local_targets": 207,
+      "retained_ntt_targets": 12,
+      "gate_regressions": 18,
+      "fresh_extraction_matches": 102,
+      "unchanged_pinned_sources": 496,
+      "unchanged_tool_executables": 4,
+      "evidence": "manifests/verification-results.json"
+    }
+  }
+}

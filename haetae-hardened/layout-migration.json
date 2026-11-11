@@ -1,0 +1,129 @@
+{
+  "purpose": "Exact naming-only edits; historical locks and verification reports remain unchanged.",
+  "files": {
+    "archive/README.md": {
+      "before_sha256": "905b106236697f27fc18b735aba312999df61513d085bb1d1db2d262b835a0ec",
+      "after_sha256": "2d83a6a4ff84906353adb076460a42eb8a827ce39a89e9525a23dd9542ce86a3"
+    },
+    "docs/UPSTREAM-SHA256SUMS": {
+      "before_sha256": "f93106cc008b580a472a00252c01eb7d55fed4b36732c8a8ff3569a708e128be",
+      "after_sha256": "c7f154f445df11f7537780c7e7f2f71b0f3dad7bcc6486989b8c03f7337a99f9"
+    },
+    "haetae-easycrypt/CLAIMS.md": {
+      "before_sha256": "8c06fdf1089c870f93469089c9b21519825ebd8b093cae04b2cf684236318cf9",
+      "after_sha256": "378f61218a54f4600282475ac5225c222f8eab3d5eb4891792024680b358ffcc"
+    },
+    "haetae-easycrypt/README.md": {
+      "before_sha256": "236071cfbe80f83439247d9e853d6ec0ff85ff3e4eedc713f67bdbb98eebad80",
+      "after_sha256": "19df9a976859e15f652fcf1e4fc2c171e0c6203b4c74773e9fa22ffc2d3598de"
+    },
+    "haetae-easycrypt/VALIDATION.md": {
+      "before_sha256": "02e202c015331cd48d9ad4870380ae0422a7f9d90997bdb59921fde158b915dd",
+      "after_sha256": "8c94744901539f2b9768fa8d64c2d6bd906c24a0b1ca57534010d6173c615525"
+    },
+    "haetae-easycrypt/docs/approx-exp-mathematical-bound.md": {
+      "before_sha256": "139e3ae1263e46510351d3dbcf5ae59b2f4576bea2b45a5d606524e4770c571c",
+      "after_sha256": "95de3232de932b2f639af8ee77e4b5063bf06f1cebe675bb0c7b049013e658df"
+    },
+    "haetae-easycrypt/docs/cdt-distribution-correspondence.md": {
+      "before_sha256": "0e5d1137f86a89219314ebd44f8946832ab33efebfa5a101968346f6968b51a3",
+      "after_sha256": "645a4b7e4d72fea163dd753db44bbf284d940548cb363d8987c8c776b621d8bf"
+    },
+    "haetae-easycrypt/docs/conditional-accepted-output.md": {
+      "before_sha256": "d07e2ca602e17d93b0f5af26d911ab4fd1f6d34ee864e3b5abb2147cedc64e75",
+      "after_sha256": "49005c23b61c58136eee9f6b902f368c453b8f37fb9ab604d25f9f8fdfa7cb03"
+    },
+    "haetae-easycrypt/docs/gaussian-iid-buffer.md": {
+      "before_sha256": "59feca3ab61c51e34c5ccbc9ccb608e9bfc8ba217007b761dabeed09d0c17ec7",
+      "after_sha256": "51edb636c46faa3ee94ebd5ec7247815f9afc45e2cf5e7fd39584b8653d510b9"
+    },
+    "haetae-easycrypt/docs/gaussian-magnitude-identification.md": {
+      "before_sha256": "513b6f60589c7d87ea5e2d1d258349b96c0308f0a4afa9012e753cd67d5de254",
+      "after_sha256": "d802e26262270e57978f94edce2172957a74978cf4baae326443d2f6defe82c2"
+    },
+    "haetae-easycrypt/docs/gaussian-payload-and-squares.md": {
+      "before_sha256": "b0bee013577f479bd61ab43e98b135af0488d950193d94a021ae1aa8ddecd765",
+      "after_sha256": "968057eb17bc44f6dd5c02e8df3ce43377183674aaa88955e26cdab2b4ee763d"
+    },
+    "haetae-easycrypt/docs/gaussian-retries-and-batches.md": {
+      "before_sha256": "ebe7f70623f2b173a98364ab894be15f84ce20e4c48fd03910fed11bf98d510b",
+      "after_sha256": "fc6de66cf56656c92394e780d51d7229e52d07c4cf5833231192a86af15547da"
+    },
+    "haetae-easycrypt/docs/gaussian-signed-output.md": {
+      "before_sha256": "bdb2a8c91a6962237e2aa79a940c4718774b38ac9b8fda1c7b37e4f21876d4b6",
+      "after_sha256": "96260de2c79f02ae6c5918129295c3a8e21f8b8c6cdee0ad63e1ad83b72ec593"
+    },
+    "haetae-easycrypt/docs/hyperball-actual-witnesses.md": {
+      "before_sha256": "b932bff3accc91c8fb7dc9bb6c4a59b6232b9733a7709f2ac9467f0e7453dc15",
+      "after_sha256": "700a656fef46095ffb8103186f477adeeadeacb67e67c8d7b288dbd049921754"
+    },
+    "haetae-easycrypt/docs/hyperball-iid-tail-bound.md": {
+      "before_sha256": "9c3e1cf3ae1c8b4275ce84d17147d7bac5da9b7212bc8a4b19446fd46b7b8bc7",
+      "after_sha256": "1c0fe7bedf62f6e5602e40a29654b87db260f9eee7b22acfc5f00b2ab3305252"
+    },
+    "haetae-easycrypt/docs/hyperball-numerical-boundary.md": {
+      "before_sha256": "6902e5bde751180cb5583af41f972f1cdd2d91c3911d8b96d1728f42394d9958",
+      "after_sha256": "37365dea48e20151510d00c8e355cd0615ee1c924e08b00966d240a4902b4ad3"
+    },
+    "haetae-easycrypt/docs/hyperball-safe-domain.md": {
+      "before_sha256": "d2d747aca6c36e9538fa57a7ddb06190f4b74e87bdaa3e2d489d4cc5d3d40ceb",
+      "after_sha256": "e8e975ab0c54f2f99d678bd2948dc304e570b5516a1052f52992d21a73a004b1"
+    },
+    "haetae-easycrypt/docs/joint-accepted-output.md": {
+      "before_sha256": "61ee0e1eaa9dd3aa4e060e7a0bc09874a2f64778e542297a8d1d403a8e8a8295",
+      "after_sha256": "0199dd378cb4d9d1f8d1d8ca298387fdb9811495c4bc6c07ecafd76c0ccaf1a9"
+    },
+    "haetae-easycrypt/manifests/jasmin-sources.sha256": {
+      "before_sha256": "010ee3104ddd6a9ce3719211093c86da5709b14a89f0ee7db2152bc9f8dcb0ba",
+      "after_sha256": "a5db7d8b2f3848cee74df87b78be172dfd9427741d9d1aa4e12500027f2e5233"
+    },
+    "haetae-easycrypt/scripts/approx-exp-certificate.py": {
+      "before_sha256": "6bb105432a1dd488717259b6c81cffe86ef2fc24eee4fd94cc6b677ea672aeef",
+      "after_sha256": "5b576cb043016e6ad0216d3d6b23e1ce15432c002c7f625feeeec8691fefb6d5"
+    },
+    "haetae-easycrypt/scripts/extract.py": {
+      "before_sha256": "19110061aeae3bca31236de583aacacc6c13d5322fdd9e683855ec813c41156b",
+      "after_sha256": "f36c9a62565bf6f794e5094f6afc6b60ff1b6391aae2366c6c6bbf3d86640cd3"
+    },
+    "haetae-easycrypt/scripts/gaussian-cdt-certificate.py": {
+      "before_sha256": "f50c5bcd2246333fdec8c3cd785fbbbdbe60ea41b0acf614b4a52ccbefbacd56",
+      "after_sha256": "2c3c1d85a26fe4a753b2d824e38681549a995e51c22b84f8419d4067bde09290"
+    },
+    "haetae-easycrypt/scripts/hyperball-reference-constants.py": {
+      "before_sha256": "dbb4734e4b80c8b2773940b5a619e8bf42ad046adfeef76752bdb06f8d1503d3",
+      "after_sha256": "e4ee02aec5c7bcb74f1314473f3c28998a61a7ccd24c80f263b636151cbbd3ed"
+    },
+    "haetae-easycrypt/scripts/reference-constants.py": {
+      "before_sha256": "02da584954df07ad7e50fe3d1ad50f466feb4289c13027fd3ec5cd07b6731b9c",
+      "after_sha256": "9f0122469c6e6ef3f18d28fff97372bb244cf9a3b23bee6a143f5cd7afa99069"
+    },
+    "haetae-easycrypt/tests/hyperball-norm-boundary.c": {
+      "before_sha256": "1a681ddc7a8f49c5ffa4461ced2abf827b4f862f74889f9c475168311c146eb0",
+      "after_sha256": "779133e880677cfaeeb14e1e7b966f3ff0cd03ea0b7ee9541df6f11a0e989bbf"
+    },
+    "haetae-easycrypt/tests/hyperball-norm-boundary.py": {
+      "before_sha256": "0f4cff80a0d0fb6747b8dc36296c2072ccb7d45a49f64fdf7eb4d90b79905716",
+      "after_sha256": "076e8bda3db03db34878552e471a37791cc65af25b4b5d88df1ef6076d8d0cfd"
+    },
+    "haetae-easycrypt/theories/HyperballReferenceConstants.ec": {
+      "before_sha256": "b573e24bf4a517087802e9fddd8867dcbc0bacff16abd6646aa19033dd5d39d8",
+      "after_sha256": "63eebacd7f813e972a3fc5d09227c993af9fe9cc7da322a5ac34ec8b1f8cc804"
+    },
+    "haetae-easycrypt/theories/ReferenceConstants.ec": {
+      "before_sha256": "25d6723796f267ae198784e73417fbba9f43a46f7e97dcc421ef5280f419ccc6",
+      "after_sha256": "36c112dec3e9458fbf53f8cbaa9e5922112324bc32a43b884999475fb9d5e652"
+    },
+    "haetae-jasmin/Makefile": {
+      "before_sha256": "bfe5793eccaf24fc327431984a0aada3c3b5a732dc28780505757256138dd04f",
+      "after_sha256": "d23e04f2ba1c90640c25fac04761d2b8646fc0efd7aa11011a8a09c363acd0eb"
+    },
+    "haetae-jasmin/README.md": {
+      "before_sha256": "1c01fa6ea058cae3355683f52c83c60cd57342377f66e2609e0183a05d14c792",
+      "after_sha256": "d9c033b17d7b2fd684332614100f908ccfde61ef0f83e2eed4ac588741cb0d55"
+    },
+    "haetae-jasmin/test/sampler.c": {
+      "before_sha256": "7a9525778ecbed836bf9ea3264c7af42cdf7b73f6b785483068b685ec6f9a68d",
+      "after_sha256": "2e27b5869f48476c73bedaeec9be87fb61bd88e50c3046dc7c9da4f3386f582c"
+    }
+  }
+}

@@ -1,8 +1,8 @@
-# HAETAE-1.2.0 이전 작업 보관
+# HAETAE 이전 작업 보관
 
 2026-09-17 재시작을 위해 과거 작업의 읽기 자료 39개만 `legacy/`에 남겼다.
 기존 구현·증명·주차별 보고서·비교용 ML-DSA 전체는 아래 Git 태그로 복원한다.
-이 자료는 이전 소스에 대한 기록이며 HAETAE-1.2.0 검증 결과가 아니다.
+이 자료는 이전 소스에 대한 기록이며 HAETAE 검증 결과가 아니다.
 
 ## 남긴 자료
 
@@ -45,7 +45,7 @@ archive 재배치 이전의 완전한 추적 파일 트리다.
 
 ```sh
 # 태그 없이도 별도 디렉터리에서 이전 구조 그대로 열기
-git worktree add --detach ../haetae-pre-1.2.0 \
+git worktree add --detach ../haetae-previous \
   6177f8db0a2887314dbff213e5ca04234eece58e
 
 # 복사할 파일을 먼저 확인하기
