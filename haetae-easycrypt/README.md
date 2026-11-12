@@ -1,274 +1,338 @@
 # HAETAE Jasmin / EasyCrypt
 
-[현재 Jasmin 구현](../haetae-jasmin/README.md)에서 직접 추출한 프로그램에 대해
-구성요소의 기능 정확성을 증명하는 작업 공간이다. KAT 실행 결과와 구분하여
-EasyCrypt가 실제로 검사한 명세·정리·의존 이론을 보관한다.
+This workspace proves component-level functional correctness for programs extracted
+directly from the [current Jasmin implementation](../haetae-jasmin/README.md). It
+preserves the specifications, theorems, and dependency theories actually checked
+by EasyCrypt, separately from KAT execution results.
 
-현재 증명 범위는 **CDT, 고정소수점 곱셈·다항식, 단일 Gaussian 시도, 유한
-소비기의 정확한 출력·승인 순서·제곱합, 서명용 전체 Gaussian 스트림 함수,
-고정 길이 SHAKE 초기화·반복 블록, 서명용 Hyperball 전체 함수와 mode 2·3·5,
-NTT, 실제 API 메모리 보조함수**다. 전체 Gaussian·Hyperball의 기본 정리는 종료한 실행의
-word 결과에 대한 Hoare 정리다. Gaussian은 충분한 승인 후보를 담은 유한 입력 구간이
-있다는 전제 아래 실제 전체 버퍼 함수의 종료도 증명한다. 전체 KeyGen/Sign/Verify와
-Sign→Verify 합성의 정확성 증명은 아직 완료하지 않았다.
+The current proof scope covers **CDT, fixed-point multiplication and polynomials,
+a single Gaussian attempt, the exact outputs, acceptance order, and sum of squares
+of finite consumers, the complete signing Gaussian stream function, fixed-length
+SHAKE initialization and repeated blocks, the complete signing Hyperball function
+and modes 2·3·5, NTT, and actual API memory helpers**. The basic theorems for the
+complete Gaussian and Hyperball functions are Hoare theorems about the word
+results of terminating executions. For Gaussian, termination of the actual
+complete buffer function is also proved under the premise that a finite input
+segment contains sufficiently many accepted candidates. Correctness proofs for
+complete KeyGen/Sign/Verify and the Sign→Verify composition remain incomplete.
 
-83비트 CDT에는 별도의 수학적 분포 정리가 있다. **균등 83비트 입력에서 실제
-Jasmin CDT의 출력 분포와 비음수 이산 Gaussian(σ=16)의 통계적 거리는
-2^-78보다 작다.** 목표 분포는 공식 명세와 참고문헌의 수식에서 정의했으며,
-그 무한 정규화·꼬리 상한·수치 인증서도 검증한다.
-[명세 대응과 범위](docs/cdt-distribution-correspondence.md)를 참조한다.
+The 83-bit CDT has a separate mathematical distribution theorem. **Under uniform
+83-bit input, the statistical distance between the output distribution of the
+actual Jasmin CDT and the nonnegative discrete Gaussian (σ=16) is less than
+2^-78.** The target distribution is defined from the formulas in the official
+specification and references; its infinite normalization, tail bounds, and
+numerical certificates are also checked. See the
+[specification correspondence and scope](docs/cdt-distribution-correspondence.md).
 
-또한 모든 sigma76 입력에서 실제 지수 인자의 범위를 증명하고, 실제 Jasmin
-`approx_exp`의 정규화 출력과 `exp(-xi/2^48)` 사이 오차가 **27/2^48 이하,
-2^-43 미만**임을 연결했다. 고정 후보에 대한 균등 48비트 거부 입력의 조건부
-승인 확률도 검증한다. [정확한 비교 대상과 경계](docs/approx-exp-mathematical-bound.md)에
-양자화·rounded-zero·미완료 분포 의무를 명시한다.
+The range of the actual exponent argument is also proved for every sigma76 input.
+The normalized output of the actual Jasmin `approx_exp` is connected to
+`exp(-xi/2^48)` with an error **at most 27/2^48 and less than 2^-43**.
+The conditional acceptance probability for uniform 48-bit rejection input at a
+fixed candidate is also checked. The
+[exact comparison target and bounds](docs/approx-exp-mathematical-bound.md)
+document quantization, rounded-zero behavior, and remaining distribution obligations.
 
-실제 인자와 반올림 전 Gaussian 지수 사이의 오차는 **2^-49 이하**다.
-반올림된 후보의 0 검사와 반올림 전 후보의 0 검사가 달라지는 구간도 정확히
-계산했다. 고정 CDT 바이트와 명시적인 독립 균등 72비트 잡음·48비트 거부 입력의
-실제 한 번의 시도에서, 반올림 전 Gaussian 수락식을 평균한 확률과의 차이는
-**29/2^48 미만, 따라서 2^-43 미만**이다. [새 수식과 증명 범위](docs/raw-gaussian-acceptance.md)에
-예외 입력과 난수 전제를 명시한다.
+The error between the actual argument and the Gaussian exponent before rounding
+is **at most 2^-49**. The interval where the zero test on the rounded candidate
+differs from the zero test before rounding is also computed exactly. In one
+actual attempt with fixed CDT bytes and explicitly independent uniform 72-bit
+noise and 48-bit rejection input, the difference from the averaged Gaussian
+acceptance formula before rounding is **less than 29/2^48, hence less than
+2^-43**. The [new formulas and proof scope](docs/raw-gaussian-acceptance.md)
+state the exceptional inputs and randomness premises.
 
-이제 CDT 83비트도 균등하게 생성한 실제 단일 시도에서, **모든 정수 출력 집합 S**의
-승인·출력 공동 확률을 비교한다. 독립적인 무한 Gaussian CDT와 수학적 반올림을
-사용한 이상적 실험과의 차이는 **29/2^48+2^-78 미만, 따라서 2^-43 미만**이다.
-이는 승인 확률로 나누기 전의 결과다. [공동 출력 확률 증명](docs/joint-accepted-output.md)을 참조한다.
+The actual single-attempt experiment, now also drawing the CDT's 83 bits
+uniformly, compares the joint acceptance-and-output probability for **every set
+S of integer outputs**. Its difference from the ideal experiment using an
+independent infinite Gaussian CDT and mathematical rounding is **less than
+29/2^48+2^-78, hence less than 2^-43**. This result precedes division by the
+acceptance probability. See the [joint output probability proof](docs/joint-accepted-output.md).
 
-이어 실제 승인 확률≥1/7, 이상적 승인 확률≥1/8을 증명하고 각자의 승인 확률로
-정규화했다. 승인된 표본 크기의 두 조건부분포는 질량 1이며 **통계적 거리
-≤16·(29/2^48+2^-78)<2^-39**다. [조건부분포 증명](docs/conditional-accepted-output.md)은
-이전 이상적 실험에 조건을 붙인 분포와 비교하며, 별도의 Gaussian 확률 질량식과
-동일하다는 식별은 다음 결과에서 별도로 증명했다.
+The actual and ideal acceptance probabilities are then proved to be ≥1/7 and
+≥1/8, respectively, and each distribution is normalized by its own acceptance
+probability. Both conditional distributions of accepted sample magnitudes have
+mass 1, with **statistical distance ≤16·(29/2^48+2^-78)<2^-39**.
+The [conditional distribution proof](docs/conditional-accepted-output.md) compares
+against the previous ideal experiment conditioned on acceptance. Identification
+with a separately defined Gaussian probability mass formula is proved in the
+next result.
 
-독립적으로 정의한 `Pr[G=k]=exp(-k²/2^153)/sum_j exp(-j²/2^153)`, `k∈Z`에 대해,
-이상적 조건부분포가 **floor((|G|+32768)/65536)의 분포와 정확히 같다**.
-무한 합의 수렴·정규화, 0의 가중치와 반올림 구간별 확률을 모두 증명했다.
-따라서 실제 승인된 표본 크기와 이 명시적인 Gaussian 목표의 통계적 거리도
-**2^-39 미만**이다. [질량식 식별과 범위](docs/gaussian-magnitude-identification.md)를 참조한다.
+For the independently defined `Pr[G=k]=exp(-k²/2^153)/sum_j exp(-j²/2^153)`,
+`k∈Z`, the ideal conditional distribution is **exactly the distribution of
+floor((|G|+32768)/65536)**. Convergence and normalization of the infinite sum,
+the weight at zero, and probabilities of rounding intervals are all proved.
+Thus the statistical distance between the actual accepted sample magnitude and
+this explicit Gaussian target is also **less than 2^-39**.
+See the [mass-function identification and scope](docs/gaussian-magnitude-identification.md).
 
-독립 균등 83·72·48비트 입력으로 실제 시도를 반복 호출하는 실험은 **확률 1로
-종료**하고, 첫 승인값의 분포는 기존 조건부분포와 정확히 같다. 전체 승인 목록은
-그 분포의 독립 표본 목록이며, Gaussian 목표와 256개는 **거리 <2^-31**,
-257개는 **거리 <257·2^-39**다. 257번째 값을 생성한 뒤 앞의 256개만 취해도
-그 256개의 결합분포가 보존된다. [반복·유한 목록·스트림 연결](docs/gaussian-retries-and-batches.md)에
-후보 인코딩, 유한 접두 구간의 충분성, 구체적 SHAKE와의 증명 경계를 명시한다.
+The experiment that repeatedly calls the actual attempt with independent
+uniform 83·72·48-bit inputs **terminates with probability 1**, and its first
+accepted value has exactly the previous conditional distribution. The entire
+accepted list is a list of independent samples from that distribution. Its
+distance from the Gaussian target is **<2^-31 for 256 samples** and
+**<257·2^-39 for 257 samples**. Generating the 257th value and then retaining
+only the first 256 preserves the joint distribution of those 256 values.
+[Retries, finite lists, and the stream connection](docs/gaussian-retries-and-batches.md)
+state the candidate encoding, finite-prefix sufficiency, and proof boundary
+with concrete SHAKE.
 
-전체 iid 바이트 버퍼 모형은 실제 sign-copy·carry·유한 Gaussian 소비기를
-호출한다. 균등 26바이트의 상위 미사용 5비트를 정확히 처리하고, 초기 49블록과
-136바이트 재충전의 분포를 연결했다. `gib_bounds`만 전제로 확률 1 종료와
-**저장되는 256개 크기 값의 정확한 독립 결합분포**, Gaussian 목표와 거리
-**<2^-31**을 증명한다. 요청이 257이면 더미까지 승인한 뒤 같은 256개를 읽는다.
-충분한 입력 구간이나 초기 제곱 워드의 정규형을 추가 전제로 요구하지 않는다.
-[전체 iid 버퍼 증명](docs/gaussian-iid-buffer.md)은 word 누적합과 수학적 정수 해석을 구분한다.
+The complete iid byte-buffer model calls the actual sign-copy, carry, and finite
+Gaussian consumer. It handles the five unused high bits of a uniform 26-byte
+candidate exactly and connects the distributions of the initial 49 blocks and
+136-byte refills. Under `gib_bounds` alone, it proves probability-1 termination,
+the **exact independent joint distribution of the 256 stored magnitudes**, and
+distance **<2^-31** from the Gaussian target. A request for 257 accepts the
+dummy as well before reading the same 256 values. No additional premise requires
+a sufficient input segment or a canonical initial square word.
+The [complete iid buffer proof](docs/gaussian-iid-buffer.md) distinguishes word
+accumulators from their mathematical integer interpretation.
 
-[부호 출력 단계](docs/gaussian-signed-output.md)에서는 실제 iid 버퍼의 32바이트가
-256개의 독립 공정 부호 비트를 만들고, 전체 표본 배열·제곱 워드 상태와 독립임을
-증명했다. `±W64.to_uint(word)`로 정의한 실제 반환 관측의 정확한 분포 법칙과,
-독립적인 signed Gaussian 목표와의 **거리 <2^-31**도 연결했다.
-목표는 `sign(G)·floor((|G|+32768)/65536)`이며, 0은 0으로 남고 ±32768은 각각
-±1로 반올림한다. 실제 scaling 뒤 부호 계산은 word 단위로 정확하며 signed32
-해석에는 각 반올림 크기≤2147483647 조건을 유지한다.
-최종 통합 결과·대상 수·해시는 [검증 기록](VALIDATION.md)과 manifest에 있다.
+The [signed-output stage](docs/gaussian-signed-output.md) proves that 32 bytes
+from the actual iid buffer produce 256 independent fair sign bits, independent
+of the entire sample-array and square-word state. It connects the exact
+distribution law of actual return observations defined by `±W64.to_uint(word)`
+and their **distance <2^-31** from an independent signed Gaussian target.
+The target is `sign(G)·floor((|G|+32768)/65536)`: zero remains zero, and ±32768
+round to ±1, respectively. The actual sign computation after scaling is exact
+at word level; its signed32 interpretation retains the condition that each
+rounded magnitude is ≤2147483647. Final integrated results, target counts,
+and hashes appear in the [verification record](VALIDATION.md) and manifests.
 
-[Hyperball 후보열 재현 증명](docs/hyperball-actual-witnesses.md)은 고정 후보 바이트에서
-실제 유한 소비기의 표본·두 더미 포함 제곱합, 실제 Newton·scaling·norm 호출까지
-연결한다. 모드만 주는 `HyperballWitnessReplay.run`은 세 모드 모두 확률1로 종료하며,
-반환 배열의 정수 노름이 반경 경계를 초과해도 승인값1을 반환한다. 중간값을 결과
-가정으로 넘기지 않는다. 이는 직접 후보 버퍼를 공급한 실행이며, SHAKE seed나
-원래 seeded Hyperball 전체의 도달 가능성·예외 확률은 별도다.
+The [Hyperball candidate-sequence replay proof](docs/hyperball-actual-witnesses.md)
+connects fixed candidate bytes to the actual finite consumer's samples and sum
+of squares, including two dummies, and then to the actual Newton, scaling, and
+norm calls. `HyperballWitnessReplay.run`, whose only input is a mode, terminates
+with probability 1 for all three modes and returns acceptance value 1 even
+though the integer norm of the returned array exceeds the radius bound.
+Intermediate values are not supplied as assumptions about the result. This
+execution supplies candidate buffers directly; SHAKE seeds, reachability in
+the original complete seeded Hyperball function, and exception probabilities
+are separate matters.
 
-[Hyperball 입력 안전 구간](docs/hyperball-safe-domain.md)에서는 `hbs_good`만 전제로
-실제 수치 계산의 안전성을 증명했다. 전제는 모드2/3/5, 초기 low limb<2^48,
-`3D*2^74≤S≤5D*2^74`이며 D는 저장 개수+2다. 임의의 표본·부호 배열에 대해
-실제 반올림 크기≤2^26, signed32 적합성, N<2^64, norm word의 정확한 정수 해석과
-승인 iff N≤모드 경계를 도출한다. 출력 범위나 수렴을 전제로 넣지 않았다.
-이는 충분한 입력 구간의 조건부 보장으로, 항상 승인하거나 외부 retry가 종료한다는
-주장이 아니다. 구간 발생 확률·SHAKE·이상적 분포는 남은 의무다.
+The [Hyperball safe input domain](docs/hyperball-safe-domain.md) proves the
+safety of the actual numerical computation under `hbs_good` alone. Its premises
+are mode 2/3/5, initial low limb<2^48, and `3D*2^74≤S≤5D*2^74`, where D is
+the number of stored samples+2. For arbitrary sample and sign arrays, it derives
+actual rounded magnitudes≤2^26, signed32 fit, N<2^64, the exact integer
+interpretation of the norm word, and acceptance iff N≤the mode bound.
+Neither output bounds nor convergence are assumed. This is a conditional
+guarantee for a sufficient input interval, not a claim of unconditional
+acceptance or termination of the outer retry. The probability of that interval,
+SHAKE, and the ideal distribution remain obligations.
 
 <!-- gaussian-payload:overview:start -->
-[전체 승인 payload와 제곱합](docs/gaussian-payload-and-squares.md)은 명시적 iid
-바이트의 Gaussian 배치에서 가시 벡터와 S의 **정확한 결합분포**를 증명한다.
-모드 2·3·5의 D=1538·2306·2818개 승인 이력은 `dlist gpd_accepted D`이고,
-같은 이력에서 두 더미를 가시 벡터에서만 제외하며 raw 제곱은 모두 누적한다.
-`hips_actual_joint_law`, `hips_actual_square_law`, `hips_actual_safe_probability`는
-이 결합분포·정수 합·안전 구간 사건의 정확한 확률식을, `hips_actual_terminates`는
-해당 iid 배치의 확률 1 종료를 진술한다. raw 제곱은 rounded 표본의 제곱이 아니다.
+[The complete accepted payload and sum of squares](docs/gaussian-payload-and-squares.md)
+prove the **exact joint distribution** of the visible vector and S in a Gaussian
+batch driven by explicit iid bytes. The accepted history of D=1538·2306·2818
+values for modes 2·3·5 has law `dlist gpd_accepted D`. The same history omits the
+two dummies only from the visible vector and accumulates every raw square.
+`hips_actual_joint_law`, `hips_actual_square_law`, and `hips_actual_safe_probability`
+state the exact joint law, integer sum, and probability formula for the safe-domain
+event; `hips_actual_terminates` states probability-1 termination of that iid
+batch. Raw squares are not the squares of rounded samples.
 
-초기 제곱합은 0이다. `hip_initial`의 표본·부호 배열 0 초기화도 증명 모형의
-선택으로 명시한다. 생산 코드는 제곱합만 0으로 초기화하며, 이 단계는 생산
-stack 전체 상태나 concrete SHAKE 실행과의 동치를 주장하지 않는다. 실제 Gaussian
-호출 순서·offset·가시 출력·S를 연결했고, iid 모형 안의 ghost 제거는 반환 세 배열을
-모두 보존한다. 그 단계에서는 안전 구간 이탈의 수치 상한·이상적 S 법칙·외부 Hyperball retry를 후속 의무로 남겼다.
+The initial sum of squares is zero. Zero initialization of the sample and sign
+arrays in `hip_initial` is also stated as a modeling choice. Production code
+initializes only the sum of squares to zero; this stage does not claim equivalence
+with the entire production stack state or a concrete SHAKE execution. It connects
+the actual Gaussian call order, offsets, visible outputs, and S, and ghost removal
+within the iid model preserves all three returned arrays. At that stage, a
+numerical bound on leaving the safe interval, the ideal law of S, and the outer
+Hyperball retry were left as subsequent obligations.
 <!-- gaussian-payload:overview:end -->
 
 <!-- hyperball-tail:overview:start -->
-[iid 제곱합 꼬리 경계](docs/hyperball-iid-tail-bound.md)에서 실제 승인 raw 제곱
-q=floor(Z²/Q), Q=2^76의 지수 모멘트를 검증했다. 지수 인자 19/200과 -15/98에서
-각각 10/9+2^-18, 7/8+2^-18의 상계를 얻고, 정규화 계수 3947/4000과 1963/2000을
-검사된 지수 구간·거듭제곱 인증서로 연결했다. 그 결과 모드 2·3·5의 전체 S가
-[3DQ/4,5DQ/4]를 벗어날 확률은 각각 **2^-29·2^-44·2^-54 미만**이다.
+The [iid sum-of-squares tail bound](docs/hyperball-iid-tail-bound.md) checks
+exponential moments of the actual accepted raw square q=floor(Z²/Q), Q=2^76.
+At exponent arguments 19/200 and -15/98, it obtains respective upper bounds
+10/9+2^-18 and 7/8+2^-18, and connects normalization factors 3947/4000 and
+1963/2000 through checked exponential-interval and power certificates.
+Consequently, the probabilities that the full S lies outside [3DQ/4,5DQ/4]
+for modes 2·3·5 are respectively **less than 2^-29·2^-44·2^-54**.
 
-`ht_iid_unsafe_acceptance`는 실제 iid Gaussian 배치와 실제 수치 계산을 잇는
-단일 시도에서, 승인하면서 반환 signed32 계수의 정수 제곱 노름이 모드 경계를
-넘는 사건에 같은 상계를 준다. 확률은 무조건부 결합 사건이며 `Pr[bad | accepted]`가
-아니다. 기존 scratch 초기화 모형과 명시적 균등 바이트를 유지한다. 이상적인 S의
-chi-square 법칙·외부 retry 전체·구체적 SHAKE·전체 API는 여전히 별도 의무다.
+`ht_iid_unsafe_acceptance` gives the same bounds, in one attempt connecting
+the actual iid Gaussian batch to the actual numerical computation, for the
+event that the attempt accepts while the integer squared norm of the returned
+signed32 coefficients exceeds the mode bound. This is an unconditional joint
+event, not `Pr[bad | accepted]`. The existing scratch-initialization model and
+explicit uniform bytes are retained. A chi-square law for ideal S, the entire
+outer retry, concrete SHAKE, and the complete API remain separate obligations.
 <!-- hyperball-tail:overview:end -->
 
-## 검증된 핵심 결과
+## Verified core results
 
-| 대상 | 결과 |
+| Target | Result |
 | --- | --- |
-| 83비트 CDT | 실제 임계값 개수와 일치, 반환 범위 0…166, 최대 입력에서 166, 종료성 |
-| CDT의 수학적 분포 | 균등 83비트 입력 실험의 정확한 확률 질량; 공식 비음수 Gaussian(σ=16)과 통계적 거리 <2^-78, 모든 출력 집합의 확률 차이 상한 |
-| `smulh48` | 모든 입력에서 `ceil(signed(a) × unsigned(b) / 2^48)`의 64비트 표현과 일치 |
-| `approx_exp` | C에서 독립 추출한 10차 Horner 계산과 일치; 각 곱셈의 정수 올림 의미 연결 |
-| 지수함수 수치 오차 | 실제 sigma76 인자는 [0,2/3] 격자에 포함; Horner prefix·올림 곱셈의 signed64 의미와 실수 exp 대비 오차≤27/2^48<2^-43·종료 |
-| 조건부 승인 확률 | 후보를 고정하고 거부 48비트만 균등하게 생성한 실제 sigma 호출; 실제 양자화 지수와 rounded-zero 보정을 사용한 확률 차이≤α·28/2^48<2^-43 |
-| 반올림 전 지수 | 제곱 limbs가 floor(Z²/2^76)과 일치; 실제 지수와 Gaussian 밀도 비율 지수 사이 오차≤2^-49 |
-| 0 보정·평균 승인 확률 | 두 0 규칙의 차이는 CDT=0·잡음 1…32767; 명시적인 균등 72+48비트 실제 시도의 평균 승인 확률 오차<29/2^48<2^-43 |
-| 모든 출력 집합의 승인·출력 공동 확률 | 독립 균등 83+72+48비트 실제 sigma 실험과 무한 Gaussian CDT·무제한 정수 반올림의 이상적 실험 사이 차이<29/2^48+2^-78<2^-43; 승인 후 정규화 전 |
-| 승인 후 조건부분포 | 실제·이상적 승인 확률≥1/7·1/8; native 조건부분포의 질량 1 및 통계적 거리≤16·(29/2^48+2^-78)<2^-39 |
-| Gaussian 질량식 식별 | 이상적 조건부분포=정수 Gaussian의 절댓값을 16비트 반올림한 분포; 독립적인 무한 정규화·0 가중치·반올림 PMF와 실제 분포 오차<2^-39 |
-| 독립 난수의 실제 시도 반복 | 매번 실제 추출 시도를 호출; 확률 1 종료, 첫 승인값의 정확한 조건부분포 및 Gaussian 거리<2^-39 |
-| 승인 목록의 결합분포 | n개 독립 표본 목록과 정확히 일치; 256개 거리<2^-31, 257개 거리<257·2^-39; 마지막 값을 소비한 후 앞 256개 사영 보존 |
-| 유한 후보 스트림의 충분성 | 203비트 후보의 26바이트 연결과 승인 순서 일치; n·t개 후보에서 n개 미만 승인될 확률≤n·(6/7)^t, 모든 접두·블록 길이에서 부족 확률→0 |
-| 균등 바이트 입력 | 전체 208비트 균등 후보와 기존 203비트 모형의 관측 분포가 정확히 같음; 미사용 5비트를 지워도 네 반환 워드 보존 |
-| 전체 iid 바이트 버퍼 | 실제 소비·carry·sign-copy 호출 모형의 확률 1 종료와 256개 가시 크기의 정확한 독립 결합분포; 요청 256/257 모두 Gaussian 거리<2^-31 |
-| 부호 비트·signed 목표 | 32개 균등 바이트의 256개 공정 비트, signed Gaussian 반올림 목표의 대칭성·0 질량·양쪽 tie 처리 |
-| 독립 부호 벡터 | 독립 공정 부호와 크기 목록의 좌표별 결합은 iid signed 조건부분포 목록이며, signed 목표와 거리<2^-31 |
-| 실제 iid 버퍼의 부호 합성 | 부호와 전체 표본 배열·제곱 워드 상태의 독립성 및 `±W64.to_uint` 가시 256개 관측의 공동 법칙 |
-| scaling 부호 연결 | 정확한 word 부호 계산, 반올림 크기≤2147483647 아래 signed32 의미; 국소→전역 연결은 sample_offset=8·sign_offset 조건 |
-| 단일 Gaussian 시도 | 모든 26바이트 입력의 표본·제곱 limbs·승인 비트가 명세와 일치하고 종료 |
-| 표본 반올림 | 실제 결과와 정수식의 일치 및 `0…12033618204333965312 < 2^64`; CDT 166 포함 |
-| 유한 Gaussian 소비기 | 26바이트 후보열을 처리한 전체 반환값과 명세 fold의 일치; 승인 개수·저장된 승인 순서·dummy 슬롯 보존·종료성 |
-| 제곱합 | 초기 두 limb가 각각 48비트 범위이고 요청이 512개 이하일 때 승인 후보의 제곱 limbs에 대한 정확한 정수 합; 실제 square-high `<2^38` |
-| 서명 offset 소비기 | 실제 `__sample_gauss_at`에 출력·순서·정수 제곱합을 연결하고 요청 영역 밖을 보존 |
-| refill 경계 | 실제 carry의 잔여 바이트 보존·종료, carry와 새 136바이트 블록의 결합 배치 |
-| SHAKE 단일 블록 | 실제 서명 코드의 24라운드 word 순열, 반환 상태의 136바이트 직렬화, 출력 범위 밖 보존·종료 |
-| SHAKE seed 초기화 | seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태 일치·종료 |
-| 서명용 전체 Gaussian 함수 | 실제 `_sf_sample_gauss_N_full_at`의 초기 49블록·32바이트 부호·반복 refill을 연속 스트림 명세에 합성; `n=256/257`에서 종료 시 표본·부호·정수 제곱합·외부 영역 보존 |
-| 서명용 Gaussian의 조건부 종료 | 실제 seed의 스트림에 충분한 승인 후보가 있는 유한 접두 구간 전제 아래 종료와 정확한 출력·부호 복사·더미 포함 제곱합·외부 영역 보존; 모든 seed의 충분성은 별도 |
-| Hyperball 누적합 | 최대 2,818개 승인 후보에서 두 limb의 48비트 범위를 증명하여 연속 Gaussian 호출 연결 |
-| Hyperball iid 꼬리·단일 시도 | 실제 승인 raw 제곱 모멘트와 안전 구간 이탈 확률 <2^-29/2^-44/2^-54; 실제 수치 호출의 단일 iid 시도에서 승인 AND 정수 제곱 노름 초과 사건에도 같은 무조건부 상계 |
-| Hyperball iid 전체 payload·제곱합 | 실제 Gaussian 호출 모형의 D=1538/2306/2818 승인 이력과 가시 벡터·raw 제곱합의 정확한 결합분포; 두 더미는 S에 포함; 안전 구간 사건의 확률식·배치 확률 1 종료 |
-| Hyperball 입력 안전 구간 | canonical 입력 제곱합 S∈[3D/4,5D/4]·2^76에서 실제 Newton6·scale·반올림 크기≤2^26과 N<2^64 도출; 임의 표본/부호의 승인 iff 정수 반경 조건 |
-| Hyperball 수치 반례의 실제 호출 | 지정 후보에서 두 더미를 포함한 소비·Newton6·scaling·norm 종료와 정확한 결과; 실제 정수 노름 초과에도 승인1. SHAKE seed·전체 seeded 경로는 제외 |
-| 고정소수점·scaling | 실제 word 곱셈·정규화·반분·Newton 6회 갱신·부호 및 signed32 출력·보존·종료; 수치 fit는 명시적 조건 |
-| 서명용 전체 Hyperball | 실제 전체 함수·mode 2/3/5를 배치 스트림·최초 승인 이력·모듈러 norm·최종 바이트와 카운터에 연결; 반환값 유일성 |
-| NTT·역 NTT | 명시적 계수 범위 아래 256점 수학적 변환과 결과 범위·종료성 |
-| 실제 API 보조함수 | 서명 문맥 prefix, 안전한 겹침의 역방향 복사, 검증 실패 시 영 초기화와 외부 메모리 보존 |
+| 83-bit CDT | Matches the actual threshold count; return range 0…166; returns 166 on maximum input; termination |
+| Mathematical CDT distribution | Exact probability masses of the uniform 83-bit input experiment; statistical distance <2^-78 from the official nonnegative Gaussian (σ=16), and a probability-difference bound for every output set |
+| `smulh48` | On all inputs, equals the 64-bit representation of `ceil(signed(a) × unsigned(b) / 2^48)` |
+| `approx_exp` | Matches the degree-10 Horner computation independently extracted from C; connects each multiplication to integer ceiling semantics |
+| Numerical exponential error | Actual sigma76 argument lies on the [0,2/3] grid; signed64 semantics for Horner prefixes and ceiling multiplication; error≤27/2^48<2^-43 relative to real exp, and termination |
+| Conditional acceptance probability | Actual sigma call with a fixed candidate and only the 48 rejection bits drawn uniformly; probability difference≤α·28/2^48<2^-43 using the actual quantized exponent and rounded-zero correction |
+| Exponent before rounding | Square limbs match floor(Z²/2^76); error≤2^-49 between the actual exponent and the Gaussian density-ratio exponent |
+| Zero correction and average acceptance probability | The two zero rules differ at CDT=0 and noise 1…32767; average acceptance-probability error<29/2^48<2^-43 for an actual attempt with explicitly uniform 72+48 bits |
+| Joint acceptance-and-output probability for every output set | Difference<29/2^48+2^-78<2^-43 between the actual sigma experiment with independent uniform 83+72+48 bits and the ideal experiment with an infinite Gaussian CDT and unbounded integer rounding; before normalization after acceptance |
+| Conditional distribution after acceptance | Actual and ideal acceptance probabilities≥1/7 and ≥1/8; native conditional distributions have mass 1 and statistical distance≤16·(29/2^48+2^-78)<2^-39 |
+| Gaussian mass-function identification | Ideal conditional distribution=distribution of the integer Gaussian's absolute value rounded by 16 bits; independent infinite normalization, zero weight, rounding PMF, and actual distribution error<2^-39 |
+| Repeated actual attempts with independent randomness | Calls the actual extracted attempt each time; probability-1 termination, exact conditional distribution of the first accepted value, and Gaussian distance<2^-39 |
+| Joint distribution of the accepted list | Exactly a list of n independent samples; distance<2^-31 for 256 values and <257·2^-39 for 257; preserves the first-256 projection after consuming the last value |
+| Finite candidate-stream sufficiency | The 26-byte concatenation of 203-bit candidates matches the acceptance order; probability of fewer than n acceptances in n·t candidates≤n·(6/7)^t, with insufficiency probability→0 for all prefix and block lengths |
+| Uniform byte input | The complete uniform 208-bit candidate and the previous 203-bit model have exactly the same observation distribution; clearing the five unused bits preserves all four return words |
+| Complete iid byte buffer | Probability-1 termination of the model calling actual consumption, carry, and sign-copy functions, and the exact independent joint distribution of 256 visible magnitudes; Gaussian distance<2^-31 for requests of either 256 or 257 |
+| Sign bits and signed target | 256 fair bits from 32 uniform bytes; symmetry, zero mass, and both tie cases for the rounded signed Gaussian target |
+| Independent sign vector | Coordinatewise combination of independent fair signs and a magnitude list yields a list of iid signed conditional samples; distance<2^-31 from the signed target |
+| Signed composition of the actual iid buffer | Independence of signs from the entire sample-array and square-word state, and the joint law of 256 visible `±W64.to_uint` observations |
+| Scaling-sign connection | Exact word-level sign computation; signed32 semantics under rounded magnitudes≤2147483647; local→global connection has sample_offset=8·sign_offset conditions |
+| Single Gaussian attempt | For every 26-byte input, the sample, square limbs, and acceptance bit match the specification; termination |
+| Sample rounding | Actual result equals the integer formula, with `0…12033618204333965312 < 2^64`; includes CDT 166 |
+| Finite Gaussian consumer | Entire return value after processing 26-byte candidates equals the specification fold; acceptance count, stored acceptance order, dummy-slot preservation, and termination |
+| Sum of squares | Exact integer sum of accepted candidates' square limbs when both initial limbs are in the 48-bit range and the request is at most 512; actual square-high `<2^38` |
+| Signing offset consumer | Connects outputs, order, and the integer sum of squares to actual `__sample_gauss_at`; preserves the region outside the request |
+| Refill boundary | Actual carry preserves remaining bytes and terminates; combined layout of carry and a new 136-byte block |
+| Single SHAKE block | Actual signing code's 24-round word permutation, 136-byte serialization of the return state, preservation outside the output region, and termination |
+| SHAKE seed initialization | Equality of the entire 200-byte state for the 64-byte seed, low 16 nonce bits, and domain/padding; termination |
+| Complete signing Gaussian function | Composes the actual `_sf_sample_gauss_N_full_at` initial 49 blocks, 32 sign bytes, and repeated refills with a continuous-stream specification; on termination for `n=256/257`, samples, signs, integer sum of squares, and preservation of external regions |
+| Conditional termination of signing Gaussian | Termination, exact outputs, sign copying, sum of squares including dummies, and external-region preservation under a finite-prefix premise providing enough accepted candidates in the actual seed's stream; sufficiency for all seeds remains separate |
+| Hyperball accumulator | Establishes the 48-bit range of both limbs for at most 2,818 accepted candidates, connecting successive Gaussian calls |
+| Hyperball iid tail and single attempt | Moments of the actual accepted raw squares and safe-domain escape probabilities <2^-29/2^-44/2^-54; the same unconditional bounds for acceptance AND excessive integer squared norm in one iid attempt with actual numerical calls |
+| Complete Hyperball iid payload and sum of squares | Exact joint distribution of the D=1538/2306/2818 accepted history, visible vector, and raw sum of squares in the actual Gaussian-call model; both dummies are included in S; safe-domain event probability formula and probability-1 batch termination |
+| Hyperball safe input domain | Derives actual Newton6, scale, rounded magnitudes≤2^26, and N<2^64 from canonical input sum S∈[3D/4,5D/4]·2^76; acceptance iff the integer radius condition for arbitrary samples/signs |
+| Actual calls for Hyperball numerical counterexamples | Consumption including both dummies, Newton6, scaling, and norm terminate with exact results on the chosen candidates; acceptance1 despite excessive actual integer norm. Excludes SHAKE seeds and the entire seeded path |
+| Fixed point and scaling | Actual word multiplication, normalization, halving, six Newton updates, signs and signed32 outputs, preservation, and termination; numerical fit is an explicit condition |
+| Complete signing Hyperball | Connects the actual complete function and modes 2/3/5 to the batch stream, first-acceptance history, modular norm, final bytes, and counters; uniqueness of return values |
+| NTT and inverse NTT | 256-point mathematical transforms, result bounds, and termination under explicit coefficient ranges |
+| Actual API helpers | Signing-context prefix, backward copying with safe overlap, zero initialization on verification failure, and preservation of external memory |
 
-샘플러 주요 정리는 별도로 추출한 실제 서명 프로그램의 내부 함수에도 연결한다.
-정확한 정리 이름·전제와 미완료 항목은 [CLAIMS.md](CLAIMS.md), 검증 결과는
-[VALIDATION.md](VALIDATION.md)에 있다.
+The main sampler theorems are also connected to internal functions of a separately
+extracted actual signing program. Exact theorem names, premises, and unfinished
+items are in [CLAIMS.md](CLAIMS.md); verification results are in
+[VALIDATION.md](VALIDATION.md).
 
-## 재현
+## Reproduction
 
-현재 추출 기준은 Jasmin / `jasmin2ec` 2026.09.0과 EasyCrypt r2026.09이다.
-Jasmin의 EasyCrypt 라이브러리, Why3 및 설정된 SMT 증명기가 필요하다.
-바이너리 해시와 추출 설정은 [toolchain.json](manifests/toolchain.json)에 기록했다.
-여러 버전이 설치되어 있으면 `PATH`와 `JASMIN2EC`, `EASYCRYPT`를 같은 도구
-설치의 실행 파일로 지정한다.
+The current extraction baseline is Jasmin / `jasmin2ec` 2026.09.0 and EasyCrypt
+r2026.09. It requires Jasmin's EasyCrypt library, Why3, and configured SMT provers.
+Binary hashes and extraction settings are recorded in
+[toolchain.json](manifests/toolchain.json). When multiple versions are installed,
+select executables from the same tool installation through `PATH`, `JASMIN2EC`,
+and `EASYCRYPT`.
 
-2026.09 추출은 선택한 배열 모델에 필요한 파일만 생성하므로, 현재 생성물은
-프로그램 6개를 포함한 barray 추출물 48개와 증명 지원 배열 5개이다.
-기존 SHAKE/NTT 이론이 사용하는 `Array5`, `Array24`, `Array25`, `Array256`,
-`WArray1024`는 같은 실제 Jasmin 입력을 warray로 별도 추출하여
-`generated/support/`에 재생성한다. 이 보조 추출의 프로그램은 사용하지 않으며
-검증할 실제 프로그램은 계속 barray 모델이다. 지원 배열도 재추출 동일성 검사와
-각 파일을 주 대상으로 하는 검증에 포함된다.
+The 2026.09 extractor generates only files required by the selected array model.
+The current generated artifacts comprise 48 barray extraction files, including
+six programs, and five proof-support arrays. `Array5`, `Array24`, `Array25`,
+`Array256`, and `WArray1024`, used by the existing SHAKE/NTT theories, are
+regenerated in `generated/support/` through a separate warray extraction of the
+same actual Jasmin inputs. Programs from that auxiliary extraction are not used:
+the actual programs being verified retain the barray model. The support arrays
+are also included in fresh-extraction equality checks and verification with
+each file as a primary target.
 
-기존 [verification-results.json](manifests/verification-results.json)은
-**2026.03 도구 환경의 역사 기록**이며 새 환경의 PASS를 뜻하지 않는다.
-그 기록에 대응하는 도구·입력·추출물 기준을
-[history/2026.03/](manifests/history/2026.03/README.md)에 보존했다.
-2026.09 전체 재실행 대상은
-[2026.09-all-targets.txt](manifests/2026.09-all-targets.txt)의 260개
-(생성물 53개, NTT 외 로컬 이론 195개, NTT 이론 12개)를 각각 주 대상으로
-검증하여 **260/260 PASS**를 확인했다. `-no-eco`, `Proofs:check`, EOF 완료
-검사와 기본 프로버 선택을 유지했고, 실행 기록의 모든 주 대상 해시가 현재
-소스와 일치한다. [현재 검증 manifest](manifests/2026.09-migration.json)에
-전체 목록·해시와 [보존된 전체 실행 기록](../evidence/toolchain-migration/haetae-full-proof-result.json)을 연결했다.
-진단 로그에 남은 옛 `/tmp` 경로는 [보존 위치 색인](../evidence/toolchain-migration/index.json)에서 공개 사본의 경로와 해시를 찾을 수 있다.
+The existing [verification-results.json](manifests/verification-results.json) is
+a **historical record from the 2026.03 tool environment**, not a PASS for the new
+environment. Its corresponding tools, inputs, and extraction baseline are
+preserved in [history/2026.03/](manifests/history/2026.03/README.md).
+The 260 targets in [2026.09-all-targets.txt](manifests/2026.09-all-targets.txt)
+(53 generated files, 195 local non-NTT theories, and 12 NTT theories) were each
+checked as primary targets in the full 2026.09 rerun, yielding **260/260 PASS**.
+The run retained `-no-eco`, `Proofs:check`, the EOF-completion check, and default
+prover selection; every recorded primary-target hash matches the current source.
+The [current verification manifest](manifests/2026.09-migration.json) links the
+full inventory and hashes to the [preserved full execution record](../evidence/toolchain-migration/haetae-full-proof-result.json).
+For old `/tmp` paths in diagnostic logs, the [preservation index](../evidence/toolchain-migration/index.json)
+provides the public copies' paths and hashes.
 
-원래 NTT·SHAKE 출처 TSV는 변경하지 않는다. 검증기는 해당 TSV의 이전 pin을
-먼저 확인하고, 검토한 지원 파일 5개의 정확한 이전·현재 SHA-256 쌍만 추가로
-허용한다. 설명용 migration manifest를 바꾸어 이 5개 파일의 다른 내용을 승인할 수 없다.
-이 진입점과 소스·명제·import·TSV 동시 변조 거부를 포함한 게이트 회귀 26개도 통과했다.
+The original NTT/SHAKE provenance TSVs remain unchanged. The verifier first
+checks their old pins, then additionally accepts only the exact reviewed
+old/current SHA-256 pairs for the five support files. Changing the descriptive
+migration manifest cannot authorize other contents for those five files.
+The 26 gate regressions also passed, covering this entry point and rejection
+of simultaneous source, statement, import, and TSV tampering.
 
 ```sh
 make -C haetae-easycrypt verify
 ```
 
-이 명령은 다음 순서로 진행한다.
+This command proceeds as follows.
 
-1. 고정된 공식 배포본·Jasmin 입력·추출물·NTT 지원 이론의 해시 확인.
-2. 현재 Jasmin에서 재추출하여 생성 파일 전체를 비교하고, C 상수와 수학적 구간 인증서를 다시 생성해 비교.
-3. 증명 생략 pragma, 새 가정 선언, 미완성 증명, 디버그 명령 검사.
-4. 생성물과 프로젝트의 **각 이론을 주 검증 대상으로** `-no-eco`, `Proofs:check` 실행.
+1. Check hashes of the pinned official distribution, Jasmin inputs, extracted artifacts, and NTT support theories.
+2. Re-extract from the current Jasmin sources and compare all generated files; regenerate and compare C constants and mathematical interval certificates.
+3. Check for proof-skipping pragmas, new assumption declarations, unfinished proofs, and debugging commands.
+4. Execute `-no-eco` and `Proofs:check` with **each generated artifact and project theory as a primary verification target**.
 
-각 검증에는 마지막 확인 정리를 덧붙인 동일 이름의 임시 복사본을 사용한다.
-EasyCrypt가 열린 증명 상태의 EOF에서 성공 코드를 반환하는 경우도 이 확인
-정리에서 실패하도록 한다. 원본 파일과 추출물은 변경하지 않는다.
+Each check uses a same-named temporary copy with a final checking lemma appended.
+If EasyCrypt returns success at EOF while a proof is still open, this lemma
+forces the check to fail. Original files and extraction artifacts remain unchanged.
 
-EasyCrypt는 import만 한 파일의 증명 본문을 기본적으로 재검사하지 않는다.
-따라서 이 게이트는 마지막 정리 파일 하나의 성공으로 의존 이론 검증을 대신하지
-않는다. NTT의 지원 이론까지 새로 검증하므로 전체 실행에는 시간이 걸린다.
+By default, EasyCrypt does not recheck proof bodies in files that are only
+imported. This gate therefore does not substitute success of a single final
+theorem file for verification of its dependencies. It also freshly checks the
+NTT support theories, so the complete run takes time.
 
-필요한 그룹만 확인할 수도 있다. 각 그룹의 PASS는 선택한 그룹에 한정된다.
+Individual groups can also be checked. A group's PASS applies only to the
+selected group.
 
 ```sh
-make -C haetae-easycrypt verify-new        # NTT 외 로컬 명세와 증명
-make -C haetae-easycrypt verify-ntt        # NTT 지원 이론과 현재 구현 정리
-make -C haetae-easycrypt verify-generated  # 추출물 로딩/타입 검사
-make -C haetae-easycrypt test-gate         # 미완성 증명·수치 인증서·비교 표 변조 거부
-make -C haetae-easycrypt test-hyperball-boundary  # 구성한 후보열의 C/Jasmin 수치 경계 재현
+make -C haetae-easycrypt verify-new        # Local specifications and proofs outside NTT
+make -C haetae-easycrypt verify-ntt        # NTT support theories and current implementation theorems
+make -C haetae-easycrypt verify-generated  # Extraction loading/type checks
+make -C haetae-easycrypt test-gate         # Reject unfinished proofs and altered numerical certificates/comparison tables
+make -C haetae-easycrypt test-hyperball-boundary  # Replay the C/Jasmin numerical boundary on constructed candidate sequences
 ```
 
-로그와 실행별 SHA-256·종료 코드는 `logs/`에 기록한다. `latest-<group>.json`은
-실행 시작 시 RUNNING으로 바뀌고, 사전 검사 실패도 FAIL로 남는다. `.eco`와 로그는
-Git에서 제외한다. 샌드박스가 Why3의 로컬 Unix 소켓 실행을 막는 경우에는 검증기
-실행 권한이 필요하며, 이 오류를 증명 성공으로 처리하지 않는다.
+Logs, per-run SHA-256 hashes, and exit codes are written to `logs/`.
+`latest-<group>.json` becomes RUNNING when execution starts; preflight failures
+are also recorded as FAIL. Git excludes `.eco` files and logs. If a sandbox
+prevents Why3 from using local Unix sockets, the verification process needs
+permission to run; this error is not treated as a successful proof.
 
-## 파일 구성과 신뢰 경계
+## File layout and trust boundaries
 
-- `generated/`: 원본 Jasmin에서 자동 추출한 프로그램과 배열 이론. 직접 수정하지 않는다.
-- `theories/`: 명세와 필요한 NTT 수학 이론. C의 CDT·계수는 독립 생성기로 가져온다.
-- `proofs/`: 실제 추출 프로시저의 Hoare/pHoare 정리와 수학적 분포·오차 정리.
-- `scripts/`: 재추출, 상수 생성, 무결성 검사와 검증 게이트.
-- `manifests/`: 입력·추출물·검증 대상·이전 NTT 이론의 출처와 해시.
+- `generated/`: programs and array theories automatically extracted from the original Jasmin sources. Do not edit them directly.
+- `theories/`: specifications and required NTT mathematical theories. Independent generators import the CDT and coefficients from C.
+- `proofs/`: Hoare/pHoare theorems for actual extracted procedures and mathematical distribution/error theorems.
+- `scripts/`: re-extraction, constant generation, integrity checks, and the verification gate.
+- `manifests/`: provenance and hashes of inputs, extracted artifacts, verification targets, and earlier NTT theories.
 
-검증은 Linux x86-64, `barray`, Jasmin의 `normal` 의미 모델에 대한 것이다.
-EasyCrypt/SMT, Jasmin 추출기와 모델 라이브러리는 신뢰하는 도구에 포함된다.
-NTT 지원에는 기록된 산술 가정이 남아 있으므로 전체 프로젝트를 공리 없는
-검증이라고 부르지 않는다. 구체적인 내용은
-[NTT 가정 목록](manifests/ntt-assumptions.md)을 참조한다.
+Verification concerns Linux x86-64, `barray`, and Jasmin's `normal` semantic
+model. EasyCrypt/SMT, the Jasmin extractor, and its model library are trusted
+tools. The NTT support retains documented arithmetic assumptions, so the whole
+project is not described as axiom-free verification. See the
+[NTT assumption inventory](manifests/ntt-assumptions.md) for details.
 
-메모리 정리는 총 byte map과 추출된 배열 객체에 대한 계약이다. 운영체제의 실제
-메모리 할당·접근 가능성, C descriptor 래퍼나 생성된 어셈블리 자체에 대한 별도의
-검증을 의미하지 않는다. SHAKE 정리는 고정 길이 seed·nonce의 흡수·패딩과
-word 순열 스트림을 다루며, FIPS bit 명세와의 별도 동치나 임의 길이 입력의
-sponge 정리는 포함하지 않는다. CDT 분포 정리의 균등 입력은 확률 실험에 명시되어
-있으며 실제 SHAKE의 성질로 가정하지 않는다. 지수함수 점별 오차와 조건부 승인
-확률은 반올림 전 지수와 0 보정 차이까지 연결했다. 전체 Gaussian 분포에는
-CDT 분포와 출력 반올림은 모든 출력 집합의 공동 확률까지 연결했다.
-승인 후 조건부분포의 정규화와 오차도 증명했다. 이상적 조건부분포와
-명시적 Gaussian 반올림 질량식도 식별했다. 독립 균등 바이트 버퍼 모형의
-종료·가시 크기 분포까지 합성했다. 후속 부호 단계에서 공정 비트·독립 부호 벡터,
-전체 비부호 상태와의 독립성 및 실제 반환 관측으로의 합성을 증명했다. 이 독립성의 비부호 상태는 표본 배열과 제곱 워드를 함께 포함한다.
-signed 관측은 W64 비트패턴의 signed 캐스팅이 아니며, 크기를 정수로 읽고 부호를
-붙인다. 구체적 SHAKE의 난수 모형 연결과 전체 서명 정확성·보안은 남아 있다.
+Memory theorems are contracts over a total byte map and extracted array objects.
+They do not separately verify actual operating-system memory allocation and
+accessibility, the C descriptor wrappers, or the generated assembly itself.
+The SHAKE theorems cover absorption/padding of a fixed-length seed and nonce and
+a word-permutation stream; they do not include a separate equivalence to the
+FIPS bit specification or a sponge theorem for arbitrary-length inputs.
+Uniform input is explicit in the CDT distribution experiment and is not assumed
+as a property of actual SHAKE. Pointwise exponential error and conditional
+acceptance probability are connected through the exponent before rounding and
+the difference in zero correction. For the full Gaussian distribution, the CDT
+distribution and output rounding are connected through joint probabilities of
+every output set. Normalization and error of the conditional accepted
+distribution are also proved, as is its identification with an explicit rounded
+Gaussian mass formula. Composition extends to termination and the visible
+magnitude distribution in the independent uniform byte-buffer model.
+The subsequent sign stage proves fair bits, an independent sign vector,
+independence from the complete sample-array and square-word state, and composition with actual return
+observations. That state includes both the sample array and square
+words. A signed observation is not a signed cast of a W64 bit pattern: it reads
+the magnitude as an integer and then applies the sign. Connecting concrete
+SHAKE to the randomness model and proving complete signature correctness and
+security remain open.
 
-scaling의 word 정리는 부호 적용의 모듈러 표현을 다룬다. W32의 signed 정수로
-해석하려면 각 반올림 크기≤2147483647이라는 fit 조건이 필요하다. 국소 샘플 창의
-부호 비트 i는 전역 인덱스 `8*sign_offset+i`에 대응하므로, scaling의 같은 표본
-좌표와 연결할 때 `sample_offset=8*sign_offset`를 추가한다. 이 조건은 국소→전역
-연결에 관한 것으로, iid 버퍼의 국소 signed 관측에 추가하는 전제는 아니다.
+The scaling word theorem concerns the modular representation of sign application.
+Interpreting it as a signed W32 integer requires the fit condition that each
+rounded magnitude is ≤2147483647. Sign bit i of a local sample window corresponds
+to global index `8*sign_offset+i`, so connecting it to the same sample coordinate
+in scaling additionally requires `sample_offset=8*sign_offset`. This condition
+concerns the local→global connection; it is not an extra premise for the iid
+buffer's local signed observation.
 
-Hyperball의 승인 norm은 64비트 모듈러 합이다. 수학적 제곱합의 반경 보장은
-오버플로 조건을 추가로 충족해야 한다. 구성한 후보열에서 C와 Jasmin의 동일한
-wrap 동작을 재현했으며, 실제 SHAKE 시드 도달 가능성을 주장하지 않는다.
-정확한 사례와 검증 명령은 [수치 경계 기록](docs/hyperball-numerical-boundary.md)에 있다.
+Hyperball's acceptance norm is a 64-bit modular sum. A mathematical sum-of-squares
+radius guarantee requires additional no-overflow conditions. The same wrapping
+behavior in C and Jasmin was replayed on constructed candidate sequences;
+reachability from an actual SHAKE seed is not claimed.
+Exact cases and verification commands are in the
+[numerical boundary record](docs/hyperball-numerical-boundary.md).

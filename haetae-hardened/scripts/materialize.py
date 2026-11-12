@@ -20,8 +20,14 @@ LAYOUT_PATHS = {
     "docs/haetae-1.2.0-jasmin-validation.md": "docs/haetae-jasmin-validation.md",
 }
 LAYOUT_SHA256 = "cddcaa784b1c62d06b1c8f787cd43951e0d7842f9f3cd42627ed493809f7fe23"
-PUBLICATION_SHA256 = "921b86b43c0797f02e9b8e079755db675d835b9e68601c3eb355520b6d0f8888"
-PUBLICATION_DOCUMENTS = {"README.md", "haetae-easycrypt/README.md", "haetae-easycrypt/VALIDATION.md"}
+PUBLICATION_SHA256 = "cc49024b7c2d898b02f25a72931c190d1c753287293106c99b524e6fb866f4f9"
+PUBLICATION_DOCUMENTS = {
+    "README.md",
+    "haetae-easycrypt/CLAIMS.md",
+    "haetae-easycrypt/README.md",
+    "haetae-easycrypt/VALIDATION.md",
+    "haetae-jasmin/README.md",
+}
 COPY_DIRS = {"jasmin", "include", "test", "kat", "benchmark"}
 MIGRATABLE_METADATA = {
     "README.md", "VALIDATION.md", "scripts/extract.py", "scripts/verify-one.sh",

@@ -1,70 +1,83 @@
-# 지수근사의 Rényi 출력분포 경계
+# Rényi output-distribution bound for the exponential approximation
 
-독립 균등 후보 입력 모형에서 **실제 지수근사·기계정수 승인 판정을 사용한
-Gaussian 크기 표본의 분포**와 **정확한 지수함수로 승인한 기준 분포**를 비교한다.
-두 분포는 같은 실제 CDT, 양자화된 지수 입력, 0 처리와 출력 반올림을 사용한다.
+Under the independent uniform candidate-input model, compare **the distribution
+of Gaussian magnitude samples using the actual exponential approximation and
+machine-integer acceptance decision** with **the reference distribution accepted
+using the exact exponential function**. Both distributions use the same actual
+CDT, quantized exponential input, handling of 0 and output rounding.
 
-정수 차수 `2 ≤ α ≤ 1024`에서 다음 상한을 검증한다.
+For integer orders `2 ≤ α ≤ 1024`, verify the following upper bound.
 
 ```text
-R_α(실제, 정확한 exp 기준) ≤ 1 + 2^-68 < 1 + 2^(-451/10).
+R_α(actual, exact-exp reference) ≤ 1 + 2^-68 < 1 + 2^(-451/10).
 ```
 
-`451/10`은 명세의 `45.1`을 정확한 유리수로 쓴 것이다. 역방향 비교에도 같은
-`1+2^-68` 상한이 성립한다. 이는 상한의 증명이며 실제 발산값의 측정 결과가 아니다.
+`451/10` expresses the specification's `45.1` as an exact rational number.
+The same upper bound `1+2^-68` holds in the reverse direction. This is a proved
+upper bound, not a measurement of the actual divergence.
 
-## 비교 대상과 수치의 의미
+## Distributions and numerical interpretation
 
-| 항목 | 이번 검증의 정의 |
+| Item | Definition in this verification |
 | --- | --- |
-| 실제 분포 P | 실제 83비트 CDT·72비트 잡음 후보에 기계정수 지수근사와 48비트 승인 판정을 적용한 뒤, 승인된 반올림 크기 표본의 분포 |
-| 기준 분포 Q | 같은 후보와 양자화 지수 `X`, 반올림 크기 `r`을 유지하고, 승인 확률을 `(r=0이면 1/2, 그 외 1) · exp(-X/2^48)`로 바꾼 분포 |
-| 명세의 수치 | [HAETAE 260904 §5.1.1](https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view)의 지수근사 비교 경계 `1+2^-45.1` |
-| 이번 상한 | 위 P,Q와 정수 차수 2~1024에서 `1+2^-68` 이하 |
+| Actual distribution P | The distribution of accepted, rounded magnitude samples after applying the machine-integer exponential approximation and 48-bit acceptance decision to the actual 83-bit CDT and 72-bit noise candidate |
+| Reference distribution Q | Retain the same candidate, quantized exponent `X` and rounded magnitude `r`, but replace the acceptance probability with `(1/2 if r=0, otherwise 1) · exp(-X/2^48)` |
+| Specification value | The exponential-approximation comparison bound `1+2^-45.1` in [HAETAE 260904 §5.1.1](https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view) |
+| Bound in this development | At most `1+2^-68` for the above P,Q and integer orders 2–1024 |
 
-이 단계의 기준 Q는 실제 유한 CDT와 양자화·0 처리 규칙을 유지한다. 무한 지지의
-이상적 Gaussian, 양자화 이전 지수, raw 후보의 0 처리까지 바꾸는 비교는 추가
-증명이 필요하다. 기존 통계적 거리 결과를 Rényi 결과로 바꾸어 부르지 않는다.
+The reference Q at this stage retains the actual finite CDT, quantization and
+handling rules for 0. Comparisons that also change to an ideal Gaussian with
+infinite support, an exponent before quantization, or different raw-candidate
+handling of 0 require additional proofs. Existing statistical-distance results
+are not relabeled as Rényi results.
 
-[Rossi 학위논문 §2.2.3](https://www.di.ens.fr/~mrossi/docs/thesis.pdf)의 정의를 따라
-로그를 취하지 않은 다음 양을 사용한다.
+Following the definition in [Rossi's dissertation §2.2.3](https://www.di.ens.fr/~mrossi/docs/thesis.pdf),
+use the following quantity without taking its logarithm.
 
 ```text
 R_α(P,Q) = (Σ_x P(x)^α / Q(x)^(α-1))^(1/(α-1)).
 ```
 
-실제 분포가 첫 번째 인자다. 유한 지지, 확률 질량 1, 지지 포함과 적분 가능성을
-확인하고, 우도비의 모멘트 표현과 위 거듭제곱합 표현이 같음을 증명한다.
-이 정의에는 지지가 포함되지 않는 경우의 무한대 확장을 넣지 않았으며, 검증한
-두 분포는 같은 지지를 가진다.
+The actual distribution is the first argument. Finite support, total probability
+mass 1, support inclusion and integrability are checked, and the likelihood-ratio
+moment expression is proved equal to the power-sum expression above. This
+definition does not include an extension to infinity when support inclusion
+fails; the two verified distributions have the same support.
 
-명세의 차수는 `α=2λ−1`이다. §4.5 표 1의 Security 행 120·180·260을 대입한
-239·359·519도 검증 범위에 포함한다. 같은 표의 Core-SVP 추정치는 별도로
-제시되어 있으므로, 이 대입만으로 모드별 λ비트 보안을 증명했다고 해석하지 않는다.
+The specification uses order `α=2λ−1`. Substituting 120·180·260 from the Security
+row of §4.5 Table 1 gives 239·359·519, which also fall within the verified range.
+The same table lists Core-SVP estimates separately, so this substitution alone
+must not be interpreted as proving λ-bit security for each mode.
 
-## 실제 코드에서 경계까지
+## From actual code to the bound
 
-1. 실제 후보의 지수 입력은 `0 ≤ X/2^48 ≤ 2/3`이다. 따라서 정확한 지수함수는
-   `exp(-X/2^48) ≥ 1/3`이고, 0 처리까지 포함한 기준 승인 확률은 `1/6` 이상이다.
-2. 기존의 기계정수 승인 확률 오차 정리에서, 같은 후보의 실제·기준 승인 확률
-   `a,b`에 대해 `|a-b| ≤ e·b`, `e=84/2^48`를 도출한다.
-3. 48비트 거부 난수는 먼저 평균하여 이 승인 확률에 포함한다. 공통 후보 분포에는
-   CDT와 잡음만 남긴다. 이를 승인 확률로 정규화하고 같은 출력값으로 모으면
-   두 방향의 점질량 비율 오차가 `δ=2^-39` 이하임을 얻는다.
-4. 확률 질량 1에서 `E_Q[P/Q−1]=0`을 얻는다. 거듭제곱 전개의 일차 항이 사라져
-   `E_Q[(P/Q)^α] ≤ 1+α(α−1)δ²`가 된다. 양의 실수 거듭제곱과 정수 차수 범위를
-   이용해 `R_α ≤ 1+2^-68`을 도출한다.
+1. The actual candidate's exponential input satisfies `0 ≤ X/2^48 ≤ 2/3`.
+   Thus the exact exponential satisfies `exp(-X/2^48) ≥ 1/3`, and the reference
+   acceptance probability, including handling of 0, is at least `1/6`.
+2. From the existing machine-integer acceptance-probability error theorem,
+   derive `|a-b| ≤ e·b`, `e=84/2^48`, for the actual and reference acceptance
+   probabilities `a,b` of the same candidate.
+3. First average over the 48-bit rejection randomness and incorporate it into
+   these acceptance probabilities. Only the CDT and noise remain in the common
+   candidate distribution. Normalizing by acceptance probability and grouping
+   equal outputs gives a point-mass ratio error at most `δ=2^-39` in both directions.
+4. Total probability mass 1 gives `E_Q[P/Q−1]=0`. The first-order term in the
+   power expansion vanishes, yielding `E_Q[(P/Q)^α] ≤ 1+α(α−1)δ²`. Positive real
+   powers and the integer-order range then give `R_α ≤ 1+2^-68`.
 
-48비트 거부 난수를 포함한 26바이트 전체를 비교 대상 후보로 남기고, 실제의
-결정적 승인 비트와 기준의 확률적 승인을 점별로 비교하는 방식은 쓰지 않는다.
-그 경우는 관측 대상이 달라 위의 작은 상대오차를 적용할 수 없다.
+The comparison does not retain all 26 bytes, including the 48 rejection bits,
+as the candidate and then compare the actual deterministic acceptance bit
+pointwise with reference probabilistic acceptance. That would change the
+observable, so the small relative-error bound above would not apply.
 
-`GaussianRenyiActual`은 정규화한 실제 커널의 출력분포를 기존
-`sc_actual_conditioned`와 정확히 동일시한다. `GaussianRenyiProduction`은 생산
-코드에서 추출한 두 Gaussian 함수의 반복 호출 결과와, 정확한 exp 기준의 실행
-모형을 각각 해당 분포에 연결한다. 기준 재시도 모형의 종료도 확률 1로 증명한다.
+`GaussianRenyiActual` identifies the normalized actual kernel's output
+distribution exactly with the existing `sc_actual_conditioned`.
+`GaussianRenyiProduction` connects repeated calls to the two Gaussian functions
+extracted from production code, and the exact-exp reference execution model,
+to their respective distributions. The reference retry model is also proved
+to terminate with probability 1.
 
-## 재현과 범위
+## Reproduction and scope
 
 ```sh
 make -C haetae-hardened prepare
@@ -73,13 +86,16 @@ python3 haetae-hardened/tests/gaussian-renyi-gate.py
 python3 haetae-hardened/scripts/verify.py --group gaussian-renyi
 ```
 
-기존 Why3 서버를 사용하면 `WHY3_SERVER_SOCKET`을 설정한다. 모든 새 정리와
-로컬 의존 정리를 각각 main target으로 검사하며, 추출 일치와 파일 해시를 확인한다.
-파일별 결과는 [gaussian-renyi-results.json](gaussian-renyi-results.json)에 기록한다.
-이전 실행 코드·KAT·API·CT/SCT 기록은 해시로 보존하고, 이번에 수정한 검증기와
-대상 목록은 과거 기록의 값과 구분한다.
+Set `WHY3_SERVER_SOCKET` when using an existing Why3 server. Every new theorem
+and local dependency theorem is checked as a main target, together with
+extraction agreement and file hashes. Per-file results are recorded in
+[gaussian-renyi-results.json](gaussian-renyi-results.json). Earlier executable-code,
+KAT, API and CT/SCT records are preserved by hash; the verifier and target list
+modified in this stage are distinguished from their historical values.
 
-이 결과는 명시한 단일 Gaussian 출력 비교에 관한 것이다. 서명 질의 전체의 보안
-결론에는 Gaussian 호출 수와 합성, 비교 대상과 보안 가정의 연결이 추가로 필요하다.
-구체적인 SHAKE의 난수 모형 연결, Hyperball 외부 재시도 종료와 전체 API 정확성도
-별도 과제다. C/Jasmin 실행 코드는 이번 단계에서 변경하지 않았다.
+This result concerns the specified comparison of a single Gaussian output.
+A security conclusion for all signing queries additionally requires the number
+and composition of Gaussian calls and a connection between the comparison and
+security assumptions. Connecting concrete SHAKE to the randomness model,
+termination of the outer Hyperball retry loop, and complete API correctness
+are also separate tasks. The C/Jasmin executable code was not changed at this stage.

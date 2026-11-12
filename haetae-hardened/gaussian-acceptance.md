@@ -1,60 +1,68 @@
-# Gaussian 거부율과 평균 후보 시도 횟수
+# Gaussian rejection rate and expected candidate attempts
 
-독립 균등 난수를 공급한 **실제 Jasmin Gaussian 후보 한 번의 거부 확률은 5% 미만**이다.
-성공할 때까지 같은 방식으로 새 후보를 만드는 모형에서, 성공한 후보까지 포함한
-시도 횟수 `T`의 평균은 **`E[T] < 20/19 ≈ 1.052632`**다.
+With independent uniform randomness, **a single actual Jasmin Gaussian candidate is rejected with probability less than 5%**.
+In the model that generates fresh candidates in the same way until success, the
+number of attempts `T`, including the successful candidate, has expectation
+**`E[T] < 20/19 ≈ 1.052632`**.
 
-| 수치 | 의미와 출처 |
+| Quantity | Meaning and source |
 | --- | --- |
-| 거부 확률 `< 1/20` | [HAETAE 명세 260904 §5.1.1](https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view)의 Gaussian 거부율 `<5%`에 대응한다. |
-| 평균 시도 횟수 `< 20/19` | 실제 승인 확률 `p > 19/20`와 재시도 횟수 법칙에서 이번에 유도한 상한이다. 명세에서 인용한 수치는 아니다. |
-| 이상적 승인 확률 `≥ 39/41` | 실제 구현과 비교하는 이상적 후보 실험의 증명용 하한이다. 측정된 승인율을 뜻하지 않는다. |
+| Rejection probability `< 1/20` | Corresponds to the Gaussian rejection rate `<5%` in [HAETAE specification 260904 §5.1.1](https://drive.google.com/file/d/1H2SFqZFG5BcWH--bJKssvXaSG0Sd3mUx/view). |
+| Expected attempts `< 20/19` | A bound derived in this development from the actual acceptance probability `p > 19/20` and the retry-count law. It is not a number quoted from the specification. |
+| Ideal acceptance probability `≥ 39/41` | A proof lower bound for the ideal candidate experiment used to compare against the actual implementation. It is not a measured acceptance rate. |
 
-한 번의 시도는 `__sample_gauss_sigma76_regs`에 26바이트 후보 하나를 전달하는
-것이다. CDT에 쓰는 83비트, 추가 잡음 72비트, 거부 판정 48비트가 서로 독립이고
-균등하다. 26바이트 전체를 균등하게 뽑아도, 사용하지 않는 5비트가 결과에 영향을
-주지 않아 같은 법칙을 얻는다.
+One attempt passes a single 26-byte candidate to `__sample_gauss_sigma76_regs`.
+The 83 CDT bits, 72 additional noise bits and 48 rejection-decision bits are
+mutually independent and uniform. Sampling all 26 bytes uniformly gives the
+same law because the 5 unused bits do not affect the result.
 
-5% 경계는 이 입력들을 모두 평균한 결과다. CDT 값과 잡음 값을 고정한 뒤에도
-각 후보의 승인 확률이 95% 이상이라는 주장은 아니다. `T`에는 첫 시도와 마지막
-성공 시도를 모두 포함한다. SHAKE 블록 수, 버퍼 refill 횟수, 더미를 제외한
-배치 출력의 비용, Hyperball 전체 재시도 횟수와는 다른 양이다.
+The 5% bound averages over all these inputs. It does not assert an acceptance
+probability of at least 95% for every candidate after fixing the CDT and noise
+values. `T` includes both the first attempt and the final successful attempt.
+It differs from the number of SHAKE blocks, buffer refills, the cost of batch
+outputs excluding dummies, and the number of complete Hyperball retries.
 
-## 증명의 연결
+## Proof connections
 
-1. 기존 유리수 인증서에서 sigma 16 비음수 Gaussian의 정규화 상수
-   `H ≥ 41/2`를 얻는다. `H`는 0의 가중치를 1로 계산한다.
-2. Gaussian 질량의 단조성과 기존 격자 합 정리를 이용해 이상적 승인 확률이
-   `p_ideal ≥ 1 − 1/H ≥ 39/41 > 951/1000`임을 증명한다. raw 후보 0의 반 가중치를
-   유지하며, Gaussian 적분이나 새 수치 가정을 도입하지 않는다.
-3. 기존에 증명한 실제·이상적 승인 확률 차이 `< 2^-43`을 적용한다.
-   따라서 `p > 951/1000 − 2^-43 > 19/20`이고 거부 확률은 `< 1/20`이다.
-4. 실제 추출 함수를 호출하는 반복문에 분석용 정수 계수기를 추가한다.
-   계수기를 지워도 기존 IID 후보 반복모형의 출력이 같음을 연결하고, 실제 횟수의
-   분포·기대값의 유한성·`E[T] = 1/p`를 증명해 `< 20/19`를 얻는다.
+1. The existing rational certificate gives the normalization constant
+   `H ≥ 41/2` for the sigma 16 nonnegative Gaussian. `H` counts the weight at 0 as 1.
+2. Monotonicity of Gaussian mass and the existing lattice-sum theorem establish
+   the ideal acceptance probability
+   `p_ideal ≥ 1 − 1/H ≥ 39/41 > 951/1000`. The half weight of raw candidate 0 is
+   retained; no Gaussian integral or new numerical assumption is introduced.
+3. Apply the previously proved difference `< 2^-43` between actual and ideal
+   acceptance probabilities. Thus `p > 951/1000 − 2^-43 > 19/20`, and the rejection
+   probability is `< 1/20`.
+4. Add an integer counter for analysis to the loop that calls the actual
+   extracted function. Prove that erasing the counter preserves the output of
+   the existing IID candidate-loop model, then prove the actual count's
+   distribution, finiteness of its expectation and `E[T] = 1/p` to obtain `< 20/19`.
 
-`GaussianAcceptanceProduction`은 새로 추출한 서명용·독립 Hyperball 코드의
-Gaussian 함수를 직접 호출한다. `GaussianProductionCounted`는 같은 함수를 매번
-새 균등 26바이트로 호출하며 실제 시도 횟수를 센다. 함수 본문의 대응은
-EasyCrypt 관계적 동치로 검사한다.
+`GaussianAcceptanceProduction` directly calls the Gaussian functions in the
+freshly extracted signer and standalone Hyperball code.
+`GaussianProductionCounted` calls the same functions with fresh uniform 26-byte
+inputs on each attempt and counts the actual attempts. Correspondence between
+function bodies is checked by relational equivalence in EasyCrypt.
 
-확률 모형에는 구체적인 SHAKE 실행을 대신해 독립 균등 입력을 명시했다.
-Gaussian 후보 반복문의 종료는 이 모형에서 확률 1로 성립한다. 구체적 SHAKE와의
-보안 가정 연결, Hyperball 외부 반복문의 종료, 공식 Rényi 경계, 전체 API 정확성은
-별도 과제다. C/Jasmin 실행 코드는 이 단계에서 변경하지 않았다.
+The probability model explicitly supplies independent uniform inputs in place
+of concrete SHAKE execution. The Gaussian candidate loop terminates with
+probability 1 in this model. Connecting concrete SHAKE through security
+assumptions, termination of the outer Hyperball loop, the specification's Rényi
+bound, and complete API correctness are separate tasks. The C/Jasmin executable
+code was not changed at this stage.
 
-## 파일과 재현
+## Files and reproduction
 
-| 파일 | 검증 대상 |
+| File | Verification target |
 | --- | --- |
-| `GaussianAcceptanceConstants.ec` | 기존 인증서로부터 필요한 정규화 상수와 수치 여유 도출 |
-| `GaussianAcceptanceIdeal.ec` | 이상적 승인 확률의 해석적 하한 |
-| `GaussianAcceptanceActual.ec` | 실제 승인·거부 확률 및 연속 거부 꼬리 상계 |
-| `GaussianAcceptanceProduction.ec` | 실제 생산 코드와 균등 26바이트 실험의 연결 |
-| `GaussianAttemptExpectation.ec` | 후보 횟수를 세는 반복문, 횟수 분포와 유한 평균 |
-| `GaussianAttemptProduction.ec` | 생산 코드 후보 반복문에 같은 횟수·평균 결과 연결 |
+| `GaussianAcceptanceConstants.ec` | Derive the required normalization constant and numerical margin from the existing certificate |
+| `GaussianAcceptanceIdeal.ec` | Analytic lower bound on the ideal acceptance probability |
+| `GaussianAcceptanceActual.ec` | Actual acceptance/rejection probabilities and a tail bound on consecutive rejections |
+| `GaussianAcceptanceProduction.ec` | Connect actual production code to the uniform 26-byte experiment |
+| `GaussianAttemptExpectation.ec` | Candidate-counting loop, count distribution and finite expectation |
+| `GaussianAttemptProduction.ec` | Connect the same count and expectation results to the production candidate loop |
 
-각 파일은 [easycrypt/proofs](easycrypt/proofs/)에 있다. 저장소 루트에서:
+The files are in [easycrypt/proofs](easycrypt/proofs/). From the repository root:
 
 ```sh
 make -C haetae-hardened prepare
@@ -62,11 +70,14 @@ python3 haetae-hardened/tests/gaussian-rate-gate.py
 python3 haetae-hardened/scripts/verify.py --group gaussian-rate
 ```
 
-이미 실행 중인 Why3 서버를 이용하려면 `WHY3_SERVER_SOCKET`을 설정한다.
-새 정리와 가져오는 로컬 의존 정리를 각각 main target으로 재검사하며,
-`-no-eco`, `Proofs:check`, EOF 완결성 검사를 적용한다. 새 추출 결과의 일치와
-기존 파일 해시도 확인한다. 정확한 대상·해시·결과는
-[gaussian-acceptance-results.json](gaussian-acceptance-results.json)에 기록한다.
-이전 보강안의 [KAT·실행 검사 기록](verification-results.json)은 당시 검증기와
-대상 목록의 해시를 포함한 역사 기록으로 보존한다. 이번에 변경한 검증기·목록과,
-그대로 유지한 실행 코드·런타임 산출물의 해시 대조 범위는 새 기록에 명시한다.
+Set `WHY3_SERVER_SOCKET` to use an already running Why3 server. Each new theorem
+and imported local dependency theorem is rechecked as a main target, with
+`-no-eco`, `Proofs:check` and EOF completeness checks. Fresh extraction agreement
+and existing file hashes are also checked. The exact targets, hashes and
+results are recorded in
+[gaussian-acceptance-results.json](gaussian-acceptance-results.json).
+The earlier hardened variant's [KAT and execution-check record](verification-results.json)
+is preserved as historical evidence, including the hashes of its verifier and
+target list at that time. The new record specifies the hash-comparison scope
+for the verifier and list changed in this stage and for the executable code
+and runtime artifacts that remain unchanged.

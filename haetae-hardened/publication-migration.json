@@ -3,15 +3,23 @@
   "files": {
     "README.md": {
       "before_sha256": "2c4250e5e6c509bfe7740c13df1787467102143e652e3db3455bcb11e59236e5",
-      "after_sha256": "b841b0219ec344e2223bfe69acc617d237339322ad82cc4edb09693d75d68c4d"
+      "after_sha256": "17d4efae099abd17287963ced3f481ba4f511b72d9292e7e027ec9288c6cb482"
     },
     "haetae-easycrypt/README.md": {
       "before_sha256": "19df9a976859e15f652fcf1e4fc2c171e0c6203b4c74773e9fa22ffc2d3598de",
-      "after_sha256": "e812752acd2f51c3efe6f3ba2652c204cfcb0f4e3b6951b0e1a8138da0800ca3"
+      "after_sha256": "b119b10e91d6b237e8a2deb2e15c55f726408eced841c51c41e6bf957546439b"
     },
     "haetae-easycrypt/VALIDATION.md": {
       "before_sha256": "8c94744901539f2b9768fa8d64c2d6bd906c24a0b1ca57534010d6173c615525",
-      "after_sha256": "33687245634bac2481439b4ee182832e2f5c036a89e21edaa60bba7aee99977f"
+      "after_sha256": "dce95bf34fe18184f354e24077f338341d950a1c63bc0683eccb66b2956f24a9"
+    },
+    "haetae-easycrypt/CLAIMS.md": {
+      "before_sha256": "378f61218a54f4600282475ac5225c222f8eab3d5eb4891792024680b358ffcc",
+      "after_sha256": "384e36a8de0a1ad1b111060f554306b3259d2e9f6718843d32aa7a4711c79dc7"
+    },
+    "haetae-jasmin/README.md": {
+      "before_sha256": "d9c033b17d7b2fd684332614100f908ccfde61ef0f83e2eed4ac588741cb0d55",
+      "after_sha256": "7c4d74d3f7482847599f703649a3290e7660f21448f95de66881cef76fd810c7"
     }
   }
 }

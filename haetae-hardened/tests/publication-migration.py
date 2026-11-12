@@ -59,7 +59,9 @@ class PublicationMigrationTests(unittest.TestCase):
     def test_publication_cannot_authorize_proof_production_or_historical_results(self):
         for name in ("haetae-easycrypt/proofs/Proof.ec", "haetae-jasmin/jasmin/sign.jazz",
                      "haetae-easycrypt/manifests/verification-results.json",
-                     "haetae-easycrypt/manifests/history/2026.03/README.md", "../README.md"):
+                     "haetae-easycrypt/manifests/history/2026.03/README.md",
+                     "haetae-easycrypt/proofs/README.md", "haetae-easycrypt/unreviewed.md",
+                     "../README.md"):
             with self.subTest(name=name):
                 self.files[name] = self.files["README.md"]
                 with self.assertRaisesRegex(SystemExit, "publication document"):
@@ -77,21 +79,25 @@ class PublicationMigrationTests(unittest.TestCase):
 
 class PublicationSnapshotTests(unittest.TestCase):
     def test_current_publication_snapshot_materializes(self):
-        name = "haetae-easycrypt/README.md"
         _, files = materialize.read_baseline()
-        self.assertEqual(files[name], (ROOT / name).read_bytes())
+        for name in ("haetae-easycrypt/README.md", "haetae-easycrypt/CLAIMS.md",
+                     "haetae-easycrypt/VALIDATION.md", "haetae-jasmin/README.md"):
+            with self.subTest(document=name):
+                self.assertEqual(files[name], (ROOT / name).read_bytes())
 
     def test_further_readme_drift_is_rejected(self):
         read_bytes = Path.read_bytes
-        readme = ROOT / "haetae-easycrypt/README.md"
+        for name in ("haetae-easycrypt/README.md", "haetae-easycrypt/CLAIMS.md",
+                     "haetae-easycrypt/VALIDATION.md", "haetae-jasmin/README.md"):
+            document = ROOT / name
 
-        def altered_bytes(path):
-            data = read_bytes(path)
-            return data + b"\nUnreviewed change.\n" if path == readme else data
+            def altered_bytes(path):
+                data = read_bytes(path)
+                return data + b"\nUnreviewed change.\n" if path == document else data
 
-        with patch.object(Path, "read_bytes", altered_bytes):
-            with self.assertRaisesRegex(SystemExit, "Pinned baseline drift: haetae-easycrypt/README.md"):
-                materialize.read_baseline()
+            with self.subTest(document=name), patch.object(Path, "read_bytes", altered_bytes):
+                with self.assertRaisesRegex(SystemExit, "Pinned baseline drift:"):
+                    materialize.read_baseline()
 
 
 if __name__ == "__main__":

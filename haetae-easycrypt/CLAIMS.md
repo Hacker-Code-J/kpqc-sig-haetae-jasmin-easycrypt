@@ -1,319 +1,382 @@
-# 검증 범위와 남은 의무
+# Verification scope and remaining obligations
 
-이 문서는 함수별 정리의 범위를 기록한다. 추출물의 로딩 성공, KAT 성공,
-구성요소 정리와 전체 API 정확성을 구분한다.
+This document records the scope of the function-level theorems. It distinguishes
+successful loading of extracted artifacts, KAT success, component theorems, and
+complete API correctness.
 
-[부호 출력 단계](docs/gaussian-signed-output.md)는 부호 비트, 전체 비부호 상태와의
-독립성, 실제 반환 관측의 signed Gaussian 분포, 조건부 signed32 적용까지 증명했다.
-새 파일을 포함한 전체 비NTT 검증이 통과했으며, 정확한 대상 수와 소스 해시는
-[VALIDATION.md](VALIDATION.md)와 검증 manifest에 기록했다.
+The [signed-output stage](docs/gaussian-signed-output.md) proves sign bits,
+independence from the complete sample-array and square-word state, the signed Gaussian distribution
+of actual return observations, and conditional signed32 application.
+The complete non-NTT verification, including the new files, passed; exact target
+counts and source hashes are recorded in [VALIDATION.md](VALIDATION.md) and the
+verification manifest.
 
-[Hyperball 실제 함수 반례](docs/hyperball-actual-witnesses.md)는 지정된 후보열에서
-실제 유한 소비·제곱 누적·Newton·scaling·norm 호출의 결과를 증명한다. 세 모드에서
-정수 반경 초과와 word 승인1을 함께 얻으며, 구체적인 SHAKE seed 도달성은 포함하지 않는다.
+The [actual-function Hyperball counterexamples](docs/hyperball-actual-witnesses.md)
+prove the results of actual finite consumption, square accumulation, Newton,
+scaling, and norm calls on prescribed candidate sequences. All three modes
+simultaneously yield an integer radius violation and word acceptance1; reachability
+from a concrete SHAKE seed is not included.
 
-[Hyperball 입력 안전 구간](docs/hyperball-safe-domain.md)은 초기 제곱합의 구체적인
-구간과 low limb 정규형에서 실제 수치 안전성을 도출한다. 표본·부호 배열과 출력
-fit는 가정하지 않는다. 구간에 도달할 확률이나 외부 retry 종료는 별도 의무다.
+The [Hyperball safe input domain](docs/hyperball-safe-domain.md) derives actual
+numerical safety from a concrete interval for the initial sum of squares and a
+canonical low limb. It does not assume sample/sign arrays or output fit.
+The probability of reaching the interval and outer-retry termination are
+separate obligations.
 
 <!-- gaussian-payload:overview:start -->
-후속 [전체 승인 payload·제곱합 단계](docs/gaussian-payload-and-squares.md)는 iid
-Gaussian 배치의 동일한 승인 이력에서 가시 벡터와 정수 S를 함께 결정한다.
-실제 호출·offset과 초기 제곱합 0을 사용해 D=1538·2306·2818개 전체 이력의 법칙과
-안전 구간 사건의 정확한 확률식을 얻었다. 표본·부호까지 0으로 초기화하는 것은
-`hip_initial`의 모형 선택이며 생산 코드는 제곱합만 초기화한다. 아래 전체 배열
-ghost 동치는 해당 iid 모형 안의 결과다. 그 단계에서는 구간 이탈의 수치 상한이나
-이상적인 S 법칙, 구체적 SHAKE·외부 Hyperball retry·전체 API 정확성을 포함하지 않았다.
+The subsequent [complete accepted-payload and sum-of-squares stage](docs/gaussian-payload-and-squares.md)
+jointly determines the visible vector and integer S from the same accepted history
+of an iid Gaussian batch. Actual calls/offsets and initial sum of squares 0 yield
+the law of the full D=1538·2306·2818 history and an exact probability formula for
+the safe-interval event. Zero initialization of samples and signs is a modeling
+choice in `hip_initial`; production code initializes only the sum of squares.
+The full-array ghost equivalence below is internal to this iid model.
+That stage did not include a numerical escape-probability bound, the ideal law
+of S, concrete SHAKE, the outer Hyperball retry, or complete API correctness.
 <!-- gaussian-payload:overview:end -->
 
 <!-- hyperball-tail:overview:start -->
-[후속 iid 꼬리 경계](docs/hyperball-iid-tail-bound.md)는 실제 승인 raw 제곱의 지수
-모멘트에서 모드 2·3·5의 안전 구간 이탈 확률 <2^-29/2^-44/2^-54를 도출한다.
-실제 Gaussian·수치 helper를 합성한 단일 iid 시도의 승인 AND 정수 제곱 노름 초과
-사건에도 같은 상계를 전달했다. 아래 공개 endpoint는 모드 외에 원하는 모멘트나
-꼬리 상계를 전제로 남기지 않는다. 승인 후 조건부 확률·외부 retry 전체·SHAKE는 제외하며,
-표본·부호 0 초기화가 proof-model 선택이라는 앞 단계의 구분을 유지한다.
+The [subsequent iid tail bound](docs/hyperball-iid-tail-bound.md) derives
+safe-interval escape probabilities <2^-29/2^-44/2^-54 for modes 2·3·5 from
+exponential moments of the actual accepted raw squares. It transfers the same
+bounds to the acceptance AND excessive integer squared-norm event in a single
+iid attempt composing actual Gaussian and numerical helpers. Apart from the
+mode, the public endpoints below retain no premises assuming the desired
+moments or tail bounds. Acceptance-conditioned probabilities, the complete outer
+retry, and SHAKE are excluded; the distinction that zero-initialized sample/sign
+arrays are a proof-model choice is retained from the preceding stage.
 <!-- hyperball-tail:overview:end -->
 
-## 현재 정리
+## Current theorems
 
-| 정리 파일 | 대표 정리 | 정확한 범위 |
+| Theorem file | Representative theorem | Exact scope |
 | --- | --- | --- |
-| [HyperballTailSpec](theories/HyperballTailSpec.ec) / [RawSquareMomentSpec](theories/RawSquareMomentSpec.ec) | `ht_raw_square`, `ht_weight_plus`, `ht_weight_minus` | Q=2^76, 구현의 floor raw 제곱과 승인 가중 기대값, 양쪽 지수 인자·모드별 수치 경계의 정의 |
-| [GaussianRawSquare](proofs/GaussianRawSquare.ec) / [GaussianPayloadMoments](proofs/GaussianPayloadMoments.ec) | `gps_square_exact`, `gpm_raw_conditioned_moment` | 실제 payload의 q=floor(Z²/Q) 및 raw 가중 승인 확률/분모와 accepted payload 모멘트의 정확한 대응 |
-| [RawSquareAcceptance](proofs/RawSquareAcceptance.ec) / [RawSquareIdealMoments](proofs/RawSquareIdealMoments.ec) | `rsa_weighted_upper`, `rsi_ideal_expectation` | 범위가 제한된 실제 가중 승인 오차와 독립 Gaussian 가중 합의 연결; 이상적 무한 지지를 구현 범위로 가정하지 않음 |
-| [GaussianLatticeSum](proofs/GaussianLatticeSum.ec) / [GaussianLatticeMgf](proofs/GaussianLatticeMgf.ec) | 정수 Gaussian 합·모멘트 상계 | 이상적 격자 합의 수렴과 유리수 인자에 대한 지수 모멘트 비교; 실제 S의 chi-square 법칙은 주장하지 않음 |
-| [GaussianSquareMoments](proofs/GaussianSquareMoments.ec) | `gsm_plus_bound`, `gsm_minus_bound`, `gsm_centered_plus`, `gsm_centered_minus` | 실제 accepted q/Q의 지수 모멘트≤10/9+2^-18 및 7/8+2^-18; centered 기대값≤3947/4000 및 1963/2000 |
-| [HyperballTailCertificate](theories/HyperballTailCertificate.ec) / [HyperballTailCertificateChecks](proofs/HyperballTailCertificateChecks.ec) / [HyperballTailConstants](proofs/HyperballTailConstants.ec) | `ht_factor_plus`, `ht_factor_minus`, `ht_mode_power_bound` | 유리수 seed·32회 구간 제곱·binary 거듭제곱의 정수 검사와 실제 exp 해석; 세 모드의 두 거듭제곱 합<epsilon |
-| [IidExponentialTail](proofs/IidExponentialTail.ec) | `iet_iid_exponential_outside` | 유한 iid 목록의 기대값 곱셈·비음수 Markov 부등식에서 양쪽 지수 꼬리 상계 |
-| [HyperballIidAttemptSafety](proofs/HyperballIidAttemptSafety.ec) | `hia_unsafe_probability`, `hia_terminates` | 실제 Gaussian 배치와 실제 수치 tail을 합성한 iid 단일 시도의 종료와 unsafe 결합 사건⊆입력 안전 구간 밖 사건 |
-| [HyperballIidTailCorrectness](proofs/HyperballIidTailCorrectness.ec) | `ht_iid_list_tail`, `ht_iid_square_tail`, `ht_iid_unsafe_acceptance` | 전체 raw 제곱합의 구간 이탈 및 단일 시도의 승인 AND 정수 노름 초과 확률 <2^-29/2^-44/2^-54; 공개 전제는 모드뿐, 승인 조건부/외부 retry/SHAKE 제외 |
-| [GaussianPayloadSpec](theories/GaussianPayloadSpec.ec) / [GaussianPayloadEncoding](proofs/GaussianPayloadEncoding.ec) | `gpd_pack_magnitude`, `gpd_pack_square`, `gpd_accepted_ll`, `gpd_scan_selected` | 실제 표본·raw 제곱의 손실 없는 정수 인코딩, q≤2^84−1, 승인 확률≥1/7과 조건부분포 질량 1; 필요한 전체 승인 목록과 개수 |
-| [GaussianPayloadBufferSpec](theories/GaussianPayloadBufferSpec.ec) / [GaussianPayloadBufferPath](proofs/GaussianPayloadBufferPath.ec) | `gpb_actual_projection`, `gpb_history_projection`, `gpb_buffer_terminates` | gib_bounds 아래 실제 iid 버퍼와 ghost 이력 모형의 반환 세 배열 동치; 더미를 포함한 전체 이력 사영·종료 |
-| [GaussianPayloadTrace](proofs/GaussianPayloadTrace.ec) / [GaussianPayloadBufferTrace](proofs/GaussianPayloadBufferTrace.ec) | `gpt_consume`, `gpt_buffer_correct`, `gpt_buffer_total` | 이전 누적 예산과 총 승인≤2818에서 실제 소비·전체 버퍼의 가시 값과 raw 제곱 정수 합을 같은 이력에 연결; 정규형·범위·종료 |
-| [GaussianPayloadKernel](proofs/GaussianPayloadKernel.ec) / [GaussianPayloadEventLaw](proofs/GaussianPayloadEventLaw.ec) | `gpk_refill_event`, `gpk_initial_event`, `gpe_history_law` | 알려진 carry 바이트를 고정한 정확한 완료 분포; 0≤n≤512에서 전체 승인 이력=dlist gpd_accepted n |
-| [GaussianPayloadDraw](proofs/GaussianPayloadDraw.ec) | `gpd_buffer_draw` | 실제 버퍼 ghost의 전체 이력 사영과 독립 승인 payload 목록 추출의 동치; 초기 배열에 조건 없음 |
-| [HyperballIidPayloadSpec](theories/HyperballIidPayloadSpec.ec) / [HyperballIidPayloadBatch](proofs/HyperballIidPayloadBatch.ec) | `hip_batch_history_law`, `hip_payload_observe_total` | 모드별 요청·offset과 초기 제곱합 0에서 전체 D개 이력의 법칙·동일 이력의 가시 벡터와 S·정규형; 표본·부호 0 초기화는 모형 선택 |
-| [HyperballIidSquareLaw](proofs/HyperballIidSquareLaw.ec) | `hips_actual_joint_law`, `hips_actual_square_law`, `hips_actual_safe_probability`, `hips_actual_terminates` | 명시적 iid 실제 호출 배치의 가시 벡터·S 결합분포, 두 더미 포함 raw 제곱합, 안전 구간 확률 항등식과 확률 1 종료; 수치 꼬리 상한 제외 |
-| [SamplerConstants](proofs/SamplerConstants.ec) | `cdt83_hi_matches_reference`, `cdt83_lo_matches_reference`, `approx_exp_matches_reference` | 고정된 C에서 독립 생성한 CDT·다항식 상수와 Jasmin 명세 연결 |
-| [CDTCorrectness](proofs/CDTCorrectness.ec) | `sample_gauss83_jazz_total`, `sample_gauss83_max83_total` | 입력 정수보다 작은 166개 임계값의 개수; 범위와 최대 입력 166; 확률 1 종료·결과 |
-| [CDTTermination](proofs/CDTTermination.ec) | `sample_gauss83_ll` | 실제 두 bounded loop의 종료성 |
-| [CDTDistribution](proofs/CDTDistribution.ec) | `cdt_distribution_mass`, `uniform_cdt_law` | 균등 정수 입력에서 strict 임계값 비교의 정확한 출력 확률: 각 구간 길이/M; 경계 +1, support, 종료 |
-| [CDTDistributionBridge](proofs/CDTDistributionBridge.ec) | `uniform83_jasmin_law`, `uniform83_jasmin_mass`, `uniform83_jasmin_endpoint` | 균등 83비트 입력을 실제 Jasmin CDT에 전달한 확률 실험; 정확한 분포·종료, support 0…166, Pr[166]=2^-83 |
-| [HalfGaussianProperties](proofs/HalfGaussianProperties.ec) | `hg16_pmf_sum`, `hg16_distr_ll`, `hg16_normalizer_truncation256` | 구현과 독립인 rho(k)=exp(-k²/512), k≥0의 무한 정규화·총확률 1·꼬리 상한 |
-| [ExpIntervalCorrectness](proofs/ExpIntervalCorrectness.ec) / [CDTGaussianEnclosure](proofs/CDTGaussianEnclosure.ec) | `ei_square_q_sound`, `ei_weights_sound`, `gi_normalizer_interval`, `gi_pmf_interval` | 실제 실수 지수함수의 유리수 구간과 외향 반올림 인증서의 건전성; 무한 정규화 분모와 각 목표 확률의 수치 구간; 구체적 수치 의무는 검사된 정수 인증서로 해소 |
-| [CDTGaussianApproximation](proofs/CDTGaussianApproximation.ec) | `cdt83_half_gaussian_statistical_distance`, `uniform83_jasmin_half_gaussian_error` | 실제 Jasmin CDT의 균등 83비트 입력 실험과 공식 목표인 비음수 Gaussian(σ=16)의 통계적 거리 <2^-78; 임의 출력 집합에 대한 확률 차이도 같은 상한 |
-| [FixedPointCorrectness](proofs/FixedPointCorrectness.ec) | `smulh48_jazz_total_correct`, `smulh48_jazz_signed_correct`, `approx_exp_jazz_reference_correct` | 모든 word 입력의 올림 결과 modulo 2^64; signed 결과는 명시적 fit 전제; C-derived 10차 word Horner 계산 |
-| [SigmaExpInputBounds](proofs/SigmaExpInputBounds.ec) | `sigma_exp_argument_bound`, `sigma_exp_argument_two_thirds` | 모든 26바이트 입력에서 실제 지수 인자 uint(xi)≤183103063064576, 3·uint(xi)≤2·2^48; 차감·병합·반올림 범위 의무 해소 |
-| [ApproxExpWordCorrectness](proofs/ApproxExpWordCorrectness.ec) | `ae_intermediate_signed64`, `ae_rounding_error3`, `ae_sigma_approx_exp_total` | 정수 ceil-Horner와 실제 word 실행 연결; 모든 Horner prefix·올림 곱셈 결과의 signed64 적합성, 최종 unsigned 해석; 다항식 대비 올림 오차 0…3/2^48 |
-| [Bernstein10Correctness](proofs/Bernstein10Correctness.ec) / [ApproxExpCertificateChecks](proofs/ApproxExpCertificateChecks.ec) | `bernstein10_checked_nonnegative`, `aec_upper_0_identity` 등 | 정수 인증서의 기저 변환·부호와 실제 계수 다항식의 6개 구간 부등식; 66개 제어 계수 검사 |
-| [ExponentialGridComparison](proofs/ExponentialGridComparison.ec) / [ApproxExpPolynomialBound](proofs/ApproxExpPolynomialBound.ec) | `eg_exp_grid_abs`, `approx_exp_polynomial_error` | 입력 정수 격자에서 실제 계수 다항식과 exp(-x/2^48)의 오차≤24/2^48; 분석적 점화 조건을 인증서로 해소 |
-| [ApproxExpNumericalCorrectness](proofs/ApproxExpNumericalCorrectness.ec) | `approx_exp_signer_numerical_total`, `sigma76_approx_exp_numerical_total` | 실제 Jasmin의 정규화 출력과 실수 지수함수 사이 절대오차≤27/2^48<2^-43 및 종료; 모든 sigma76 입력에서는 별도 범위·fit 전제 없음 |
-| [Rejection48Correctness](proofs/Rejection48Correctness.ec) / [SigmaRejection48Bridge](proofs/SigmaRejection48Bridge.ec) | `rejection48_word_probability`, `sigma_rejection48_actual_probability` | 균등 48비트 거부 입력의 정확한 even 비교·포화·실제 rounded-zero 확률; 실제 sigma 프로시저 호출과 연결 |
-| [SigmaExpAcceptanceCorrectness](proofs/SigmaExpAcceptanceCorrectness.ec) | `sigma_exp_acceptance_error`, `sigma_exp_acceptance_error_strict` | 후보 바이트를 고정한 실제 sigma 호출의 승인 확률과 α(rounded)·exp(-uint(xi)/2^48)의 차이≤α·28/2^48<2^-43; 48비트 거부 입력의 균등성은 실험에 명시 |
-| [SigmaSquareExact](proofs/SigmaSquareExact.ec) / [SigmaRawExponentCorrectness](proofs/SigmaRawExponentCorrectness.ec) | `sigma_square_word_exact`, `sigma_raw_exponent_exact`, `sigma_raw_exponent_error` | 실제 square limbs의 정수 의미와 모든 26바이트 입력에서 xi=floor((y(y+2^73x)+2^104)/2^105); 반올림 전 지수 대비 정규화 오차≤2^-49 |
-| [SigmaRawDensityIdentity](proofs/SigmaRawDensityIdentity.ec) | `sr_gaussian_weight_identity`, `sr_gaussian_density_ratio` | 독립적인 비음수 Gaussian σ=16의 비정규화 가중치와 exp(-E)의 곱이 Z=y+2^72x의 σ=2^76 Gaussian 비정규화 가중치와 일치 |
-| [SigmaRawZeroCorrectness](proofs/SigmaRawZeroCorrectness.ec) / [SigmaRawNoiseSpec](theories/SigmaRawNoiseSpec.ec) | `sr_zero_tests_differ`, `sr_zero_factor_difference`, `sr_noise_mismatch_probability` | rounded-zero와 raw-zero가 달라지는 조건은 x=0·1≤y<32768; 균등 72비트 잡음의 예외 확률과 최대 반 보정 효과<2^-58 |
-| [SigmaRawAcceptanceCorrectness](proofs/SigmaRawAcceptanceCorrectness.ec) | `sr_actual_acceptance_error`, `sr_actual_acceptance_regular` | 고정 후보의 실제 승인 확률과 raw Gaussian 수락식의 차이≤57/(2·2^48)+예외 지시함수/2; 예외 밖에서는 <2^-43 |
-| [ExponentialLipschitz](proofs/ExponentialLipschitz.ec) / [FiniteExpectationError](proofs/FiniteExpectationError.ec) | `exp_neg_lipschitz`, `finite_expectation_error` | 비음수 실수에서 지수함수 오차 전달; 유한 분포의 점별 오차·예외 질량을 평균 오차로 합성 |
-| [SigmaNoise72Bridge](proofs/SigmaNoise72Bridge.ec) / [SigmaRawAverageCorrectness](proofs/SigmaRawAverageCorrectness.ec) | `sigma_noise72_actual_probability`, `sr_average_acceptance_error_strict` | CDT 바이트 고정·독립 균등 72비트 잡음과 48비트 거부 입력을 실제 sigma에 전달; raw Gaussian 수락식의 평균과 승인 확률 차이<29/2^48<2^-43 |
-| [SigmaRoundedOutputCorrectness](proofs/SigmaRoundedOutputCorrectness.ec) / [SigmaCDT83Patch](proofs/SigmaCDT83Patch.ec) | `sj_actual_rounding`, `sj_cdt83_patch_count`, `sj_cdt83_expectation` | 실제 unsigned 출력과 floor((y+2^72x+32768)/65536) 연결; 83비트 실제 byte 입력의 CDT 법칙과 기대값 변환 |
-| [SigmaJointAttemptBridge](proofs/SigmaJointAttemptBridge.ec) / [SigmaJoint203Bridge](proofs/SigmaJoint203Bridge.ec) | `sigma_joint_noise72_law`, `sigma_joint203_law`, `sigma_joint203_ll` | 실제 sigma 호출이 표본과 승인 비트를 함께 반환하는 실험; 독립 균등 83+72+48비트의 모든 출력 집합에 대한 공동 확률·단일 시도 종료 |
-| [DistributionExpectationDistance](proofs/DistributionExpectationDistance.ec) / [SigmaJointKernelCorrectness](proofs/SigmaJointKernelCorrectness.ec) | `distribution_expectation_distance`, `sj_noise_kernel_range`, `sj_kernel_actual` | 무한 지지집합에서 [0,1] 커널의 기댓값 차이≤통계적 거리; 독립 Gaussian 수락식·수학적 반올림과 실제 배열 연결 |
-| [SigmaJointFixedCorrectness](proofs/SigmaJointFixedCorrectness.ec) | `sj_point_error`, `sj_fixed_joint_error` | 출력 집합의 지시함수를 점별 오차에 먼저 적용; 고정 CDT의 승인·출력 공동 확률 오차≤57/(2·2^48)+32767/2^73 |
-| [SigmaJointIdealCorrectness](proofs/SigmaJointIdealCorrectness.ec) / [SigmaJointCorrectness](proofs/SigmaJointCorrectness.ec) | `sj_ideal_joint_law`, `sj_joint_output_error`, `sj_joint_output_error_strict` | 실제 203비트 실험과 독립적인 무한 Gaussian CDT·무제한 정수 반올림 실험의 승인·출력 공동 확률 차이<29/2^48+2^-78<30/2^48<2^-43; 모든 출력 집합, 추가 fit·정확도 전제 없음 |
-| [SigmaAcceptanceLowerBound](proofs/SigmaAcceptanceLowerBound.ec) | `sc_actual_point_lower`, `sc_actual_acceptance_lower`, `sc_ideal_acceptance_lower` | 후보 고정·거부 48비트 균등 실험 및 전체 203비트 시도의 승인 확률≥1/7; 이상적 승인 확률≥1/8; 추가 범위·양수성 전제 없음 |
-| [SigmaConditionalActual](proofs/SigmaConditionalActual.ec) / [SigmaConditionalIdeal](proofs/SigmaConditionalIdeal.ec) | `sc_actual_conditioned_law`, `sc_ideal_conditioned_law` | native dcond·정수 사영 분포의 사건 확률을 각 실제/이상적 프로시저의 공동 확률÷승인 확률로 연결; 이상적 무한 지지와 무제한 정수 출력 유지 |
-| [ConditionalRatioBound](proofs/ConditionalRatioBound.ec) | `conditional_ratio_error_lower` | 분자·분모 오차≤δ와 승인 확률 하한 l>0에서 정규화 오차≤2δ/l; 실제/이상적 분모를 같다고 가정하지 않음 |
-| [SigmaConditionalCorrectness](proofs/SigmaConditionalCorrectness.ec) | `sc_conditioned_distributions_correct`, `sc_conditioned_event_error`, `sc_conditioned_sdist_strict` | 실제 및 이전 이상적 실험의 승인 후 표본 크기 조건부분포는 질량 1, 모든 사건 오차·통계적 거리≤16·(29/2^48+2^-78)<2^-39; 양수성 전제는 수치 하한으로 해소 |
-| [Gaussian76Properties](proofs/Gaussian76Properties.ec) | `g76_rho_summable`, `g76_normalizer_ge1`, `g76_distr_mu1`, `g76_distr_ll` | 모든 정수의 rho(k)=exp(-k²/2^153) 무한 합 수렴과 독립적인 정규화; 독립 Gaussian 확률 질량·질량 1·무한 지지 |
-| [GaussianBlockReindex](proofs/GaussianBlockReindex.ec) / [Gaussian76Kernel](proofs/Gaussian76Kernel.ec) | `gb_block_sum`, `g76_full_contribution` | 절대수렴과 support 조건 아래 몫·나머지 블록 합 재색인; 모든 이상적 x≥0의 Gaussian 가중치 상쇄와 정확한 1/(N·H16) 계수 |
-| [Gaussian76Folding](proofs/Gaussian76Folding.ec) / [Gaussian76Rounding](proofs/Gaussian76Rounding.ec) | `g76_accept_weight_sum`, `g76_rounded_event_law`, `g76_rounded_mass`, `g76_rounded_zero_ties` | 0은 한 번·양수 크기는 두 번 세는 절댓값 가중치와 반올림 구간 PMF; raw 수락 가중치 합=Z/2; ±32768→1 |
-| [Gaussian76Identification](proofs/Gaussian76Identification.ec) | `g76_ideal_conditioned_eq`, `g76_gaussian_mass`, `g76_actual_gaussian_correct`, `g76_actual_rounded_mass_error` | 기존 이상적 조건부분포와 명시적 정수 Gaussian 절댓값 반올림 분포의 정확한 동치; 실제 승인 표본 크기 분포와의 통계적 거리<2^-39 및 각 출력값의 구간 합 오차 |
-| [GaussianRetryCore](proofs/GaussianRetryCore.ec) / [GaussianRetryAttempt](proofs/GaussianRetryAttempt.ec) / [GaussianRetryActual](proofs/GaussianRetryActual.ec) | `gr_retry_total`, `gr_actual_pair_equiv`, `gr_actual_retry_law`, `gr_actual_retry_ll` | 승인·거절 모두의 실제 시도 분포 연결; 독립 균등 83·72·48비트로 실제 시도를 반복 호출하는 실험의 확률 1 종료와 첫 승인값의 정확한 조건부분포 |
-| [GaussianRetryTail](proofs/GaussianRetryTail.ec) / [GaussianRetryBatchTail](proofs/GaussianRetryBatchTail.ec) | `gaussian_retry_tail_bound`, `grbt_prefix_shortfall_1m7`, `grbt_all_prefix_shortfall_limit` | 독립 시도 t회 모두 거절될 확률≤(6/7)^t; n·t개에서 n개 미만 승인될 확률≤n·(6/7)^t; 모든 유한 접두 길이의 부족 확률→0 |
-| [GaussianRetryBatch](proofs/GaussianRetryBatch.ec) / [GaussianBatchDistance](proofs/GaussianBatchDistance.ec) / [GaussianRetryBatchCorrectness](proofs/GaussianRetryBatchCorrectness.ec) | `gra_batch_joint_law`, `gra_batch_256_gaussian`, `gra_batch_257_gaussian`, `gra_prefix256_law` | 실제 시도 호출 반복의 전체 승인 목록이 독립 조건부분포 목록과 일치; 256개 Gaussian 거리<2^-31, 257개<257·2^-39; 마지막 값 생성 후 앞 256개 사영 |
-| [GaussianRetryInputs](proofs/GaussianRetryInputs.ec) / [GaussianRetryPrefixCorrectness](proofs/GaussianRetryPrefixCorrectness.ec) | `gr_candidate_stream_pairs_iid`, `gr_prefix_failure_law`, `gr_block_prefix_failure_limit` | 203비트의 canonical 26바이트 후보와 실제 word 사건열·승인 개수 연결; 실제 블록별 후보 수에서 충분하지 않은 iid 접두 구간의 확률→0; 무한 균등 함수나 SHAKE 독립성 가정 없음 |
-| [GaussianRetryRank](proofs/GaussianRetryRank.ec) / [GaussianRetryConsumerTotal](proofs/GaussianRetryConsumerTotal.ec) / [GaussianRetryBufferTotal](proofs/GaussianRetryBufferTotal.ec) | `grr_rank_step_bounded`, `gs_progress_consume_total` | 유한 최대 호환 블록 번호로 감소량 구성; 실제 bounded 소비기의 정확한 진행 조건과 확률 1 종료 |
-| [GaussianRetryStreamBridge](proofs/GaussianRetryStreamBridge.ec) / [GaussianRetryStreamTermination](proofs/GaussianRetryStreamTermination.ec) | `gr_sample_gauss_N_prefix_total`, `gr_prefix_result_dummy`, `gr_prefix_result_squares` | 구체적 SHAKE 스트림의 충분한 유한 접두 구간·기존 offset/limb 전제 아래 실제 서명용 전체 버퍼 함수의 종료와 정확한 첫 256개·부호 복사·257번째 dummy 포함 제곱합·frame |
-| [MixedRadixUniform](proofs/MixedRadixUniform.ec) / [GaussianUnusedBits](proofs/GaussianUnusedBits.ec) / [GaussianUniformBytes](proofs/GaussianUniformBytes.ec) | `mru_join_uniform`, `gub_sigma76_spec`, `gbc_candidate_sigma_law`, `gbc_candidate_observer_law` | 균등 26바이트의 canonical 203비트 사영과 정확한 분포; 모든 입력에서 미사용 상위 5비트를 지워도 반환 네 워드 보존 |
-| [GaussianBlockSampling](proofs/GaussianBlockSampling.ec) | `gbs_joint_law`, `gbs_total` | 양수 크기 후보 묶음을 순서대로 처리하는 실제 확률 루프의 종료와 전체 독립 승인 목록 법칙 |
-| [GaussianByteCarryDistribution](proofs/GaussianByteCarryDistribution.ec) / [GaussianIidKernel](proofs/GaussianIidKernel.ec) | `gbc_fixed_tail_refill`, `gik_refill_event`, `gik_initial_event` | 이미 알려진 잔여 바이트를 고정한 완료 분포; 새 136바이트와 초기 6,664바이트의 정확한 기대값 불변식 |
-| [GaussianIidBufferSpec](theories/GaussianIidBufferSpec.ec) / [GaussianIidBufferPath](proofs/GaussianIidBufferPath.ec) | `gib_actual_functional` | 실제 sign-copy·carry·소비기를 호출하는 iid 버퍼 모형과 목록 표현의 전체 반환 튜플 동치; `gib_bounds` 외 초기 제곱 워드 조건 없음 |
-| [GaussianIidVisible](proofs/GaussianIidVisible.ec) / [GaussianIidStep](proofs/GaussianIidStep.ec) | `giv_consume_fold`, `gis_initial`, `gis_refill` | 물리적 가시 접두와 순서대로 승인한 크기 목록의 대응; 요청 257의 미기록 더미를 가시 값으로 읽지 않음 |
-| [GaussianIidInitial](proofs/GaussianIidInitial.ec) / [GaussianIidNormalization](proofs/GaussianIidNormalization.ec) | `gib_initial_law`, `gid_functional_uniform` | 초기 49개 블록 추출과 하나의 균등 6,664바이트 추출의 정확한 동치 |
-| [GaussianIidProgress](proofs/GaussianIidProgress.ec) / [GaussianIidTermination](proofs/GaussianIidTermination.ec) | `gip_refill_progress`, `git_functional_lossless` | 임의의 고정 잔여 바이트 뒤에서도 새 블록의 온전한 후보가 진행 확률≥1/7 보장; 충분한 접두 구간 전제 없는 확률 1 종료 |
-| [GaussianIidEventLaw](proofs/GaussianIidEventLaw.ec) / [GaussianIidDistribution](proofs/GaussianIidDistribution.ec) | `gii_actual_correct`, `gii_actual_joint_law`, `gii_actual_gaussian_event` | `gib_bounds` 아래 실제 함수 호출 iid 버퍼 모형의 확률 1 종료, 요청 256/257의 가시 256개 정확한 독립 결합분포와 Gaussian 거리<2^-31 |
-| [GaussianSignedTarget](proofs/GaussianSignedTarget.ec) | `gst_target_eq`, `gst_round_signed_ties`, `gst_target_zero_mass`, `gst_target_symmetry` | 독립적인 signed 반올림 목표=공정 부호를 절댓값 반올림 분포에 적용한 법칙; 0 질량 보존, ±32768→±1, 대칭성 |
-| [GaussianSignBits](proofs/GaussianSignBits.ec) | `gsb_uniform256`, `gsb_result_bits_nth`, `gsb_hb_sign_bit` | 32개 균등 바이트→256개 공정 비트; 실제 복사 창의 low-bit-first 순서와 전역 부호 인덱스 8·signoff+i 연결 |
-| [GaussianSignedVector](proofs/GaussianSignedVector.ec) | `gsv_actual_law`, `gsv_ideal_law`, `gsv_actual_gaussian` | 독립 곱분포의 부호·크기 목록을 결합한 256개 signed 정수의 정확한 iid 법칙 및 signed Gaussian 목표와 거리<2^-31 |
-| [IndependentSignSampling](proofs/IndependentSignSampling.ec) | `IndependentSign.rectangle`, `IndependentSign.output_marginal` | 임의 계산 뒤 독립 부호 추출의 사건 확률 곱셈 법칙; 계산의 종료 전제 없음, 출력 주변분포 유지에는 부호 분포의 질량 1만 요구 |
-| [GaussianSignIndependence](proofs/GaussianSignIndependence.ec) | `gsi_actual_redraw`, `gsi_sign_state_independent` | 명시적 iid 바이트 모형에서 부호 창과 전체 표본 배열·제곱 워드 상태를 분리; 후자 상태를 보존한 공정 부호 재추출 동치 |
-| [GaussianSignedCorrectness](proofs/GaussianSignedCorrectness.ec) | `gsc_actual_joint_law`, `gsc_actual_signed_law`, `gsc_actual_gaussian_event`, `gsc_actual_correct` | `gib_bounds` 아래 실제 반환 부호와 가시 크기의 결합 및 ±W64.to_uint 관측의 signed 256개 법칙·거리<2^-31 |
-| [HyperballSignedScale](proofs/HyperballSignedScale.ec) | `hss_scalar_word_total`, `hss_coeff_signed_fit`, `hss_scale_samples_signed_total` | 실제 scalar/vector scaling 부호의 정확한 word 의미; 반올림 크기≤2147483647인 좌표의 signed32 해석; 국소→전역 연결은 sample_offset=8·signoff 조건 |
-| [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | 모든 26바이트 입력의 `(rounded, square_low, square_high, accepted)`가 pure word 명세와 일치하며 종료 |
-| [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | 실제 rounded 출력과 정수 반올림식 일치, byte 조립·shift·최종 합의 무래핑, 최대 CDT 값 166 포함 |
-| [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | 요청 `n≤512`, 입력 byte 수 `b≤8192`일 때 승인 수 `c≤n`, `26c≤b`, 요청 범위 밖 출력 보존; 하위 제곱합 limb의 `[0,2^48)` 범위; 유한 종료 |
-| [GaussianTraceCorrectness](proofs/GaussianTraceCorrectness.ec) | `sample_gauss_jazz_trace_total_correct`, `sample_gauss_jazz_packed_trace_total` | 실제 유한 소비기의 전체 반환 튜플이 26바이트 후보에 대한 명세 fold와 일치; 요청 도달 시 정지, 거부 후보의 임시 쓰기·dummy 생략·word 제곱합 포함 |
-| [GaussianTraceProperties](proofs/GaussianTraceProperties.ec) | `gauss_trace_prefix_count_exact`, `gauss_trace_prefix_accepted_sequence`, `gauss_trace_prefix_full_stable` | 승인 비트로 filter한 후보 중 앞 `n`개의 개수와 순서, 요청 개수 도달 후 fold 불변 |
-| [SigmaSquareBounds](proofs/SigmaSquareBounds.ec) | `sigma76_square_high_bound` | 모든 26바이트 입력에서 실제 square-high의 unsigned 값 `<2^38`; 실수 제곱과의 오차 정리는 아님 |
-| [GaussianAccumulatorCorrectness](proofs/GaussianAccumulatorCorrectness.ec) | `gauss_trace_prefix_uint_sums`, `gauss_trace_result_canonical_both_exact` | 각 raw limb의 독립적인 mod `2^64` 합; 초기 두 limb가 각각 `<2^48`, `n≤512`이면 최종 `low + 2^48×high`가 승인 후보의 limb 합과 정수로 일치 |
-| [GaussianOffsetBridge](proofs/GaussianOffsetBridge.ec) | `sample_gauss_at_trace_total_correct` | 실제 signer `__sample_gauss_at`과 입력·출력 window 명세의 정확한 튜플 동치·종료; `bo+b≤8192`, `oo+n≤4096`; 요청 영역 밖 보존 |
-| [GaussianSequenceCorrectness](proofs/GaussianSequenceCorrectness.ec) | `sample_gauss_jazz_sequence_total`, `sample_gauss_jazz_accumulator_exact_total`, `sample_gauss_at_sequence_total` | 공개 유한 소비기와 실제 signer offset 소비기의 승인 개수·저장된 승인 순서, 공개 소비기의 정확한 정수 제곱합 |
-| [GaussianValueCorrectness](proofs/GaussianValueCorrectness.ec) | `sample_gauss_at_value_total` | 실제 signer offset 소비기의 반환 square 버퍼에 정수 합 정리를 전달; 초기 두 limb `<2^48`, 요청 `n≤512`, 유효 window 조건 |
-| [GaussianStreamAccumulator](proofs/GaussianStreamAccumulator.ec) | `gauss_trace_result_stream_accumulator`, `sample_gauss_at_stream_accumulator_correct`, `gauss_stream_finite_partitions` | 누적 승인 개수 `≤512`에 따른 정수 예산으로 호출 간 누적합과 오버플로 여유 보존; 매 호출 후 상위 limb가 48비트라는 가정을 요구하지 않음 |
-| [GaussianStreamSequence](proofs/GaussianStreamSequence.ec) | `gauss_stream_events_append_available`, `gauss_visible_output_concat`, `sample_gauss_at_dummy_last_total` | 연속 byte 함수의 후보열 분할·결합, 승인 순서와 동일 dummy flag 유지, 실제 offset 소비기의 dummy 슬롯 보존 |
-| [GaussianStreamBuffer](proofs/GaussianStreamBuffer.ec) | `gs_stream_advance`, `gs_refill_segment`, `gs_copy_signs_total` | 초기 49블록과 refill의 후보 수·잔여 바이트 대응, 연속 스트림의 버퍼 구간 연결, 실제 32바이트 부호 복사·frame·종료 |
-| [GaussianStreamSpec](theories/GaussianStreamSpec.ec) | `gs_selected_complete_stable`, `gs_stream_result_unique` | 충분한 후보 prefix 이후 처음 `n`개 승인 결과가 불변이며, 같은 초기값과 스트림을 만족하는 전체 반환 튜플은 유일함 |
-| [GaussianStreamComposition](proofs/GaussianStreamComposition.ec) | `gs_progress_consume`, `gs_progress_consume_correct` | 실제 offset 소비 호출을 연속 스트림의 다음 후보 구간에 연결; 승인 개수·저장 순서·dummy·출력 frame·정확한 제곱합 불변식 보존 |
-| [GaussianStreamCorrectness](proofs/GaussianStreamCorrectness.ec) | `sample_gauss_N_full_at_correct` | 실제 `_sf_sample_gauss_N_full_at`가 종료하면 seed·nonce의 word SHAKE 스트림에서 처음 승인된 `n`개 후보와 동일한 결과를 반환; 초기 49블록·부호 복사·반복 refill 전체 포함; `n=256/257`, 유효 offset, 초기 두 limb `<2^48`인 Hoare 부분 정확성 |
-| [GaussianRefillCorrectness](proofs/GaussianRefillCorrectness.ec) | `gauss_carry_total`, `gauss_carry_squeeze_layout` | 실제 carry가 첫 블록의 부호 prefix 여부를 반영해 잔여 바이트를 보존하며 종료; carry·블록 직렬화 계약을 결합한 유한 버퍼 배치 |
-| [SHAKEBlockCorrectness](proofs/SHAKEBlockCorrectness.ec) | `keccakf1600_word_total`, `squeeze256_word_total` | 실제 signer의 24라운드 word 순열 대응과 136바이트 출력·외부 영역 보존·종료; 출력 offset `0…8056` |
-| [SHAKESeedInitCorrectness](proofs/SHAKESeedInitCorrectness.ec) | `seed_init_total`, `shake_block_stream_total` | 실제 초기화가 seed 64바이트·nonce 하위 16비트·domain/padding의 전체 200바이트 상태와 일치하며 종료; 각 squeeze가 word 스트림의 정확한 다음 136바이트와 대응 |
-| [HyperballGaussianBounds](proofs/HyperballGaussianBounds.ec) | `hb_sigma76_square_high_bound`, `hb_cumulative_canonical`, `hb_sample_gauss_N_full_at_correct` | square-high `<2^36`으로 범위를 강화; 0에서 최대 2,818개 승인 후보를 누적해도 두 초기 limb `<2^48` 유지; 여러 Gaussian 호출의 전제 연결 |
-| [HyperballFixedPointCorrectness](proofs/HyperballFixedPointCorrectness.ec) | `hb_newton_total`, `hb_half_round_integer_total`, `hb_mul_rnd13_signed_fit` | 곱셈·조건부 부호·정규화·초기 추정과 Newton 6회 반복의 정확한 word 계산과 종료; canonical low에서 정수 올림 반분, 명시적 fit 아래 signed W32 의미 |
-| [HyperballScaleCorrectness](proofs/HyperballScaleCorrectness.ec) / [HyperballNormCorrectness](proofs/HyperballNormCorrectness.ec) | `hb_scale_samples_total`, `hb_scale_and_check_total` | 전역 sample/sign 인덱스, 출력 분할·보존, signed32 제곱합의 mod `2^64` 계산과 unsigned 승인 판정·종료; 정수 norm 해석은 별도 조건부 정리 |
-| [HyperballBatchCorrectness](proofs/HyperballBatchCorrectness.ec) / [HyperballHistoryCorrectness](proofs/HyperballHistoryCorrectness.ec) | `hb_batch_call_correct`, `hb_history_append`, `hb_history_finish` | 처음 두 번 257개·나머지 256개 승인 후보, 정확한 누적합, 실제 호출 연결; 이전 시도의 거부 이력과 최초 승인 결과·카운터 연결 |
-| [HyperballByteCorrectness](proofs/HyperballByteCorrectness.ec) | `hyperball_b_raw_array_total` | 마지막 nonce의 seed SHAKE 첫 바이트와 실제 반환 배열 일치·종료 |
-| [HyperballCorrectness](proofs/HyperballCorrectness.ec) | `hyperball_full_correct`, `hyperball_mode2_correct`, `hyperball_mode3_correct`, `hyperball_mode5_correct` | 실제 전체 함수와 mode 2·3·5의 word 명세에 대한 Hoare 부분 정확성; Gaussian 배치·고정소수점 scaling·모듈러 norm·retry·최종 byte/counter; mode 상수는 C에서 독립 생성 |
-| [HyperballResultUniqueness](proofs/HyperballResultUniqueness.ec) / [HyperballResultProperties](proofs/HyperballResultProperties.ec) | `hb_result_unique`, `hb_result_modular_norm`, `hb_result_integer_norm` | 미사용 scratch 영역·블록 증인과 무관한 전체 반환값 유일성, 출력 보존 및 모듈러 norm; 수학적 norm은 `<2^64` 또는 명시적 좌표 범위에서 연결 |
-| [HyperballSafeSpec](theories/HyperballSafeSpec.ec) / [HyperballSafeConstants](proofs/HyperballSafeConstants.ec) | `hbs_mode_certificate`, `hbs_initial_numeric_bound`, `hbs_center_good` | Q=2^76, canonical 입력 S∈[3D/4,5D/4]·Q; 모드별 상한·초기 양수 차이 인증서와 비어 있지 않은 구간 |
-| [HyperballMulBounds](proofs/HyperballMulBounds.ec) | `hmb_mul_floor_bounds`, `hmb_mul_error`, `hmb_square_floor` | low<2R,value≤2^88 피연산자의 실제 곱셈/제곱 정수 오차·정규화; masked shift의 wrap과 필요한 headroom을 검증 |
-| [HyperballPositiveArithmetic](proofs/HyperballPositiveArithmetic.ec) | `hpa_sub_exact`, `hpa_threehalves_exact`, `hpa_signed_mul_positive` | 초기 빼기의 비정규형 low<2R를 유지한 정확한 양수 차이; 보정항과 signed 곱셈의 양수 경로 연결 |
-| [HyperballNewtonBarrier](proofs/HyperballNewtonBarrier.ec) | `hnb_error_bound`, `hnb_z_bound` | 세 반올림 오차의 전파와 정수 cubic 상한; 고정밀 단위256의 여유를 흡수하는 한 단계 범위 보존 |
-| [HyperballSafeNewton](proofs/HyperballSafeNewton.ec) | `hbs_safe_newton`, `hbs_safe_newton_total` | hbs_good에서 초기 상태와 여섯 갱신의 상한·최종 정규형 및 실제 Newton 호출 종료 도출; 출력 범위 전제 없음 |
-| [HyperballSafeScale](proofs/HyperballSafeScale.ec) | `hsa_mode_scale_bound`, `hsa_rnd13_bound`, `hsa_scale_result_safe` | 역수 상한→scale≤2^85→모든 W64 표본의 M≤2^26; 임의 부호의 signed32·노름 안전성과 정확한 정수 승인 판정 |
-| [HyperballSafeCorrectness](proofs/HyperballSafeCorrectness.ec) | `hsc_total`, `hsc_full_magnitude`, `hsc_accepted_radius_total` | 모드와 입력 hbs_good만 전제로 실제 수치 실행의 종료·계수 범위·N<2^64·정확한 norm word·승인 iff 반경 조건; 표본/부호 제한·출력 fit 전제 없음 |
-| [HyperballWitnessSpec](theories/HyperballWitnessSpec.ec) / [HyperballWitnessArithmetic](proofs/HyperballWitnessArithmetic.ec) | `hbw_sum_exact`, `hbw_fixture_norm` | 입력·기대 관측의 정의, 모드별 정수 합·나머지·범위; 기대값 정의 자체는 실행 결과 가정이 아님 |
-| [HyperballWordEvaluation](proofs/HyperballWordEvaluation.ec) | `hwe_mul48`, `hwe_mulu`, `hwe_norm` | 입력·출력 word wrap을 보존하는 정수 div/mod 표현; 초기 low limb 정규형·high 양수 전제 없음 |
-| [HyperballWitnessCandidate](proofs/HyperballWitnessCandidate.ec) | `hbw_candidate_spec`, `hbw_candidate_total` | 고정26바이트의 실제 CDT·표본·제곱 limbs·승인1 계산과 실제 sigma 호출 종료 |
-| [HyperballWitnessSampling](proofs/HyperballWitnessSampling.ec) | `hbw_sampling_total`, `hbw_sampling_correct` | 실제 유한 소비기257/257/256… 호출; 활성 표본, 부호0, 저장되지 않는 두 더미 포함 정확한 raw 제곱합·종료 |
-| [HyperballWitnessNewton](proofs/HyperballWitnessNewton.ec) | `hbw_newton_exact`, `hbw_scale_exact`, `hbw_magnitude_overflow` | 초기 빼기와 여섯 갱신, scale·계수의 정확한 word 값; 계산된 초기 high의 음수 해석 및 M>2^31−1 |
-| [HyperballWitnessNorm](proofs/HyperballWitnessNorm.ec) | `hbw_scale_and_check_repeated_total`, `hbw_actual_norm_total` | 실제 scale·norm 호출의 정확한 계수 prefix·나머지·승인1과 반환 배열의 큰 정수 노름; scalar 전제는 수치 정리로 해소 |
-| [HyperballWitnessExecution](proofs/HyperballWitnessExecution.ec) / [HyperballWitnessReplay](proofs/HyperballWitnessReplay.ec) | `hbwr_total`, `hbwr_accepted_outside_radius_total` | 모드만 받는 지정 후보 실행의 종료·실제 승인1·반경 초과; 중간 기대값 전제 없이 실제 helper를 합성. SHAKE/전체 seeded 경로 제외 |
-| [HyperballNormBoundary](proofs/HyperballNormBoundary.ec) | `hyperball_mode{2,3,5}_prescribed_norm_boundary` | 구성한 좌표 벡터의 정수 제곱합·64비트 나머지·bound 비교를 확인하는 산술 정리; 실제 SHAKE 시드 도달 가능성 주장은 없음 |
-| [SigningSamplerBridge](proofs/SigningSamplerBridge.ec) | `signer_cdt83_total_correct`, `signer_smulh48_total_correct`, `signer_approx_exp_reference_total_correct`, `signer_sigma76_total_correct` | 위 CDT·올림·Horner·단일 시도 결과를 실제 mode 2/3/5 서명 추출물의 내부 함수에 전달 |
-| [NTTCorrectness](proofs/NTTCorrectness.ec) | `target_poly_ntt_jazz_total`, `target_poly_invntt_jazz_total`, `target_poly_invntt_jazz_total18` | 입력 계수 범위와 기록된 산술 가정 아래 `NTTFullSpec.full_ntt/full_invntt` 대응과 종료; 역변환의 Montgomery 인자 포함 |
-| [ApiBoundaryCorrectness](proofs/ApiBoundaryCorrectness.ec) | `api_copy_addr_to_addr_backward_correct`, `api_zero_raw_len64_correct` | canonical/no-wrap 주소, 안전한 alias 조건 아래 원래 byte 복사·영 초기화와 frame; 일반 `_api_prepare_pre_raw` 결과는 현재 사용되지 않는 소스 helper에 한정 |
-| [ProductionApiCorrectness](proofs/ProductionApiCorrectness.ec) | `production_sf_prepare_pre_raw_total_correct`, `production_sign_backward_copy_total_correct`, `production_verify_zero_total_correct` | 실제 호출되는 signer 문맥 helper, Sign 역방향 복사, Verify 영 초기화의 정확성·종료성 |
+| [HyperballTailSpec](theories/HyperballTailSpec.ec) / [RawSquareMomentSpec](theories/RawSquareMomentSpec.ec) | `ht_raw_square`, `ht_weight_plus`, `ht_weight_minus` | Q=2^76; definitions of the implementation's floored raw square, acceptance-weighted expectation, both exponent arguments, and mode-specific numerical bounds |
+| [GaussianRawSquare](proofs/GaussianRawSquare.ec) / [GaussianPayloadMoments](proofs/GaussianPayloadMoments.ec) | `gps_square_exact`, `gpm_raw_conditioned_moment` | Exact correspondence between actual payload q=floor(Z²/Q), the raw weighted acceptance probability/denominator, and the accepted-payload moment |
+| [RawSquareAcceptance](proofs/RawSquareAcceptance.ec) / [RawSquareIdealMoments](proofs/RawSquareIdealMoments.ec) | `rsa_weighted_upper`, `rsi_ideal_expectation` | Connects bounded actual weighted-acceptance error to an independent Gaussian weighted sum; does not assume that the ideal infinite support is bounded by the implementation's range |
+| [GaussianLatticeSum](proofs/GaussianLatticeSum.ec) / [GaussianLatticeMgf](proofs/GaussianLatticeMgf.ec) | Integer Gaussian sum/moment bounds | Convergence of the ideal lattice sum and comparison of exponential moments at rational arguments; no chi-square law for actual S is claimed |
+| [GaussianSquareMoments](proofs/GaussianSquareMoments.ec) | `gsm_plus_bound`, `gsm_minus_bound`, `gsm_centered_plus`, `gsm_centered_minus` | Exponential moments of actual accepted q/Q≤10/9+2^-18 and 7/8+2^-18; centered expectations≤3947/4000 and 1963/2000 |
+| [HyperballTailCertificate](theories/HyperballTailCertificate.ec) / [HyperballTailCertificateChecks](proofs/HyperballTailCertificateChecks.ec) / [HyperballTailConstants](proofs/HyperballTailConstants.ec) | `ht_factor_plus`, `ht_factor_minus`, `ht_mode_power_bound` | Integer checks of rational seeds, 32 interval squarings, and binary exponentiation, with actual exp interpretation; the sum of the two powers for each of the three modes is <epsilon |
+| [IidExponentialTail](proofs/IidExponentialTail.ec) | `iet_iid_exponential_outside` | Two-sided exponential tail bounds from expectation multiplication for finite iid lists and the nonnegative Markov inequality |
+| [HyperballIidAttemptSafety](proofs/HyperballIidAttemptSafety.ec) | `hia_unsafe_probability`, `hia_terminates` | Termination of one iid attempt composing the actual Gaussian batch and actual numerical tail, with unsafe joint event⊆event outside the safe input interval |
+| [HyperballIidTailCorrectness](proofs/HyperballIidTailCorrectness.ec) | `ht_iid_list_tail`, `ht_iid_square_tail`, `ht_iid_unsafe_acceptance` | Probability of the full raw sum of squares leaving its interval, and of acceptance AND excessive integer norm in one attempt, <2^-29/2^-44/2^-54; the only public premise is the mode; excludes acceptance-conditioned probabilities, outer retries, and SHAKE |
+| [GaussianPayloadSpec](theories/GaussianPayloadSpec.ec) / [GaussianPayloadEncoding](proofs/GaussianPayloadEncoding.ec) | `gpd_pack_magnitude`, `gpd_pack_square`, `gpd_accepted_ll`, `gpd_scan_selected` | Lossless integer encoding of actual samples and raw squares, q≤2^84−1, acceptance probability≥1/7, and conditional-distribution mass 1; required complete accepted lists and their lengths |
+| [GaussianPayloadBufferSpec](theories/GaussianPayloadBufferSpec.ec) / [GaussianPayloadBufferPath](proofs/GaussianPayloadBufferPath.ec) | `gpb_actual_projection`, `gpb_history_projection`, `gpb_buffer_terminates` | Under gib_bounds, equivalence of all three return arrays between the actual iid buffer and the ghost-history model; projection of the entire history, including dummies, and termination |
+| [GaussianPayloadTrace](proofs/GaussianPayloadTrace.ec) / [GaussianPayloadBufferTrace](proofs/GaussianPayloadBufferTrace.ec) | `gpt_consume`, `gpt_buffer_correct`, `gpt_buffer_total` | Connects visible values and the integer sum of raw squares from actual consumption and complete-buffer execution to the same history, under the preceding accumulation budget and total acceptances≤2818; canonical form, bounds, and termination |
+| [GaussianPayloadKernel](proofs/GaussianPayloadKernel.ec) / [GaussianPayloadEventLaw](proofs/GaussianPayloadEventLaw.ec) | `gpk_refill_event`, `gpk_initial_event`, `gpe_history_law` | Exact completion distribution with known carry bytes fixed; complete accepted history=dlist gpd_accepted n for 0≤n≤512 |
+| [GaussianPayloadDraw](proofs/GaussianPayloadDraw.ec) | `gpd_buffer_draw` | Equivalence between the entire-history projection of the actual buffer ghost and drawing an independent accepted-payload list; no conditions on initial arrays |
+| [HyperballIidPayloadSpec](theories/HyperballIidPayloadSpec.ec) / [HyperballIidPayloadBatch](proofs/HyperballIidPayloadBatch.ec) | `hip_batch_history_law`, `hip_payload_observe_total` | Law of the complete D-element history from mode-specific requests/offsets and initial sum of squares 0; visible vector and S from that same history, and canonical form; zero initialization of samples/signs is a modeling choice |
+| [HyperballIidSquareLaw](proofs/HyperballIidSquareLaw.ec) | `hips_actual_joint_law`, `hips_actual_square_law`, `hips_actual_safe_probability`, `hips_actual_terminates` | Joint visible-vector/S distribution of the explicit iid batch of actual calls, raw sum of squares including both dummies, exact safe-interval probability identity, and probability-1 termination; excludes a numerical tail bound |
+| [SamplerConstants](proofs/SamplerConstants.ec) | `cdt83_hi_matches_reference`, `cdt83_lo_matches_reference`, `approx_exp_matches_reference` | Connects CDT and polynomial constants independently generated from the pinned C source to the Jasmin specification |
+| [CDTCorrectness](proofs/CDTCorrectness.ec) | `sample_gauss83_jazz_total`, `sample_gauss83_max83_total` | Number of the 166 thresholds strictly below the input integer; range and output 166 at maximum input; probability-1 termination and result |
+| [CDTTermination](proofs/CDTTermination.ec) | `sample_gauss83_ll` | Termination of the two actual bounded loops |
+| [CDTDistribution](proofs/CDTDistribution.ec) | `cdt_distribution_mass`, `uniform_cdt_law` | Exact output probabilities for strict threshold comparison under uniform integer input: each interval's length/M; boundary +1, support, and termination |
+| [CDTDistributionBridge](proofs/CDTDistributionBridge.ec) | `uniform83_jasmin_law`, `uniform83_jasmin_mass`, `uniform83_jasmin_endpoint` | Probabilistic experiment passing uniform 83-bit input to the actual Jasmin CDT; exact distribution and termination, support 0…166, Pr[166]=2^-83 |
+| [HalfGaussianProperties](proofs/HalfGaussianProperties.ec) | `hg16_pmf_sum`, `hg16_distr_ll`, `hg16_normalizer_truncation256` | Implementation-independent infinite normalization, total probability 1, and tail bound for rho(k)=exp(-k²/512), k≥0 |
+| [ExpIntervalCorrectness](proofs/ExpIntervalCorrectness.ec) / [CDTGaussianEnclosure](proofs/CDTGaussianEnclosure.ec) | `ei_square_q_sound`, `ei_weights_sound`, `gi_normalizer_interval`, `gi_pmf_interval` | Soundness of rational enclosures and outward-rounding certificates for the actual real exponential; numerical intervals for the infinite normalization denominator and each target probability; checked integer certificates discharge concrete numerical obligations |
+| [CDTGaussianApproximation](proofs/CDTGaussianApproximation.ec) | `cdt83_half_gaussian_statistical_distance`, `uniform83_jasmin_half_gaussian_error` | Statistical distance <2^-78 between the actual Jasmin CDT's uniform 83-bit input experiment and the official nonnegative Gaussian target (σ=16); the same probability-difference bound for any output set |
+| [FixedPointCorrectness](proofs/FixedPointCorrectness.ec) | `smulh48_jazz_total_correct`, `smulh48_jazz_signed_correct`, `approx_exp_jazz_reference_correct` | Ceiling result modulo 2^64 for all word inputs; signed results require explicit fit premises; C-derived degree-10 word Horner computation |
+| [SigmaExpInputBounds](proofs/SigmaExpInputBounds.ec) | `sigma_exp_argument_bound`, `sigma_exp_argument_two_thirds` | Actual exponent argument uint(xi)≤183103063064576 and 3·uint(xi)≤2·2^48 for every 26-byte input; discharges subtraction, merging, and rounding-range obligations |
+| [ApproxExpWordCorrectness](proofs/ApproxExpWordCorrectness.ec) | `ae_intermediate_signed64`, `ae_rounding_error3`, `ae_sigma_approx_exp_total` | Connects integer ceil-Horner to actual word execution; signed64 fit of every Horner prefix and ceiling-multiplication result, final unsigned interpretation; rounding error relative to the polynomial is 0…3/2^48 |
+| [Bernstein10Correctness](proofs/Bernstein10Correctness.ec) / [ApproxExpCertificateChecks](proofs/ApproxExpCertificateChecks.ec) | `bernstein10_checked_nonnegative`, `aec_upper_0_identity` and related theorems | Basis conversion and signs of integer certificates, and six interval inequalities for the actual coefficient polynomial; checks 66 control coefficients |
+| [ExponentialGridComparison](proofs/ExponentialGridComparison.ec) / [ApproxExpPolynomialBound](proofs/ApproxExpPolynomialBound.ec) | `eg_exp_grid_abs`, `approx_exp_polynomial_error` | Error≤24/2^48 between the actual coefficient polynomial and exp(-x/2^48) on the integer input grid; certificates discharge analytic recurrence conditions |
+| [ApproxExpNumericalCorrectness](proofs/ApproxExpNumericalCorrectness.ec) | `approx_exp_signer_numerical_total`, `sigma76_approx_exp_numerical_total` | Absolute error≤27/2^48<2^-43 between the actual Jasmin normalized output and the real exponential, and termination; no separate range/fit premises for any sigma76 input |
+| [Rejection48Correctness](proofs/Rejection48Correctness.ec) / [SigmaRejection48Bridge](proofs/SigmaRejection48Bridge.ec) | `rejection48_word_probability`, `sigma_rejection48_actual_probability` | Exact even comparison, saturation, and actual rounded-zero probability for uniform 48-bit rejection input; connected to the actual sigma procedure call |
+| [SigmaExpAcceptanceCorrectness](proofs/SigmaExpAcceptanceCorrectness.ec) | `sigma_exp_acceptance_error`, `sigma_exp_acceptance_error_strict` | Difference≤α·28/2^48<2^-43 between the acceptance probability of an actual sigma call with fixed candidate bytes and α(rounded)·exp(-uint(xi)/2^48); the experiment explicitly draws uniform 48-bit rejection input |
+| [SigmaSquareExact](proofs/SigmaSquareExact.ec) / [SigmaRawExponentCorrectness](proofs/SigmaRawExponentCorrectness.ec) | `sigma_square_word_exact`, `sigma_raw_exponent_exact`, `sigma_raw_exponent_error` | Integer semantics of actual square limbs and xi=floor((y(y+2^73x)+2^104)/2^105) for every 26-byte input; normalized error≤2^-49 relative to the exponent before rounding |
+| [SigmaRawDensityIdentity](proofs/SigmaRawDensityIdentity.ec) | `sr_gaussian_weight_identity`, `sr_gaussian_density_ratio` | The unnormalized weight of the independent nonnegative Gaussian σ=16 multiplied by exp(-E) equals the unnormalized σ=2^76 Gaussian weight at Z=y+2^72x |
+| [SigmaRawZeroCorrectness](proofs/SigmaRawZeroCorrectness.ec) / [SigmaRawNoiseSpec](theories/SigmaRawNoiseSpec.ec) | `sr_zero_tests_differ`, `sr_zero_factor_difference`, `sr_noise_mismatch_probability` | Rounded-zero and raw-zero differ exactly when x=0 and 1≤y<32768; exceptional probability under uniform 72-bit noise and maximal half-correction effect<2^-58 |
+| [SigmaRawAcceptanceCorrectness](proofs/SigmaRawAcceptanceCorrectness.ec) | `sr_actual_acceptance_error`, `sr_actual_acceptance_regular` | Difference≤57/(2·2^48)+exception indicator/2 between actual acceptance probability and the raw Gaussian acceptance formula for a fixed candidate; <2^-43 outside the exception |
+| [ExponentialLipschitz](proofs/ExponentialLipschitz.ec) / [FiniteExpectationError](proofs/FiniteExpectationError.ec) | `exp_neg_lipschitz`, `finite_expectation_error` | Exponential-error propagation on nonnegative reals; composes pointwise error and exceptional mass of a finite distribution into average error |
+| [SigmaNoise72Bridge](proofs/SigmaNoise72Bridge.ec) / [SigmaRawAverageCorrectness](proofs/SigmaRawAverageCorrectness.ec) | `sigma_noise72_actual_probability`, `sr_average_acceptance_error_strict` | Passes fixed CDT bytes, independent uniform 72-bit noise, and 48-bit rejection input to actual sigma; difference<29/2^48<2^-43 between average raw Gaussian acceptance and actual acceptance probability |
+| [SigmaRoundedOutputCorrectness](proofs/SigmaRoundedOutputCorrectness.ec) / [SigmaCDT83Patch](proofs/SigmaCDT83Patch.ec) | `sj_actual_rounding`, `sj_cdt83_patch_count`, `sj_cdt83_expectation` | Connects actual unsigned output to floor((y+2^72x+32768)/65536); CDT law and expectation transformation for actual 83-bit byte input |
+| [SigmaJointAttemptBridge](proofs/SigmaJointAttemptBridge.ec) / [SigmaJoint203Bridge](proofs/SigmaJoint203Bridge.ec) | `sigma_joint_noise72_law`, `sigma_joint203_law`, `sigma_joint203_ll` | Experiments returning both the sample and acceptance bit from an actual sigma call; joint probability for every output set under independent uniform 83+72+48 bits, and single-attempt termination |
+| [DistributionExpectationDistance](proofs/DistributionExpectationDistance.ec) / [SigmaJointKernelCorrectness](proofs/SigmaJointKernelCorrectness.ec) | `distribution_expectation_distance`, `sj_noise_kernel_range`, `sj_kernel_actual` | Expectation difference of [0,1] kernels over infinite support≤statistical distance; connects the independent Gaussian acceptance formula and mathematical rounding to actual arrays |
+| [SigmaJointFixedCorrectness](proofs/SigmaJointFixedCorrectness.ec) | `sj_point_error`, `sj_fixed_joint_error` | Applies the output-set indicator to pointwise error first; joint acceptance-and-output probability error≤57/(2·2^48)+32767/2^73 for fixed CDT |
+| [SigmaJointIdealCorrectness](proofs/SigmaJointIdealCorrectness.ec) / [SigmaJointCorrectness](proofs/SigmaJointCorrectness.ec) | `sj_ideal_joint_law`, `sj_joint_output_error`, `sj_joint_output_error_strict` | Joint acceptance-and-output probability difference<29/2^48+2^-78<30/2^48<2^-43 between the actual 203-bit experiment and an independent infinite-Gaussian-CDT experiment with unbounded integer rounding; every output set, without extra fit/accuracy premises |
+| [SigmaAcceptanceLowerBound](proofs/SigmaAcceptanceLowerBound.ec) | `sc_actual_point_lower`, `sc_actual_acceptance_lower`, `sc_ideal_acceptance_lower` | Acceptance probability≥1/7 both with fixed candidates and uniform 48-bit rejection input and in the complete 203-bit attempt; ideal acceptance probability≥1/8; no additional range/positivity premises |
+| [SigmaConditionalActual](proofs/SigmaConditionalActual.ec) / [SigmaConditionalIdeal](proofs/SigmaConditionalIdeal.ec) | `sc_actual_conditioned_law`, `sc_ideal_conditioned_law` | Connects event probabilities of native dcond and integer-projection distributions to joint probability÷acceptance probability of the corresponding actual/ideal procedures; retains ideal infinite support and unbounded integer outputs |
+| [ConditionalRatioBound](proofs/ConditionalRatioBound.ec) | `conditional_ratio_error_lower` | Normalization error≤2δ/l from numerator/denominator errors≤δ and acceptance lower bound l>0; does not assume actual and ideal denominators are equal |
+| [SigmaConditionalCorrectness](proofs/SigmaConditionalCorrectness.ec) | `sc_conditioned_distributions_correct`, `sc_conditioned_event_error`, `sc_conditioned_sdist_strict` | Conditional accepted-magnitude distributions of the actual and previous ideal experiments have mass 1; every event error and statistical distance≤16·(29/2^48+2^-78)<2^-39; numerical lower bounds discharge positivity premises |
+| [Gaussian76Properties](proofs/Gaussian76Properties.ec) | `g76_rho_summable`, `g76_normalizer_ge1`, `g76_distr_mu1`, `g76_distr_ll` | Convergence and independent normalization of the infinite sum rho(k)=exp(-k²/2^153) over all integers; independent Gaussian probability masses, mass 1, and infinite support |
+| [GaussianBlockReindex](proofs/GaussianBlockReindex.ec) / [Gaussian76Kernel](proofs/Gaussian76Kernel.ec) | `gb_block_sum`, `g76_full_contribution` | Quotient/remainder block-sum reindexing under absolute convergence and support conditions; Gaussian-weight cancellation for every ideal x≥0 and the exact factor 1/(N·H16) |
+| [Gaussian76Folding](proofs/Gaussian76Folding.ec) / [Gaussian76Rounding](proofs/Gaussian76Rounding.ec) | `g76_accept_weight_sum`, `g76_rounded_event_law`, `g76_rounded_mass`, `g76_rounded_zero_ties` | Absolute-value weights counting zero once and positive magnitudes twice, with rounding-interval PMFs; sum of raw acceptance weights=Z/2; ±32768→1 |
+| [Gaussian76Identification](proofs/Gaussian76Identification.ec) | `g76_ideal_conditioned_eq`, `g76_gaussian_mass`, `g76_actual_gaussian_correct`, `g76_actual_rounded_mass_error` | Exact equivalence between the existing ideal conditional distribution and the explicitly defined rounded absolute value of an integer Gaussian; statistical distance<2^-39 from actual accepted magnitudes, and interval-sum error for each output |
+| [GaussianRetryCore](proofs/GaussianRetryCore.ec) / [GaussianRetryAttempt](proofs/GaussianRetryAttempt.ec) / [GaussianRetryActual](proofs/GaussianRetryActual.ec) | `gr_retry_total`, `gr_actual_pair_equiv`, `gr_actual_retry_law`, `gr_actual_retry_ll` | Connects actual attempt distributions for both acceptance and rejection; probability-1 termination and the exact first-accepted-value conditional distribution for repeated actual calls with independent uniform 83·72·48-bit inputs |
+| [GaussianRetryTail](proofs/GaussianRetryTail.ec) / [GaussianRetryBatchTail](proofs/GaussianRetryBatchTail.ec) | `gaussian_retry_tail_bound`, `grbt_prefix_shortfall_1m7`, `grbt_all_prefix_shortfall_limit` | Probability that all t independent attempts reject≤(6/7)^t; probability of fewer than n acceptances in n·t attempts≤n·(6/7)^t; shortfall probability→0 over all finite prefix lengths |
+| [GaussianRetryBatch](proofs/GaussianRetryBatch.ec) / [GaussianBatchDistance](proofs/GaussianBatchDistance.ec) / [GaussianRetryBatchCorrectness](proofs/GaussianRetryBatchCorrectness.ec) | `gra_batch_joint_law`, `gra_batch_256_gaussian`, `gra_batch_257_gaussian`, `gra_prefix256_law` | The full accepted list from repeated actual attempt calls equals an independent list from the conditional distribution; Gaussian distance<2^-31 for 256 and <257·2^-39 for 257; first-256 projection after generating the last value |
+| [GaussianRetryInputs](proofs/GaussianRetryInputs.ec) / [GaussianRetryPrefixCorrectness](proofs/GaussianRetryPrefixCorrectness.ec) | `gr_candidate_stream_pairs_iid`, `gr_prefix_failure_law`, `gr_block_prefix_failure_limit` | Connects canonical 26-byte encoding of 203-bit candidates to actual word-event sequences and acceptance counts; probability of an insufficient iid prefix→0 at actual blockwise candidate counts; no uniform infinite function or SHAKE independence is assumed |
+| [GaussianRetryRank](proofs/GaussianRetryRank.ec) / [GaussianRetryConsumerTotal](proofs/GaussianRetryConsumerTotal.ec) / [GaussianRetryBufferTotal](proofs/GaussianRetryBufferTotal.ec) | `grr_rank_step_bounded`, `gs_progress_consume_total` | Constructs a decreasing quantity from a finite maximum compatible block index; exact progress conditions and probability-1 termination of the actual bounded consumer |
+| [GaussianRetryStreamBridge](proofs/GaussianRetryStreamBridge.ec) / [GaussianRetryStreamTermination](proofs/GaussianRetryStreamTermination.ec) | `gr_sample_gauss_N_prefix_total`, `gr_prefix_result_dummy`, `gr_prefix_result_squares` | Termination of the actual complete signing buffer and exact first 256 values, sign copy, sum of squares including the 257th dummy, and frame, under a sufficient finite prefix of the concrete SHAKE stream and the existing offset/limb premises |
+| [MixedRadixUniform](proofs/MixedRadixUniform.ec) / [GaussianUnusedBits](proofs/GaussianUnusedBits.ec) / [GaussianUniformBytes](proofs/GaussianUniformBytes.ec) | `mru_join_uniform`, `gub_sigma76_spec`, `gbc_candidate_sigma_law`, `gbc_candidate_observer_law` | Canonical 203-bit projection and exact distribution of uniform 26-byte input; clearing the five unused high bits preserves all four returned words for every input |
+| [GaussianBlockSampling](proofs/GaussianBlockSampling.ec) | `gbs_joint_law`, `gbs_total` | Termination and the complete independent accepted-list law for the actual probabilistic loop processing positive-sized candidate batches in order |
+| [GaussianByteCarryDistribution](proofs/GaussianByteCarryDistribution.ec) / [GaussianIidKernel](proofs/GaussianIidKernel.ec) | `gbc_fixed_tail_refill`, `gik_refill_event`, `gik_initial_event` | Completion distribution with already known remaining bytes fixed; exact expectation invariants for the new 136 bytes and initial 6,664 bytes |
+| [GaussianIidBufferSpec](theories/GaussianIidBufferSpec.ec) / [GaussianIidBufferPath](proofs/GaussianIidBufferPath.ec) | `gib_actual_functional` | Equivalence of the complete return tuples of the iid buffer model calling actual sign-copy, carry, and consumer functions and its list representation; no initial square-word condition beyond `gib_bounds` |
+| [GaussianIidVisible](proofs/GaussianIidVisible.ec) / [GaussianIidStep](proofs/GaussianIidStep.ec) | `giv_consume_fold`, `gis_initial`, `gis_refill` | Correspondence between the physical visible prefix and the list of magnitudes accepted in order; does not read the unrecorded dummy of a request for 257 as a visible value |
+| [GaussianIidInitial](proofs/GaussianIidInitial.ec) / [GaussianIidNormalization](proofs/GaussianIidNormalization.ec) | `gib_initial_law`, `gid_functional_uniform` | Exact equivalence between drawing the initial 49 blocks and drawing one uniform 6,664-byte array |
+| [GaussianIidProgress](proofs/GaussianIidProgress.ec) / [GaussianIidTermination](proofs/GaussianIidTermination.ec) | `gip_refill_progress`, `git_functional_lossless` | After any fixed remaining bytes, an intact candidate in the new block guarantees progress probability≥1/7; probability-1 termination without a sufficient-prefix premise |
+| [GaussianIidEventLaw](proofs/GaussianIidEventLaw.ec) / [GaussianIidDistribution](proofs/GaussianIidDistribution.ec) | `gii_actual_correct`, `gii_actual_joint_law`, `gii_actual_gaussian_event` | Under `gib_bounds`, probability-1 termination of the iid buffer model with actual calls, exact independent joint distribution of the visible 256 values for requests of 256/257, and Gaussian distance<2^-31 |
+| [GaussianSignedTarget](proofs/GaussianSignedTarget.ec) | `gst_target_eq`, `gst_round_signed_ties`, `gst_target_zero_mass`, `gst_target_symmetry` | Independent signed rounding target=law obtained by applying fair signs to the rounded absolute-value distribution; preserves zero mass, ±32768→±1, and symmetry |
+| [GaussianSignBits](proofs/GaussianSignBits.ec) | `gsb_uniform256`, `gsb_result_bits_nth`, `gsb_hb_sign_bit` | 32 uniform bytes→256 fair bits; connects the actual copied window's low-bit-first order to global sign index 8·signoff+i |
+| [GaussianSignedVector](proofs/GaussianSignedVector.ec) | `gsv_actual_law`, `gsv_ideal_law`, `gsv_actual_gaussian` | Exact iid law of 256 signed integers combining sign and magnitude lists from an independent product distribution, and distance<2^-31 from the signed Gaussian target |
+| [IndependentSignSampling](proofs/IndependentSignSampling.ec) | `IndependentSign.rectangle`, `IndependentSign.output_marginal` | Event-probability multiplication law for drawing independent signs after an arbitrary computation; no termination premise for the computation, and preservation of its output marginal requires only mass 1 of the sign distribution |
+| [GaussianSignIndependence](proofs/GaussianSignIndependence.ec) | `gsi_actual_redraw`, `gsi_sign_state_independent` | Separates the sign window from the entire sample-array and square-word state in the explicit iid byte model; equivalence to redrawing fair signs while preserving that state |
+| [GaussianSignedCorrectness](proofs/GaussianSignedCorrectness.ec) | `gsc_actual_joint_law`, `gsc_actual_signed_law`, `gsc_actual_gaussian_event`, `gsc_actual_correct` | Under `gib_bounds`, combines actual returned signs and visible magnitudes, with the law of 256 signed ±W64.to_uint observations and distance<2^-31 |
+| [HyperballSignedScale](proofs/HyperballSignedScale.ec) | `hss_scalar_word_total`, `hss_coeff_signed_fit`, `hss_scale_samples_signed_total` | Exact word semantics of actual scalar/vector scaling signs; signed32 interpretation at coordinates with rounded magnitude≤2147483647; local→global connection requires sample_offset=8·signoff |
+| [SigmaCorrectness](proofs/SigmaCorrectness.ec) | `sigma76_regs_total_correct`, `sigma76_jazz_total_correct` | For every 26-byte input, `(rounded, square_low, square_high, accepted)` matches the pure word specification, and execution terminates |
+| [SigmaRoundingCorrectness](proofs/SigmaRoundingCorrectness.ec) | `sigma76_spec_rounding`, `sigma76_regs_rounding_correct`, `sigma76_jazz_rounding_correct` | Actual rounded output equals the integer rounding formula; byte assembly, shifts, and the final sum do not wrap; includes maximum CDT value 166 |
+| [GaussianConsumerCorrectness](proofs/GaussianConsumerCorrectness.ec) | `sample_gauss_jazz_bounded_total`, `sample_gauss_jazz_normalized_total` | For request `n≤512` and input-byte count `b≤8192`, acceptance count `c≤n`, `26c≤b`, and preservation outside the requested output range; low sum-of-squares limb in `[0,2^48)`; finite termination |
+| [GaussianTraceCorrectness](proofs/GaussianTraceCorrectness.ec) | `sample_gauss_jazz_trace_total_correct`, `sample_gauss_jazz_packed_trace_total` | The actual finite consumer's complete return tuple equals the specification fold over 26-byte candidates; stops when the request is met, including temporary writes of rejected candidates, dummy omission, and word sum of squares |
+| [GaussianTraceProperties](proofs/GaussianTraceProperties.ec) | `gauss_trace_prefix_count_exact`, `gauss_trace_prefix_accepted_sequence`, `gauss_trace_prefix_full_stable` | Count and order of the first `n` candidates filtered by the acceptance bit; fold stability after the requested count is reached |
+| [SigmaSquareBounds](proofs/SigmaSquareBounds.ec) | `sigma76_square_high_bound` | Actual square-high unsigned value `<2^38` for every 26-byte input; not an error theorem relative to a real square |
+| [GaussianAccumulatorCorrectness](proofs/GaussianAccumulatorCorrectness.ec) | `gauss_trace_prefix_uint_sums`, `gauss_trace_result_canonical_both_exact` | Independent mod `2^64` sums of each raw limb; if both initial limbs are `<2^48` and `n≤512`, final `low + 2^48×high` equals the accepted candidates' limb sum as an integer |
+| [GaussianOffsetBridge](proofs/GaussianOffsetBridge.ec) | `sample_gauss_at_trace_total_correct` | Exact tuple equivalence and termination between actual signer `__sample_gauss_at` and the input/output-window specification; `bo+b≤8192`, `oo+n≤4096`; preservation outside the requested region |
+| [GaussianSequenceCorrectness](proofs/GaussianSequenceCorrectness.ec) | `sample_gauss_jazz_sequence_total`, `sample_gauss_jazz_accumulator_exact_total`, `sample_gauss_at_sequence_total` | Acceptance counts and stored acceptance order for the public finite consumer and actual signer offset consumer; exact integer sum of squares for the public consumer |
+| [GaussianValueCorrectness](proofs/GaussianValueCorrectness.ec) | `sample_gauss_at_value_total` | Transfers the integer-sum theorem to the actual signer offset consumer's returned square buffer; both initial limbs `<2^48`, request `n≤512`, and valid windows |
+| [GaussianStreamAccumulator](proofs/GaussianStreamAccumulator.ec) | `gauss_trace_result_stream_accumulator`, `sample_gauss_at_stream_accumulator_correct`, `gauss_stream_finite_partitions` | Preserves inter-call accumulation and overflow headroom through an integer budget based on cumulative acceptances `≤512`; does not require the high limb to be 48-bit after every call |
+| [GaussianStreamSequence](proofs/GaussianStreamSequence.ec) | `gauss_stream_events_append_available`, `gauss_visible_output_concat`, `sample_gauss_at_dummy_last_total` | Splitting and joining candidate sequences from a continuous byte function; preserves acceptance order and the same dummy flag, and the actual offset consumer's dummy slot |
+| [GaussianStreamBuffer](proofs/GaussianStreamBuffer.ec) | `gs_stream_advance`, `gs_refill_segment`, `gs_copy_signs_total` | Correspondence of candidate counts and remaining bytes for the initial 49 blocks and refills; connects continuous-stream buffer segments; actual 32-byte sign copy, frame, and termination |
+| [GaussianStreamSpec](theories/GaussianStreamSpec.ec) | `gs_selected_complete_stable`, `gs_stream_result_unique` | The first `n` accepted results stabilize after a sufficient candidate prefix; the entire return tuple satisfying the same initial values and stream is unique |
+| [GaussianStreamComposition](proofs/GaussianStreamComposition.ec) | `gs_progress_consume`, `gs_progress_consume_correct` | Connects an actual offset-consumer call to the next candidate segment of the continuous stream; preserves acceptance count, stored order, dummy handling, output frame, and the exact sum-of-squares invariant |
+| [GaussianStreamCorrectness](proofs/GaussianStreamCorrectness.ec) | `sample_gauss_N_full_at_correct` | If actual `_sf_sample_gauss_N_full_at` terminates, it returns the same result as the first `n` accepted candidates in the seed/nonce word-SHAKE stream; includes all initial 49 blocks, sign copying, and repeated refills; Hoare partial correctness for `n=256/257`, valid offsets, and both initial limbs `<2^48` |
+| [GaussianRefillCorrectness](proofs/GaussianRefillCorrectness.ec) | `gauss_carry_total`, `gauss_carry_squeeze_layout` | Actual carry preserves remaining bytes and terminates, accounting for the first block's sign prefix; finite buffer layout combining carry and block-serialization contracts |
+| [SHAKEBlockCorrectness](proofs/SHAKEBlockCorrectness.ec) | `keccakf1600_word_total`, `squeeze256_word_total` | Correspondence to the actual signer's 24-round word permutation, 136-byte output, external-region preservation, and termination; output offset `0…8056` |
+| [SHAKESeedInitCorrectness](proofs/SHAKESeedInitCorrectness.ec) | `seed_init_total`, `shake_block_stream_total` | Actual initialization equals the entire 200-byte state for a 64-byte seed, low 16 nonce bits, and domain/padding, and terminates; each squeeze matches the exact next 136 bytes of the word stream |
+| [HyperballGaussianBounds](proofs/HyperballGaussianBounds.ec) | `hb_sigma76_square_high_bound`, `hb_cumulative_canonical`, `hb_sample_gauss_N_full_at_correct` | Strengthens the square-high bound to `<2^36`; accumulating at most 2,818 accepted candidates from zero preserves both initial limbs `<2^48`; connects the premises of multiple Gaussian calls |
+| [HyperballFixedPointCorrectness](proofs/HyperballFixedPointCorrectness.ec) | `hb_newton_total`, `hb_half_round_integer_total`, `hb_mul_rnd13_signed_fit` | Exact word computation and termination of multiplication, conditional signs, normalization, initial estimate, and six Newton iterations; integer ceiling-halving for canonical low, and signed W32 semantics under explicit fit |
+| [HyperballScaleCorrectness](proofs/HyperballScaleCorrectness.ec) / [HyperballNormCorrectness](proofs/HyperballNormCorrectness.ec) | `hb_scale_samples_total`, `hb_scale_and_check_total` | Global sample/sign indices, output partition/preservation, mod `2^64` sum of signed32 squares, unsigned acceptance decision, and termination; integer norm interpretation is a separate conditional theorem |
+| [HyperballBatchCorrectness](proofs/HyperballBatchCorrectness.ec) / [HyperballHistoryCorrectness](proofs/HyperballHistoryCorrectness.ec) | `hb_batch_call_correct`, `hb_history_append`, `hb_history_finish` | The first two calls accept 257 candidates and the rest 256; exact accumulation and actual-call connection; connects previous attempts' rejection history to the first accepted result and counters |
+| [HyperballByteCorrectness](proofs/HyperballByteCorrectness.ec) | `hyperball_b_raw_array_total` | Actual return array equals the first seed-SHAKE byte at the final nonce; termination |
+| [HyperballCorrectness](proofs/HyperballCorrectness.ec) | `hyperball_full_correct`, `hyperball_mode2_correct`, `hyperball_mode3_correct`, `hyperball_mode5_correct` | Hoare partial correctness of the actual complete function and modes 2·3·5 against the word specification; Gaussian batches, fixed-point scaling, modular norm, retries, and final byte/counter; mode constants independently generated from C |
+| [HyperballResultUniqueness](proofs/HyperballResultUniqueness.ec) / [HyperballResultProperties](proofs/HyperballResultProperties.ec) | `hb_result_unique`, `hb_result_modular_norm`, `hb_result_integer_norm` | Uniqueness of the full return value independently of unused scratch regions and block witnesses, output preservation, and modular norm; mathematical norm is connected under `<2^64` or explicit coordinate bounds |
+| [HyperballSafeSpec](theories/HyperballSafeSpec.ec) / [HyperballSafeConstants](proofs/HyperballSafeConstants.ec) | `hbs_mode_certificate`, `hbs_initial_numeric_bound`, `hbs_center_good` | Q=2^76, canonical input S∈[3D/4,5D/4]·Q; certificates for mode-specific upper bounds and positive initial differences, and a nonempty interval |
+| [HyperballMulBounds](proofs/HyperballMulBounds.ec) | `hmb_mul_floor_bounds`, `hmb_mul_error`, `hmb_square_floor` | Integer error and normalization of actual multiplication/squaring for operands low<2R,value≤2^88; checks masked-shift wrapping and required headroom |
+| [HyperballPositiveArithmetic](proofs/HyperballPositiveArithmetic.ec) | `hpa_sub_exact`, `hpa_threehalves_exact`, `hpa_signed_mul_positive` | Exact positive difference retaining the initial subtraction's noncanonical low<2R; connects the correction term and positive path of signed multiplication |
+| [HyperballNewtonBarrier](proofs/HyperballNewtonBarrier.ec) | `hnb_error_bound`, `hnb_z_bound` | Propagation of three rounding errors and an integer cubic upper bound; one-step range preservation absorbing a margin of 256 high-precision units |
+| [HyperballSafeNewton](proofs/HyperballSafeNewton.ec) | `hbs_safe_newton`, `hbs_safe_newton_total` | Derives bounds on the initial state and six updates, final canonical form, and termination of the actual Newton call from hbs_good; no output-range premise |
+| [HyperballSafeScale](proofs/HyperballSafeScale.ec) | `hsa_mode_scale_bound`, `hsa_rnd13_bound`, `hsa_scale_result_safe` | Reciprocal upper bound→scale≤2^85→M≤2^26 for every W64 sample; signed32 and norm safety for arbitrary signs, and the exact integer acceptance decision |
+| [HyperballSafeCorrectness](proofs/HyperballSafeCorrectness.ec) | `hsc_total`, `hsc_full_magnitude`, `hsc_accepted_radius_total` | From the mode and input hbs_good alone, termination of actual numerical execution, coefficient bounds, N<2^64, exact norm word, and acceptance iff the radius condition; no sample/sign restrictions or output-fit premises |
+| [HyperballWitnessSpec](theories/HyperballWitnessSpec.ec) / [HyperballWitnessArithmetic](proofs/HyperballWitnessArithmetic.ec) | `hbw_sum_exact`, `hbw_fixture_norm` | Definitions of inputs and expected observations; mode-specific integer sums, remainders, and bounds; defining expectations does not assume execution results |
+| [HyperballWordEvaluation](proofs/HyperballWordEvaluation.ec) | `hwe_mul48`, `hwe_mulu`, `hwe_norm` | Integer div/mod expressions preserving input/output word wrapping; no premises requiring canonical initial low or positive high |
+| [HyperballWitnessCandidate](proofs/HyperballWitnessCandidate.ec) | `hbw_candidate_spec`, `hbw_candidate_total` | Actual CDT, sample, square limbs, and acceptance1 computation on fixed 26-byte input, and termination of the actual sigma call |
+| [HyperballWitnessSampling](proofs/HyperballWitnessSampling.ec) | `hbw_sampling_total`, `hbw_sampling_correct` | Actual finite-consumer calls 257/257/256…; active samples, signs0, exact raw sum of squares including both unstored dummies, and termination |
+| [HyperballWitnessNewton](proofs/HyperballWitnessNewton.ec) | `hbw_newton_exact`, `hbw_scale_exact`, `hbw_magnitude_overflow` | Exact word values of initial subtraction, six updates, scale, and coefficients; negative interpretation of the computed initial high and M>2^31−1 |
+| [HyperballWitnessNorm](proofs/HyperballWitnessNorm.ec) | `hbw_scale_and_check_repeated_total`, `hbw_actual_norm_total` | Exact coefficient prefix, remainder, and acceptance1 of actual scale/norm calls, and the returned array's large integer norm; numerical theorems discharge scalar premises |
+| [HyperballWitnessExecution](proofs/HyperballWitnessExecution.ec) / [HyperballWitnessReplay](proofs/HyperballWitnessReplay.ec) | `hbwr_total`, `hbwr_accepted_outside_radius_total` | Termination, actual acceptance1, and radius violation for a prescribed-candidate execution taking only the mode; composes actual helpers without intermediate expected-value premises. Excludes SHAKE and the entire seeded path |
+| [HyperballNormBoundary](proofs/HyperballNormBoundary.ec) | `hyperball_mode{2,3,5}_prescribed_norm_boundary` | Arithmetic theorem checking the integer sum of squares, 64-bit remainder, and bound comparison for a constructed coordinate vector; no claim of reachability from an actual SHAKE seed |
+| [SigningSamplerBridge](proofs/SigningSamplerBridge.ec) | `signer_cdt83_total_correct`, `signer_smulh48_total_correct`, `signer_approx_exp_reference_total_correct`, `signer_sigma76_total_correct` | Transfers the preceding CDT, ceiling, Horner, and single-attempt results to internal functions of actual mode 2/3/5 signing extractions |
+| [NTTCorrectness](proofs/NTTCorrectness.ec) | `target_poly_ntt_jazz_total`, `target_poly_invntt_jazz_total`, `target_poly_invntt_jazz_total18` | Correspondence to `NTTFullSpec.full_ntt/full_invntt` and termination under input coefficient ranges and documented arithmetic assumptions; includes the inverse transform's Montgomery factor |
+| [ApiBoundaryCorrectness](proofs/ApiBoundaryCorrectness.ec) | `api_copy_addr_to_addr_backward_correct`, `api_zero_raw_len64_correct` | Original-byte copying, zero initialization, and frame under canonical/no-wrap addresses and safe alias conditions; the general `_api_prepare_pre_raw` result is limited to a source helper not currently used |
+| [ProductionApiCorrectness](proofs/ProductionApiCorrectness.ec) | `production_sf_prepare_pre_raw_total_correct`, `production_sign_backward_copy_total_correct`, `production_verify_zero_total_correct` | Correctness and termination of the actually called signer-context helper, Sign backward copy, and Verify zero initialization |
 
-`phoare [...] = 1`인 결정적 함수의 정리는 해당 전제 아래 종료와 결과를 함께
-보장한다. 이것을 난수 입력 분포나 완전한 서명 성공 확률에 대한 정리로 해석하지
-않는다. `sigma76_from_cdt_contract` 같은 중간 합성 정리의 CDT 전제는 최종
-`sigma76_*_correct` 정리에서 실제 CDT 정리로 해소했다.
+For deterministic functions, theorems of the form `phoare [...] = 1` guarantee
+both termination and the result under their premises. They are not interpreted
+as theorems about random-input distributions or the success probability of a
+complete signature operation. CDT premises in intermediate composition results
+such as `sigma76_from_cdt_contract` are discharged by the actual CDT theorem
+in the final `sigma76_*_correct` theorems.
 
-## 중요한 전제와 한계
+## Important premises and limitations
 
-- CDT 분포 정리는 `Uniform83Jasmin.sample`의 명시적 균등 정수 입력에 관한 것이다.
-  비교 대상은 공식 명세 260904 §5.1.1과 그 참고문헌 [21]의 정의에서 가져온
-  `exp(-k²/512)/sum_{j≥0}exp(-j²/512)`이다. 구현 테이블을 사용해 목표 분포를
-  정의하거나 C 주석의 floor-CDF 공식을 가정하지 않았다. 무한 합의 정규화와
-  수치 인증서도 증명했다. [명세 대응과 증명 경계](docs/cdt-distribution-correspondence.md)에
-  출처·해시·연결 과정을 기록한다.
-- 이 단일 CDT의 통계적 거리 상한은 SHAKE의 균등성·독립성이나 sigma76의
-  거부 샘플링 분포를 자동으로 보장하지 않는다. 공식 명세는 별도 CDT 오차
-  예산을 명시하지 않으며, 지수 다항식 거부에 대한 Rényi 경계는 다른 의무다.
-  `RealExp`·`RealSeries`·`Distr`·`SDist`의 표준 분석·확률 기반도 신뢰 범위에 포함된다.
-- 지수함수 오차 정리는 실제 고정소수점 입력 xi/2^48의 정수 격자를 대상으로 한다.
-  실제 C 계수 다항식의 오차와 실행 중 올림 오차를 함께 포함한다.
-  [수학적 경계와 연결](docs/approx-exp-mathematical-bound.md)에 입력 범위,
-  인증서와 실제 프로시저 정리를 기록했다. Horner 중간 결과의 signed64 의미를
-  정당화했지만, smulh48 내부의 의도된 unsigned word 연산까지 무래핑이라고
-  부르지는 않는다.
-- 승인 확률 정리는 실제 sigma 함수를 호출하며 거부 바이트만 균등하게 바꾼다.
-  비교 대상은 실제 양자화된 xi와 실제 반올림 출력이 0일 때의 α=1/2 보정을
-  유지한다. 이후 raw 지수 오차와 raw-zero 보정 차이는 아래 새 정리로 연결했다. C 주석의
-  단방향 ceiling, 공식 Rényi 오차, 승인된 전체 Gaussian 표본 분포는 별도 의무다.
-- NTT의 `poly_repr_bound rp p s`는 각 signed word가 `p`의 계수를 mod 64513으로
-  나타내고 `[-2^s,2^s)`에 있다는 뜻이다. 순변환은 `s=16→24`, 역변환은
-  `s=16/18→16`이다. 출력 24-bit 범위를 그대로 역변환 전제로 넣는 정리는 없다.
-- Gaussian 소비기는 승인되기 전에 후보를 써 놓을 수 있다. 따라서 보존 범위는
-  반환 승인 수가 아닌 **요청 길이 `n` 이후**이다. 승인 표본열 정리는 반환
-  승인 수와 저장 가능 길이의 최솟값까지만 읽는다. `dont_write_last≠0`이면 마지막
-  dummy 후보도 승인 개수와 제곱합에는 포함되지만 해당 슬롯은 원래 값을 보존한다.
-- 제곱합은 초기값과 **승인 후보가 반환한 square limbs**의 합이다. 이를 반올림된
-  출력값의 제곱이나 이상적인 실수 제곱의 합이라고 부르지 않는다. 초기 낮은 limb가
-  임의의 64비트 값이면 덧셈 때 유실되는 carry 때문에 전체 합의 무조건적인
-  mod `2^112` 동치도 성립하지 않는다. 일반 정리는 headroom을 명시하고, 초기
-  두 limb가 각각 48비트이면 그 전제를 구체적 범위 정리로 해소한다.
-- 초기 49블록은 `49×136−32=6632=255×26+2`바이트의 후보 입력을 제공한다.
-  실제 길이 256·257 요청은 refill이 필요하다. 각 refill에서 남는 0…25바이트와
-  새 136바이트의 배치를 실제 `_sf_sample_gauss_N_full_at`의 전체 반복문에
-  연결했다. 반환 시 보이는 표본은 256개, 부호는 32바이트이며, 257번째 dummy는
-  제곱합에 포함되고 출력 슬롯은 보존된다.
-- 호출 간 누적합 정리는 `gauss_stream_acc_ok`의 총 정수 예산을 사용한다.
-  상위 limb의 48비트 범위가 매번 유지된다고 가정하지 않는다. 한 Gaussian 호출
-  안의 반복 refill에는 이 불변식을 연결했다. Hyperball에서는 더 강한 square-high
-  상한과 `256*i + min(i,2)`의 누적 승인 개수로 각 polynomial 호출의 초기 두 limb
-  조건을 증명했다. mode 5의 최대 개수는 2,818이다.
-- 전체 Gaussian의 기본 Hoare 정리는 **종료한 실행의 반환값**을 다룬다.
-  후속 `gr_sample_gauss_N_prefix_total`은 구체적 seed의 스트림에 충분한
-  승인 후보를 담은 유한 구간이 있다는 조건 아래 실제 함수의 종료까지 증명한다.
-  모든 seed가 그 조건을 만족한다거나 SHAKE 출력이 독립 균등하다고 가정하지 않는다.
-- Hyperball 전체 정리도 종료한 실행의 **word 명세 대응**이다. 모든 이전 시도의
-  거부와 마지막 승인을 이력에 기록하고, 미사용 scratch 영역을 제외한 모든 입력을
-  구체적인 Gaussian 스트림에 연결한다. 반환값 유일성은 nonce의 단사성을 가정하지
-  않는다. 실제 내부 카운터는 W64 덧셈이며 SHAKE에는 하위 16비트만 들어간다.
-- Hyperball의 norm 승인은 `N mod 2^64 <= bound`이다. `N`은 저장된 signed32
-  계수의 수학적 제곱합이다. `N < 2^64`가 있어야 정수 반경 판정으로 해석할 수
-  있다. 모든 좌표 절댓값 `<=2^26`, 총 2,816개 이하라는 충분조건도 증명했지만,
-  실제 모든 scaling 출력이 이를 충족한다는 전제는 추가하지 않았다.
-  [수치 경계와 재현](docs/hyperball-numerical-boundary.md)에 구성한 후보열의
-  C/Jasmin 동일 wrap 사례를 기록했다. 실제 SHAKE 시드 반례는 제시하지 않는다.
-- Newton 정리는 초기 추정과 6회 갱신의 정확한 word 계산을 증명한다. 실수
-  역제곱근 수렴·근사 오차나 모든 중간 계산의 무오버플로를 뜻하지 않는다.
-  C 참조 코드도 드물게 첫 추정값이 음수일 수 있음을 명시한다.
-- 단일 SHAKE 블록은 [word 명세](theories/SHAKEBlockSpec.ec)의 24라운드 순열과
-  연결했다. [스트림 명세](theories/SHAKEStreamSpec.ec)는 64바이트 seed와 nonce
-  하위 2바이트의 흡수·패딩 및 반복 squeeze를 포함한다. 임의 길이 입력의 sponge나
-  FIPS 202의 bit 명세와의 별도 동치는 포함하지 않는다. 재사용한 정의·증명의 출처는
-  [SHAKE 출처 목록](manifests/shake-support-origin.tsv)에 기록했다.
-- rounded 표본에는 새 정수 연결과 무래핑 정리가 있다. 이를 전체 제곱·Horner
-  계산의 모든 중간값이나 실수 Gaussian 계산의 무오버플로 정리로 확대하지 않는다.
-- `_api_prepare_pre_raw`와 실제 `_sf_prepare_pre_raw`는 다른 구현이다.
-  현재 production 문맥 주장은 후자를 직접 검증한 정리에 근거한다.
-- 메모리는 `Glob.mem`의 총 byte map이다. canonical/no-wrap과 alias 조건은
-  실제 OS 할당·메모리 접근 권한이나 caller의 C ABI 검증을 대체하지 않는다.
-- NTT의 남은 산술 가정은 [별도 목록](manifests/ntt-assumptions.md)에 명시한다.
-  새 샘플러/API 정리에 알고리즘 정확성을 가정하는 공리는 추가하지 않았다.
+- The CDT distribution theorem concerns the explicit uniform integer input of
+  `Uniform83Jasmin.sample`. Its target is
+  `exp(-k²/512)/sum_{j≥0}exp(-j²/512)`, from the definitions in official
+  specification 260904 §5.1.1 and its reference [21]. The implementation table is
+  not used to define the target distribution, and the floor-CDF formula in the
+  C comment is not assumed. Infinite-sum normalization and numerical certificates
+  are also proved. The [specification correspondence and proof boundary](docs/cdt-distribution-correspondence.md)
+  record sources, hashes, and the connection.
+- The statistical-distance bound for this single CDT does not automatically
+  guarantee SHAKE uniformity/independence or the sigma76 rejection-sampling
+  distribution. The official specification states no separate CDT error budget,
+  and the Rényi bound for exponential-polynomial rejection is a different
+  obligation. The standard analysis/probability foundations of `RealExp`,
+  `RealSeries`, `Distr`, and `SDist` are also within the trust boundary.
+- The exponential-error theorem concerns the integer grid of actual fixed-point
+  input xi/2^48. It includes both the error of the actual C coefficient polynomial
+  and rounding-up error during execution. The
+  [mathematical bounds and connection](docs/approx-exp-mathematical-bound.md)
+  record the input range, certificates, and actual procedure theorems.
+  Signed64 semantics of Horner intermediate results are justified, but the
+  intentional unsigned-word operations inside smulh48 are not described as
+  nonwrapping.
+- The acceptance-probability theorem calls the actual sigma function and varies
+  only the rejection bytes uniformly. Its target retains the actual quantized
+  xi and the α=1/2 correction when the actual rounded output is zero.
+  Raw-exponent error and the difference in raw-zero correction are subsequently
+  connected by the new theorems below. The one-sided ceiling in the C comment,
+  the official Rényi error, and the complete accepted Gaussian sample
+  distribution are separate obligations.
+- NTT's `poly_repr_bound rp p s` means that each signed word represents a
+  coefficient of `p` mod 64513 and lies in `[-2^s,2^s)`. The forward transform
+  has `s=16→24`, and the inverse has `s=16/18→16`. No theorem directly feeds
+  the 24-bit output range into the inverse transform's premise.
+- The Gaussian consumer may write a candidate before accepting it. Preservation
+  therefore applies **after the requested length `n`**, rather than after the
+  returned acceptance count. The accepted-sequence theorem reads only the minimum
+  of the returned acceptance count and the storable length. If
+  `dont_write_last≠0`, the final dummy still contributes to the acceptance count
+  and sum of squares, but its slot retains its original value.
+- The sum of squares combines the initial value and **square limbs returned by
+  accepted candidates**. It is not described as the sum of squared rounded
+  outputs or ideal real squares. If the initial low limb is an arbitrary 64-bit
+  value, lost carry during addition also prevents unconditional equivalence
+  mod `2^112` for the whole sum. General theorems state headroom explicitly;
+  when both initial limbs are 48-bit, concrete range theorems discharge that
+  premise.
+- The initial 49 blocks provide `49×136−32=6632=255×26+2` candidate-input
+  bytes. Actual requests of length 256·257 require refill. The layout of the
+  remaining 0…25 bytes and new 136 bytes in each refill is connected to the
+  complete loop of actual `_sf_sample_gauss_N_full_at`. At return, 256 samples
+  and 32 sign bytes are visible; the 257th dummy contributes to the sum of
+  squares while its output slot is preserved.
+- The inter-call accumulation theorem uses the total integer budget in
+  `gauss_stream_acc_ok`. It does not assume the high limb remains in the 48-bit
+  range at every step. This invariant is connected to repeated refills within
+  one Gaussian call. For Hyperball, a stronger square-high bound and cumulative
+  acceptance count `256*i + min(i,2)` establish the initial two-limb conditions
+  of each polynomial call. The maximum count for mode 5 is 2,818.
+- The basic Hoare theorem for complete Gaussian concerns **return values of
+  terminating executions**. The subsequent `gr_sample_gauss_N_prefix_total`
+  also proves termination of the actual function when the concrete seed's
+  stream has a finite segment containing enough accepted candidates.
+  It does not assume that all seeds satisfy this condition or that SHAKE outputs
+  are independent and uniform.
+- The complete Hyperball theorem likewise concerns **correspondence to a word
+  specification** for terminating executions. It records every earlier rejection
+  and the final acceptance in a history and connects all inputs other than
+  unused scratch regions to concrete Gaussian streams. Return-value uniqueness
+  does not assume nonce injectivity. The actual internal counter uses W64 addition,
+  while SHAKE receives only its low 16 bits.
+- Hyperball's norm acceptance condition is `N mod 2^64 <= bound`, where `N` is
+  the mathematical sum of squares of the stored signed32 coefficients.
+  Interpreting this as an integer radius test requires `N < 2^64`. A sufficient
+  condition of coordinate magnitudes `<=2^26` and at most 2,816 coordinates is
+  also proved; no premise asserts that every actual scaling output satisfies it.
+  The [numerical boundary and reproduction](docs/hyperball-numerical-boundary.md)
+  record identical C/Jasmin wrapping on constructed candidate sequences.
+  No actual SHAKE-seed counterexample is provided.
+- The Newton theorem proves exact word computation of the initial estimate and
+  six updates. It does not establish convergence to the real inverse square
+  root, approximation error, or absence of overflow in every intermediate
+  computation. The C reference also states that the initial estimate can rarely
+  be negative.
+- A single SHAKE block is connected to the 24-round permutation in the
+  [word specification](theories/SHAKEBlockSpec.ec). The
+  [stream specification](theories/SHAKEStreamSpec.ec) includes absorption/padding
+  of a 64-byte seed and the low two nonce bytes, followed by repeated squeezes.
+  It does not include an arbitrary-length-input sponge or a separate equivalence
+  to the FIPS 202 bit specification. Sources of reused definitions/proofs appear
+  in the [SHAKE provenance inventory](manifests/shake-support-origin.tsv).
+- The rounded sample has new integer-connection and no-wrap theorems. These are
+  not extended into no-overflow theorems for every intermediate value in the full
+  square/Horner computation or a real Gaussian computation.
+- `_api_prepare_pre_raw` and actual `_sf_prepare_pre_raw` are different
+  implementations. The current production-context claim relies on a theorem
+  directly verifying the latter.
+- Memory is the total byte map `Glob.mem`. Canonical/no-wrap and alias
+  conditions do not replace actual OS allocation/access permissions or
+  verification of the caller's C ABI.
+- Remaining NTT arithmetic assumptions are stated in a
+  [separate inventory](manifests/ntt-assumptions.md). No axioms assuming algorithmic
+  correctness were added to the new sampler/API theorems.
 
-반올림 전 수락식 정리는 [별도 수식 기록](docs/raw-gaussian-acceptance.md)의
-`Z=y+2^72x`, `E=y(y+2^73x)/2^153`을 비교 대상으로 사용한다. 고정 후보가
-예외 구간에 있으면 승인 확률 차이가 약 1/2일 수 있으므로, 모든 고정 후보에서
-작은 raw-reference 오차가 성립한다고 주장하지 않는다. 평균 정리는 명시적인
-균등 72비트 잡음과 독립 균등 48비트 거부 입력의 실제 단일 시도에 관한 것으로,
-승인 후 표본 분포나 실제 SHAKE에 대한 정리가 아니다.
+The acceptance-formula theorem before rounding uses `Z=y+2^72x` and
+`E=y(y+2^73x)/2^153` from the [separate formula record](docs/raw-gaussian-acceptance.md)
+as its target. At a fixed candidate in the exceptional interval, the acceptance
+probability difference can be about 1/2; a small raw-reference error is not claimed
+for every fixed candidate. The average theorem concerns an actual single attempt
+with explicit uniform 72-bit noise and independent uniform 48-bit rejection input,
+not the accepted-sample distribution or actual SHAKE.
 
-[모든 출력 집합의 공동 확률 정리](docs/joint-accepted-output.md)는 CDT 입력까지
-균등하게 생성한다. 이상적 CDT의 지지집합을 166에서 자르거나 이상적 출력을
-64비트로 감지 않으며, 실제 출력은 unsigned 정수로 읽는다. 최종 비교 사건은
-`accepted /\ S(output)`이고 승인 확률로 나누지 않는다. 따라서 승인된 표본의
-조건부분포는 후속 정규화 정리로 연결했다. 독립 난수에서의 거부 반복은 아래
-후속 정리로 다룬다. 이 단계가 다루지 않았던 부호 처리는 아래 부호 단계에서
-별도로 합성하며, 구체적 SHAKE의 확률 성질은 남아 있다.
+The [joint probability theorem for every output set](docs/joint-accepted-output.md)
+also draws the CDT input uniformly. It neither truncates the ideal CDT support
+at 166 nor wraps ideal outputs to 64 bits; actual outputs are read as unsigned
+integers. The final comparison event is `accepted /\ S(output)`, without division
+by acceptance probability. The accepted-sample conditional distribution is
+therefore connected by subsequent normalization theorems. Independent-randomness
+rejection repetition is addressed by the subsequent theorems below. Sign handling,
+not covered at this stage, is composed separately in the sign stage below;
+probabilistic properties of concrete SHAKE remain open.
 
-[조건부분포 정리](docs/conditional-accepted-output.md)는 각 실험의 서로 다른
-승인 확률로 나누며, 실제≥1/7·이상적≥1/8을 증명해 분모가 0인 경우를 배제한다.
-모든 사건에 대한 공통 비엄격 상한을 먼저 세워 통계적 거리를 제한한 뒤,
-수치 여유로 <2^-39를 얻는다. 비교 대상은 이전 독립적 이상 실험의 조건부분포이며,
-그 조건부분포를 별도의 반올림 Gaussian 확률 질량식으로 식별하는 후속 정리는 아래에 기록한다.
+The [conditional-distribution theorem](docs/conditional-accepted-output.md) divides
+by the distinct acceptance probability of each experiment and excludes zero
+denominators by proving actual≥1/7 and ideal≥1/8. It first bounds statistical
+distance through a common non-strict bound for every event, then uses the
+numerical margin to obtain <2^-39. The comparison target is the conditional
+distribution of the preceding independent ideal experiment; its subsequent
+identification with a separate rounded Gaussian mass formula is recorded below.
 
-[Gaussian 질량식 식별](docs/gaussian-magnitude-identification.md)은 G의 분모를
-구현과 무관한 모든 정수의 지수함수 합으로 정의하고 수렴·양수성을 증명한다.
-기존 이상적 조건부분포는 floor((|G|+32768)/65536)의 분포와 정확히 같으므로,
-실제 승인 표본 크기와의 기존 통계적 거리 상한은 오차 추가 없이 이전된다.
-반올림된 확률은 각 구간의 Gaussian 가중치를 합한 값이다. 이 수학적 G에 부호가
-있다는 사실을 실제 구현의 부호 처리 증명으로 해석하지 않는다.
+[Gaussian mass-function identification](docs/gaussian-magnitude-identification.md)
+defines G's denominator as an implementation-independent sum of exponentials
+over all integers and proves convergence and positivity. Since the existing
+ideal conditional distribution is exactly the distribution of
+floor((|G|+32768)/65536), its existing statistical-distance bound from actual
+accepted magnitudes transfers without additional error. Rounded probabilities
+are sums of Gaussian weights over each interval. The fact that this mathematical
+G is signed is not interpreted as a proof of sign handling in the actual implementation.
 
-[거절 반복과 승인 목록](docs/gaussian-retries-and-batches.md)은 실제 추출 시도를
-매번 호출하는 독립 난수 실험의 종료와 전체 결합분포를 증명한다. 승인 확률≥1/7을
-이용해 양수성 전제를 해소하며, 반복 때문에 기존 표본 오차가 추가로 커지지 않는다.
-목록 오차는 표본 개수에 따른 독립 곱분포 상한을 사용한다. 후보 스트림의 입력
-모형은 사용하지 않는 상위 5비트를 0으로 둔 203비트 인코딩이다.
-유한 접두 구간의 부족 확률이 0으로 수렴한다는 사실을 구체적인 SHAKE가
-독립 균등 난수를 생성한다는 증명이나 모든 seed의 종료 보장으로 사용하지 않는다.
+[Rejection retries and accepted lists](docs/gaussian-retries-and-batches.md)
+prove termination and the full joint distribution of an independent-randomness
+experiment calling the actual extracted attempt each time. Acceptance
+probability≥1/7 discharges the positivity premise, and repetition does not
+increase the existing per-sample error. List errors use an independent-product
+bound depending on the number of samples. The candidate-stream input model is
+a 203-bit encoding with the five unused high bits set to zero. The convergence
+of finite-prefix shortfall probability to zero is not used as proof that concrete
+SHAKE generates independent uniform randomness or that every seed terminates.
 
-[전체 iid 바이트 버퍼 정리](docs/gaussian-iid-buffer.md)는 위 반복 실험을 넘어
-실제 소비·carry·sign-copy 함수를 호출하는 운영 모형에 분포를 전달한다.
-각 블록은 명시적으로 독립 균등 136바이트를 뽑으며, 이미 고정된 잔여 바이트에
-새 균등 분포를 가정하지 않는다. 초기 49블록, 부분 후보, 요청 257의 더미를
-포함한 제어 흐름 아래 확률 1 종료와 저장되는 256개 크기의 정확한 목록 법칙을
-증명한다. 초기 배열들은 임의의 word 값이며, 제곱 누적합의 정수/no-wrap 해석에는
-이전 limb·범위 조건이 계속 필요하다. 이 iid 크기 단계의 확률 법칙은 크기 목록에
-한정했다. 부호 독립성과 적용은 이어지는 부호 단계의 별도 계약이다.
+The [complete iid byte-buffer theorem](docs/gaussian-iid-buffer.md) goes beyond
+that retry experiment to transfer the distribution to an operational model
+calling actual consumption, carry, and sign-copy functions. Each block explicitly
+draws 136 independent uniform bytes; already fixed remaining bytes are not
+assumed to have a fresh uniform distribution. It proves probability-1 termination
+and the exact list law of the 256 stored magnitudes under the control flow
+including the initial 49 blocks, partial candidates, and the dummy in a request
+for 257. Initial arrays contain arbitrary word values; integer/no-wrap
+interpretation of square accumulation still requires the previous limb/range
+conditions. The probability law at this iid magnitude stage was restricted to
+the magnitude list. Sign independence and application are separate contracts
+of the following sign stage.
 
-[부호 출력 단계](docs/gaussian-signed-output.md)의 비부호 상태는 단순한 가시 크기
-목록이 아니라 `(전체 표본 배열, 제곱 워드 배열)`이다. 명시적인 iid 바이트 모형에서
-이 상태와 256개 공정 부호 비트의 독립성을 증명했고, 실제 버퍼와 부호 재추출
-절차의 동치를 통해 반환값의 공동 사건에 전달했다. 새 소스를 각각 주 대상으로
-검사한 최종 통합 게이트도 통과했다.
-signed 관측은 각 `W64.to_uint` 크기에 부호를 붙인 정수이고 `W64.to_sint`가 아니다.
-목표 `gst_target`은 `sign(G)·floor((|G|+32768)/65536)`의 분포다. 0은 0으로
-남고 양쪽 tie ±32768은 각각 ±1이 된다. 독립 부호 벡터 정리는 기존 256개 거리
-`<2^-31`을 그대로 유지한다. 이 결과가 제곱 워드를 포함한 반환 튜플 전체의
-Gaussian 법칙을 추가하는 것은 아니다.
+The state considered in the [signed-output stage](docs/gaussian-signed-output.md)
+is not just the visible magnitude list, but `(entire sample array, square-word array)`.
+Its independence from 256 fair sign bits is proved in the explicit iid byte model
+and transferred to joint return-value events through equivalence between the
+actual buffer and a sign-redrawing procedure. The final integrated gate, checking
+each new source as a primary target, also passed.
+A signed observation is an integer obtained by applying a sign to each
+`W64.to_uint` magnitude, not `W64.to_sint`. The target `gst_target` is the
+distribution of `sign(G)·floor((|G|+32768)/65536)`. Zero remains zero and the two
+ties ±32768 become ±1, respectively. The independent sign-vector theorem retains
+the existing 256-sample distance `<2^-31`. This does not add a Gaussian law for
+the entire return tuple including square words.
 
-scaling 연결은 전역 좌표 i의 부호 비트와 같은 좌표의 표본을 사용한 정확한
-word 계산을 유지한다. signed32 해석에는 각 반올림 크기≤2147483647을 명시한다.
-국소 부호 비트 i는 전역 인덱스 `8*signoff+i`에 대응하므로, 국소 Gaussian 샘플
-창과 scaling의 전역 표본 창을 연결할 때는 `sample_offset=8*signoff`가 필요하다.
-이는 국소 signed 관측의 분포 정리에는 요구하지 않는 추가 정렬 조건이다.
-이 부호 연결만으로 Hyperball의 수치 조건을 해소하지는 않는다. 후속 입력 안전 구간에서는
-hbs_good에서 fit·norm 무오버플로를 도출했으며, 구간 발생 확률·분포 의무는 남아 있다.
+The scaling connection retains exact word computation using the sign bit and
+sample at the same global coordinate i. Signed32 interpretation explicitly
+requires each rounded magnitude≤2147483647. Local sign bit i corresponds to
+global index `8*signoff+i`, so connecting a local Gaussian sample window to the
+global scaling sample window requires `sample_offset=8*signoff`. This is an
+additional alignment condition not required by the distribution theorem for local
+signed observations. The sign connection alone does not discharge Hyperball's
+numerical conditions. The subsequent safe-input-domain stage derives fit and
+norm no-overflow from hbs_good; interval-probability and distribution obligations
+remain.
 
-## 아직 증명하지 않은 부분
+## Parts not yet proved
 
-| 의무 | 현재 경계와 다음 연결 |
+| Obligation | Current boundary and next connection |
 | --- | --- |
-| Gaussian 분포 합성 | iid 부호 단계의 실제 공동 법칙과 조건부 signed32 적용까지 연결. 남은 범위는 구체적 SHAKE와 이상적 XOF/의사난수 가정의 연결, 공식 Rényi 경계와 Hyperball 전체 합성은 별도 의무 |
-| 별도 Gaussian 경로 | raw seed 주소를 받는 `_sample_gauss_N_full_at`와 서명용 `_sf_sample_gauss_N_full_at`의 대응 및 메모리 계약 연결; 현재 전체 함수 정리는 후자에 한정 |
-| SHAKE sponge | 검증된 고정 길이 seed/nonce word 스트림과 bit/FIPS 명세의 별도 동치, 임의 길이 입력의 sponge |
-| Hyperball의 수학·확률 의미 | iid raw 제곱합의 안전 구간 이탈 및 단일 실제-call 시도의 승인 AND 정수 노름 초과 확률 <2^-29/2^-44/2^-54까지 증명. 남은 범위는 승인 조건부 unsafe 확률·실제 seed 연결·실제 역제곱근 오차·이상적 S/최종 출력 법칙·외부 retry 종료와 전체 실행 경계; 모든 입력/seed의 반경 보장으로 확대하지 않음 |
-| KeyGen 전체 | `_keypair_full_m23/m5`의 샘플링·행렬·FFT guard·packing·retry를 공개 키/비밀 키 관계와 합성 |
-| Sign 전체 | `_sf_signature_core_mode{2,3,5}`의 challenge·응답·norm·hint·packing과 retry를 서명 명세로 합성 |
-| Verify 전체 | `_verify_full_mode{2,3,5}`의 decode·matrix/CRT·norm·challenge와 반환 판정을 검증 명세로 합성 |
-| Sign→Verify | 정당한 KeyGen/Sign 결과가 같은 메시지·문맥에서 실제 Verify에 의해 승인됨을 증명 |
-| 최종 연결 | C descriptor 래퍼·난수 바인딩·실제 메모리 계약과 컴파일된 어셈블리 연결; 전체 구현 보안 |
+| Gaussian distribution composition | Connected through the actual joint law of the iid sign stage and conditional signed32 application. Remaining scope includes connecting concrete SHAKE to ideal-XOF/pseudorandomness assumptions; the official Rényi bound and complete Hyperball composition are separate obligations |
+| Separate Gaussian path | Correspondence and memory-contract connection between `_sample_gauss_N_full_at` taking a raw seed address and signing `_sf_sample_gauss_N_full_at`; current complete-function theorems cover only the latter |
+| SHAKE sponge | Separate equivalence of the verified fixed-length seed/nonce word stream to the bit/FIPS specification, and the sponge for arbitrary-length inputs |
+| Mathematical/probabilistic Hyperball semantics | Proved safe-interval escape of the iid raw sum of squares and acceptance AND excessive integer norm in one actual-call attempt with probability <2^-29/2^-44/2^-54. Remaining scope includes conditional unsafe probability given acceptance, actual-seed connection, actual inverse-square-root error, ideal S/final-output laws, outer-retry termination, and full-execution bounds; not extended to a radius guarantee for every input/seed |
+| Complete KeyGen | Compose sampling, matrices, FFT guard, packing, and retries in `_keypair_full_m23/m5` with the public-key/secret-key relation |
+| Complete Sign | Compose challenge, response, norm, hint, packing, and retries in `_sf_signature_core_mode{2,3,5}` with the signature specification |
+| Complete Verify | Compose decode, matrix/CRT, norm, challenge, and the return decision in `_verify_full_mode{2,3,5}` with the verification specification |
+| Sign→Verify | Prove that a valid KeyGen/Sign result is accepted by actual Verify for the same message/context |
+| Final connection | Connect C descriptor wrappers, randomness bindings, and actual memory contracts to compiled assembly; complete implementation security |
 
-따라서 이 프로젝트의 검증 게이트 PASS는 **등록된 구성요소 정리의 성공**이다.
-전체 HAETAE 구현 정확성 완료를 나타내는 상태로 사용하지 않는다.
+A PASS from this project's verification gate therefore means **successful checks
+of the registered component theorems**. It is not used as a status indicating
+completed correctness verification of the entire HAETAE implementation.

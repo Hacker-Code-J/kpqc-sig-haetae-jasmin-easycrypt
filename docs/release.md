@@ -1,60 +1,68 @@
-# 논문 아티팩트 공개 기준
+# Research artifact publication
 
-논문이 인용하는 아티팩트는 특정 소스 상태와 그 소스로 수행한 검증 기록을
-함께 식별해야 한다. 개발 브랜치의 최신 상태와 논문 제출 당시의 결과를 구분한다.
-이 문서는 공개 절차를 설명하며, 릴리스나 DOI가 이미 발급되었음을 뜻하지 않는다.
+An artifact cited by a paper must identify both a specific source state and
+the verification records produced from it. Distinguish the current development
+branch from the results used at submission. This guide describes the publication
+procedure; it does not by itself establish a release or DOI.
 
-## 선택한 최초 공개 범위
+## Selected initial publication scope
 
-최초 공개본에는 구현·명세·증명 소스, 재현 스크립트와 도구 설치 안내, 라이선스
-고지, 검증 결과와 로그를 포함한다. 컴파일러·프로버 실행 파일, 설치된 도구
-환경 또는 VM/컨테이너 이미지는 배포 대상에 포함하지 않는다. 도구 바이너리
-배포를 위해 검토하던 시스템 소스 패키지 취득은 이 공개본의 선행 조건이 아니다.
-실제 재현에는 [환경 안내](../env/README.md)의 도구 설치가 필요하다.
+The initial release contains implementation/specification/proof sources,
+reproduction scripts and tool-installation instructions, license notices,
+verification results and logs. Compiler/prover executables, installed tool
+stacks and VM/container images are not distributed. System source-package
+acquisition for a possible tool-binary distribution is not a prerequisite for
+this source release. Actual reproduction requires the tools described in the
+[environment guide](../env/README.md).
 
-## 확인한 재현 결과
+## Recorded reproduction
 
-2026-11-11에 커밋 **`88a543f`**의 깨끗한 소스 내보내기를 사용하여,
-공개 bootstrap으로 별도 설치한 도구 환경에서 **전체 runner 28단계가 PASS**했다.
-원본 277개와 보강안·의존 증명 177개를 실행했고, 소스 불변과 로그 해시를
-확인했다. [전체 재현 기록](../evidence/full-replay-20261111/README.md)은
-검증한 소스, 도구, 자원과 결과의 범위를 함께 식별한다. 같은 Linux 호스트의
-별도 설치 환경에서 수행한 결과이며, 다른 머신 재현이나 공개 릴리스를 뜻하지 않는다.
+On 2026-11-11, a clean source export of commit **`88a543f`** passed **all 28 full-runner
+stages** using tools separately installed by the public bootstrap. The run
+executed 277 original targets and 177 hardened/dependency targets, and source
+stability and log hashes were checked. The
+[full reproduction record](../evidence/full-replay-20261111/README.md) identifies
+sources, tools, resources and scope. This was a separate installation on the
+same Linux host, not an independent-machine replay or a publication event.
 
-후속 [Fastexp 출처 조사](provenance/fastexp.md)는 같은 바이트를 명시적으로
-배포하는 공식 리비전과 라이선스 원문을 확인했다. 검증 소스 압축본 `88a543f`를
-배포할 때에는 새 `LICENSES/formosa-libjade/` 고지와 출처 자료도 함께 포함한다.
-검증한 파일·잠금·원본 압축본은 유지하며, 고지 추가를 새 증명 실행으로 표시하지 않는다.
+The subsequent [Fastexp provenance review](provenance/fastexp.md) identified an
+official, explicitly licensed revision containing identical bytes and preserved
+the license texts. Distribute the new `LICENSES/formosa-libjade/` notices and
+provenance materials alongside the tested `88a543f` source archive. Retain the
+verified files, locks and original archive; adding notices is not a new proof run.
 
-앞선 [소켓 제한 기록](../evidence/release-candidate-20261111/README.md)과
-[문서 해시 연결 수정](../evidence/readme-publication-fix-20261111/README.md)은
-작업 이력으로 보존한다. 역사적 lock·증명과 과거 결과를 새 PASS로 덮어쓰지 않는다.
+The earlier [socket restriction record](../evidence/release-candidate-20261111/README.md)
+and [document-hash transition repair](../evidence/readme-publication-fix-20261111/README.md)
+remain development history. Historical locks, proofs and earlier outcomes are
+not overwritten with a later PASS.
 
-## 소스 고정 전
+## Before freezing sources
 
-1. [연구 대응표](research-map.md)의 각 주장이 실제 정리·전제·명령과 맞는지
-   확인한다. 전체 API, iid 모형, 원본·보강 구현의 범위를 구분한다.
-2. 변경된 소스와 추출물의 검증을 수행한다. 과거 PASS를 복사하거나 파일 해시만
-   새 값으로 바꾸어 현재 결과를 승인하지 않는다.
-3. 공개할 파일 목록과 Git 이력을 확인한다. 실행에 필요한 근거는 저장소 안에
-   포함하고, 개인 환경 파일·자격 증명·비공개 원고와 무관한 대용량 결과는 공개
-   대상에서 제외한다. 기존 이력 변경은 별도의 작업으로 다룬다.
-4. [출처 안내](THIRD-PARTY.md)와 원본 라이선스·고지의 포함 여부를 확인한다.
+1. Check each claim in the [research map](research-map.md) against the actual
+   theorem, premises and command. Distinguish complete-API obligations, iid
+   models, and the original/hardened implementations.
+2. Verify changed sources and extractions. Do not copy an earlier PASS or merely
+   replace hashes to approve a new result.
+3. Review the publication file list and Git history. Include required evidence;
+   exclude personal configuration, credentials, private manuscripts and unrelated
+   large outputs. Treat history rewriting as a separate operation.
+4. Check the [provenance guide](THIRD-PARTY.md) and the inclusion of original
+   licenses and notices.
 
-## 독립 재현
+## Separate reproduction
 
-공개 후보 커밋을 새 디렉터리에 clone하고 [환경 안내](../env/README.md)에 따라
-환경을 구성한다. 기존 빌드 디렉터리, 개인 홈 경로, 저장소 밖 논문 폴더 없이
-다음을 실행한다.
+Clone the release-candidate commit into a new directory and configure its tools
+according to the [environment guide](../env/README.md). Run without existing
+build directories, personal home-path dependencies or a sibling thesis directory:
 
 ```sh
 bash scripts/reproduce.sh quick
 bash scripts/reproduce.sh full
 ```
 
-커밋 전 작업 상태를 별도 디렉터리에서 확인하려면 소스 내보내기를 사용할 수 있다.
-이 결과는 Git 릴리스를 대신하지 않으며, `SOURCE-MANIFEST.json`이 기준 커밋·
-작업 상태·파일 해시를 기록한다. 출력 경로는 아직 존재하지 않는 경로를 선택한다.
+For an uncommitted working tree, a source export can provide a separate check.
+It is not a Git release: `SOURCE-MANIFEST.json` records the base commit,
+working-tree status and file hashes. Choose an output path that does not exist:
 
 ```sh
 python3 scripts/export-source.py /tmp/haetae-artifact
@@ -63,25 +71,29 @@ bash scripts/reproduce.sh quick
 bash scripts/reproduce.sh full
 ```
 
-결과에는 소스 커밋 또는 파일 해시 목록, 실행 명령, 도구·프로버 버전,
-검사 대상 목록, 종료 코드, 실행 시간과 자원 정보를 함께 남긴다. 실패·시간 초과·
-생략된 검사를 PASS에 포함하지 않는다. 기록 이후 검증 대상 소스가 바뀌면
-영향받는 결과를 재실행한다. 과거 실행 기록은 해당 소스의 증거로 계속 보존한다.
+Preserve the source commit or file-hash inventory, actual commands, tool/prover
+versions, target list, exit codes, elapsed time and resources. Failures, timeouts
+and omitted checks are not PASS. If checked sources change after recording,
+rerun affected checks. Earlier records remain evidence of their original sources.
 
-## 인용 가능한 공개본
+## Citable releases
 
-- 독립 재현을 마친 커밋에 새 릴리스 태그를 연결한다. 이미 인용한 태그를 다른
-  커밋으로 옮기지 않는다. 태그명에는 참조 구현의 배포 버전을 반복할 필요가 없다.
-- 릴리스에는 소스 아카이브, 재현 안내, 검증 요약과 해당 파일의 체크섬을 제공한다.
-  기존 대용량 Git 이력 전체가 필요하지 않은 독자를 위해 소스 아카이브를 함께
-  제공한다. CI 상태만으로 논문에서 사용하는 전체 검증이 실행되었다고 주장하지 않는다.
-- 최종 공개본은 소속기관 저장소나 연구 아티팩트 장기 보존 서비스에도 보관한다.
-  영구 식별자가 실제로 발급되면 [CITATION.cff](../CITATION.cff)와 논문에 반영한다.
-- 논문 제목·학위 정보·출판 식별자가 확정되기 전에는 추정값을 인용 메타데이터에
-  넣지 않는다. 현재 CITATION은 소프트웨어 저장소 자체의 인용 정보다.
+- Attach a new release tag to the commit that completed the documented
+  reproduction. Never move an already cited tag to another commit. The tag need
+  not repeat the reference implementation's distribution version.
+- Provide source archives, reproduction instructions, verification summaries and
+  checksums. A source archive lets readers avoid downloading the entire large
+  historical Git repository. CI status alone does not establish that all checks
+  used in the paper ran.
+- Preserve the final release in an institutional repository or long-term research
+  artifact archive as well. Once a persistent identifier actually exists, record
+  it in [CITATION.cff](../CITATION.cff) and the paper.
+- Do not invent a thesis title, degree information or publication identifier
+  before they are finalized. The current CITATION describes the software repository.
 
-## 수정본
+## Revisions
 
-후속 오류 수정이나 새 증명을 공개할 때에는 새 태그와 검증 기록을 만든다.
-변경이 논문의 주장이나 수치에 미치는 영향과 이전 공개본의 적용 범위를 설명한다.
-명칭·문서 정리와 구현·정리 변경을 구분하여 기록한다.
+Use a new tag and verification record for subsequent fixes or new proofs.
+Explain their effect on paper claims or measurements and the applicability of
+prior releases. Distinguish naming/documentation changes from implementation
+or theorem changes.
