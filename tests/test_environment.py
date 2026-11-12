@@ -5,8 +5,11 @@ import hashlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
+import shlex
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -112,6 +115,95 @@ class EnvironmentTests(unittest.TestCase):
         self.assertTrue(any("EasyCrypt requires local Unix sockets" in error
                             and "Operation not permitted" in error
                             for error in report["errors"]))
+
+
+class BootstrapPrerequisiteTests(unittest.TestCase):
+    def bootstrap_fixture(self, release, package_status="missing", args=()):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            env_dir, binary_dir, modules = (root / name for name in
+                                            ("env", "bin", "modules"))
+            for path in (env_dir, binary_dir, modules):
+                path.mkdir()
+            script = env_dir / "bootstrap.sh"
+            script.write_bytes((ROOT / "env/bootstrap.sh").read_bytes())
+            (env_dir / "opam-switch.export").write_bytes(
+                (ROOT / "env/opam-switch.export").read_bytes())
+            calls = root / "calls"
+            for command in ("git", "make", "cc", "c++", "wget", "unzip", "cvc4"):
+                path = binary_dir / command
+                path.write_text("#!/bin/sh\nexit 0\n")
+                path.chmod(0o755)
+            programs = {
+                "python3": "exec " + shlex.quote(sys.executable) + ' "$@"\n',
+                "uname": ('case "$1" in -s) echo Linux;; '
+                          '-m) echo x86_64;; *) exit 1;; esac\n'),
+                "dpkg-query": (
+                    'echo dpkg-query >> "$BOOTSTRAP_CALLS"\n'
+                    '[ "$BOOTSTRAP_PACKAGE_STATUS" != missing ] || exit 1\n'
+                    'printf %s "$BOOTSTRAP_PACKAGE_STATUS"\n'),
+                "opam": (
+                    'printf "opam %s\\n" "$*" >> "$BOOTSTRAP_CALLS"\n'
+                    'if [ "$1 $2" = "switch import" ]; then\n'
+                    '  [ -f "$3" ] || exit 89\n'
+                    'fi\n'
+                    '[ "$1 $2" != "switch create" ] || exit 97\n'
+                    'exit 0\n'),
+            }
+            for name, body in programs.items():
+                path = binary_dir / name
+                path.write_text("#!/bin/sh\n" + body)
+                path.chmod(0o755)
+            action = ("raise OSError('release metadata unavailable')" if release is None
+                      else "return " + repr(release))
+            (modules / "platform.py").write_text(
+                "def freedesktop_os_release():\n    " + action + "\n")
+            settings = {**os.environ, "PATH": str(binary_dir) + os.pathsep + os.defpath,
+                        "PYTHONPATH": str(modules), "PYTHONDONTWRITEBYTECODE": "1",
+                        "BOOTSTRAP_CALLS": str(calls),
+                        "BOOTSTRAP_PACKAGE_STATUS": package_status}
+            process = subprocess.run(["bash", str(script), *args], cwd=root,
+                                     env=settings, capture_output=True, text=True)
+            return (process, calls.read_text() if calls.exists() else "",
+                    (env_dir / "downloads").exists())
+
+    def test_missing_debian_package_fails_before_environment_mutation(self):
+        for release in ({"ID": "ubuntu", "ID_LIKE": "debian"},
+                        {"ID": "debian"},
+                        {"ID": "linuxmint", "ID_LIKE": "ubuntu debian"}):
+            with self.subTest(release=release):
+                process, calls, created = self.bootstrap_fixture(release)
+                self.assertEqual(process.returncode, 2)
+                self.assertIn("python3-distutils", process.stderr)
+                self.assertIn("Ubuntu 22.04", process.stderr)
+                self.assertNotIn("opam ", calls)
+                self.assertFalse(created)
+
+    def test_installed_package_reaches_unchanged_exact_prover_versions(self):
+        process, calls, _ = self.bootstrap_fixture(
+            {"ID": "ubuntu", "ID_LIKE": "debian"}, "installed")
+        self.assertEqual(process.returncode, 97)  # Fixture stops before real installation.
+        self.assertIn("--packages=ocaml-base-compiler.5.2.1,alt-ergo.2.6.0,z3.4.12.6",
+                      calls)
+
+    def test_non_debian_or_unidentified_hosts_skip_debian_package_gate(self):
+        for release in ({"ID": "fedora", "ID_LIKE": "rhel"}, None):
+            with self.subTest(release=release):
+                process, calls, _ = self.bootstrap_fixture(release)
+                self.assertEqual(process.returncode, 97)
+                self.assertNotIn("dpkg-query", calls)
+
+    def test_help_remains_nonmutating(self):
+        process, calls, created = self.bootstrap_fixture(
+            {"ID": "ubuntu", "ID_LIKE": "debian"}, args=("--help",))
+        self.assertEqual(process.returncode, 0)
+        self.assertFalse(calls)
+        self.assertFalse(created)
+
+    def test_ci_baseline_installs_the_registered_system_dependency(self):
+        workflow = (ROOT / ".github/workflows/reproduce.yml").read_text()
+        self.assertIn("runs-on: ubuntu-22.04", workflow)
+        self.assertIn("python3 python3-distutils", workflow)
 
 
 if __name__ == "__main__":

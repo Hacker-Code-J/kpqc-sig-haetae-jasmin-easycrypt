@@ -20,7 +20,7 @@ defaults:
 
 jobs:
   reproduce:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 360
     env:
       JOBS: "2"
@@ -32,7 +32,7 @@ jobs:
       - name: Install system prerequisites
         run: |
           sudo apt-get update
-          sudo apt-get install -y opam build-essential cmake ninja-build git python3 \
+          sudo apt-get install -y opam build-essential cmake ninja-build git python3 python3-distutils \
             wget unzip bzip2 pkg-config libssl-dev libgmp-dev libpcre2-dev libppl-dev \
             libmpfr-dev zlib1g-dev autoconf automake libtool cvc4
       - name: Reconstruct the toolchain

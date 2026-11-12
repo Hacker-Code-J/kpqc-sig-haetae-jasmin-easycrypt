@@ -20,18 +20,28 @@ with the cause and stops.
 
 ## Installation
 
-Install the required system packages on Ubuntu 24.04. Only the system package
+The documented installation and hosted CI use Ubuntu 22.04 (Jammy). Install
+the required system packages there. Only the system package
 commands below require administrator privileges.
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y opam build-essential cmake ninja-build git python3 \
+sudo apt-get install -y opam build-essential cmake ninja-build git python3 python3-distutils \
   wget unzip bzip2 pkg-config libssl-dev libgmp-dev libpcre2-dev libppl-dev \
   libmpfr-dev zlib1g-dev autoconf automake libtool cvc4
 bash env/bootstrap.sh
 source env/activate.sh
 bash scripts/check-environment.sh
 ```
+
+The fixed [Z3 4.12.6 opam recipe](https://github.com/ocaml/opam-repository/blob/master/packages/z3/z3.4.12.6/opam)
+declares `python3-distutils` on Debian-family systems. Ubuntu provides this
+package in [Jammy](https://packages.ubuntu.com/jammy/python3-distutils), but not
+Noble (24.04). The bootstrap checks that existing dependency before importing
+the compiler switch and reports an actionable error if it is missing. The CI
+runner matches the Ubuntu 22.04 base of the successful local reproduction.
+This platform correction does not change compiler/prover versions or package
+source recipes; Ubuntu 24.04 is not the supported installation recipe here.
 
 `bootstrap.sh` configures the environment only under `env/.opam-root/`,
 `env/_opam/`, `env/provers/`, `env/config/` and `env/downloads/`. It does not

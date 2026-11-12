@@ -14,6 +14,27 @@ env_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 for command in opam git make cc c++ python3 wget unzip cvc4; do
   command -v "$command" >/dev/null || { echo "Missing prerequisite: $command (see env/README.md)" >&2; exit 2; }
 done
+# Z3 4.12.6 declares this system package on Debian-family hosts. Check before
+# importing the much larger compiler switch so an unavailable package fails early.
+haetae_os_family="$(python3 - <<'PY'
+import platform
+try:
+    release = platform.freedesktop_os_release()
+except (AttributeError, OSError):
+    release = {}
+print(release.get("ID", "") + " " + release.get("ID_LIKE", ""))
+PY
+)"
+case " $haetae_os_family " in
+  *" debian "*)
+    haetae_distutils_status="$(dpkg-query -W -f='${db:Status-Status}' python3-distutils 2>/dev/null || true)"
+    if [[ "$haetae_distutils_status" != installed ]]; then
+      echo 'Missing python3-distutils, required by the Z3 4.12.6 opam package on Debian/Ubuntu.' >&2
+      echo 'Use the documented Ubuntu 22.04 baseline and install python3-distutils before bootstrapping.' >&2
+      exit 2
+    fi
+    ;;
+esac
 export OPAMROOT="$env_dir/.opam-root"
 export XDG_CONFIG_HOME="$env_dir/config"
 export OPAMJOBS="${JOBS:-2}"
