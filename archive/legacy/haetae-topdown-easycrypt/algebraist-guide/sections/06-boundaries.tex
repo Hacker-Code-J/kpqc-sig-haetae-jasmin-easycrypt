@@ -1,18 +1,18 @@
-\section{열린 경계와 과장 금지선}
+\section{Open boundaries and limits on claims}
 \label{sec:boundaries}
 
-\subsection{가장 좁지만 중요한 의미론(semantics) 간극(gap): product/replay}
+\subsection{The narrow but important semantic gap: product/replay}
 
-현재 raw \(\mu\) 선에는 다음 두 사실이 각각 존재한다.
+The raw \(\mu\) line currently contains two separate facts.
 
 \begin{enumerate}
-  \item 실제 generated Sign/Verify hash 호출의 \emph{반환값}은 관련 입력에서
-        같은 32바이트 접두부를 갖는다;
-  \item 실제 Sign 후 Verify 전체 실행은 ghost trace와 exact하게 대응하고,
-        trace는 각 hash 결과를 \identifier{observed_mu}에 저장한다.
+  \item The \emph{return values} of the actual generated Sign/Verify hash calls
+        have the same 32-byte prefix on related inputs;
+  \item the actual complete Sign-then-Verify execution corresponds exactly to
+        a ghost trace, which stores each hash result in \identifier{observed_mu}.
 \end{enumerate}
 
-원하는 결론은 accepted Verify 사후상태(post-state)에서
+The desired conclusion in an accepted Verify post-state is
 \[
 \begin{aligned}
   \mathit{VerifyResult}=0\Longrightarrow
@@ -21,225 +21,234 @@
     &\mathit{VerifyTrace.observed\_mu})
 \end{aligned}
 \]
-이다. 수학적으로는 1과 2를 합치면 자명해 보이지만, 현재 program-logic
-표면에서는 두 명제(proposition)의 변수(variable)가 같은 시점에 존재하지 않는다.
+Mathematically, combining facts 1 and 2 may appear immediate, but the variables
+in the two propositions do not coexist at the same point in the current
+program-logic surface.
 
 \begin{center}
 \begin{tikzpicture}[node distance=8mm]
-  \node[provennode] (returns) {hash-call 시점의\\두 반환값 pRHL 관계};
-  \node[partialnode, below=of returns] (stored) {완료된 두 trace의\\stored observation 관계};
-  \node[provennode, left=12mm of stored] (signcont) {Sign의 잔여 실행\\signature core};
-  \node[provennode, right=12mm of stored] (verifycont) {Verify의 잔여 실행\\challenge와 mismatch};
-  \draw[openarrow] (returns) -- node[right,align=left]{product/replay\\운송 부재} (stored);
-  \draw[flowarrow] (returns) -- (signcont);
-  \draw[flowarrow] (returns) -- (verifycont);
+  \node[provennode] (returns) {pRHL relation between two\\return values at the hash call};
+  \node[partialnode, below=20mm of returns] (stored) {Stored-observation relation\\between two completed traces};
+  \node[provennode, left=12mm of stored] (signcont) {Remaining Sign execution\\signature core};
+  \node[provennode, right=12mm of stored] (verifycont) {Remaining Verify execution\\challenge and mismatch};
+  \draw[openarrow] (returns) -- node[right,align=left,font=\small]{Missing product/replay\\transport} (stored);
+  \draw[flowarrow] (returns.west) -| (signcont.north);
+  \draw[flowarrow] (returns.east) -| (verifycont.north);
 \end{tikzpicture}
 \end{center}
 
-hash-call의 pRHL goal에는 \(res\{1\},res\{2\}\)가 있지만 전체 trace가 끝난
-unary post-state에는 이 지역 반환변수가 사라진다. 반대로 hash-call 지점에서
-pRHL 정리(theorem)를 적용하면 Sign과 Verify의 서로 다른 잔여 continuation을 처리해야
-한다. Sign 쪽 continuation을 일방적으로 버리려면 아직 없는 losslessness 또는
-적절한 product rule이 필요하다.
+The hash-call pRHL goal contains \(res\{1\},res\{2\}\), but those local return
+variables disappear from the unary post-state after the entire trace completes.
+Conversely, applying the pRHL theorem at the hash-call point requires handling
+the different remaining continuations of Sign and Verify. Discarding the Sign
+continuation on one side requires losslessness or an appropriate product rule,
+neither of which is yet available.
 
 \begin{openobligation}[\claimid{OBL-MU-PRODUCT-REPLAY}]
-반환값 수준의 region-local pRHL 정리(theorem)를 이미 완료된 sequential trace의 stored
-observation 관계(relation)로 운반하는 sound rule 또는 증명 구조가 필요하다.
+A sound rule or proof structure is needed to transport the return-value-level
+region-local pRHL theorem to a stored-observation relation in an already
+completed sequential trace.
 \end{openobligation}
 
-이 의무는 Week~7에 \statusdeferred / explicit paper boundary로 동결되었다
-\cite{product-replay}. 다음 접근은 의도적으로 거부되었다.
+This obligation was frozen in Week~7 as \statusdeferred / an explicit paper
+boundary \cite{product-replay}. The following approaches were deliberately rejected.
 
 \begin{itemize}
-  \item observation equality를 전제로 가정하여 결론을 재진술하기;
-  \item SHAKE locality axiom을 새로 추가하기;
-  \item 또 다른 caller/observation wrapper로 theorem surface를 계속 넓히기;
-  \item termination 근거 없이 Sign continuation을 버리기.
+  \item Assuming observation equality as a premise and restating the conclusion;
+  \item adding a new SHAKE locality axiom;
+  \item continually enlarging the theorem surface with another caller/observation wrapper;
+  \item discarding the Sign continuation without a termination justification.
 \end{itemize}
 
-따라서 \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)은 현재 주장하지 않는다.
-이것은 byte-locality 정리(theorem)가 부족해서가 아니라 프로그램 논리의 운송 화살표가
-없어서 생긴 의미론 간극이다.
+Accordingly, \(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\) is not currently claimed.
+This semantic gap arises from a missing program-logic transport arrow, not from
+a lack of byte-locality theorems.
 
-\subsection{accepted-path와 legitimate-signature correctness는 다른 방향이다}
+\subsection{Accepted-path and legitimate-signature correctness run in different directions}
 
-실제 Verify에 대해 증명된 방향은
+The direction proved for actual Verify is
 \[
   \operatorname{Accept}\Longrightarrow\operatorname{TailReached}
   \Longrightarrow\operatorname{HashInputsBound}
 \]
-이다. 이는 이미 accept한 실행을 분석하는 security-facing lane이다.
+This is a security-facing lane analyzing executions that have already accepted.
 
-기능정확성에 필요한 방향은
+The direction required for functional correctness is
 \[
   \sigma\leftarrow\operatorname{Sign}(sk,M)
   \Longrightarrow
   \operatorname{Verify}(vk,M,\sigma)=\operatorname{Accept}
 \]
-이다. 이를 위해서는 Sign이 만든 서명이 unpack/norm/hint/challenge gate를 모두
-통과한다는 사실이 필요하다. 첫 방향의 정리(theorem)를 둘째 방향으로 뒤집을 수 없다.
+This requires showing that signatures produced by Sign pass every
+unpacking, norm, hint, and challenge gates. A theorem in the first direction cannot be reversed
+into one in the second direction.
 
 \begin{openobligation}[\claimid{OBL-SIGN-OUTPUT-TAIL-REACH}]
-실제 Sign output이 실제 Verify의 early-reject tree를 통과해 tail에 도달함을
-증명해야 한다. 현재 signature prefix inverse와 성공 조건부 full-HBZ wrapper는
-닫혔고, fixed all-zero HBZ의 반환 실행에서는 failure도 배제되었다. 그러나 이
-고정 입력은 실제 Sign output 전체의 canonicality를 대신하지 않는다. \(h\)
-suffix, metadata/padding, norm, hint, arithmetic correctness가 남아 있다.
+Actual Sign output must be proved to pass actual Verify's early-reject tree and
+reach the tail. The signature-prefix inverse and success-conditioned full-HBZ
+wrapper are closed, and failure is also excluded for returning fixed all-zero
+HBZ executions. However, this fixed input does not substitute for canonicality
+of all actual Sign output. The \(h\) suffix, metadata/padding, norm, hint and
+arithmetic correctness remain.
 \end{openobligation}
 
-\claimid{OBL-SIGN-VERIFY-CORRECTNESS}는 이 의무와 나머지 산술·challenge
-정확성에 막혀 \statusblocked 다.
+\claimid{OBL-SIGN-VERIFY-CORRECTNESS} is \statusblocked\ by this obligation and
+the remaining arithmetic and challenge correctness obligations.
 
-\subsection{full signature codec에서 남은 표현론}
+\subsection{Representation obligations remaining in the full signature codec}
 
-prefix의 단면--수축(section--retraction)을 full codec으로 확장하려면 적어도
-다음 사각형(square)이 필요하다. Week~14에는 이 중 HBZ 간선 하나가 닫혔고,
-Week~15에는 그 간선의 fixed all-zero 반환 실행에서 failure가 배제되었다.
+Extending the prefix's section--retraction to the full codec requires at least
+the following squares. Week~14 closed one HBZ edge among them, and Week~15
+excluded failure of returning fixed all-zero executions on that edge.
 
 \begin{itemize}
-  \item 두 size-delta metadata byte가 pack/unpack에서 같은 크기를 나타냄;
-  \item HBZ rANS actual full wrapper가 성공 조건 아래 역함수(inverse function)임
+  \item The two size-delta metadata bytes denote the same sizes in pack/unpack;
+  \item the actual full HBZ rANS wrapper is an inverse under the success condition
         (\statusproved, Week~14);
-  \item canonical all-zero HBZ의 fixed-input Hoare success
-        (\statusproved, Week~15; termination은 미증명);
-  \item 두 번째 \(h\) suffix codec의 encode/decode
-        (\statusdeferred, Week~16 MINCORE 전환);
-  \item trailing zero padding의 정준성(canonicality)과 parser의 zero gate;
-  \item packer/unpacker가 목표 밖 배열 tail을 보존함;
-  \item 실제 Sign이 canonical 입력과 성공 buffer bound를 산출함.
+  \item fixed-input Hoare success for canonical all-zero HBZ
+        (\statusproved, Week~15; termination is unproved);
+  \item encode/decode for the second, \(h\), suffix codec
+        (\statusdeferred, transition to Week~16 MINCORE);
+  \item canonicality of trailing zero padding and the parser's zero gate;
+  \item preservation of array tails outside the target by the packer/unpacker;
+  \item actual Sign produces canonical inputs and successful buffer bounds.
 \end{itemize}
 
-따라서
-\claimid{OBL-SIG-PREFIX-CODEC}은 제한된 의미에서 \statusproved 지만,
-\claimid{OBL-SIG-FULL-CODEC-MODE2}는 \statusblocked 다. prefix inverse와 full
-inverse를 같은 명제(proposition)로 부르면 안 된다.
+Thus \claimid{OBL-SIG-PREFIX-CODEC} is \statusproved\ in a limited sense, while
+\claimid{OBL-SIG-FULL-CODEC-MODE2} is \statusblocked. The prefix inverse and full
+inverse must not be described as the same proposition.
 
-\subsection{대수(algebra)·수치(numerics)·확률(probability) 층(layer)에 남은 의무}
+\subsection{Remaining algebraic, numerical and probabilistic obligations}
 
-frozen paper의 MINCORE 전선은 KeyGen \identifier{STOP-KG-NTT}, Sign
-\identifier{STOP-SIGN-CHAL-MODE2}, Verify \FrozenPaperGate 로 정리되었다.
-post-freeze에는 \identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral action,
-native \(R_q\) 행곱과 HAETAE 표현 운송이 닫혔지만, actual ExpandVecA와 기존
-security-side synthetic object의 의미론 불일치가 \CurrentGate 를 만든다.
-이와 별개로 actual Verify의 2-by-4 NTT/CRT/freeze 절차 의미론도 frozen
-의무로 남는다. 전체 구현 refinement에는 다음 독립적인 의무들이 남는다.
+The frozen paper's MINCORE frontier was recorded as KeyGen
+\identifier{STOP-KG-NTT}, Sign \identifier{STOP-SIGN-CHAL-MODE2}, and Verify
+\FrozenPaperGate. Post-freeze work closed \identifier{rq_mul_coeff_foldr_to_bigi},
+full-NTT spectral action, native \(R_q\) row products and HAETAE representation
+transport, but a semantic mismatch between actual ExpandVecA and the existing
+security-side synthetic object creates \CurrentGate. Separately, the actual
+Verify 2-by-4 NTT/CRT/freeze procedure semantics remain a frozen obligation.
+Full implementation refinement still requires the following independent obligations.
 
 \begin{description}[leftmargin=39mm,style=nextline]
   \item[public-key algebra/NTT]
-    \(R_q\)-모듈(module) 계산, NTT 표현, public-key 관계가 실제 구현과 일치함.
+    \(R_q\)-module computations, NTT representations and the public-key relation
+    agree with the actual implementation.
   \item[sampler distribution]
-    uniform/small/hyperball sampler와 실제 random tape의 출력분포(output
-    distribution)가 논문 분포(distribution)와 일치하거나 명시적 거리
-    상계(distance bound)를 가짐.
-  \item[rejection과 종료]
-    KeyGen/Sign retry가 종료하고, 수락 분포(accepted distribution)와 retry loss가
-    계산됨.
+    The output distributions of uniform/small/hyperball samplers and the actual
+    random tape agree with the paper distributions or have explicit distance bounds.
+  \item[rejection and termination]
+    KeyGen/Sign retries terminate, and the accepted distribution and retry loss
+    are calculated.
   \item[highbits/LSB]
-    실제 coefficient decomposition, rounding, packing이 논문의
-    정수 분해(integer decomposition)와
-    일치하며 challenge 양쪽 입력이 같음.
+    Actual coefficient decomposition, rounding and packing agree with the paper's
+    integer decomposition, and both challenge inputs are equal.
   \item[FIPS202 transcript]
-    모든 domain separator, 길이, absorb 순서, squeeze 길이가 고정 명세와
-    byte-for-byte 일치함.
+    Every domain separator, length, absorb order and squeeze length agrees
+    byte-for-byte with the fixed specification.
   \item[FFT tie policy]
-    fixed-point FFT와 경계 동률 처리까지 analytic predicate와 연결됨.
+    Fixed-point FFT, including boundary tie handling, is connected to the
+    analytic predicate.
   \item[two-transcript extraction]
-    실제 byte-level challenge와 accepted signature instance를 paper/ROM reduction의
-    두 transcript 추출에 연결함.
+    The actual byte-level challenge and accepted signature instance are connected
+    to two-transcript extraction in the paper/ROM reduction.
 \end{description}
 
-\subsection{Week 16 frozen KeyGen의 KG--NTT--MUL 종료 경계}
+\subsection{The KG--NTT--MUL stopping boundary of frozen Week 16 KeyGen}
 
-actual \identifier{_kp_m23_matrix}와 \identifier{_keypair_finalize_m23}의
-투명한 two-call harness는 pre-finalization \(bp\) snapshot, finalizer semantics,
-KG-2-like low/high 분해, adjusted \(s_2\), snapshot-only mod-\(2q\) 영 합동식을
-같은 사후조건에 둔다
-\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}. 이는
-\claimid{OBL-MINCORE-KEYGEN}의 실제 coefficient 경계에서 의미 있는
-\statuspartial 진전이다.
+The transparent two-call harness for actual \identifier{_kp_m23_matrix} and
+\identifier{_keypair_finalize_m23} places the pre-finalization \(bp\) snapshot,
+finalizer semantics, KG-2-like low/high decomposition, adjusted \(s_2\), and a
+snapshot-only mod-\(2q\) zero congruence in the same postcondition
+\cite{week16-mincore-plan,week16-kg-report,week16-kg-ntt-mul-report}. This is
+meaningful \statuspartial\ progress at the actual coefficient boundary of
+\claimid{OBL-MINCORE-KEYGEN}.
 
-matrix helper의 결과는 \identifier{KeygenM23ArithmeticSpec.output_row}로
-표현된다. 새 \theoremname{output_row_from_mode2_ntt_words}는 이것을 actual full
-NTT, pointwise row product, inverse NTT와 Montgomery 표현으로 정확히 rewrite하며,
-\theoremname{actual_m23_matrix_snapshot_rows_explicit}는 투명한 harness의 두 active
-row에 그 표현을 적용한다.
-frozen paper 시점에는 그 spectral 표현이 native \(R_q\) negacyclic 곱과 같다는
-compiled 정리와, \identifier{Rq.poly}를 보안 모형의
-\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) 표현으로 옮기는 어댑터가 없었다.
-KG-NTT-MUL 감사는 누락 leaf를 odd-root orthogonality/full-NTT convolution과
-이 어댑터로 특정하고 \identifier{STOP-KG-NTT}로 종료했다. frozen 판정에서
-다음 승격은 금지된다.
+The matrix helper's result is expressed as
+\identifier{KeygenM23ArithmeticSpec.output_row}. The new
+\theoremname{output_row_from_mode2_ntt_words} rewrites this exactly in terms of
+actual full NTT, pointwise row products, inverse NTT and Montgomery representation;
+\theoremname{actual_m23_matrix_snapshot_rows_explicit} applies that expression
+to the transparent harness's two active rows.
+At the frozen-paper point, there was neither a compiled theorem equating this
+spectral expression with native \(R_q\) negacyclic multiplication nor an adapter
+transporting \identifier{Rq.poly} into the security model's
+\(A_{\mathrm{gen}}s_{\mathrm{gen}}\) representation. The KG-NTT-MUL audit
+identified odd-root orthogonality/full-NTT convolution and this adapter as the
+missing leaves and ended with \identifier{STOP-KG-NTT}. The frozen verdict
+prohibits the following promotions.
 
 \begin{itemize}
-  \item snapshot의 \(\mathit{pre\_bp}\)를 근거 없이
-        \(A_{\mathrm{gen}}s_{\mathrm{gen}}\)으로 이름 바꾸기;
-  \item KG-2-like coefficient 분해에서 faithful KG-1 또는 KG-3를 결론내기;
-  \item adjusted \(s_2\) 한 성분에서 complete KG-4 vector를 결론내기;
-  \item snapshot 합동식을 논문식 \(A s=qj\pmod{2q}\)로 승격하기;
-  \item 이 two-call harness에서 sampler, retry, packing, public API 또는 KeyGen
-        종료성을 추론하기.
+  \item Renaming snapshot \(\mathit{pre\_bp}\) to
+        \(A_{\mathrm{gen}}s_{\mathrm{gen}}\) without justification;
+  \item concluding faithful KG-1 or KG-3 from KG-2-like coefficient decomposition;
+  \item concluding a complete KG-4 vector from one adjusted \(s_2\) component;
+  \item promoting the snapshot congruence to the paper equation \(A s=qj\pmod{2q}\);
+  \item inferring sampler, retry, packing, public API or KeyGen termination
+        results from this two-call harness.
 \end{itemize}
 
-\subsection{post-freeze KG 진전과 새로운 의미론 경계}
+\subsection{Post-freeze KG progress and the new semantic boundary}
 
-frozen 뒤의 shared NTT theory는 pure coefficient normalization, full-NTT
-spectral action과 임의 열 수 행곱을 증명했다. Mode~2에서는 KeyGen 3열 및 Verify
-4열의 순수 specialization이 모두 컴파일된다. KeyGen 쪽은 native \(R_q\) 행곱에서
-\identifier{HAETAE_Algebra.poly_dot}까지 운송되었다
-\cite{post-freeze-kg-rq-haetae-report}. 단, Verify 4열 정리는 actual helper
-loop를 열지 않으므로 \FrozenPaperGate 를 해제하지 않는다.
+Post-freeze shared NTT theory proved pure coefficient normalization, full-NTT
+spectral action and row products with arbitrary column counts. In Mode~2, pure
+specializations for KeyGen's 3 columns and Verify's 4 columns both compile.
+The KeyGen side was transported from native \(R_q\) row products to
+\identifier{HAETAE_Algebra.poly_dot}
+\cite{post-freeze-kg-rq-haetae-report}. However, the Verify 4-column theorem does
+not open the actual helper loop and therefore does not clear \FrozenPaperGate.
 
-다음 감사는 actual \identifier{avec}의 SHAKE128 framing, nonce 515/516,
-little-endian candidate와 \(<64513\) rejection을 paper \(a\)에 연결하고 paper
-\(qj=q(1,0)^T\)를 snapshot zero equation에 독립적으로 더했다. 그러나 다음 세
-대상은 서로 같지 않다.
+The next audit connected actual \identifier{avec}'s SHAKE128 framing, nonces
+515/516, little-endian candidates and \(<64513\) rejection to paper \(a\), and
+independently added paper \(qj=q(1,0)^T\) to the snapshot zero equation.
+However, the following three objects are distinct.
 
 \begin{center}
 actual SHAKE128/rejection \(a\)
 \(\neq\) synthetic security generator,
-\qquad paper \(qj\)는 별도 correction.
+\qquad paper \(qj\) is a separate correction.
 \end{center}
 
-compiled counterexample는 security-named row~0 coefficient~0이 401이고 paper
-\(qj[0,0]=64513\)임을 보인다. all-zero seed trace의 actual 값도 44985다.
-따라서 \CurrentGate 의 수리는 synthetic
-\identifier{public_rounding_vector_seed}를 actual expansion 의미론으로 교체 또는
-정제하고 coefficientwise actual-array representation을 증명하는 일이다
-\cite{post-freeze-kg-actual-avec-qj-report}. 이 경계를 넘기 전에는 다음 승격도
-금지된다.
+A compiled counterexample shows that security-named row~0 coefficient~0 is 401,
+whereas paper \(qj[0,0]=64513\). The actual value in the all-zero seed trace is
+also 44985. Repairing \CurrentGate\ therefore requires replacing or refining
+synthetic \identifier{public_rounding_vector_seed} with actual expansion semantics
+and proving a coefficientwise actual-array representation
+\cite{post-freeze-kg-actual-avec-qj-report}. Before crossing this boundary, the
+following promotions are also prohibited.
 
 \begin{itemize}
-  \item synthetic object를 actual \identifier{avec} 또는 paper \(qj\)로 재명명;
-  \item 별도 \(qj\) correction을 modulo-\(q\) HAETAE vector 안에서 보존된다고 가정;
-  \item 새 actual-carrier 전용 coefficient-product를 기존 security
-        matrix/secret만으로 정의한 일반 ring \identifier{matrix_vec_mul} 정리 없이
-        security-level width-6 mod-\(2q\) 식으로 재명명;
-  \item deterministic partial correctness에서 sampler distribution, uniformity,
-        losslessness 또는 termination을 추론.
+  \item Renaming the synthetic object to actual \identifier{avec} or paper \(qj\);
+  \item assuming that the separate \(qj\) correction is preserved in a modulo-\(q\)
+        HAETAE vector;
+  \item renaming the new coefficient-product dedicated to the actual carrier
+        as a security-level width-6 mod-\(2q\) equation without a theorem for
+        general ring \identifier{matrix_vec_mul} defined solely from the existing
+        security matrix/secret;
+  \item inferring sampler distribution, uniformity, losslessness or termination
+        from deterministic partial correctness.
 \end{itemize}
 
-\sourcepath{KgFaithfulAugmentedModel.ec}는 이 포장을 위한 actual width-6 carrier와
-generated-product transport를 정의하고 standalone fresh compile을 통과한다.
-\theoremname{actual_faithful_augmented_productE}는 전용 structured
-coefficient-product를 head, generated HAETAE \identifier{poly_dot}, adjusted
-error의 합으로 전개한다.
-\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj}가
-actual checked parent에 대해 이 product와 faithful \(qj\)의 합동식을
-coefficientwise 증명한다. product는 actual matrix/secret만을 입력으로 받으며,
-중간 2-by-3 block은 명시된 열에서 복원된 \identifier{poly_dot}이다.
-따라서 이 작업의 판정은 \FaithfulAugmentedVerdict 다. 그러나 이 전용
-mod-\(2q\) evaluator는 기존 mod-\(q\) security \identifier{matrix_vec_mul}이 아니고,
-security-side ExpandVecA equivalence도 아니다. 따라서 \CurrentGate 가 사라지지는
-않는다.
+\sourcepath{KgFaithfulAugmentedModel.ec} defines an actual width-6 carrier and
+generated-product transport for this packaging and passes standalone fresh
+compilation. \theoremname{actual_faithful_augmented_productE} expands the
+dedicated structured coefficient-product as the sum of the head, generated
+HAETAE \identifier{poly_dot}, and adjusted error.
+\theoremname{checked_mode2_parent_m23_finalize_faithful_augmented_paper_as_qj}
+proves coefficientwise congruence of this product with faithful \(qj\) for the
+actual checked parent. The product takes only the actual matrix/secret as input;
+the middle 2-by-3 block is \identifier{poly_dot} reconstructed from the specified
+columns. The verdict for this work is therefore \FaithfulAugmentedVerdict.
+However, this dedicated mod-\(2q\) evaluator is not the existing mod-\(q\)
+security \identifier{matrix_vec_mul}, nor is it security-side ExpandVecA
+equivalence. It therefore does not remove \CurrentGate.
 
-\sourcepath{ImplementationSecurityGoals.ec}는 이 항목들을
-\identifier{obl_*} operation으로 열거한다. 이 파일이 컴파일된다는 것은
-목표의 이름과 합성 인터페이스가 well-formed하다는 뜻이지 각 boolean이
-참임을 증명했다는 뜻이 아니다.
+\sourcepath{ImplementationSecurityGoals.ec} lists these items as
+\identifier{obl_*} operations. Compiling the file means that the goal names and
+composition interface are well-formed, not that each boolean has been proved true.
 
-\subsection{최상위 기능정확성은 아직 명세다}
+\subsection{Top-level functional correctness is still a specification}
 
-\sourcepath{TopLevelGoals.ec}는
+\sourcepath{TopLevelGoals.ec} declares
 \begin{align*}
   \mathsf{FC}_{\mathrm{KG}}
     &:\quad \mathsf{JKeyGen}_2=\mathsf{PaperKeyGen}_2,\\
@@ -251,14 +260,13 @@ security-side ExpandVecA equivalence도 아니다. 따라서 \CurrentGate 가 �
       \mathsf{JVerify}_2(vk,M,\sigma)
       =\mathsf{PaperVerify}_2(vk,M,\sigma)
 \end{align*}
-를 boolean specification으로 둔다. 여기서 Sign/KeyGen의 등식(equality)은
-확률분포(probability distribution)의 등식(equality in distribution)을 포함한다.
-현재의 prefix, memory, transcript, codec 정리(theorem)는 이 목표에
-필요한 결정론적 하위 사각형이지만 전체 등식 자체는 아니다.
+as boolean specifications. For Sign/KeyGen, equality here includes equality
+of probability distributions. The current prefix, memory, transcript and codec
+theorems provide necessary deterministic subsquares, not the full equalities.
 
-\subsection{보안 합성식은 아직 조건부 인터페이스다}
+\subsection{The security composition formula is still a conditional interface}
 
-구현과 논문 스킴 사이의 목표는
+The goal connecting implementation and paper scheme has the form
 \[
   \Adv^{\mathrm{euf\mbox{-}cma}}_{\mathrm{Jasmin}}
   \le
@@ -268,125 +276,124 @@ security-side ExpandVecA equivalence도 아니다. 따라서 \CurrentGate 가 �
   +\delta_{\mathrm{Verify}}
   +\delta_{\mathrm{Encoding}}
 \]
-의 모양이다. 현재 파일은 손실 변수(loss variable)를 선언하고
-부등식(inequality)의 interface를 정의하지만,
-각 \(\delta\)를 모두 닫아 최종 정리(theorem)로 합성하지 않았다.
+The current file declares loss variables and defines the inequality's interface,
+but has not discharged every \(\delta\) and composed them into a final theorem.
 
-논문 수준 reduction interface는 다시 MLWE, BST-MSIS, ROM 및 rejection/fork
-오차로 내려간다. \sourcepath{SecurityAssumptions.ec}는 최종적으로 남길 수 있는
-암호학적 인터페이스를 MLWE, BST-MSIS, ROM 세 종류로 제한한다. 하지만 구체적
-게임 instance와 매개변수화된 reduction이 구현의 정확한 byte-level scheme에
-연결되었다는 뜻은 아니다.
+The paper-level reduction interface further reduces to MLWE, BST-MSIS, ROM and
+rejection/fork errors. \sourcepath{SecurityAssumptions.ec} restricts the
+cryptographic interfaces that may remain in the final result to MLWE, BST-MSIS
+and ROM. This does not mean that concrete game instances and a parameterized
+reduction have been connected to the implementation's exact byte-level scheme.
 
-\begin{caution}[선언 종류의 구분]
-연산(operation), 가정(assumption), 정리(theorem)는 서로 다르다.
-\identifier{op obl_sampler_distribution : bool.}처럼 본문 없이 선언된 operation은
-목표를 표현하는 추상 기호(abstract symbol)다. 그것을 참이라고 가정하는 axiom과 동일하지
-않고, 그것을 참이라고 증명한 theorem도 아니다. 프로젝트의 검증 스크립트는
-authored axiom과 proof hole을 별도로 금지·검색한다.
+\begin{caution}[Distinguishing declaration kinds]
+Operations, assumptions and theorems are different. An operation declared without
+a body, such as \identifier{op obl_sampler_distribution : bool.}, is an abstract
+symbol expressing a goal. It is neither an axiom assuming the goal true nor a
+theorem proving it true. The project's verification scripts separately prohibit
+and scan for authored axioms and proof holes.
 \end{caution}
 
-\subsection{신뢰 경계와 범위 밖 항목}
+\subsection{Trust boundary and out-of-scope items}
 
-현재 증거 사슬은 다음을 신뢰하거나 고정한다.
-
-\begin{itemize}
-  \item SHA-256가 기록된 46쪽 HAETAE 명세 PDF \cite{haetae-spec};
-  \item pinned \sourcepath{haetae-ref-jasmin/} 구현과 focused extraction
-        \cite{pinned-jasmin};
-  \item EasyCrypt kernel, Jasmin model, 호출된 SMT prover와 build toolchain;
-  \item source hash와 generated extraction/certificate manifest.
-\end{itemize}
-
-다음은 이 sprint의 결론에 포함되지 않는다.
+The current evidence chain trusts or fixes the following.
 
 \begin{itemize}
-  \item mode~2 이외의 parameter set;
-  \item 물리적 side channel, fault, RNG 품질;
-  \item memory safety나 constant-time이 EUF-CMA에서 자동으로 따라온다는 주장;
-  \item 실제 하드웨어/컴파일러 전체의 end-to-end correctness;
-  \item full KeyGen, Sign, Verify 또는 구현 EUF-CMA가 완료되었다는 주장.
+  \item The 46-page HAETAE specification PDF with a recorded SHA-256 \cite{haetae-spec};
+  \item the pinned \sourcepath{haetae-ref-jasmin/} implementation and focused
+        extraction \cite{pinned-jasmin};
+  \item the EasyCrypt kernel, Jasmin model, invoked SMT provers and build toolchain;
+  \item source hashes and generated extraction/certificate manifests.
 \end{itemize}
 
-\subsection{현재 주장 행렬}
+The conclusions of this sprint exclude the following.
+
+\begin{itemize}
+  \item Parameter sets other than mode~2;
+  \item physical side channels, faults and RNG quality;
+  \item claims that memory safety or constant-time automatically follow from EUF-CMA;
+  \item end-to-end correctness of all actual hardware/compiler components;
+  \item claims that full KeyGen, Sign, Verify or implementation EUF-CMA are complete.
+\end{itemize}
+
+\subsection{Current claim matrix}
 
 \begin{longtable}{@{}L{47mm} L{27mm} L{70mm}@{}}
 \toprule
-주장 & 상태 & 정확한 경계 \\
+Claim & Status & Exact boundary \\
 \midrule
 \endfirsthead
 \toprule
-주장 & 상태 & 정확한 경계 \\
+Claim & Status & Exact boundary \\
 \midrule
 \endhead
-packed SK의 VK prefix & \statusproved &
-실제 generated packer/Internal KeyGen의 반환 시 첫 992바이트 \\
+VK prefix of packed SK & \statusproved &
+First 992 bytes upon return from the actual generated packer/Internal KeyGen \\
 raw \(\mu\) generated seam & \statusproved &
-raw branch, 관련 key/pre/message region에서 64-to-32 prefix \\
+64-to-32 prefix on the raw branch and related key/pre/message regions \\
 position-64 challenge suffix & \statusproved &
-동일 초기 state/position에서 32-byte absorb \\
+32-byte absorb from equal initial state/position \\
 actual API key copy/address/frame & \statusproved &
-각 명명된 valid/canonical/disjoint 계약 아래 \\
+Under each named valid/canonical/disjoint contract \\
 accepted Verify tail/input binding & \statusproved &
-accept \(\Rightarrow\) tail/hash inputs 방향 \\
+Direction accept \(\Rightarrow\) tail/hash inputs \\
 stored observed \(\mu\) equality & \statuspartial &
-product/replay transport 부재 \\
+Missing product/replay transport \\
 signature prefix inverse & \statusproved &
-canonical challenge/low, 앞 1056바이트 \\
+Canonical challenge/low, first 1056 bytes \\
 HBZ leaf inverse & \statusproved &
-앞 1024 coefficient, rANS 제외 \\
-actual rANS table와 pure step & \statusproved &
-concrete 13-symbol table, 명시된 state range \\
+First 1024 coefficients, excluding rANS \\
+actual rANS table and pure step & \statusproved &
+Concrete 13-symbol table, specified state range \\
 pure normalization byte trace & \statusproved &
-canonical symbol list, actual loop 아님 \\
-actual array/list·word-step bridge & \statusproved &
-1024-symbol suffix 점화식(recurrence), literal table word 등식(equality) \\
+Canonical symbol list, not an actual loop \\
+actual array/list and word-step bridge & \statusproved &
+1024-symbol suffix recurrence, literal table word equalities \\
 actual final serialization leaf & \statusproved &
-네 번의 실제 store와 누적 trace의 little-endian 직렬화(serialization) 합성 \\
+Composition of four actual stores with little-endian serialization of the accumulated trace \\
 actual encoder success size & \statusproved &
-반환한다면 실패이거나 \(0\le off\le1020\), \(4\le1024-off\le1024\) \\
+If it returns, failure or \(0\le off\le1020\), \(4\le1024-off\le1024\) \\
 actual inner normalization & \statusproved &
-byte segment·frame·no-underflow와 정확한 순수 \(0..2\) exit \\
+Byte segment, frame, no-underflow and exact pure \(0..2\) exit \\
 actual encoder trace refinement & \statusproved &
-성공 조건부 부분정확성(success-conditioned partial correctness)의 전체 suffix 등식(equality) \\
+Complete suffix equality in success-conditioned partial correctness \\
 actual decoder trace refinement & \statusproved &
-exact-trace 부분정확성(partial correctness), 1024-symbol 등식(equality), 정확한 byte 소비와 tail frame \\
+Exact-trace partial correctness, 1024-symbol equality, exact byte consumption and tail frame \\
 actual rANS harness control & \statusproved &
-실제 호출 순서와 성공/실패 분기만 완료 \\
+Only the actual call order and success/failure branches are complete \\
 actual rANS core inverse & \statusproved &
-actual encoder/copy/decoder의 성공 조건부 부분정확성(success-conditioned partial correctness) \\
+Success-conditioned partial correctness of actual encoder/copy/decoder \\
 actual encoder success witness & \statusproved &
-fixed all-zero/all-6 반환 실행의 failure exclusion; termination/losslessness 없음 \\
+Failure exclusion for returning fixed all-zero/all-6 executions; no termination/losslessness \\
 production full-HBZ wrapper inverse & \statusproved &
-prepare/apply, rANS core와 production lift의 성공 조건부 합성 완료 \\
+Success-conditioned composition of prepare/apply, rANS core and production lift is complete \\
 actual KeyGen matrix/finalize snapshot & \statuspartial &
-KG-2-like 분해와 snapshot mod-\(2q\) identity는 증명;
-frozen paper에서는 마지막 NTT-word rewrite 뒤 \identifier{STOP-KG-NTT} \\
-post-freeze NTT/Rq/HAETAE 행곱 & \statusproved &
-순수 spectral action, native \(R_q\) 3열/4열 행곱과 KeyGen 3열 HAETAE 표현 운송;
-actual Verify procedure는 제외 \\
+KG-2-like decomposition and snapshot mod-\(2q\) identity proved;
+in the frozen paper, \identifier{STOP-KG-NTT} after the final NTT-word rewrite \\
+post-freeze NTT/Rq/HAETAE row products & \statusproved &
+Pure spectral action, native \(R_q\) 3-column/4-column row products and KeyGen
+3-column HAETAE representation transport; actual Verify procedure excluded \\
 post-freeze actual \identifier{avec}/paper \(a,qj\) & \statuspartial &
-결정론적 expansion과 별도 \(qj\) snapshot 합성은 증명;
-synthetic security 의미론 불일치에서 \CurrentGate \\
-faithful augmented coefficient-product 합성 & \statusproved &
-standalone actual-carrier structured product \(\equiv qj\); frozen 82-target 밖이며
-generic security-model \identifier{matrix_vec_mul}/ExpandVecA equivalence는 제외 \\
+Deterministic expansion and separate \(qj\) snapshot composition proved;
+\CurrentGate\ at the synthetic security semantics mismatch \\
+faithful augmented coefficient-product composition & \statusproved &
+Standalone actual-carrier structured product \(\equiv qj\); outside the frozen
+82-target set; generic security-model \identifier{matrix_vec_mul}/ExpandVecA equivalence excluded \\
 actual Sign accepted core & \statuspartial &
-실제 세 helper의 호출·accept branch control만;
+Only call and accept-branch control for the three actual helpers;
 \identifier{STOP-SIGN-CHAL-MODE2} \\
 actual Verify core sequence & \statuspartial &
-실제 다섯 helper 순서, V-1/V-2/V-5/V-6 word projection, norm/tail local 결과;
+Actual five-helper sequence, V-1/V-2/V-5/V-6 word projections, local norm/tail results;
 frozen \FrozenPaperGate \\
 \(h\) suffix codec & \statusdeferred &
-Week~16 MINCORE KeyGen 범위 전환; inverse 미시도 \\
+Scope moved to Week~16 MINCORE KeyGen; inverse not attempted \\
 full signature codec & \statusblocked &
-HBZ wrapper 뒤에도 \(h\), metadata, padding과 residual frame 잔여 \\
+\(h\), metadata, padding and residual frames remain after the HBZ wrapper \\
 Sign output tail reach & \statuspartial &
-prefix와 success-conditioned HBZ wrapper만 닫힘; \(h\), metadata/padding,
-norm/hint/arithmetic 잔여 \\
+Only prefix and success-conditioned HBZ wrapper closed; \(h\), metadata/padding,
+norm/hint/arithmetic remain \\
 FC-KeyGen/Sign/Verify & \statusspecified / \statuspartial &
-KeyGen snapshot 포함 하위 결정론적 seam만 일부 증명 \\
-구현 EUF-CMA & \statusspecified &
-loss와 paper reduction 연결 미완 \\
+Only some deterministic lower-level seams proved, including the KeyGen snapshot \\
+Implementation EUF-CMA & \statusspecified &
+Loss and paper-reduction connections incomplete \\
 \bottomrule
 \end{longtable}

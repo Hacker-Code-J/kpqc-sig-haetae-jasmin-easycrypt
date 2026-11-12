@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "scope": "English prose, guide PDFs, portable historical-path index, exact documentation migrations, and related regression checks. Not a new full proof replay.",
+  "baseline_commit": "a4c259a52debb6ae6509f5bcf92a1594178854fd",
+  "historical_execution_records_unchanged": true,
+  "unchanged_scientific_source_files": 753,
+  "unchanged_evidence_payload_files": 1181,
+  "historical_host_paths": "Original encoded host-path identities remain in immutable execution records. Authored prose and portable index are English.",
+  "original_patch_recovery_commit": "3336e4290e56b7588f0b8abe1ae30366730f461b",
+  "validation": {
+    "public_tests": 33,
+    "materialization_tests": 23,
+    "layout_migration_tests": 2,
+    "publication_migration_tests": 6,
+    "fresh_extractions": 25,
+    "unchanged_implementation_outputs": 78,
+    "full_proof_replay": false,
+    "pdfs": {
+      "algebraist": {
+        "pages": 64,
+        "hangul_characters": 0,
+        "words_outside_page": [],
+        "overfull_or_undefined_or_missing_glyph_warnings": 0,
+        "visual_review": "All original final-pass contact sheets reviewed; Figure 1 and product/replay diagram spacing corrected and rerendered at high resolution. No overlap remains in reviewed corrected figures.",
+        "pdf_sha256": "faa88d16a82487717c93e7e011882814beab8d8078e52a9418f7fd801673c850"
+      },
+      "theory": {
+        "pages": 67,
+        "hangul_characters": 0,
+        "words_outside_page": [],
+        "overfull_or_undefined_or_missing_glyph_warnings": 0,
+        "visual_review": "All 67 rendered pages reviewed in contact sheets after typography corrections; no clipping or overlap observed.",
+        "pdf_sha256": "08a762d18d8dc9bc9e769940d2799fddd945908045122d24f8371e92ade07a9c"
+      }
+    },
+    "translation_review": "Independent reviews found no material strengthening of mathematical claims or loss of assumptions. Protected formulas, identifiers and references preserved; natural-language annotations translated; layout and reproduction-context adjustments recorded in the diff."
+  },
+  "changes": [
+    {
+      "path": "archive/README.md",
+      "before_sha256": "2d83a6a4ff84906353adb076460a42eb8a827ce39a89e9525a23dd9542ce86a3",
+      "after_sha256": "9481dc1054bf2c5f6fa41ce4a1936b3e97b3a54ac0aa41933a7aaef58ce1cd5d"
+    },
+    {
+      "path": "archive/SHA256SUMS",
+      "before_sha256": "2336f15cc87813f49604b0f4316859e6eb3c7cebf7e0b2074ca045371986a4d4",
+      "after_sha256": "19b01363f9aa498efece6024a9d9da2f6057069f7545268e20a3583acdeeacbc"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/README.md",
+      "before_sha256": "3c23849d950debdcd73d9079d3b571210cc9488462066c820758c1ea5bbded31",
+      "after_sha256": "154320e1ddfd9275a29b8f2aea9da5031923f7cb25bdc918ddb2dcbe534de1c1"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/main.pdf",
+      "before_sha256": "e6dd930b59276125153f39f5f977e1ed8cdf5efaba99370b5766439849b98b40",
+      "after_sha256": "faa88d16a82487717c93e7e011882814beab8d8078e52a9418f7fd801673c850"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/main.tex",
+      "before_sha256": "ada73302ce5e228ce62324427f3d13398cea5842763f35bf44dd49d0669e3c60",
+      "after_sha256": "924c8ec969ee12eb97c9b1a250ed87bf9dd51540e723e829d656aca657f29cb4"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/preamble.tex",
+      "before_sha256": "6b35465be86c5f48f10edcdaf5af99aba9cb79f5468ac6bcca1cd1f7c055aabc",
+      "after_sha256": "742adf79f1481de62a561a94d87186434b12475654b4c902bf1bf3426643dba8"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/01-reading-contract.tex",
+      "before_sha256": "a979018231adf45db51f35996ec60a0ff32623bcf000d63398a23de0b00e303d",
+      "after_sha256": "df52cb81e79eaa609cd05d61302f2894fc396d4e4813a468c7d508eb18f75b27"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/02-algebraic-object.tex",
+      "before_sha256": "f5c345aee97791c900bdab6399c3224472bb1d6bd1b9002e186bb9d7d73d6eae",
+      "after_sha256": "c453eddfbf6516a178a1c5ea683989e6dc686e88cd57c10d7a5f350bf15c5b2c"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/03-representation-and-logic.tex",
+      "before_sha256": "2f31f1feac6f76062c738f19d7e5e48f5b39d87b93f33c39680b18d92a1a026c",
+      "after_sha256": "11c700df5d35b2aff75b73b5b72f55bd682606a3413cef24bfe14ea573993540"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/04-proved-spine.tex",
+      "before_sha256": "9fc3f52ba8ee6d1358b873e9f28af5404da0a813617cdac4ce1584f34f080e60",
+      "after_sha256": "b0ff4310d09e92a9ce735112ca101ffa3f630b9955fd626055a0671e67afd723"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/05-rans-frontier.tex",
+      "before_sha256": "04bd676e4ba540baf6145c18958637e3ed883bba37e36c6b4091036ee931882d",
+      "after_sha256": "1456d25f8923ab22bd4b0834c90111ae92e6f7ceba4920c715663ee18e1a09f3"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/06-boundaries.tex",
+      "before_sha256": "7abf770f7ae5eee3f768dacabf3ae72beb92e164481f3dbb15841aaf17732377",
+      "after_sha256": "c130f6ee992077a9d0ab8f39a0bf763ef2f6b1f276120d82ba8e04898385cb73"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/07-roadmap.tex",
+      "before_sha256": "b6955c6ef0ea633ee1419486f50bf4a1dea91ee63e69bc719a3e3f9ffa87481c",
+      "after_sha256": "3ace5595eaa78d42871a92d71c4c10b58b3715c237e8e7847f56771498b66e07"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/sections/08-source-index.tex",
+      "before_sha256": "72ed9950a35eec2a7139b4d80253d2e72f7aa6210c3f5ec24d0c46c5a058cea0",
+      "after_sha256": "f6daccddccfe0dfdc9a910b20cb1d11a11624eb72ea8c2718b1a9e53a103cb21"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/status.tex",
+      "before_sha256": "822819f23ecc410de61273992e42c8a14c1b58c5cd3e605e8901e62a06a3ff06",
+      "after_sha256": "4f4c21fcb8980d3215fc9d6f60795d170cd1d0ed903a9b8dccd2fed4d308de93"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/README.md",
+      "before_sha256": "046f77223a869baa093cfe4cbbce41795fbc3c075bb4ccebb31021aa7b4a78a9",
+      "after_sha256": "9da5ffe63ef79c85c907eb850001de726126aea2bcd4b189efe3a59a08236eca"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/main.pdf",
+      "before_sha256": "66f3df0d5293cbf4728c9b48fbb3b61af19d5b7998c260e0a806fbb348de811b",
+      "after_sha256": "08a762d18d8dc9bc9e769940d2799fddd945908045122d24f8371e92ade07a9c"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/main.tex",
+      "before_sha256": "d5832a1d3cecc47fff1cbf2cf3a6220bfbf481737fc3c62da356003186214659",
+      "after_sha256": "19737f9587fbd61b743cd59e0e74e8ddb2876090cda9d0a623fe611b2113d46e"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/preamble.tex",
+      "before_sha256": "5af5edabff4da2e447d12197b8e4324fe72b5bd8161c5a9cd9863b27922d5770",
+      "after_sha256": "24a3d44885a6eddd1b9e53519ed3a12ce8983f2487909a9b9642607c54f99e8a"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/01-orientation.tex",
+      "before_sha256": "362f8d681053b5c0dcd6fe04ad42d148c7c0834670f67dbc09cdf463482bcae1",
+      "after_sha256": "bb1782bf7ada28bf564bf8935e029abb7c6d6e26720038b55055fb48035dcc18"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/02-mathematical-target.tex",
+      "before_sha256": "e0287e13c56e6097044f0f9f4f5a60725f9b9877357e5d8d5bb4a49de32b3111",
+      "after_sha256": "06c6b5800e585417feb64b21868ca5bf9bb64fc2fa8759a161ca310b3e3a28f9"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/03-formal-language.tex",
+      "before_sha256": "3829541a1de2a4a85745afe1295dcf62f48fbc99a799341e1dd1a6d072df8c97",
+      "after_sha256": "feac11dcd82cbbbc3f54b358fd2920d6b3002e090c8291eeb7ddeddd845c50e7"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/04-proved-chain.tex",
+      "before_sha256": "57658daa59c9c2ad097aa5efb1aadfe9a2acef2db5161667ea527c0f32daf14a",
+      "after_sha256": "beebc2a6907367c17fdae3b627d7738ff02da0f6d16664a3c65f00d570b476de"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/05-security-boundary.tex",
+      "before_sha256": "a2028393d9448c1756e2eb0832b9aba28150423ca489f65b6fb323eaaab46bbd",
+      "after_sha256": "4b7b70eccf27ebd3d0fe8ed8040b81a3af77f589c99b978a75f1cbff4a739dc2"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/06-open-obligations.tex",
+      "before_sha256": "49828e5e6aed3f37edf8050d2455f41cd085fbc78e94d5852bd2504c0311799e",
+      "after_sha256": "aecb303d6aab18097d47e071344876c55cefb9f368294049a87dac6be669815b"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/07-trust-and-reproduction.tex",
+      "before_sha256": "91cf106cff1d8c37801eab7ae2cf4c3b9d1afb91841827ddb577301635b141c7",
+      "after_sha256": "4c63adbdfc3adda9a24dcb1e644696ea491f7e6c8379c5c40a1c353b2469e195"
+    },
+    {
+      "path": "archive/legacy/haetae-topdown-easycrypt/theory-guide/sections/08-source-index.tex",
+      "before_sha256": "afd8a8d03fd92d40f2527e9facd083ba9753eaf3911c4242ccb293bb10f9d118",
+      "after_sha256": "b5fa8526fb755a3b0a37eed9de647b738dd672887d0f08ff047b48e14745ab0b"
+    },
+    {
+      "path": "evidence/README.md",
+      "before_sha256": "0dbcbce5afc9558e00c21622c0667c52f1eff14b182642c3ea4b0898a54431e9",
+      "after_sha256": "3afd806db975fc4c1b0c3d2b1a30d5c12d96de7927ec10ecdea1d70a7cd4d4a5"
+    },
+    {
+      "path": "evidence/current/README.md",
+      "before_sha256": "391f895298370217c4adfbf8fe54c5384c078371d4cb4370184133dd5906f7d5",
+      "after_sha256": "e48d510c0ad427a99b7c3dc4221ec3e598ea3fa9cedb531d756aeb98839ce755"
+    },
+    {
+      "path": "evidence/current/SHA256SUMS",
+      "before_sha256": "9390c955319349c57b5a82823df24c188263b1f02dbfc34128dbc8273d28813c",
+      "after_sha256": "b0ac1c0d17989691f7fea41c90207336db3b073415912e9dd25b65902240deaf"
+    },
+    {
+      "path": "evidence/full-replay-20261111/README.md",
+      "before_sha256": "6a5734204459a4c35b7bb62873550b7006b5edc67b41b5dc85a72b51b4cfb8af",
+      "after_sha256": "f2d75ecfeb15ddc98afb381f9c559381a72618bfb30f0696799e02479b218bdd"
+    },
+    {
+      "path": "evidence/full-replay-20261111/SHA256SUMS",
+      "before_sha256": "006fd732732fa8ed315a0766678f3652cd44c7b8ce03ee2d1a04ee270c8ee706",
+      "after_sha256": "af21fcb45b6d384107d48e8f034d5b8a048e32c0cb84c87aa201d7c4bbc2233c"
+    },
+    {
+      "path": "evidence/readme-publication-fix-20261111/README.md",
+      "before_sha256": "603697ae8c708caff6976c83d3a87706286010d9932202967ef55ec7ae7b0eff",
+      "after_sha256": "f3573a09c9cbb5c4a1a008a4d3184a5bb11794aae1ffb224022b9cae9fc6c6f4"
+    },
+    {
+      "path": "evidence/readme-publication-fix-20261111/SHA256SUMS",
+      "before_sha256": "f1103c6123e7dd8c64a3772dd6bbf27865671bc290f2e8b8086e4defd604a7d7",
+      "after_sha256": "8b6bb40ba4189d0d0fb9dda21fe40445e4d721841575b979c8288ecb33e3da4e"
+    },
+    {
+      "path": "evidence/readme-publication-fix-20261111/reviewed-readme.patch",
+      "before_sha256": "34486dd531b383a0c004eefc84d5ceeb7d039c0d610aa87750aa5252a4a016b0",
+      "after_sha256": null
+    },
+    {
+      "path": "evidence/release-candidate-20261111/README.md",
+      "before_sha256": "b0f9734231788a43757677989f3f1b980275c0ce07fe6aa76fe653c7cbccbb72",
+      "after_sha256": "cbd52a95edb169df59698326ca79950d2ab81013aba042b08e054cbc59296008"
+    },
+    {
+      "path": "evidence/release-candidate-20261111/SHA256SUMS",
+      "before_sha256": "7d9c9f1770175b3797e4f9e444f81c624b669357119cb0cf371ab6a446bb2cae",
+      "after_sha256": "b6e54d0cf6256883a4e6c4c0e8c3addc2bb482ef456e82d714fbcde557b7760f"
+    },
+    {
+      "path": "evidence/toolchain-migration/README.md",
+      "before_sha256": "835436e9ce6926da6dd7f270ca12585c8c977d71d58ffb6e45966e9d7e736b6f",
+      "after_sha256": "ada51ffb0c5a3d7f9959cf164f0b97293e83dd461ede1369ce2fb0362711eecb"
+    },
+    {
+      "path": "evidence/toolchain-migration/index.json",
+      "before_sha256": "f040c03cc2e150f7ff29f2e8e8f8fd4acb4dfa4d1a28cd872140cdc9294e8942",
+      "after_sha256": "ceccac460998df09033a1feb1e17cd71f5e13cb971761d86042ea0a794f5746f"
+    },
+    {
+      "path": "haetae-hardened/publication-migration.json",
+      "before_sha256": "cc49024b7c2d898b02f25a72931c190d1c753287293106c99b524e6fb866f4f9",
+      "after_sha256": "e38f234e3c1acc10fc46a0965950486b93cba87da9dde11c67720a8093fb5004"
+    },
+    {
+      "path": "haetae-hardened/scripts/materialize.py",
+      "before_sha256": "1482913dabf91c6a71c7358cde3655003c0ab9c4587ee270179ed4e1bc0a37dd",
+      "after_sha256": "4f654801fece606b896e1817200cff931ea40df02064a2f5516d00dd679c86c0"
+    },
+    {
+      "path": "haetae-hardened/tests/publication-migration.py",
+      "before_sha256": "1ab681be536938cc3808c710aa457fca2a4b386c10d1c927f0a5e6e465758303",
+      "after_sha256": "a708d5dcacb27cc8010243d06900da801d49227d8546dd024f3ec2425441e671"
+    },
+    {
+      "path": "scripts/check-evidence.py",
+      "before_sha256": "98f71cfb6707e98b225c39f19f9e2fbbded288cad458ff7b2525c32329b7d7c7",
+      "after_sha256": "959984d07c26bc2eb57f8e6d4d1ded465ff89b1c6c87591b1b034cd4dfc26b0e"
+    },
+    {
+      "path": "tests/test_evidence.py",
+      "before_sha256": "43a25b022bb7865f980acab1df237fdb9ca96aa91fbb8b59f64c1b5f8c3830f8",
+      "after_sha256": "ea161994ec2c15728286a35040e14ea451ce6511c9fd388763ecda64cc76bf57"
+    },
+    {
+      "path": "docs/english-edition.md",
+      "before_sha256": null,
+      "after_sha256": "9aea9a3cffce6e36e7d1bb8808e532bb558fbcf5fc256cbc6db138fd33658540"
+    },
+    {
+      "path": "evidence/readme-publication-fix-20261111/reviewed-readme.md",
+      "before_sha256": null,
+      "after_sha256": "5bbd6e14b75d494396b5721cce3aed2551c74af0e7cb23d3ef28eecf8540aa56"
+    }
+  ]
+}

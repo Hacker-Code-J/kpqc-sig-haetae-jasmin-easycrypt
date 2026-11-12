@@ -1,27 +1,28 @@
-\section{의존성에 따른 다음 작업과 참여 지점}
+\section{Dependency-ordered next steps and contribution points}
 \label{sec:roadmap}
 
-\subsection{현재 단일 우선순위: security ExpandVecA 의미론 수리}
+\subsection{The current single priority: repairing security ExpandVecA semantics}
 
-최신 post-freeze gate는 \CurrentGate 다. 첫 의무는
+The latest post-freeze gate is \CurrentGate. The first obligation is
 \begin{quote}
 \CurrentPriority
 \end{quote}
-이다. post-freeze NTT/Rq/HAETAE 운송과 actual \identifier{avec}의 paper \(a\)
-해석은 컴파일되었다. 그러나 기존 security-side object는 actual SHAKE128/rejection
-expansion도 paper \(qj\)도 아닌 synthetic generator다. 이 불일치를 고치지 않은
-채 전체 KeyGen 식을 합성하면 concrete coefficient 44985와 401을 같다고 놓게 된다.
-한편 frozen paper의 \FrozenPaperGate 는 별도 상태다. 순수 2-by-4 행곱
-specialization이 post-freeze에 생겼어도 actual Verify helper loop와 CRT/freeze
-절차 정리는 여전히 열려 있다.
+Post-freeze NTT/Rq/HAETAE transport and the interpretation of actual
+\identifier{avec} as paper \(a\) have compiled. However, the existing security-side
+object is a synthetic generator, neither the actual SHAKE128/rejection expansion
+nor paper \(qj\). Composing the full KeyGen equation without repairing this mismatch
+would equate the concrete coefficients 44985 and 401. Meanwhile, the frozen
+paper's \FrozenPaperGate\ is a separate status. Although a pure 2-by-4 row-product
+specialization became available post-freeze, the actual Verify helper loop and
+CRT/freeze procedure theorems remain open.
 
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}[node distance=6mm]
   \node[provennode] (snapshot) {1. actual matrix/finalizer\\snapshot};
-  \node[provennode, below=of snapshot] (ntt) {2. full-NTT와 native \(R_q\)\\row product};
+  \node[provennode, below=of snapshot] (ntt) {2. full-NTT and native \(R_q\)\\row product};
   \node[provennode, below=of ntt] (repr) {3. \(R_q\)--HAETAE\\dot representation};
-  \node[provennode, below=of repr] (avec) {4. actual \identifier{avec}\(\to\)paper \(a\)\\paper \(qj\) 별도 합성};
+  \node[provennode, below=of repr] (avec) {4. actual \identifier{avec}\(\to\)paper \(a\)\\separate paper \(qj\) composition};
   \node[provennode, below=of avec] (faithful) {5. actual-carrier structured product\\\(\equiv qj\pmod{2q}\)};
   \node[blockednode, below=of faithful] (security) {6. security ExpandVecA\\semantic equivalence (STOP)};
   \node[blockednode, below=of security] (paper) {7. security-model\\KG-1--KG-4 lift};
@@ -32,341 +33,345 @@ specialization이 post-freeze에 생겼어도 actual Verify helper loop와 CRT/f
   \draw[openarrow] (faithful) -- (security);
   \draw[openarrow] (security) -- (paper);
 \end{tikzpicture}
-\caption{post-freeze KeyGen의 현재 절단면. actual-carrier 전용 coefficient-product까지
-닫혔지만, generic security ExpandVecA/\identifier{matrix_vec_mul} 의미론에서 중단했다.}
+\caption{The current post-freeze KeyGen cut. The coefficient-product dedicated to
+actual carriers is closed, but work stopped at generic security
+ExpandVecA/\identifier{matrix_vec_mul} semantics.}
 \label{fig:next-order}
 \end{figure}
 
-codec 선에서는 Week~15에 fixed all-6 반환 실행의 failure exclusion까지 닫혔다.
-그러나 fixed-input termination/losslessness는 열려 있고, \(h\) suffix codec은
-이번 one-week MINCORE 범위 전환으로 \statusdeferred 되었다. 이 두 사실은 현재
-KeyGen blocker와 독립적이다.
+On the codec line, Week~15 closed failure exclusion for returning fixed all-6
+executions. Fixed-input termination/losslessness remain open, however, and the
+\(h\) suffix codec became \statusdeferred\ when scope moved to this one-week
+MINCORE effort. Both facts are independent of the current KeyGen blocker.
 
-\subsection{1단계 완료: encoder}
+\subsection{Stage 1 complete: encoder}
 
-\claimid{OBL-RANS-ENCODE-REFINEMENT}는 실제
-\identifier{_rans_encode}를 여는
-\theoremname{actual_rans_encode_trace_closure}와 그 확장된 따름정리(corollary)
-\theoremname{actual_rans_encode_trace_refinement}로 닫혔다. 성공 분기(success
-branch)의 사후조건(postcondition)은 다음을 동시에 준다.
-
-\begin{itemize}
-  \item actual output suffix가 canonical symbol list의
-        \identifier{trace_bytes}와 점별로 같음;
-  \item 바깥 반복(outer iteration)마다 actual word state가 suffix의 순수
-        \identifier{encode_trace} state와 같음;
-  \item actual \(off\)와 trace byte 길이가
-        \(off+|\operatorname{TraceBytes}|=1024\)를 만족함;
-  \item 이미 증명된 final 4-byte state 직렬화(serialization)를 normalization
-        suffix 앞에 합성하여 segment 순서를 확정함;
-  \item 쓰지 않은 접두부(unwritten prefix)의 frame을 유지함;
-  \item 실패 branch를 숨기지 않음.
-\end{itemize}
-
-Week~10의 array/list suffix 점화식(recurrence), actual reciprocal word step,
-내부 byte/frame/no-underflow, final serialization leaf와 성공 offset/size 범위는
-Week~11의 tail-aware 바깥/안쪽 불변식(outer/inner invariant), generated table
-load--protect--word-update 보조정리(lemma), final-store 합성(composition)에
-연결되었다. 따라서 임의의 valid trace나 새 증인 버퍼(witness buffer)가 아니라
-실제 반환 버퍼의 suffix가 정준 trace 바이트(canonical trace bytes)와 일치한다.
-
-다만 이는 Hoare 부분정당성(Hoare partial correctness)이다. 실제 실행이 성공
-분기(success branch)에 도달한다는 성공 증인(success witness)과 종료성(termination)은
-이 Week~11 정리 하나에서 따라오지 않는다. Week~15는 fixed all-6 반환 실행의
-failure를 별도 정리로 배제했지만 종료성은 여전히 남는다.
-
-\subsection{2단계 완료: decoder}
-
-\claimid{OBL-RANS-DECODE-REFINEMENT}는 실제
-\identifier{_rans_decode}를 여는
-\theoremname{actual_rans_decode_trace_refinement}로 닫혔다. exact-trace 입력
-관계(input relation) 아래 다음이 귀납법(induction)으로 증명되었다.
+\claimid{OBL-RANS-ENCODE-REFINEMENT} was closed by
+\theoremname{actual_rans_encode_trace_closure}, which opens actual
+\identifier{_rans_encode}, and its expanded corollary
+\theoremname{actual_rans_encode_trace_refinement}. The success-branch
+postcondition establishes all of the following together.
 
 \begin{itemize}
-  \item iteration \(i\)에서 decoded prefix가 원래 symbol prefix와 같음;
-  \item state/cursor가 pure \(x_i,c_i\)와 같음;
-  \item actual table lookup이 구간 분할(interval partition)의 유일한 \(s_i\)를 선택함;
-  \item nested normalization loop가 \(\beta_i\)를 정확한 순서로 소비함;
-  \item 내부 loop 종료에서 \(state=2^{23}\)을 유도하고, 반환값에서
-        \(off=size\), \(bad=0\)을 결론냄;
-  \item decoded tail frame.
+  \item The actual output suffix equals the canonical symbol list's
+        \identifier{trace_bytes} pointwise;
+  \item at each outer iteration, the actual word state equals the suffix's pure
+        \identifier{encode_trace} state;
+  \item actual \(off\) and trace-byte length satisfy
+        \(off+|\operatorname{TraceBytes}|=1024\);
+  \item the already proved final 4-byte state serialization is composed before
+        the normalization suffix, fixing segment order;
+  \item the unwritten-prefix frame is preserved;
+  \item the failure branch is not hidden.
 \end{itemize}
 
-encoder와 decoder를 직접 lockstep으로 묶는 방법은 reverse/forward 방향과
-중간 buffer copy 때문에 proof surface가 커진다. 이미 구성된 순수 trace를
-공통 매개체로 삼아 두 refinement를 독립적으로 검증했다. 단, 이 decoder
-정리(theorem)는 입력 trace를 전제로 받는 Hoare 부분정당성(Hoare partial
-correctness)이며 종료성(termination)을 주지 않는다.
+Week~10's array/list suffix recurrence, actual reciprocal word step, inner
+byte/frame/no-underflow results, final serialization leaf and successful
+offset/size ranges were connected to Week~11's tail-aware outer/inner invariants,
+generated table load--protect--word-update lemmas and final-store composition.
+Consequently, the suffix of the actual returned buffer, rather than an arbitrary
+valid trace or a fresh witness buffer, agrees with the canonical trace bytes.
 
-\subsection{3단계 완료: actual harness inverse}
+This is nevertheless Hoare partial correctness. A success witness showing that
+an actual execution reaches the success branch, and termination, do not follow
+from this Week~11 theorem alone. Week~15 separately excluded failure in returning
+fixed all-6 executions, but termination still remains.
 
-\claimid{OBL-RANS-CORE-INVERSE}는
-\sourcepath{Mode2RansCoreActualInverse.ec}의
-\theoremname{actual_rans_encode_copy_decode_inverse}로 닫혔다. 이 정리(theorem)는
-\sourcepath{Mode2RansActualInverse.ec}에 정의된 actual harness를 직접 대상으로
-삼아 다음 의미론적 결론을 낸다. 두 파일명은 각각 ``harness 정의/control''과
-``Week~13 semantic inverse''를 가리키며, 후자는 전자의 control-only 정리(theorem)를
-의미론적 결과로 잘못 읽지 않도록 별도 증명된 것이다.
+\subsection{Stage 2 complete: decoder}
+
+\claimid{OBL-RANS-DECODE-REFINEMENT} was closed by
+\theoremname{actual_rans_decode_trace_refinement}, which opens actual
+\identifier{_rans_decode}. Under the exact-trace input relation, induction proved
+the following.
 
 \begin{itemize}
-  \item encoder 실패 분기(failure branch)를 숨기지 않고 decoder를 실행하지 않음;
-  \item encoder 성공 suffix의 \identifier{segment_matches}를 actual copy의
-        \identifier{slice_eq}에 합성함;
-  \item copy된 buffer에서 decoder의 pointwise exact-read 전제를 산출함;
-  \item actual decoder 반환에서 \(bad=0\), exact consumption, 1024-symbol
-        등식(equality), tail frame을 얻음;
-  \item 임의의 trace, 새 증인 버퍼(witness buffer), encoder 성공을 외부 전제로
-        넣지 않음.
+  \item At iteration \(i\), the decoded prefix equals the original symbol prefix;
+  \item state/cursor equal the pure \(x_i,c_i\);
+  \item actual table lookup selects the interval partition's unique \(s_i\);
+  \item the nested normalization loop consumes \(\beta_i\) in the exact order;
+  \item \(state=2^{23}\) is derived at the internal loop exit, and the return
+        values establish \(off=size\) and \(bad=0\);
+  \item the decoded tail frame.
 \end{itemize}
 
-이 정리(theorem)는 성공 조건부 부분정확성(success-conditioned partial
-correctness)이다. canonical all-zero array는 전제의 비공허성(non-vacuity)을
-보이지만, encoder 성공의 존재나 전체 실행의 종료성(termination)을 자동으로
-주지 않는다. Week~13 당시 성공 도달성은
-\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}의 별도 의무였고, Week~15는 그중
-fixed all-6 Hoare 사후조건만 닫았다.
+Connecting encoder and decoder directly in lockstep enlarges the proof surface
+because of their reverse/forward directions and the intervening buffer copy.
+The two refinements were verified independently using the already constructed
+pure trace as a common intermediary. This decoder theorem assumes an input
+trace and establishes Hoare partial correctness, not termination.
 
-\subsection{4단계 완료: production full-HBZ wrapper}
+\subsection{Stage 3 complete: actual harness inverse}
 
-\claimid{OBL-SIG-HBZ-ENCODE-DECODE}는
-\theoremname{signature_pack_unpack_hbz_full_actual_exact}와
-\theoremname{signature_pack_unpack_hbz_full_inverse_mode2}로 닫혔다. actual
-\identifier{_encode_hb_z1_full}과 \identifier{_decode_hb_z1_full}을 직접 여는
-사슬은 다음을 결론낸다.
+\claimid{OBL-RANS-CORE-INVERSE} was closed by
+\theoremname{actual_rans_encode_copy_decode_inverse} in
+\sourcepath{Mode2RansCoreActualInverse.ec}. This theorem directly concerns the
+actual harness defined in \sourcepath{Mode2RansActualInverse.ec} and derives the
+following semantic conclusions. The two filenames refer respectively to
+``harness definition/control'' and ``Week~13 semantic inverse''; the latter
+was proved separately to prevent misreading the former's control-only theorem
+as a semantic result.
 
 \begin{itemize}
-  \item canonical HBZ coefficient를 actual prepare가 정준 기호열(canonical
-        symbol stream)로 옮김;
-  \item actual rANS core 정리(theorem)의 실패/성공 분기를 그대로 보존함;
-  \item 성공 시 actual apply가 복원된 symbol을 원래 coefficient로 되돌림;
-  \item wrapper-level size, state, 입력/출력 tail frame을 연결함;
-  \item actual success witness나 decoder 결과를 외부 전제로 다시 요구하지 않음.
+  \item The encoder failure branch remains explicit and does not run the decoder;
+  \item \identifier{segment_matches} of the encoder's successful suffix is
+        composed with \identifier{slice_eq} of the actual copy;
+  \item the copied buffer supplies the decoder's pointwise exact-read premises;
+  \item actual decoder return gives \(bad=0\), exact consumption, 1024-symbol
+        equality and the tail frame;
+  \item no arbitrary trace, fresh witness buffer or encoder success is added
+        as an external premise.
 \end{itemize}
 
-이 단계는 성공 조건부 부분정확성(success-conditioned partial correctness)으로
-\statusproved 다 \cite{week14-report,hbz-full-wrapper-composition}. 실제 성공
-가지의 일반 도달가능성(reachability)과 종료성(termination)은 별도
-정리(theorem)다. Week~15는 fixed all-zero 입력의 반환 실행에 한해 failure를
-배제한다.
+This is success-conditioned partial correctness. The canonical all-zero array
+shows non-vacuity of the premises but does not automatically establish existence
+of encoder success or termination of the complete execution. In Week~13,
+success reachability was a separate obligation,
+\claimid{OBL-RANS-ACTUAL-SUCCESS-WITNESS}; Week~15 closed only its fixed all-6
+Hoare postcondition.
 
-\subsection{5단계 완료: fixed all-6 success 사후조건}
+\subsection{Stage 4 complete: production full-HBZ wrapper}
 
-Week~15의 \theoremname{actual_rans_encode_all_six_success}는 actual failure가
-trace length \(>1020\)을 요구한다는 정리와 all-6 trace의 \(\le1020\) budget을
-모순시켜 반환하는 fixed-input 실행의 \(bad=0\)을 얻는다. focused/production
-lift는 \(4\le size\le1024\), exact trace/frame과 zero coefficient round trip을
-동시에 보인다 \cite{week15-report,rans-actual-success-witness}.
+\claimid{OBL-SIG-HBZ-ENCODE-DECODE} was closed by
+\theoremname{signature_pack_unpack_hbz_full_actual_exact} and
+\theoremname{signature_pack_unpack_hbz_full_inverse_mode2}. The chain directly
+opening actual \identifier{_encode_hb_z1_full} and
+\identifier{_decode_hb_z1_full} concludes the following.
 
-이 단계의 완료 판정은 fixed-input Hoare 부분정확성이다. termination,
-losslessness, non-vacuous execution 또는 \identifier{phoare}로 승격하지 않는다.
-원래 뒤따를 예정이던 \(h\) suffix, metadata/padding, full signature inverse와
-Sign output tail reach는 Week~16 MINCORE 전환으로 각각 deferred 또는 blocked
-상태를 유지한다.
+\begin{itemize}
+  \item Actual prepare maps canonical HBZ coefficients to a canonical symbol stream;
+  \item the actual rANS core theorem's failure/success branches are preserved;
+  \item on success, actual apply maps recovered symbols back to the original
+        coefficients;
+  \item wrapper-level size, state and input/output tail frames are connected;
+  \item no actual success witness or decoder result is required again as an
+        external premise.
+\end{itemize}
 
-\subsection{6단계 frozen 종료: KG--NTT--MUL 감사}
+This stage is \statusproved\ as success-conditioned partial correctness
+\cite{week14-report,hbz-full-wrapper-composition}. General reachability of the
+actual success branch and termination are separate theorems. Week~15 excludes
+failure only for returning executions on the fixed all-zero input.
 
-\theoremname{output_row_from_mode2_ntt_words}와
-\theoremname{actual_m23_matrix_snapshot_rows_explicit}는
-\identifier{KeygenM23ArithmeticSpec.output_row}를 actual full-invNTT/pointwise
-word 표현으로 rewrite하고 두 active row에 적용하는 마지막 sound edge를 닫았다
-\cite{week16-kg-ntt-mul-report}. frozen paper 시점에는 다음 두 화살표가 없었다.
+\subsection{Stage 5 complete: fixed all-6 success postcondition}
+
+Week~15's \theoremname{actual_rans_encode_all_six_success} derives \(bad=0\)
+for returning fixed-input executions by contradicting the theorem that actual
+failure requires trace length \(>1020\) with the all-6 trace budget \(\le1020\).
+Focused/production lifts establish \(4\le size\le1024\), exact trace/frame
+and the zero coefficient round trip together
+\cite{week15-report,rans-actual-success-witness}.
+
+The completion verdict at this stage is fixed-input Hoare partial correctness.
+It is not promoted to termination, losslessness, non-vacuous execution or
+\identifier{phoare}. The originally planned subsequent \(h\) suffix,
+metadata/padding, full signature inverse and Sign output tail reach remain
+respectively deferred or blocked after the transition to Week~16 MINCORE.
+
+\subsection{Stage 6 frozen stop: KG--NTT--MUL audit}
+
+\theoremname{output_row_from_mode2_ntt_words} and
+\theoremname{actual_m23_matrix_snapshot_rows_explicit} closed the final sound
+edge rewriting \identifier{KeygenM23ArithmeticSpec.output_row} into actual
+full-invNTT/pointwise word expressions and applying them to two active rows
+\cite{week16-kg-ntt-mul-report}. At the frozen-paper point, the following two
+arrows were absent:
 \[
   \operatorname{array256\_mont}
     (\operatorname{full\_invntt}(\widehat a\odot\operatorname{full\_ntt}(p)))
   \;\not\Longrightarrow\;
   (\operatorname{full\_invntt}\widehat a)\star_{R_q}p,
 \]
-그리고 native \identifier{Rq.poly} 곱을 보안 모형의 integer-list
-\identifier{poly_mul}/\identifier{matrix_vec_mul}로 옮기는 어댑터도 없다. 첫
-화살표에는 odd-root orthogonality와 full-NTT convolution이 필요했다. 시간 제한
-감사는 이를 새 전제로 가정하지 않고 \identifier{STOP-KG-NTT}로 종료했다.
-post-freeze에 이 순수 대수와 \(R_q\)--HAETAE 표현 간극은 닫혔지만, 이 역사적
-frozen 판정 자체는 변경하지 않는다.
+and the adapter transporting native \identifier{Rq.poly} multiplication to the
+security model's integer-list \identifier{poly_mul}/\identifier{matrix_vec_mul}
+was also absent. The first arrow required odd-root orthogonality and full-NTT
+convolution. The time-bounded audit did not assume them as new premises and
+ended with \identifier{STOP-KG-NTT}. Post-freeze work closed these pure-algebra
+and \(R_q\)--HAETAE representation gaps, but does not change this historical
+frozen verdict itself.
 
-\subsection{7단계 동결: accepted Sign core}
+\subsection{Stage 7 frozen: accepted Sign core}
 
-다음 세 actual helper의 순차 실행은 투명한 harness에서 합성되어 control
-정리까지 컴파일됐다.
+Sequential execution of the following three actual helpers was composed in a
+transparent harness and compiled through its control theorem.
 \begin{center}
 \identifier{_sf_round_challenge_mode2}\quad
 \identifier{_sf_z_check}\quad
 \identifier{_sf_hint_mode2}
 \end{center}
-컴파일된 control theorem은
-\sourcepath{Mode2SignAcceptedCore.ec}의
+The compiled control theorem in \sourcepath{Mode2SignAcceptedCore.ec} is
 \begin{center}
 \theoremname{actual_sign_accepted_core_branch_control_mode2}
 \end{center}
-이다. 그러나 headline S-1--S-7 정리는
-\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct} 부재로
-\identifier{STOP-SIGN-CHAL-MODE2}에서 동결되었다.
-반환하고 accept한 실행에 대해 commitment/challenge, response
-\(z=y+(-1)^bcs\), 두 exact integer norm predicate와 coefficientwise hint 식을
-도출해야 한다 \cite{week16-mincore-plan,claim-ledger}.
+However, the headline S-1--S-7 theorem was frozen at
+\identifier{STOP-SIGN-CHAL-MODE2} because
+\identifier{sf_challenge_mode2_highbits_lsb_sampleinball_correct} is absent.
+For returning, accepted executions, commitment/challenge, the response
+\(z=y+(-1)^bcs\), two exact integer norm predicates and the coefficientwise hint
+equation must be derived \cite{week16-mincore-plan,claim-ledger}.
 
-headline 정리는 아직 컴파일된 증명으로 세어서는 안 된다.
-사전조건이 \identifier{reject=0}이나 최종 식을 가정해서도 안 된다. sampler
-분포, signing-loop 종료성, packing과 전체 1474-byte signature는 이 단계의 범위
-밖이다.
+The headline theorem must not yet be counted as a compiled proof. Its
+precondition must not assume \identifier{reject=0} or the final equations.
+Sampler distributions, signing-loop termination, packing and the complete
+1474-byte signature are outside this stage's scope.
 
-\subsection{8단계 frozen 종료: actual Verify helper chain}
+\subsection{Stage 8 frozen stop: actual Verify helper chain}
 
-\sourcepath{Mode2VerifyCoreSequence.ec}의
-\theoremname{actual_verify_core_sequence_branch_control_mode2}와
-\theoremname{actual_verify_core_sequence_input_snapshots_mode2}는 actual
-Verify의 다섯 helper 호출 순서와 입력 snapshot을 고정한다.
+In \sourcepath{Mode2VerifyCoreSequence.ec},
+\theoremname{actual_verify_core_sequence_branch_control_mode2} and
+\theoremname{actual_verify_core_sequence_input_snapshots_mode2} fix the actual
+Verify five-helper call sequence and input snapshots.
 \sourcepath{Mode2VerifyPrepareNorm.ec},
-\sourcepath{Mode2VerifyRecover.ec},
-\sourcepath{Mode2VerifyTailChallenge.ec}는 각각
+\sourcepath{Mode2VerifyRecover.ec}, and
+\sourcepath{Mode2VerifyTailChallenge.ec} respectively provide
 \theoremname{verify_prepare_z1_wprime_mode2_word_exact},
 \theoremname{actual_sign_verify_recover_w_z2_mode2_word_semantics},
-\theoremname{verify_tail_exact_trace_mode2}와
-\theoremname{poly_mismatch_mode2_word_exact}를 제공한다
-\cite{week16-verify-report}. 따라서 V-1/V-2/V-5/V-6 projection, W64 norm gate,
-tail trace/mismatch expression은 helper-local 범위에서 닫혔다.
+\theoremname{verify_tail_exact_trace_mode2}, and
+\theoremname{poly_mismatch_mode2_word_exact}
+\cite{week16-verify-report}. Thus V-1/V-2/V-5/V-6 projections, the W64 norm gate,
+and tail trace/mismatch expression are closed at helper-local scope.
 
-그러나 actual 2-by-4
+However, \identifier{verify_matrix_ntt_acc_mode2_cols4_correct} for actual 2-by-4
 \identifier{_polyvec_ntt}/\identifier{_polymat_pointwise_acc}/
-\identifier{_polyvec_invntt}의
-\identifier{verify_matrix_ntt_acc_mode2_cols4_correct}와 actual from-CRT/freeze의
-\identifier{verify_crt_freeze_mode2_word_exact}가 없다. challenge leaf
-\identifier{verify_tail_m23_highbits_lsb_sampleinball_correct}도 독립적으로 남는다.
-이것이 frozen \FrozenPaperGate 다. post-freeze의 pure
-\theoremname{verify_mode2_row_product_from_reprs}는 첫 절차 leaf의 대수적 목표를
-주지만 actual loop refinement를 대신하지 않는다.
+\identifier{_polyvec_invntt}, and
+\identifier{verify_crt_freeze_mode2_word_exact} for actual from-CRT/freeze,
+are absent. The challenge leaf
+\identifier{verify_tail_m23_highbits_lsb_sampleinball_correct} also remains
+independently open. This is the frozen \FrozenPaperGate. The post-freeze pure
+\theoremname{verify_mode2_row_product_from_reprs} supplies the first procedure
+leaf's algebraic goal but does not replace actual loop refinement.
 
-\subsection{9단계 진행: post-freeze actual avec/qj 감사}
+\subsection{Stage 9 in progress: post-freeze actual avec/qj audit}
 
 \theoremname{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral action, generic row
-product, native \(R_q\) 3항 곱과 HAETAE dot representation은 이제
-\statusproved 다. actual sampler 쪽도 nonce 515/516, SHAKE128 framing,
-little-endian parsing, \(<64513\) rejection과 unchanged storage를 paper \(a\)로
-해석하며 paper \(qj\)를 snapshot equation에 별도로 합성한다
-\cite{post-freeze-kg-rq-haetae-report,
+products, native \(R_q\) 3-term products and HAETAE dot representation are
+now \statusproved. The actual sampler side also interprets nonces 515/516,
+SHAKE128 framing, little-endian parsing, \(<64513\) rejection and unchanged
+storage as paper \(a\), and separately composes paper \(qj\) into the snapshot
+equation \cite{post-freeze-kg-rq-haetae-report,
 post-freeze-kg-actual-avec-qj-report}.
 
-현재 첫 목표는 \claimid{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}다. security
-\identifier{public_rounding_vector_seed}가 actual expansion과 동일한 semantics를
-갖도록 specification을 교체·정제하고, coefficientwise actual-array
-representation을 증명해야 한다. 이후에도 paper \(qj\) correction을 별도로
-보존하는 actual-carrier width-6 coefficient-product packaging은 최신
-\sourcepath{KgFaithfulAugmentedModel.ec}에서 닫혔다. 이 파일은 actual
-matrix/secret 구체화, generated HAETAE \identifier{poly_dot} 운송과
-\theoremname{actual_faithful_augmented_productE}를 거쳐 actual checked parent의
-product \(\equiv qj\pmod{2q}\) 식을 standalone fresh-compiled theorem으로
-합성한다. 이 product는 actual matrix/secret만을 입력으로 받고 중간
-2-by-3 block을 그 열에서 복원하므로 \FaithfulAugmentedVerdict 로 판정한다.
-남은 의무는 이 전용 mod-\(2q\) block semantics를 기존 mod-\(q\), width-4
-security model로 잘못 동일시하지 않은 채, synthetic security object를 actual
-ExpandVecA semantics로 교체·정제하는 별도 대응 정리다.
+The first current goal is \claimid{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}.
+The specification must be replaced/refined so that security
+\identifier{public_rounding_vector_seed} has the same semantics as actual
+expansion, and a coefficientwise actual-array representation must be proved.
+The actual-carrier width-6 coefficient-product packaging that separately preserves
+the paper \(qj\) correction is closed in the latest
+\sourcepath{KgFaithfulAugmentedModel.ec}. Through actual matrix/secret
+concretization, generated HAETAE \identifier{poly_dot} transport and
+\theoremname{actual_faithful_augmented_productE}, this file composes the actual
+checked parent's product equation \(\equiv qj\pmod{2q}\) as a standalone,
+freshly compiled theorem. This product takes only the actual matrix/secret as
+input and reconstructs the middle 2-by-3 block from its columns, giving the
+verdict \FaithfulAugmentedVerdict. The remaining obligation is a separate
+correspondence theorem replacing/refining the synthetic security object with
+actual ExpandVecA semantics without incorrectly identifying these dedicated
+mod-\(2q\) block semantics with the existing mod-\(q\), width-4 security model.
 
-각 부모를 닫을 때 자식
-정리(child theorem)의 전제가 실제 앞 절차의 결론에서 나오는지 확인해야 한다.
-external precondition으로 원하는 등식을 다시 요구하면 합성이 아니라 조건부
-재진술이다.
+When closing each parent, check that the child theorem's premises follow from
+the actual preceding procedure's conclusions. Requiring the desired equality
+again as an external precondition is a conditional restatement, not composition.
 
-\subsection{동결된 product/replay 선은 별도로 다룬다}
+\subsection{Treat the frozen product/replay line separately}
 
-codec 선과 독립적으로 \claimid{OBL-MU-PRODUCT-REPLAY}는 explicit paper
-boundary로 남아 있다. 재개하려면 wrapper 추가가 아니라 다음 중 하나가 필요하다.
+Independently of the codec line, \claimid{OBL-MU-PRODUCT-REPLAY} remains an
+explicit paper boundary. Resuming it requires one of the following, not another
+wrapper.
 
 \begin{itemize}
-  \item hash 반환값을 ghost observation에 저장하는 시점까지 보존하는 sound
-        relational sequencing lemma;
-  \item 두 continuation을 함께 처리하는 product program과 그 semantics;
-  \item Sign continuation의 losslessness/termination을 먼저 증명한 뒤 사용할 수
-        있는 정당한 one-sided elimination;
-  \item hash-time snapshot을 trace가 보존하도록 하는 최소 instrumentation 변경과
-        그 actual-to-trace exactness 재증명.
+  \item A sound relational sequencing lemma preserving hash return values until
+        they are stored in ghost observations;
+  \item a product program handling both continuations and its semantics;
+  \item justified one-sided elimination after first proving losslessness/termination
+        of the Sign continuation;
+  \item a minimal instrumentation change making the trace preserve the hash-time
+        snapshot, with a renewed proof of actual-to-trace exactness.
 \end{itemize}
 
-어느 선택도 단순한 byte lemma가 아니다. program logic 설계와 theorem surface
-trade-off를 먼저 검토해야 한다.
+None of these is a simple byte lemma. Program-logic design and theorem-surface
+trade-offs must be considered first.
 
-\subsection{순수 대수학자가 바로 기여할 수 있는 문제}
+\subsection{Problems to which pure algebraists can contribute directly}
 
-\begin{question}[rANS를 제한된 전단사(restricted bijection)로 패키징하기]
-집합(set)
+\begin{question}[Packaging rANS as a restricted bijection]
+Using the sets
 \[
   \mathcal X_s=\{x:2^{23}\le x<2^{31}\},\qquad
   \mathcal N_s=\{r:1\le r<x_{\max}(s)\}
 \]
-와 0/1/2-byte 섬유(fiber)를 사용해 normalization--fast-step을 명시적인
-부분 전단사(partial bijection)로 패키징할 수 있는가? 현재 개별 lemma를 actual
-loop invariant에서 재사용하기 쉬운 하나의 귀납 정리(induction theorem)로 묶는
-것이 목표다.
+and 0/1/2-byte fibers, can normalization--fast-step be packaged as an explicit
+partial bijection? The goal is to combine the current individual lemmas into
+one induction theorem that is easy to reuse in actual loop invariants.
 \end{question}
 
-\begin{question}[표현의 몫(quotient)과 정준 단면(canonical section)]
-signature 각 구성요소에 대해 raw word 공간(word space), 바이트 몫(byte quotient),
-정준 대표자계(canonical system of representatives), decoder 단면(section)을 한
-번에 기술하는 공통 구조를 만들 수 있는가?
-새 추상화는 실제 기존 술어를 재사용하고, prefix/HBZ/향후 \(h\) codec의
-중복만 제거해야 한다.
+\begin{question}[Representation quotients and canonical sections]
+Can a common structure describe, for each signature component, the raw word
+space, byte quotient, canonical system of representatives and decoder section
+at once? A new abstraction should reuse the actual existing predicates and
+remove only duplication across prefix/HBZ/future \(h\) codecs.
 \end{question}
 
-\begin{question}[ExpandVecA, \(R_q\), mod-\(2q\) 표현]
-닫힌 NTT·\(R_q\)·HAETAE 결과의 정확한 명제(proposition)/전제(premise)를
-유지하면서 actual SHAKE128/rejection \identifier{avec}를 faithful security
-matrix로 어떻게 표현할 수 있는가? paper \(qj\) correction을 modulo-\(q\)
-vector와 혼합하지 않고, 새 actual-carrier structured coefficient-product를
-augmented matrix/secret만의 generic ring \identifier{matrix_vec_mul} 및 security
-model에 어떻게 연결할 수 있는가? Verify 쪽은
-동일한 순수 4열 행곱을 actual NTT/CRT/freeze procedure theorem에 연결하는 별도
-가환사각형(commutative square)이 필요하다.
+\begin{question}[ExpandVecA, \(R_q\), and mod-\(2q\) representations]
+How can actual SHAKE128/rejection \identifier{avec} be represented as a faithful
+security matrix while preserving the exact propositions and premises of the
+closed NTT, \(R_q\), and HAETAE results? Without mixing the paper \(qj\)
+correction into a modulo-\(q\) vector, how can the new actual-carrier structured
+coefficient-product be connected to generic ring \identifier{matrix_vec_mul}
+defined solely from the augmented matrix/secret and to the security model?
+The Verify side needs a separate commutative square connecting the same pure
+4-column row product to actual NTT/CRT/freeze procedure theorems.
 \end{question}
 
-\begin{question}[high/low decomposition의 정수 경계(integer bound)]
-논문의 \(r=\alpha\operatorname{HighBits}(r)+\operatorname{LowBits}(r)\)와
-실제 고정폭 rounding/sign-extension/packing 사이의
-정준 대표자(canonical representative) 조건을 정확히
-분리할 수 있는가? 이 작업은 전체 challenge input과 norm/hint correctness의
-대수적 중심이다.
+\begin{question}[Integer bounds in high/low decomposition]
+Can the canonical-representative conditions between the paper equation
+\(r=\alpha\operatorname{HighBits}(r)+\operatorname{LowBits}(r)\) and actual
+fixed-width rounding/sign-extension/packing be separated precisely?
+This is the algebraic core of complete challenge-input and norm/hint correctness.
 \end{question}
 
-\begin{question}[rejection distribution]
-partial map으로 모델링된 retry loop를 확률 커널(probability kernel)로 올리고,
-수락 분포(accepted distribution)와 termination/loss bound를 논문 sampler에
-연결할 수 있는가?
-결정론적 Hoare 정리(deterministic Hoare theorem)와
-분포 정리(distribution theorem)를 섞지 않는 interface 설계가 필요하다.
+\begin{question}[Rejection distribution]
+Can a retry loop modeled as a partial map be lifted to a probability kernel,
+and its accepted distribution and termination/loss bound connected to the paper
+sampler? The interface must keep deterministic Hoare theorems distinct from
+distribution theorems.
 \end{question}
 
-\subsection{대수기하학자의 기술이 유용한 곳}
+\subsection{Where algebraic-geometric skills are useful}
 
-현재 작업이 스킴 이론적(scheme-theoretic) 증명은 아니지만 다음 습관은 직접
-유용하다.
+Although the current work is not a scheme-theoretic proof, the following habits
+are directly useful.
 
 \begin{itemize}
-  \item 전체 객체(object) 대신 필요한 제한(restriction)만 비교하는
-        국소--대역(local-to-global) 사고;
-  \item 서로 다른 표현 좌표(chart) 사이의 전이사상(transition map)과
-        호환성(compatibility) 도식을 명시하는 습관;
-  \item 몫(quotient)과 대표 단면(representative section)을 분리하는 습관;
-  \item 섬유(fiber)가 비어 있지 않음을 witness로 확인하고,
-        조건부 정리(conditional theorem)의
-        non-vacuity를 점검하는 습관;
-  \item 큰 목표를 가환사각형(commutative square)과 장애물(obstruction)로
-        분해하는 습관.
+  \item Local-to-global reasoning that compares only the necessary restrictions
+        rather than entire objects;
+  \item making transition maps and compatibility diagrams between different
+        representation charts explicit;
+  \item separating quotients from representative sections;
+  \item checking with witnesses that fibers are nonempty and examining
+        non-vacuity of conditional theorems;
+  \item decomposing a large goal into commutative squares and obstructions.
 \end{itemize}
 
-단, 이 습관을 ``현재 코드가 층(sheaf)을 형식화한다''는 주장으로 바꾸면 안 된다.
-실제 proof term은 배열, word, 메모리, procedure semantics 위에 있다.
+These habits must not be turned into a claim that ``the current code formalizes
+a sheaf.'' The actual proof terms concern arrays, words, memory and procedure
+semantics.
 
-\subsection{새 정리(theorem)를 제출할 때의 판정 체크리스트}
+\subsection{Checklist for submitting a new theorem}
 
 \begin{enumerate}
-  \item 정리(theorem)의 actual/generated/pure 경계를 이름과 주석에 명시했는가?
-  \item 부모 결론을 전제로 다시 가정하지 않았는가?
-  \item termination, partial correctness, losslessness를 구분했는가?
-  \item canonicality, address range, no-wrap, separation 전제가 모두 보이는가?
-  \item 반환값, global state, ghost observation 중 무엇을 비교하는지 명시했는가?
-  \item 사용하지 않는 배열·메모리 구간의 frame이 필요한가?
-  \item 전제의 concrete witness 또는 실제 predecessor가 있어 non-vacuous한가?
-  \item authored axiom, admit/sorry/abort, debug declaration이 없는가?
-  \item manifest에 들어가 fresh \identifier{-no-eco} compile되는가?
-  \item claim ledger와 theorem graph의 부모 상태를 과장 없이 갱신했는가?
+  \item Do its name and comments state the actual/generated/pure boundary?
+  \item Does it avoid assuming the parent conclusion again as a premise?
+  \item Does it distinguish termination, partial correctness and losslessness?
+  \item Are all canonicality, address-range, no-wrap and separation premises visible?
+  \item Does it identify whether return values, global state or ghost observations
+        are being compared?
+  \item Is a frame needed for unused array or memory regions?
+  \item Is it non-vacuous through a concrete witness to its premises or an actual
+        predecessor?
+  \item Is it free of authored axioms, admit/sorry/abort and debug declarations?
+  \item Is it included in the manifest and freshly compiled with \identifier{-no-eco}?
+  \item Have parent statuses in the claim ledger and theorem graph been updated
+        without overstatement?
 \end{enumerate}
 
-이 체크리스트를 통과해야 ``수학적으로 그럴듯함''이 ``현재 구현에 대해
-검증됨''으로 바뀐다.
+Passing this checklist is what turns ``mathematically plausible'' into
+``verified for the current implementation.''

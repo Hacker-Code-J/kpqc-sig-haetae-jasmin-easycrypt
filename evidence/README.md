@@ -1,10 +1,16 @@
-# 검증 근거
+# Verification evidence
 
-- [공개 준비 시점의 검증](current/README.md): 현재 구현의 전체 증명 검사,
-  깨끗한 소스 내보내기의 실행 검사, 독립적으로 설치한 도구의 재현 결과.
-- [과거 도구 이관 검증](toolchain-migration/README.md): 당시 290개 주 대상의
-  검사 소스·로그와 원래 해시를 보존한 기록.
+See the [English-edition record](../docs/english-edition.md) for translated
+explanations and the preservation of original execution records.
 
-두 기록의 실행 시점과 소스 스냅샷을 구분한다. 현재 기록도 이후 변경된 소스의
-성공을 자동으로 보증하지 않는다. 논문에 사용하는 공개본은 해당 소스 상태와
-검증 기록을 함께 고정해야 한다.
+- [Verification at publication preparation](current/README.md): full proof checks
+  for the implementation at that time, execution checks from a clean source export,
+  and reproduction results using independently installed tools.
+- [Historical toolchain-migration verification](toolchain-migration/README.md):
+  a record preserving the checked sources, logs, and original hashes for the
+  290 primary targets at that time.
+
+Keep the execution dates and source snapshots of these records distinct. Even the
+record named `current` does not automatically guarantee success for later source
+changes. A public version used in a paper must pin its source state together with
+its verification evidence.

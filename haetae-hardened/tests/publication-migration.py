@@ -61,6 +61,8 @@ class PublicationMigrationTests(unittest.TestCase):
                      "haetae-easycrypt/manifests/verification-results.json",
                      "haetae-easycrypt/manifests/history/2026.03/README.md",
                      "haetae-easycrypt/proofs/README.md", "haetae-easycrypt/unreviewed.md",
+                     "archive/legacy/haetae-topdown-easycrypt/logs/verify-all-summary.txt",
+                     "archive/legacy/haetae-topdown-easycrypt/algebraist-guide/references.bib",
                      "../README.md"):
             with self.subTest(name=name):
                 self.files[name] = self.files["README.md"]
@@ -80,15 +82,13 @@ class PublicationMigrationTests(unittest.TestCase):
 class PublicationSnapshotTests(unittest.TestCase):
     def test_current_publication_snapshot_materializes(self):
         _, files = materialize.read_baseline()
-        for name in ("haetae-easycrypt/README.md", "haetae-easycrypt/CLAIMS.md",
-                     "haetae-easycrypt/VALIDATION.md", "haetae-jasmin/README.md"):
+        for name in sorted(materialize.PUBLICATION_DOCUMENTS - {"README.md"}):
             with self.subTest(document=name):
                 self.assertEqual(files[name], (ROOT / name).read_bytes())
 
     def test_further_readme_drift_is_rejected(self):
         read_bytes = Path.read_bytes
-        for name in ("haetae-easycrypt/README.md", "haetae-easycrypt/CLAIMS.md",
-                     "haetae-easycrypt/VALIDATION.md", "haetae-jasmin/README.md"):
+        for name in sorted(materialize.PUBLICATION_DOCUMENTS - {"README.md"}):
             document = ROOT / name
 
             def altered_bytes(path):

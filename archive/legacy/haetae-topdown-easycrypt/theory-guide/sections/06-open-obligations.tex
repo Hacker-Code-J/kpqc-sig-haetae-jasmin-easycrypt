@@ -1,74 +1,79 @@
-\section{남은 증명 의무와 권장 진행 순서}
+\section{Remaining proof obligations and recommended order}
 \label{sec:open-obligations}
 
-\subsection{Week~5/6이 닫은 실제 API 경계}
+\subsection{Actual API boundaries closed in Weeks~5/6}
 
-Week~5는 실제 caller의 control과 입력을, Week~6은 cross-call memory 조건을
-다음 범위에서 닫았다.
+Week~5 closed actual caller control and inputs, and Week~6 closed cross-call
+memory conditions, within the following scope.
 
 \begin{itemize}
-  \item \identifier{RawApiAddressBridge}가 canonical 정수 주소와
-        \identifier{W64} 주소의 왕복을 증명한다.
-  \item \identifier{keypair_raw_api_exports_matching_prefixes}가 실제 raw KeyGen의
-        두 순차 export 뒤 외부 VK/SK의 첫 992바이트 일치를 증명한다.
-  \item exact Sign/Verify trace, \(accept\Rightarrow tail\), accepted hash-input
-        binding이 실제 caller의 control과 hash 인자를 노출한다.
-  \item 실제 Sign의 signature/siglen 출력은 명시적으로 분리된 VK/SK/pre/message
-        구간을 보존하고 KeyGen의 외부 key prefix를 유지한다.
-  \item 실제 생성 hash는 전체 memory 등식 대신 VK/pre/message read region의
-        바이트 등식만으로 비교된다.
-  \item 실제 raw Sign 다음 cryptolab Verify의 실행과 두 trace의 순차 실행은
-        결과와 최종 memory까지 정확히 대응한다.
+  \item \identifier{RawApiAddressBridge} proves round trips between canonical
+        integer addresses and \identifier{W64} addresses.
+  \item \identifier{keypair_raw_api_exports_matching_prefixes} proves equality of
+        the first 992 external VK/SK bytes after actual raw KeyGen's two sequential exports.
+  \item Exact Sign/Verify traces, \(accept\Rightarrow tail\), and accepted hash-input
+        binding expose actual caller control and hash arguments.
+  \item Actual Sign's signature/siglen outputs preserve explicitly disjoint
+        VK/SK/pre/message regions and retain KeyGen's external key prefix.
+  \item Actual generated hashes are compared using only byte equality on the
+        VK/pre/message read regions, instead of whole-memory equality.
+  \item Executing actual raw Sign followed by cryptolab Verify corresponds exactly
+        to sequential execution of the two traces, including results and final memory.
 \end{itemize}
 
-\identifier{raw_api_region_reaches_mu_zero_loss}는 이 실제 external-memory 사실과
-Sign import를 \identifier{sk_memory_prefix}로 바꾼다. 이 경로는
-\cref{thm:memory-witness}의 constructed \identifier{stores}를 사용하지 않는다.
+\identifier{raw_api_region_reaches_mu_zero_loss} converts these actual
+external-memory facts and Sign import into \identifier{sk_memory_prefix}. This
+path does not use the constructed \identifier{stores} of \cref{thm:memory-witness}.
 
-\subsection{동결된 보안 관문(gate): 저장 \texorpdfstring{\(\mu\)}{mu}의 생성/재전달(product/replay)}
+\subsection{Frozen security gate: product/replay for stored \texorpdfstring{\(\mu\)}{mu}}
 
-이전의 \claim{OBL-API-KEY-MEMORY-RAW}는 구현의 early-reject 제어흐름보다 강한
-무조건 명제였기 때문에 Week~5에서 분해되었다. Week~6 이후 직접 잔여 의무는
-다음 하나의 의미론 간선으로 좁혀졌다.
+The former \claim{OBL-API-KEY-MEMORY-RAW} was decomposed in Week~5 because it was
+an unconditional statement stronger than the implementation's early-reject
+control flow. Since Week~6, the direct remaining obligation has narrowed to one
+semantic edge.
 
 \begin{obligation}[\claim{OBL-DIRECT-OBSERVED-MU}]
-실제 raw Sign trace와 성공한 cryptolab Verify trace의 순차 실행 뒤
+After sequential execution of the actual raw Sign trace and a successful
+cryptolab Verify trace, directly conclude
 \[
   \operatorname{MuPrefix}_{32}
   (\mu_{S,\mathrm{trace}},\mu_{V,\mathrm{trace}})
 \]
-를 직접 결론으로 얻는다. 여기서 두 항은 각각
-\identifier{SignRawApiMuTrace.observed_mu}와
-\identifier{VerifyCryptolabMuTrace.observed_mu}다. 생성 hash return의 pRHL
-정리를 이미 완료된 두 trace의 ghost field에 운반할 정당한 product/replay
-규칙이 필요하다.
+where the two terms are respectively
+\identifier{SignRawApiMuTrace.observed_mu} and
+\identifier{VerifyCryptolabMuTrace.observed_mu}. A justified product/replay rule
+is needed to transport the pRHL theorem for generated hash returns to the ghost
+fields of the two already completed traces.
 \end{obligation}
 
-\cref{thm:sign-output-frame}과 \cref{thm:region-local-mu}, actual sequential trace는
-frame, locality, control 및 input binding을 이미 공급한다. 하지만 Sign hash 뒤
-signing continuation과 Verify hash 뒤 challenge/compare continuation이 서로
-달라, 열린 signing losslessness 없이 한쪽 continuation을 버릴 수 없다. Week~7은
-추가 observation wrapper, 목표를 반복하는 precondition, SHAKE locality axiom을
-거부하고 \claim{OBL-MU-PRODUCT-REPLAY}를 \statusdeferred 인 명시적 paper
-boundary로 동결했다. 따라서 이 lane에서
-\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)을 기록하지 않으며 같은 seam에
-wrapper를 더 쌓지 않는다.
+\cref{thm:sign-output-frame}, \cref{thm:region-local-mu}, and the actual sequential
+trace already provide frame, locality, control, and input binding. However, the
+signing continuation after the Sign hash differs from the challenge/compare
+continuation after the Verify hash, so one continuation cannot be discarded
+without the still-open signing losslessness result. Week~7 rejected additional
+observation wrappers, preconditions that repeat the goal, and SHAKE locality
+axioms, and froze \claim{OBL-MU-PRODUCT-REPLAY} as an explicit
+\statusdeferred{} paper boundary. Thus this lane does not record
+\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\), and no further wrappers are stacked
+on the same seam.
 
-\subsection{최근 닫힌 관문: 실제 rANS 핵심과 production 전체 HBZ}
+\subsection{Recently closed gates: actual rANS core and production full HBZ}
 
-Week~7--11은 정준 서명 접두부, HBZ 잎/표, 순수 바이트 추적, 실제 접미부 복사와
-결합 제어, 그리고 실제 인코더의 성공 접미부 정제를 차례로 닫았다. Week~12는
-\claim{OBL-RANS-DECODE-REFINEMENT}를 정확 추적 부분정확성으로 닫았다. Week~13은
-이 세 결과를 \identifier{Mode2RansActualHarness.run} 안에서 합성해
-\claim{OBL-RANS-CORE-INVERSE}를 성공 조건부 Hoare 부분정확성으로 닫았다.
-Week~14는 실제 full-HBZ prepare/apply와 이 핵심 역함수를 합성하고 production
-SignaturePack/Unpack 경계까지 정확히 운반해
-\claim{OBL-SIG-HBZ-ENCODE-DECODE}를 같은 강도의 부분정확성으로 닫았다.
+Weeks~7--11 successively closed the canonical signature prefix, HBZ leaves/tables,
+pure byte traces, actual suffix copy and harness control, and actual encoder
+successful-suffix refinement. Week~12 closed
+\claim{OBL-RANS-DECODE-REFINEMENT} as exact-trace partial correctness. Week~13
+composed these three results inside \identifier{Mode2RansActualHarness.run},
+closing \claim{OBL-RANS-CORE-INVERSE} as success-conditioned Hoare partial
+correctness. Week~14 composed actual full-HBZ prepare/apply with this core inverse
+and transported it exactly to the production SignaturePack/Unpack boundary,
+closing \claim{OBL-SIG-HBZ-ENCODE-DECODE} at the same strength of partial correctness.
 
-\identifier{actual_rans_encode_copy_decode_inverse}의 전제는 초기 인자
-바인딩과 \identifier{mode2_hbz_symbol_stream}뿐이다. 인코더가 실제로 실패하면
-복사와 디코더를 실행하지 않고 초기 디코더 배열/상태를 유지한다. 인코더가
-성공하면 실제 복사 구간에서 Week~12의 정확 추적 입력 전체를 구성하여
+The premises of \identifier{actual_rans_encode_copy_decode_inverse} are only
+initial argument binding and \identifier{mode2_hbz_symbol_stream}. If the encoder
+actually fails, neither copy nor decoder runs, and the initial decoder array/state
+is retained. If the encoder succeeds, the full Week~12 exact-trace input is
+constructed from the actual copied segment, yielding
 \[
 \begin{aligned}
   bad_{\mathrm{dec}}&=0,&
@@ -77,253 +82,254 @@ SignaturePack/Unpack 경계까지 정확히 운반해
   decoded[1024..2048)&=decoded_0[1024..2048)
 \end{aligned}
 \]
-을 얻는다. 복사된 추적, 디코더 점별 읽기, 디코더 성공과 출력 등식은
-사전조건이 아니다. \identifier{encoder_success_size_word_bridge}도 실제 성공
-범위에서 W64 크기 뺄셈의 무랩을 도출하므로 임의의 정수 버퍼 증인을 두지
-않는다.
+The copied trace, pointwise decoder reads, decoder success, and output equality
+are not preconditions. \identifier{encoder_success_size_word_bridge} also derives
+non-wrapping W64 size subtraction from the actual success bounds, so no arbitrary
+integer-buffer witness is assumed.
 
-\identifier{signature_pack_unpack_hbz_full_actual_exact}는 production 결합과
-focused full-HBZ 결합의 반환 튜플 및 \identifier{decoder_ran}을 정확히
-맞춘다. 그 Hoare 따름정리
-\identifier{signature_pack_unpack_hbz_full_inverse_mode2}는 정준 HBZ만으로
-zero-size 실패 또는 nonzero-size 성공 결론을 낸다. 성공 분기에서는
-(4\le size\le1024), (bad=0), 1024계수 복원, coefficient/encoded 꼬리
-프레임과 실제 prepare-symbol 추적을 얻는다. encoder success나 decoder 결과는
-전제가 아니다.
+\identifier{signature_pack_unpack_hbz_full_actual_exact} exactly matches the
+return tuples and \identifier{decoder_ran} of the production harness and focused
+full-HBZ harness. Its Hoare corollary
+\identifier{signature_pack_unpack_hbz_full_inverse_mode2} concludes zero-size
+failure or nonzero-size success from canonical HBZ alone. The success branch gives
+(4\le size\le1024), (bad=0), 1024-coefficient recovery, coefficient/encoded tail
+frames, and the actual prepare-symbol trace. Neither encoder success nor the
+decoder result is a premise.
 
 \begin{verified}[\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS}]
-Week~15의 \identifier{actual_rans_encode_all_six_success}는 실제 prepare가
-만든 all-6 기호열에서 종료한 실제 encoder가 \(bad=0\), \(0\le off\le1020\),
-\(4\le size\le1024\)와 정확한 trace/frame을 반환함을 증명한다.
-\identifier{signature_pack_unpack_hbz_zero_success_mode2}는 이를 고정
-all-zero HBZ의 production pack/unpack 왕복까지 올린다. 성공, 크기나 trace를
-전제로 받지 않으므로 이 고정 입력 Hoare 의무는 \statusproved 다.
+Week~15's \identifier{actual_rans_encode_all_six_success} proves that, on the
+all-6 symbol stream produced by actual prepare, a terminating actual encoder
+returns \(bad=0\), \(0\le off\le1020\), \(4\le size\le1024\), and the exact
+trace/frame. \identifier{signature_pack_unpack_hbz_zero_success_mode2} lifts this
+to the production pack/unpack round trip for fixed all-zero HBZ. This fixed-input
+Hoare obligation is \statusproved{} because success, size, and trace are not premises.
 \end{verified}
 
-Week~15 판정은 \identifier{GO-WITNESS}였지만
-\identifier{GO-WITNESS-LOSSLESS}는 아니다. 고정 입력 실행의 종료,
-losslessness, 확률 1 성공과 일반 정준 입력의 성공은 여전히 별도다. 이후
-1주 최소 논문 범위가 원래 (h) 코덱 권고를 덮어썼으므로
-\claim{OBL-SIG-H-ENCODE-DECODE}는 현재 \statusdeferred 다.
+The Week~15 verdict was \identifier{GO-WITNESS}, not
+\identifier{GO-WITNESS-LOSSLESS}. Termination, losslessness, probability-1 success
+of the fixed-input execution, and success for general canonical inputs remain
+separate. The subsequent one-week minimum paper scope superseded the original
+(h)-codec recommendation, so \claim{OBL-SIG-H-ENCODE-DECODE} is currently
+\statusdeferred.
 
-\subsection{KeyGen 관문: 동결 STOP-KG-NTT에서 최신 STOP-KG-AVEC-QJ까지}
+\subsection{KeyGen gate: from frozen STOP-KG-NTT to current STOP-KG-AVEC-QJ}
 
-Week~16은 실제 \identifier{_kp_m23_matrix}와
-\identifier{_keypair_finalize_m23}를 투명한 두 호출 harness에서 합성했다.
-\identifier{actual_m23_matrix_finalize_semantic_snapshot}는 실제 중간
-\identifier{pre_bp}, NTT scratch, finalizer low/high 의미와 스냅샷
-mod-\(2q\) 영 등식을 닫는다. 이 결과로 KG-2형 계수 분해와 KG-4의 조정된
-\(s_2\) 성분은 증명되었지만 전체 논문 KeyGen 식은 아니다.
+Week~16 composed actual \identifier{_kp_m23_matrix} and
+\identifier{_keypair_finalize_m23} in a transparent two-call harness.
+\identifier{actual_m23_matrix_finalize_semantic_snapshot} closes the actual
+intermediate \identifier{pre_bp}, NTT scratch, finalizer low/high semantics, and
+the snapshot mod-\(2q\) zero equality. This proves KG-2-style coefficient
+decomposition and the adjusted \(s_2\) component of KG-4, but not the full paper
+KeyGen equation.
 
-\begin{boundary}[paper-freeze의 \claim{STOP-KG-NTT}]
-\identifier{KeygenM23ArithmeticSpec.output_row}가 표현하는
-full-NTT--점별 곱--inverse-NTT 결과를 보안 모델의 행별 다항식 곱
+\begin{boundary}[\claim{STOP-KG-NTT} at paper freeze]
+Connecting the full-NTT--pointwise-product--inverse-NTT result represented by
+\identifier{KeygenM23ArithmeticSpec.output_row} to the security model's row-wise
+polynomial product
 \[
   \sum_{\mathrm{col}}
   A_{\mathrm{gen}}[\mathrm{row},\mathrm{col}]
   s_{\mathrm{gen}}[\mathrm{col}]
 \]
-과 연결하려면 odd-root orthogonality/full-NTT convolution 정리와
-\identifier{Rq.poly}--security-list adapter가 필요했다. 둘 다 82대상 동결
-경계에는 없으므로 그 주장 행렬은 faithful KG-1, KG-3, 전체 KG-4와
-\(As=qj\pmod{2q}\)를 구성하지 않는다.
+required an odd-root orthogonality/full-NTT convolution theorem and an
+\identifier{Rq.poly}--security-list adapter. Neither was present at the frozen
+82-target boundary, so that claim matrix does not establish faithful KG-1, KG-3,
+full KG-4, or \(As=qj\pmod{2q}\).
 \end{boundary}
 
-post-freeze에는 \identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral
-action, 일반/mode-2 row product와 Rq--HAETAE 계수 표현 adapter가 닫혔다. 이어
-actual mode-2 sampler의 nonce 515/516, SHAKE128 framing, little-endian parsing과
-rejection 의미가 paper \(a\)로 운반되고, 별도 paper \(qj\) correction이 기존
-snapshot 등식과 합성됐다.
+Post-freeze work closed \identifier{rq_mul_coeff_foldr_to_bigi}, full-NTT spectral
+action, general/mode-2 row products, and the Rq--HAETAE coefficient-representation
+adapter. Subsequently, the actual mode-2 sampler's nonces 515/516, SHAKE128 framing,
+little-endian parsing, and rejection semantics were transported to paper \(a\),
+and a separate paper \(qj\) correction was composed with the existing snapshot equality.
 
-\begin{boundary}[최신 \claim{STOP-KG-AVEC-QJ}]
-기존 보안 모델의 \identifier{public_rounding_vector_seed}는 tag 401 기반
-synthetic generator다. 이는 actual sampler와도 paper \(qj\)와도 같지 않으며,
-\identifier{security_named_qj_is_not_paper_qj}가 row~0 coefficient~0에서
-\(401\ne64513\)을 증명한다. all-zero raw seed의 실제 nonce-515 첫 계수도
-44985이므로 이 동일성을 가정할 수 없다. 보안 모델을 actual ExpandVecA 의미로
-교체ㆍ정제하는 \claim{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}가 KG 승격보다 먼저다.
+\begin{boundary}[Current \claim{STOP-KG-AVEC-QJ}]
+The existing security model's \identifier{public_rounding_vector_seed} is a
+synthetic generator based on tag 401. It equals neither the actual sampler nor
+paper \(qj\), and \identifier{security_named_qj_is_not_paper_qj} proves
+\(401\ne64513\) at row~0 coefficient~0. The actual first nonce-515 coefficient
+for an all-zero raw seed is also 44985, so this identity cannot be assumed.
+\claim{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}, replacing/refining the security model
+with actual ExpandVecA semantics, must precede promotion of KG claims.
 \end{boundary}
 
-따라서 동결 \claim{OBL-MINCORE-KEYGEN} 상태는 KG-2/finalization의
-\statuspartial 로 유지된다. 최신 보조 전선도 full KG-1--KG-4를 승격하지 않는다.
-MINCORE Sign의 동결 판정은
-\identifier{STOP-SIGN-CHAL-MODE2}다. MINCORE Verify의 동결 판정은
-\identifier{STOP-VERIFY-MATRIX-CRT}이며, 제한 합성은 \statusspecified 다.
-Verify의 순수 NTT 기반은 post-freeze에 닫혔지만 실제
+Thus the frozen \claim{OBL-MINCORE-KEYGEN} status remains \statuspartial{} for
+KG-2/finalization. The current auxiliary frontier also does not promote full
+KG-1--KG-4. The frozen MINCORE Sign verdict is
+\identifier{STOP-SIGN-CHAL-MODE2}. The frozen MINCORE Verify verdict is
+\identifier{STOP-VERIFY-MATRIX-CRT}, and restricted composition is
+\statusspecified. Verify's pure NTT foundation was closed post-freeze, but the
+actual procedure leaves
 \identifier{verify_matrix_ntt_acc_}\allowbreak
-\identifier{mode2_cols4_correct}와
-\identifier{verify_crt_freeze_mode2_word_exact} 절차 leaf가 남는다.
+\identifier{mode2_cols4_correct} and
+\identifier{verify_crt_freeze_mode2_word_exact} remain.
 
-\subsection{분리된 기능정확성 경로}
+\subsection{Separate functional-correctness path}
 
-\claim{OBL-SIGN-OUTPUT-TAIL-REACH}는 정당한 Sign 출력이 Verify의 unpack/norm
-early-reject gate를 통과한다는 \statuspartial 의무다. signature prefix inverse는
-닫혔지만 전체 suffix와 이후 gate는 열려 있다. 이는 성공한 Verify에
-대해 tail 도달을 증명한 \cref{thm:verify-accept-tail}의 역이나 귀결이 아니다.
-full pack/unpack inverse, norm, hint, response 및 산술 정확성이 필요하다. 이를
-전체 challenge equality와 결합한 \claim{OBL-SIGN-VERIFY-CORRECTNESS}는 현재
-\statusblocked 이다. 이 기능 경로를 accepted-forgery 보안 경로의 숨은 전제로
-넣지 않는다.
+\claim{OBL-SIGN-OUTPUT-TAIL-REACH} is a \statuspartial{} obligation stating that
+legitimate Sign outputs pass Verify's unpack/norm early-reject gates. The signature
+prefix inverse is closed, but the full suffix and subsequent gates remain open.
+This is neither the converse nor a consequence of \cref{thm:verify-accept-tail},
+which proves tail reachability for successful Verify executions. It requires the
+full pack/unpack inverse, norm, hint, response, and arithmetic correctness.
+\claim{OBL-SIGN-VERIFY-CORRECTNESS}, combining this with full challenge equality,
+is currently \statusblocked. This functional path is not inserted as a hidden
+premise of the accepted-forgery security path.
 
-\subsection{그 다음 관문: 문맥(context)과 전체 도전값 전사(challenge transcript)}
+\subsection{Next gates: context and the full challenge transcript}
 
-raw/internal 경로와 public-context 경로는 구현에서 실제로 다르다. Sign은
-\identifier{_sf_prepare_pre_raw}와 \identifier{_sf_mu_preptr}를 사용하고,
-Verify는 \identifier{prelen}의 최상위 비트로 context branch를 고른다. 다음을
-보여야 한다.
+The raw/internal and public-context paths actually differ in the implementation.
+Sign uses \identifier{_sf_prepare_pre_raw} and \identifier{_sf_mu_preptr}, while
+Verify selects the context branch using the most significant bit of
+\identifier{prelen}. The following must be shown.
 
 \begin{enumerate}
-  \item \(ctxlen\le255\)와 길이 인코딩의 정확성;
-  \item 양쪽이 정확히 \(ctxlen\text{-byte}\Vert ctx\)를 같은 순서로 흡수함;
-  \item caller memory가 두 절차의 pointer/length 전제를 공급함.
+  \item \(ctxlen\le255\) and correctness of length encoding;
+  \item Both sides absorb exactly \(ctxlen\text{-byte}\Vert ctx\) in the same order;
+  \item Caller memory supplies the pointer/length premises for both procedures.
 \end{enumerate}
 
-그 다음 \claim{OBL-HIGH-LSB-PACK}은 Sign과 Verify가 만드는
-\(\operatorname{HighBits}_h,\operatorname{LSB}\)의 packed bytes가 같음을
-보여야 한다. 이 결과를 기존 \identifier{challenge_input_eq_components}와
-합성하면 전체 challenge 입력 리스트가 같아진다. 이후에야 FIPS202
-domain/padding/squeeze와 binary challenge sampler를 포함한 실제 full call을
-paper ROM query에 연결할 수 있다.
+Next, \claim{OBL-HIGH-LSB-PACK} must show equality of the packed bytes of
+\(\operatorname{HighBits}_h,\operatorname{LSB}\) produced by Sign and Verify.
+Composing this result with the existing \identifier{challenge_input_eq_components}
+gives equality of the full challenge input lists. Only then can the actual full
+call, including FIPS202 domain/padding/squeeze and the binary challenge sampler,
+be connected to a paper ROM query.
 
-\subsection{그 이후의 기능 및 확률적 의무}
+\subsection{Subsequent functional and probabilistic obligations}
 
 \begin{longtable}{L{0.28\textwidth}L{0.18\textwidth}L{0.46\textwidth}}
-\caption{현재 명명된 주요 미해결 의무}\label{tab:open-obligations}\\
+\caption{Main currently named unresolved obligations}\label{tab:open-obligations}\\
 \toprule
-의무 & 성격 & 필요한 결과 \\
+Obligation & Nature & Required result \\
 \midrule
 \endfirsthead
 \toprule
-의무 & 성격 & 필요한 결과 \\
+Obligation & Nature & Required result \\
 \midrule
 \endhead
-\claim{OBL-API-KEY-MEMORY-RAW-ACCEPT} & API/관계 & 승인된 Sign/Verify 추적
-(accepted Sign/Verify trace)의 직접 저장 \(\mu_{32}\) 등식; 프레임/국소성/제어는
-이미 증명됨 \\
-\claim{OBL-DIRECT-OBSERVED-MU} & API/관계 & 실제 순차 추적 사후상태(actual
-sequential-trace post-state)의 \identifier{observed_mu} 접두부 결론 \\
-\claim{OBL-MU-PRODUCT-REPLAY} & 의미론/\statusdeferred & 생성 해시 반환값
-(generated hash return)의 pRHL 정리를 완료된 추적 유령 필드(completed-trace
-ghost field)로 옮기는 정당한 규칙 \\
-\claim{OBL-SIG-PREFIX-FRAME} & 인코딩(encoding) & 패킹 서명 꼬리(pack signature
-tail)와 도전값 출력 꼬리(challenge-output tail)의 보존; 언패킹 하위 꼬리(unpack
-low tail)는 증명됨 \\
-\claim{OBL-RANS-DECODE-REFINEMENT} & 인코딩(encoding);\newline\statusproved &
-정확한 실제 추적, 상태 필드와 mode-2 표 아래 실제 디코더의 \(bad=0\), 정확한
-소비 크기(consumed size), 1024기호 일치(symbol equality)와 출력 꼬리
-프레임(frame); 종료는 별도 \\
-\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & 인코딩(encoding);\newline\statusproved &
-모든 기호가 6인 고정 입력에서 종료한 실제 인코더가 \(bad=0\), 정확한
-크기/trace/frame을 반환함; 종료, losslessness와 \(\operatorname{phoare}=1\)은
-별도 \\
-\claim{OBL-RANS-CORE-INVERSE} & 인코딩(encoding);\newline\statusproved & 실제
-인코더 실패 분기를 보존하고, 성공 시 실제 복사 구간을 디코더의 정확 추적
-입력으로 운반해 \(bad=0\), 정확한 소비, 1024기호 복원과 꼬리 프레임을 얻는
-성공 조건부 부분정확성; 종료/성공 도달은 별도 \\
-\claim{OBL-SIG-HBZ-ENCODE-DECODE} & 인코딩(encoding);\newline\statusproved &
-production 전체 HBZ 래퍼에서 zero-size 실패를 보존하고, nonzero-size 성공 시
-크기 범위, \(bad=0\), 1024계수 복원, 두 꼬리 프레임과 prepare-symbol 추적을
-공급하는 성공 조건부 부분정확성; 고정 zero 입력의 실패 배제는 증명됐고
-종료/일반 입력 성공은 별도 \\
-\claim{OBL-SIG-H-ENCODE-DECODE} & 인코딩(encoding);\newline\statusdeferred &
-Week~16 최소 KeyGen 범위가 우선되어 연기된 실제 힌트 코덱 역함수 \\
-\claim{OBL-MINCORE-KEYGEN} & 기능정확성;\newline
+\claim{OBL-API-KEY-MEMORY-RAW-ACCEPT} & API/relational & Direct stored
+\(\mu_{32}\) equality for accepted Sign/Verify traces; frame/locality/control
+are already proved \\
+\claim{OBL-DIRECT-OBSERVED-MU} & API/relational & An \identifier{observed_mu}
+prefix conclusion in the actual sequential-trace post-state \\
+\claim{OBL-MU-PRODUCT-REPLAY} & Semantics;\newline\statusdeferred & A justified rule
+transporting the pRHL theorem for generated hash returns to completed-trace ghost fields \\
+\claim{OBL-SIG-PREFIX-FRAME} & Encoding & Preservation of the pack signature tail
+and challenge-output tail; the unpack low tail is proved \\
+\claim{OBL-RANS-DECODE-REFINEMENT} & Encoding;\newline\statusproved &
+Actual decoder \(bad=0\), exact consumed size, 1024-symbol equality, and output-tail
+frame under the exact actual trace, state fields, and mode-2 tables;
+termination is separate \\
+\claim{OBL-RANS-ACTUAL-SUCCESS-WITNESS} & Encoding;\newline\statusproved &
+A terminating actual encoder returns \(bad=0\) and the exact size/trace/frame on
+fixed input consisting entirely of symbol 6; termination, losslessness, and
+\(\operatorname{phoare}=1\) are separate \\
+\claim{OBL-RANS-CORE-INVERSE} & Encoding;\newline\statusproved &
+Success-conditioned partial correctness preserving the actual encoder failure
+branch and, on success, transporting the actual copied segment to the decoder's
+exact-trace input to obtain \(bad=0\), exact consumption, 1024-symbol recovery,
+and the tail frame; termination/success reachability are separate \\
+\claim{OBL-SIG-HBZ-ENCODE-DECODE} & Encoding;\newline\statusproved &
+Success-conditioned partial correctness preserving zero-size failure in the
+production full-HBZ wrapper and supplying size bounds, \(bad=0\),
+1024-coefficient recovery, two tail frames, and the prepare-symbol trace on
+nonzero-size success; failure exclusion for fixed zero input is proved,
+while termination/general-input success are separate \\
+\claim{OBL-SIG-H-ENCODE-DECODE} & Encoding;\newline\statusdeferred &
+Actual hint-codec inverse deferred in favor of the Week~16 minimum KeyGen scope \\
+\claim{OBL-MINCORE-KEYGEN} & Functional correctness;\newline
 \statuspartial;\newline\identifier{STOP-KG-NTT} &
-실제 snapshot/finalizer와 마지막 \identifier{output_row} rewrite까지인 동결
-82대상 주장. post-freeze NTT/Rq 보조 정리는 이 역사적 stop을 전진시켰지만
-동결 claim 자체와 full KG 식은 승격하지 않음 \\
+Frozen 82-target claim through the actual snapshot/finalizer and final
+\identifier{output_row} rewrite. Post-freeze NTT/Rq auxiliary theorems advanced
+this historical stopping point, but promote neither the frozen claim itself nor the full KG equation \\
 \claim{OBL-KG-}\newline
 \claim{SECURITY-}\newline
 \claim{EXPANDVECA-}\newline
-\claim{SEMANTICS} & 기능정확성;\newline
+\claim{SEMANTICS} & Functional correctness;\newline
 \statusblocked;\newline\identifier{STOP-KG-}\newline
-\identifier{AVEC-QJ} & synthetic
-\identifier{public_rounding_vector_seed}를 actual SHAKE128/LE16/rejection 및
-nonce 515/516 의미로 교체ㆍ정제하고 paper \(qj\)를 별도 correction으로 유지한
-actual-array 표현 정리가 필요 \\
-\claim{OBL-MINCORE-SIGN} & 기능정확성;\newline\statuspartial;\newline
-\identifier{STOP-SIGN-}\allowbreak\identifier{CHAL-MODE2} & 실제 round-challenge, z-check, hint helper
-직접 호출과 accepted-branch control만 컴파일; full challenge semantics와
-S-1--S-7 headline은 미증명 \\
-\claim{OBL-MINCORE-VERIFY} & 기능정확성;\newline\statuspartial;\newline
-\identifier{STOP-VERIFY-}\allowbreak\identifier{MATRIX-CRT} & actual helper 순서, V-1/V-2/V-5/V-6
-machine-word 식, W64 norm gate와 tail/mismatch word expression은 컴파일;
-post-freeze 순수 NTT 기반은 증명됐으나 실제 2-by-4 matrix accumulation,
-CRT/freeze 의미 bridge와 challenge equality는 미증명 \\
-\claim{OBL-MINCORE-COMPOSITION} & 기능정확성;\newline\statusspecified &
-decoded-object 경계의 제한 Sign--Verify 합성은 아직 미증명 \\
+\identifier{AVEC-QJ} & Requires an actual-array representation theorem
+replacing/refining synthetic \identifier{public_rounding_vector_seed} with
+actual SHAKE128/LE16/rejection and nonce 515/516 semantics while retaining
+paper \(qj\) as a separate correction \\
+\claim{OBL-MINCORE-SIGN} & Functional correctness;\newline\statuspartial;\newline
+\identifier{STOP-SIGN-}\allowbreak\identifier{CHAL-MODE2} & Only direct calls to the actual
+round-challenge, z-check, and hint helpers and accepted-branch control compile;
+full challenge semantics and S-1--S-7 headline claims are unproved \\
+\claim{OBL-MINCORE-VERIFY} & Functional correctness;\newline\statuspartial;\newline
+\identifier{STOP-VERIFY-}\allowbreak\identifier{MATRIX-CRT} & Actual helper order,
+V-1/V-2/V-5/V-6 machine-word equations, the W64 norm gate, and tail/mismatch word
+expressions compile; the post-freeze pure NTT foundation is proved, but actual
+2-by-4 matrix accumulation, the CRT/freeze semantic bridge, and challenge equality are unproved \\
+\claim{OBL-MINCORE-COMPOSITION} & Functional correctness;\newline\statusspecified &
+Restricted Sign--Verify composition at the decoded-object boundary remains unproved \\
 \claim{OBL-SIG-SUFFIX-METADATA},\newline
-\claim{OBL-SIG-SUFFIX-PADDING} & 인코딩(encoding) & 크기 차이 왕복(size-delta
-round trip)과 1474바이트 정준 영 패딩(canonical zero padding) \\
-\claim{OBL-SIG-FULL-CODEC-MODE2} & 인코딩(encoding) & 접두부(prefix)와 전체
-접미부(suffix)를 합친 실제 패킹/언패킹 역함수(actual pack/unpack inverse),
-실패 표시(bad flag)의 성공과 정준 구문 분석(canonical parse) \\
-\claim{OBL-SIGN-OUTPUT-TAIL-REACH} & 기능정확성 & 정당한 Sign 출력의 전체
-패킹/언패킹(full pack/unpack) 및 노름/힌트 관문(norm/hint gate) 통과 \\
-\claim{OBL-SIGN-VERIFY-CORRECTNESS} & 기능정확성 & 응답(response), 힌트(hint),
-산술식과 전체 도전값을 포함한 정당한 서명의 승인(accept) \\
-\claim{OBL-KG-TERMINATION}, \claim{OBL-KG-DIST} & 확률/종료 & 재시도 반복문
-(retry loop)의 무손실성(losslessness) 또는 종료, 실제 KeyGen 출력분포, 특이성
-거부(singular rejection) 효과 \\
-\claim{OBL-FFT-TAIL}, TieMin & 수치해석 & 고정소수점 FFT 오차의 나쁜 사건
-(bad event) 확률과 동률 최솟값(tied minimum) 정책의 차이 \\
-\claim{OBL-SIGN-ACCEPTED-DIST} & 확률분포 & 초구 표본기(hyperball sampler),
-거부(rejection), 승인 출력(accepted output)이 논문 분포와 일치하거나 명시적
-통계손실을 가짐 \\
-\claim{OBL-VERIFY-EVENT} & 대수/프로그램 & Jasmin의 최종 승인 비트(accept bit)가
-논문의 노름(norm), 힌트, 방정식, 도전값 조건과 동치 \\
-\claim{OBL-CHALLENGE} & 조합론/확률 & 도전값 지지집합(challenge support),
-기수(cardinality), 점 확률(point probability), 최소 엔트로피(min-entropy) \\
-\claim{OBL-FORK} & 암호 환원 & 두 새 전사(fresh transcript)에서 정확한
-BST-MSIS 인스턴스(instance)를 추출 \\
-\claim{OBL-SIGROM-ADAPTER} & 게임 기반 보안 & 바이트 수준 공용 API를 정확한
-\identifier{Sig_ROM.Scheme} 및 질의 계수(query accounting)에 인스턴스화 \\
+\claim{OBL-SIG-SUFFIX-PADDING} & Encoding & Size-delta round trip and
+1474-byte canonical zero padding \\
+\claim{OBL-SIG-FULL-CODEC-MODE2} & Encoding & Actual pack/unpack inverse
+combining the prefix and full suffix, a successful bad flag, and canonical parsing \\
+\claim{OBL-SIGN-OUTPUT-TAIL-REACH} & Functional correctness & Full pack/unpack
+and norm/hint gate passage for legitimate Sign outputs \\
+\claim{OBL-SIGN-VERIFY-CORRECTNESS} & Functional correctness & Acceptance of
+legitimate signatures, including response, hint, arithmetic equations, and the full challenge \\
+\claim{OBL-KG-TERMINATION}, \claim{OBL-KG-DIST} & Probability;\newline termination &
+Retry-loop losslessness or termination, actual KeyGen output distribution,
+and the effects of singular rejection \\
+\claim{OBL-FFT-TAIL}, TieMin & Numerical analysis & Bad-event probability for
+fixed-point FFT errors and differences arising from the tied-minimum policy \\
+\claim{OBL-SIGN-ACCEPTED-DIST} & Probability distributions & The hyperball sampler,
+rejection, and accepted outputs agree with the paper distribution or incur explicit statistical loss \\
+\claim{OBL-VERIFY-EVENT} & Algebra;\newline programs & Jasmin's final accept bit is equivalent
+to the paper's norm, hint, equation, and challenge conditions \\
+\claim{OBL-CHALLENGE} & Combinatorics;\newline probability & Challenge support,
+cardinality, point probability, and min-entropy \\
+\claim{OBL-FORK} & Cryptographic reduction & Extraction of the exact
+BST-MSIS instance from two fresh transcripts \\
+\claim{OBL-SIGROM-ADAPTER} & Game-based security & Instantiation of the byte-level
+public API as the exact \identifier{Sig_ROM.Scheme}, with query accounting \\
 \bottomrule
 \end{longtable}
 
-\subsection{의존성에 따른 작업 순서}
+\subsection{Dependency-based work order}
 
-현재 코드와 가장 잘 맞는 순서는 다음과 같다.
+The following order best matches the current code.
 
 \begin{enumerate}
-  \item 생성/재전달 경로는 현재 논문 경계로 유지하고 같은 호출자 이음매에
-        관찰 래퍼를 더하지 않는다.
-  \item Week~14 production 래퍼와 Week~15 고정 all-6 성공 정리를 유지하고
-        rANS 반복 불변식을 다시 증명하지 않는다. 고정 입력 종료/losslessness는
-        별도 의무로 남긴다.
-  \item 동결 주장 행렬의 \identifier{STOP-KG-NTT}는 역사적 경계로 유지한다.
-        post-freeze에 닫힌 NTT/Rq--HAETAE 정리를 재사용하되 이를 동결 PDF의
-        claim으로 소급 기록하지 않는다.
-  \item 최신 \identifier{STOP-KG-AVEC-QJ}를 먼저 해결한다. synthetic
-        \identifier{public_rounding_vector_seed}를 actual ExpandVecA 의미로
-        교체ㆍ정제하고 paper \(qj\) correction과 분리한 뒤
-        \identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}를 증명한다.
-  \item 보안 \(a\), actual array와 Rq/HAETAE row product를 연결한 뒤 mode-2
-        폭 4/mod-\(q\) 표현을 논문 augmented 폭 6/mod-\(2q\) matrixㆍsecretㆍerror
-        packaging으로 운반한다. 그 전에는 faithful KG-1/KG-3/전체 KG-4를
-        주장하지 않는다.
-  \item \identifier{STOP-SIGN-CHAL-MODE2}를 유지한다. full
-        highbits/LSB/\(\mu\)-to-SampleInBall leaf, 실제 Sign row-product 적용과
-        response/hint 표현 의무 없이 S-1--S-7을 주장하지 않는다.
-  \item Verify에서는 이미 닫힌 순수 NTT 기반을 실제 2-by-4 accumulation에
-        적용하는 \identifier{verify_matrix_ntt_acc_}\allowbreak
-        \identifier{mode2_cols4_correct}와
-        \identifier{verify_crt_freeze_mode2_word_exact}를 닫아 combined matrix
-        theorem을 합성한 다음 downstream challenge leaf를 닫는다.
-  \item (h) 코덱은 현재 연기 상태를 유지한다. 범위가 다시 열리면 크기
-        메타데이터(size metadata), 영 패딩(zero padding), 패킹/도전값
-        꼬리 프레임(pack/challenge tail frame)을 합성해 전체 1474바이트
-        코덱(codec)과 정준 구문 분석(canonical parse)을 닫는다.
-  \item 노름/힌트(norm/hint), 응답(response)과 산술 정확성을 결합하여
-        \claim{OBL-SIGN-OUTPUT-TAIL-REACH}와 정당한 Sign/Verify 정확성
-        (legitimate Sign/Verify correctness)을 닫는다.
-  \item 별도의 보안 경로에서 공용 문맥(public-context) \(\mu\),
-        highbits/LSB와 전체 도전값 호출(challenge call)을 합성한다.
-  \item KeyGen/Sign의 확률분포와 종료 손실을 정량화하고 바이트 충실 ROM 스킴
-        (byte-faithful ROM scheme)을 논문의 분포/포킹(distribution/forking)
-        의무와 결합한다.
+  \item Retain the product/replay path as the current paper boundary and add no
+        more observation wrappers at the same caller seam.
+  \item Preserve the Week~14 production wrapper and Week~15 fixed all-6 success
+        theorem without reproving the rANS loop invariants. Leave fixed-input
+        termination/losslessness as separate obligations.
+  \item Retain \identifier{STOP-KG-NTT} in the frozen claim matrix as a historical
+        boundary. Reuse the NTT/Rq--HAETAE theorems closed post-freeze, without
+        retroactively recording them as claims of the frozen PDF.
+  \item Resolve the current \identifier{STOP-KG-AVEC-QJ} first. Replace/refine
+        synthetic \identifier{public_rounding_vector_seed} with actual ExpandVecA
+        semantics, separate it from the paper \(qj\) correction, and prove
+        \identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}.
+  \item Connect security \(a\), the actual array, and the Rq/HAETAE row product,
+        then transport the mode-2 width-4/mod-\(q\) representation to the paper's
+        augmented width-6/mod-\(2q\) matrix, secret, and error packaging. Before
+        that, do not claim faithful KG-1/KG-3/full KG-4.
+  \item Retain \identifier{STOP-SIGN-CHAL-MODE2}. Do not claim S-1--S-7 without
+        the full highbits/LSB/\(\mu\)-to-SampleInBall leaf, application of the
+        actual Sign row product, and response/hint representation obligations.
+  \item For Verify, close \identifier{verify_matrix_ntt_acc_}\allowbreak
+        \identifier{mode2_cols4_correct}, which applies the already closed pure
+        NTT foundation to actual 2-by-4 accumulation, and
+        \identifier{verify_crt_freeze_mode2_word_exact}; compose the combined
+        matrix theorem, then close the downstream challenge leaf.
+  \item Keep the (h) codec deferred for now. When its scope is reopened, compose
+        size metadata, zero padding, and pack/challenge tail frames to close the
+        full 1474-byte codec and canonical parsing.
+  \item Combine norm/hint, response, and arithmetic correctness to close
+        \claim{OBL-SIGN-OUTPUT-TAIL-REACH} and legitimate Sign/Verify correctness.
+  \item In the separate security path, compose public-context \(\mu\),
+        highbits/LSB, and the full challenge call.
+  \item Quantify KeyGen/Sign distribution and termination losses, then combine
+        the byte-faithful ROM scheme with the paper's distribution/forking obligations.
 \end{enumerate}
 
-이 순서는 넓은 보안 명제를 먼저 선언하고 하위 전제를 나중에 채우는 방식이
-아니라, 이미 컴파일되는 가장 가까운 seam에서 바깥 경계로 한 단계씩 올라가는
-방식이다.
+This order advances one step at a time from the nearest already-compiling seam
+toward the outer boundary, rather than declaring broad security statements first
+and filling their underlying premises afterward.

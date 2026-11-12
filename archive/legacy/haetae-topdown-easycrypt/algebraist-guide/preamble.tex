@@ -1,5 +1,4 @@
 \usepackage{fontspec}
-\usepackage{xetexko}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{unicode-math}
 \usepackage[a4paper,margin=25mm]{geometry}
@@ -17,9 +16,6 @@
 \setsansfont{TeX Gyre Heros}
 \setmonofont{Latin Modern Mono}[Scale=MatchLowercase]
 \setmathfont{TeX Gyre Pagella Math}
-\setmainhangulfont{Noto Serif CJK KR}
-\setsanshangulfont{Noto Sans CJK KR}
-\setmonohangulfont{Noto Sans Mono CJK KR}[Scale=MatchLowercase]
 
 \definecolor{provedcolor}{HTML}{176B45}
 \definecolor{partialcolor}{HTML}{9A6700}
@@ -35,19 +31,19 @@
   linkcolor=specifiedcolor,
   citecolor=provedcolor,
   urlcolor=specifiedcolor,
-  pdftitle={HAETAE-2 구현 검증의 대수적 지도},
-  pdfsubject={순수 대수학자와 대수기하학자를 위한 HAETAE top-down EasyCrypt 안내서},
+  pdftitle={An Algebraic Map of HAETAE-2 Implementation Verification},
+  pdfsubject={A HAETAE top-down EasyCrypt guide for pure algebraists and algebraic geometers},
   pdfauthor={HAETAE top-down EasyCrypt project}
 }
 
 \setlist[itemize]{leftmargin=2em,itemsep=0.28em,topsep=0.4em}
 \setlist[enumerate]{leftmargin=2.3em,itemsep=0.28em,topsep=0.4em}
 \renewcommand{\arraystretch}{1.18}
-\renewcommand{\contentsname}{목차}
-\renewcommand{\figurename}{그림}
-\renewcommand{\tablename}{표}
-\renewcommand{\refname}{참고문헌}
-\setlength{\emergencystretch}{3em}
+\renewcommand{\contentsname}{Contents}
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\renewcommand{\refname}{References}
+\setlength{\emergencystretch}{5em}
 \setlength{\parindent}{1em}
 \setlength{\parskip}{0.18em}
 
@@ -55,19 +51,19 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 
 \theoremstyle{definition}
-\newtheorem{definition}{정의}[section]
-\newtheorem{translation}[definition]{번역 원리}
-\newtheorem{verified}[definition]{검증된 명제(verified proposition)}
-\newtheorem{openobligation}[definition]{미해결 의무}
-\newtheorem{caution}[definition]{주의}
-\newtheorem{question}[definition]{참여 질문}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{translation}[definition]{Translation principle}
+\newtheorem{verified}[definition]{Verified proposition}
+\newtheorem{openobligation}[definition]{Open obligation}
+\newtheorem{caution}[definition]{Caution}
+\newtheorem{question}[definition]{Participation question}
 
-\crefname{definition}{정의}{정의}
-\crefname{translation}{번역 원리}{번역 원리}
-\crefname{verified}{검증된 명제(verified proposition)}{검증된 명제(verified propositions)}
-\crefname{openobligation}{미해결 의무}{미해결 의무}
-\crefname{caution}{주의}{주의}
-\crefname{question}{참여 질문}{참여 질문}
+\crefname{definition}{Definition}{Definitions}
+\crefname{translation}{Translation principle}{Translation principles}
+\crefname{verified}{Verified proposition}{Verified propositions}
+\crefname{openobligation}{Open obligation}{Open obligations}
+\crefname{caution}{Caution}{Cautions}
+\crefname{question}{Participation question}{Participation questions}
 
 \newcommand{\identifier}[1]{\nolinkurl{#1}}
 \newcommand{\sourcepath}[1]{\nolinkurl{#1}}
@@ -101,7 +97,7 @@
   {\end{quote}}
 
 \newenvironment{analogy}
-  {\begin{quote}\color{analogycolor}\noindent\textbf{비유(형식화된 정리(theorem) 아님).}\par\smallskip}
+  {\begin{quote}\color{analogycolor}\noindent\textbf{Analogy (not a formalized theorem).}\par\smallskip}
   {\end{quote}}
 
 \tikzset{

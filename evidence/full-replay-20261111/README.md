@@ -1,51 +1,60 @@
-# 공개 소스의 전체 재현 PASS
+# Full reproduction of the public sources: PASS
 
-검증한 소스는 커밋 **`88a543fd07ef268fcbea78d488726cc7652a552f`**의
-깨끗한 내보내기다. 공개 bootstrap으로 별도 설치했던 도구 환경을 활성화하고
-일반 Linux 터미널에서 `bash scripts/reproduce.sh full --jobs 2`를 한 번
-실행했다. **28단계 모두 PASS**이며 실행 전후 소스 해시가 같다.
+The verified sources were a clean export of commit
+**`88a543fd07ef268fcbea78d488726cc7652a552f`**. The tool environment previously
+installed separately using the public bootstrap was activated, and
+`bash scripts/reproduce.sh full --jobs 2` was run once in a normal Linux terminal.
+**All 28 steps passed**, and source hashes were unchanged before and after execution.
 
-| 확인 항목 | 결과 | 근거 |
+| Check | Result | Evidence |
 | --- | --- | --- |
-| 전체 runner | 28/28 PASS, 모든 종료 코드 0 | [원본 요약](runner-summary.json) |
-| 원본 생성물·명세·증명 | 277/277 PASS | [증명 요약](baseline-summary.json) |
-| 보강안 및 원본 의존 증명 | 177/177 PASS | [증명 요약](hardened-summary.json) |
-| 실행 소스 | 1,829개 파일, clean commit export | [소스 manifest](source-manifest.json) |
-| 실행 환경 | 고정 버전·로컬 소켓 검사 PASS | [환경 기록](environment.json) |
-| 실행 후 검토 | 단계 로그 28개 해시, 증명 대상 454개 해시·로그, 소스 불변 확인 | [확인 기록](verification.json) |
+| Full runner | 28/28 PASS, all exit codes 0 | [Original summary](runner-summary.json) |
+| Baseline artifacts, specifications, and proofs | 277/277 PASS | [Proof summary](baseline-summary.json) |
+| Hardened targets and baseline proof dependencies | 177/177 PASS | [Proof summary](hardened-summary.json) |
+| Executed sources | 1,829 files, clean commit export | [Source manifest](source-manifest.json) |
+| Execution environment | Pinned versions and local socket checks PASS | [Environment record](environment.json) |
+| Post-run review | Hashes of 28 step logs, hashes and logs for 454 proof targets, and source immutability confirmed | [Verification record](verification.json) |
 
-보강안의 177개에는 원본 의존 파일 147개가 포함된다. 따라서 주 대상 실행은
-총 454회이며, 중복을 제외한 파일은 307개다. 두 검증기는 `-no-eco`와
-`Proofs:check` 및 기존 EOF 검사를 사용했다. 재추출 비교, API·샘플러·KAT,
-경계 사례, 수치 인증서, CT/SCT와 회귀 검사도 전체 runner 안에서 통과했다.
+The 177 hardened targets include 147 baseline dependency files. Thus there were
+454 primary-target executions, covering 307 distinct files. Both verifiers used
+`-no-eco`, `Proofs:check`, and the existing EOF checks. Re-extraction comparison,
+API, sampler, KAT, edge-case, numerical-certificate, CT/SCT, and regression checks
+also passed within the full runner.
 
-실행은 2026-11-11 11:40:56–13:16:50 UTC에 이루어졌다. 전체 시간은
-**5,753.527초(약 1시간 35분 53초)**, GNU time의 최대 RSS는
-**3,536,252 KiB(약 3.37 GiB)**다. [자원 기록](resources.txt)은 이 호스트의
-이번 실행에 대한 측정이며 다른 장치의 실행 시간을 보장하지 않는다.
+The run took place on 2026-11-11 from 11:40:56–13:16:50 UTC. Total elapsed time was
+**5,753.527 seconds (approximately 1 hour 35 minutes 53 seconds)**, and GNU time
+reported a maximum RSS of **3,536,252 KiB (approximately 3.37 GiB)**.
+The [resource record](resources.txt) measures this run on this host; it does not
+guarantee execution times on other devices.
 
-## 결과의 범위
+## Scope of the result
 
-이 기록으로 이전의 소켓 제한과 공개 README 해시 연결 문제 이후에 남았던
-새 도구 환경의 전체 runner 실행 공백을 해소했다. 이전 실패·과거 검증 기록은
-수정하지 않고 그대로 보존한다.
+This record closes the gap in full-runner execution with the new tool environment
+that remained after the earlier socket restriction and public README hash-linkage
+issue. The earlier failures and historical verification records remain preserved;
+their execution results have not been rewritten.
 
-별도 설치 환경은 **같은 Linux 호스트**에서 구성했다. 다른 머신·운영체제나
-독립 연구자의 재현, GitHub Actions 원격 실행을 주장하지 않는다. 전체 runner의
-PASS는 명시한 구성요소·실험 범위에 해당하며, 전체 KeyGen/Sign/Verify 정확성,
-구체적 SHAKE의 iid 대체, Hyperball 외부 반복 종료 또는 전체 서명 보안성의
-완료를 뜻하지 않는다.
+The separate installation was on the **same Linux host**. This does not claim
+reproduction on another machine or operating system, by an independent researcher,
+or in a remote GitHub Actions run. The full-runner PASS covers the stated
+components and experiments; it does not establish complete KeyGen/Sign/Verify
+correctness, replacement of concrete SHAKE with iid sampling, termination of the
+outer Hyperball loop, or complete signature security.
 
-이 결과를 추가하는 문서·증거 커밋과 실제 검증한 소스 커밋 `88a543f`를
-구분한다. 이미 검증한 소스 압축본의 바이트와 식별자는 유지한다.
+Distinguish the documentation/evidence commit adding this result from the source
+commit actually verified, `88a543f`. The bytes and identifiers of the already
+verified source archive are retained.
 
-## 전체 로그와 보존
+## Complete logs and preservation
 
-454개 상세 증명 로그, 두 증명 요약, 28단계 로그와 runner 요약, 원본
-소스 manifest, 실행 스크립트, 콘솔·자원 기록을 하나의 압축본으로 보존했다.
-[압축본 정보](archive.json)에 파일명·크기·SHA-256이 있다. 로컬 공개 준비
-디렉터리에 있는 첨부물이며, 공개 다운로드 URL·릴리스 태그·DOI는 아직 없다.
-원본 로그의 호스트 경로는 실행 당시의 기록으로 남긴다.
+One archive preserves the 454 detailed proof logs, both proof summaries, the
+28 step logs and runner summary, the original source manifest, execution scripts,
+and console and resource records. [Archive metadata](archive.json) gives its
+filename, size, and SHA-256. At the time of this record, it was an attachment in
+the local publication-preparation directory, with no public download URL, release
+tag, or DOI yet assigned. Host paths in the original logs remain as records of
+the execution environment at that time.
 
-이 디렉터리의 요약은 `sha256sum --check --quiet SHA256SUMS`로 확인한다.
-압축본을 푼 디렉터리에서도 같은 명령으로 전체 로그의 무결성을 확인할 수 있다.
+Check the summaries in this directory with
+`sha256sum --check --quiet SHA256SUMS`. The same command in the extracted archive
+directory checks the integrity of all logs.

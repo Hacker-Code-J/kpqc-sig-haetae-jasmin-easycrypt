@@ -1,28 +1,29 @@
-\section{신뢰 경계와 재현 방법}
+\section{Trust boundaries and reproduction}
 \label{sec:trust-reproduction}
 
-\subsection{무엇을 신뢰하는가}
+\subsection{What is trusted}
 
-이 증명 개발의 신뢰 기반(trusted computing base, TCB)은 다음을 포함한다.
+The trusted computing base (TCB) of this proof development includes the following.
 
 \begin{itemize}
-  \item EasyCrypt 커널/형 검사기(kernel/type checker)와 가져온 표준 라이브러리;
-  \item Why3 및 호출된 SMT 증명기(prover);
-  \item Jasmin 구문분석기/컴파일러(parser/compiler)와 \identifier{jasmin2ec}
-        번역기;
-  \item 해시(hash)로 고정한 Jasmin 소스, 생성 추출물, 재사용 EasyCrypt 산출물;
-  \item 소스 해시(source hash) 및 LaTeX 빌드를 수행하는 호스트 도구.
+  \item The EasyCrypt kernel/type checker and imported standard libraries;
+  \item Why3 and the invoked SMT provers;
+  \item The Jasmin parser/compiler and \identifier{jasmin2ec} translator;
+  \item Hash-pinned Jasmin sources, generated extractions, and reused EasyCrypt artifacts;
+  \item Host tools performing source hashing and LaTeX builds.
 \end{itemize}
 
-\identifier{jasmin2ec}가 소스를 받아들이고 생성된 EasyCrypt가 컴파일된다는
-사실은 번역기의 의미보존 증명이 아니다. 별도의 검증된 번역기 정리가 없는 한
-번역기 자체는 TCB에 남는다. 마찬가지로 메모리 안전성과 SCT/상수시간
-(constant-time)은
-EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
+Acceptance of the source by \identifier{jasmin2ec} and compilation of the
+generated EasyCrypt do not prove the translator's semantic preservation. Unless
+there is a separate verified-translator theorem, the translator itself remains
+in the TCB. Likewise, memory safety and SCT/constant-time properties do not follow
+from EUF-CMA and form separate tracks.
 
-\subsection{증명 검증 파이프라인}
+\subsection{Proof verification pipeline}
 
-저장소 루트에서 다음을 실행한다.
+The commands in this historical proof pipeline require the complete earlier
+tree restored as described in the archive README. Run them from that restored
+repository root.
 
 \begin{verbatim}
 ./haetae-topdown-easycrypt/scripts/verify-all.sh
@@ -30,76 +31,77 @@ EUF-CMA에서 따라오지 않으며 별도의 트랙이다.
 python3 haetae-topdown-easycrypt/post-freeze/check-kg-actual-avec-qj-trace.py
 \end{verbatim}
 
-첫 명령은 동결 82대상 aggregate를, 둘째는 paper-freeze 범위를 명시적으로,
-셋째는 latest post-freeze mismatch의 독립 deterministic witness를 검사한다.
+The first command checks the frozen 82-target aggregate, the second explicitly
+checks the paper-freeze scope, and the third checks an independent deterministic
+witness of the latest post-freeze mismatch.
 
-이 스크립트는 다음을 순서대로 검사한다.
+The script checks the following in order.
 
 \begin{enumerate}
-  \item 고정 소스(pinned source)와 읽기 전용 증명 트리(read-only proof tree)의
-        SHA-256 변동(drift);
-  \item 패커(packer), 서명 코덱, HBZ 준비/적용/전체 래퍼, API 키 복사 보조절차,
-        원시 API 호출자, 원시 \(\mu\), 전사 집중 추출(focused extraction)의 재생성과 hash
-        일치, Week~7 pack/unpack과 Week~8 focused HBZ procedure body identity 및
-        Week~9 실제 rANS 결합 모듈(actual rANS harness)이 재사용하는 생성 대상
-        동일성(generated-target identity);
-  \item 실제 512단어 HBZ 기호 인증서(symbol certificate)의 결정적 재생성,
-        생성기/출력(generator/output) 해시 일치와 생성된 EasyCrypt 인증서 자체의
-        커널(kernel) 재검사;
-  \item Week~9 rANS 정리 표면에 더해 Week~10 배열/목록, 단어 단계, 내부 진행,
-        실제 내부 반복문, 직렬화와 성공 크기 정리 표면 및 Week~11 꼬리 인식
-        불변식, 생성 단어 단계, 최종 저장과 실제 인코더 추적 폐쇄, Week~12
-        디코더 커서/표/재생 불변식과 실제 추적 정제, Week~13 복사 추적/점별
-        입력/W64 크기 어댑터와 실제 핵심 역함수, Week~14 full/focused 내부
-        동치, full encoder/decoder, 직접 결합과 production 경계 lift의
-        과대주장 검사, Week~15 고정 all-six 예산/실패 원인/production 성공 lift,
-        Week~16 실제 M23 matrix/finalizer 스냅샷, 마지막 NTT 표현 rewrite,
-        직접 Sign/Verify core control과 \identifier{STOP-VERIFY-MATRIX-CRT}
-        동결 표면 검사;
-  \item 현재 매니페스트된 82개 작성 EasyCrypt 대상의 \identifier{-no-eco} 새
-        컴파일;
-  \item \identifier{admit}, \identifier{sorry}, 작성 \identifier{axiom},
-        디버그/임시(debug/temporary) 선언 부재와 매니페스트(manifest) 완전성;
-  \item 선택된 상류 기준선(upstream baseline)의 새 컴파일(fresh compile);
-  \item 기존 주차별(sprint) LaTeX 연구 노트의 참조/인용 오류 없는 빌드;
-  \item \sourcepath{manifests/paper-artifacts.md}의 동결 PDF, 82대상, 주장 행렬과
-        exact blocker가 변하지 않았는지 확인하는 paper-freeze audit.
+  \item SHA-256 drift in the pinned sources and read-only proof tree;
+  \item Regeneration and hash agreement of focused extractions for the packer,
+        signature codec, HBZ prepare/apply/full wrappers, API key-copy helpers,
+        raw API callers, raw \(\mu\), and transcripts; Week~7 pack/unpack and
+        Week~8 focused HBZ procedure-body identity; and identity of generated
+        targets reused by the Week~9 actual rANS harness;
+  \item Deterministic regeneration of the actual 512-word HBZ symbol certificate,
+        generator/output hash agreement, and kernel rechecking of the generated
+        EasyCrypt certificate itself;
+  \item In addition to Week~9 rANS theorem surfaces, overclaim checks for Week~10
+        array/list, word-step, inner-progress, actual inner-loop, serialization,
+        and success-size theorem surfaces; Week~11 tail-aware invariants, generated
+        word steps, final stores, and actual encoder trace closure; Week~12 decoder
+        cursor/table/replay invariants and actual trace refinement; Week~13 copy
+        traces, pointwise inputs, W64 size adapters, and the actual core inverse;
+        Week~14 full/focused internal equivalence, full encoder/decoder, direct
+        harness, and production-boundary lift; Week~15 fixed all-six budget,
+        failure causes, and production success lift; and frozen-surface checks for
+        Week~16 actual M23 matrix/finalizer snapshots, the final NTT representation
+        rewrite, direct Sign/Verify core control, and \identifier{STOP-VERIFY-MATRIX-CRT};
+  \item Fresh \identifier{-no-eco} compilation of the 82 currently manifested
+        authored EasyCrypt targets;
+  \item Absence of \identifier{admit}, \identifier{sorry}, authored
+        \identifier{axiom}s, and debug/temporary declarations, and manifest completeness;
+  \item Fresh compilation of selected upstream baselines;
+  \item Builds of the existing sprint LaTeX research notes without reference/citation errors;
+  \item A paper-freeze audit checking that the frozen PDF, 82 targets, claim matrix,
+        and exact blockers in \sourcepath{manifests/paper-artifacts.md} remain unchanged.
 \end{enumerate}
 
 {\small\raggedright
-추출 해시(hash)는 생성물 변동(drift)을 탐지하지만 번역 의미의 정당성을
-대신하지 않는다. 또한 실행 요약은 매 실행 때 덮어쓰므로, 발표용 스냅샷에는
-마지막 \texttt{RESULT PASS} 줄까지 포함된 완전한 로그를 보관해야 한다.
-76대상 완료 스냅샷의 종료 표식은
-\sourcepath{logs/verify-all-before-kg-ntt-mul.log}에 보존된
+Extraction hashes detect generated-artifact drift but do not replace justification
+of translation semantics. Run summaries are also overwritten on every run, so
+publication snapshots must retain complete logs including the final
+\texttt{RESULT PASS} line. The terminal marker of the 76-target completion snapshot
+is preserved in \sourcepath{logs/verify-all-before-kg-ntt-mul.log} as
 \texttt{RESULT PASS}\newline
-\texttt{authored-targets=76 cache=-no-eco}다. Sign 수정 전 77대상 완료 표식은
-\sourcepath{logs/verify-all-before-week16-sign.log}에 보존되고
-\sourcepath{WEEK16_SIGN_REPORT.md}는 78번째 대상의 직접 actual-call control과
-중단 판정을 설명한다. Verify 수정 전 78/78 완료 로그는
-\sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며
-해시 \hashsplit{cf8056712327dc8211cf93ae427ac505}{3e8a9d2366747f171392468ac3ff0d75}를
-갖는다. \sourcepath{WEEK16_VERIFY_REPORT.md}는 canonical decoded
-\((x,v,h,c)\) 경계의 \identifier{STOP-VERIFY-}\allowbreak
-\identifier{MATRIX-CRT}와 남은 blocker를
-설명한다. paper-freeze 직전 82/82 aggregate 로그는
-\sourcepath{logs/verify-all-before-paper-freeze.log}에 보존되고 SHA-256은
-\hashsplit{4cd64e5a656be82710bca1410c4d194}{03a3c661d6b91b0319a0ea8f7c91646da}이다.
+\texttt{authored-targets=76 cache=-no-eco}. The 77-target completion marker before
+the Sign changes is preserved in
+\sourcepath{logs/verify-all-before-week16-sign.log}, and
+\sourcepath{WEEK16_SIGN_REPORT.md} describes the 78th target's direct actual-call
+control and stop verdict. The 78/78 completion log before the Verify changes is
+preserved in \sourcepath{logs/verify-all-before-week16-verify.log}, with hash
+\hashsplit{cf8056712327dc8211cf93ae427ac505}{3e8a9d2366747f171392468ac3ff0d75}.
+\sourcepath{WEEK16_VERIFY_REPORT.md} describes
+\identifier{STOP-VERIFY-}\allowbreak
+\identifier{MATRIX-CRT} and the remaining blockers at the canonical decoded
+\((x,v,h,c)\) boundary. The 82/82 aggregate log immediately before paper freeze
+is preserved in \sourcepath{logs/verify-all-before-paper-freeze.log}, with SHA-256
+\hashsplit{4cd64e5a656be82710bca1410c4d194}{03a3c661d6b91b0319a0ea8f7c91646da}.
 \newline
-기준 커밋 \identifier{e87bcc3}에 추적된
-\sourcepath{logs/verify-all-summary.txt}는 paper-freeze audit까지 통과한
-terminal \texttt{RESULT PASS}\newline
+\sourcepath{logs/verify-all-summary.txt}, tracked at baseline commit
+\identifier{e87bcc3}, retains the terminal
+\texttt{RESULT PASS}\newline
 \texttt{authored-targets=82}\newline
-\texttt{cache=-no-eco}와 SHA-256
-\hashsplit{08ef9639dc73d56dba42d02999d07897}{d29bc8e60aa100a648e9437fd64387ad}를
-유지한다.
-동결 논문 PDF 해시는
-\hashsplit{be935948028829556951863b44ceb2e6}{c5b2037820991b3a43a4b461b036e53d}다.
+\texttt{cache=-no-eco}, including a passing paper-freeze audit, and SHA-256
+\hashsplit{08ef9639dc73d56dba42d02999d07897}{d29bc8e60aa100a648e9437fd64387ad}.
+The frozen paper PDF hash is
+\hashsplit{be935948028829556951863b44ceb2e6}{c5b2037820991b3a43a4b461b036e53d}.
 \par}
 
-\begin{boundary}[82대상 paper-freeze와 별도 post-freeze 보조 층]
-2026-08-10의 Week~14 완료 실행은 Week~13의 67대상 기준선에 다음 다섯 이론을
-추가해 72대상을 닫았다.
+\begin{boundary}[82-target paper freeze and separate post-freeze auxiliary layer]
+The Week~14 completion run on 2026-08-10 closed 72 targets by adding the following
+five theories to the Week~13 67-target baseline.
 \begin{itemize}[leftmargin=1.5em,itemsep=0.05em,topsep=0.25em]
   \raggedright
   \item \sourcepath{Mode2HbzInternal}\allowbreak\sourcepath{Boundaries.ec};
@@ -108,69 +110,82 @@ terminal \texttt{RESULT PASS}\newline
   \item \sourcepath{Mode2HbzFullActualInverse.ec},
         \sourcepath{Mode2HbzSignature}\allowbreak\sourcepath{BoundaryLift.ec}.
 \end{itemize}
-Week~15는 \sourcepath{Mode2RansAllSixBudget.ec}와
-\sourcepath{Mode2RansActualSuccessWitness.ec}를 더해 74대상으로, Week~16은
-\sourcepath{Mode2KeygenSnapshotAlgebra.ec}와
-\sourcepath{Mode2KeygenCoreEquation.ec}를 더해 76대상으로 확장했다.
-KG-NTT-MUL 감사가 추가한 paper-freeze 시점 77번째 대상
-\sourcepath{Mode2Keygen}\allowbreak\sourcepath{NttMulBridge.ec}는 마지막
-\identifier{output_row} 표현
-rewrite와 actual two-call harness의 두 active row consequence를 개별 fresh
-compile했다. 이 동결 버전은 odd-root convolution이나 security-list
-adapter를 가정하지 않으며 판정은 \identifier{STOP-KG-NTT}였다.
+Week~15 added \sourcepath{Mode2RansAllSixBudget.ec} and
+\sourcepath{Mode2RansActualSuccessWitness.ec}, expanding to 74 targets; Week~16
+added \sourcepath{Mode2KeygenSnapshotAlgebra.ec} and
+\sourcepath{Mode2KeygenCoreEquation.ec}, expanding to 76 targets.
+The 77th target at paper freeze, added by the KG-NTT-MUL audit,
+\sourcepath{Mode2Keygen}\allowbreak\sourcepath{NttMulBridge.ec}, individually
+fresh-compiled the final \identifier{output_row} representation rewrite and the
+two active-row consequences for the actual two-call harness. This frozen version
+assumes neither odd-root convolution nor a security-list adapter; its verdict was
+\identifier{STOP-KG-NTT}.
 \sourcepath{logs/week14-hbz-full-}\allowbreak
-\sourcepath{surface-scan.log}는 production 직접 호출,
-사전조건, 실패/성공 분기와 frame 결론의 정리 표면을 검사한다. Week~13 독립
-검증 기록은 그 아래 실제 rANS 핵심 역함수에 순환 전제가 없음을 별도로
-확인한다. \sourcepath{logs/week15-rans-}\allowbreak
-\sourcepath{success-surface-scan.log}는 고정 입력
-정리가 성공, trace, capacity나 losslessness를 전제하지 않는지 검사하고,
+\sourcepath{surface-scan.log} checks theorem surfaces for direct production calls,
+preconditions, failure/success branches, and frame conclusions. The Week~13
+independent verification record separately confirms that the underlying actual
+rANS core inverse has no circular premises.
+\sourcepath{logs/week15-rans-}\allowbreak
+\sourcepath{success-surface-scan.log} checks that the fixed-input theorem does not
+assume success, trace, capacity, or losslessness, and
 \sourcepath{logs/week16-keygen-}\allowbreak
-\sourcepath{core-surface-scan.log}는 실제 두 호출, 비순환
-사전조건, NTT boundary가 원하는 곱을 숨기지 않는지와
-\identifier{STOP-KG-NTT} 경계를 검사한다.
-\sourcepath{logs/week16-sign-core-surface-scan.log}는 실제 세 helper 호출,
-비순환 precondition과 stop 경계를 검사한다. 실행 중 생성되는
-\sourcepath{logs/verify-all-summary.txt}의 중간 PASS 줄은 완료 증거가 아니며,
-terminal RESULT와 고정 해시가 함께 있을 때만 현재 aggregate 증거로 쓴다.
-Verify 수정 전 78/78 완료 로그는
-\sourcepath{logs/verify-all-before-week16-verify.log}에 보존되며,
-paper-freeze 직전 82/82 aggregate는
-\sourcepath{logs/verify-all-before-paper-freeze.log}에 보존된다.
+\sourcepath{core-surface-scan.log} checks the two actual calls, non-circular
+preconditions, that the NTT boundary does not hide the desired product, and the
+\identifier{STOP-KG-NTT} boundary.
+\sourcepath{logs/week16-sign-core-surface-scan.log} checks the three actual helper
+calls, non-circular preconditions, and stop boundary. Intermediate PASS lines in
+\sourcepath{logs/verify-all-summary.txt}, generated during execution, are not
+completion evidence; only a terminal RESULT together with a fixed hash is used
+as current aggregate evidence. The 78/78 completion log before the Verify changes
+is preserved in \sourcepath{logs/verify-all-before-week16-verify.log}, and the
+82/82 aggregate immediately before paper freeze is preserved in
+\sourcepath{logs/verify-all-before-paper-freeze.log}.
 
-post-freeze의 \sourcepath{NTTFullSpectralAction.ec},
+Post-freeze \sourcepath{NTTFullSpectralAction.ec},
 \sourcepath{NTTMode2RowSpecializations.ec},\newline
-\sourcepath{RqHAETAEBridge.ec}는 외부 NTT 트리에서 fresh compile됐고, 강화된
-\newline\sourcepath{Mode2KeygenNttMulBridge.ec}는 현재 82대상 aggregate 안에서 다시
-컴파일된다. 세 \sourcepath{post-freeze/KgActualAvecQj*.ec} 대상은 동결
-매니페스트에 넣지 않고 각각 \identifier{-no-eco}로 별도 컴파일했다. 따라서
-82라는 수는 post-freeze 보조 정리까지 모두 센 수가 아니며, 동결 proof-target
-surface가 유지됐다는 뜻이다.
+\sourcepath{RqHAETAEBridge.ec} were fresh-compiled in the external NTT tree, and
+the strengthened \newline\sourcepath{Mode2KeygenNttMulBridge.ec} is recompiled
+within the current 82-target aggregate. The three
+\sourcepath{post-freeze/KgActualAvecQj*.ec} targets were each compiled separately
+with \identifier{-no-eco}, without adding them to the frozen manifest. Thus 82 is
+not a count of all post-freeze auxiliary theorems; it means that the frozen
+proof-target surface has been maintained.
 \end{boundary}
 
-\subsection{이 문서 빌드}
+\subsection{Building this document}
 
-이 안내서는 기존 sprint 노트와 독립된 XeLaTeX 문서다. 저장소 루트에서
+This guide is a XeLaTeX document independent of the existing sprint notes.
+To build the English edition, run the following in this archived guide's
+directory, using the fonts listed in its README:
+\begin{verbatim}
+latexmk -xelatex -interaction=nonstopmode -halt-on-error main.tex
+\end{verbatim}
+This builds the translated PDF only. The original build script below requires
+the complete earlier tree. From that restored repository root, run
 
 \begin{verbatim}
 sh haetae-topdown-easycrypt/theory-guide/build.sh
 \end{verbatim}
 
-을 실행하면 \sourcepath{haetae-topdown-easycrypt/theory-guide/main.pdf}가
-생성된다. 스크립트는 중단 오류와 정의되지 않은 참조/인용(undefined
-reference/citation)을 실패로 처리한다.
+to generate \sourcepath{haetae-topdown-easycrypt/theory-guide/main.pdf}.
+The script treats fatal errors and undefined references/citations as failures.
 
-문서 작성 시 관찰된 도구 경계는 Jasmin/\identifier{jasmin2ec} 2026.03.0,
-EasyCrypt OPAM switch \identifier{easycrypt-5.2}, Why3 1.8.0이며, 구성된
-prover에는 Alt-Ergo 2.6.0, CVC4 1.8.0, CVC5 1.2.1, Z3 4.12.6이 포함된다.
-정확한 재현 결과는 버전 문자열보다 실행 로그를 우선한다.
+The tool versions observed when writing this document were
+Jasmin/\identifier{jasmin2ec} 2026.03.0, EasyCrypt OPAM switch
+\identifier{easycrypt-5.2}, and Why3 1.8.0; configured provers included
+Alt-Ergo 2.6.0, CVC4 1.8.0, CVC5 1.2.1, and Z3 4.12.6.
+For exact reproduction results, execution logs take precedence over version strings.
 
-\begin{takeaway}{완료 판정 기준}
-이 안내서가 컴파일되는 것과 EasyCrypt 정리가 컴파일되는 것은 서로 다른
-증거다. 문서 배포 전에는 \identifier{build.sh}와 전체
-\identifier{verify-all.sh}를 모두 성공시켜야 한다. 현재 동결 증명 기준선은
-82/82 aggregate와 paper-freeze audit의 terminal PASS다. post-freeze 주장은 세
-actual-\identifier{avec}/paper-\identifier{qj} 대상의 개별 fresh compile, Rq/NTT 보조
-대상과 deterministic trace까지 별도로 확인해야 한다. 덮어쓰기 중인 summary의
-중간 PASS 줄은 완료 증거가 아니다. 이 안내서의 별도 빌드도 함께 확인한다.
+\begin{takeaway}{Completion criteria}
+The following criteria concern updates to the historical research baseline;
+the English edition does not claim a new proof replay.
+Compilation of this guide and compilation of EasyCrypt theorems are different
+forms of evidence. Before distributing the document, both \identifier{build.sh}
+and the full \identifier{verify-all.sh} must succeed. The current frozen proof
+baseline is the terminal PASS of the 82/82 aggregate and paper-freeze audit.
+Post-freeze claims additionally require separate checks of fresh compilation of
+the three actual-\identifier{avec}/paper-\identifier{qj} targets, the Rq/NTT
+auxiliary targets, and the deterministic trace. Intermediate PASS lines in a
+summary being overwritten are not completion evidence. The separate build of
+this guide must also be checked.
 \end{takeaway}

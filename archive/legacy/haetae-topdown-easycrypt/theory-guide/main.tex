@@ -1,129 +1,138 @@
 \documentclass[11pt,a4paper]{article}
 \input{preamble}
 
-\title{\textbf{HAETAE-2 Jasmin 구현 검증}\\[0.4em]
-  \Large 수학자와 암호이론가를 위한 현재 증명 전선}
-\author{HAETAE top-down EasyCrypt 작업 문서}
-\date{상태 기준: 2026년 8월 13일}
+\title{\textbf{HAETAE-2 Jasmin Implementation Verification}\\[0.4em]
+  \Large Current Proof Frontier for Mathematicians and Cryptographers}
+\author{HAETAE top-down EasyCrypt working document}
+\date{Status as of August 13, 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-이 문서는 HAETAE-2의 논문 명세, Jasmin 구현, EasyCrypt 증명 사이에서 현재
-실제로 연결된 부분을 수학적 명제로 재구성한다. 핵심 성과는 모든 종료하는
-내부 KeyGen 실행이 반환하는 비밀키의 첫 992바이트가 검증키와 같다는
-부분정확성 정리와, 이 불변식으로부터 Sign과 Verify의 실제 생성 절차가
-원시/내부(raw/internal) 경로에서 같은 32바이트 메시지 다이제스트 접두부를
-만들고 같은 도전값 접미부(challenge suffix) 상태에 도달한다는 관계적
-정리이다. 이 국소 경계에서는 통계적 손실이 0이다. 실제 원시 KeyGen 호출자의
-순차 VK/SK 내보내기, 정수/64비트 주소 바인딩, Sign/Verify의 정확 추적(exact
-trace), 성공한 Verify의 꼬리 구간(tail) 도달 및 해시 입력 바인딩도 검증되었다.
-실제 Sign 출력의 프레임 조건(frame condition), 구간 국소(region-local) 해시
-동치, 실제 Sign 다음 Verify의 순차 추적까지 닫혔다. 다만 완료된 추적의
-\(\mu\)를 운반하는 생성/재전달(product/replay) 간선은 명시적 논문 경계로
-동결되어 있다.
+This document reconstructs as mathematical statements the connections currently
+established between the HAETAE-2 paper specification, Jasmin implementation,
+and EasyCrypt proofs. The main results are a partial-correctness theorem that
+the first 992 bytes of the secret key returned by every terminating internal
+KeyGen execution equal the verification key, and relational theorems derived
+from this invariant: the actual generated Sign and Verify procedures produce
+the same 32-byte message-digest prefix and reach the same challenge-suffix
+state along their raw/internal paths. Statistical loss is 0 at this local
+boundary. Sequential VK/SK exports by the actual raw KeyGen caller,
+integer/64-bit address bindings, exact Sign/Verify traces, successful Verify's
+arrival at the tail, and hash-input bindings were also verified. The frame
+condition of actual Sign output, region-local hash equivalence, and the
+sequential trace of actual Sign followed by Verify were closed. However, the
+product/replay edge transporting stored \(\mu\) observations from completed
+traces is frozen as an explicit paper boundary.
 
-서명 기능 경로에서는 정준(canonical) 입력 아래 1056바이트 접두부 코덱의
-왕복(round trip), HBZ 준비/적용(prepare/apply), 실제 표 인증서(table
-certificate), 순수 rANS 단계와 정규화 바이트 스택(normalization-byte stack),
-실제 접미부 복사와 검증 결합 모듈(harness)의 제어를 증명했다. Week~10은 배열과
-목록의 접미부 연결, 실제 W32/W64 단어 단계, 생성된 내부 정규화 반복문의
-바이트/프레임 보존과 커서 무언더플로, 최종 4바이트 직렬화의 잎 정리, 그리고
-실제 \identifier{_rans_encode}의 성공 시 크기 범위
-\(4\le 1024-\mathsf{off}\le1024\)를 추가했다. Week~11은 꼬리 인식
-불변식(tail-aware invariant), 생성 단어 단계 연결(generated word-step bridge),
-한 기호 외부 전이와 최종 직렬화 합성(serialization composition)을 실제 생성
-절차 안에 설치했다. 그 결과 종료한 실제 \identifier{_rans_encode}가 실패를
-반환하거나, 성공 시 전체 반환 접미부가 순수 \identifier{trace_bytes}와 같고
-오프셋--길이 등식 및 초기 접두부 프레임을 만족한다는 성공 조건부 부분정확성
-(success-conditioned partial correctness) 정리가 컴파일된다. Week~12는 실제
-생성 \identifier{_rans_decode}의 초기 4바이트 파싱, 구체적 표 조회와 단어
-갱신, 0/1/2바이트 정규화 재생(normalization replay), 외부/내부 반복 불변식과
-최종 거절 검사를 직접 닫았다. 그 결과 정확한 \identifier{trace_bytes} 입력을
-받아 종료한 실행이 1024개 기호를 복원하고, 정확한 크기를 소비하며, 출력 꼬리를
-보존하고 \(bad=0\)을 반환한다는 정확 추적 부분정확성(exact-trace partial
-correctness)이 컴파일된다. Week~13은 실제 인코더의 접미부와 실제 복사의
-점별 구간 등식을 디코더의 정확 추적 입력으로 운반하고, 동일한 결합 모듈에서
-실패 시 디코더 미실행과 성공 시 1024기호 복원을 함께 증명했다. Week~14는
-실제 full-HBZ prepare--rANS--apply 경계를 production
-SignaturePack/Unpack 추출 경계까지 올려, 실패 시 초기 버퍼 보존과 성공 시
-원래 1024계수 복원 및 꼬리 프레임을 같은 계약으로 증명했다. Week~15는
-all-zero HBZ의 실제 prepare 결과가 all-6 기호열임을 보이고, 그 기호열의
-정규화 예산이 1020바이트 이하라는 순수 상계로 실제 인코더 실패를 배제했다.
-따라서 종료한 고정 입력 실행에 대해서는 production pack/unpack의 nonzero-size
-왕복까지 컴파일된다. 이는 Hoare 부분정확성이므로 종료, losslessness나
-확률 1 성공을 뜻하지 않는다.
+Along the signature functional path, the work proved the 1056-byte prefix-codec
+round trip under canonical inputs, HBZ prepare/apply, actual table certificates,
+pure rANS steps and normalization-byte stacks, actual suffix copying, and
+harness control. Week~10 added array/list suffix connections, actual W32/W64
+word steps, byte/frame preservation and cursor non-underflow in the generated
+inner normalization loop, leaf theorems for final 4-byte serialization, and
+the actual \identifier{_rans_encode} successful size bound
+\(4\le 1024-\mathsf{off}\le1024\). Week~11 installed the tail-aware invariant,
+generated word-step bridge, one-symbol outer transition, and final
+serialization composition inside the actual generated procedure. The resulting
+success-conditioned partial-correctness theorem compiles: a terminating actual
+\identifier{_rans_encode} either returns failure or, on success, its entire
+returned suffix equals pure \identifier{trace_bytes}, with the offset--length
+equality and initial-prefix frame. Week~12 directly closed the actual generated
+\identifier{_rans_decode} initial 4-byte parsing, concrete table lookup and word
+update, 0/1/2-byte normalization replay, outer/inner loop invariants, and final
+rejection check. The resulting exact-trace partial-correctness theorem compiles:
+a terminating execution on exact \identifier{trace_bytes} input recovers
+1024 symbols, consumes the exact size, preserves the output tail, and returns
+\(bad=0\). Week~13 transported the actual encoder suffix and the pointwise
+region equality established by actual copying into the decoder's exact-trace
+input, proving both decoder non-execution on failure and 1024-symbol recovery
+on success in the same harness. Week~14 lifted the actual full-HBZ
+prepare--rANS--apply boundary to the production SignaturePack/Unpack extraction
+boundaries, proving preservation of the initial buffer on failure and recovery
+of the original 1024 coefficients with a tail frame on success in one contract.
+Week~15 showed that actual preparation of all-zero HBZ produces an all-6 symbol
+sequence, and excluded actual encoder failure using a pure upper bound of
+1020 bytes on that sequence's normalization budget. Thus the production
+pack/unpack nonzero-size round trip compiles for terminating fixed-input
+executions. This is Hoare partial correctness; it does not imply termination,
+losslessness, or probability-1 success.
 
-Week~16의 82개 작성 대상은 실제 KeyGen matrix/finalizer 스냅샷, Sign의 actual
-세 helper control, Verify의 actual 다섯 helper 순서와 V-1/V-2/V-5/V-6,
-W64 norm gate 및 tail/mismatch word expression까지를
-\identifier{PAPER-FROZEN} 경계로 고정한다. 동결 주장 행렬에서 KeyGen은
-\identifier{STOP-KG-NTT}, Sign은 \identifier{STOP-SIGN-CHAL-MODE2}, Verify는
-\identifier{STOP-VERIFY-MATRIX-CRT}이며, 이 판정들은 완전한 세 알고리즘의
-정확성을 뜻하지 않는다.
+Week~16's 82 authored targets freeze the actual KeyGen matrix/finalizer
+snapshot, actual three-helper Sign control, actual five-helper Verify sequence,
+V-1/V-2/V-5/V-6, the W64 norm gate, and tail/mismatch word expressions at the
+\identifier{PAPER-FROZEN} boundary. In the frozen claim matrix, KeyGen is at
+\identifier{STOP-KG-NTT}, Sign at \identifier{STOP-SIGN-CHAL-MODE2}, and Verify
+at \identifier{STOP-VERIFY-MATRIX-CRT}. These decisions do not establish
+correctness of the three complete algorithms.
 
-paper-freeze 이후의 보조 증명은 동결 논문을 소급 확장하지 않고 NTT/Rq
-경계를 더 전진시켰다. odd-root/full-NTT spectral action과 2-by-3/2-by-4
-수학적 row product, \identifier{Rq.poly}에서
-\identifier{HAETAE_Algebra.poly}로의 덧셈ㆍ곱셈ㆍ3항 dot 표현 보존이 닫혔다.
-또한 종료한 실제 mode-2 \identifier{avec} 확장의 nonce 515/516,
-SHAKE128 framing, little-endian 16-bit parsing 및 \(<64513\) rejection 의미를
-논문 \(a\)에 연결하고 독립적인 논문 \(qj\) 항을 finalizer 스냅샷과 합성했다.
-그러나 기존 보안 모델의 synthetic \identifier{haetae_mode23_qj_vector}는
-논문 \(qj\) 및 실제 확장과 다른 객체임이 컴파일된 정리와 구체적 trace로
-확인되었다. 따라서 최신 보조 판정은
-\identifier{STOP-KG-AVEC-QJ}이며, 첫 수리 의무는
-\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}다. 힌트 (h) 코덱은 계속
-연기되어 있다.
-따라서
-\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\)과
-\(\delta_{\mathrm{Encoding}}=0\)은 아직 주장할 수 없다. 접미부 코덱,
-문맥, 하이비트(highbits)/LSB, 전체 도전값, 재시도 분포와 구현 수준 EUF-CMA도 열려
-있다. 이 문서는 이 경계를 분리해 읽기 위한 전용 안내서이다.
+Post-freeze auxiliary proofs advanced the NTT/Rq boundary without retroactively
+extending the frozen paper. Odd-root/full-NTT spectral action, mathematical
+2-by-3/2-by-4 row products, and preservation of addition, multiplication, and
+3-term dot-product representation from \identifier{Rq.poly} to
+\identifier{HAETAE_Algebra.poly} were closed. The work also connected the nonces
+515/516, SHAKE128 framing, little-endian 16-bit parsing, and \(<64513\) rejection
+semantics of terminating actual mode-2 \identifier{avec} expansion to the
+paper's \(a\), and composed an independent paper \(qj\) term with the finalizer
+snapshot. However, compiled theorems and concrete traces confirmed that the
+existing security model's synthetic \identifier{haetae_mode23_qj_vector} is a
+different object from the paper's \(qj\) and actual expansion. The latest
+auxiliary decision is therefore \identifier{STOP-KG-AVEC-QJ}, with
+\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS} as the first repair obligation.
+The hint (h) codec remains deferred.
+Consequently,
+\(\delta_{\mu,\mathrm{raw\_api\_accept}}=0\) and
+\(\delta_{\mathrm{Encoding}}=0\) cannot yet be claimed. Suffix codecs, context,
+highbits/LSB, the complete challenge, retry distributions, and implementation-level
+EUF-CMA also remain open. This guide is dedicated to distinguishing these boundaries.
 \end{abstract}
 
-\begin{takeaway}{한 문장 요약}
-현재 증명은
+\begin{takeaway}{One-sentence summary}
+The current proofs close
 \[
   \prefix_{992}(sk)=vk
   \Rightarrow
   \take_{32}(\mu_{\mathrm{Sign}}^{64})=\mu_{\mathrm{Verify}}^{32}
   \Rightarrow
-  \text{도전값 접미부 상태 일치}
+  \text{equal challenge-suffix states}
 \]
-를 실제 생성된 원시/내부 절차에 대해 닫았고, 실제 원시 API의 내보내기, 정확
-추적, Sign 출력 프레임 및 구간 국소 메모리 연결까지 올라갔다. 기능 경로는
-실제 서명 접두부 코덱에 이어 HBZ 준비/적용, 실제 표 인증서와 순수 rANS 단계,
-공통 정규화 바이트 추적, 실제 접미부 복사와 3회 호출 결합의 제어를 닫았다.
-Week~10에는 실제 인코더 내부 쓰기 의미와 성공 시 크기 범위까지 추가되었다.
-Week~11은 순수 꼬리를 보존하는 정확한 내부 불변식, 생성 단어 갱신, 외부 반복과
-마지막 네 저장을 합성하여 실제 인코더의 성공 접미부 정제를 닫았다. Week~12는
-같은 순수 추적을 실제 디코더가 앞에서부터 소비하여 원래 기호, 정확한 소비
-크기와 출력 꼬리 프레임을 복원함을 닫았다. Week~13은 실제
-인코더--복사--디코더 세 절차를 직접 호출하는 결합 모듈에서 실패/성공 분기와
-성공 시 전체 기호 복원을 합성했다. Week~14는 그 결과를 실제 full-HBZ
-prepare/apply와 합성하고 production SignaturePack/Unpack 경계로 운반했다.
-Week~15는 all-zero HBZ에 대해 실제 all-6 prepare, 인코더 실패 배제와
-production 고정 입력 왕복을 닫았다. Week~16의 82개 작성 대상은 실제 KeyGen
-matrix/finalizer 스냅샷과 Sign/Verify의 제한된 actual control 및 machine-word
-경계를 \identifier{PAPER-FROZEN}으로 고정했다. 이 동결 행렬의 중단점은 각각
-\identifier{STOP-KG-NTT}, \identifier{STOP-SIGN-CHAL-MODE2},
-\identifier{STOP-VERIFY-MATRIX-CRT}다.
+for actual generated raw/internal procedures, extending to actual raw-API
+exports, exact traces, Sign output frames, and region-local memory connections.
+Along the functional path, the actual signature-prefix codec is followed by
+closed HBZ prepare/apply, actual table certificates and pure rANS steps, a
+common normalization-byte trace, actual suffix copying, and 3-call harness
+control. Week~10 added actual encoder inner-write semantics and successful size
+bounds. Week~11 composed exact inner invariants preserving the pure tail,
+generated word updates, the outer loop, and the final four stores to close the
+actual encoder's successful-suffix refinement. Week~12 closed the actual
+decoder's forward consumption of the same pure trace, recovering the original
+symbols, exact consumed size, and output-tail frame. Week~13 composed the
+failure/success branches and complete symbol recovery on success in a harness
+directly calling the actual encoder--copy--decoder procedures. Week~14 composed
+that result with actual full-HBZ prepare/apply and transported it to the
+production SignaturePack/Unpack boundaries. Week~15 closed actual all-6
+preparation, encoder-failure exclusion, and the production fixed-input round
+trip for all-zero HBZ. Week~16's 82 authored targets froze the actual KeyGen
+matrix/finalizer snapshot and the limited actual Sign/Verify control and
+machine-word boundaries as \identifier{PAPER-FROZEN}. The frozen matrix's
+stopping points are respectively \identifier{STOP-KG-NTT},
+\identifier{STOP-SIGN-CHAL-MODE2}, and \identifier{STOP-VERIFY-MATRIX-CRT}.
 
-post-freeze 보조 층은 NTT spectral action, native Rq row product와
-Rq--HAETAE 표현 다리, 실제 \identifier{avec}의 paper-\(a\) 의미 및 별도
-paper-\(qj\) 항까지 닫았다. 반대로 보안 모델의 synthetic \(qj\)가 이 두 객체와
-같지 않음을 증명했으므로 최신 판정은 \identifier{STOP-KG-AVEC-QJ}다. 이는
-full KG-1--KG-4, \(As=qj\pmod{2q}\), full KeyGen, \(h\) codec, 전체 signature
-codec이나 Sign--Verify correctness가 완료됐다는 판정이 아니다.
-다만 완료된 추적의 저장된 \(\mu\)를 연결하는 생성/재전달 정리는
-\statusdeferred 이고, 고정 입력 종료/losslessness,
-\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}, MINCORE Sign/Verify/합성,
-(h) 접미부 및 전체 Verify 관문이 남아 있다. Verify의 순수 NTT 잎은 닫혔지만
-실제 2-by-4 matrix-accumulation과 CRT/freeze 절차 잎이 combined theorem을
-막는다. 따라서 API/인코딩 무손실(zero loss)과 EUF-CMA로의 승격은 아직
-허용되지 않는다.
+The post-freeze auxiliary layer closed NTT spectral action, native Rq row
+products, the Rq--HAETAE representation bridge, the actual \identifier{avec}
+paper-\(a\) semantics, and the separate paper-\(qj\) term. Conversely, the
+security model's synthetic \(qj\) was proved unequal to these two objects, so
+the latest decision is \identifier{STOP-KG-AVEC-QJ}. This does not mark full
+KG-1--KG-4, \(As=qj\pmod{2q}\), full KeyGen, the \(h\) codec, the complete
+signature codec, or Sign--Verify correctness as complete.
+The product/replay theorem connecting stored \(\mu\) observations from completed
+traces remains \statusdeferred. Fixed-input termination/losslessness,
+\identifier{OBL-KG-SECURITY-EXPANDVECA-SEMANTICS}, MINCORE Sign/Verify/composition,
+the (h) suffix, and the complete Verify gate remain open. Verify's pure NTT
+leaves are closed, but the actual 2-by-4 matrix-accumulation and CRT/freeze
+procedure leaves block the combined theorem. Promotion to API/encoding zero
+loss and EUF-CMA is therefore not yet justified.
 \end{takeaway}
 
 \tableofcontents

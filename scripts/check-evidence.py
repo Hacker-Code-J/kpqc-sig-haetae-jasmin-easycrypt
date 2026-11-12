@@ -8,6 +8,11 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def historical_path_id(path):
+    """Identify a recorded host path without requiring its spelling in the index."""
+    return hashlib.sha256(path.encode("utf-8")).hexdigest()
+
+
 def safe_file(root, name):
     relative = PurePosixPath(name)
     if relative.is_absolute() or not relative.parts or ".." in relative.parts:
@@ -25,7 +30,8 @@ def safe_file(root, name):
 
 def check_evidence(root, manifest):
     index = json.loads(safe_file(root, "index.json").read_text())
-    if index.get("schema_version") != 1:
+    version = index.get("schema_version")
+    if version not in (1, 2):
         raise ValueError("Unsupported evidence index")
     files, originals = {}, {}
     for row in index["files"]:
@@ -36,7 +42,15 @@ def check_evidence(root, manifest):
         if len(data) != row["bytes"] or hashlib.sha256(data).hexdigest() != row["sha256"]:
             raise ValueError(f"Evidence hash or size mismatch: {name}")
         files[name] = row
-        for original in (row["original_path"], *row.get("historical_aliases", [])):
+        if version == 1:
+            identities = [historical_path_id(path) for path in
+                          (row["original_path"], *row.get("historical_aliases", []))]
+        else:
+            identities = [row["historical_path_sha256"], *row.get("historical_alias_sha256", [])]
+            if any(not isinstance(value, str) or len(value) != 64 or
+                   any(char not in "0123456789abcdef" for char in value) for value in identities):
+                raise ValueError(f"Invalid historical path identity: {name}")
+        for original in identities:
             if original in originals and originals[original] != name:
                 raise ValueError(f"Ambiguous historical evidence path: {original}")
             originals[original] = name
@@ -57,9 +71,10 @@ def check_evidence(root, manifest):
     for identity, row in targets.items():
         if row["id"] != identity or row["status"] != "PASS" or row["exit_code"] != 0:
             raise ValueError(f"Historical target did not pass: {identity}")
-        if row["log"] not in originals:
+        if historical_path_id(row["log"]) not in originals:
             raise ValueError(f"Missing final historical log: {identity}")
-        mains = [originals[arg] for arg in row["command"] if arg in originals and arg.endswith(".ec")]
+        mains = [originals[historical_path_id(arg)] for arg in row["command"]
+                 if arg.endswith(".ec") and historical_path_id(arg) in originals]
         if len(mains) != 1 or files[mains[0]]["sha256"] != row["source_sha256"]:
             raise ValueError(f"Historical checked source mismatch: {identity}")
     return len(files), len(targets)

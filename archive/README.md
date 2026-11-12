@@ -1,73 +1,86 @@
-# HAETAE 이전 작업 보관
+# Archive of earlier HAETAE work
 
-2026-09-17 재시작을 위해 과거 작업의 읽기 자료 39개만 `legacy/`에 남겼다.
-기존 구현·증명·주차별 보고서·비교용 ML-DSA 전체는 아래 Git 태그로 복원한다.
-이 자료는 이전 소스에 대한 기록이며 HAETAE 검증 결과가 아니다.
+For the 2026-09-17 restart, only 39 reference files from earlier work were retained
+in `legacy/`. The complete earlier implementation, proofs, weekly reports, and
+ML-DSA comparison material can be restored from the Git tags below. These materials
+record work on earlier sources; they are not verification results for the restarted
+HAETAE project.
 
-## 남긴 자료
+## Retained materials
 
-`legacy/` 아래에서는 원래 경로와 파일 내용을 그대로 유지한다.
+Files under `legacy/` retain their original paths. The guides have since been
+translated into English; their original versions remain preserved in Git history.
+The [English-edition record](../docs/english-edition.md) explains the translation,
+PDF rebuilds, exact document migrations, and unchanged historical proof evidence.
 
-| 자료 | 용도 |
+| Material | Purpose |
 | --- | --- |
-| [최신 post-freeze 경계](legacy/haetae-topdown-easycrypt/manifests/post-freeze-paper-artifacts.md) | 169개 대상의 성과, 조건, 남은 의무 |
-| [동결 논문 경계](legacy/haetae-topdown-easycrypt/manifests/paper-artifacts.md) · [논문 PDF](legacy/haetae-topdown-easycrypt/latex/main.pdf) | 이전 82개 대상의 논문 기준점 |
-| [주장 원장](legacy/haetae-topdown-easycrypt/CLAIM_LEDGER.md) · [정리 의존 관계](legacy/haetae-topdown-easycrypt/THEOREM_GRAPH.md) | 증명한 것과 미해결 항목의 구분 |
-| [가정](legacy/haetae-ref-easycrypt/manifests/assumptions.md) · [입력 소스](legacy/haetae-topdown-easycrypt/manifests/source-roots.md) · [도구 버전](legacy/haetae-ref-easycrypt/manifests/toolchain.md) | 이전 증명 재현에 필요한 전제 |
-| [보안 모델 대응 공백](legacy/haetae-security/PAPER_CORRESPONDENCE_GAPS.md) | 재사용 시 다시 검토할 보안 모델 경계 |
-| [NTT 증명 안내](legacy/haetae-ntt-verify/easycrypt-ct/README.md) | 재사용 후보 NTT 코드·증명의 진입점 |
-| [이론 안내서 PDF](legacy/haetae-topdown-easycrypt/theory-guide/main.pdf) · [대수학 안내서 PDF](legacy/haetae-topdown-easycrypt/algebraist-guide/main.pdf) | 각 안내서의 최신 로컬 수정 및 `.tex`·`.bib`·README 원본 |
-| [post-freeze 검증 요약](legacy/haetae-topdown-easycrypt/logs/verify-post-freeze-summary.txt) | `RESULT PASS post-freeze-theories=169`로 끝나는 과거 실행 기록 |
-| [진행 중 검증 요약](legacy/haetae-topdown-easycrypt/logs/verify-all-summary.txt) | 재시작 당시 미커밋 로그. 163개 compile 행이 있으나 최종 `RESULT`가 없어 완료 증거로 사용하지 않음 |
+| [Latest post-freeze scope](legacy/haetae-topdown-easycrypt/manifests/post-freeze-paper-artifacts.md) | Results, conditions, and remaining obligations for 169 targets |
+| [Frozen paper scope](legacy/haetae-topdown-easycrypt/manifests/paper-artifacts.md) · [Paper PDF](legacy/haetae-topdown-easycrypt/latex/main.pdf) | Earlier paper baseline covering 82 targets |
+| [Claim ledger](legacy/haetae-topdown-easycrypt/CLAIM_LEDGER.md) · [Theorem dependencies](legacy/haetae-topdown-easycrypt/THEOREM_GRAPH.md) | Distinction between proved claims and unresolved items |
+| [Assumptions](legacy/haetae-ref-easycrypt/manifests/assumptions.md) · [Input sources](legacy/haetae-topdown-easycrypt/manifests/source-roots.md) · [Tool versions](legacy/haetae-ref-easycrypt/manifests/toolchain.md) | Prerequisites for reproducing the earlier proofs |
+| [Security-model correspondence gaps](legacy/haetae-security/PAPER_CORRESPONDENCE_GAPS.md) | Security-model boundaries to reassess before reuse |
+| [NTT proof guide](legacy/haetae-ntt-verify/easycrypt-ct/README.md) | Entry point for NTT code and proofs that may be reused |
+| [Theory guide PDF](legacy/haetae-topdown-easycrypt/theory-guide/main.pdf) · [Algebraist guide PDF](legacy/haetae-topdown-easycrypt/algebraist-guide/main.pdf) | Guides with the latest local revisions at the restart; accompanying `.tex`, `.bib`, and README sources |
+| [Post-freeze verification summary](legacy/haetae-topdown-easycrypt/logs/verify-post-freeze-summary.txt) | Historical execution record ending in `RESULT PASS post-freeze-theories=169` |
+| [In-progress verification summary](legacy/haetae-topdown-easycrypt/logs/verify-all-summary.txt) | Uncommitted log at the restart: 163 compile rows, but no final `RESULT`, so it is not completion evidence |
 
-안내서와 원장 안의 소스 링크·상대경로는 **이전 전체 트리 기준**이다.
-여기에 복사하지 않은 파일은 태그에서 찾는다. 원본 문서의 내용·링크·해시를
-고쳐 쓰지 않았으며, 원래 빌드 스크립트와 외부 증명 파일이 필요한 재현 작업은
-아래처럼 전체 트리를 복원한 뒤 수행한다. 이번 정리에서 과거 증명을 재실행하지 않았다.
+Source links and relative paths in the guides and ledgers refer to the **complete
+earlier tree**. Files not copied here can be found in the tags. The English
+translations change document bytes; the original documents, links, and hashes remain
+available in Git history. Reproduction requiring the original build scripts and
+external proof files must use the complete restored tree as shown below. The earlier
+proofs were not rerun as part of the archive reorganization or the translation.
 
 ```sh
-# 현재 저장소 루트에서 보관 문서의 바이트 무결성 확인
+# Check the integrity of the archived files from the current repository root
 sha256sum --check archive/SHA256SUMS
 ```
 
-## 전체 이력 복구
+## Restoring the complete history
 
-| 보관 태그 (`archive/pre-haetae-1.2.0/` 아래) | 보존한 상태 |
+| Archive tag (under `archive/pre-haetae-1.2.0/`) | Preserved state |
 | --- | --- |
-| `main-20260917` | 기존 `main`, `4bde1207e2a290952d491d5b41c4bd773081e3c4` |
-| `ntt-foundation-20260917` | NTT 브랜치, `5a7b487be5fd402e21f3919203af42f21c428e81` |
-| `kg-rq-haetae-bridge-20260917` | 마지막 기존 개발 커밋, `ce8b083226596c7c116f1ae95ede95a877117190` |
-| `worktree-20260917` | 기존 미커밋 20개 파일을 그대로 보존한 `6177f8db0a2887314dbff213e5ca04234eece58e` |
+| `main-20260917` | Earlier `main`, `4bde1207e2a290952d491d5b41c4bd773081e3c4` |
+| `ntt-foundation-20260917` | NTT branch, `5a7b487be5fd402e21f3919203af42f21c428e81` |
+| `kg-rq-haetae-bridge-20260917` | Last earlier development commit, `ce8b083226596c7c116f1ae95ede95a877117190` |
+| `worktree-20260917` | `6177f8db0a2887314dbff213e5ca04234eece58e`, preserving the 20 previously uncommitted files without changes |
 
-`worktree` 스냅샷에는 안내서의 수정 소스·PDF뿐 아니라 `.xdv`,
-`.fdb_latexmk`, 진행 중 로그도 원래 경로로 포함된다. 새 배포본 도입 및
-archive 재배치 이전의 완전한 추적 파일 트리다.
+The `worktree` snapshot contains the revised guide sources and PDFs, as well as
+`.xdv`, `.fdb_latexmk`, and in-progress logs at their original paths. It is the
+complete tracked-file tree before the new distribution was introduced and the
+archive was reorganized.
 
 ```sh
-# 태그 없이도 별도 디렉터리에서 이전 구조 그대로 열기
+# Open the earlier layout in a separate directory, even without the tags
 git worktree add --detach ../haetae-previous \
   6177f8db0a2887314dbff213e5ca04234eece58e
 
-# 복사할 파일을 먼저 확인하기
+# Inspect a file before copying it
 git show 6177f8db0a2887314dbff213e5ca04234eece58e:haetae-ref-jasmin/jasmin/sampler.jinc
 ```
 
-원래 프로젝트 간 상대경로와 pinned manifest가 연결되어 있으므로 증명 루트
-하나만 이 디렉터리로 옮겨 실행하지 않는다. `worktree`에서 필요한 도구 버전과
-검증 스크립트를 확인한 뒤 선택적으로 새 작업에 가져온다.
+The original projects are connected by relative paths and pinned manifests, so do
+not move a single proof root into this directory and run it in isolation. Check the
+required tool versions and verification scripts in the `worktree`, then selectively
+bring the needed material into new work.
 
-추적하지 않았던 로컬 파일과 빌드 산출물은 이 컴퓨터의
-`.omx/restart-backup/haetae-1.2.0-20260917/legacy-tree/`로 옮겨 별도 보존했다.
-그 로컬 백업은 Git에 들어가지 않는다. 영구 복구의 기준은 위 Git 스냅샷이다.
+Previously untracked local files and build outputs were moved to
+`.omx/restart-backup/haetae-1.2.0-20260917/legacy-tree/` on this computer for separate
+preservation. That local backup is not in Git. The Git snapshots above are the
+basis for durable recovery.
 
-## main 정비 범위
+## Scope of the main-branch reorganization
 
-기존 `main` → NTT → bridge가 하나의 조상 관계이므로 이력을 유지한 채
-`main`을 전진시켰다. 두 옛 로컬 작업 브랜치는 태그 보존 후 정리했다.
-과거 스냅샷 커밋들은 게시한 `main`의 이력에 포함되므로 다른 clone에서도
-위 커밋 해시로 복구할 수 있다. 보관 태그 4개는 로컬에 유지하며, 현재 사용한
-GitHub 앱 도구가 태그 게시를 지원하지 않아 원격에는 아직 게시하지 않았다.
-원격 브랜치 삭제와 GitHub 설정 변경은 포함하지 않는다.
+The earlier `main` → NTT → bridge commits form one ancestry chain, so `main` was
+advanced while retaining history. The two old local working branches were removed
+after their states were preserved as tags. The historical snapshot commits are part
+of the published `main` history, so other clones can restore them by the commit
+hashes above. At the time of the reorganization, the four archive tags were retained
+locally and had not been published remotely because the GitHub app tools used then
+did not support publishing tags. Remote branch deletion and GitHub settings changes
+were outside the scope of that work.
 
-중복 참조 구현·프로파일링·비교 자료·중간 산출물을 현재 트리에서 덜어냈지만
-기존 이력을 유지하므로 `.git` 용량을 줄이는 이력 재작성은 하지 않았다.
+Duplicate reference implementations, profiling and comparison material, and
+intermediate outputs were removed from the current tree. History was retained;
+there was no history rewrite to reduce the size of `.git`.

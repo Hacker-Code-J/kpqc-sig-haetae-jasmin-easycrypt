@@ -1,41 +1,51 @@
-# 과거 도구 이관 검증 근거
+# Historical toolchain-migration verification evidence
 
-이 디렉터리는 2026-10-10에 수행한 HAETAE 도구 이관 검증의 선택된 근거를
-원래 바이트 그대로 보관한다. **현재 작업 트리의 전체 검증 결과는 아니다.**
-기록 안의 `current`는 당시 검증 시점의 소스를 뜻한다. 이후 추가된 NTT 정리,
-폴더 이름 변경과 공개 준비 수정에 과거 PASS를 자동으로 적용하지 않는다.
+This directory preserves selected evidence from the HAETAE toolchain-migration
+verification performed on 2026-10-10. The underlying execution records retain their
+original bytes; this explanatory README has been translated into English.
+**These are not full verification results for the current working tree.**
+Within the records, `current` refers to the sources at the time of verification.
+Historical PASS results do not automatically apply to subsequently added NTT
+theorems, directory renaming, or publication-preparation changes.
 
-| 근거 | 기록된 범위 |
+| Evidence | Recorded scope |
 | --- | --- |
-| [최종 결과](haetae-full-proof-result.json) | 원본 260개와 보강안 30개, 총 290개 주 대상 PASS |
-| [대상별 결과](proofs/summary.json) | 실행 명령, 소스 해시, 종료 코드, 시간, 최종 로그 |
-| [이동 색인](index.json) | 원래 경로와 공개 사본 경로, 크기, SHA-256 |
-| [보강안 최종 게이트](haetae-provenance-finalization/summary.json) | 당시 materialization·추출·검증기 회귀 기록 |
+| [Final result](haetae-full-proof-result.json) | 260 baseline and 30 hardened targets: 290 primary targets PASS |
+| [Per-target results](proofs/summary.json) | Execution commands, source hashes, exit codes, times, and final logs |
+| [Relocation index](index.json) | Historical-path digests, public-copy paths, sizes, and SHA-256 |
+| [Final hardened gates](haetae-provenance-finalization/summary.json) | Materialization, extraction, and verifier regression records from that time |
 
-원본 260개는 명세·증명 207개와 생성물 53개다. 보강안 30개를 합한 290개는
-정리 개수가 아니라 **주 검증 대상으로 실행한 파일 개수**다. 원래 결과와
-대상별 결과의 해시는 기존
-[이관 manifest](../../haetae-easycrypt/manifests/2026.09-migration.json)의
-`full_replay` 기록과 일치한다.
+The 260 baseline targets consist of 207 specifications/proofs and 53 generated
+artifacts. Including the 30 hardened targets, the total of 290 is the **number of
+files executed as primary verification targets**, not a theorem count. Hashes of
+the original result and per-target results match the `full_replay` entry in the
+existing [migration manifest](../../haetae-easycrypt/manifests/2026.09-migration.json).
 
-최종 대상 290개의 로그와 실제 검사한 주 소스 사본을 모두 포함한다.
-HAETAE 입력 해시 목록, 작은 최종 게이트 기록, 이관 manifest가 명시적으로
-참조한 진단 파일도 포함한다. 관련 없는 다른 프로젝트, 학위논문 원고·발표자료,
-모든 실패한 후보와 중간 실험을 통째로 복사하지 않았다. 그러므로 원래 JSON의
-`prior_attempts` 등에서 참조하는 모든 파일이 포함되어 있다는 뜻은 아니다.
+All logs for the 290 final targets and copies of the primary sources actually
+checked are included. The HAETAE input-hash list, small final-gate records, and
+diagnostic files explicitly referenced by the migration manifest are also included.
+Unrelated projects, thesis manuscripts and presentation materials, and every failed
+candidate or intermediate experiment were not copied wholesale. Thus this does not
+mean that every file referenced by fields such as `prior_attempts` in the original
+JSON is included.
 
-원래 결과의 `/home/...`, `/tmp/...` 경로와 당시 폴더 이름은 이력의 일부이므로
-수정하지 않았다. 외부 경로를 실행하거나 방문할 필요 없이 `index.json`의
-`original_path`·`historical_aliases`를 해당 항목의 상대 `path`로 대응시키면 된다.
-이 색인은 파일 이동에 따른 무결성을 확인하며, 증명 검사를 새로 실행하지 않는다.
+The original results retain their `/home/...` and `/tmp/...` paths and directory
+names from that time as part of the historical record. The schema-2 `index.json`
+uses `historical_path_sha256` and `historical_alias_sha256` instead of copying raw
+host paths into its metadata. The checker matches SHA-256 digests of the UTF-8
+encoded paths recorded in the untouched original result JSON to the corresponding
+entry's English relative `path`. There is no need to execute or visit external
+paths. The original index remains recoverable from Git commit `a4c259a`; source
+and log bytes are unchanged. This index checks integrity across file relocation;
+it does not rerun proof checks.
 
-저장소 루트에서 다음 명령으로 사본 해시, 고정된 결과 해시, 대상 수와
-각 대상의 실제 주 소스 사본을 확인한다.
+From the repository root, use the following command to check copy hashes, pinned
+result hashes, target counts, and the actual primary-source copy for each target:
 
 ```sh
 python3 scripts/check-evidence.py
 ```
 
-현재 소스 재현 절차는 [환경 안내](../../env/README.md)와
-[저장소 안내](../../README.md)를 따른다. 이 자료만으로 당시의 전체 실행 환경과
-모든 의존 소스가 복원된다고 주장하지 않는다.
+For reproduction of the current sources, follow the [environment guide](../../env/README.md)
+and [repository guide](../../README.md). This evidence alone does not claim to
+reconstruct the complete historical execution environment and all source dependencies.
