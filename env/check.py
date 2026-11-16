@@ -75,8 +75,8 @@ def main():
             packages = subprocess.run(["opam", "list", "--installed", "--short", "--columns=name,version"],
                                       capture_output=True, text=True)
             installed = dict(line.split() for line in packages.stdout.splitlines() if len(line.split()) == 2)
-            if prefix.returncode or packages.returncode or installed.get("easycrypt") != "2026.09":
-                errors.append("Active opam switch must contain easycrypt.2026.09")
+            if prefix.returncode or packages.returncode or installed.get("easycrypt") != "2026.10":
+                errors.append("Active opam switch must contain easycrypt.2026.10")
             elif Path(executable).resolve().parent != Path(prefix.stdout.strip()).resolve() / "bin":
                 errors.append("Selected EasyCrypt executable does not belong to the active opam switch")
             tools["opam_packages"] = {name: installed.get(name) for name in ("ocaml", "easycrypt", "jasmin", "why3")}

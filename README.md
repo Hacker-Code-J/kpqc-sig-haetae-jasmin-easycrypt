@@ -30,10 +30,17 @@ success and machine-checked proof scope are reported separately.
 
 ## Getting started
 
-The supported platform is Linux x86-64. Use Jasmin 2026.09.0, EasyCrypt r2026.09,
+The supported platform is Linux x86-64. Use Jasmin 2026.09.0, EasyCrypt r2026.10,
 and the matching Why3/provers. Follow the [environment guide](env/README.md)
 for installation, tool checks and resources. Tool versions are independent of
 implementation directory names.
+
+The [2026.10 migration record](evidence/easycrypt-2026.10-20261116/README.md)
+covers 14 Gaussian probability/termination proof mains, 10 gate regressions
+and four rejection controls. The applied proof port preserves the statements,
+assumptions and numerical bounds. The full reproduction procedure has not yet
+been replayed under 2026.10; the earlier full-run record remains tied to its
+original 2026.09 environment and source snapshot.
 
 ```sh
 git clone https://github.com/Hacker-Code-J/kpqc-sig-haetae-jasmin-easycrypt.git

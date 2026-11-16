@@ -69,7 +69,7 @@ lemma gr_retry_phoare (d0 : (int * bool) distr) (event : int -> bool) :
   is_lossless d0 => 0%r < mu d0 gr_accept =>
   phoare [GaussianRetry.sample : d = d0 ==> event res] = (mu (gr_output d0) event).
 proof.
-  move=> hd ha; bypr => &m ->.
+  move=> hd ha; bypr => &m; rewrite ge0_mu /= => ->.
   exact (gr_retry_law d0 event &m hd ha).
 qed.
 
@@ -87,7 +87,8 @@ lemma gr_retry_lossless :
   phoare [GaussianRetry.sample :
     is_lossless d /\ 0%r < mu d gr_accept ==> true] = 1%r.
 proof.
-  bypr => &m [hd ha].
+  bypr => &m; split; first smt().
+  move=> [hd ha].
   rewrite (gr_retry_law d{m} (fun _ => true) &m hd ha).
   exact (gr_output_ll d{m} ha).
 qed.

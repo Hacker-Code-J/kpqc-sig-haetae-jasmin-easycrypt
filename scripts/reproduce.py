@@ -85,6 +85,8 @@ def steps(mode, jobs):
     result = [
         ("environment", ["bash", "scripts/check-environment.sh"]),
         ("evidence", [sys.executable, "scripts/check-evidence.py"]),
+        ("easycrypt-2026.10-evidence", [sys.executable,
+            "evidence/easycrypt-2026.10-20261116/check.py"]),
         ("evidence-regressions", [sys.executable, "tests/test_evidence.py"]),
         ("runner-regressions", [sys.executable, "tests/test_reproduction.py"]),
         ("environment-regressions", [sys.executable, "tests/test_environment.py"]),

@@ -17,8 +17,18 @@ this source release. Actual reproduction requires the tools described in the
 
 ## Recorded reproduction
 
+The current development sources incorporate the
+[EasyCrypt 2026.10 proof port](../evidence/easycrypt-2026.10-20261116/README.md).
+Its recorded scope is 14 Gaussian probability/termination proof mains,
+10 gate regressions and four rejection controls. The only proof-source change
+is the two-site nonnegativity adaptation in `GaussianRetryCore.ec`; theorem
+statements, assumptions and numerical bounds are unchanged. The bootstrap pin
+now selects 2026.10. Full reproduction under that pin remains to be run before
+claiming a new full-suite release. Historical evidence is preserved below.
+
 On 2026-11-11, a clean source export of commit **`88a543f`** passed **all 28 full-runner
-stages** using tools separately installed by the public bootstrap. The run
+stages** using the 2026.09 tools separately installed by that revision's public
+bootstrap. The run
 executed 277 original targets and 177 hardened/dependency targets, and source
 stability and log hashes were checked. The
 [full reproduction record](../evidence/full-replay-20261111/README.md) identifies

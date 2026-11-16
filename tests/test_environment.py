@@ -22,7 +22,7 @@ spec.loader.exec_module(environment)
 
 class EnvironmentTests(unittest.TestCase):
     def check_fixture(self, *, version="2026.09.0", override=False, missing=False,
-                      socket_error=None):
+                      socket_error=None, easycrypt_version="2026.10"):
         with tempfile.TemporaryDirectory() as directory:
             prefix = Path(directory)
             binary_dir = prefix / "bin"
@@ -58,7 +58,8 @@ class EnvironmentTests(unittest.TestCase):
                 elif command == ["opam", "var", "prefix"]:
                     output = str(prefix)
                 else:
-                    output = "ocaml 5.4.0\neasycrypt 2026.09\njasmin 2026.09.0\nwhy3 1.8.2\n"
+                    output = (f"ocaml 5.4.0\neasycrypt {easycrypt_version}\n"
+                              "jasmin 2026.09.0\nwhy3 1.8.2\n")
                 return subprocess.CompletedProcess(command, 0, stdout=output, stderr="")
 
             output = io.StringIO()
@@ -106,6 +107,11 @@ class EnvironmentTests(unittest.TestCase):
         status, report, _, _, _ = self.check_fixture()
         self.assertFalse(status, report)
         self.assertEqual(report["local_unix_socket"], "PASS")
+
+    def test_previous_easycrypt_release_is_rejected(self):
+        status, report, _, _, _ = self.check_fixture(easycrypt_version="2026.09")
+        self.assertTrue(status)
+        self.assertIn("Active opam switch must contain easycrypt.2026.10", report["errors"])
 
     def test_denied_local_socket_fails_environment_check(self):
         status, report, _, _, _ = self.check_fixture(

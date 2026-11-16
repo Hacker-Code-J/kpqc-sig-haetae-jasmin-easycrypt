@@ -1,22 +1,31 @@
 # Reproduction environment
 
 The supported platform is Linux x86-64. The following compiler and prover
-combination is fixed for this artifact. If tools are already installed, start
-with `bash scripts/check-environment.sh`. It also checks permission to create
+combination is fixed for the current development sources. If tools are already
+installed, start with `bash scripts/check-environment.sh`. It also checks permission to create
 and listen on a local Unix socket, as required by the Why3 server. If the
 execution environment prohibits this, it reports `local_unix_socket: FAIL`
 with the cause and stops.
 
-| Tool | Baseline |
+| Tool | Current pin |
 | --- | --- |
 | Jasmin compiler / extractor | 2026.09.0, official extracted-source release |
-| EasyCrypt | r2026.09, commit `2aaa14acf7b2ce234b475f24f9e85ba0bdaeb024` |
+| EasyCrypt | r2026.10, commit `859766e50e936fb9e420fb6fb1ad8824ffb8d83e` |
 | Why3 | 1.8.2 |
 | Main OCaml switch | 5.4.0; package versions and metadata recorded in `opam-switch.export` |
 | Alt-Ergo | 2.6.0 |
 | Z3 | 4.12.6 |
 | CVC4 | 1.8 |
 | CVC5 | 1.2.1, official Linux x86-64 static distribution |
+
+The [2026.10 migration record](../evidence/easycrypt-2026.10-20261116/README.md)
+checks 14 selected Gaussian proof mains, 10 gate regressions and four rejection
+controls. The proof port and the current bootstrap/checker pin use 2026.10.
+This does not establish a full-suite replay or a new clean bootstrap execution.
+The 2026.09 full-reproduction records below retain their original source and
+tool identities; use their cited source revision to reproduce that baseline.
+The older `haetae-easycrypt/manifests/toolchain.json` and verification-result
+manifests remain recorded observations, not the current bootstrap selection.
 
 ## Installation
 
@@ -40,8 +49,8 @@ package in [Jammy](https://packages.ubuntu.com/jammy/python3-distutils), but not
 Noble (24.04). The bootstrap checks that existing dependency before importing
 the compiler switch and reports an actionable error if it is missing. The CI
 runner matches the Ubuntu 22.04 base of the successful local reproduction.
-This platform correction does not change compiler/prover versions or package
-source recipes; Ubuntu 24.04 is not the supported installation recipe here.
+That earlier platform correction did not change compiler/prover versions or
+package source recipes; Ubuntu 24.04 is not the supported installation recipe here.
 
 `bootstrap.sh` configures the environment only under `env/.opam-root/`,
 `env/_opam/`, `env/provers/`, `env/config/` and `env/downloads/`. It does not
@@ -60,7 +69,7 @@ Successful installation alone does not establish proof reproduction.
 - [Official Jasmin release](https://github.com/jasmin-lang/jasmin/releases/tag/v2026.09.0),
   `jasmin-compiler-v2026.09.0.tar.bz2`:
   SHA-256 `11fec571efb9f7b3a47fea324b4e2a68289e0b73b2248d237eccf139b5218190`.
-- [Pinned EasyCrypt source](https://github.com/EasyCrypt/easycrypt/tree/2aaa14acf7b2ce234b475f24f9e85ba0bdaeb024).
+- [Pinned EasyCrypt source](https://github.com/EasyCrypt/easycrypt/tree/859766e50e936fb9e420fb6fb1ad8824ffb8d83e).
 - [Official CVC5 release](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.2.1),
   `cvc5-Linux-x86_64-static.zip`:
   SHA-256 `6d44abc233980a14d72cc5809287d27c3335b1d6ee863381d0b5ffcbd0d8de56`.
@@ -75,7 +84,8 @@ bash scripts/reproduce.sh full
 ```
 
 `quick` checks the environment, published historical-evidence integrity,
-upstream hashes, Jasmin API/sampler/KAT execution, EasyCrypt verifier regressions,
+the applied 2026.10 scoped-evidence/source integrity, upstream hashes,
+Jasmin API/sampler/KAT execution, EasyCrypt verifier regressions,
 NTT target inventories, hardened-source materialization and extraction-provenance
 regressions, and the hardened implementation's API/KAT behavior. It does not
 rerun the complete proof collection.
@@ -113,7 +123,8 @@ downloads require network access; the checks themselves do not download
 additional materials after installation.
 
 All 28 stages of the full runner passed on source commit `88a543f` using the
-environment separately installed by the public bootstrap. That execution took
+2026.09 environment separately installed by that revision's public bootstrap.
+That execution took
 about **1 hour 35 minutes 53 seconds**, with GNU time maximum RSS
 **3,536,252 KiB (about 3.37 GiB)**. The
 [execution record](../evidence/full-replay-20261111/README.md) identifies tools,
@@ -128,4 +139,4 @@ cannot start the Why3 server, use a normal Linux shell or an execution
 environment that permits local sockets.
 
 The installation follows [opam switch import](https://opam.ocaml.org/doc/man/opam-switch.html)
-and the [installation guide for the selected EasyCrypt release](https://github.com/EasyCrypt/easycrypt/blob/r2026.09/INSTALL.md).
+and the [installation guide for the selected EasyCrypt release](https://github.com/EasyCrypt/easycrypt/blob/r2026.10/INSTALL.md).

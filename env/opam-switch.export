@@ -1,7 +1,7 @@
 opam-version: "2.0"
 compiler: ["ocaml-base-compiler.5.4.0"]
 roots: [
-  "easycrypt.2026.09"
+  "easycrypt.2026.10"
   "jasmin.2026.09.0"
   "ocaml-base-compiler.5.4.0"
   "why3.1.8.2"
@@ -43,7 +43,7 @@ installed: [
   "dune-private-libs.3.24.2"
   "dune-site.3.24.2"
   "dyn.3.24.2"
-  "easycrypt.2026.09"
+  "easycrypt.2026.10"
   "ezjsonm.1.3.0"
   "fmt.0.11.0"
   "fpath.0.7.3"
@@ -84,7 +84,7 @@ installed: [
   "yojson.3.0.0"
   "zarith.1.14"
 ]
-pinned: ["easycrypt.2026.09" "jasmin.2026.09.0"]
+pinned: ["easycrypt.2026.10" "jasmin.2026.09.0"]
 package "angstrom" {
   opam-version: "2.0"
   version: "0.16.1"
@@ -1597,7 +1597,7 @@ package "dyn" {
 }
 package "easycrypt" {
   opam-version: "2.0"
-  version: "2026.09"
+  version: "2026.10"
   synopsis: "EasyCrypt: Computer-Aided Cryptographic Proofs"
   description: """\
 EasyCrypt is a toolset for reasoning about relational properties
@@ -1650,7 +1650,7 @@ The required steps for configuring the provers are listed on:
   dev-repo: "git+https://github.com/EasyCrypt/easycrypt.git"
   url {
     src:
-      "git+https://github.com/EasyCrypt/easycrypt.git#2aaa14acf7b2ce234b475f24f9e85ba0bdaeb024"
+      "git+https://github.com/EasyCrypt/easycrypt.git#859766e50e936fb9e420fb6fb1ad8824ffb8d83e"
   }
 }
 package "ezjsonm" {

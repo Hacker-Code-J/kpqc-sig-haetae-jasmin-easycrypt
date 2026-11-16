@@ -8,7 +8,22 @@ Run commands at the repository root and follow the
 [environment guide](../env/README.md) to prepare the tools. Distinguish quick
 regression checks from the complete specification/proof checks.
 
-For the later completed full-runner execution and its exact source identity,
+## Applied EasyCrypt 2026.10 proof port
+
+The [2026.10 execution record](../evidence/easycrypt-2026.10-20261116/README.md)
+checks 14 selected Gaussian probability/termination proof mains, 10 existing
+gate regressions and four explicit rejection controls. Its verified
+`GaussianRetryCore.ec` bytes are now applied to this tree. Two proof-body edits
+discharge the new `bypr` nonnegativity obligations; statements, assumptions,
+definitions and numerical bounds are unchanged.
+
+The checker pin is now 2026.10, while Jasmin, Why3 and the SMT prover versions
+are unchanged. This record does not recheck every imported proof, the whole
+project or fresh Jasmin extraction. The historical manifests and logs below
+remain evidence of their original source/tool states and are not rewritten
+as a full 2026.10 PASS.
+
+For the earlier 2026.09 full-runner execution and its exact source identity,
 see the [recorded reproduction summary](../docs/release.md#recorded-reproduction).
 The sections below preserve the boundaries of the earlier execution stages.
 
