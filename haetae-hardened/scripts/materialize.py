@@ -55,6 +55,19 @@ PUBLICATION_DOCUMENTS = {
     "haetae-easycrypt/VALIDATION.md",
     "haetae-jasmin/README.md",
 }
+# Exact reviewed 2026.10 changes follow the earlier migration chain. Keep the
+# historical locks intact; the proof port and its scoped replay are recorded in
+# evidence/easycrypt-2026.10-20261116/. No production bytes are authorized here.
+EASYCRYPT_2026_10_PORTS = {
+    "haetae-easycrypt/VALIDATION.md": {
+        "before_sha256": "dce95bf34fe18184f354e24077f338341d950a1c63bc0683eccb66b2956f24a9",
+        "after_sha256": "4339d956fb4a290fe1fc4ab13e45681783cf0b81dbcf8602ab566fc944ae06c9",
+    },
+    "haetae-easycrypt/proofs/GaussianRetryCore.ec": {
+        "before_sha256": "436bb6f35fccfc806657a8c001e85fb8dd6eec6ee63eed2ded94c908b5c59b4a",
+        "after_sha256": "d94fabf6958ecd3d2d6fb70df17e11ad932439b9e0893fe7ea02330b4b6e550e",
+    },
+}
 COPY_DIRS = {"jasmin", "include", "test", "kat", "benchmark"}
 MIGRATABLE_METADATA = {
     "README.md", "VALIDATION.md", "scripts/extract.py", "scripts/verify-one.sh",
@@ -359,7 +372,7 @@ def read_baseline():
         content = path.read_bytes()
         actual = digest(content)
         allowed = {expected}
-        for edits in (layout, publication):
+        for edits in (layout, publication, EASYCRYPT_2026_10_PORTS):
             entry = edits.get(name)
             if entry and entry["before_sha256"] in allowed:
                 allowed.add(entry["after_sha256"])

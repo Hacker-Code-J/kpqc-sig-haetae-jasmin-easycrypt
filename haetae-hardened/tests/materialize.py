@@ -336,5 +336,62 @@ class ToolchainMigrationTests(unittest.TestCase):
             materialize.read_baseline()
 
 
+class EasyCrypt202610MigrationTests(unittest.TestCase):
+    # These are the two inputs changed by the reviewed 2026.10 integration.
+    INPUTS = {
+        "haetae-easycrypt/VALIDATION.md":
+            "dce95bf34fe18184f354e24077f338341d950a1c63bc0683eccb66b2956f24a9",
+        "haetae-easycrypt/proofs/GaussianRetryCore.ec":
+            "436bb6f35fccfc806657a8c001e85fb8dd6eec6ee63eed2ded94c908b5c59b4a",
+    }
+
+    def test_current_reviewed_inputs_materialize_without_rewriting_locks(self):
+        locks = [PROJECT / name for name in (
+            "baseline-lock.json", "toolchain-migration-lock.json",
+            "layout-migration.json", "publication-migration.json")]
+        originals = {path: path.read_bytes() for path in locks}
+        _, inputs = materialize.read_baseline()
+        for name in self.INPUTS:
+            self.assertEqual(inputs[name], (PROJECT.parent / name).read_bytes())
+        self.assertEqual(originals, {path: path.read_bytes() for path in locks})
+
+    def test_exact_bytes_and_reviewed_predecessor_are_both_required(self):
+        for name, before in self.INPUTS.items():
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / name
+                source.parent.mkdir(parents=True)
+                reviewed = (PROJECT.parent / name).read_bytes()
+                source.write_bytes(reviewed)
+                lock = root / "baseline-lock.json"
+                lock.write_text(json.dumps({"files": {name: before}}))
+                with patch.object(materialize, "ROOT", root), patch.object(materialize, "LOCK", lock):
+                    self.assertEqual(materialize.read_baseline()[1][name], reviewed)
+                    source.write_bytes(reviewed + b"\n(* unreviewed change *)\n")
+                    with self.assertRaisesRegex(SystemExit, "Pinned baseline drift"):
+                        materialize.read_baseline()
+                    source.write_bytes(reviewed)
+                    lock.write_text(json.dumps({"files": {name: "0" * 64}}))
+                    with self.assertRaisesRegex(SystemExit, "Pinned baseline drift"):
+                        materialize.read_baseline()
+
+    def test_reviewed_pair_cannot_authorize_other_paths(self):
+        original = "haetae-easycrypt/proofs/GaussianRetryCore.ec"
+        reviewed = (PROJECT.parent / original).read_bytes()
+        for name in ("haetae-easycrypt/proofs/OtherProof.ec",
+                     "haetae-jasmin/jasmin/sign.jazz",
+                     "haetae-easycrypt/manifests/verification-results.json"):
+            with self.subTest(name=name), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                source = root / name
+                source.parent.mkdir(parents=True)
+                source.write_bytes(reviewed)
+                lock = root / "baseline-lock.json"
+                lock.write_text(json.dumps({"files": {name: self.INPUTS[original]}}))
+                with patch.object(materialize, "ROOT", root), patch.object(materialize, "LOCK", lock):
+                    with self.assertRaisesRegex(SystemExit, "Pinned baseline drift"):
+                        materialize.read_baseline()
+
+
 if __name__ == "__main__":
     unittest.main()
