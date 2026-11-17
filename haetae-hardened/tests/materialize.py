@@ -393,5 +393,35 @@ class EasyCrypt202610MigrationTests(unittest.TestCase):
                         materialize.read_baseline()
 
 
+class ReferenceMetadataTests(unittest.TestCase):
+    def test_local_cache_removal_preserves_reference_data_and_history(self):
+        root = PROJECT.parent / "haetae-easycrypt/manifests"
+        historical = root / "history/2026.03/specification-sources.json"
+        original = historical.read_bytes()
+        self.assertEqual(materialize.digest(original),
+                         "268b5721e1e66cd6d771fb9701cea15e28cb6d87aff257ed46dcf84c864b62f7")
+        expected = json.loads(original)
+        del expected["local_cache"]
+        self.assertEqual(json.loads((root / "specification-sources.json").read_text()), expected)
+        materialize.read_baseline()
+        self.assertEqual(historical.read_bytes(), original)
+
+    def test_changed_reference_formula_is_rejected(self):
+        metadata = PROJECT.parent / "haetae-easycrypt/manifests/specification-sources.json"
+        read_bytes = Path.read_bytes
+
+        def changed_formula(path):
+            data = read_bytes(path)
+            if path == metadata:
+                document = json.loads(data)
+                document["target_formula"] = "unreviewed formula"
+                return json.dumps(document).encode()
+            return data
+
+        with patch.object(Path, "read_bytes", changed_formula):
+            with self.assertRaisesRegex(SystemExit, "Pinned baseline drift"):
+                materialize.read_baseline()
+
+
 if __name__ == "__main__":
     unittest.main()

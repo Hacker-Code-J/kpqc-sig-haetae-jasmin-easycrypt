@@ -475,33 +475,29 @@ sources, extracted artifacts, and tool versions.
 - The pinned official C distribution, production Jasmin sources, and `archive`
   materials were not modified.
 
-Independent review found missing connections to the actual production-context
-helper and to the integer meaning of rounded results; these were supplied by
-`ProductionApiCorrectness` and `SigmaRoundingCorrectness`, respectively.
-The final review approved the current component scope.
-Independent review of the Hyperball stage approved word-level partial correctness
-of the actual complete function and mode wrappers. It checked the premises of
-multiple Gaussian calls, actual fixed-point/scaling/norm calls, first-acceptance
-history, final byte/counter, and return-value uniqueness. It confirmed that public
-theorem premises did not hide the desired conclusions, numerical fit, convergence,
-or termination assumptions. Unconditional mathematical-norm guarantees, real
-Newton convergence/error, probability distributions/termination, a separate
-equivalence to the FIPS bit specification, and complete API composition remain
-obligations.
+At this stage, `ProductionApiCorrectness` connected the actual production-context
+helper to its contract, and `SigmaRoundingCorrectness` supplied the integer
+interpretation of rounded results.
+The Hyperball results established word-level partial correctness of the complete
+function and mode wrappers, with explicit premises for multiple Gaussian calls,
+fixed-point/scaling/norm calls, first-acceptance history, final byte/counter, and
+return-value uniqueness. Unconditional mathematical-norm guarantees, real Newton
+convergence/error, probability distributions/termination, a separate equivalence
+to the FIPS bit specification, and complete API composition were separate
+obligations at that stage.
 
-Final independent review of the CDT stage checked the official nonnegative
-Gaussian definition, infinite normalization/tail, interval certificates,
-the +1 boundary of strict comparison, actual Jasmin calls, the 1/2
-statistical-distance factor, and the theorem for arbitrary output sets.
-It separately reviewed name separation and valid controls in the final mutation
-tests. Approval is limited to the single-CDT explicit uniform-input experiment.
-It does not extend to the official specification's separate Rényi bound,
-sigma76 rejection sampling, actual SHAKE uniformity/independence, Hyperball,
-or the complete signature distribution.
+The CDT result covered the official nonnegative Gaussian definition, infinite
+normalization/tail, interval certificates, the +1 boundary of strict comparison,
+actual Jasmin calls, the 1/2 statistical-distance factor, and arbitrary output
+sets. Mutation tests also covered name separation and valid controls. The result
+applies to the single-CDT explicit uniform-input experiment. It excludes the
+official specification's separate Rényi bound, sigma76 rejection sampling,
+actual SHAKE uniformity/independence, Hyperball, and the complete signature
+distribution.
 
-Independent review of the exponential stage checked the actual input range,
-signed Horner interpretation, 24+3 error composition, termination of actual calls,
-the conditional sigma call, and the clipped/even acceptance formula.
+The exponential result covered the actual input range, signed Horner
+interpretation, 24+3 error composition, termination of actual calls, the
+conditional sigma call, and the clipped/even acceptance formula.
 Its comparison target was `α(actual rounded)·exp(-actual xi/2^48)`.
 Subsequent stages proved raw-exponent error and the difference between the two
 zero rules, connecting them to acceptance probability averaged over explicit

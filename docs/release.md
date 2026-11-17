@@ -1,30 +1,34 @@
 # Research artifact publication
 
-An artifact cited by a paper must identify both a specific source state and
-the verification records produced from it. Distinguish the current development
-branch from the results used at submission. This guide describes the publication
-procedure; it does not by itself establish a release or DOI.
+An artifact release identifies a Git commit and verification summaries. Cite
+the release tag or commit hash and link the summary for the result used. Each
+summary applies to the source hashes it records.
+
+[Version 1.0.1](https://github.com/Hacker-Code-J/kpqc-sig-haetae-jasmin-easycrypt/releases/tag/haetae-sampler-ntt-proofs-v1.0.1)
+was published on 2026-11-12. The current development sources contain the
+later EasyCrypt 2026.10 migration described below.
 
 ## Selected initial publication scope
 
 The initial release contains implementation/specification/proof sources,
 reproduction scripts and tool-installation instructions, license notices,
 verification results and logs. Compiler/prover executables, installed tool
-stacks and VM/container images are not distributed. System source-package
-acquisition for a possible tool-binary distribution is not a prerequisite for
-this source release. Actual reproduction requires the tools described in the
-[environment guide](../env/README.md).
+stacks and VM/container images are not distributed. Install the compiler and
+prover versions listed in the [environment guide](../env/README.md) before
+running the reproduction commands.
 
 ## Recorded reproduction
 
 The current development sources incorporate the
 [EasyCrypt 2026.10 proof port](../evidence/easycrypt-2026.10-20261116/README.md).
-Its recorded scope is 14 Gaussian probability/termination proof mains,
-10 gate regressions and four rejection controls. The only proof-source change
-is the two-site nonnegativity adaptation in `GaussianRetryCore.ec`; theorem
-statements, assumptions and numerical bounds are unchanged. The bootstrap pin
-now selects 2026.10. Full reproduction under that pin remains to be run before
-claiming a new full-suite release. Historical evidence is preserved below.
+The recorded run checked 14 Gaussian probability/termination proof files,
+10 verifier regression tests and four tests that reject incomplete or false
+proofs. In `GaussianRetryCore.ec`, the edits add a distribution-mass
+nonnegativity step to `gr_retry_phoare` and a `0 <= 1` step to
+`gr_retry_lossless`. Theorem statements, assumptions and numerical bounds are
+unchanged. `env/opam-switch.export` pins EasyCrypt 2026.10. The `full`
+reproduction command has not been run under that pin; the record below describes
+the earlier 2026.09 execution.
 
 On 2026-11-11, a clean source export of commit **`88a543f`** passed **all 28 full-runner
 stages** using the 2026.09 tools separately installed by that revision's public
@@ -41,21 +45,19 @@ the license texts. Distribute the new `LICENSES/formosa-libjade/` notices and
 provenance materials alongside the tested `88a543f` source archive. Retain the
 verified files, locks and original archive; adding notices is not a new proof run.
 
-The earlier [socket restriction record](../evidence/release-candidate-20261111/README.md)
-and [document-hash transition repair](../evidence/readme-publication-fix-20261111/README.md)
-remain development history. Historical locks, proofs and earlier outcomes are
-not overwritten with a later PASS.
+Earlier environment and document-integrity failures are recorded in the
+[socket restriction report](../evidence/release-candidate-20261111/README.md) and
+[document-hash report](../evidence/readme-publication-fix-20261111/README.md).
 
 ## Before freezing sources
 
 1. Check each claim in the [research map](research-map.md) against the actual
    theorem, premises and command. Distinguish complete-API obligations, iid
    models, and the original/hardened implementations.
-2. Verify changed sources and extractions. Do not copy an earlier PASS or merely
-   replace hashes to approve a new result.
-3. Review the publication file list and Git history. Include required evidence;
-   exclude personal configuration, credentials, private manuscripts and unrelated
-   large outputs. Treat history rewriting as a separate operation.
+2. Run `bash scripts/reproduce.sh full` on the release-candidate sources; retain
+   the runner's input hashes, commands, logs and per-stage results.
+3. Include sources, required evidence and license notices in the publication
+   file list. Exclude local configuration and generated build files.
 4. Check the [provenance guide](THIRD-PARTY.md) and the inclusion of original
    licenses and notices.
 
@@ -95,11 +97,11 @@ rerun affected checks. Earlier records remain evidence of their original sources
   checksums. A source archive lets readers avoid downloading the entire large
   historical Git repository. CI status alone does not establish that all checks
   used in the paper ran.
-- Preserve the final release in an institutional repository or long-term research
-  artifact archive as well. Once a persistent identifier actually exists, record
-  it in [CITATION.cff](../CITATION.cff) and the paper.
-- Do not invent a thesis title, degree information or publication identifier
-  before they are finalized. The current CITATION describes the software repository.
+- Deposit the release in an institutional repository or research artifact
+  archive. Record its assigned DOI or archive record URL in
+  [CITATION.cff](../CITATION.cff) and the paper.
+- The current `CITATION.cff` identifies the software repository. Add publication
+  metadata when it is available.
 
 ## Revisions
 

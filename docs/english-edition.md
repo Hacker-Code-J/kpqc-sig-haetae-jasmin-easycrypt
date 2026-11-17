@@ -1,10 +1,8 @@
 # English edition and historical evidence
 
 The maintained documentation, archived research guides, and their PDFs are
-published in English. Translation does not change the scope of the recorded
-mathematical results. In particular, the earlier guides retain their frozen and
-post-freeze boundaries, conditional correctness statements, and open obligations.
-Building a translated PDF is not a proof replay.
+published in English. The translated guides retain the recorded proof scope,
+conditional correctness statements and open obligations.
 
 ## Original documents and exact changes
 
@@ -21,9 +19,8 @@ explanation. Execution logs, source snapshots, proof results, and their hashes
 remain unchanged.
 
 The hardened materializer retains the original baseline, toolchain, and layout
-locks. Its exact publication ledger additionally permits the reviewed English
-guide bytes and archive checksum list. It does not permit arbitrary changes to
-proofs, implementation files, or execution results.
+locks. Its publication ledger accepts exact hash transitions for the English
+guides and archive checksum list; other source and result changes fail the check.
 
 ## Historical paths are data
 
@@ -47,7 +44,6 @@ or a newly performed verification.
 
 ## Publication boundary
 
-Previously published tags, source archives, and verification archives are not
-replaced by this translation. A new source package must identify its own commit
-and distinguish it from the source commits checked by the historical proof runs.
-Any new release title and tag require the repository owner's approval.
+The translation retains previously published tags and archives. New source
+packages identify their own commits and the verification records that apply to
+those sources.

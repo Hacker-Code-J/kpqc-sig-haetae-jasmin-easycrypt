@@ -31,16 +31,15 @@ success and machine-checked proof scope are reported separately.
 ## Getting started
 
 The supported platform is Linux x86-64. Use Jasmin 2026.09.0, EasyCrypt r2026.10,
-and the matching Why3/provers. Follow the [environment guide](env/README.md)
-for installation, tool checks and resources. Tool versions are independent of
-implementation directory names.
+Why3 1.8.2 and the prover versions listed in the [environment guide](env/README.md).
+That guide provides installation commands and tool checks. Implementation
+directory names do not specify compiler or prover versions.
 
 The [2026.10 migration record](evidence/easycrypt-2026.10-20261116/README.md)
-covers 14 Gaussian probability/termination proof mains, 10 gate regressions
-and four rejection controls. The applied proof port preserves the statements,
-assumptions and numerical bounds. The full reproduction procedure has not yet
-been replayed under 2026.10; the earlier full-run record remains tied to its
-original 2026.09 environment and source snapshot.
+covers 14 Gaussian probability/termination proof files, 10 verifier regression
+tests and four tests that reject incomplete or false proofs. The `full`
+reproduction command has not been run under 2026.10; the earlier full-run record
+uses the 2026.09 environment and source snapshot.
 
 ```sh
 git clone https://github.com/Hacker-Code-J/kpqc-sig-haetae-jasmin-easycrypt.git
@@ -76,15 +75,8 @@ python3 haetae-hardened/scripts/verify.py --group all
 | [docs/HAETAE.md](docs/HAETAE.md) | Reference-distribution provenance and identity |
 | [archive/](archive/) | Earlier research records, preserved separately from current results |
 
-Both `haetae-easycrypt` and `haetae-hardened` use EasyCrypt. The former is the
-verification workspace for the original implementation; the latter contains a
-behavior-changing implementation and its proofs. Historical verification records
-remain evidence of their original source/tool states and are not automatically
-promoted to PASS for current sources. See the [research history](docs/research-notes.md)
-for the detailed development record.
-
-Maintained reader documentation is in English. Frozen evidence, archived source
-snapshots and historical path literals retain their original bytes and language.
+Historical verification records identify the source and tool versions checked
+in each run. See the [research history](docs/research-notes.md) for earlier results.
 
 ## Citation and publication
 

@@ -44,7 +44,6 @@
     }
   ],
   "correspondence_review": "Human-readable source correspondence; not a formal verification of PDF parsing",
-  "local_cache": ".omx/reference-documents/",
   "target_formula": "rho(k)=exp(-k*k/512) for k>=0; pmf(k)=rho(k)/sum_{j>=0}rho(j)",
   "cdf_rounding_note": "The C floor-CDF comment is not used as a mathematical premise.",
   "approximate_exponential_correspondence": {

@@ -68,6 +68,22 @@ EASYCRYPT_2026_10_PORTS = {
         "after_sha256": "d94fabf6958ecd3d2d6fb70df17e11ad932439b9e0893fe7ea02330b4b6e550e",
     },
 }
+# Documentation and reference metadata revisions retain their original pins.
+# These pairs authorize no proof or implementation changes.
+DOCUMENTATION_PORTS = {
+    "archive/README.md": {
+        "before_sha256": "9481dc1054bf2c5f6fa41ce4a1936b3e97b3a54ac0aa41933a7aaef58ce1cd5d",
+        "after_sha256": "06cc062ebf36b8ee4341ac57373dd6ffe7dd5b81d5dca410c06f40ec2ced1125",
+    },
+    "haetae-easycrypt/VALIDATION.md": {
+        "before_sha256": "4339d956fb4a290fe1fc4ab13e45681783cf0b81dbcf8602ab566fc944ae06c9",
+        "after_sha256": "a13db00b1435cae103f1169463d46538564307a857acab7c6d2ba3fbbacd0c91",
+    },
+    "haetae-easycrypt/manifests/specification-sources.json": {
+        "before_sha256": "268b5721e1e66cd6d771fb9701cea15e28cb6d87aff257ed46dcf84c864b62f7",
+        "after_sha256": "3d40687f8a5ea7d7c1530862d2a0baa8e278e53b7cace8a9c2d1a8ff7a17265c",
+    },
+}
 COPY_DIRS = {"jasmin", "include", "test", "kat", "benchmark"}
 MIGRATABLE_METADATA = {
     "README.md", "VALIDATION.md", "scripts/extract.py", "scripts/verify-one.sh",
@@ -372,7 +388,7 @@ def read_baseline():
         content = path.read_bytes()
         actual = digest(content)
         allowed = {expected}
-        for edits in (layout, publication, EASYCRYPT_2026_10_PORTS):
+        for edits in (layout, publication, EASYCRYPT_2026_10_PORTS, DOCUMENTATION_PORTS):
             entry = edits.get(name)
             if entry and entry["before_sha256"] in allowed:
                 allowed.add(entry["after_sha256"])

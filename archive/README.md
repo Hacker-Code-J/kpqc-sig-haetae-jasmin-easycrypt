@@ -65,21 +65,14 @@ not move a single proof root into this directory and run it in isolation. Check 
 required tool versions and verification scripts in the `worktree`, then selectively
 bring the needed material into new work.
 
-Previously untracked local files and build outputs were moved to
-`.omx/restart-backup/haetae-1.2.0-20260917/legacy-tree/` on this computer for separate
-preservation. That local backup is not in Git. The Git snapshots above are the
-basis for durable recovery.
-
 ## Scope of the main-branch reorganization
 
 The earlier `main` → NTT → bridge commits form one ancestry chain, so `main` was
 advanced while retaining history. The two old local working branches were removed
 after their states were preserved as tags. The historical snapshot commits are part
 of the published `main` history, so other clones can restore them by the commit
-hashes above. At the time of the reorganization, the four archive tags were retained
-locally and had not been published remotely because the GitHub app tools used then
-did not support publishing tags. Remote branch deletion and GitHub settings changes
-were outside the scope of that work.
+hashes above. At the time of the reorganization, the four archive tags were local;
+the commit hashes provide recovery independently of those tags.
 
 Duplicate reference implementations, profiling and comparison material, and
 intermediate outputs were removed from the current tree. History was retained;
